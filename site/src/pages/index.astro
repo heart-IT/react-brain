@@ -25,19 +25,15 @@ const stats = [
 <Base>
   <div class="hero" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr)); gap:2.5rem; align-items:center;">
     <div style="flex: 1.15">
-      <p class="label-caps" style="color:var(--accent); margin:0">Decision engine · React &amp; React Native</p>
+      <p class="label-caps" style="margin:0">decision engine · react &amp; react native</p>
       <h1>The React ecosystem, as an encyclopedia that shows its work.</h1>
       <p class="muted">{meta.one_liner} Every recommendation is <strong style="color:var(--fg)">context-keyed</strong>,
       every load-bearing fact carries a <strong style="color:var(--fg)">verified-on date and a primary source</strong>,
       and the corpus <a href={href('scorecard/')}>grades its own forecasts</a>.</p>
 
-      <div class="stats">
+      <div class="statline">
         {stats.map((s) => (
-          <a class="stat" href={href(s.to)}>
-            <div class="label">{s.label}</div>
-            <div class="value">{s.value}</div>
-            <div class="go">{s.go} →</div>
-          </a>
+          <a href={href(s.to)}><strong>{s.value}</strong>{s.label}</a>
         ))}
       </div>
 
@@ -122,66 +118,49 @@ const stats = [
     </figure>
   </div>
 
-  <h2>Recently updated</h2>
-  <div class="grid">
-    {recent.map((e) => (
-      <a class="card" href={href(`entries/${e.slug}/`)} style="text-decoration:none; color:inherit; margin:0">
-        <p style="margin:0; display:flex; justify-content:space-between; gap:.5rem; align-items:baseline">
-          <strong style="font-family:var(--font-head); color:var(--bright)">{e.slug}</strong>
-          <span class={`badge ${e.status}`}>{e.status}</span>
-        </p>
-        <p class="meta" style="margin:.3rem 0 .75rem">{e.group} · verified {String(e.updated)}</p>
-        <p class="muted" style="margin:0; font-size:.9rem">{e.topic}</p>
-      </a>
-    ))}
-  </div>
 
-  <h2>Browse by decision</h2>
-  {groups.map((g) => (
-    <div class="card">
-      <h3 style="margin:0 0 .1rem">{g.label} <span class="badge">{g.entries.length}</span></h3>
-      <p style="margin:.25rem 0 0">
-        {g.entries.map((id, i) => {
-          const e = entries.find((x) => x.id === id);
-          return e && (<span>{i > 0 && ' · '}<a href={href(`entries/${e.slug}/`)}>{e.slug}</a></span>);
-        })}
-      </p>
-    </div>
-  ))}
 
-  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr)); gap:1.5rem; align-items:start">
+  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr)); gap:0 4rem; align-items:start">
     <div>
-      <h2>What makes it different</h2>
-      <ul>
-        <li><strong>Decisions, not articles.</strong> Pages are organized by the choice you're making —
-          the {readingCount} great articles are cited as evidence and
-          <a href={href('reading/')}>linked to the originals</a>.</li>
-        <li><strong>A published track record.</strong> Every default is a dated, falsifiable prediction;
-          challenges and live npm data resolve them on the <a href={href('scorecard/')}>scorecard</a>.</li>
-        <li><strong>It runs.</strong> The same corpus powers a CLI, an MCP server for coding agents,
-          the <a href={href('doctor/')}>in-browser doctor</a>, and a
-          <a href={href('stack/')}>stack composer</a> for greenfield apps.</li>
-        <li><strong>Nothing asserted casually</strong> — see the <a href={href('methodology/')}>methodology</a>.</li>
-      </ul>
+      <h2>Browse by decision</h2>
+      <div class="rows">
+        {groups.map((g) => (
+          <a class="row" href={href(`entries/#${g.id}`)} style="display:flex; justify-content:space-between; gap:1rem; align-items:baseline">
+            <span class="row-title" style="font-family:var(--font-head); font-weight:600; color:var(--bright)">{g.label.split(' — ')[0].split(' (')[0]}</span>
+            <span class="meta">{g.entries.length}</span>
+          </a>
+        ))}
+      </div>
+
+      <h2>Recently updated</h2>
+      <div class="rows">
+        {recent.map((e) => (
+          <a class="row" href={href(`entries/${e.slug}/`)}>
+            <span class="row-title" style="font-family:var(--font-head); font-weight:600; color:var(--bright)">{e.slug}</span>
+            <span class="meta" style="margin-left:.8rem">{String(e.updated)}</span>
+            <span class="muted" style="display:block; font-size:.88rem; margin-top:.15rem">{e.topic}</span>
+          </a>
+        ))}
+      </div>
     </div>
-    <div style="margin-top:2.2rem">
+    <div>
+
+      <h2>This week</h2>
       <div class="card pick">
-        <p class="label-caps" style="margin:0 0 .55rem; color:var(--accent)">★ Recommendation of the week</p>
+        <p class="label-caps" style="margin:0 0 .55rem">recommendation of the week</p>
         <h3 style="margin:0; font: 600 1.1rem/1.35 var(--font-head); color:var(--bright)">{pickHeadline}</h3>
         <p class="meta" style="margin:.45rem 0 .75rem">
           {pick.slug} · <span class={`badge ${pick.confidence}`}>{pick.confidence}</span> · verified {String(pick.updated)}
         </p>
         <a href={href(`entries/${pick.slug}/#explanation`)}>Read the reasoning →</a>
       </div>
-      <div class="card">
-        <p class="label-caps" style="margin:0 0 .6rem; color:var(--muted)">Quick start</p>
-        <p class="meta" style="margin:.2rem 0">1 · analyze a repo</p>
-        <pre style="margin:.2rem 0 .8rem">npx react-brain doctor .</pre>
-        <p class="meta" style="margin:.2rem 0">2 · compose a greenfield stack</p>
-        <pre style="margin:.2rem 0 .8rem">npx react-brain stack --rn --expo</pre>
-        <p class="meta" style="margin:.2rem 0">3 · get a personalized learning path</p>
-        <pre style="margin:.2rem 0">npx react-brain learn .</pre>
-      </div>
+      <h2>Quick start</h2>
+      <pre>npx react-brain doctor .      <span style="color:#5b6470"># assess a repo</span>
+npx react-brain stack --rn    <span style="color:#5b6470"># compose a stack</span>
+npx react-brain learn .       <span style="color:#5b6470"># learning path</span></pre>
+      <p class="muted" style="font-size:.9rem">Organized by decision, not by article — {readingCount} deep-dives
+      cited as evidence, every default a dated prediction on the
+      <a href={href('scorecard/')}>scorecard</a>, and <a href={href('methodology/')}>nothing asserted casually</a>.</p>
     </div>
   </div>
 </Base>

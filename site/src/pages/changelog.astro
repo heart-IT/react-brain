@@ -10,13 +10,15 @@ const days = changelog();
   that loop made visible — generated straight from the repo's git history for the encyclopedia files.</p>
   {days.length === 0 && <p class="muted">No history available in this build (shallow checkout). See the
   <a href={`${GITHUB}/commits/main`}>commit log on GitHub</a>.</p>}
+  <div class="rows">
   {days.map((d) => (
-    <div class="card">
-      <strong>{d.date}</strong>
-      <ul style="margin:.4rem 0 0">
-        {d.subjects.map((s) => <li>{s}</li>)}
+    <div>
+      <strong class="meta">{d.date}</strong>
+      <ul style="margin:.35rem 0 0; max-width:78ch">
+        {d.subjects.map((s) => <li class="muted" style="font-size:.92rem">{s}</li>)}
       </ul>
     </div>
   ))}
+  </div>
   <p class="muted">Full history: <a href={`${GITHUB}/commits/main`}>github.com/heart-IT/react-brain/commits</a></p>
 </Base>

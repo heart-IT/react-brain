@@ -31,10 +31,11 @@ const claimText = (c) => /[.!?)\u2026\u201d"']$/.test(c.trim()) ? c : c + '\u202
   </table></div>
 
   <h2>Resolved predictions</h2>
+  <div class="rows">
   {sc.resolved.map((r) => {
     const e = byId[r.id];
     return (
-      <div class="card">
+      <div>
         <p style="margin:0">
           {e ? <a href={href(`entries/${e.slug}/`)}><strong>{e.slug}</strong></a> : <strong>{r.id}</strong>}
           {' '}<span class={`badge ${r.outcome.outcome}`}>{r.outcome.outcome}</span>
@@ -46,6 +47,7 @@ const claimText = (c) => /[.!?)\u2026\u201d"']$/.test(c.trim()) ? c : c + '\u202
       </div>
     );
   })}
+  </div>
 
   <p class="muted">Ledger: append-only <a href={`${GITHUB}/blob/main/tools/predictions.jsonl`}><code>tools/predictions.jsonl</code></a> —
   {sc.totalPredictions} predictions to date. Unresolved ones aren't shown as wins; the score only counts

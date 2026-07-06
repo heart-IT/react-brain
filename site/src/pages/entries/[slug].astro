@@ -39,12 +39,12 @@ const toc = [
 
   <nav aria-label="On this page" style="display:flex; flex-wrap:wrap; gap:.45rem; margin:.4rem 0 0">
     {toc.map(([id, label]) => (
-      <a href={`#${id}`} style="font-size:.82rem; padding:.3rem .65rem; background:var(--card); border:1px solid var(--line); border-radius:4px; text-decoration:none; color:var(--muted)">{label}</a>
+      <a href={`#${id}`} class="meta" style="text-decoration:none">{label}</a>
     ))}
   </nav>
 
   <div class="card rec">
-    <p class="label-caps" style="margin:0; color:var(--ok)">Recommendation</p>
+    <p class="label-caps" style="margin:0; color:var(--ok)">recommendation</p>
     <p style="margin:.4rem 0 0">{e.recommend?.default}</p>
     {e.recommend?.when?.length > 0 && (
       <ul class="muted" style="margin-top:.6rem">
@@ -77,13 +77,15 @@ const toc = [
       <h2 id="reading">Canonical reading</h2>
       <p class="muted" style="font-size:.88rem">Editorial annotations on why each piece matters — the
       articles themselves are the originals; read them there.</p>
-      {e.reading.map((r) => (
-        <div class="card">
-          <a href={r.url} rel="noopener"><strong>{r.title}</strong></a>
-          {r.by && <span class="muted"> — {r.by}</span>}
-          <p style="margin:.4rem 0 0" class="muted">{r.what}</p>
-        </div>
-      ))}
+      <div class="rows">
+        {e.reading.map((r) => (
+          <div>
+            <a href={r.url} rel="noopener"><strong>{r.title}</strong></a>
+            {r.by && <span class="meta" style="margin-left:.5rem">{r.by}</span>}
+            <p style="margin:.3rem 0 0; font-size:.9rem; max-width:78ch" class="muted">{r.what}</p>
+          </div>
+        ))}
+      </div>
     </>
   )}
 

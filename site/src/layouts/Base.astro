@@ -171,7 +171,7 @@ const bottomLinks = [
     color-scheme: dark;       /* dark-first by design */
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--fg); font: 400 15.5px/1.6 var(--font-body); }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 400 15.5px/1.65 var(--font-body); }
 
   /* ── top bar ─────────────────────────────────────────────────────────────── */
   header { border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 92%, black); position: sticky; top: 0; z-index: 5; }
@@ -195,9 +195,9 @@ const bottomLinks = [
   .side-item { display: flex; align-items: center; gap: .55rem; color: var(--muted); text-decoration: none; font-size: .9rem; font-weight: 500; padding: .6rem .55rem; border-radius: 4px; border-left: 2px solid transparent; }
   .side-item:hover { color: var(--fg); background: var(--card); }
   .side-item.active { color: var(--bright); background: var(--card); border-left-color: var(--accent); }
-  .side-item .count { margin-left: auto; font: 500 .72rem var(--font-mono); color: var(--muted); background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: .05em .45em; }
+  .side-item .count { margin-left: auto; font: 400 .75rem var(--font-mono); color: var(--muted); opacity: .75; }
   .side-bottom { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--line); }
-  .content main { max-width: 1200px; margin: 0 auto; padding: 1.5rem 24px 4rem; }
+  .content main { max-width: 1140px; margin: 0 auto; padding: 2.4rem 28px 5rem; }
   footer { border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; }
   footer p { max-width: 1200px; margin: 0 auto; padding: 1rem 24px 2rem; }
   footer p.meta { padding-bottom: 0; }
@@ -225,9 +225,9 @@ const bottomLinks = [
   /* typography scale — headline-xl/lg/md from the design spec */
   h1, h2, h3 { font-family: var(--font-head); color: var(--bright); }
   h1 { font-size: clamp(1.75rem, 1.1rem + 2.4vw, 3rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.17; margin: .5rem 0 .4rem; }
-  h2 { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.01em; margin: 2.2rem 0 .6rem; }
+  h2 { font-size: 1.3rem; font-weight: 600; letter-spacing: -0.01em; margin: 3.2rem 0 .9rem; }
   h3 { font-size: 1.1rem; font-weight: 600; margin: 1.3rem 0 .35rem; }
-  .label-caps, th, legend { font: 600 .75rem/1.35 var(--font-body); text-transform: uppercase; letter-spacing: .05em; }
+  .label-caps, th, legend { font: 500 .78rem/1.5 var(--font-mono); text-transform: none; letter-spacing: 0; color: var(--muted); }
   .meta { font: 400 .8rem/1.5 var(--font-mono); color: var(--muted); }
 
   /* code — literal values are mono; blocks sit on the deepest layer */
@@ -242,43 +242,44 @@ const bottomLinks = [
   /* tables — label-caps headers, subtle rows */
   .tbl { overflow-x: auto; }
   table { border-collapse: collapse; width: 100%; font-size: .9rem; }
-  th, td { text-align: left; padding: .5rem .65rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th, td { text-align: left; padding: .6rem .7rem .6rem 0; border-bottom: 1px solid var(--line); vertical-align: top; }
   th { color: var(--muted); }
-  tbody tr:hover { background: color-mix(in srgb, var(--card) 55%, transparent); }
+  tbody tr:hover { background: color-mix(in srgb, var(--card) 45%, transparent); }
 
   .muted { color: var(--muted); }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 1rem 1.1rem; margin: .8rem 0; transition: border-color .15s; }
-  .card:hover { border-color: var(--line-strong); }
+  .card { background: var(--card); border-radius: 10px; padding: 1.1rem 1.25rem; margin: 1rem 0; }
+  a.card { transition: background .15s; }
+  a.card:hover { background: color-mix(in srgb, var(--card) 80%, #1f2630); }
   /* callouts: left color bar, per the functional palette */
   .card.rec { border-left: 3px solid var(--ok); }
   .card.caution { border-left: 3px solid var(--warn); }
 
-  /* chips: high-contrast text on ~10% tinted background (never pills-with-borders) */
-  .badge { display: inline-block; font: 600 .75rem/1.4 var(--font-body); text-transform: uppercase; letter-spacing: .05em; padding: .14em .55em; border-radius: 4px; color: var(--muted); background: color-mix(in srgb, var(--muted) 12%, transparent); vertical-align: middle; }
-  .badge.reviewed, .badge.high, .badge.held { color: var(--ok); background: color-mix(in srgb, var(--ok) 12%, transparent); }
-  .badge.drafted, .badge.medium, .badge.weakened { color: var(--warn); background: color-mix(in srgb, var(--warn) 12%, transparent); }
-  /* badge TEXT uses lightened variants — the base tokens measure 4.10:1 / 3.83:1
-     on the 12% tints at 12px, below AA; borders/bars keep the saturated tokens */
-  .badge.low, .badge.overturned { color: #F87171; background: color-mix(in srgb, var(--bad) 12%, transparent); }
-  .badge.stub, .badge.beta { color: #C084FC; background: color-mix(in srgb, var(--exp) 12%, transparent); }
+  /* status markers: quiet colored text, no pill chrome — the word carries the
+     meaning, color reinforces it (lightened variants keep AA at this size) */
+  .badge { display: inline; font: 500 .78rem/1.5 var(--font-mono); padding: 0; color: var(--muted); vertical-align: baseline; }
+  .badge.reviewed, .badge.high, .badge.held { color: var(--ok); }
+  .badge.drafted, .badge.medium, .badge.weakened { color: var(--warn); }
+  .badge.low, .badge.overturned { color: #F87171; }
+  .badge.stub, .badge.beta { color: #C084FC; }
 
   ul { padding-left: 1.2rem; }
-  li { margin: .25rem 0; }
+  li { margin: .3rem 0; }
+  .rows > * { display: block; padding: .9rem 0; border-top: 1px solid var(--line); margin: 0; }
+  .rows > *:last-child { border-bottom: 1px solid var(--line); }
+  a.row { text-decoration: none; color: inherit; }
+  a.row:hover .row-title { color: var(--accent); }
   .hero { padding: 1.6rem 0 .5rem; }
   .hero p { max-width: 46rem; font-size: 1.06rem; }
 
-  /* stat tiles — interactive: hover reveals the action */
-  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); gap: .8rem; margin: 1.2rem 0; }
-  .stat { display: block; background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: .8rem 1rem; text-decoration: none; position: relative; transition: border-color .15s; }
-  .stat .label { font: 500 .74rem var(--font-mono); color: var(--muted); letter-spacing: .03em; }
-  .stat .value { font: 700 1.7rem/1.2 var(--font-head); color: var(--bright); margin-top: .15rem; }
-  .stat .go { position: absolute; right: .8rem; bottom: .6rem; font: 600 .74rem var(--font-body); color: var(--accent); opacity: 0; transform: translateX(-4px); transition: opacity .15s, transform .15s; }
-  .stat:hover, .stat:focus-visible { border-color: var(--accent); }
-  .stat:hover .go, .stat:focus-visible .go { opacity: 1; transform: none; }
+  /* the stat line — numbers inline, no boxes */
+  .statline { display: flex; flex-wrap: wrap; gap: .4rem 1.6rem; margin: 1.4rem 0 1.6rem; padding: 0; }
+  .statline a { text-decoration: none; color: var(--muted); font: 400 .82rem var(--font-mono); }
+  .statline a strong { display: block; font: 700 1.45rem/1.3 var(--font-head); color: var(--bright); }
+  .statline a:hover { color: var(--fg); }
+  .statline a:hover strong { color: var(--accent); }
 
-  /* the flagship sidebar widget — visually distinct from ordinary cards */
-  .card.pick { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 7%, var(--card)), var(--card)); }
-  .card.pick:hover { border-color: var(--accent); }
+  /* the flagship widget — one accent bar, nothing else */
+  .card.pick { border-left: 3px solid var(--accent); }
 
   /* buttons — primary solid, secondary ghost; rectangular soft corners, never pills */
   input, textarea, button, select { font: inherit; color: inherit; }
