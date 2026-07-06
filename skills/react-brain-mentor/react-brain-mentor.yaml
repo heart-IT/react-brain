@@ -1,0 +1,469 @@
+# ══════════════════════════════════════════════════════════════
+# SKILL: REACT-BRAIN MENTOR — Forward-looking advisory for React + React Native projects
+# ══════════════════════════════════════════════════════════════
+# Status: draft (evolves with the react-brain ENCYCLOPEDIA — see encyclopedia.yaml)
+#
+# react-brain is a React-ecosystem ENCYCLOPEDIA: a curated body of knowledge about
+# the React + React Native world — which libraries, which patterns, the tradeoffs,
+# and what to use when. This skill is that encyclopedia made ACTIONABLE for a
+# specific project. It is an ADVISORY / WORKFLOW skill, not a detection ruleset
+# and not a gate.
+#
+# It does three things the knowledge skills and /review do NOT:
+#   1. Looks at the WHOLE project trajectory, not just a diff.
+#   2. Suggests + RANKS improvements by leverage, and teaches the *why*.
+#   3. Is encyclopedia-aware — cites curated react-brain entries on ecosystem
+#      choices ("you're using X; in this context entry RB-E-… recommends Y").
+#
+# DIVISION OF LABOR (no duplication):
+#   - react-brain encyclopedia = BREADTH: ecosystem selection + cross-cutting
+#     patterns across the whole React/RN world (routing, data, forms, styling…).
+#   - existing knowledge skills  = DEPTH: enforcement inside one domain
+#     (react-native-best-practices = RN perf, engineering-principles = arch, …).
+#   The mentor uses the encyclopedia for selection/breadth and routes to the
+#   depth skills for in-domain rules. Neither re-encodes the other.
+# ══════════════════════════════════════════════════════════════
+
+trigger:
+  when_to_use:
+    - "User asks for a project review with suggestions / improvements (not a pass/fail gate)"
+    - "User says 'mentor me', 'how can I improve this', 'what should I do next', 'level up this codebase'"
+    - "Onboarding to an unfamiliar React or React Native codebase and wanting a health read + roadmap"
+    - "Deciding what to refactor, harden, or adopt next — and in what order"
+    - "Evaluating an ecosystem choice (which state/router/data/forms/styling lib) against the react-brain encyclopedia"
+  when_not_to_use:
+    - "Pass/fail gate-keeping review of a specific diff or PR — use the `review` skill (it issues SHIP/REVISE)"
+    - "Detailed rule enforcement in one domain — invoke that knowledge skill directly (e.g. react-native-jsi)"
+    - "Writing the encyclopedia entries or the tutorial — use `diataxis-documentation`"
+    - "Throwaway scripts or one-off prototypes the user has no intent to grow"
+
+# ------------------------------------------------------------------------------
+# COMPOSITION — routing signals and ecosystem graph edges
+# ------------------------------------------------------------------------------
+composition:
+
+  # Selection signals — when this skill applies. Matches React (web) and/or RN.
+  applies_when:
+    framework: "react OR react-native (react / react-dom / react-native in package.json)"
+    meta: "user wants suggestions + a roadmap, not a pass/fail verdict"
+
+  group_memberships: []
+
+  # Graph relationships (outgoing edges). The mentor ORCHESTRATES these for DEPTH
+  # and cites the react-brain encyclopedia for BREADTH — it duplicates neither.
+  complements:
+    - target: review
+      on: "mentor advises + ranks; defers to review for pass/fail gate-keeping of a specific diff"
+    - target: engineering-principles
+      on: "architecture / boundary / code-quality dimension routes here (depth)"
+    - target: react-native-best-practices
+      on: "RN performance / rendering / bundle / state dimension routes here (depth)"
+    - target: react-native-jsi
+      on: "native module / JSI / New Architecture dimension routes here (depth)"
+    - target: design-systems-governance
+      on: "design tokens / accessibility / component lifecycle dimension routes here (depth)"
+    - target: typographic-grid-foundations
+      on: "typography / grid / layout craft dimension routes here (depth)"
+    - target: parity-verify
+      on: "iOS/Android behavioral parity dimension routes here (depth)"
+    - target: diataxis-documentation
+      on: "documentation-health dimension routes here; also governs how encyclopedia entries are written"
+    - target: agentic-engineering-patterns
+      on: "testing discipline / verify-don't-assume overlays the testing dimension"
+    - target: holepunch-p2p-systems
+      on: "P2P / local-first backend dimension (Holepunch/Pear: Hypercore/Autobase/Hyperbee/Hyperswarm/hrpc) routes here for DEPTH; cited by encyclopedia entry RB-E-P2P"
+
+intent:
+  authorized_scope:
+    - "Read a project, infer its platform(s) and maturity stage, and produce a ranked improvement roadmap"
+    - "Route each assessment dimension to the depth knowledge skill that owns its rules"
+    - "Cite react-brain encyclopedia entries for ecosystem-selection and breadth recommendations"
+    - "Rank suggestions by impact × effort, calibrated to the project's maturity stage"
+    - "Teach the consequence/benefit (the 'why') behind each suggestion in one plain sentence"
+    - "Name what the project already does well (strengths) before improvements"
+    - "Propose a concrete learning path (often a route through encyclopedia entries) and the next 3 steps"
+  forbidden_scope:
+    - "Issuing a pass/fail or SHIP/REJECT verdict (that is the review skill's job)"
+    - "Blocking commits, builds, or merges"
+    - "Re-encoding depth rules that already live in a knowledge skill — route to it instead"
+    - "Ungrounded praise or vague advice ('make it cleaner') with no source and no next step"
+    - "Dumping an unranked list of every possible improvement"
+    - "Recommending a library/pattern swap the encyclopedia hasn't vetted for this context"
+    - "Presenting a stub (unwritten) encyclopedia entry as settled guidance"
+    - "Pushing production-hardening or premature abstraction on an early-stage prototype"
+
+# ------------------------------------------------------------------------------
+# MENTOR PRINCIPLES — self-discipline that keeps advice grounded, not cheerleading
+# Every item the mentor outputs MUST satisfy MP-GROUNDED..MP-TEACH-WHY. Violating
+# one is a defect (see quality_gates). These separate a mentor from a flatterer.
+# ------------------------------------------------------------------------------
+mentor_principles:
+  - id: MP-GROUNDED
+    rule: "Every suggestion cites a source: a depth knowledge-skill rule ID, a named engineering principle, or a react-brain encyclopedia entry ID. No source ⇒ do not surface it."
+  - id: MP-RANKED
+    rule: "Suggestions are ordered by impact × effort. Never an unordered dump. Lead with high-impact / low-effort (quick wins)."
+  - id: MP-ACTIONABLE
+    rule: "Every suggestion ends with a concrete next step — a file to touch, a command to run, or a specific pattern to apply. 'Improve testing' is not a step; 'add a failure-path test for fetchUser() in user.test.ts' is."
+  - id: MP-TEACH-WHY
+    rule: "Each suggestion states, in one plain sentence, the cost of NOT doing it and/or the benefit of doing it. This is the mentor layer — without it, it's just a linter."
+  - id: MP-STAGE-CALIBRATED
+    rule: "Calibrate to the project's maturity stage (see maturity_stages). Suppress suggestions the stage marks as premature."
+  - id: MP-BOUNDED
+    rule: "Surface the top N (default 5–7) highest-leverage improvements per pass. Offer 'want the full backlog?' rather than dumping. Focus beats exhaustiveness."
+  - id: MP-STRENGTHS-FIRST
+    rule: "Name 2–4 things the project does well before listing improvements. Build on strengths; a wall of criticism is not mentorship."
+  - id: MP-NO-GATEKEEPING
+    rule: "Advise; never block. No SHIP/REJECT verdict. If the user wants a gate, hand off to the review skill and say so."
+  - id: MP-VETTED-OVER-PROMOTION
+    rule: "Recommend an ecosystem swap/pattern only when a react-brain encyclopedia entry vets it FOR THIS CONTEXT (entry status `drafted` or `reviewed`) AND it beats the current choice on a stated axis. If the entry is a stub or the current choice is already context-appropriate, stay silent. Never recommend churn for novelty."
+  - id: MP-RESPECT-CONSTRAINTS
+    rule: "Honor existing project conventions and explicit user constraints (bundle budget, target OS versions, team size, deadline) over generic best-practice. Conflicts get surfaced, not overridden."
+
+# ------------------------------------------------------------------------------
+# MATURITY STAGES — the mentor calibrates every suggestion to where the project is.
+# Detect the stage in Phase 0; suppress anything in `defer` for that stage.
+# ------------------------------------------------------------------------------
+maturity_stages:
+  - stage: prototype
+    signals: ["no tests or near-zero", "single dev / single commit burst", "no CI", "README is a stub", "'POC'/'spike'/'demo' in name or docs"]
+    emphasize: ["validate the core idea works", "minimal structure that won't fight a rewrite", "name boundaries you'll keep"]
+    defer: ["full test coverage", "accessibility audit", "performance tuning", "design-system tokenization", "CI/CD hardening", "library migrations for marginal gains"]
+
+  - stage: mvp
+    signals: ["a few tests", "basic CI", "real users imminent", "1–3 devs", "feature-complete-ish for v1"]
+    emphasize: ["test the critical paths + one failure path each", "error/empty/loading states", "type the public surface", "boundaries between feature areas", "a11y basics (labels, contrast, focus)", "lock in the right core ecosystem choices early (router, data layer)"]
+    defer: ["exhaustive coverage", "micro-perf optimization without a profile", "deep design-system governance", "multi-platform parity if shipping one platform first"]
+
+  - stage: production
+    signals: ["meaningful test suite", "CI gates", "real users", "release process exists", "issue tracker active"]
+    emphasize: ["performance with profiling data (RN: TTI/FPS)", "accessibility to standard", "design tokens + theming", "platform parity (iOS/Android)", "observability + error boundaries", "dependency/security hygiene"]
+    defer: ["speculative scaling work without a measured bottleneck", "rewriting a working library choice without a concrete pain"]
+
+  - stage: scale
+    signals: ["multiple teams", "monorepo with many packages", "performance budgets enforced", "design system shipped", "many releases"]
+    emphasize: ["package boundaries + dependency direction", "bundle budgets", "design-system versioning/deprecation policy", "shared-code extraction across web + native", "migration safety"]
+    defer: ["one-off micro-fixes — prefer systemic moves"]
+
+# ------------------------------------------------------------------------------
+# ASSESSMENT DIMENSIONS — the lenses the mentor scans.
+#   owner            = the DEPTH skill that owns in-domain rules (route to it).
+#   encyclopedia_cat = the BREADTH category in encyclopedia.yaml the mentor cites
+#                      for ecosystem-selection guidance in this dimension.
+# Skip a dimension the project doesn't have.
+# ------------------------------------------------------------------------------
+assessment_dimensions:
+  - id: DIM-REACT
+    lens: "React core — version line, React Compiler (auto-memoization), RSC (web), concurrent features (<Activity>, use(), useEffectEvent)"
+    owner: engineering-principles
+    encyclopedia_cat: react-core
+  - id: DIM-ARCH
+    lens: "Architecture, boundaries, dependency direction, code-sharing between web + native"
+    owner: engineering-principles
+    encyclopedia_cat: cross-platform
+  - id: DIM-PERF
+    lens: "Rendering, re-renders, list virtualization, bundle size, startup/TTI, jank"
+    owner: react-native-best-practices
+    encyclopedia_cat: lists-and-perf
+    applies_to: [react-native, react]
+  - id: DIM-STATE
+    lens: "State management, data fetching, caching, granular subscriptions"
+    owner: react-native-best-practices
+    encyclopedia_cat: state-and-data
+  - id: DIM-NAV
+    lens: "Navigation / routing structure"
+    owner: null
+    encyclopedia_cat: navigation
+  - id: DIM-FORMS
+    lens: "Forms, validation, controlled vs uncontrolled inputs"
+    owner: null
+    encyclopedia_cat: forms
+  - id: DIM-STYLING
+    lens: "Styling approach, theming, design-token plumbing"
+    owner: design-systems-governance
+    encyclopedia_cat: styling
+  - id: DIM-TYPES
+    lens: "TypeScript rigor, public API surface, generics vs any, exported types"
+    owner: engineering-principles
+    encyclopedia_cat: typescript
+  - id: DIM-TEST
+    lens: "Test coverage of critical + failure paths, determinism, confidence"
+    owner: agentic-engineering-patterns
+    encyclopedia_cat: testing
+    cross_ref: review
+  - id: DIM-A11Y
+    lens: "Accessibility: roles, labels, focus order, contrast, dynamic type, screen readers"
+    owner: design-systems-governance
+    encyclopedia_cat: accessibility
+  - id: DIM-NATIVE
+    lens: "Native modules, JSI/TurboModules, New Architecture, threading, C++ memory safety"
+    owner: react-native-jsi
+    encyclopedia_cat: native
+    applies_to: [react-native]
+  - id: DIM-PARITY
+    lens: "iOS/Android behavioral + visual parity"
+    owner: parity-verify
+    encyclopedia_cat: native
+    applies_to: [react-native]
+  - id: DIM-DX
+    lens: "Developer-experience feedback loop — CI gates, lint/format, git hooks, monorepo task graph, contributor onboarding"
+    owner: null
+    encyclopedia_cat: dx
+  - id: DIM-BUILD
+    lens: "Build tooling & bundlers — Metro (RN) / Vite-Rolldown (web), Hermes engine, build speed, native build caching"
+    owner: null
+    encyclopedia_cat: build-tooling
+  - id: DIM-OBS
+    lens: "Observability — crash reporting, performance/error monitoring, error boundaries (production-stage)"
+    owner: null
+    encyclopedia_cat: observability
+    applies_to: [react, react-native]
+  - id: DIM-DOCS
+    lens: "Documentation completeness + correct Diataxis quadrant"
+    owner: diataxis-documentation
+    encyclopedia_cat: null
+  - id: DIM-SEC
+    lens: "Secrets, injection, sensitive-data leakage, dependency CVEs"
+    owner: review
+    encyclopedia_cat: security
+    cross_ref: engineering-principles
+
+# ------------------------------------------------------------------------------
+# PROTOCOL — the mentor workflow
+# ------------------------------------------------------------------------------
+protocol:
+
+  phase_0_understand:
+    description: "Build a fast, accurate picture before advising. Never advise blind."
+    steps:
+      - "Read package.json (deps, scripts, workspaces), tsconfig, and the directory tree (skip node_modules)."
+      - "Determine platform(s): react (web) only, react-native only, or BOTH."
+      - "Determine maturity stage from maturity_stages.signals. State it explicitly and let the user correct it."
+      - "Inventory the project's current ecosystem choices (router, state, data layer, styling, forms, lists) from deps — these are what the encyclopedia is matched against in Phase 3."
+      - "Run the deterministic scan: `react-brain doctor <repo>` (npx react-brain doctor <repo>, or `node tools/react-brain-doctor.mjs <repo>` from the react-brain repo). It returns (a) dep→entry ecosystem fit and (b) a MODERNIZATION source-scan of legacy CORE RN APIs (Animated, StyleSheet, FlatList, SafeAreaView, Image, TouchableOpacity, AsyncStorage) → modern replacements, each tagged with a `strength` (deprecated|superseded|context), a target entry/skill, an effort, and a file count. Ingest these as pre-grounded candidate improvements; rank them in Phase 4 per `modernization_scan`. (`--files` lists the offending files for concrete next steps.)"
+      - "Detect SIBLING apps: scan the monorepo / parent directory for other package.json projects. When siblings share a backend or stack, compare their ecosystem choices — a pattern one app solved well that another hand-rolls is a high-leverage, low-risk, ALREADY-PROVEN recommendation, and duplicated logic across siblings is the RB-E-CROSSPLATFORM target (extract a shared core). Verify they aren't already sharing before recommending it."
+      - "Read any project-specific conventions skill in .claude/skills/ and honor it (MP-RESPECT-CONSTRAINTS)."
+      - "Ask the user for constraints you can't infer: target users, deadline, team size, bundle/OS budgets — only if they change the advice."
+
+  phase_1_route:
+    description: "Discover and route to DEPTH knowledge skills — same mechanism /review uses. No hardcoded list."
+    steps:
+      - "Glob ~/.claude/skills/*/SKILL.md. For each with a {name}.yaml, read its composition block."
+      - "Activate every skill whose composition.applies_when matches this project (language/framework/meta)."
+      - "Map activated skills onto assessment_dimensions.owner. A dimension whose owner skill is absent ⇒ use general judgement + the encyclopedia, and say so."
+      - "List the consulted skills + 'react-brain encyclopedia' in the report header (transparency)."
+
+  phase_2_assess:
+    description: "Scan each in-scope dimension for OPPORTUNITIES, not just violations."
+    steps:
+      - "For each dimension in scope for the platform + stage, apply the owner skill's rules to gather depth findings."
+      - "Frame findings as opportunities with a trajectory ('this works now; here's what it costs at 10x users / next quarter')."
+      - "Capture both gaps (missing) and strengths (present + done well) — strengths feed MP-STRENGTHS-FIRST."
+      - "Do NOT yet rank or write prose — just collect {dimension, finding, source, kind:gap|strength}."
+
+  phase_3_encyclopedia:
+    description: "Match the project's ecosystem choices against the react-brain encyclopedia (BREADTH). MP-VETTED-OVER-PROMOTION."
+    steps:
+      - "Read encyclopedia.yaml `groups` (TOC) + `encyclopedia_awareness.capability_map` — navigate to the relevant entries; do NOT scan all 37. Two reach paths cover every entry."
+      - "CROSS-CUTTING domains: for each in-scope assessment_dimension that has an encyclopedia_cat, find the matching entry (arch, react-core, state/data, perf/lists, styling, types, nav, a11y, testing, dx, build, observability, security, native)."
+      - "CAPABILITY domains: for each dependency/feature detected in Phase 0, look it up in `capability_map` and pull the matching entry — this is how media/payments/editors/charts/i18n/desktop/keyboard/meta-frameworks/etc. (which no dimension names) get surfaced. Skip a capability entry whose domain the project doesn't have (efficiency)."
+      - "Compare the project's current choice (Phase 0) against the entry's context-appropriate recommendation for this project's stage + platform + constraints."
+      - "If the choice diverges AND the entry status is drafted|reviewed AND the swap beats the current choice on a stated axis ⇒ add a suggestion citing the entry ID and the axis it wins on (calibrate certainty to the entry's `confidence`)."
+      - "If the current choice already matches the entry's recommendation ⇒ record it as a STRENGTH ('good ecosystem fit'), not a change."
+      - "If the project has no choice yet in a relevant domain ⇒ cite the entry's recommend.default as a forward suggestion. Never invent options outside the index, and never present a stub as settled (as of 2026-06-25 there are no stubs — all entries are drafted+)."
+
+  phase_4_prioritize:
+    description: "Rank with the impact × effort model; calibrate to stage."
+    steps:
+      - "Score each gap finding (see prioritization). Drop anything the current stage marks `defer`."
+      - "Order: quick wins (high impact / low effort) first, then big bets (high impact / high effort), then the rest."
+      - "Trim to the top 5–7 (MP-BOUNDED). Keep the remainder as an optional backlog the user can ask for."
+      - "Library/ecosystem swaps are usually M/L effort — weight migration cost honestly, never rank a rewrite as a quick win."
+      - "Fold the Phase-0 modernization-scan findings in per `modernization_scan.strength_policy`: `deprecated` → always eligible (overrides stage `defer`); `superseded` → mvp+ only, effort scaled by file count; `context` → only if a depth dimension corroborates the row's axis. They compete in the SAME impact×effort ranking — not a separate list."
+
+  phase_5_report:
+    description: "Write the mentor report (see output.format). Teaching tone, grounded, ranked, actionable."
+
+# ------------------------------------------------------------------------------
+# PRIORITIZATION — impact × effort. Simple on purpose; the ranking is the value.
+# ------------------------------------------------------------------------------
+prioritization:
+  impact:
+    HIGH: "Affects correctness, security, users at scale, or unblocks a whole class of future work"
+    MEDIUM: "Improves maintainability, performance, or DX for the team"
+    LOW: "Polish; marginal gains"
+  effort:
+    S: "< half a day; localized change"
+    M: "1–3 days; touches several files or needs a small design decision"
+    L: "> 3 days; cross-cutting, needs coordination or a migration (most library swaps are here)"
+  ordering:
+    - "1. Quick wins — HIGH impact, S effort. Always lead here."
+    - "2. Big bets — HIGH impact, M/L effort. Worth a plan."
+    - "3. Fill-ins — MEDIUM impact, S effort."
+    - "4. Defer — LOW impact, or anything the maturity stage marks premature."
+  rule: "Two suggestions tie ⇒ the one that unblocks more future work wins."
+
+# ------------------------------------------------------------------------------
+# MODERNIZATION SCAN — folding `react-brain doctor`'s source-scan into the roadmap.
+# The CLI deterministically finds legacy CORE RN APIs (invisible to a dep-scan, since
+# they import from 'react-native') and maps each to a modern replacement + a `strength`.
+# The mentor RANKS them like any other finding, but `strength` sets how aggressively —
+# upholding MP-VETTED-OVER-PROMOTION (never churn a context-appropriate choice) and
+# MP-STAGE-CALIBRATED. Single source of truth: skills/react-brain-mentor/modern-defaults.yaml.
+# ------------------------------------------------------------------------------
+modernization_scan:
+  source: "`react-brain doctor <repo>` → MODERNIZATION section (tools/detect.mjs `scanModernDefaults`, driven by modern-defaults.yaml `match:` fields)."
+  grounding: "Each row is PRE-GROUNDED (satisfies MP-GROUNDED): cite its target `entry` (RB-E-…) or `defer_to_skill` as the Source. Next step = 'replace <legacy> with <modern> in <file(s)>' — run with `--files` to name them."
+  strength_policy:
+    - id: deprecated        # e.g. SafeAreaView (RN 0.81 + Android edge-to-edge)
+      handle: "ALWAYS eligible, EVERY stage — correctness, not churn, so it OVERRIDES stage `defer`. Impact HIGH when it breaks (removed/edge-to-edge), else MEDIUM. A quick win at the row's effort. Never suppress."
+    - id: superseded        # e.g. AsyncStorage, Image, Animated, TouchableOpacity
+      handle: "Eligible at mvp+/production (production emphasizes dependency hygiene); DEFER at prototype (matches maturity_stages.prototype.defer — 'library migrations for marginal gains'). Impact MEDIUM; effort = the row's effort scaled by file count (few files → S, many → M/L). Weigh migration cost honestly."
+    - id: context           # e.g. StyleSheet, FlatList
+      handle: "Do NOT auto-recommend. Surface ONLY when a depth dimension corroborates the row's axis: FlatList → recommend only if DIM-PERF flags a large/janky list (cite RB-E-LISTS); StyleSheet → only if the team wants Tailwind-style DX. Otherwise omit, or park in the optional backlog as 'context-dependent'. Presenting these as mandatory is the Migration-pusher anti-pattern."
+  ranking: "Fold ELIGIBLE findings into the SAME Top-improvements table (never a separate unranked dump). They compete on impact × effort with every other finding and count toward the MP-BOUNDED top 5–7 — deprecated rows rise, context rows usually drop to the backlog."
+
+# ------------------------------------------------------------------------------
+# ENCYCLOPEDIA AWARENESS — how the mentor draws on react-brain's knowledge corpus.
+# This is the 'improve as time goes' hook: as encyclopedia entries are written and
+# reviewed, the mentor's breadth recommendations grow. Single source of truth.
+# ------------------------------------------------------------------------------
+encyclopedia_awareness:
+  index: "encyclopedia.yaml (this directory)"
+  what_it_covers: "BREADTH — ecosystem selection + cross-cutting patterns across the React/RN world. NOT depth rules owned by knowledge skills."
+  discovery_order:
+    - "1. Read encyclopedia.yaml `groups` (table of contents) + `capability_map` below — navigate to the ≤3 relevant entries; do NOT read all 37."
+    - "2. Two routes reach every entry: (a) cross-cutting domains via assessment_dimensions.encyclopedia_cat; (b) feature/capability domains via `capability_map` (detected dep/need → entry). Never skip a domain just because no dimension names it."
+    - "3. For a matched entry, cite `recommend.default` (no-context pick) + `recommend.when` (context → choice). `options` are the candidate set; `note`/`sources` carry verified facts. As of 2026-06-25 every entry is `drafted`+ (0 stubs), so breadth is fully citable; 14 are `reviewed` with long-form encyclopedia/<id>.md."
+    - "4. `reading` (curated, fetch-verified deep-dive articles) is for the report's Suggested-learning-path section ONLY — do not load it for the recommend decision (keeps Phase 3 lean)."
+    - "5. When the user wants the full why, read encyclopedia/<id>.md (present for the 14 reviewed entries) for the reasoning + sources."
+  # Feature/capability entries are surfaced by DETECTING the relevant dependency or need
+  # in Phase 0 — not scanned for every project. This makes every entry reachable AND keeps
+  # assessment lean: signal seen ⇒ cite the entry; signal absent ⇒ skip it.
+  capability_map:
+    - { entry: RB-E-META-FRAMEWORKS, signal: "web app needs SSR/RSC/full-stack (next, @tanstack/react-start, react-router framework mode, remix, astro, waku; or Expo Router web)" }
+    - { entry: RB-E-DESKTOP, signal: "React shipped to desktop (electron, @tauri-apps, pear/holepunch, capacitor) or a stated desktop target" }
+    - { entry: RB-E-COMPONENT-LIBS, signal: "web UI on a component/headless lib, or choosing one (shadcn, radix, @base-ui, react-aria, mui, chakra, mantine, antd)" }
+    - { entry: RB-E-ANIMATION, signal: "animation/gesture libs (reanimated, react-native-gesture-handler, motion/framer-motion, lottie, @shopify/react-native-skia) or notably animated UI" }
+    - { entry: RB-E-I18N, signal: "i18n libs (next-intl, i18next, react-intl/formatjs, @lingui) or a multi-locale requirement" }
+    - { entry: RB-E-CHARTS, signal: "charts/dataviz (victory, recharts, visx, chart.js, react-native-gifted-charts, skia charts)" }
+    - { entry: RB-E-EDITORS, signal: "rich-text/content editor (@tiptap, prosemirror, lexical, slate, @blocknote)" }
+    - { entry: RB-E-SVG, signal: "SVG / vector graphics / icons in RN (react-native-svg, react-native-svg-transformer, @shopify/react-native-skia, lucide-react-native, @expo/vector-icons, @react-native-vector-icons/*)" }
+    - { entry: RB-E-MAPS, signal: "maps / geolocation UI (react-native-maps, expo-maps, @rnmapbox/maps, @maplibre/maplibre-react-native, react-native-better-maps, react-map-gl, react-leaflet, mapcn)" }
+    - { entry: RB-E-MEDIA, signal: "camera/video/real-time media (react-native-vision-camera, expo-camera, livekit, react-native-webrtc, agora, @daily-co)" }
+    - { entry: RB-E-STORAGE, signal: "on-device storage (react-native-mmkv, @react-native-async-storage, op-sqlite, expo-sqlite, watermelondb, react-native-keychain)" }
+    - { entry: RB-E-NATIVE-UI, signal: "iOS widgets / Live Activities / App Clips / share extensions (expo-widgets, voltra, expo-targets)" }
+    - { entry: RB-E-KEYBOARD, signal: "keyboard-heavy forms, react-native-keyboard-controller, or KeyboardAvoidingView pain (esp. Android edge-to-edge)" }
+    - { entry: RB-E-PAYMENTS, signal: "in-app purchases / subscriptions (react-native-purchases/RevenueCat, react-native-iap, expo-iap, react-native-wallet)" }
+    - { entry: RB-E-BROWNFIELD, signal: "RN embedded in an existing native app, super-app, or micro-frontends (react-native-brownfield, granite, rock)" }
+    - { entry: RB-E-GAMES, signal: "games / real-time interactive rendering (skia game loop, react-native-godot, react-native-wgpu, react-native-game-engine)" }
+    - { entry: RB-E-ALT-FRAMEWORKS, signal: "team weighing leaving React/RN, or comparing Flutter / Lynx / Valdi / Kotlin-Multiplatform / Web Components" }
+    - { entry: RB-E-ONDEVICE-AI, signal: "on-device AI/ML (react-native-executorch, @react-native-ai/apple, react-native-rag, local LLM/TTS/whisper)" }
+    - { entry: RB-E-AI-UI, signal: "in-app cloud-LLM UI (ai / @ai-sdk, assistant-ui, streaming chat, generative UI, streamdown)" }
+    - { entry: RB-E-RN-VERSIONS, signal: "RN project on an older version, or planning an upgrade / New-Architecture migration" }
+    - { entry: RB-E-P2P, signal: "P2P / local-first / serverless backend — Holepunch/Pear stack (hypercore, autobase, hyperbee, hyperswarm, corestore, hrpc, pear-runtime, react-native-bare-kit); data via local RPC, not REST. Depth → holepunch-p2p-systems" }
+  recommend_only_if:
+    - "the entry's status is drafted or reviewed (never `stub` — a stub's recommend.default is a LEAD, surface it as tentative)"
+    - "the project's current choice diverges from the entry's `recommend.when` match FOR THIS CONTEXT (stage/platform/constraints)"
+    - "the swap beats the current choice on a stated axis, and the migration cost is honestly weighed (MP-VETTED-OVER-PROMOTION)"
+    - "calibrate certainty to the entry's `confidence` (high = recommend directly; low = recommend tentatively, tell the user to prototype)"
+  never:
+    - "present a `stub` entry as settled guidance"
+    - "invent entries, options, or recommendations not in the index"
+    - "recommend churn from one adequate choice to another for novelty"
+
+# ------------------------------------------------------------------------------
+# OUTPUT
+# ------------------------------------------------------------------------------
+output:
+  format: |
+    ## 🧠 react-brain Mentor Report
+
+    **Project:** {name}  ·  **Platform:** {react | react-native | both}  ·  **Stage:** {prototype | mvp | production | scale}
+    **Consulted:** {depth skills from Phase 1} + react-brain encyclopedia
+    **Current stack:** {router / state / data / styling / lists detected in Phase 0}
+
+    ### ✅ What's working
+    - {strength} — {one line on why it's a good foundation; note good ecosystem fits here}
+    - … (2–4 items)
+
+    ### 🎯 Top improvements (ranked)
+    | # | Improvement | Impact | Effort | Why it matters | Source | Next step |
+    |---|-------------|--------|--------|----------------|--------|-----------|
+    | 1 | …           | HIGH   | S      | …              | RN-RULE-… / RB-E-… | … |
+
+    ### 📚 Encyclopedia notes
+    {Only if Phase 3 produced anything. Each: entry id → current choice vs recommended → the axis it wins on → migration cost. Omit this whole section if nothing diverges or all entries are stubs.}
+
+    ### 🗺️ Suggested learning path
+    {Ordered route — often through encyclopedia entries — for the dev to grow toward. 3–5 steps, stage-appropriate.}
+
+    ### 👉 Next 3 steps
+    1. {smallest concrete action that starts the #1 improvement}
+    2. …
+    3. …
+
+    _Want the full backlog, or a pass/fail gate on a specific diff (use `review`)? Just ask._
+  rules:
+    - "Every row in Top improvements has a non-empty Source and Next step (MP-GROUNDED, MP-ACTIONABLE)."
+    - "Omit the Encyclopedia notes section entirely when nothing diverges or entries are stubs — silence beats a forced swap."
+    - "Modernization-scan findings appear as normal ranked rows (Source = their entry/skill; Next step = the file-level swap), NOT a separate dump; `deprecated` rows are always eligible regardless of stage, `context` rows only when a depth dimension corroborates."
+    - "Stage appears in the header and visibly shapes what's included/excluded."
+
+# ------------------------------------------------------------------------------
+# ANTI-PATTERNS — mentor failure modes
+# ------------------------------------------------------------------------------
+anti_patterns:
+  - name: "Flatterer"
+    detection: "Report is all praise, or every improvement lacks a cost/benefit ('why it matters' empty)."
+    correction: "Every suggestion needs a grounded why (MP-TEACH-WHY). Strengths come first but are not the whole report."
+  - name: "Kitchen-sink dump"
+    detection: ">7 improvements, unordered, no impact/effort columns."
+    correction: "Rank, trim to top 5–7, offer the backlog on request (MP-BOUNDED, MP-RANKED)."
+  - name: "Stage mismatch"
+    detection: "Pushing CI/CD hardening, full coverage, design tokens, or a library migration onto a prototype."
+    correction: "Re-detect stage; suppress what maturity_stages marks `defer`."
+  - name: "Migration pusher"
+    detection: "Recommends swapping an adequate library for the encyclopedia's favorite with no context-specific win, or off a stub entry; OR presents a `context`-strength modernization-scan row (StyleSheet, FlatList) as mandatory."
+    correction: "Apply MP-VETTED-OVER-PROMOTION; require a stated winning axis + honest migration cost, and a drafted/reviewed entry. For `context` modernization rows, require a corroborating depth signal (see modernization_scan.strength_policy)."
+  - name: "Depth re-encoder"
+    detection: "Mentor restates detection logic that already lives in a knowledge skill instead of routing to it."
+    correction: "Cite the skill's rule id and route to it; the encyclopedia is for breadth, not depth."
+  - name: "Stub-as-settled"
+    detection: "Cites an encyclopedia entry whose status is `stub` as if it were vetted guidance."
+    correction: "Only drafted|reviewed entries are citable; say 'no vetted guidance yet' otherwise."
+  - name: "Gate-keeper drift"
+    detection: "Report issues a SHIP/REJECT verdict or blocks merge."
+    correction: "Mentor advises only. Hand off to the review skill for gating (MP-NO-GATEKEEPING)."
+  - name: "Advice without context"
+    detection: "Suggestions written before Phase 0 established platform + stage + current stack."
+    correction: "Always run Phase 0 first. Never advise blind."
+
+# ------------------------------------------------------------------------------
+# QUALITY GATES — self-check before emitting the report
+# ------------------------------------------------------------------------------
+quality_gates:
+  - id: QG-PHASE0-DONE
+    check: "Platform, maturity stage, and current stack are stated in the header and inferred from evidence, not assumed."
+  - id: QG-EVERY-SUGGESTION-GROUNDED
+    check: "Every improvement row has a Source (skill rule id / principle / encyclopedia entry id)."
+  - id: QG-EVERY-SUGGESTION-ACTIONABLE
+    check: "Every improvement row has a concrete Next step, not a category."
+  - id: QG-RANKED-AND-BOUNDED
+    check: "Improvements are ordered by impact × effort and number ≤ 7."
+  - id: QG-STRENGTHS-PRESENT
+    check: "2–4 genuine strengths listed before improvements."
+  - id: QG-STAGE-CALIBRATED
+    check: "Nothing in the report is on the current stage's `defer` list."
+  - id: QG-NO-UNVETTED-SWAP
+    check: "Every recommended library/pattern swap cites a drafted|reviewed encyclopedia entry, a winning axis, and a migration-cost note."
+  - id: QG-NO-VERDICT
+    check: "No SHIP/REJECT/pass-fail verdict and no merge-blocking language."
+
+# ------------------------------------------------------------------------------
+# DELIBERATE NON-GOALS
+# ------------------------------------------------------------------------------
+# This skill INTENTIONALLY does not:
+#   - Re-encode DEPTH rules owned by knowledge skills (route + cite instead)
+#   - Issue gate-keeping verdicts (review owns that)
+#   - Hardcode a skill registry (discover via composition-block globbing)
+#   - Hardcode the encyclopedia's content (read encyclopedia.yaml; it grows over time)

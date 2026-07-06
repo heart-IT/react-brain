@@ -1,0 +1,21 @@
+{
+  "date": "2026-06-25",
+  "fingerprints": {
+    "ourpot": {
+      "RB-E-SVG": "@expo/vector-icons, react-native-svg",
+      "RB-E-STORAGE": "AsyncStorage, expo-secure-store (secrets)",
+      "RB-E-NAV": "React Navigation",
+      "RB-E-P2P": "Autobase (multiwriter), Corestore, Holepunch (Hypercore stack), blind-pairing, hrpc",
+      "RB-E-NATIVE": "Expo (managed native)",
+      "RB-E-MEDIA": "QR generation (qrcode-svg), expo-camera, expo-image-picker",
+      "RB-E-DESKTOP": "Pear (mobile, Holepunch)",
+      "RB-E-ANIMATION": "Gesture Handler, Reanimated, Worklets",
+      "RB-E-BUILD": "Metro",
+      "RB-E-TESTING": "brittle (Holepunch TAP)",
+      "RB-E-DX": "Prettier, husky (git hooks), lunte (lint)",
+      "RB-E-TYPESCRIPT": "TypeScript",
+      "RB-E-REACT-CORE": "React 19.2.7",
+      "RB-E-RN-VERSIONS": "RN 0.83.9"
+    }
+  }
+}

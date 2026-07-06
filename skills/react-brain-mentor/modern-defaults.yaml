@@ -1,0 +1,102 @@
+# modern-defaults.yaml — the RN "legacy default ❌ → modern replacement ✅" checklist
+# ─────────────────────────────────────────────────────────────────────────────
+# A cross-cutting, mentor-consumed swap list: the core React Native primitives most
+# apps still reach for out of habit, and the modern replacement each one has. Every
+# row is keyed to a react-brain entry (breadth) or a depth skill (rules), so the
+# mentor applies it with its EXISTING discipline — not as blanket "always replace".
+#
+# Source: Jay Meistrich, "How to Build the Fastest Apps: Break the Rules"
+#         App.js Conf 2026 — https://www.youtube.com/watch?v=K3flMIHS-cI
+#         (the slide is his opinionated absolute list; the corpus keeps it context-keyed)
+#
+# HOW THE MENTOR USES THIS (honor MP-VETTED-OVER-PROMOTION + QG-NO-UNVETTED-SWAP):
+#   - strength: deprecated  → RN itself deprecated the legacy API. Recommend the swap
+#                             regardless of stage; frame as correctness, not preference.
+#   - strength: superseded  → legacy still works but the modern pick is the clear default.
+#                             Recommend unless the project has a stated reason to stay.
+#   - strength: context     → genuinely context-dependent; the corpus treats the legacy
+#                             option as legitimate. Recommend ONLY when the row's `axis`
+#                             actually applies (never churn for novelty).
+#   - Most `legacy` sides are CORE RN APIs (not packages), so a package.json dep-scan
+#     can't see them — `detect` gives the source-level signal (import from 'react-native')
+#     for when source scanning is wired. Weigh migration cost honestly (see `effort`).
+
+meta:
+  source: "https://www.youtube.com/watch?v=K3flMIHS-cI"
+  by: "Jay Meistrich (Software Mansion), App.js Conf 2026"
+  discipline: "context-keyed, not absolute — apply per the mentor's no-churn rules"
+  strength_levels: [deprecated, superseded, context]
+
+swaps:
+  - legacy: "Animated (core)"
+    modern: "Reanimated 4 (+ Gesture Handler 3)"
+    entry: RB-E-ANIMATION
+    defer_to_skill: react-native-best-practices   # heavy-animation perf rules
+    axis: "UI-thread animation — no JS-thread jank"
+    strength: superseded
+    effort: M
+    detect: "import { Animated } from 'react-native'"
+    match: { rn_named_import: Animated }
+    note: "Core Animated is fine for trivial fades; Reanimated 4 for anything real (requires New Arch)."
+
+  - legacy: "StyleSheet (core)"
+    modern: "NativeWind / Unistyles (or Uniwind)"
+    entry: RB-E-STYLING
+    axis: "authoring DX + zero-runtime styling"
+    strength: context
+    effort: M
+    detect: "StyleSheet.create("
+    match: { rn_named_import: StyleSheet }
+    note: "The corpus keeps StyleSheet/Unistyles legitimate — swap only if the team wants Tailwind-style DX; not a defect on its own."
+
+  - legacy: "FlatList (core)"
+    modern: "Legend List (or FlashList)"
+    entry: RB-E-LISTS
+    defer_to_skill: react-native-best-practices   # RN-RULE-USE-FLASHLIST owns thresholds
+    axis: "scroll performance on large lists"
+    strength: context
+    effort: M
+    detect: "import { FlatList } from 'react-native'"
+    match: { rn_named_import: FlatList }
+    note: "Corpus default is FlashList for large lists, FlatList otherwise; Legend List when you want one engine across RN + web. Small/static lists don't need the swap."
+
+  - legacy: "AsyncStorage"
+    modern: "MMKV (key-value) / SQLite (relational)"
+    entry: RB-E-STORAGE
+    axis: "synchronous access + speed"
+    strength: superseded
+    effort: S
+    detect: "dep: @react-native-async-storage/async-storage"
+    match: { dep: "@react-native-async-storage/async-storage" }
+    note: "react-native-mmkv (v4, Nitro) is the common drop-in for key-value; op-sqlite/expo-sqlite for relational. Never store secrets in either — use Keychain/secure-store."
+
+  - legacy: "SafeAreaView (core)"
+    modern: "react-native-safe-area-context"
+    entry: RB-E-RN-VERSIONS            # deprecation noted on the RN 0.81 row
+    axis: "correctness under mandatory edge-to-edge"
+    strength: deprecated               # RN 0.81 deprecated core SafeAreaView
+    effort: S
+    detect: "import { SafeAreaView } from 'react-native'"
+    match: { rn_named_import: SafeAreaView }
+    note: "Hard deprecation (RN 0.81, Android edge-to-edge). Use useSafeAreaInsets / SafeAreaView from safe-area-context. Apply regardless of stage."
+
+  - legacy: "Image (core)"
+    modern: "expo-image"
+    entry: RB-E-MEDIA
+    axis: "caching, blurhash placeholders, decode perf"
+    strength: superseded
+    effort: S
+    detect: "import { Image } from 'react-native'"
+    match: { rn_named_import: Image }
+    note: "expo-image adds disk/memory caching, blurhash/thumbhash placeholders, transitions, and better decode. Works in bare RN, not just Expo."
+
+  - legacy: "TouchableOpacity (core)"
+    modern: "Pressable → your design-system Button"
+    entry: null                        # no ecosystem-selection entry; it's a rule
+    defer_to_skill: react-native-best-practices   # + design-systems-governance for the DS layer
+    axis: "modern press API, accessibility, visual consistency"
+    strength: superseded
+    effort: M
+    detect: "import { TouchableOpacity } from 'react-native'"
+    match: { rn_named_import: TouchableOpacity }
+    note: "Pressable is the modern primitive (richer press states, better a11y). The deeper win is not hand-rolling touchables at all — route presses through a design-system component (design-systems-governance). Rule-based, not a library pick."

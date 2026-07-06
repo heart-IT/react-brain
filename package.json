@@ -1,0 +1,41 @@
+{
+  "name": "react-brain",
+  "version": "0.2.0",
+  "description": "Executable React / React Native ecosystem encyclopedia — doctor (advise a repo), evidence (corpus self-audit), pulse (health/drift), query.",
+  "type": "module",
+  "bin": {
+    "react-brain": "tools/cli.mjs"
+  },
+  "files": [
+    "tools/",
+    "skills/react-brain-mentor/encyclopedia.yaml",
+    "encyclopedia/",
+    "README.md"
+  ],
+  "scripts": {
+    "stack": "node tools/cli.mjs stack",
+    "doctor": "node tools/cli.mjs doctor",
+    "evidence": "node tools/cli.mjs evidence",
+    "pulse": "node tools/cli.mjs pulse",
+    "calibrate": "node tools/cli.mjs calibrate",
+    "signals": "node tools/cli.mjs signals",
+    "learn": "node tools/cli.mjs learn",
+    "query": "node tools/cli.mjs query"
+  },
+  "dependencies": {
+    "yaml": "^2.8.1"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "react",
+    "react-native",
+    "encyclopedia",
+    "ecosystem",
+    "mentor",
+    "cli",
+    "ecosystem-fit"
+  ],
+  "license": "Apache-2.0"
+}
