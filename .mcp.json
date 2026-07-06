@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "react-brain": {
+      "command": "node",
+      "args": ["tools/mcp-server.mjs"]
+    }
+  }
+}

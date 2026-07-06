@@ -201,6 +201,24 @@ export function pkgsForPick(entryId, pickText) {
 
 export const trunc = (s, n) => (s && s.length > n ? s.slice(0, n - 1) + '…' : (s || ''));
 
+// Rank entries against a free-text query (id / category / topic / options / recommend).
+// One scorer for the CLI `query` verb and the MCP server — they must agree.
+export function searchEntries(terms, max = 3) {
+  const ql = terms.join(' ').toLowerCase();
+  const q = ql.replace(/^rb-e-/, '');
+  const score = (e) => {
+    const id = e.id.replace('RB-E-', '').toLowerCase();
+    const hay = [e.id, e.category, e.topic, JSON.stringify(e.options || []), e.recommend?.default || ''].join(' ').toLowerCase();
+    let s = 0;
+    if (id === q || e.category === q) s += 100;
+    if (id.includes(q) || e.category.includes(q) || e.topic.toLowerCase().includes(q)) s += 20;
+    for (const t of terms) if (hay.includes(t.toLowerCase())) s += 3;
+    return s;
+  };
+  return loadDoc().entries.map((e) => ({ e, s: score(e) })).filter((x) => x.s > 0)
+    .sort((a, b) => b.s - a.s).slice(0, max).map((x) => x.e);
+}
+
 // ── the calibration track record ────────────────────────────────────────────────
 // The append-only ledger (written by `calibrate`/`challenge`) lives next to the tools.
 // Reading it here, in the shared core, lets stack/doctor/learn show calibration-weighted

@@ -15,7 +15,7 @@
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
-import { loadDoc } from './detect.mjs';
+import { searchEntries } from './detect.mjs';
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 const [cmd, ...rest] = process.argv.slice(2);
@@ -56,24 +56,12 @@ examples:
 
 function query(terms) {
   if (!terms.length) { console.error('usage: react-brain query <entry-id | category | keyword>'); process.exit(1); }
-  const ql = terms.join(' ').toLowerCase();
-  const q = ql.replace(/^rb-e-/, '');
-  const entries = loadDoc().entries;
-  const score = (e) => {
-    const id = e.id.replace('RB-E-', '').toLowerCase();
-    const hay = [e.id, e.category, e.topic, JSON.stringify(e.options || []), e.recommend?.default || ''].join(' ').toLowerCase();
-    let s = 0;
-    if (id === q || e.category === q) s += 100;
-    if (id.includes(q) || e.category.includes(q) || e.topic.toLowerCase().includes(q)) s += 20;
-    for (const t of terms) if (hay.includes(t.toLowerCase())) s += 3;
-    return s;
-  };
-  const ranked = entries.map((e) => ({ e, s: score(e) })).filter((x) => x.s > 0).sort((a, b) => b.s - a.s).slice(0, 3);
+  const ranked = searchEntries(terms);
   if (!ranked.length) {
     console.log(`no entry matches "${terms.join(' ')}". Try: state, data, nav, styling, native, build, testing, security, p2p, svg, animation, …`);
     return;
   }
-  for (const { e } of ranked) {
+  for (const e of ranked) {
     console.log(`\n${'━'.repeat(72)}`);
     console.log(`${e.id}  —  ${e.topic}`);
     console.log(`group: ${e.group}  ·  status: ${e.status}·${e.confidence}  ·  platforms: ${(e.platforms || []).join('/')}`);
