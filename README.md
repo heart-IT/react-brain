@@ -26,11 +26,12 @@ command, one verb per moment of a project's life (see [`tools/`](tools/)):
 | **choose** | `react-brain stack --rn --expo --p2p` | greenfield — compose a stack from intent, no repo |
 | **assess** | `react-brain doctor .` (`--json` for agents) | you have a stack — fit vs the encyclopedia + source signals |
 | **master** | `react-brain learn .` | own it — a repo-personalized learning path |
+| **decide** | `react-brain decide state .` | commit the choice — a living ADR with receipts, premise-checked by `doctor` over time |
 | query | `react-brain query "data fetching"` | look up one entry's recommendation |
 | *(corpus upkeep)* | `evidence` · `pulse` · `calibrate` · `signals` · `lint` | self-audit · freshness · scored track record · live-npm reality check · mechanized invariants |
 
 **For agents (MCP):** `tools/mcp-server.mjs` serves the corpus as MCP tools — `capsules`
-(compact index) / `query` / `recommend` / `doctor` / `stack` — zero-dep stdio; `.mcp.json`
+(compact index) / `query` / `recommend` / `doctor` / `decide` / `stack` — zero-dep stdio; `.mcp.json`
 wires it for Claude Code here, or `claude mcp add react-brain -- node <repo>/tools/mcp-server.mjs`.
 
 **Quality gate:** `npm test` = `lint` (schema, TOC, mentor-reachability, dup-URL, detect

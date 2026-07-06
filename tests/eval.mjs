@@ -94,7 +94,25 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
   const r = spawnSync(process.execPath, [join(ROOT, 'tools/mcp-server.mjs')], { input, encoding: 'utf8', timeout: 30000 });
   const lines = r.stdout.trim().split('\n').map((l) => JSON.parse(l));
   check(lines[0]?.result?.serverInfo?.name === 'react-brain', 'mcp: initialize returns serverInfo');
-  check(lines[1]?.result?.tools?.length === 5, 'mcp: five tools listed');
+  check(lines[1]?.result?.tools?.length === 6, 'mcp: six tools listed (incl. decide)');
+}
+
+// ── 8. living decision records: decide generates, doctor re-checks premises ─────
+{
+  const adr = execFileSync(process.execPath,
+    [join(ROOT, 'tools/react-brain-decide.mjs'), 'state', FIX('rn-smells'), '--stdout'], { encoding: 'utf8' });
+  check(adr.includes('entry: RB-E-STATE'), 'decide: premise block names the entry');
+  check(/entry_updated: 20\d\d-/.test(adr), 'decide: premise block carries entry_updated');
+  check(adr.includes('## Options considered'), 'decide: candidate table present');
+  check(adr.includes('## Review by'), 'decide: review horizon present');
+  check(adr.includes('Current choice detected in this repo: **Zustand**'), 'decide: repo context resolved (detected Zustand)');
+
+  const d = doctor('rn-smells');   // fixture ships docs/adr/001-state.md with 2020 premises
+  check(d.adrs?.length === 1, 'doctor: finds the fixture decision record');
+  const flags = d.adrs?.[0]?.flags || [];
+  check(flags.some((x) => x.includes('premises moved')), 'doctor: flags moved premises (entry re-verified since ADR)');
+  check(flags.some((x) => x.includes('review horizon passed')), 'doctor: flags passed review horizon');
+  check(doctor('web-clean').adrs?.length === 0, 'doctor: no ADR false-positives on a repo without records');
 }
 
 // ── report ──────────────────────────────────────────────────────────────────────

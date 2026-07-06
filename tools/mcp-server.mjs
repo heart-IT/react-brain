@@ -8,6 +8,7 @@
 //   query      — full entry lookup by id / category / keyword (same scorer as the CLI)
 //   recommend  — context-resolved recommendation (the stack/doctor resolver)
 //   doctor     — run the deterministic repo analyzer, return its --json report
+//   decide     — generate a living decision record (ADR with receipts) for a topic
 //   stack      — compose a greenfield stack from intent flags, return the plan text
 //
 // Zero-dep by design: MCP's stdio transport is newline-delimited JSON-RPC 2.0, which
@@ -83,6 +84,13 @@ function doctor({ path }) {
     { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
 }
 
+function decide({ topic, path }) {
+  const args = [resolve(__dir, 'react-brain-decide.mjs'), String(topic)];
+  if (path) args.push(String(path));
+  args.push('--stdout');
+  return execFileSync(process.execPath, args, { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
+}
+
 function stack({ flags = '' }) {
   const args = String(flags).split(/\s+/).filter((f) => /^--[\w=-]+$/.test(f));   // flags only — no arbitrary args
   return execFileSync(process.execPath, [resolve(__dir, 'react-brain-stack.mjs'), ...args],
@@ -102,6 +110,9 @@ const TOOLS = [
   { name: 'doctor', fn: doctor,
     description: 'Run the deterministic react-brain analyzer on a repo path: detected ecosystem choices vs encyclopedia fit, gaps, legacy-API modernization scan, and source-level signals. Returns JSON. Use as ground truth for platform/stage/deps.',
     inputSchema: { type: 'object', properties: { path: { type: 'string', description: 'absolute path to the repo' } }, required: ['path'] } },
+  { name: 'decide', fn: decide,
+    description: 'Generate a LIVING DECISION RECORD (ADR markdown with receipts) for a topic, optionally resolved against a repo path: context-resolved pick, candidate table, evidence chain (sources, calibration track record, npm signals), and a machine-readable premise block that react-brain doctor re-checks over time.',
+    inputSchema: { type: 'object', properties: { topic: { type: 'string' }, path: { type: 'string', description: 'optional absolute repo path for context' } }, required: ['topic'] } },
   { name: 'stack', fn: stack,
     description: 'Compose a greenfield stack from intent flags (e.g. "--rn --expo --p2p --stage=mvp" or "--web --ssr"). Returns an explained, install-ready stack plan.',
     inputSchema: { type: 'object', properties: { flags: { type: 'string' } }, required: ['flags'] } },

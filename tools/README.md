@@ -168,6 +168,21 @@ the note carries the evidence). It's CLAIM-only — TRAILING/STALE are softer an
 a live-data divergence flows straight into the track record and then surfaces inline (`track: ~
 weakened`) in `stack`/`doctor`/`learn`: **live npm → calibrate → every recommendation.**
 
+## `react-brain-decide.mjs` — decisions with receipts (LIVING ADRs)
+Turns a recommendation into the artifact teams actually need: an **Architecture Decision
+Record** with the full evidence chain — your repo's context resolved through the corpus
+(which when-clause fired and why), the candidate table, primary sources with verified-on
+dates, the pick's **calibration track record**, and a live-npm signals snapshot. The
+radical part is the machine-readable premise block in the frontmatter (entry id ·
+entry_updated · prediction check_by): **`doctor` re-checks every record in `docs/adr/`**
+and flags when the premises MOVE — entry re-verified since the decision, prediction
+resolved weakened/overturned, or the review horizon passed. ADRs everywhere rot silently;
+these know when they expire.
+```sh
+node tools/react-brain-decide.mjs state .            # writes docs/adr/NNN-state.md
+node tools/react-brain-decide.mjs "data fetching" . --stdout
+```
+
 ## `react-brain-lint.mjs` — trust / invariants
 Every structural rule that used to live in session discipline, mechanized and offline:
 per-entry schema (required fields, status/confidence enums, `reviewed` ⇒ doc + sources,

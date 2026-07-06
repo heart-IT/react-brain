@@ -10,7 +10,7 @@
 // Shared detection lives in ./detect.mjs (one source of truth, also used by evidence).
 // ───────────────────────────────────────────────────────────────────────────────
 
-import { loadEntries, analyzeRepo, fit, trunc, GROUP_ORDER, trackRecord, TRACK_GLYPH, scanModernDefaults, scanSourceSignals } from './detect.mjs';
+import { loadEntries, analyzeRepo, fit, trunc, GROUP_ORDER, trackRecord, TRACK_GLYPH, scanModernDefaults, scanSourceSignals, checkAdrs } from './detect.mjs';
 
 const EXPECTED = {
   always: ['RB-E-STATE', 'RB-E-STYLING', 'RB-E-TESTING', 'RB-E-TYPESCRIPT', 'RB-E-DX', 'RB-E-NAV'],
@@ -100,6 +100,21 @@ function printReport(a, entries) {
     }
   }
 
+  // DECISION RECORDS — living ADRs (react-brain decide) re-checked against the corpus.
+  const adrs = checkAdrs(a.path, entries);
+  if (adrs.length) {
+    console.log(`\n  DECISION RECORDS  (docs/adr — premises re-checked against the current corpus)`);
+    console.log(`  ${'-'.repeat(74)}`);
+    for (const rec of adrs) {
+      if (!rec.flags.length) console.log(`  ✓ ${rec.file}  [${rec.entry} · ${rec.status}] premises hold`);
+      else {
+        console.log(`  ⚠ ${rec.file}  [${rec.entry} · ${rec.status}]`);
+        for (const fl of rec.flags) console.log(`      ${fl}`);
+      }
+    }
+    console.log(`  (regenerate a record: react-brain decide <topic> .)`);
+  }
+
   console.log(`\n  note: deterministic dep + source scan. Judgment dimensions (architecture, a11y,`);
   console.log(`        testing depth, security) → run the react-brain mentor. Fit is heuristic.`);
 }
@@ -119,6 +134,7 @@ function jsonReport(a, entries) {
   const modernization = (!NO_SCAN && a.platform !== 'react') ? scanModernDefaults(a.path, a.deps) : null;
   const sourceSignals = !NO_SCAN ? scanSourceSignals(a.path, entries, { stage: a.stage, platform: a.platform, deps: a.deps }) : null;
   return {
+    adrs: checkAdrs(a.path, entries),
     name: a.name, path: a.path, version: a.version || null, platform: a.platform,
     desktopShell: a.desktopShell || null, stage: a.stage, depCount: a.depCount,
     ts: a.ts, ci: a.ci, tests: a.tests, lintfmt: a.lintfmt, hooks: a.hooks,

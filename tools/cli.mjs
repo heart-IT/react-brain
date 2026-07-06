@@ -8,6 +8,7 @@
 //   calibrate— scored prediction track record: does `confidence` mean anything? (trust)
 //   signals  — recommendations vs live npm reality (empirical / external trust)
 //   learn    — a repo-personalized learning path (knowledge → human)
+//   decide   — a living decision record: ADR with receipts, premise-checked by doctor
 //   query    — look up an entry's recommendation
 // doctor/evidence/pulse delegate to their scripts (one source of truth); query is native.
 // ───────────────────────────────────────────────────────────────────────────────
@@ -40,6 +41,10 @@ usage: react-brain <command> [args]
                        (flags: --record [log CLAIMs to ledger], --list, --no-registry, --today=…)
   learn    <repo...>   a repo-personalized learning path through the encyclopedia
                        (flags: --stage=prototype|mvp|production|scale, --full)
+  decide   <topic> [repo]  generate a LIVING DECISION RECORD (ADR with receipts): resolved
+                       context, candidate table, evidence chain, calibration track record,
+                       and a machine-readable premise block that \`doctor\` re-checks
+                       (flags: --out=docs/adr, --stdout)
   query    <term>      look up an entry's recommendation (id / category / keyword)
   lint                 mechanized corpus invariants: schema, TOC, reachability, dup URLs
                        (offline; exit 1 on errors — run after any corpus edit)
@@ -83,6 +88,7 @@ switch (cmd) {
   case 'calibrate': delegate('react-brain-calibrate.mjs'); break;
   case 'signals': delegate('react-brain-signals.mjs'); break;
   case 'learn': delegate('react-brain-learn.mjs'); break;
+  case 'decide': delegate('react-brain-decide.mjs'); break;
   case 'lint': delegate('react-brain-lint.mjs'); break;
   case 'query': query(rest); break;
   case undefined: case 'help': case '--help': case '-h': help(); break;
