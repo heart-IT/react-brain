@@ -33,3 +33,12 @@ reading:
     url: "https://frontendatscale.com/blog/tanstack-db/"
     by: "Maxi Ferreira (Frontend at Scale)"
     what: "Builds the local-first reactive-persistence mental model from first principles — Collections, live queries via differential dataflow, optimistic transactional mutations — contrasting it with request/response fetching. The shift to sync-engine thinking."
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "react-native-mmkv", label: "MMKV", token: "mmkv" }
+  - { pkg: "@react-native-async-storage/async-storage", label: "AsyncStorage", token: "asyncstorage" }
+  - { pkg: "@op-engineering/op-sqlite", label: "op-sqlite", token: "op-sqlite" }
+  - { pkg: "op-sqlite", label: "op-sqlite", token: "op-sqlite" }
+  - { pkg: "expo-sqlite", label: "expo-sqlite", token: "sqlite" }
+  - { pkg: "react-native-keychain", label: "Keychain", token: "keychain" }
+  - { pkg: "expo-secure-store", label: "expo-secure-store (secrets)", token: "secure-store" }
+  - { pkg: "@nozbe/watermelondb", label: "WatermelonDB", token: "watermelondb" }

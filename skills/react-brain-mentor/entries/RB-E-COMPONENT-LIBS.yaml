@@ -39,3 +39,12 @@ reading:
     url: "https://aurorascharff.no/posts/building-design-components-with-action-props-using-async-react/"
     by: "Aurora Scharff"
     what: "A pattern for design-system components that accept action props and run them in internal transitions (useTransition/useOptimistic) for built-in pending/optimistic UI. A durable component-API pattern for the async-React era."
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "@radix-ui/*", label: "Radix UI", token: "radix" }
+  - { pkg: "@base-ui-components/*", label: "Base UI", token: "base ui" }
+  - { pkg: "react-aria-components", label: "React Aria", token: "react aria" }
+  - { pkg: "@mui/*", label: "MUI", token: "mui" }
+  - { pkg: "@chakra-ui/*", label: "Chakra", token: "chakra" }
+  - { pkg: "@mantine/*", label: "Mantine", token: "mantine" }
+  - { pkg: "antd", label: "Ant Design", token: "ant" }
+  - { pkg: "@heroui/*", label: "HeroUI", token: "heroui" }

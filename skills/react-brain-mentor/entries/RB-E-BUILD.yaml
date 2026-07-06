@@ -63,3 +63,10 @@ reading:
     what: "Why RN Android builds are slow (conservative Gradle/Metro/C++ defaults) and how parallel Gradle, dynamic Metro workers, ccache, and single-architecture builds cut times from 20+ min to 2-5 min, with benchmarks. The RN-CI build-perf dimension the other readings here don't cover."
 sources:
   - "https://reactnative.dev/blog/2026/02/11/react-native-0.84"
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "vite", label: "Vite", token: "vite" }
+  - { pkg: "@rspack/*", label: "Rspack", token: "rspack" }
+  - { pkg: "esbuild", label: "esbuild", token: "esbuild" }
+  - { pkg: "@react-native/metro-config", label: "Metro", token: "metro" }
+  - { pkg: "metro", label: "Metro", token: "metro" }
+  - { pkg: "webpack", label: "webpack", token: "webpack" }

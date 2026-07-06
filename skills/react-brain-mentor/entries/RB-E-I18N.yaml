@@ -31,3 +31,9 @@ reading:
     url: "https://formatjs.github.io/docs/core-concepts/icu-syntax/"
     by: "FormatJS (react-intl)"
     what: "The canonical, example-driven explanation of the ICU message format — interpolation, plurals/selectordinal, select, number/date skeletons, rich text. ICU is a stable Unicode standard, so this foundational reference doesn't go stale."
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "next-intl", label: "next-intl", token: "next-intl" }
+  - { pkg: "react-i18next", label: "react-i18next", token: "i18next" }
+  - { pkg: "i18next", label: "i18next", token: "i18next" }
+  - { pkg: "react-intl", label: "react-intl", token: "formatjs" }
+  - { pkg: "@lingui/*", label: "Lingui", token: "lingui" }

@@ -40,3 +40,11 @@ reading:
 sources:
   - "https://docs.expo.dev/versions/latest/sdk/maps/"
   - "https://github.com/gmi-software/react-native-better-maps"
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "react-native-maps", label: "react-native-maps", token: "react-native-maps" }
+  - { pkg: "expo-maps", label: "expo-maps (alpha)", token: "expo-maps" }
+  - { pkg: "@rnmapbox/maps", label: "Mapbox RN", token: "mapbox" }
+  - { pkg: "@maplibre/maplibre-react-native", label: "MapLibre RN", token: "maplibre" }
+  - { pkg: "react-native-better-maps", label: "Better Maps (Nitro)", token: "better-maps" }
+  - { pkg: "react-map-gl", label: "react-map-gl", token: "react-map-gl" }
+  - { pkg: "react-leaflet", label: "react-leaflet", token: "leaflet" }

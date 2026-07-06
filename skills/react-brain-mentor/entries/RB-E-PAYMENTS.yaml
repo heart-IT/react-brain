@@ -32,3 +32,7 @@ reading:
     url: "https://www.revenuecat.com/blog/engineering/building-the-rc-fortress/"
     by: "RevenueCat Engineering"
     what: "A resilience case study for keeping purchases working when subscription backends fail — cached paywall snapshots, temporary offline entitlements, buffered request log/replay — with tradeoffs made explicit. The realities of subscription infra regardless of library."
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "react-native-purchases", label: "RevenueCat", token: "revenuecat" }
+  - { pkg: "react-native-iap", label: "react-native-iap", token: "react-native-iap" }
+  - { pkg: "expo-iap", label: "expo-iap", token: "expo-iap" }

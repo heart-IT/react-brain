@@ -35,3 +35,7 @@ reading:
     url: "https://tigerabrodi.blog/how-to-build-a-performant-ai-markdown-renderer"
     by: "Tiger Abrodi"
     what: "The architecture behind streaming-markdown rendering (the Streamdown problem): repairing incomplete markdown before parsing, block-level memoization to avoid re-parsing every token, processor caching, and startTransition for smooth streaming."
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "@ai-sdk/*", label: "Vercel AI SDK", token: "ai sdk" }
+  - { pkg: "ai", label: "Vercel AI SDK", token: "ai sdk" }
+  - { pkg: "@assistant-ui/*", label: "assistant-ui", token: "assistant-ui" }

@@ -53,3 +53,7 @@ sources:
   - "https://reactnative.dev/blog/2026/02/11/react-native-0.84"
   - "https://reactnative.dev/blog/2026/06/11/react-native-0.86"
   - "https://github.com/zoontek/react-native-edge-to-edge"
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "react-native-nitro-modules", label: "Nitro Modules", token: "nitro" }
+  - { pkg: "expo-modules-core", label: "Expo Modules", token: "expo modules" }
+  - { pkg: "expo", label: "Expo (managed native)", token: "expo modules" }

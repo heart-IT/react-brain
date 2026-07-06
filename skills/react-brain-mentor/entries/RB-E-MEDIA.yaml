@@ -53,3 +53,12 @@ reading:
     what: "By VisionCamera's creator: three scanning APIs (CodeScanner / useBarcodeScannerOutput / frame processors), narrowing barcodeFormats and outputResolution for latency, the frame-vs-preview coordinate gotcha, and MLKit vs Apple's native AVCaptureMetadataOutput vs commercial SDKs. The reference for RN code scanning."
 sources:
   - "https://blog.margelo.com/building-videocall-app-with-filters"
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "react-native-vision-camera", label: "VisionCamera", token: "visioncamera" }
+  - { pkg: "expo-camera", label: "expo-camera", token: "expo-camera" }
+  - { pkg: "@livekit/*", label: "LiveKit", token: "livekit" }
+  - { pkg: "react-native-webrtc", label: "react-native-webrtc", token: "webrtc" }
+  - { pkg: "expo-av", label: "expo-av (playback)", token: "expo-av" }
+  - { pkg: "expo-video", label: "expo-video (playback)", token: "expo-video" }
+  - { pkg: "react-native-qrcode-svg", label: "QR generation (qrcode-svg)", token: "scanning" }
+  - { pkg: "expo-image-picker", label: "expo-image-picker", token: "camera" }

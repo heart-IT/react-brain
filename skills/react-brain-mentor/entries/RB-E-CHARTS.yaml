@@ -33,3 +33,12 @@ reading:
 sources:
   - "https://reactnativerewind.com/issues/react-native-0-86-charting-your-financial-ruin-and-the-junk-drawer-in-your-package-json"
   - "https://github.com/FormidableLabs/victory-native-xl"
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "victory-native", label: "Victory Native", token: "victory" }
+  - { pkg: "victory", label: "Victory", token: "victory" }
+  - { pkg: "recharts", label: "Recharts", token: "recharts" }
+  - { pkg: "@visx/*", label: "visx", token: "visx" }
+  - { pkg: "chart.js", label: "Chart.js", token: "chart.js" }
+  - { pkg: "react-native-gifted-charts", label: "gifted-charts", token: "gifted-charts" }
+  - { pkg: "d3-force", label: "d3-force", token: "visx" }
+  - { pkg: "d3", label: "D3", token: "visx" }

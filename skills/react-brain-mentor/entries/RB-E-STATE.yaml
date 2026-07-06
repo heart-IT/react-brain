@@ -48,3 +48,13 @@ reading:
     what: "A decision framework for WHERE state should live, keyed by component proximity × data type: props/callbacks for adjacent components, lifted state or composition for siblings, context for slow-changing globals, Zustand for frequently-updated client state, TanStack Query for server data, URL params for view state, events for fire-and-forget. 'Reach for the closest tool that can actually reach the problem, and only move outward when it stops working.' The how-to-choose guide that operationalizes this entry's server-vs-client-vs-view split."
 sources:
   - "https://2025.stateofreact.com/en-US/libraries/state-management/"
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "zustand", label: "Zustand", token: "zustand" }
+  - { pkg: "jotai", label: "Jotai", token: "jotai" }
+  - { pkg: "@reduxjs/toolkit", label: "Redux Toolkit", token: "rtk" }
+  - { pkg: "react-redux", label: "Redux (react-redux)", token: "redux" }
+  - { pkg: "redux", label: "Redux (classic)", token: "redux" }
+  - { pkg: "@xstate/*", label: "XState", token: "xstate" }
+  - { pkg: "xstate", label: "XState", token: "xstate" }
+  - { pkg: "valtio", label: "Valtio", token: "valtio" }
+  - { pkg: "mobx", label: "MobX", token: "mobx" }

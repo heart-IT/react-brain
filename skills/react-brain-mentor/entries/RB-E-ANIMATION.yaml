@@ -53,3 +53,12 @@ reading:
     what: "Uses Suspense to freeze exiting content during animations; explains Fragment refs, useInsertionEffect, and Suspense DOM-update behavior. A durable web exit-animation technique grounded in React internals."
 sources:
   - "https://reactnative.dev/blog/2026/04/07/react-native-0.85"
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "react-native-reanimated", label: "Reanimated", token: "reanimated" }
+  - { pkg: "react-native-gesture-handler", label: "Gesture Handler", token: "gesture handler" }
+  - { pkg: "react-native-worklets", label: "Worklets", token: "worklets" }
+  - { pkg: "framer-motion", label: "framer-motion / Motion", token: "motion" }
+  - { pkg: "motion", label: "Motion", token: "motion" }
+  - { pkg: "lottie-react-native", label: "Lottie", token: "lottie" }
+  - { pkg: "@shopify/react-native-skia", label: "Skia", token: "skia" }
+  - { pkg: "moti", label: "Moti", token: "moti" }

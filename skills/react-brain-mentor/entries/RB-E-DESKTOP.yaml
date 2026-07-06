@@ -44,3 +44,9 @@ reading:
 sources:
   - "https://tauri.app/"
   - "https://github.com/tw93/Pake"
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "electron", label: "Electron", token: "electron" }
+  - { pkg: "@tauri-apps/*", label: "Tauri", token: "tauri" }
+  - { pkg: "pear-runtime-react-native", label: "Pear (mobile, Holepunch)", token: "pear" }
+  - { pkg: "pear-runtime", label: "Pear (Holepunch)", token: "pear" }
+  - { pkg: "@capacitor/*", label: "Capacitor", token: "capacitor" }

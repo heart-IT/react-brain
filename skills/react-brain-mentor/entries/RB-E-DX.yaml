@@ -29,3 +29,13 @@ reading:
     what: "Large-scale case study adopting Expo's bare workflow (not EAS) with fingerprint caching + JS patching to halve CI builds and grow contributors 9→105. A durable enterprise RN build/CI-DX blueprint."
 sources:
   - "https://medium.com/doctolib/expo-without-eas-scaling-the-react-native-developer-experience-of-an-app-with-90m-users-2694ea841805"
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "husky", label: "husky (git hooks)", token: "husky" }
+  - { pkg: "lefthook", label: "lefthook", token: "lefthook" }
+  - { pkg: "@biomejs/biome", label: "Biome", token: "biome" }
+  - { pkg: "eslint", label: "ESLint", token: "eslint" }
+  - { pkg: "prettier", label: "Prettier", token: "prettier" }
+  - { pkg: "lint-staged", label: "lint-staged", token: "lint-staged" }
+  - { pkg: "turbo", label: "Turborepo", token: "turborepo" }
+  - { pkg: "nx", label: "Nx", token: "nx" }
+  - { pkg: "lunte", label: "lunte (lint)", token: "lint" }

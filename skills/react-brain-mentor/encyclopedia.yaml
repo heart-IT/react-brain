@@ -52,6 +52,9 @@
 #                    a canonical article lives in the relevant entry's `reading`; an article with
 #                    no home has revealed a GAP → add the entry. Pure how-to depth still routes to
 #                    `defer_to_skill`, not here.
+#   detect         — package.json signals owned by THIS entry: [{pkg, label, token}]
+#                    (pkg: exact name | '@scope/*' | 'name*'). tools/detect.mjs assembles
+#                    these into the detection table — adding an entry never touches tools.
 #   sources, updated, doc
 # ══════════════════════════════════════════════════════════════
 

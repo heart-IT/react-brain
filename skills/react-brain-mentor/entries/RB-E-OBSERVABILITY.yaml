@@ -30,3 +30,6 @@ reading:
     url: "https://3perf.com/blog/hydration-mismatch/"
     by: "Ivan Akulov (3perf, perf consultant)"
     what: "Web-side production-perf diagnosis from real consulting: a single hydration mismatch makes React recreate the DOM, and because LCP only tracks NEW elements, the remounted (font-swapped, larger) text re-triggers LCP at hydration time — green→red with no obvious cause. Durable lessons: keep server/client renders identical, scope unavoidable mismatches with Suspense, and know how the metric itself measures (the metric mechanics are the observability half — the rendering-strategy background lives in RB-E-META-FRAMEWORKS's readings). The web counterpart to the Indeed RN piece above."
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "@sentry/*", label: "Sentry", token: "sentry" }
+  - { pkg: "@bugsnag/*", label: "Bugsnag", token: "bugsnag" }

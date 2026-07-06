@@ -3,8 +3,8 @@
 // table, per-repo analysis, and the fit heuristic. Imported by both
 // react-brain-doctor.mjs (knowledge→code) and react-brain-evidence.mjs (code→knowledge).
 //
-// SEED notes: YAML via a python3+pyyaml shim (swap for `npm i yaml`); the DETECTORS
-// table is here (production TODO = migrate into per-entry `detect:` fields in the YAML).
+// YAML via the `yaml` npm package (python3+pyyaml shim as zero-install fallback).
+// The DETECTORS table is ASSEMBLED from per-entry `detect:` fields (entries/<ID>.yaml).
 // ───────────────────────────────────────────────────────────────────────────────
 
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
@@ -40,7 +40,9 @@ export function loadYamlMany(paths) {
 // mentor_hints); entries live one-per-file in entries/<ID>.yaml, ordered here by
 // the TOC so consumers see the same sequence the monolith had. A monolith with an
 // inline `entries:` key still loads (back-compat for old checkouts / forks).
+let _doc = null;
 export function loadDoc() {
+  if (_doc) return _doc;
   const doc = loadYaml(ENC_PATH);
   if (!doc.entries && existsSync(ENTRIES_DIR)) {
     const files = readdirSync(ENTRIES_DIR).filter((f) => f.endsWith('.yaml')).sort();
@@ -49,173 +51,19 @@ export function loadDoc() {
     entries.sort((a, b) => (order.get(a.id) ?? 1e9) - (order.get(b.id) ?? 1e9));
     doc.entries = entries;
   }
-  return doc;
+  return (_doc = doc);
 }
 export function loadEntries() { return Object.fromEntries(loadDoc().entries.map((e) => [e.id, e])); }
 
 // pattern -> [entry, human label, token to look for in the entry's recommend text]
 // pattern forms: exact 'name' · scope prefix '@scope/*' · name prefix 'name*'
-export const DETECTORS = [
-  ['zustand','RB-E-STATE','Zustand','zustand'],
-  ['jotai','RB-E-STATE','Jotai','jotai'],
-  ['@reduxjs/toolkit','RB-E-STATE','Redux Toolkit','rtk'],
-  ['react-redux','RB-E-STATE','Redux (react-redux)','redux'],
-  ['redux','RB-E-STATE','Redux (classic)','redux'],
-  ['@xstate/*','RB-E-STATE','XState','xstate'],
-  ['xstate','RB-E-STATE','XState','xstate'],
-  ['valtio','RB-E-STATE','Valtio','valtio'],
-  ['mobx','RB-E-STATE','MobX','mobx'],
-  ['@tanstack/react-query','RB-E-DATA','TanStack Query','tanstack query'],
-  ['swr','RB-E-DATA','SWR','swr'],
-  ['@apollo/client','RB-E-DATA','Apollo Client','apollo'],
-  ['urql','RB-E-DATA','urql','urql'],
-  ['@trpc/*','RB-E-DATA','tRPC','trpc'],
-  ['@rocicorp/zero','RB-E-DATA','Zero','zero'],
-  ['@tanstack/react-db','RB-E-DATA','TanStack DB','tanstack db'],
-  ['@react-navigation/*','RB-E-NAV','React Navigation','react navigation'],
-  ['expo-router','RB-E-NAV','Expo Router','expo router'],
-  ['react-router-dom','RB-E-NAV','React Router','react router'],
-  ['react-router','RB-E-NAV','React Router','react router'],
-  ['@tanstack/react-router','RB-E-NAV','TanStack Router','tanstack router'],
-  ['next','RB-E-META-FRAMEWORKS','Next.js','next.js'],
-  ['@tanstack/react-start','RB-E-META-FRAMEWORKS','TanStack Start','tanstack start'],
-  ['astro','RB-E-META-FRAMEWORKS','Astro','astro'],
-  ['waku','RB-E-META-FRAMEWORKS','Waku','waku'],
-  ['react-hook-form','RB-E-FORMS','React Hook Form','react hook form'],
-  ['formik','RB-E-FORMS','Formik','formik'],
-  ['@tanstack/react-form','RB-E-FORMS','TanStack Form','tanstack form'],
-  ['zod','RB-E-FORMS','Zod','zod'],
-  ['valibot','RB-E-FORMS','Valibot','valibot'],
-  ['@tailwindcss/*','RB-E-STYLING','Tailwind','tailwind'],
-  ['tailwindcss','RB-E-STYLING','Tailwind','tailwind'],
-  ['nativewind','RB-E-STYLING','NativeWind','nativewind'],
-  ['react-native-unistyles','RB-E-STYLING','Unistyles','unistyles'],
-  ['@tamagui/*','RB-E-STYLING','Tamagui','tamagui'],
-  ['tamagui','RB-E-STYLING','Tamagui','tamagui'],
-  ['@stylexjs/stylex','RB-E-STYLING','StyleX','stylex'],
-  ['styled-components','RB-E-STYLING','styled-components','styled-components'],
-  ['@emotion/*','RB-E-STYLING','Emotion','css-in-js'],
-  ['@radix-ui/*','RB-E-COMPONENT-LIBS','Radix UI','radix'],
-  ['@base-ui-components/*','RB-E-COMPONENT-LIBS','Base UI','base ui'],
-  ['react-aria-components','RB-E-COMPONENT-LIBS','React Aria','react aria'],
-  ['@mui/*','RB-E-COMPONENT-LIBS','MUI','mui'],
-  ['@chakra-ui/*','RB-E-COMPONENT-LIBS','Chakra','chakra'],
-  ['@mantine/*','RB-E-COMPONENT-LIBS','Mantine','mantine'],
-  ['antd','RB-E-COMPONENT-LIBS','Ant Design','ant'],
-  ['@heroui/*','RB-E-COMPONENT-LIBS','HeroUI','heroui'],
-  // ── svg / vector / icons ──
-  ['react-native-svg-transformer','RB-E-SVG','svg-transformer','svg-transformer'],
-  ['react-native-svg','RB-E-SVG','react-native-svg','react-native-svg'],
-  ['@react-native-vector-icons/*','RB-E-SVG','vector-icons (scoped)','vector-icons'],
-  ['react-native-vector-icons','RB-E-SVG','react-native-vector-icons (legacy)','legacy'],
-  ['lucide-react-native','RB-E-SVG','Lucide icons','lucide'],
-  ['@expo/vector-icons','RB-E-SVG','@expo/vector-icons','expo/vector-icons'],
-  ['react-native-reanimated','RB-E-ANIMATION','Reanimated','reanimated'],
-  ['react-native-gesture-handler','RB-E-ANIMATION','Gesture Handler','gesture handler'],
-  ['react-native-worklets','RB-E-ANIMATION','Worklets','worklets'],
-  ['framer-motion','RB-E-ANIMATION','framer-motion / Motion','motion'],
-  ['motion','RB-E-ANIMATION','Motion','motion'],
-  ['lottie-react-native','RB-E-ANIMATION','Lottie','lottie'],
-  ['@shopify/react-native-skia','RB-E-ANIMATION','Skia','skia'],
-  ['moti','RB-E-ANIMATION','Moti','moti'],
-  ['@shopify/flash-list','RB-E-LISTS','FlashList','flashlist'],
-  ['@legendapp/list','RB-E-LISTS','Legend List','legend list'],
-  ['react-window','RB-E-LISTS','react-window','react-window'],
-  ['@tanstack/react-virtual','RB-E-LISTS','TanStack Virtual','react-virtual'],
-  ['@tanstack/react-table','RB-E-LISTS','TanStack Table','hightable'],
-  ['react-native-nitro-modules','RB-E-NATIVE','Nitro Modules','nitro'],
-  ['expo-modules-core','RB-E-NATIVE','Expo Modules','expo modules'],
-  ['expo','RB-E-NATIVE','Expo (managed native)','expo modules'],
-  ['react-native-vision-camera','RB-E-MEDIA','VisionCamera','visioncamera'],
-  ['expo-camera','RB-E-MEDIA','expo-camera','expo-camera'],
-  ['@livekit/*','RB-E-MEDIA','LiveKit','livekit'],
-  ['react-native-webrtc','RB-E-MEDIA','react-native-webrtc','webrtc'],
-  ['expo-av','RB-E-MEDIA','expo-av (playback)','expo-av'],
-  ['expo-video','RB-E-MEDIA','expo-video (playback)','expo-video'],
-  ['react-native-qrcode-svg','RB-E-MEDIA','QR generation (qrcode-svg)','scanning'],
-  ['expo-image-picker','RB-E-MEDIA','expo-image-picker','camera'],
-  ['react-native-mmkv','RB-E-STORAGE','MMKV','mmkv'],
-  ['@react-native-async-storage/async-storage','RB-E-STORAGE','AsyncStorage','asyncstorage'],
-  ['@op-engineering/op-sqlite','RB-E-STORAGE','op-sqlite','op-sqlite'],
-  ['op-sqlite','RB-E-STORAGE','op-sqlite','op-sqlite'],
-  ['expo-sqlite','RB-E-STORAGE','expo-sqlite','sqlite'],
-  ['react-native-keychain','RB-E-STORAGE','Keychain','keychain'],
-  ['expo-secure-store','RB-E-STORAGE','expo-secure-store (secrets)','secure-store'],
-  ['@nozbe/watermelondb','RB-E-STORAGE','WatermelonDB','watermelondb'],
-  ['react-native-keyboard-controller','RB-E-KEYBOARD','keyboard-controller','keyboard-controller'],
-  ['react-native-avoid-softinput','RB-E-KEYBOARD','avoid-softinput','avoid-softinput'],
-  ['react-native-purchases','RB-E-PAYMENTS','RevenueCat','revenuecat'],
-  ['react-native-iap','RB-E-PAYMENTS','react-native-iap','react-native-iap'],
-  ['expo-iap','RB-E-PAYMENTS','expo-iap','expo-iap'],
-  ['electron','RB-E-DESKTOP','Electron','electron'],
-  ['@tauri-apps/*','RB-E-DESKTOP','Tauri','tauri'],
-  ['pear-runtime-react-native','RB-E-DESKTOP','Pear (mobile, Holepunch)','pear'],
-  ['pear-runtime','RB-E-DESKTOP','Pear (Holepunch)','pear'],
-  ['@capacitor/*','RB-E-DESKTOP','Capacitor','capacitor'],
-  ['hyper*','RB-E-P2P','Holepunch (Hypercore stack)','holepunch'],
-  ['autobase','RB-E-P2P','Autobase (multiwriter)','autobase'],
-  ['corestore','RB-E-P2P','Corestore','corestore'],
-  ['hrpc','RB-E-P2P','hrpc','hrpc'],
-  ['blind-pairing*','RB-E-P2P','blind-pairing','pairing'],
-  ['vite','RB-E-BUILD','Vite','vite'],
-  ['@rspack/*','RB-E-BUILD','Rspack','rspack'],
-  ['esbuild','RB-E-BUILD','esbuild','esbuild'],
-  ['@react-native/metro-config','RB-E-BUILD','Metro','metro'],
-  ['metro','RB-E-BUILD','Metro','metro'],
-  ['webpack','RB-E-BUILD','webpack','webpack'],
-  ['jest','RB-E-TESTING','Jest','jest'],
-  ['vitest','RB-E-TESTING','Vitest','vitest'],
-  ['@testing-library/react-native','RB-E-TESTING','RN Testing Library','testing library'],
-  ['@testing-library/react','RB-E-TESTING','React Testing Library','testing library'],
-  ['@playwright/test','RB-E-TESTING','Playwright','playwright'],
-  ['detox','RB-E-TESTING','Detox','detox'],
-  ['msw','RB-E-TESTING','MSW','msw'],
-  ['@storybook/*','RB-E-TESTING','Storybook','storybook'],
-  ['brittle','RB-E-TESTING','brittle (Holepunch TAP)','brittle'],
-  ['husky','RB-E-DX','husky (git hooks)','husky'],
-  ['lefthook','RB-E-DX','lefthook','lefthook'],
-  ['@biomejs/biome','RB-E-DX','Biome','biome'],
-  ['eslint','RB-E-DX','ESLint','eslint'],
-  ['prettier','RB-E-DX','Prettier','prettier'],
-  ['lint-staged','RB-E-DX','lint-staged','lint-staged'],
-  ['turbo','RB-E-DX','Turborepo','turborepo'],
-  ['nx','RB-E-DX','Nx','nx'],
-  ['lunte','RB-E-DX','lunte (lint)','lint'],
-  ['@sentry/*','RB-E-OBSERVABILITY','Sentry','sentry'],
-  ['@bugsnag/*','RB-E-OBSERVABILITY','Bugsnag','bugsnag'],
-  ['typescript','RB-E-TYPESCRIPT','TypeScript','typescript'],
-  ['next-intl','RB-E-I18N','next-intl','next-intl'],
-  ['react-i18next','RB-E-I18N','react-i18next','i18next'],
-  ['i18next','RB-E-I18N','i18next','i18next'],
-  ['react-intl','RB-E-I18N','react-intl','formatjs'],
-  ['@lingui/*','RB-E-I18N','Lingui','lingui'],
-  ['victory-native','RB-E-CHARTS','Victory Native','victory'],
-  ['victory','RB-E-CHARTS','Victory','victory'],
-  ['recharts','RB-E-CHARTS','Recharts','recharts'],
-  ['@visx/*','RB-E-CHARTS','visx','visx'],
-  ['chart.js','RB-E-CHARTS','Chart.js','chart.js'],
-  ['react-native-gifted-charts','RB-E-CHARTS','gifted-charts','gifted-charts'],
-  ['d3-force','RB-E-CHARTS','d3-force','visx'],
-  ['d3','RB-E-CHARTS','D3','visx'],
-  ['react-native-maps','RB-E-MAPS','react-native-maps','react-native-maps'],
-  ['expo-maps','RB-E-MAPS','expo-maps (alpha)','expo-maps'],
-  ['@rnmapbox/maps','RB-E-MAPS','Mapbox RN','mapbox'],
-  ['@maplibre/maplibre-react-native','RB-E-MAPS','MapLibre RN','maplibre'],
-  ['react-native-better-maps','RB-E-MAPS','Better Maps (Nitro)','better-maps'],
-  ['react-map-gl','RB-E-MAPS','react-map-gl','react-map-gl'],
-  ['react-leaflet','RB-E-MAPS','react-leaflet','leaflet'],
-  ['@tiptap/*','RB-E-EDITORS','TipTap','tiptap'],
-  ['prosemirror-*','RB-E-EDITORS','ProseMirror','prosemirror'],
-  ['lexical','RB-E-EDITORS','Lexical','lexical'],
-  ['@blocknote/*','RB-E-EDITORS','BlockNote','blocknote'],
-  ['slate','RB-E-EDITORS','Slate','slate'],
-  ['react-native-executorch','RB-E-ONDEVICE-AI','ExecuTorch','executorch'],
-  ['@react-native-ai/apple','RB-E-ONDEVICE-AI','Apple on-device LLM','apple'],
-  ['react-native-rag','RB-E-ONDEVICE-AI','react-native-rag','rag'],
-  ['@ai-sdk/*','RB-E-AI-UI','Vercel AI SDK','ai sdk'],
-  ['ai','RB-E-AI-UI','Vercel AI SDK','ai sdk'],
-  ['@assistant-ui/*','RB-E-AI-UI','assistant-ui','assistant-ui'],
-];
+// Rows are DECLARED per entry (entries/<ID>.yaml `detect:` — pkg/label/token) and
+// assembled here in TOC order. Matching is exact-name except explicit globs and no
+// glob spans entries, so cross-entry order is not load-bearing; within-entry order
+// is preserved. One source of truth: an entry OWNS its detection signals — adding
+// an entry never touches this file.
+export const DETECTORS = loadDoc().entries.flatMap((e) =>
+  (e.detect || []).map((d) => [d.pkg, e.id, d.label, d.token]));
 
 export function matchDetector(name) {
   for (const d of DETECTORS) {

@@ -47,3 +47,13 @@ reading:
 sources:
   - "https://www.spotvirtual.com/blog/why-were-breaking-up-with-css-in-js"
   - "https://engineering.fb.com/2025/11/11/web/stylex-a-styling-library-for-css-at-scale/"
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "@tailwindcss/*", label: "Tailwind", token: "tailwind" }
+  - { pkg: "tailwindcss", label: "Tailwind", token: "tailwind" }
+  - { pkg: "nativewind", label: "NativeWind", token: "nativewind" }
+  - { pkg: "react-native-unistyles", label: "Unistyles", token: "unistyles" }
+  - { pkg: "@tamagui/*", label: "Tamagui", token: "tamagui" }
+  - { pkg: "tamagui", label: "Tamagui", token: "tamagui" }
+  - { pkg: "@stylexjs/stylex", label: "StyleX", token: "stylex" }
+  - { pkg: "styled-components", label: "styled-components", token: "styled-components" }
+  - { pkg: "@emotion/*", label: "Emotion", token: "css-in-js" }

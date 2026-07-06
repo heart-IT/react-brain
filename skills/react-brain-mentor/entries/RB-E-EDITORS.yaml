@@ -27,3 +27,9 @@ reading:
     url: "https://smoores.dev/post/unreasonable_effectiveness_of_prosemirror/"
     by: "Shane Friedman (Storyteller)"
     what: "Teaches ProseMirror's core abstractions (nodes, marks, positions, mappings) through a real parse→transform→serialize pipeline. Durable conceptual grounding for the document model under most React editors."
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "@tiptap/*", label: "TipTap", token: "tiptap" }
+  - { pkg: "prosemirror-*", label: "ProseMirror", token: "prosemirror" }
+  - { pkg: "lexical", label: "Lexical", token: "lexical" }
+  - { pkg: "@blocknote/*", label: "BlockNote", token: "blocknote" }
+  - { pkg: "slate", label: "Slate", token: "slate" }

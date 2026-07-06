@@ -44,3 +44,9 @@ reading:
 sources:
   - "https://shopify.engineering/flashlist-v2"
   - "https://rednegra.net/blog/20260212-virtual-scroll/"
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "@shopify/flash-list", label: "FlashList", token: "flashlist" }
+  - { pkg: "@legendapp/list", label: "Legend List", token: "legend list" }
+  - { pkg: "react-window", label: "react-window", token: "react-window" }
+  - { pkg: "@tanstack/react-virtual", label: "TanStack Virtual", token: "react-virtual" }
+  - { pkg: "@tanstack/react-table", label: "TanStack Table", token: "hightable" }

@@ -39,3 +39,13 @@ reading:
     what: "Why tests coupled to internals are brittle (false failures on refactor, false passes on breakage) and why to test behavior the way users use it. The mental model behind Testing Library."
 sources:
   - "https://reactnative.dev/blog/2026/04/07/react-native-0.85"
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "jest", label: "Jest", token: "jest" }
+  - { pkg: "vitest", label: "Vitest", token: "vitest" }
+  - { pkg: "@testing-library/react-native", label: "RN Testing Library", token: "testing library" }
+  - { pkg: "@testing-library/react", label: "React Testing Library", token: "testing library" }
+  - { pkg: "@playwright/test", label: "Playwright", token: "playwright" }
+  - { pkg: "detox", label: "Detox", token: "detox" }
+  - { pkg: "msw", label: "MSW", token: "msw" }
+  - { pkg: "@storybook/*", label: "Storybook", token: "storybook" }
+  - { pkg: "brittle", label: "brittle (Holepunch TAP)", token: "brittle" }

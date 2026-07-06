@@ -44,3 +44,10 @@ reading:
 sources:
   - "https://registry.npmjs.org/react-native-svg/latest"
   - "https://github.com/oblador/react-native-vector-icons/blob/master/MIGRATION.md"
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "react-native-svg-transformer", label: "svg-transformer", token: "svg-transformer" }
+  - { pkg: "react-native-svg", label: "react-native-svg", token: "react-native-svg" }
+  - { pkg: "@react-native-vector-icons/*", label: "vector-icons (scoped)", token: "vector-icons" }
+  - { pkg: "react-native-vector-icons", label: "react-native-vector-icons (legacy)", token: "legacy" }
+  - { pkg: "lucide-react-native", label: "Lucide icons", token: "lucide" }
+  - { pkg: "@expo/vector-icons", label: "@expo/vector-icons", token: "expo/vector-icons" }

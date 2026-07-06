@@ -29,3 +29,9 @@ reading:
     url: "https://formisch.dev/blog/one-core-six-frameworks/"
     by: "Fabian Hiller (Formisch / Valibot)"
     what: "Shows build-time framework abstraction (a tiny core swapped by a bundler plugin) instead of a runtime adapter layer, so form state uses each framework's native signals. A generalizable library-design pattern reframing portability vs integration."
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "react-hook-form", label: "React Hook Form", token: "react hook form" }
+  - { pkg: "formik", label: "Formik", token: "formik" }
+  - { pkg: "@tanstack/react-form", label: "TanStack Form", token: "tanstack form" }
+  - { pkg: "zod", label: "Zod", token: "zod" }
+  - { pkg: "valibot", label: "Valibot", token: "valibot" }

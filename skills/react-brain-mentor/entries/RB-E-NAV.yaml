@@ -44,3 +44,9 @@ reading:
 sources:
   - "https://reactnavigation.org/blog/2025/12/19/react-navigation-8.0-alpha/"
   - "https://reactrouter.com/"
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "@react-navigation/*", label: "React Navigation", token: "react navigation" }
+  - { pkg: "expo-router", label: "Expo Router", token: "expo router" }
+  - { pkg: "react-router-dom", label: "React Router", token: "react router" }
+  - { pkg: "react-router", label: "React Router", token: "react router" }
+  - { pkg: "@tanstack/react-router", label: "TanStack Router", token: "tanstack router" }

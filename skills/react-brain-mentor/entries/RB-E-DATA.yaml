@@ -48,3 +48,11 @@ reading:
     what: "A full architecture for pushing invalidation EVENTS (not data) over SSE to drive TanStack Query cache updates, with reference-counted subscriptions and horizontal-scaling guidance. The real-time dimension the other DATA readings don't cover."
 sources:
   - "https://2025.stateofreact.com/en-US/libraries/"
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "@tanstack/react-query", label: "TanStack Query", token: "tanstack query" }
+  - { pkg: "swr", label: "SWR", token: "swr" }
+  - { pkg: "@apollo/client", label: "Apollo Client", token: "apollo" }
+  - { pkg: "urql", label: "urql", token: "urql" }
+  - { pkg: "@trpc/*", label: "tRPC", token: "trpc" }
+  - { pkg: "@rocicorp/zero", label: "Zero", token: "zero" }
+  - { pkg: "@tanstack/react-db", label: "TanStack DB", token: "tanstack db" }

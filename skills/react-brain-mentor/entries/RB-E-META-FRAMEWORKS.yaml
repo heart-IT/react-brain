@@ -51,3 +51,8 @@ reading:
 sources:
   - "https://tanstack.com/blog/who-owns-the-tree"
   - "https://frontendmasters.com/blog/react-server-components-in-tanstack/"
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "next", label: "Next.js", token: "next.js" }
+  - { pkg: "@tanstack/react-start", label: "TanStack Start", token: "tanstack start" }
+  - { pkg: "astro", label: "Astro", token: "astro" }
+  - { pkg: "waku", label: "Waku", token: "waku" }

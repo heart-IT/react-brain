@@ -35,3 +35,5 @@ reading:
     what: "The production adoption case the tsgo-internals piece lacks: VS Code's ~50-extension codebase cut type-checking 36s→5s (~7x) and editor project-load 60s→10s by migrating INCREMENTALLY — TS 6.0 as a low-churn bridge, then TS 6-and-7 side-by-side in CI (TS 6 still emitting), then esbuild + TS 7 as the default. The surprising blocker wasn't type errors but formatter differences failing pre-commit checks. Evidence that TS 7 (Go-native tsc) is trustworthy for daily use on a large real codebase — if you bridge through TS 6 first."
 sources:
   - "https://devblogs.microsoft.com/typescript/announcing-typescript-7-0-rc/"
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "typescript", label: "TypeScript", token: "typescript" }
