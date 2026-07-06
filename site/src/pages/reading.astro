@@ -1,0 +1,33 @@
+---
+import Base from '../layouts/Base.astro';
+import { corpus } from '../lib/corpus.js';
+const { groups, entries } = corpus();
+const count = entries.reduce((n, e) => n + (e.reading?.length || 0), 0);
+---
+<Base title="react-brain — curated reading">
+  <h1>Curated reading</h1>
+  <p class="muted">{count} deep-dives, every one fetch-verified and annotated with <em>why it matters</em> —
+  organized by the decision it informs, not by publish date. The annotations are our editorial take;
+  <strong>the articles are the originals — read them there.</strong> A piece lands here only if it's the
+  canonical explanation for its topic; how-to content routes to depth skills instead.</p>
+  {groups.map((g) => (
+    <section>
+      <h2>{g.label}</h2>
+      {g.entries.map((id) => {
+        const e = entries.find((x) => x.id === id);
+        return e?.reading?.length > 0 && (
+          <div>
+            <h3><a href={`/entries/${e.slug}/`}>{e.slug}</a> <span class="muted">— {e.topic}</span></h3>
+            {e.reading.map((r) => (
+              <div class="card">
+                <a href={r.url} rel="noopener"><strong>{r.title}</strong></a>
+                {r.by && <span class="muted"> — {r.by}</span>}
+                <p style="margin:.4rem 0 0" class="muted">{r.what}</p>
+              </div>
+            ))}
+          </div>
+        );
+      })}
+    </section>
+  ))}
+</Base>

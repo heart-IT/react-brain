@@ -1,0 +1,81 @@
+---
+import Base from '../../layouts/Base.astro';
+import { corpus, downloads, fmtDownloads, track, GITHUB } from '../../lib/corpus.js';
+
+export function getStaticPaths() {
+  return corpus().entries.map((e) => ({ params: { slug: e.slug }, props: { id: e.id } }));
+}
+const { id } = Astro.props;
+const { entries, byId } = corpus();
+const e = byId[id];
+const dl = downloads();
+const tr = track()[id];
+const pkgs = (e.detect || []).filter((d) => !d.pkg.includes('*') && dl[d.pkg] != null);
+const related = entries.filter((x) => x.group === e.group && x.id !== id);
+---
+<Base title={`react-brain — ${e.slug}`} description={e.topic}>
+  <p class="muted" style="margin-bottom:0"><a href="/entries/">entries</a> / {e.group}</p>
+  <h1>{e.topic}</h1>
+  <p>
+    <span class={`badge ${e.status}`}>{e.status}</span>
+    <span class={`badge ${e.confidence}`}>confidence: {e.confidence}</span>
+    {tr && <span class={`badge ${tr}`}>track: {tr}</span>}
+    <span class="badge">platforms: {(e.platforms || []).join(' + ')}</span>
+    <span class="badge">verified: {String(e.updated)}</span>
+  </p>
+
+  <div class="card">
+    <strong>Recommendation</strong>
+    <p style="margin:.4rem 0 0">{e.recommend?.default}</p>
+    {e.recommend?.when?.length > 0 && (
+      <ul class="muted" style="margin-top:.6rem">
+        {e.recommend.when.map((w) => <li>{w}</li>)}
+      </ul>
+    )}
+    {e.confidence === 'low' && <p class="muted" style="margin:.4rem 0 0"><em>Low confidence — treat as a vetted lead and prototype before committing.</em></p>}
+  </div>
+
+  <h2>Options &amp; tradeoffs</h2>
+  <table>
+    <thead><tr><th>option</th><th>tradeoff</th></tr></thead>
+    <tbody>{(e.options || []).map((o) => <tr><td><strong>{o.name}</strong></td><td>{o.tradeoff}</td></tr>)}</tbody>
+  </table>
+
+  {pkgs.length > 0 && (
+    <p class="muted" style="font-size:.88rem">npm weekly downloads (from the corpus's last signals run):
+      {pkgs.map((d, i) => <span>{i > 0 && ' · '}<code>{d.pkg}</code> {fmtDownloads(dl[d.pkg])}</span>)}
+    </p>
+  )}
+
+  {e.note && (<><h2>Verified notes</h2><p>{String(e.note).trim()}</p></>)}
+
+  {e.reading?.length > 0 && (
+    <>
+      <h2>Canonical reading</h2>
+      <p class="muted" style="font-size:.88rem">Editorial annotations on why each piece matters — the
+      articles themselves are the originals; read them there.</p>
+      {e.reading.map((r) => (
+        <div class="card">
+          <a href={r.url} rel="noopener"><strong>{r.title}</strong></a>
+          {r.by && <span class="muted"> — {r.by}</span>}
+          <p style="margin:.4rem 0 0" class="muted">{r.what}</p>
+        </div>
+      ))}
+    </>
+  )}
+
+  {e.doc && (
+    <p>📖 Long-form explanation: <a href={`${GITHUB}/blob/main/encyclopedia/${e.doc}`} rel="noopener">{e.doc}</a></p>
+  )}
+  {e.sources?.length > 0 && (
+    <>
+      <h2>Sources</h2>
+      <ul>{e.sources.map((s) => <li><a href={s} rel="noopener">{s}</a></li>)}</ul>
+    </>
+  )}
+  {e.defer_to_skill && <p class="muted">Depth (in-domain rules) is owned by the <code>{e.defer_to_skill}</code> skill — this entry is selection breadth.</p>}
+
+  {related.length > 0 && (
+    <p class="muted">Related in {e.group}: {related.map((x, i) => <span>{i > 0 && ' · '}<a href={`/entries/${x.slug}/`}>{x.slug}</a></span>)}</p>
+  )}
+</Base>

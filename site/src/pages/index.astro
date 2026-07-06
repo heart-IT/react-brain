@@ -1,0 +1,45 @@
+---
+import Base from '../layouts/Base.astro';
+import { corpus, scorecard } from '../lib/corpus.js';
+const { meta, groups, entries } = corpus();
+const reviewed = entries.filter((e) => e.status === 'reviewed').length;
+const readingCount = entries.reduce((n, e) => n + (e.reading?.length || 0), 0);
+const sc = scorecard();
+const high = sc?.tiers?.high;
+---
+<Base>
+  <div class="hero">
+    <h1>The React ecosystem, as an encyclopedia that shows its work.</h1>
+    <p>{meta.one_liner} Not a listicle: every recommendation is <strong>context-keyed</strong>
+    (“for server state at MVP+…”, never “X is best”), every load-bearing fact carries a
+    <strong>verified-on date and a primary source</strong>, and the corpus
+    <a href="/scorecard/">grades its own forecasts</a>.</p>
+    <p class="muted">{entries.length} entries · {reviewed} reviewed long-form · {readingCount} vetted
+    deep-dive readings · digested from {meta.sources_digested.length} newsletter archives, cross-checked
+    {high?.score != null && <> · high-confidence picks currently scoring <strong>{high.score}%</strong> on resolved predictions</>}</p>
+  </div>
+
+  <h2>Browse by decision</h2>
+  {groups.map((g) => (
+    <div class="card">
+      <h3 style="margin-top:0">{g.label}</h3>
+      <p style="margin:.2rem 0 0">
+        {g.entries.map((id, i) => {
+          const e = entries.find((x) => x.id === id);
+          return e && (<span>{i > 0 && ' · '}<a href={`/entries/${e.slug}/`}>{e.slug}</a></span>);
+        })}
+      </p>
+    </div>
+  ))}
+
+  <h2>What makes it different</h2>
+  <ul>
+    <li><strong>Decisions, not articles.</strong> Pages are organized by the choice you're making
+      (state, data, navigation, maps…) — the great articles are cited as evidence on each page and
+      <a href="/reading/">linked to the originals</a>.</li>
+    <li><strong>A published track record.</strong> Every default is a dated, falsifiable prediction;
+      challenges and live npm data resolve them. See the <a href="/scorecard/">scorecard</a>.</li>
+    <li><strong>It runs.</strong> The same corpus powers a CLI (<code>npx react-brain doctor .</code>),
+      an MCP server for coding agents, and the <a href="/doctor/">in-browser doctor</a>.</li>
+  </ul>
+</Base>

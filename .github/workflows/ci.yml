@@ -17,3 +17,18 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+
+  site:
+    # the website is a rendering of the corpus — prove it still builds from the YAML
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - run: npm ci
+        working-directory: site
+      - run: npm run build
+        working-directory: site

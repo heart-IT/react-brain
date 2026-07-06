@@ -1,0 +1,35 @@
+---
+import Base from '../../layouts/Base.astro';
+import { corpus, track } from '../../lib/corpus.js';
+const { groups, entries } = corpus();
+const tr = track();
+---
+<Base title="react-brain — entries">
+  <h1>Entries</h1>
+  <p class="muted">One page per decision. Status: <span class="badge reviewed">reviewed</span> = checked
+  against primary sources + long-form explanation; <span class="badge drafted">drafted</span> = internally
+  consistent, citable. Confidence is orthogonal — how settled the pick is.</p>
+  {groups.map((g) => (
+    <section>
+      <h2>{g.label}</h2>
+      <table>
+        <thead><tr><th>entry</th><th>topic</th><th>status</th><th>confidence</th><th>track</th><th>updated</th></tr></thead>
+        <tbody>
+          {g.entries.map((id) => {
+            const e = entries.find((x) => x.id === id);
+            return e && (
+              <tr>
+                <td><a href={`/entries/${e.slug}/`}>{e.slug}</a></td>
+                <td>{e.topic}</td>
+                <td><span class={`badge ${e.status}`}>{e.status}</span></td>
+                <td><span class={`badge ${e.confidence}`}>{e.confidence}</span></td>
+                <td>{tr[e.id] ? <span class={`badge ${tr[e.id]}`}>{tr[e.id]}</span> : ''}</td>
+                <td class="muted">{String(e.updated)}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </section>
+  ))}
+</Base>

@@ -38,6 +38,15 @@ invariants) + `tests/eval.mjs` (golden fixtures asserting detection/fit/signals/
 Run after any corpus edit. Layout: `encyclopedia.yaml` is the index; entries live one-per-file
 in `skills/react-brain-mentor/entries/<ID>.yaml`, each owning its `detect:`/`detect_source:` signals.
 
+**Website ([`site/`](site/)):** the encyclopedia *rendered* for humans — an Astro static site
+generated from the same YAML at build time (nothing forks). Entry pages (decision + options +
+context-keyed recommendation + verified dates), a library browser joined to live-npm download
+signals, the curated-reading index (annotation + link out — originals are never republished),
+the **calibration scorecard** (the corpus's published hit rate), and an in-browser **doctor**
+(paste a package.json → ecosystem-fit report, fully client-side).
+`cd site && npm install && npm run dev`. One corpus, three surfaces: site (humans) ·
+CLI/npm (repos) · MCP (agents).
+
 `stack`/`doctor`/`learn` share one intent-resolver + detection core, so they never
 disagree about what a recommendation means.
 

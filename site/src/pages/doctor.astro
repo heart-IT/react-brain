@@ -1,0 +1,71 @@
+---
+import Base from '../layouts/Base.astro';
+import { doctorData } from '../lib/corpus.js';
+const { detectors, caps } = doctorData();
+---
+<Base title="react-brain — doctor (in browser)">
+  <h1>Doctor <span class="badge">beta · runs in your browser</span></h1>
+  <p class="muted" style="max-width:44rem">Paste a <code>package.json</code> — your dependencies are matched
+  against the encyclopedia's detection table and each detected choice is compared to the context-keyed
+  recommendation. Nothing leaves your browser. The full doctor
+  (<code>npx react-brain doctor .</code>) adds what a browser can't: the legacy-API modernization scan and
+  source-level signals.</p>
+
+  <textarea id="pkg" placeholder='{"dependencies": {"react": "19.2.0", "zustand": "5.0.0", ...}}'></textarea>
+  <p><button id="run">Analyze</button></p>
+  <div id="out"></div>
+
+  <script is:inline define:vars={{ detectors, caps }}>
+    // ports of tools/detect.mjs matchDetector() + fit() — same table, same semantics
+    const matchDetector = (name) => {
+      for (const d of detectors) {
+        const pat = d[0];
+        if (pat.endsWith('/*') || pat.endsWith('*')) { if (name.startsWith(pat.replace(/\*$/, ''))) return d; }
+        else if (name === pat) return d;
+      }
+      return null;
+    };
+    const fit = (cap, tokens) => {
+      const def = (cap.def || '').toLowerCase();
+      const when = (cap.when || []).join(' || ').toLowerCase();
+      if (tokens.some((x) => def.includes(x))) return ['✓ aligned', 'ok'];
+      if (tokens.some((x) => when.includes(x))) return ['~ contextual', 'warn'];
+      return ['↗ review', 'muted'];
+    };
+    const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+    document.getElementById('run').addEventListener('click', () => {
+      const out = document.getElementById('out');
+      let pkg;
+      try { pkg = JSON.parse(document.getElementById('pkg').value); }
+      catch { out.innerHTML = '<p class="muted">That is not valid JSON.</p>'; return; }
+      const deps = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) };
+      const names = Object.keys(deps);
+      if (!names.length) { out.innerHTML = '<p class="muted">No dependencies found.</p>'; return; }
+      const hasRN = 'react-native' in deps || 'expo' in deps;
+      const platform = hasRN && 'react-dom' in deps ? 'both' : hasRN ? 'react-native' : 'react';
+
+      const byEntry = {};
+      for (const n of names) {
+        const d = matchDetector(n);
+        if (!d) continue;
+        (byEntry[d[1]] ||= { labels: new Set(), tokens: new Set() });
+        byEntry[d[1]].labels.add(d[2]);
+        if (d[3]) byEntry[d[1]].tokens.add(d[3]);
+      }
+      const ids = Object.keys(byEntry);
+      let html = `<p><strong>${esc(pkg.name || 'your app')}</strong> · platform: ${platform} · ${names.length} deps · ${ids.length} decisions detected</p>`;
+      html += '<table><thead><tr><th>decision</th><th>your choice</th><th>fit</th><th>the corpus says</th></tr></thead><tbody>';
+      for (const id of ids) {
+        const cap = caps[id]; if (!cap) continue;
+        const [label] = fit(cap, [...byEntry[id].tokens]);
+        html += `<tr><td><a href="/entries/${cap.slug}/">${cap.slug}</a> <span class="badge ${cap.confidence}">${cap.confidence}</span></td>` +
+          `<td>${esc([...byEntry[id].labels].join(', '))}</td><td>${label}</td>` +
+          `<td class="muted">${esc(cap.def.slice(0, 160))}${cap.def.length > 160 ? '…' : ''}</td></tr>`;
+      }
+      html += '</tbody></table>';
+      html += '<p class="muted" style="font-size:.88rem">✓ aligned = matches the recommendation for some context · ~ contextual = matches a when-clause · ↗ review = differs from the default (not necessarily wrong — check the entry\'s context keys). For gaps, modernization and source signals run <code>npx react-brain doctor .</code></p>';
+      out.innerHTML = html;
+    });
+  </script>
+</Base>

@@ -1,0 +1,16 @@
+{
+  "name": "react-brain-site",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "The react-brain encyclopedia, rendered — generated from the corpus YAML at build time.",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "astro": "^7.0.0",
+    "yaml": "^2.8.1"
+  }
+}
