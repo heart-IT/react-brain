@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import { corpus, scorecard } from '../lib/corpus.js';
+import { corpus, scorecard, href } from '../lib/corpus.js';
 const { meta, groups, entries } = corpus();
 const reviewed = entries.filter((e) => e.status === 'reviewed').length;
 const readingCount = entries.reduce((n, e) => n + (e.reading?.length || 0), 0);
@@ -13,7 +13,7 @@ const high = sc?.tiers?.high;
     <p>{meta.one_liner} Not a listicle: every recommendation is <strong>context-keyed</strong>
     (“for server state at MVP+…”, never “X is best”), every load-bearing fact carries a
     <strong>verified-on date and a primary source</strong>, and the corpus
-    <a href="/scorecard/">grades its own forecasts</a>.</p>
+    <a href={href("scorecard/")}>grades its own forecasts</a>.</p>
     <p class="muted">{entries.length} entries · {reviewed} reviewed long-form · {readingCount} vetted
     deep-dive readings · digested from {meta.sources_digested.length} newsletter archives, cross-checked
     {high?.score != null && <> · high-confidence picks currently scoring <strong>{high.score}%</strong> on resolved predictions</>}</p>
@@ -26,7 +26,7 @@ const high = sc?.tiers?.high;
       <p style="margin:.2rem 0 0">
         {g.entries.map((id, i) => {
           const e = entries.find((x) => x.id === id);
-          return e && (<span>{i > 0 && ' · '}<a href={`/entries/${e.slug}/`}>{e.slug}</a></span>);
+          return e && (<span>{i > 0 && ' · '}<a href={href(`entries/${e.slug}/`)}>{e.slug}</a></span>);
         })}
       </p>
     </div>
@@ -36,10 +36,13 @@ const high = sc?.tiers?.high;
   <ul>
     <li><strong>Decisions, not articles.</strong> Pages are organized by the choice you're making
       (state, data, navigation, maps…) — the great articles are cited as evidence on each page and
-      <a href="/reading/">linked to the originals</a>.</li>
+      <a href={href("reading/")}>linked to the originals</a>.</li>
     <li><strong>A published track record.</strong> Every default is a dated, falsifiable prediction;
-      challenges and live npm data resolve them. See the <a href="/scorecard/">scorecard</a>.</li>
+      challenges and live npm data resolve them. See the <a href={href("scorecard/")}>scorecard</a>.</li>
     <li><strong>It runs.</strong> The same corpus powers a CLI (<code>npx react-brain doctor .</code>),
-      an MCP server for coding agents, and the <a href="/doctor/">in-browser doctor</a>.</li>
+      an MCP server for coding agents, the <a href={href("doctor/")}>in-browser doctor</a> (paste a
+      package.json → fit report), and a <a href={href("stack/")}>stack composer</a> for greenfield apps.</li>
+    <li><strong>Nothing is asserted casually.</strong> Verification, adversarial challenge, calibration,
+      live-npm signals — the whole process is documented in the <a href={href("methodology/")}>methodology</a>.</li>
   </ul>
 </Base>

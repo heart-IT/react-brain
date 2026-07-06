@@ -6,11 +6,15 @@
   "description": "The react-brain encyclopedia, rendered — generated from the corpus YAML at build time.",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && pagefind --site dist",
     "preview": "astro preview"
   },
   "dependencies": {
     "astro": "^7.0.0",
     "yaml": "^2.8.1"
+  },
+  "devDependencies": {
+    "marked": "^18.0.5",
+    "pagefind": "^1.5.2"
   }
 }

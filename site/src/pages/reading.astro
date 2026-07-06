@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import { corpus } from '../lib/corpus.js';
+import { corpus, href } from '../lib/corpus.js';
 const { groups, entries } = corpus();
 const count = entries.reduce((n, e) => n + (e.reading?.length || 0), 0);
 ---
@@ -17,7 +17,7 @@ const count = entries.reduce((n, e) => n + (e.reading?.length || 0), 0);
         const e = entries.find((x) => x.id === id);
         return e?.reading?.length > 0 && (
           <div>
-            <h3><a href={`/entries/${e.slug}/`}>{e.slug}</a> <span class="muted">— {e.topic}</span></h3>
+            <h3><a href={href(`entries/${e.slug}/`)}>{e.slug}</a> <span class="muted">— {e.topic}</span></h3>
             {e.reading.map((r) => (
               <div class="card">
                 <a href={r.url} rel="noopener"><strong>{r.title}</strong></a>

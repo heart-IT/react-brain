@@ -82,3 +82,59 @@ export function doctorData() {
 }
 
 export const GITHUB = 'https://github.com/heart-IT/react-brain';
+
+// Base-path-aware URL builder. The site will be served under a subpath of an
+// existing (WordPress) host — set base in astro.config or ASTRO_BASE and every
+// internal link follows. BASE_URL always ends with '/'.
+export const BASE = import.meta.env?.BASE_URL || '/';
+export const href = (p) => BASE + String(p).replace(/^\//, '');
+
+// ── long-form Explanation docs (encyclopedia/<ID>.md) rendered to HTML ──────────
+import { marked } from 'marked';
+export function docHtml(entry) {
+  if (!entry.doc) return null;
+  const p = join(ROOT, 'encyclopedia', entry.doc);
+  if (!existsSync(p)) return null;
+  let md = readFileSync(p, 'utf8');
+  md = md.replace(/^---[\s\S]*?\n---\n/, '');                  // frontmatter is index metadata
+  let html = marked.parse(md);
+  // cross-link sibling entries wherever the prose cites an id (RB-E-STATE → its page)
+  const { byId } = corpus();
+  html = html.replace(/RB-E-([A-Z0-9-]+)/g, (m, rest) => {
+    const e = byId[`RB-E-${rest}`];
+    return e ? `<a href="${href(`entries/${e.slug}/`)}">${m}</a>` : m;
+  });
+  return html;
+}
+
+// ── changelog: the corpus's git history (what changed, when) ────────────────────
+import { execSync } from 'node:child_process';
+export function changelog(limit = 60) {
+  try {
+    const out = execSync(
+      `git log --date=short --pretty=format:%ad%x09%s -n ${limit} -- skills/react-brain-mentor encyclopedia`,
+      { cwd: ROOT, encoding: 'utf8' });
+    const days = new Map();
+    for (const line of out.split('\n').filter(Boolean)) {
+      const [date, subject] = line.split('\t');
+      (days.get(date) || days.set(date, []).get(date)).push(subject);
+    }
+    return [...days.entries()].map(([date, subjects]) => ({ date, subjects }));
+  } catch { return []; }   // shallow clone / no git → page degrades gracefully
+}
+
+// ── data for the client-side stack composer (one source of truth: the stack tool) ─
+// Dynamic import from the real file path: a static relative import would make Vite
+// BUNDLE tools/*.mjs, relocating detect.mjs's import.meta.url anchor into dist/ and
+// breaking its encyclopedia path. A variable specifier stays a runtime import, so the
+// tool executes from disk with correct anchors (and the CLI-guard keeps it silent).
+import { pathToFileURL } from 'node:url';
+export async function stackData() {
+  const stack = await import(pathToFileURL(join(ROOT, 'tools/react-brain-stack.mjs')).href);
+  const { entries } = corpus();
+  const caps = Object.fromEntries(entries.map((e) => [e.id, {
+    slug: e.slug, topic: e.topic, status: e.status, confidence: e.confidence, group: e.group,
+    def: e.recommend?.default || '', when: e.recommend?.when || [],
+  }]));
+  return { recipe: stack.RECIPE, stageRank: stack.STAGE_RANK, caps };
+}

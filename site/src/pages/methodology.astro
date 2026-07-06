@@ -1,0 +1,50 @@
+---
+import Base from '../layouts/Base.astro';
+import { href, GITHUB } from '../lib/corpus.js';
+---
+<Base title="react-brain — methodology" description="How the corpus stays true: verification, adversarial challenge, calibration, live-npm signals, mechanized invariants.">
+  <h1>Methodology — how this stays true</h1>
+  <p class="prose">Most React resources rot silently: a listicle is true the day it's published and
+  unaccountable after. react-brain is built around the opposite bet — <strong>every claim should be
+  checkable, dated, and eventually scored.</strong> Five mechanisms do the work:</p>
+
+  <h2>1. Verified facts, not vibes</h2>
+  <p class="prose">Load-bearing facts (versions, maintenance status, breaking changes) are checked against
+  <em>primary sources</em> — official blogs, changelogs, the npm registry — before they enter an entry, and
+  stamped with a <code>verified:</code> date you can see on every page. Newsletter claims are treated as
+  leads, never as facts.</p>
+
+  <h2>2. Context-keyed recommendations</h2>
+  <p class="prose">No entry says "X is best." Recommendations are written as <em>context → choice</em>
+  clauses ("GraphQL backend → Apollo"; "P2P/serverless app → a client cache is N/A by design"). The same
+  resolver that renders these pages powers the CLI and the <a href={href('doctor/')}>doctor</a>, so the
+  advice can't drift between surfaces.</p>
+
+  <h2>3. Adversarial challenge</h2>
+  <p class="prose">High-stakes recommendations are periodically <em>attacked</em>: a challenger steelmans
+  the case against the default and tests it with current evidence. Verdicts — SURVIVES / WEAKENED /
+  OVERTURNED — require concrete evidence, and overturning demands the alternative win on a stated axis.
+  Survived challenges are recorded on the entry; they're a stronger trust signal than editorial review.</p>
+
+  <h2>4. Calibration — a published track record</h2>
+  <p class="prose">Every default is logged as a dated, falsifiable prediction with a check-by horizon
+  (shorter for fast-moving domains). Resolutions land in an append-only ledger and are scored per
+  confidence tier on the <a href={href('scorecard/')}>scorecard</a>. Unresolved predictions are never
+  counted as wins — "unproven" is displayed as unproven.</p>
+
+  <h2>5. External anchors + mechanized invariants</h2>
+  <p class="prose">Editorial opinion is checked against the outside world: live npm downloads and publish
+  dates flag claims that data contradicts (a library called "maintenance mode" that shipped last week gets
+  its claim weakened — that has actually happened, see the scorecard). Structural rules — every entry has
+  vetted reading, every category is reachable, no duplicate sources, schemas hold — run as an offline lint
+  plus a golden-fixture eval in <a href={`${GITHUB}/actions`}>CI on every change</a>.</p>
+
+  <h2>Editorial line on articles</h2>
+  <p class="prose">Great articles are cited with a short editorial annotation on <em>why they matter</em>
+  and linked prominently to the original. Nothing is republished or paraphrased at length —
+  <a href={href('reading/')}>the reading index</a> exists to send you to the canonical source with
+  context, not to replace it.</p>
+
+  <p class="muted">Everything above is inspectable: the corpus, the tools, the ledger, and the tests are
+  all in <a href={GITHUB}>the repo</a>.</p>
+</Base>

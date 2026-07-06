@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import { corpus, scorecard, GITHUB } from '../lib/corpus.js';
+import { corpus, scorecard, GITHUB, href } from '../lib/corpus.js';
 const sc = scorecard();
 const { byId } = corpus();
 const tierRows = ['high', 'medium', 'low'].map((t) => ({ t, ...sc.tiers[t] }));
@@ -34,7 +34,7 @@ const tierRows = ['high', 'medium', 'low'].map((t) => ({ t, ...sc.tiers[t] }));
     return (
       <div class="card">
         <p style="margin:0">
-          {e ? <a href={`/entries/${e.slug}/`}><strong>{e.slug}</strong></a> : <strong>{r.id}</strong>}
+          {e ? <a href={href(`entries/${e.slug}/`)}><strong>{e.slug}</strong></a> : <strong>{r.id}</strong>}
           {' '}<span class={`badge ${r.outcome.outcome}`}>{r.outcome.outcome}</span>
           <span class="badge">{r.confidence}</span>
           <span class="muted" style="font-size:.85rem"> asserted {r.asserted} · resolved {r.outcome.on}</span>

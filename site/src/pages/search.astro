@@ -1,0 +1,28 @@
+---
+import Base from '../layouts/Base.astro';
+import { BASE } from '../lib/corpus.js';
+// Pagefind indexes the BUILT site (npm run build → pagefind --site dist), so its
+// assets exist only after a build. In `astro dev` the widget shows a hint instead.
+---
+<Base title="react-brain — search">
+  <h1>Search</h1>
+  <link rel="stylesheet" href={`${BASE}pagefind/pagefind-ui.css`} />
+  <div id="search"></div>
+  <p id="search-hint" class="muted" hidden>Search is generated at build time — run
+  <code>npm run build &amp;&amp; npm run preview</code> to use it locally (in <code>astro dev</code> the
+  index doesn't exist yet).</p>
+  <script is:inline define:vars={{ BASE }}>
+    const s = document.createElement('script');
+    s.src = `${BASE}pagefind/pagefind-ui.js`;
+    s.onload = () => new PagefindUI({ element: '#search', showSubResults: true, pageSize: 8 });
+    s.onerror = () => { document.getElementById('search-hint').hidden = false; };
+    document.head.appendChild(s);
+  </script>
+</Base>
+
+<style is:global>
+  /* map Pagefind UI onto the site palette */
+  :root { --pagefind-ui-primary: var(--accent); --pagefind-ui-text: var(--fg);
+    --pagefind-ui-background: var(--bg); --pagefind-ui-border: var(--line);
+    --pagefind-ui-tag: var(--card); --pagefind-ui-font: inherit; }
+</style>

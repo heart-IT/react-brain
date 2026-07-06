@@ -1,6 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { corpus, track } from '../../lib/corpus.js';
+import { corpus, track, href } from '../../lib/corpus.js';
 const { groups, entries } = corpus();
 const tr = track();
 ---
@@ -19,7 +19,7 @@ const tr = track();
             const e = entries.find((x) => x.id === id);
             return e && (
               <tr>
-                <td><a href={`/entries/${e.slug}/`}>{e.slug}</a></td>
+                <td><a href={href(`entries/${e.slug}/`)}>{e.slug}</a></td>
                 <td>{e.topic}</td>
                 <td><span class={`badge ${e.status}`}>{e.status}</span></td>
                 <td><span class={`badge ${e.confidence}`}>{e.confidence}</span></td>

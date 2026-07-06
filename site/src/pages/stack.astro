@@ -1,0 +1,92 @@
+---
+import Base from '../layouts/Base.astro';
+import { stackData, BASE } from '../lib/corpus.js';
+// RECIPE + STAGE_RANK come from tools/react-brain-stack.mjs via the corpus loader —
+// the same source of truth as `npx react-brain stack`; the resolver below is a
+// faithful client-side port of detect.mjs resolveRecommendation.
+const { recipe, stageRank, caps } = await stackData();
+---
+<Base title="react-brain — stack composer" description="Compose a greenfield React / React Native stack from your intent — context-keyed, from the verified corpus.">
+  <h1>Stack composer <span class="badge">runs in your browser</span></h1>
+  <p class="muted" style="max-width:44rem">Starting from zero? Describe the app and get the corpus's
+  context-keyed picks — the same recipe and resolver as <code>npx react-brain stack</code>. Domains enter
+  the stack by maturity stage (a prototype isn't told to set up observability); feature domains
+  (media, maps, payments…) are demand-driven — look them up per need.</p>
+
+  <fieldset>
+    <legend>Intent</legend>
+    <label>platform
+      <select id="platform">
+        <option value="react-native">React Native</option>
+        <option value="react">Web</option>
+        <option value="both">Both (universal)</option>
+      </select>
+    </label>
+    <label>stage
+      <select id="stage">
+        <option value="prototype">prototype</option>
+        <option value="mvp" selected>mvp</option>
+        <option value="production">production</option>
+        <option value="scale">scale</option>
+      </select>
+    </label>
+    <label><input type="checkbox" id="expo" checked /> Expo</label>
+    <label><input type="checkbox" id="p2p" /> P2P / Holepunch</label>
+    <label><input type="checkbox" id="graphql" /> GraphQL</label>
+    <label><input type="checkbox" id="ssr" /> SSR / server-rendered</label>
+  </fieldset>
+  <p><button id="compose">Compose stack</button></p>
+  <div id="out"></div>
+
+  <script is:inline define:vars={{ recipe, stageRank, caps, BASE }}>
+    // port of detect.mjs resolveRecommendation (when-clause context matching)
+    const resolve = (cap, tokens) => {
+      const t = tokens.map((x) => x.toLowerCase()).filter(Boolean);
+      for (const clause of cap.when || []) {
+        const i = clause.indexOf('→'); if (i < 0) continue;
+        const ctx = clause.slice(0, i).trim(), choice = clause.slice(i + 1).trim();
+        if (t.some((tok) => ctx.toLowerCase().includes(tok))) {
+          const na = /\bn\/a\b|does not apply|not\b.*\bapply/i.test(choice);
+          return { why: choice, ctx, via: na ? 'na' : 'when' };
+        }
+      }
+      return { why: cap.def, ctx: 'default', via: 'default' };
+    };
+    // port of the stack tool's platMatch + buildIntent token construction
+    const platMatch = (rowPlat, p) =>
+      rowPlat === 'any' ? true : rowPlat === 'both' ? p === 'both'
+      : rowPlat === 'rn' ? (p === 'react-native' || p === 'both') : (p === 'react' || p === 'both');
+    const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+    document.getElementById('compose').addEventListener('click', () => {
+      const platform = document.getElementById('platform').value;
+      const stage = document.getElementById('stage').value;
+      const on = (id) => document.getElementById(id).checked;
+      const tokens = ['new project'];
+      if (platform === 'react-native') tokens.push('bare rn');
+      if (platform === 'both') tokens.push('new universal');
+      if (on('expo')) tokens.push('expo app', 'expo');
+      if (on('p2p')) tokens.push('p2p', 'holepunch', 'serverless', 'pear app', 'no-backend');
+      if (on('graphql')) tokens.push('graphql');
+      if (on('ssr')) tokens.push('server-rendered', 'data-fetching/ssr', 'next.js');
+
+      let html = '';
+      for (const row of recipe) {
+        if (!platMatch(row.plat, platform)) continue;
+        if (stageRank[row.tier] > stageRank[stage]) continue;
+        if (row.onlyIf === 'p2p' && !on('p2p')) continue;
+        const cap = caps[row.id]; if (!cap) continue;
+        const r = resolve(cap, tokens);
+        const via = r.via === 'when' ? `matched: “${esc(r.ctx)}”` : r.via === 'na' ? 'not applicable for this intent' : 'default';
+        html += `<div class="card"><p style="margin:0"><a href="${BASE}entries/${cap.slug}/"><strong>${cap.slug}</strong></a>
+          <span class="badge ${cap.confidence}">${cap.confidence}</span>
+          <span class="muted" style="font-size:.85rem">${via} · enters at ${row.tier}</span></p>
+          <p style="margin:.4rem 0 0;font-size:.95rem">${esc(r.why)}</p></div>`;
+      }
+      html += `<p class="muted" style="font-size:.88rem">Feature domains (media, maps, payments, charts, editors, i18n…)
+        aren't in a default stack — look them up per need. For the install-ready version with coherence
+        checks: <code>npx react-brain stack --${platform === 'react-native' ? 'rn' : platform === 'react' ? 'web' : 'both'}${on('expo') ? ' --expo' : ''}${on('p2p') ? ' --p2p' : ''} --stage=${stage}</code></p>`;
+      document.getElementById('out').innerHTML = html;
+    });
+  </script>
+</Base>

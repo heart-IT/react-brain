@@ -26,8 +26,8 @@ import { loadEntries, resolveRecommendation, pkgsForPick, trunc, GROUP_ORDER, tr
 // (core = from day one; mvp/production/scale = as the project grows). Feature domains
 // (media, payments, charts, editors, games, on-device-ai, i18n, native-ui, keyboard,
 // desktop) are demand-driven, not default-stack — surfaced as a footer, not picked.
-const STAGE_RANK = { prototype: 0, mvp: 1, production: 2, scale: 3 };
-const RECIPE = [
+export const STAGE_RANK = { prototype: 0, mvp: 1, production: 2, scale: 3 };
+export const RECIPE = [
   // react-foundations
   { id: 'RB-E-REACT-CORE',      plat: 'any', tier: 'core' },
   { id: 'RB-E-TYPESCRIPT',      plat: 'any', tier: 'core' },
@@ -57,9 +57,9 @@ const RECIPE = [
   { id: 'RB-E-SECURITY',        plat: 'any', tier: 'production' },
   { id: 'RB-E-OBSERVABILITY',   plat: 'any', tier: 'production' },
 ];
-const FEATURE_DOMAINS = ['media', 'maps', 'payments', 'charts', 'editors', 'games', 'on-device AI', 'AI UI', 'i18n', 'native-ui (widgets/Live Activities)', 'keyboard', 'desktop shell'];
+export const FEATURE_DOMAINS = ['media', 'maps', 'payments', 'charts', 'editors', 'games', 'on-device AI', 'AI UI', 'i18n', 'native-ui (widgets/Live Activities)', 'keyboard', 'desktop shell'];
 
-function buildIntent(flags) {
+export function buildIntent(flags) {
   const has = (f) => flags.includes(`--${f}`);
   const platform = has('rn') ? 'react-native' : has('web') ? 'react' : 'both';
   const expo = has('expo');
@@ -98,7 +98,7 @@ const AVOID = new Set(['react-native-vector-icons', 'react-native-iap', 'formik'
 const keepForPlatform = (intentPlat) => (p) =>
   !AVOID.has(p) && (intentPlat === 'react-native' ? !isWebpkg(p) : intentPlat === 'react' ? !isRNpkg(p) : true);
 
-const platMatch = (rowPlat, intentPlat) =>
+export const platMatch = (rowPlat, intentPlat) =>
   rowPlat === 'any' ? true
   : rowPlat === 'both' ? intentPlat === 'both'
   : rowPlat === 'rn' ? (intentPlat === 'react-native' || intentPlat === 'both')
@@ -203,8 +203,12 @@ function printStack(intent, entries) {
   console.log('');
 }
 
+// Run the CLI only when executed directly — the site (and anything else) imports
+// RECIPE/buildIntent/platMatch from here so there is exactly one source of truth.
+import { pathToFileURL } from 'node:url';
+const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 const flags = process.argv.slice(2).filter((x) => x.startsWith('--'));
-if (flags.includes('--help') || flags.includes('-h')) {
+if (isMain && (flags.includes('--help') || flags.includes('-h'))) {
   console.log(`usage: react-brain stack [intent flags]
   platform : --rn | --web | --both (default)      --expo
   backend  : --p2p (Holepunch/local-first)        --graphql   --ssr
@@ -213,4 +217,4 @@ if (flags.includes('--help') || flags.includes('-h')) {
 example: react-brain stack --rn --expo --p2p --stage=production`);
   process.exit(0);
 }
-printStack(buildIntent(flags), loadEntries());
+if (isMain) printStack(buildIntent(flags), loadEntries());

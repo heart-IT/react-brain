@@ -1,0 +1,22 @@
+---
+import Base from '../layouts/Base.astro';
+import { changelog, GITHUB } from '../lib/corpus.js';
+const days = changelog();
+---
+<Base title="react-brain — changelog" description="What changed in the corpus, week by week — the freshness machinery, visible.">
+  <h1>Changelog</h1>
+  <p class="muted" style="max-width:44rem">The corpus is kept alive by a weekly loop: harvest the React
+  newsletters → fetch-verify every claim → apply a reviewable delta → re-run the invariants. This page is
+  that loop made visible — generated straight from the repo's git history for the encyclopedia files.</p>
+  {days.length === 0 && <p class="muted">No history available in this build (shallow checkout). See the
+  <a href={`${GITHUB}/commits/main`}>commit log on GitHub</a>.</p>}
+  {days.map((d) => (
+    <div class="card">
+      <strong>{d.date}</strong>
+      <ul style="margin:.4rem 0 0">
+        {d.subjects.map((s) => <li>{s}</li>)}
+      </ul>
+    </div>
+  ))}
+  <p class="muted">Full history: <a href={`${GITHUB}/commits/main`}>github.com/heart-IT/react-brain/commits</a></p>
+</Base>

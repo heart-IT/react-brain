@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import { corpus, downloads, fmtDownloads } from '../lib/corpus.js';
+import { corpus, downloads, fmtDownloads, href } from '../lib/corpus.js';
 const { entries } = corpus();
 const dl = downloads();
 // one row per concrete npm package the corpus tracks, joined to its owning entry
@@ -22,7 +22,7 @@ rows.sort((a, b) => (b.weekly || 0) - (a.weekly || 0));
         <tr>
           <td><code>{r.pkg}</code></td>
           <td>{r.label}</td>
-          <td><a href={`/entries/${r.entry.slug}/`}>{r.entry.slug}</a> <span class={`badge ${r.entry.confidence}`}>{r.entry.confidence}</span></td>
+          <td><a href={href(`entries/${r.entry.slug}/`)}>{r.entry.slug}</a> <span class={`badge ${r.entry.confidence}`}>{r.entry.confidence}</span></td>
           <td>{r.weekly != null ? fmtDownloads(r.weekly) : '—'}</td>
         </tr>
       ))}

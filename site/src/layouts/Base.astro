@@ -1,6 +1,7 @@
 ---
 const { title = 'react-brain', description = 'A verified, context-keyed encyclopedia of the React + React Native ecosystem — what to use, when, and why.' } = Astro.props;
-import { GITHUB } from '../lib/corpus.js';
+import { GITHUB, href } from '../lib/corpus.js';
+const FAVICON = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>";
 ---
 <!doctype html>
 <html lang="en">
@@ -9,24 +10,33 @@ import { GITHUB } from '../lib/corpus.js';
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{title}</title>
   <meta name="description" content={description} />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:type" content="website" />
+  <link rel="icon" href={FAVICON} />
 </head>
 <body>
+  <a class="skip" href="#main">Skip to content</a>
   <header>
-    <nav>
-      <a class="brand" href="/">🧠 react-brain</a>
-      <a href="/entries/">entries</a>
-      <a href="/libraries/">libraries</a>
-      <a href="/reading/">reading</a>
-      <a href="/scorecard/">scorecard</a>
-      <a href="/doctor/">doctor</a>
+    <nav aria-label="Site">
+      <a class="brand" href={href('')}>🧠 react-brain</a>
+      <a href={href('entries/')}>entries</a>
+      <a href={href('libraries/')}>libraries</a>
+      <a href={href('reading/')}>reading</a>
+      <a href={href('stack/')}>stack</a>
+      <a href={href('doctor/')}>doctor</a>
+      <a href={href('scorecard/')}>scorecard</a>
+      <a href={href('changelog/')}>changelog</a>
+      <a href={href('search/')}>search</a>
       <a href={GITHUB} rel="noopener">github</a>
     </nav>
   </header>
-  <main><slot /></main>
+  <main id="main"><slot /></main>
   <footer>
     <p>Generated from the <a href={GITHUB}>react-brain corpus</a> — every fact carries a
-    verified-on date; every recommendation is context-keyed and adversarially challenged.
-    Articles are cited and linked, never republished: read the originals.</p>
+    verified-on date; every recommendation is context-keyed and adversarially challenged
+    (<a href={href('methodology/')}>methodology</a>). Articles are cited and linked, never
+    republished: read the originals.</p>
   </footer>
 </body>
 </html>
@@ -44,21 +54,27 @@ import { GITHUB } from '../lib/corpus.js';
   body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
   main { max-width: 60rem; margin: 0 auto; padding: 1.5rem 1.25rem 4rem; }
   header { border-bottom: 1px solid var(--line); }
-  nav { max-width: 60rem; margin: 0 auto; padding: .8rem 1.25rem; display: flex; gap: 1.1rem; flex-wrap: wrap; align-items: baseline; }
+  nav { max-width: 60rem; margin: 0 auto; padding: .8rem 1.25rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: baseline; }
   nav a { color: var(--muted); text-decoration: none; }
   nav a:hover { color: var(--fg); }
   nav .brand { color: var(--fg); font-weight: 700; margin-right: .5rem; }
   footer { border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; }
   footer p { max-width: 60rem; margin: 0 auto; padding: 1rem 1.25rem 2rem; }
   a { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+  .skip { position: absolute; left: -999px; top: 0; background: var(--accent); color: #fff; padding: .5rem 1rem; z-index: 10; }
+  .skip:focus { left: .5rem; top: .5rem; }
   h1 { font-size: 1.6rem; line-height: 1.25; margin: .5rem 0 .4rem; }
   h2 { font-size: 1.15rem; margin: 2rem 0 .5rem; }
   h3 { font-size: 1rem; margin: 1.2rem 0 .3rem; }
+  .tbl { overflow-x: auto; }
   table { border-collapse: collapse; width: 100%; font-size: .92rem; }
   th, td { text-align: left; padding: .45rem .6rem; border-bottom: 1px solid var(--line); vertical-align: top; }
   th { color: var(--muted); font-weight: 600; }
   code { background: var(--card); padding: .1em .35em; border-radius: 4px; font-size: .88em; }
   pre { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: .9rem 1rem; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  blockquote { border-left: 3px solid var(--line); margin: 1rem 0; padding: .1rem 1rem; color: var(--muted); }
   .muted { color: var(--muted); }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 1rem 1.1rem; margin: .8rem 0; }
   .badge { display: inline-block; font-size: .72rem; font-weight: 600; padding: .12em .55em; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); vertical-align: middle; }
@@ -72,10 +88,18 @@ import { GITHUB } from '../lib/corpus.js';
   .badge.overturned { color: var(--bad); border-color: currentColor; }
   ul { padding-left: 1.2rem; }
   li { margin: .25rem 0; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); gap: .8rem; }
   .hero { padding: 1.5rem 0 .5rem; }
   .hero p { max-width: 44rem; }
-  input, textarea, button { font: inherit; color: inherit; }
+  input, textarea, button, select { font: inherit; color: inherit; }
   textarea { width: 100%; min-height: 12rem; background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: .8rem; }
   button { background: var(--accent); color: #fff; border: 0; border-radius: 8px; padding: .55rem 1.1rem; cursor: pointer; font-weight: 600; }
+  select { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: .4rem .6rem; }
+  fieldset { border: 1px solid var(--line); border-radius: 10px; padding: .8rem 1rem; margin: .8rem 0; }
+  legend { color: var(--muted); font-size: .85rem; padding: 0 .4rem; }
+  label { margin-right: 1rem; }
+  .prose { max-width: 46rem; }
+  .prose h1 { font-size: 1.45rem; margin-top: 1.6rem; }
+  .prose h2 { font-size: 1.2rem; margin-top: 1.8rem; }
+  .prose h3 { font-size: 1.02rem; }
+  .prose img { max-width: 100%; }
 </style>

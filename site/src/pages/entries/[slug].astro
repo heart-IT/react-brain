@@ -1,6 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { corpus, downloads, fmtDownloads, track, GITHUB } from '../../lib/corpus.js';
+import { corpus, downloads, fmtDownloads, track, docHtml, href, GITHUB } from '../../lib/corpus.js';
 
 export function getStaticPaths() {
   return corpus().entries.map((e) => ({ params: { slug: e.slug }, props: { id: e.id } }));
@@ -12,9 +12,10 @@ const dl = downloads();
 const tr = track()[id];
 const pkgs = (e.detect || []).filter((d) => !d.pkg.includes('*') && dl[d.pkg] != null);
 const related = entries.filter((x) => x.group === e.group && x.id !== id);
+const doc = docHtml(e);
 ---
 <Base title={`react-brain — ${e.slug}`} description={e.topic}>
-  <p class="muted" style="margin-bottom:0"><a href="/entries/">entries</a> / {e.group}</p>
+  <p class="muted" style="margin-bottom:0"><a href={href('entries/')}>entries</a> / {e.group}</p>
   <h1>{e.topic}</h1>
   <p>
     <span class={`badge ${e.status}`}>{e.status}</span>
@@ -36,10 +37,10 @@ const related = entries.filter((x) => x.group === e.group && x.id !== id);
   </div>
 
   <h2>Options &amp; tradeoffs</h2>
-  <table>
+  <div class="tbl"><table>
     <thead><tr><th>option</th><th>tradeoff</th></tr></thead>
     <tbody>{(e.options || []).map((o) => <tr><td><strong>{o.name}</strong></td><td>{o.tradeoff}</td></tr>)}</tbody>
-  </table>
+  </table></div>
 
   {pkgs.length > 0 && (
     <p class="muted" style="font-size:.88rem">npm weekly downloads (from the corpus's last signals run):
@@ -64,9 +65,6 @@ const related = entries.filter((x) => x.group === e.group && x.id !== id);
     </>
   )}
 
-  {e.doc && (
-    <p>📖 Long-form explanation: <a href={`${GITHUB}/blob/main/encyclopedia/${e.doc}`} rel="noopener">{e.doc}</a></p>
-  )}
   {e.sources?.length > 0 && (
     <>
       <h2>Sources</h2>
@@ -75,7 +73,16 @@ const related = entries.filter((x) => x.group === e.group && x.id !== id);
   )}
   {e.defer_to_skill && <p class="muted">Depth (in-domain rules) is owned by the <code>{e.defer_to_skill}</code> skill — this entry is selection breadth.</p>}
 
+  {doc && (
+    <>
+      <h2 id="explanation">The full explanation</h2>
+      <p class="muted" style="font-size:.88rem">The reviewed long-form essay behind this entry — the
+      <em>why</em>, not a how-to. Also on <a href={`${GITHUB}/blob/main/encyclopedia/${e.doc}`} rel="noopener">GitHub</a>.</p>
+      <article class="prose" set:html={doc} />
+    </>
+  )}
+
   {related.length > 0 && (
-    <p class="muted">Related in {e.group}: {related.map((x, i) => <span>{i > 0 && ' · '}<a href={`/entries/${x.slug}/`}>{x.slug}</a></span>)}</p>
+    <p class="muted">Related in {e.group}: {related.map((x, i) => <span>{i > 0 && ' · '}<a href={href(`entries/${x.slug}/`)}>{x.slug}</a></span>)}</p>
   )}
 </Base>
