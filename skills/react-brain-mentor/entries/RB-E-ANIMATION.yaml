@@ -62,3 +62,7 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "lottie-react-native", label: "Lottie", token: "lottie" }
   - { pkg: "@shopify/react-native-skia", label: "Skia", token: "skia" }
   - { pkg: "moti", label: "Moti", token: "moti" }
+detect_source:   # source-level signals owned by this entry (regex over repo source)
+  - pattern: "useNativeDriver:\\s*false"
+    signal: "JS-driven Animated animations (useNativeDriver: false)"
+    hint: "drive animations off the JS thread — native driver where supported, else Reanimated (perf depth → react-native-best-practices)"

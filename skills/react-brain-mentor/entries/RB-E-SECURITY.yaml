@@ -48,3 +48,11 @@ reading:
 sources:
   - "https://react.dev/blog/2025/12/11/denial-of-service-and-source-code-exposure-in-react-server-components"
   - "https://github.com/advisories/GHSA-83fc-fqcc-2hmg"
+detect_source:   # source-level signals owned by this entry (regex over repo source)
+  - pattern: "AsyncStorage\\.setItem\\(\\s*[`'\"][^`'\"]*(?:token|secret|password|jwt|api[_-]?key)"
+    flags: "i"
+    signal: "secret-looking values written to AsyncStorage"
+    hint: "AsyncStorage is plaintext — tokens/secrets belong in Keychain/Keystore (react-native-keychain / expo-secure-store, see RB-E-STORAGE)"
+  - pattern: "dangerouslySetInnerHTML"
+    signal: "raw HTML injection surface (dangerouslySetInnerHTML)"
+    hint: "sanitize the payload and/or adopt Trusted Types; per-diff injection checks → the review skill"

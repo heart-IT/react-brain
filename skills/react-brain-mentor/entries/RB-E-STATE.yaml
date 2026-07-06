@@ -58,3 +58,8 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "xstate", label: "XState", token: "xstate" }
   - { pkg: "valtio", label: "Valtio", token: "valtio" }
   - { pkg: "mobx", label: "MobX", token: "mobx" }
+detect_source:   # source-level signals owned by this entry (regex over repo source)
+  - pattern: "\\bcreateContext\\s*\\("
+    min_files: 5
+    signal: "Context created in 5+ files — check it isn't the app's state manager"
+    hint: "Context is DI, not a store: every consumer re-renders on any value change — frequently-changing state belongs in a selector-based store (Zustand/Jotai) or use-context-selector"

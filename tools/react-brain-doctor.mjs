@@ -10,7 +10,7 @@
 // Shared detection lives in ./detect.mjs (one source of truth, also used by evidence).
 // ───────────────────────────────────────────────────────────────────────────────
 
-import { loadEntries, analyzeRepo, fit, trunc, GROUP_ORDER, trackRecord, TRACK_GLYPH, scanModernDefaults } from './detect.mjs';
+import { loadEntries, analyzeRepo, fit, trunc, GROUP_ORDER, trackRecord, TRACK_GLYPH, scanModernDefaults, scanSourceSignals } from './detect.mjs';
 
 const EXPECTED = {
   always: ['RB-E-STATE', 'RB-E-STYLING', 'RB-E-TESTING', 'RB-E-TYPESCRIPT', 'RB-E-DX', 'RB-E-NAV'],
@@ -84,8 +84,46 @@ function printReport(a, entries) {
     }
   }
 
+  // SOURCE SIGNALS — entry-owned regex signals over the source (all platforms).
+  if (!NO_SCAN) {
+    const { findings, scanned } = scanSourceSignals(a.path, entries, { stage: a.stage, platform: a.platform, deps: a.deps });
+    if (findings.length) {
+      console.log(`\n  SOURCE SIGNALS  (patterns a dep-scan can't see — heuristic, verify in context)`);
+      console.log(`  ${'-'.repeat(74)}`);
+      for (const f of findings) {
+        const where = f.absent ? 'absent' : `${f.count} file${f.count === 1 ? '' : 's'}`;
+        console.log(`  ! ${f.signal}  [${f.entry.replace('RB-E-', '')} · ${where}]`);
+        if (f.hint) console.log(`      ${f.hint}`);
+        if (SHOW_FILES && f.files.length) console.log(`      ${f.files.slice(0, 8).join(', ')}${f.files.length > 8 ? ` +${f.files.length - 8} more` : ''}`);
+      }
+      console.log(`  (${scanned} files scanned${SHOW_FILES ? '' : '; --files lists offenders'})`);
+    }
+  }
+
   console.log(`\n  note: deterministic dep + source scan. Judgment dimensions (architecture, a11y,`);
   console.log(`        testing depth, security) → run the react-brain mentor. Fit is heuristic.`);
+}
+
+// Machine-readable report for agents / the mentor's Phase 0: everything the pretty
+// printer shows, as one JSON object per repo (array when several).
+function jsonReport(a, entries) {
+  if (a.missing || a.notReact) return { name: a.name, path: a.path, skipped: a.missing ? 'no package.json' : 'not a React/RN repo' };
+  const tr = trackRecord();
+  const detected = Object.keys(a.byEntry).filter((id) => entries[id]).map((id) => ({
+    entry: id, labels: [...a.byEntry[id].labels], fit: fit(entries[id], a.byEntry[id].tokens),
+    status: entries[id].status, confidence: entries[id].confidence, track: tr[id] || null,
+    recommend: entries[id].recommend?.default || null,
+  }));
+  const expected = [...EXPECTED.always, ...(EXPECTED[a.platform] || [])];
+  const gaps = expected.filter((id) => !a.byEntry[id]).map((id) => ({ entry: id, recommend: entries[id]?.recommend?.default || null }));
+  const modernization = (!NO_SCAN && a.platform !== 'react') ? scanModernDefaults(a.path, a.deps) : null;
+  const sourceSignals = !NO_SCAN ? scanSourceSignals(a.path, entries, { stage: a.stage, platform: a.platform, deps: a.deps }) : null;
+  return {
+    name: a.name, path: a.path, version: a.version || null, platform: a.platform,
+    desktopShell: a.desktopShell || null, stage: a.stage, depCount: a.depCount,
+    ts: a.ts, ci: a.ci, tests: a.tests, lintfmt: a.lintfmt, hooks: a.hooks,
+    detected, gaps, modernization, sourceSignals, unmapped: a.unmapped,
+  };
 }
 
 function printMatrix(analyses, entries) {
@@ -110,12 +148,18 @@ function printMatrix(analyses, entries) {
 }
 
 const argv = process.argv.slice(2);
-const NO_SCAN = argv.includes('--no-scan');       // skip the source-level modernization scan
+const NO_SCAN = argv.includes('--no-scan');       // skip the source-level scans (modernization + signals)
 const SHOW_FILES = argv.includes('--files');      // list the offending files per finding
+const AS_JSON = argv.includes('--json');          // machine-readable (agents / mentor Phase 0)
 const targets = argv.filter((x) => !x.startsWith('--'));
-if (!targets.length) { console.error('usage: node tools/react-brain-doctor.mjs <repoPath> [<repoPath> ...] [--no-scan] [--files]'); process.exit(1); }
+if (!targets.length) { console.error('usage: node tools/react-brain-doctor.mjs <repoPath> [<repoPath> ...] [--no-scan] [--files] [--json]'); process.exit(1); }
 const entries = loadEntries();
 const analyses = targets.map(analyzeRepo);
-for (const a of analyses) printReport(a, entries);
-if (analyses.filter((a) => !a.missing && !a.notReact).length > 1) printMatrix(analyses, entries);
-console.log('');
+if (AS_JSON) {
+  const out = analyses.map((a) => jsonReport(a, entries));
+  console.log(JSON.stringify(out.length === 1 ? out[0] : out, null, 2));
+} else {
+  for (const a of analyses) printReport(a, entries);
+  if (analyses.filter((a) => !a.missing && !a.notReact).length > 1) printMatrix(analyses, entries);
+  console.log('');
+}

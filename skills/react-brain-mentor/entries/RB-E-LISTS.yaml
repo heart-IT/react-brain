@@ -50,3 +50,7 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "react-window", label: "react-window", token: "react-window" }
   - { pkg: "@tanstack/react-virtual", label: "TanStack Virtual", token: "react-virtual" }
   - { pkg: "@tanstack/react-table", label: "TanStack Table", token: "hightable" }
+detect_source:   # source-level signals owned by this entry (regex over repo source)
+  - pattern: "<ScrollView[\\s\\S]{0,600}?\\.map\\("
+    signal: "ScrollView rendering a mapped array — virtualization likely bypassed"
+    hint: "list cost scales with MOUNTED NODES, not data length — FlatList/FlashList (thresholds → react-native-best-practices)"

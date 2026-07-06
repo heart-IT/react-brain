@@ -56,3 +56,8 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "@trpc/*", label: "tRPC", token: "trpc" }
   - { pkg: "@rocicorp/zero", label: "Zero", token: "zero" }
   - { pkg: "@tanstack/react-db", label: "TanStack DB", token: "tanstack db" }
+detect_source:   # source-level signals owned by this entry (regex over repo source)
+  - pattern: "useEffect\\([\\s\\S]{0,300}?\\bfetch\\("
+    signal: "fetch-in-useEffect data loading"
+    hint: "hides race conditions, StrictMode double-fires, stale error states — a server cache (TanStack Query) fixes the class (see reading: 'Why You Want React Query')"
+    unless_dep: "@tanstack/react-query"

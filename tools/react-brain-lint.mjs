@@ -103,6 +103,13 @@ for (const { file, e } of entries) {
       seenPkgs.set(d.pkg, id);
     }
   }
+
+  // detect_source rules: regex must compile, signal required
+  for (const r of e.detect_source || []) {
+    if (!r?.pattern || !r?.signal) err(`${id}: detect_source rule missing pattern/signal`);
+    if (r?.pattern) { try { new RegExp(r.pattern, r.flags || ''); } catch (ex) { err(`${id}: detect_source pattern does not compile: ${ex.message}`); } }
+    if (r?.min_stage && !['prototype', 'mvp', 'production', 'scale'].includes(r.min_stage)) err(`${id}: detect_source bad min_stage '${r.min_stage}'`);
+  }
 }
 
 // cross-entry shared reading URLs — legal (a talk can serve 3 entries) but audible

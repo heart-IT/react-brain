@@ -31,3 +31,8 @@ reading:
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "react-native-keyboard-controller", label: "keyboard-controller", token: "keyboard-controller" }
   - { pkg: "react-native-avoid-softinput", label: "avoid-softinput", token: "avoid-softinput" }
+detect_source:   # source-level signals owned by this entry (regex over repo source)
+  - pattern: "KeyboardAvoidingView"
+    signal: "core KeyboardAvoidingView in use"
+    hint: "smooth on iOS but SNAPS on Android (no per-frame insets) and breaks under Android-15 edge-to-edge — react-native-keyboard-controller for parity"
+    unless_dep: "react-native-keyboard-controller"

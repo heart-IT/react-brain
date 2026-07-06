@@ -33,3 +33,9 @@ reading:
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "@sentry/*", label: "Sentry", token: "sentry" }
   - { pkg: "@bugsnag/*", label: "Bugsnag", token: "bugsnag" }
+detect_source:   # source-level signals owned by this entry (regex over repo source)
+  - pattern: "componentDidCatch|ErrorBoundary|errorElement|getDerivedStateFromError"
+    absent: true
+    min_stage: "production"
+    signal: "no error boundary found anywhere in source (production-stage repo)"
+    hint: "add app/route-level error boundaries and wire them to crash reporting (Sentry) — an uncaught render error blanks the whole tree"

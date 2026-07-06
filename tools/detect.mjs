@@ -306,3 +306,54 @@ export function scanModernDefaults(repoPath, deps = {}) {
   findings.sort((a, b) => (rank[a.strength] - rank[b.strength]) || ((b.count || 0) - (a.count || 0)));
   return { findings, scanned: files.length, capped };
 }
+
+// ── entry-owned source signals ────────────────────────────────────────────────────
+// Beyond deps (detect:) and legacy core-API imports (modern-defaults.yaml), entries may
+// declare `detect_source:` — regex signals over the repo's SOURCE that a dep-scan can't
+// see (ScrollView rendering a mapped array, secrets in AsyncStorage, fetch-in-useEffect,
+// no error boundary anywhere). Rule fields:
+//   pattern (JS regex source) · flags? · signal · hint? · min_files? (report only if ≥N)
+//   absent? (fire when the pattern matches NOWHERE) · min_stage? (gate absent-rules by
+//   repo stage) · unless_dep? (skip when the dep is present)
+// Rules from entries whose `platforms` exclude the repo's platform are skipped.
+const STAGE_ORDER = ['prototype', 'mvp', 'production', 'scale'];
+
+export function scanSourceSignals(repoPath, entries, { stage = 'mvp', platform = 'react-native', deps = {} } = {}) {
+  const list = Array.isArray(entries) ? entries : Object.values(entries);
+  const rules = [];
+  for (const e of list) {
+    const plats = e.platforms || [];
+    const platOK = platform === 'both' || plats.includes(platform) || (platform === 'react-native' && plats.includes('react-native')) || (platform === 'react' && plats.includes('react'));
+    if (!platOK) continue;
+    for (const r of e.detect_source || []) {
+      if (r.unless_dep && r.unless_dep in deps) continue;
+      if (r.min_stage && STAGE_ORDER.indexOf(stage) < STAGE_ORDER.indexOf(r.min_stage)) continue;
+      let re; try { re = new RegExp(r.pattern, r.flags || ''); } catch { continue; }
+      rules.push({ entry: e.id, re, ...r });
+    }
+  }
+  if (!rules.length) return { findings: [], scanned: 0, capped: false };
+
+  const root = resolve(repoPath);
+  const files = walkSource(root, []);
+  const capped = files.length >= MAX_FILES;
+  const hits = new Map(rules.map((r) => [r, new Set()]));
+  for (const f of files) {
+    let src;
+    try { if (statSync(f).size > MAX_BYTES) continue; src = readFileSync(f, 'utf8'); } catch { continue; }
+    const rel = f.startsWith(root) ? f.slice(root.length + 1) : f;
+    for (const r of rules) if (r.re.test(src)) hits.get(r).add(rel);
+  }
+
+  const findings = [];
+  for (const r of rules) {
+    const matched = [...hits.get(r)].sort();
+    if (r.absent) {
+      if (!matched.length && files.length) findings.push({ entry: r.entry, signal: r.signal, hint: r.hint || null, absent: true, count: 0, files: [] });
+    } else if (matched.length >= (r.min_files || 1)) {
+      findings.push({ entry: r.entry, signal: r.signal, hint: r.hint || null, absent: false, count: matched.length, files: matched });
+    }
+  }
+  findings.sort((a, b) => (b.count - a.count));
+  return { findings, scanned: files.length, capped };
+}
