@@ -1,0 +1,19 @@
+# Corpus + tools gate: lint (schema/TOC/reachability/dup-URL invariants) and the
+# golden-fixture eval (33 assertions over detection/fit/signals/routing/stack/MCP).
+# Both offline — no secrets, no network beyond npm ci.
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test

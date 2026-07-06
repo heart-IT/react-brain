@@ -24,6 +24,14 @@
     "lint": "node tools/cli.mjs lint",
     "test": "node tools/cli.mjs lint && node tests/eval.mjs"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/heart-IT/react-brain.git"
+  },
+  "homepage": "https://github.com/heart-IT/react-brain#readme",
+  "bugs": {
+    "url": "https://github.com/heart-IT/react-brain/issues"
+  },
   "dependencies": {
     "yaml": "^2.8.1"
   },

@@ -5,11 +5,14 @@ split by what can run without an LLM. Everything is **propose-only** for knowled
 deterministic fixes (dead links) are safe to surface; recommendation changes stay a
 human-reviewed diff.
 
-> **Why local, not cloud `/schedule`:** the pulse/doctor/evidence read this repo *and*
-> the sibling apps off the local filesystem, and the repo has no git remote — so a cloud
-> cron can't see them. The working hands-off path is a **local** schedule (cron) on this
-> machine. Cloud `/schedule` only fits the web-only harvest, and even then has nowhere to
-> commit proposals back. Keep upkeep local until/unless the repo gets a remote.
+> **Local vs cloud `/schedule` (updated 2026-07-06 — the repo now has a remote:**
+> **github.com/heart-IT/react-brain):** anything that reads the SIBLING APPS
+> (pulse drift, doctor, evidence, learn) stays **local** — ledgerhr/ourpot/bitbarter live
+> only on this machine's filesystem. But corpus-only work is now cloud-schedulable: the
+> weekly newsletter HARVEST + challenge can run as a cloud `/schedule` agent that clones
+> the repo, edits `entries/<ID>.yaml`, runs `npm test`, and opens a **PR** (the propose-only
+> guardrail, now enforced by review instead of trust). CI runs lint + the golden eval on
+> every push/PR. Keep Tier 1 on the local cron; Tier 2 may go cloud when wanted.
 
 ---
 
