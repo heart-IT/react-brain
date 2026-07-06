@@ -20,7 +20,9 @@
     "calibrate": "node tools/cli.mjs calibrate",
     "signals": "node tools/cli.mjs signals",
     "learn": "node tools/cli.mjs learn",
-    "query": "node tools/cli.mjs query"
+    "query": "node tools/cli.mjs query",
+    "lint": "node tools/cli.mjs lint",
+    "test": "node tools/cli.mjs lint && node tests/eval.mjs"
   },
   "dependencies": {
     "yaml": "^2.8.1"

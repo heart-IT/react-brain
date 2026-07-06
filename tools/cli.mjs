@@ -41,6 +41,8 @@ usage: react-brain <command> [args]
   learn    <repo...>   a repo-personalized learning path through the encyclopedia
                        (flags: --stage=prototype|mvp|production|scale, --full)
   query    <term>      look up an entry's recommendation (id / category / keyword)
+  lint                 mechanized corpus invariants: schema, TOC, reachability, dup URLs
+                       (offline; exit 1 on errors — run after any corpus edit)
   help                 this
 
 examples:
@@ -93,6 +95,7 @@ switch (cmd) {
   case 'calibrate': delegate('react-brain-calibrate.mjs'); break;
   case 'signals': delegate('react-brain-signals.mjs'); break;
   case 'learn': delegate('react-brain-learn.mjs'); break;
+  case 'lint': delegate('react-brain-lint.mjs'); break;
   case 'query': query(rest); break;
   case undefined: case 'help': case '--help': case '-h': help(); break;
   default: console.error(`unknown command: ${cmd}\n`); help(); process.exit(1);

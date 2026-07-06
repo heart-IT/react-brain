@@ -17,7 +17,7 @@ recommend:
     - "Expo app → Expo Router (file-based)"
     - "bare RN → React Navigation"
     - "type-safe web SPA without a meta-framework → TanStack Router"
-    - "React Navigation 8 is still ALPHA in 2026 — pin/verify before adopting its native tabs"
+    - "adopting React Navigation 8 native tabs → still ALPHA in 2026; pin + verify against the RN8 release notes first"
 note: >
   React Navigation 8.0 (ALPHA, announced 2025-12) makes NATIVE bottom tabs the default
   (via react-native-screens — native look incl. iOS 26 liquid glass), adds native icon

@@ -1,0 +1,137 @@
+#!/usr/bin/env node
+// ── react-brain lint — the corpus's mechanized invariants (offline, fast) ───────
+// Every structural rule that used to live in session discipline, encoded. Network
+// checks (dead links) stay in `pulse`; judgment stays in `challenge`. Run after ANY
+// corpus edit; `npm test` runs it. Exit 1 on errors; warnings don't fail.
+//
+//   ERRORS  — schema violations, unreachable entries, id/file mismatches, dup URLs
+//             within an entry, dup detect packages across entries, broken doc refs
+//   WARNS   — cross-entry duplicate reading URLs (sometimes deliberate), stale
+//             count claims in prose/comments
+// ───────────────────────────────────────────────────────────────────────────────
+
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join, resolve } from 'node:path';
+import { loadYaml, loadYamlMany, ENC_PATH, ENTRIES_DIR, GROUP_ORDER } from './detect.mjs';
+
+const __dir = dirname(fileURLToPath(import.meta.url));
+const MENTOR_PATH = resolve(__dir, '../skills/react-brain-mentor/react-brain-mentor.yaml');
+
+const STATUSES = new Set(['stub', 'drafted', 'reviewed', 'stale']);
+const CONFIDENCES = new Set(['high', 'medium', 'low']);
+const PLATFORMS = new Set(['react', 'react-native']);
+
+const errors = [];
+const warns = [];
+const err = (m) => errors.push(m);
+const warn = (m) => warns.push(m);
+
+// ── load ────────────────────────────────────────────────────────────────────────
+const index = loadYaml(ENC_PATH);
+const files = existsSync(ENTRIES_DIR) ? readdirSync(ENTRIES_DIR).filter((f) => f.endsWith('.yaml')).sort() : [];
+const parsed = loadYamlMany(files.map((f) => join(ENTRIES_DIR, f)));
+const entries = files.map((f, i) => ({ file: f, e: parsed[i] }));
+const mentor = loadYaml(MENTOR_PATH);
+const contentDir = resolve(dirname(ENC_PATH), index.encyclopedia?.content_dir || '../../encyclopedia');
+
+// ── index / TOC ─────────────────────────────────────────────────────────────────
+const groups = index.groups || [];
+const tocIds = groups.flatMap((g) => g.entries || []);
+const groupIds = new Set(groups.map((g) => g.id));
+for (const g of GROUP_ORDER) if (!groupIds.has(g)) err(`index: GROUP_ORDER group '${g}' missing from groups TOC`);
+const tocDups = tocIds.filter((id, i) => tocIds.indexOf(id) !== i);
+if (tocDups.length) err(`index: duplicate TOC ids: ${[...new Set(tocDups)].join(', ')}`);
+
+const ids = new Set(entries.map(({ e }) => e?.id).filter(Boolean));
+for (const id of tocIds) if (!ids.has(id)) err(`index: TOC lists ${id} but entries/${id}.yaml is missing`);
+
+// ── per-entry schema ────────────────────────────────────────────────────────────
+const seenPkgs = new Map();               // detect pkg pattern -> entry id (cross-entry uniqueness)
+const urlOwners = new Map();              // reading url -> [entry ids] (cross-entry dup = warn)
+for (const { file, e } of entries) {
+  const where = `entries/${file}`;
+  if (!e || typeof e !== 'object') { err(`${where}: does not parse to a mapping`); continue; }
+  const id = e.id || '(no id)';
+  if (`${e.id}.yaml` !== file) err(`${where}: id '${e.id}' ≠ filename`);
+  if (!tocIds.includes(e.id)) err(`${where}: not listed in any group in the index TOC (unreachable by order)`);
+
+  for (const k of ['id', 'topic', 'category', 'group', 'status', 'confidence', 'updated'])
+    if (!e[k]) err(`${id}: missing required field '${k}'`);
+  if (e.group && !groupIds.has(e.group)) err(`${id}: group '${e.group}' not in TOC groups`);
+  if (e.status && !STATUSES.has(e.status)) err(`${id}: bad status '${e.status}'`);
+  if (e.confidence && !CONFIDENCES.has(e.confidence)) err(`${id}: bad confidence '${e.confidence}'`);
+  if (!Array.isArray(e.platforms) || !e.platforms.length) err(`${id}: platforms must be a non-empty list`);
+  else for (const p of e.platforms) if (!PLATFORMS.has(p)) err(`${id}: bad platform '${p}'`);
+  if (e.updated && !/^\d{4}-\d{2}-\d{2}/.test(String(e.updated))) err(`${id}: updated '${e.updated}' is not YYYY-MM-DD`);
+
+  if (!Array.isArray(e.options) || !e.options.length) err(`${id}: options must be a non-empty list`);
+  else for (const o of e.options) if (!o?.name || !o?.tradeoff) err(`${id}: option missing name/tradeoff: ${JSON.stringify(o).slice(0, 60)}`);
+
+  if (!e.recommend?.default) err(`${id}: missing recommend.default`);
+  for (const w of e.recommend?.when || [])
+    if (!String(w).includes('→')) err(`${id}: recommend.when clause has no '→': "${String(w).slice(0, 60)}"`);
+
+  // the corpus invariant since 2026-06-25: every entry carries curated reading
+  if (!Array.isArray(e.reading) || !e.reading.length) err(`${id}: no reading (corpus invariant: every entry has ≥1 vetted deep-dive)`);
+  for (const r of e.reading || []) {
+    for (const k of ['title', 'url', 'what']) if (!r?.[k]) err(`${id}: reading item missing '${k}' (${(r?.title || r?.url || '?').slice(0, 50)})`);
+    if (r?.url && !/^https?:\/\//.test(r.url)) err(`${id}: reading url not http(s): ${r.url}`);
+  }
+  for (const s of e.sources || []) if (!/^https?:\/\//.test(s)) err(`${id}: source not http(s): ${s}`);
+
+  // reviewed entries carry their proof
+  if (e.status === 'reviewed') {
+    if (!e.doc) err(`${id}: reviewed but no doc (long-form Explanation required)`);
+    if (!(e.sources || []).length) err(`${id}: reviewed but no sources`);
+  }
+  if (e.doc && !existsSync(join(contentDir, e.doc))) err(`${id}: doc '${e.doc}' not found in ${contentDir}`);
+
+  // duplicate URLs within each list (a URL may legally appear in BOTH reading and
+  // sources — the canonical deep-dive often is the fact source for a reviewed entry)
+  for (const [label, urls] of [['reading', (e.reading || []).map((r) => r?.url)], ['sources', e.sources || []]]) {
+    const dups = urls.filter((u, i) => u && urls.indexOf(u) !== i);
+    if (dups.length) err(`${id}: duplicate URL(s) in ${label}: ${[...new Set(dups)].join(' ')}`);
+  }
+  for (const r of e.reading || []) if (r?.url) (urlOwners.get(r.url) || urlOwners.set(r.url, []).get(r.url)).push(id);
+
+  // detect rows
+  for (const d of e.detect || []) {
+    if (!d?.pkg || !d?.label || !d?.token) err(`${id}: detect row missing pkg/label/token: ${JSON.stringify(d).slice(0, 60)}`);
+    if (d?.pkg) {
+      if (seenPkgs.has(d.pkg) && seenPkgs.get(d.pkg) !== id) err(`${id}: detect pkg '${d.pkg}' already owned by ${seenPkgs.get(d.pkg)}`);
+      seenPkgs.set(d.pkg, id);
+    }
+  }
+}
+
+// cross-entry shared reading URLs — legal (a talk can serve 3 entries) but audible
+for (const [u, owners] of urlOwners) if (owners.length > 1) warn(`reading URL shared by ${owners.join(' + ')}: ${u}`);
+
+// ── reachability: every category via mentor dims ∪ capability_map ───────────────
+const dims = (mentor.assessment_dimensions || []).map((d) => d.encyclopedia_cat).filter(Boolean);
+const capIds = (mentor.encyclopedia_awareness?.capability_map || []).map((r) => r.entry);
+for (const id of capIds) if (!ids.has(id)) err(`mentor capability_map: unknown entry ${id}`);
+const cats = new Map();                    // category -> entry ids
+for (const { e } of entries) if (e?.category) (cats.get(e.category) || cats.set(e.category, []).get(e.category)).push(e.id);
+for (const [cat, owners] of cats) {
+  const reachable = dims.includes(cat) || owners.some((id) => capIds.includes(id));
+  if (!reachable) err(`ORPHAN category '${cat}' (${owners.join(', ')}): no assessment_dimension and no capability_map row — invisible to the mentor`);
+}
+
+// ── stale count claims in prose (the "34 entries" class of drift) ───────────────
+const n = entries.length;
+const idxText = readFileSync(ENC_PATH, 'utf8');
+for (const m of idxText.matchAll(/(\d+) entries across/g))
+  if (Number(m[1]) !== n) warn(`index header claims '${m[1]} entries across', actual ${n}`);
+const mentorText = readFileSync(MENTOR_PATH, 'utf8');
+for (const m of mentorText.matchAll(/all (\d+)\b/g))
+  if (Number(m[1]) !== n) warn(`mentor yaml says 'all ${m[1]}', actual ${n}`);
+
+// ── report ──────────────────────────────────────────────────────────────────────
+const quiet = process.argv.includes('--quiet');
+console.log(`react-brain lint — ${n} entries · ${seenPkgs.size} detect patterns · ${urlOwners.size} reading URLs`);
+if (errors.length) { console.log(`\n✗ ${errors.length} error(s):`); for (const e of errors) console.log(`  ✗ ${e}`); }
+if (warns.length && !quiet) { console.log(`\n⚠ ${warns.length} warning(s):`); for (const w of warns) console.log(`  ⚠ ${w}`); }
+if (!errors.length) console.log(`\n✓ clean${warns.length ? ` (${warns.length} warnings)` : ''}`);
+process.exit(errors.length ? 1 : 0);
