@@ -26,7 +26,7 @@ const stats = [
   <div class="hero" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr)); gap:2.5rem; align-items:center;">
     <div style="flex: 1.15">
       <p class="label-caps" style="margin:0">decision engine · react &amp; react native</p>
-      <h1>The React ecosystem, as an encyclopedia that shows its work.</h1>
+      <h1>The React ecosystem, as an encyclopedia that shows its work.<span class="blink" aria-hidden="true">▊</span></h1>
       <p class="muted">{meta.one_liner} Every recommendation is <strong style="color:var(--fg)">context-keyed</strong>,
       every load-bearing fact carries a <strong style="color:var(--fg)">verified-on date and a primary source</strong>,
       and the corpus <a href={href('scorecard/')}>grades its own forecasts</a>.</p>
@@ -43,82 +43,27 @@ const stats = [
       </p>
     </div>
 
-    <figure style="margin:0; max-width:34rem; justify-self:center; width:100%">
-      <!-- 3-second version: 5 nodes, thick arrows, accent per stage (gray input,
-           blue knowledge, cyan engine, green health, purple recommendation).
-           The whitepaper version lives on /architecture/. -->
-      <svg class="flow-h" viewBox="0 0 660 260" role="img" aria-label="Flow: your project feeds the knowledge graph and recommendation engine, producing a recommendation, a health score, and a decision matrix" style="width:100%; height:auto; display:block">
-        <defs>
-          <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M0 0L10 5L0 10z" fill="#3A3D44"/>
-          </marker>
-        </defs>
-        <!-- project (input · gray) -->
-        <rect x="8" y="86" width="118" height="88" rx="8" fill="#141519" stroke="#34373D"/>
-        <text x="67" y="122" text-anchor="middle" fill="#F0F1F4" font-family="Hanken Grotesk, sans-serif" font-size="16" font-weight="700">Project</text>
-        <text x="67" y="144" text-anchor="middle" fill="#8A93A0" font-family="JetBrains Mono, monospace" font-size="10.5">package.json</text>
-        <text x="67" y="159" text-anchor="middle" fill="#8A93A0" font-family="JetBrains Mono, monospace" font-size="10.5">code signals</text>
-        <path d="M130 130h32" stroke="#3A3D44" stroke-width="4" marker-end="url(#ah)"/>
-        <!-- knowledge graph (blue) -->
-        <rect x="170" y="76" width="150" height="108" rx="8" fill="#141519" stroke="#34373D"/>
-        <circle cx="232" cy="99" r="3.2" fill="#61DAFB"/><circle cx="252" cy="93" r="3.2" fill="#61DAFB"/><circle cx="262" cy="107" r="3.2" fill="#61DAFB"/><circle cx="242" cy="110" r="3.2" fill="#61DAFB"/>
-        <path d="M232 99l10-6m10 14-10-14m-10 6 10 11m10-3-20 3" stroke="#61DAFB" stroke-width="1" opacity=".7"/>
-        <text x="245" y="136" text-anchor="middle" fill="#F0F1F4" font-family="Hanken Grotesk, sans-serif" font-size="15" font-weight="700">Knowledge graph</text>
-        <text x="245" y="156" text-anchor="middle" fill="#8A93A0" font-family="JetBrains Mono, monospace" font-size="10.5">libraries · patterns</text>
-        <text x="245" y="171" text-anchor="middle" fill="#8A93A0" font-family="JetBrains Mono, monospace" font-size="10.5">relationships</text>
-        <path d="M324 130h32" stroke="#3A3D44" stroke-width="4" marker-end="url(#ah)"/>
-        <!-- engine (cyan) -->
-        <rect x="364" y="76" width="140" height="108" rx="8" fill="#141519" stroke="#34373D"/>
-        <text x="434" y="120" text-anchor="middle" fill="#F0F1F4" font-family="Hanken Grotesk, sans-serif" font-size="15" font-weight="700">Recommendation</text>
-        <text x="434" y="139" text-anchor="middle" fill="#F0F1F4" font-family="Hanken Grotesk, sans-serif" font-size="15" font-weight="700">engine</text>
-        <text x="434" y="161" text-anchor="middle" fill="#8A93A0" font-family="JetBrains Mono, monospace" font-size="10.5">context-keyed</text>
-        <!-- branch arrows -->
-        <path d="M508 108c22 0 22-56 40-62" stroke="#3A3D44" stroke-width="4" fill="none" marker-end="url(#ah)"/>
-        <path d="M508 130h40" stroke="#3A3D44" stroke-width="4" marker-end="url(#ah)"/>
-        <path d="M508 152c22 0 22 56 40 62" stroke="#3A3D44" stroke-width="4" fill="none" marker-end="url(#ah)"/>
-        <!-- outcomes -->
-        <rect x="556" y="16" width="98" height="52" rx="8" fill="#141519" stroke="#34373D"/>
-        <text x="605" y="41" text-anchor="middle" fill="#C7A8F0" font-family="Hanken Grotesk, sans-serif" font-size="13.5" font-weight="700">✓ Pick</text>
-        <text x="605" y="57" text-anchor="middle" fill="#8A93A0" font-family="JetBrains Mono, monospace" font-size="9.5">per decision</text>
-        <rect x="556" y="104" width="98" height="52" rx="8" fill="#141519" stroke="#34373D"/>
-        <text x="605" y="129" text-anchor="middle" fill="#6BDB8E" font-family="Hanken Grotesk, sans-serif" font-size="13.5" font-weight="700">{high?.score ?? 80} health</text>
-        <text x="605" y="145" text-anchor="middle" fill="#8A93A0" font-family="JetBrains Mono, monospace" font-size="9.5">calibrated</text>
-        <rect x="556" y="192" width="98" height="52" rx="8" fill="#141519" stroke="#3A3D44"/>
-        <text x="605" y="217" text-anchor="middle" fill="#F0F1F4" font-family="Hanken Grotesk, sans-serif" font-size="13.5" font-weight="700">Matrix</text>
-        <text x="605" y="233" text-anchor="middle" fill="#8A93A0" font-family="JetBrains Mono, monospace" font-size="9.5">tradeoffs</text>
-      </svg>
-      <svg class="flow-v" viewBox="0 0 320 400" role="img" aria-label="Flow: your project feeds the knowledge graph and recommendation engine, producing a pick, a health score, and a decision matrix" style="width:100%; max-width:20rem; height:auto; display:none; margin:0 auto">
-        <defs>
-          <marker id="ahv" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M0 0L10 5L0 10z" fill="#3A3D44"/>
-          </marker>
-        </defs>
-        <rect x="40" y="8" width="240" height="64" rx="8" fill="#141519" stroke="#34373D"/>
-        <text x="160" y="36" text-anchor="middle" fill="#F0F1F4" font-family="Hanken Grotesk, sans-serif" font-size="19" font-weight="700">Project</text>
-        <text x="160" y="58" text-anchor="middle" fill="#8A93A0" font-family="JetBrains Mono, monospace" font-size="12">package.json · signals</text>
-        <path d="M160 76v22" stroke="#3A3D44" stroke-width="4" marker-end="url(#ahv)"/>
-        <rect x="40" y="106" width="240" height="64" rx="8" fill="#141519" stroke="#34373D"/>
-        <text x="160" y="134" text-anchor="middle" fill="#F0F1F4" font-family="Hanken Grotesk, sans-serif" font-size="19" font-weight="700">Knowledge graph</text>
-        <text x="160" y="156" text-anchor="middle" fill="#8A93A0" font-family="JetBrains Mono, monospace" font-size="12">libraries · patterns</text>
-        <path d="M160 174v22" stroke="#3A3D44" stroke-width="4" marker-end="url(#ahv)"/>
-        <rect x="40" y="204" width="240" height="64" rx="8" fill="#141519" stroke="#34373D"/>
-        <text x="160" y="232" text-anchor="middle" fill="#F0F1F4" font-family="Hanken Grotesk, sans-serif" font-size="19" font-weight="700">Recommendation</text>
-        <text x="160" y="254" text-anchor="middle" fill="#8A93A0" font-family="JetBrains Mono, monospace" font-size="12">engine · context-keyed</text>
-        <path d="M160 272v22" stroke="#3A3D44" stroke-width="4" marker-end="url(#ahv)"/>
-        <rect x="14" y="304" width="92" height="56" rx="8" fill="#141519" stroke="#34373D"/>
-        <text x="60" y="336" text-anchor="middle" fill="#C7A8F0" font-family="Hanken Grotesk, sans-serif" font-size="15" font-weight="700">✓ Pick</text>
-        <rect x="114" y="304" width="92" height="56" rx="8" fill="#141519" stroke="#34373D"/>
-        <text x="160" y="336" text-anchor="middle" fill="#6BDB8E" font-family="Hanken Grotesk, sans-serif" font-size="15" font-weight="700">{high?.score ?? 80} health</text>
-        <rect x="214" y="304" width="92" height="56" rx="8" fill="#141519" stroke="#3A3D44"/>
-        <text x="260" y="336" text-anchor="middle" fill="#F0F1F4" font-family="Hanken Grotesk, sans-serif" font-size="15" font-weight="700">Matrix</text>
-      </svg>
-      <figcaption class="meta" style="text-align:center; margin-top:.5rem">
-        <a href={href('architecture/')} style="color:var(--muted)">How it actually works →</a>
-      </figcaption>
-    </figure>
+    <div style="max-width:34rem; justify-self:center; width:100%">
+      <div class="term" role="img" aria-label="Example react-brain doctor run: detected ecosystem choices compared against the encyclopedia, with fit marks and gaps">
+        <div class="term-bar" aria-hidden="true"><i></i><i></i><i></i><span>react-brain — doctor</span></div>
+        <pre aria-hidden="true"><span class="t-p">$ npx react-brain doctor .</span>
+
+<span class="t-dim">ourpot (v1.4) · react-native · production · 41 deps</span>
+
+  state        Zustand              <span class="t-ok">✓ aligned</span>
+  lists        FlashList            <span class="t-ok">✓ aligned</span>
+  nav          Expo Router          <span class="t-ok">✓ aligned</span>
+  data         Hypercore (P2P)      <span class="t-warn">~ contextual</span>
+  animation    Reanimated 4         <span class="t-ok">✓ aligned</span>
+  rn-versions  0.83 → 0.86          <span class="t-warn">↗ review</span>
+
+<span class="t-dim">2 source signals · 1 gap · docs: entries/rn-versions</span></pre>
+      </div>
+      <p class="meta" style="text-align:center; margin-top:.5rem">
+        <a href={href('architecture/')} style="color:var(--muted)">how it works →</a>
+      </p>
+    </div>
   </div>
-
-
 
   <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr)); gap:0 4rem; align-items:start">
     <div>
@@ -155,9 +100,9 @@ const stats = [
         <a href={href(`entries/${pick.slug}/#explanation`)}>Read the reasoning →</a>
       </div>
       <h2>Quick start</h2>
-      <pre>npx react-brain doctor .      <span style="color:#5b6470"># assess a repo</span>
-npx react-brain stack --rn    <span style="color:#5b6470"># compose a stack</span>
-npx react-brain learn .       <span style="color:#5b6470"># learning path</span></pre>
+      <pre><span class="t-p">$</span> npx react-brain doctor .      <span class="t-dim"># assess a repo</span>
+<span class="t-p">$</span> npx react-brain stack --rn    <span class="t-dim"># compose a stack</span>
+<span class="t-p">$</span> npx react-brain learn .       <span class="t-dim"># learning path</span></pre>
       <p class="muted" style="font-size:.9rem">Organized by decision, not by article — {readingCount} deep-dives
       cited as evidence, every default a dated prediction on the
       <a href={href('scorecard/')}>scorecard</a>, and <a href={href('methodology/')}>nothing asserted casually</a>.</p>
@@ -165,9 +110,3 @@ npx react-brain learn .       <span style="color:#5b6470"># learning path</span>
   </div>
 </Base>
 
-<style>
-  @media (max-width: 639px) {
-    .flow-h { display: none !important; }
-    .flow-v { display: block !important; }
-  }
-</style>

@@ -74,7 +74,7 @@ const EXPECTED = {
         const choice = [...byEntry[id].labels].join(', ');
         lines.push(`${f}  ${cap.slug}: ${choice}`);
         html += `<tr><td><a href="${BASE}entries/${cap.slug}/">${cap.slug}</a> <span class="badge ${cap.confidence}">${cap.confidence}</span></td>` +
-          `<td>${esc(choice)}</td><td>${f}</td>` +
+          `<td>${esc(choice)}</td><td><span class="${f.startsWith('✓') ? 'mark-ok' : f.startsWith('~') ? 'mark-warn' : 'mark-dim'}">${f}</span></td>` +
           `<td class="muted">${esc(cap.def.slice(0, 160))}${cap.def.length > 160 ? '…' : ''}</td></tr>`;
       }
       html += '</tbody></table></div>';

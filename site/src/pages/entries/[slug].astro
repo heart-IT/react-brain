@@ -29,7 +29,7 @@ const toc = [
 ].filter(Boolean);
 ---
 <Base title={`react-brain — ${e.slug}`} description={e.topic} activeGroup={e.group}>
-  <p class="meta" style="margin-bottom:0"><a href={href('entries/')}>entries</a> / <a href={href(`entries/#${e.group}`)} style="color:var(--muted)">{e.group}</a> · verified {String(e.updated)} · {(e.platforms || []).join(' + ')}</p>
+  <p class="meta" style="margin-bottom:0"><span aria-hidden="true" style="color:var(--line-strong)">~/</span><a href={href('entries/')}>entries</a><span aria-hidden="true" style="color:var(--line-strong)">/</span><a href={href(`entries/#${e.group}`)} style="color:var(--muted)">{e.group}</a> · verified {String(e.updated)} · {(e.platforms || []).join(' + ')}</p>
   <h1>{e.topic}</h1>
   <p>
     <span class={`badge ${e.status}`}>{e.status}</span>
