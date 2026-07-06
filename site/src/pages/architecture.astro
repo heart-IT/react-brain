@@ -1,0 +1,36 @@
+---
+import Base from '../layouts/Base.astro';
+import { corpus, href, BASE, GITHUB } from '../lib/corpus.js';
+const { entries } = corpus();
+const readingCount = entries.reduce((n, e) => n + (e.reading?.length || 0), 0);
+---
+<Base title="react-brain — architecture" description="How the decision engine actually works: inputs, the knowledge graph, the analysis engine, and the outcomes — mapped to the real system.">
+  <h1>Architecture</h1>
+  <p class="muted" style="max-width:46rem">The homepage shows the 3-second version. This is the whole
+  machine — and below the diagram, an honest mapping of each block to the real code and data that
+  implement it (everything is <a href={GITHUB}>open source</a>).</p>
+
+  <img src={`${BASE}architecture.png`} alt="Detailed react-brain architecture: project inputs (package.json — dependency manifest, scripts, metadata; code signals — static analysis and code metrics) flow through a parser/extractor into the analysis engine, where a knowledge graph (component relationships, library insights, best practices, historical data, semantic context) exchanges with an article database (technical blogs, documentation, case studies, performance reports) via enrichment/contextualization and pattern matching/scoring — producing production-grade recommendations, a health score, and a decision matrix" style="width:100%; border-radius:8px; border:1px solid var(--line)" />
+
+  <h2>What each block really is</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>diagram block</th><th>the real thing</th></tr></thead>
+    <tbody>
+      <tr><td><strong>package.json</strong></td><td>The dependency scan: every dep is matched against detection rules each encyclopedia entry declares for itself (<code>detect:</code> — exact names and scope globs).</td></tr>
+      <tr><td><strong>Code signals</strong></td><td>Source-level scans: legacy core-API imports (Animated, FlatList, SafeAreaView…) and entry-owned regex signals — the smells a dep-scan can't see (ScrollView rendering a mapped array, secrets in AsyncStorage, fetch-in-useEffect, no error boundary at production stage).</td></tr>
+      <tr><td><strong>Knowledge graph</strong></td><td>The encyclopedia: {entries.length} decision entries with options, tradeoffs, and <em>context-keyed</em> recommendations ("GraphQL backend → Apollo"; "P2P app → a client cache is N/A by design"), cross-linked and grouped.</td></tr>
+      <tr><td><strong>Article database</strong></td><td>{readingCount} fetch-verified deep-dives with editorial annotations — the <a href={href('reading/')}>curated reading</a> — plus the primary sources each verified fact cites.</td></tr>
+      <tr><td><strong>Pattern matching &amp; scoring</strong></td><td>The shared resolver: detected choices vs the entry's context recommendation (✓ aligned / ~ contextual / ↗ review), plus expected-domain gap detection — one implementation shared by the CLI, the MCP server, and this site's <a href={href('doctor/')}>doctor</a>.</td></tr>
+      <tr><td><strong>Enrichment &amp; contextualization</strong></td><td>The weekly loop: newsletter harvest → fetch-verify every claim → adversarial challenges → live-npm signals (downloads, publish dates) → a reviewed delta. See the <a href={href('methodology/')}>methodology</a> and <a href={href('changelog/')}>changelog</a>.</td></tr>
+      <tr><td><strong>Production-grade recommendations</strong></td><td>The per-decision picks — status- and confidence-badged, dated, sourced. <a href={href('entries/')}>Browse entries</a>.</td></tr>
+      <tr><td><strong>Health score</strong></td><td>Calibration, not vibes: every default is a dated falsifiable prediction; resolutions are scored per confidence tier on the <a href={href('scorecard/')}>scorecard</a>.</td></tr>
+      <tr><td><strong>Decision matrix</strong></td><td>Each entry's options-with-tradeoffs table plus the <a href={href('libraries/')}>library browser</a> (tracked packages × live npm downloads × owning decision).</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>One corpus, three surfaces</h2>
+  <p class="prose">The same YAML corpus renders this site for humans, ships as
+  <code>npx react-brain</code> for repos (doctor / stack / learn), and serves coding agents as MCP
+  tools (capsules / query / recommend / doctor / stack). Nothing forks — a weekly corpus update
+  updates all three.</p>
+</Base>

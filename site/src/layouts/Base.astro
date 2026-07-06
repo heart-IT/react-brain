@@ -4,7 +4,8 @@
 // categorization only (green recommended · orange caveat · red avoid · purple experimental),
 // soft 4px geometry, 1200px container, borders-not-shadows.
 const { title = 'react-brain', description = 'A verified, context-keyed encyclopedia of the React + React Native ecosystem — what to use, when, and why.' } = Astro.props;
-import { GITHUB, href } from '../lib/corpus.js';
+import { GITHUB, href, corpusInfo } from '../lib/corpus.js';
+const info = corpusInfo();
 const FAVICON = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>";
 ---
 <!doctype html>
@@ -43,6 +44,10 @@ const FAVICON = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
   </header>
   <main id="main"><slot /></main>
   <footer>
+    <p class="meta" style="display:flex; gap:.6rem; flex-wrap:wrap; align-items:center">
+      <span>corpus v{info.version}</span>·<span>{info.count} decisions</span>·<span>last updated {info.updated}</span>
+      <span style="margin-left:auto"><a href={href('changelog/')} style="color:var(--muted)">changelog →</a></span>
+    </p>
     <p>Generated from the <a href={GITHUB}>react-brain corpus</a> — every fact carries a
     verified-on date; every recommendation is context-keyed and adversarially challenged
     (<a href={href('methodology/')}>methodology</a>). Articles are cited and linked, never
@@ -85,6 +90,7 @@ const FAVICON = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
   nav .brand svg { color: var(--accent); }
   footer { border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; }
   footer p { max-width: 1200px; margin: 0 auto; padding: 1rem 24px 2rem; }
+  footer p.meta { padding-bottom: 0; }
   a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
   .skip { position: absolute; left: -999px; top: 0; background: var(--accent); color: #00263a; padding: .5rem 1rem; z-index: 10; }
@@ -130,11 +136,18 @@ const FAVICON = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
   .hero { padding: 1.6rem 0 .5rem; }
   .hero p { max-width: 46rem; font-size: 1.06rem; }
 
-  /* stat tiles (mock: mono label + big Hanken number on a card) */
+  /* stat tiles (mock: mono label + big Hanken number) — interactive: hover reveals the action */
   .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); gap: .8rem; margin: 1.2rem 0; }
-  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: .8rem 1rem; }
+  .stat { display: block; background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: .8rem 1rem; text-decoration: none; position: relative; transition: border-color .15s; }
   .stat .label { font: 500 .74rem var(--font-mono); color: var(--muted); letter-spacing: .03em; }
   .stat .value { font: 700 1.7rem/1.2 var(--font-head); color: var(--bright); margin-top: .15rem; }
+  .stat .go { position: absolute; right: .8rem; bottom: .6rem; font: 600 .74rem var(--font-body); color: var(--accent); opacity: 0; transform: translateX(-4px); transition: opacity .15s, transform .15s; }
+  .stat:hover, .stat:focus-visible { border-color: var(--accent); }
+  .stat:hover .go, .stat:focus-visible .go { opacity: 1; transform: none; }
+
+  /* the flagship sidebar widget — visually distinct from ordinary cards */
+  .card.pick { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 7%, var(--card)), var(--card)); }
+  .card.pick:hover { border-color: var(--accent); }
 
   /* buttons — primary solid, secondary ghost; rectangular soft corners, never pills */
   input, textarea, button, select { font: inherit; color: inherit; }

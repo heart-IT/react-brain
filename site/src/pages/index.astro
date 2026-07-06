@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import { corpus, scorecard, href, BASE } from '../lib/corpus.js';
+import { corpus, scorecard, href } from '../lib/corpus.js';
 const { meta, groups, entries } = corpus();
 const reviewed = entries.filter((e) => e.status === 'reviewed').length;
 const readingCount = entries.reduce((n, e) => n + (e.reading?.length || 0), 0);
@@ -8,10 +8,23 @@ const libCount = new Set(entries.flatMap((e) => (e.detect || []).map((d) => d.pk
 const sc = scorecard();
 const high = sc?.tiers?.high;
 const recent = [...entries].sort((a, b) => String(b.updated).localeCompare(String(a.updated))).slice(0, 3);
+// Recommendation of the week: deterministic — the most recently re-verified reviewed entry
+const pick = [...entries].filter((e) => e.status === 'reviewed')
+  .sort((a, b) => String(b.updated).localeCompare(String(a.updated)))[0];
+// first clause only — split at real sentence boundaries (". ", ";", spaced em-dash),
+// never at version dots like "19.2"
+const clause = (pick.recommend?.default || '').split(/\.\s|;|\s—\s/)[0].trim();
+const pickHeadline = clause.length > 110 ? clause.slice(0, 109) + '…' : clause;
+const stats = [
+  { label: 'decisions', value: entries.length, to: 'entries/', go: 'Browse' },
+  { label: 'verified readings', value: readingCount, to: 'reading/', go: 'Read' },
+  { label: 'libraries tracked', value: libCount, to: 'libraries/', go: 'Compare' },
+  ...(high?.score != null ? [{ label: 'calibration · high tier', value: `${high.score}%`, to: 'scorecard/', go: 'Inspect' }] : []),
+];
 ---
 <Base>
-  <div class="hero" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr)); gap:2rem; align-items:center;">
-    <div>
+  <div class="hero" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr)); gap:2.5rem; align-items:center;">
+    <div style="flex: 1.15">
       <p class="label-caps" style="color:var(--accent); margin:0">Decision engine · React &amp; React Native</p>
       <h1>The React ecosystem, as an encyclopedia that shows its work.</h1>
       <p class="muted">{meta.one_liner} Every recommendation is <strong style="color:var(--fg)">context-keyed</strong>,
@@ -19,10 +32,13 @@ const recent = [...entries].sort((a, b) => String(b.updated).localeCompare(Strin
       and the corpus <a href={href('scorecard/')}>grades its own forecasts</a>.</p>
 
       <div class="stats">
-        <div class="stat"><div class="label">decisions</div><div class="value">{entries.length}</div></div>
-        <div class="stat"><div class="label">reviewed essays</div><div class="value">{reviewed}</div></div>
-        <div class="stat"><div class="label">libraries tracked</div><div class="value">{libCount}</div></div>
-        {high?.score != null && <div class="stat"><div class="label">calibration (high tier)</div><div class="value">{high.score}%</div></div>}
+        {stats.map((s) => (
+          <a class="stat" href={href(s.to)}>
+            <div class="label">{s.label}</div>
+            <div class="value">{s.value}</div>
+            <div class="go">{s.go} →</div>
+          </a>
+        ))}
       </div>
 
       <p style="display:flex; gap:.7rem; flex-wrap:wrap">
@@ -30,7 +46,55 @@ const recent = [...entries].sort((a, b) => String(b.updated).localeCompare(Strin
         <a class="btn ghost" href={href('doctor/')}>Analyze package.json</a>
       </p>
     </div>
-    <img src={`${BASE}flow-diagram.png`} alt="react-brain flow: project inputs (package.json, code signals) feed the analysis engine (knowledge graph + article database), producing production-grade recommendations, a health score, and a decision matrix" style="width:100%; border-radius:8px; border:1px solid var(--line)" />
+
+    <figure style="margin:0; max-width:34rem; justify-self:center; width:100%">
+      <!-- 3-second version: 5 nodes, thick arrows, accent per stage (gray input,
+           blue knowledge, cyan engine, green health, purple recommendation).
+           The whitepaper version lives on /architecture/. -->
+      <svg viewBox="0 0 660 260" role="img" aria-label="Flow: your project feeds the knowledge graph and recommendation engine, producing a recommendation, a health score, and a decision matrix" style="width:100%; height:auto; display:block">
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0 0L10 5L0 10z" fill="#3F484E"/>
+          </marker>
+        </defs>
+        <!-- project (input · gray) -->
+        <rect x="8" y="86" width="118" height="88" rx="8" fill="#161B22" stroke="#94A3B8" stroke-opacity=".55"/>
+        <text x="67" y="122" text-anchor="middle" fill="#E2E2E8" font-family="Hanken Grotesk, sans-serif" font-size="16" font-weight="700">Project</text>
+        <text x="67" y="144" text-anchor="middle" fill="#94A3B8" font-family="JetBrains Mono, monospace" font-size="10.5">package.json</text>
+        <text x="67" y="159" text-anchor="middle" fill="#94A3B8" font-family="JetBrains Mono, monospace" font-size="10.5">code signals</text>
+        <path d="M130 130h32" stroke="#3F484E" stroke-width="4" marker-end="url(#ah)"/>
+        <!-- knowledge graph (blue) -->
+        <rect x="170" y="76" width="150" height="108" rx="8" fill="#161B22" stroke="#38BDF8" stroke-opacity=".75"/>
+        <circle cx="232" cy="99" r="3.2" fill="#38BDF8"/><circle cx="252" cy="93" r="3.2" fill="#38BDF8"/><circle cx="262" cy="107" r="3.2" fill="#38BDF8"/><circle cx="242" cy="110" r="3.2" fill="#38BDF8"/>
+        <path d="M232 99l10-6m10 14-10-14m-10 6 10 11m10-3-20 3" stroke="#38BDF8" stroke-width="1" opacity=".7"/>
+        <text x="245" y="136" text-anchor="middle" fill="#E2E2E8" font-family="Hanken Grotesk, sans-serif" font-size="15" font-weight="700">Knowledge graph</text>
+        <text x="245" y="156" text-anchor="middle" fill="#94A3B8" font-family="JetBrains Mono, monospace" font-size="10.5">libraries · patterns</text>
+        <text x="245" y="171" text-anchor="middle" fill="#94A3B8" font-family="JetBrains Mono, monospace" font-size="10.5">relationships</text>
+        <path d="M324 130h32" stroke="#3F484E" stroke-width="4" marker-end="url(#ah)"/>
+        <!-- engine (cyan) -->
+        <rect x="364" y="76" width="140" height="108" rx="8" fill="#161B22" stroke="#79D1FB" stroke-opacity=".75"/>
+        <text x="434" y="120" text-anchor="middle" fill="#E2E2E8" font-family="Hanken Grotesk, sans-serif" font-size="15" font-weight="700">Recommendation</text>
+        <text x="434" y="139" text-anchor="middle" fill="#E2E2E8" font-family="Hanken Grotesk, sans-serif" font-size="15" font-weight="700">engine</text>
+        <text x="434" y="161" text-anchor="middle" fill="#94A3B8" font-family="JetBrains Mono, monospace" font-size="10.5">context-keyed</text>
+        <!-- branch arrows -->
+        <path d="M508 108c22 0 22-56 40-62" stroke="#3F484E" stroke-width="4" fill="none" marker-end="url(#ah)"/>
+        <path d="M508 130h40" stroke="#3F484E" stroke-width="4" marker-end="url(#ah)"/>
+        <path d="M508 152c22 0 22 56 40 62" stroke="#3F484E" stroke-width="4" fill="none" marker-end="url(#ah)"/>
+        <!-- outcomes -->
+        <rect x="556" y="16" width="98" height="52" rx="8" fill="#161B22" stroke="#A855F7" stroke-opacity=".8"/>
+        <text x="605" y="41" text-anchor="middle" fill="#A855F7" font-family="Hanken Grotesk, sans-serif" font-size="13.5" font-weight="700">✓ Pick</text>
+        <text x="605" y="57" text-anchor="middle" fill="#94A3B8" font-family="JetBrains Mono, monospace" font-size="9.5">per decision</text>
+        <rect x="556" y="104" width="98" height="52" rx="8" fill="#161B22" stroke="#22C55E" stroke-opacity=".8"/>
+        <text x="605" y="129" text-anchor="middle" fill="#22C55E" font-family="Hanken Grotesk, sans-serif" font-size="13.5" font-weight="700">{high?.score ?? 80} health</text>
+        <text x="605" y="145" text-anchor="middle" fill="#94A3B8" font-family="JetBrains Mono, monospace" font-size="9.5">calibrated</text>
+        <rect x="556" y="192" width="98" height="52" rx="8" fill="#161B22" stroke="#3F484E"/>
+        <text x="605" y="217" text-anchor="middle" fill="#E2E2E8" font-family="Hanken Grotesk, sans-serif" font-size="13.5" font-weight="700">Matrix</text>
+        <text x="605" y="233" text-anchor="middle" fill="#94A3B8" font-family="JetBrains Mono, monospace" font-size="9.5">tradeoffs</text>
+      </svg>
+      <figcaption class="meta" style="text-align:center; margin-top:.5rem">
+        <a href={href('architecture/')} style="color:var(--muted)">How it actually works →</a>
+      </figcaption>
+    </figure>
   </div>
 
   <h2>Recently updated</h2>
@@ -41,8 +105,8 @@ const recent = [...entries].sort((a, b) => String(b.updated).localeCompare(Strin
           <strong style="font-family:var(--font-head); color:var(--bright)">{e.slug}</strong>
           <span class={`badge ${e.status}`}>{e.status}</span>
         </p>
-        <p class="meta" style="margin:.3rem 0">{e.group} · verified {String(e.updated)}</p>
-        <p class="muted" style="margin:.3rem 0 0; font-size:.9rem">{e.topic}</p>
+        <p class="meta" style="margin:.3rem 0 .75rem">{e.group} · verified {String(e.updated)}</p>
+        <p class="muted" style="margin:0; font-size:.9rem">{e.topic}</p>
       </a>
     ))}
   </div>
@@ -75,14 +139,24 @@ const recent = [...entries].sort((a, b) => String(b.updated).localeCompare(Strin
         <li><strong>Nothing asserted casually</strong> — see the <a href={href('methodology/')}>methodology</a>.</li>
       </ul>
     </div>
-    <div class="card" style="margin-top:2.2rem">
-      <p class="label-caps" style="margin:0 0 .6rem; color:var(--muted)">Quick start</p>
-      <p class="meta" style="margin:.2rem 0">1 · analyze a repo</p>
-      <pre style="margin:.2rem 0 .8rem">npx react-brain doctor .</pre>
-      <p class="meta" style="margin:.2rem 0">2 · compose a greenfield stack</p>
-      <pre style="margin:.2rem 0 .8rem">npx react-brain stack --rn --expo</pre>
-      <p class="meta" style="margin:.2rem 0">3 · get a personalized learning path</p>
-      <pre style="margin:.2rem 0">npx react-brain learn .</pre>
+    <div style="margin-top:2.2rem">
+      <div class="card pick">
+        <p class="label-caps" style="margin:0 0 .55rem; color:var(--accent)">★ Recommendation of the week</p>
+        <p style="margin:0; font: 600 1.1rem/1.35 var(--font-head); color:var(--bright)">{pickHeadline}</p>
+        <p class="meta" style="margin:.45rem 0 .75rem">
+          {pick.slug} · <span class={`badge ${pick.confidence}`}>{pick.confidence}</span> · verified {String(pick.updated)}
+        </p>
+        <a href={href(`entries/${pick.slug}/#explanation`)}>Read the reasoning →</a>
+      </div>
+      <div class="card">
+        <p class="label-caps" style="margin:0 0 .6rem; color:var(--muted)">Quick start</p>
+        <p class="meta" style="margin:.2rem 0">1 · analyze a repo</p>
+        <pre style="margin:.2rem 0 .8rem">npx react-brain doctor .</pre>
+        <p class="meta" style="margin:.2rem 0">2 · compose a greenfield stack</p>
+        <pre style="margin:.2rem 0 .8rem">npx react-brain stack --rn --expo</pre>
+        <p class="meta" style="margin:.2rem 0">3 · get a personalized learning path</p>
+        <pre style="margin:.2rem 0">npx react-brain learn .</pre>
+      </div>
     </div>
   </div>
 </Base>

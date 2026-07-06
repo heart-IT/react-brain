@@ -83,6 +83,13 @@ export function doctorData() {
 
 export const GITHUB = 'https://github.com/heart-IT/react-brain';
 
+// version + freshness line for the footer (real numbers, not marketing copy)
+export function corpusInfo() {
+  const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
+  const { meta, entries } = corpus();
+  return { version: pkg.version, count: entries.length, updated: String(meta.updated) };
+}
+
 // Base-path-aware URL builder. The site will be served under a subpath of an
 // existing (WordPress) host — set base in astro.config or ASTRO_BASE and every
 // internal link follows. BASE_URL always ends with '/'.
