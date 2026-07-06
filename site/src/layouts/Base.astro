@@ -148,22 +148,25 @@ const bottomLinks = [
 
 <style is:global>
   :root {
-    /* Technical Precision tokens (technical_precision/DESIGN.md) */
-    --bg: #0F1115;            /* base layer */
-    --card: #161B22;          /* content layer */
-    --code-bg: #010409;       /* code blocks — distinct from cards */
-    --line: #30363D;          /* border-subtle */
-    --line-strong: #3F484E;   /* outline-variant / hover borders */
-    --fg: #E2E2E8;            /* on-surface */
-    --bright: #FFFFFF;
-    --muted: #94A3B8;         /* text-muted */
-    --accent: #38BDF8;        /* link-blue: actions + hyperlinks */
-    --primary: #79D1FB;       /* primary buttons */
-    --on-primary: #003547;
-    --ok: #22C55E;            /* recommended */
-    --warn: #F59E0B;          /* caveat */
-    --bad: #EF4444;           /* avoid / deprecated */
-    --exp: #A855F7;           /* experimental */
+    /* "quiet ink" palette — evolved from technical_precision/DESIGN.md (kept:
+       dark-first, tonal layers, semantic-color-as-categorization; retuned: warmer
+       neutral ink instead of blue-gray, ONE chromatic accent (React's #61DAFB,
+       used sparingly), white primary actions, softened semantic tints) */
+    --bg: #0B0C0E;            /* base ink */
+    --card: #141519;          /* surface — one step up */
+    --code-bg: #08090B;       /* code sits below the surface */
+    --line: #232529;          /* hairlines */
+    --line-strong: #34373D;
+    --fg: #D9DBE0;            /* body */
+    --bright: #F5F6F8;        /* headings / emphasis */
+    --muted: #8A93A0;
+    --accent: #61DAFB;        /* links + active — the React cyan, small doses */
+    --primary: #F5F6F8;       /* primary buttons: white on ink */
+    --on-primary: #0B0C0E;
+    --ok: #6BDB8E;            /* recommended */
+    --warn: #E4B457;          /* caveat */
+    --bad: #F08A8A;           /* avoid / deprecated */
+    --exp: #C7A8F0;           /* experimental */
     --font-head: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
     --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
     --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -171,10 +174,10 @@ const bottomLinks = [
     color-scheme: dark;       /* dark-first by design */
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--fg); font: 400 15.5px/1.65 var(--font-body); }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 400 16px/1.65 var(--font-body); }
 
   /* ── top bar ─────────────────────────────────────────────────────────────── */
-  header { border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 92%, black); position: sticky; top: 0; z-index: 5; }
+  header { border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(8px); position: sticky; top: 0; z-index: 5; }
   .bar { max-width: 1500px; margin: 0 auto; padding: 0 20px; height: var(--header-h); display: flex; gap: 1.1rem; align-items: center; }
   .brand { color: var(--bright); font: 700 1.05rem var(--font-head); display: inline-flex; align-items: center; gap: .45rem; text-decoration: none; white-space: nowrap; }
   .brand svg { color: var(--accent); }
@@ -251,16 +254,16 @@ const bottomLinks = [
   a.card { transition: background .15s; }
   a.card:hover { background: color-mix(in srgb, var(--card) 80%, #1f2630); }
   /* callouts: left color bar, per the functional palette */
-  .card.rec { border-left: 3px solid var(--ok); }
-  .card.caution { border-left: 3px solid var(--warn); }
+  .card.rec { border-left: 2px solid var(--ok); }
+  .card.caution { border-left: 2px solid var(--warn); }
 
   /* status markers: quiet colored text, no pill chrome — the word carries the
-     meaning, color reinforces it (lightened variants keep AA at this size) */
+     meaning, color reinforces it */
   .badge { display: inline; font: 500 .78rem/1.5 var(--font-mono); padding: 0; color: var(--muted); vertical-align: baseline; }
   .badge.reviewed, .badge.high, .badge.held { color: var(--ok); }
   .badge.drafted, .badge.medium, .badge.weakened { color: var(--warn); }
-  .badge.low, .badge.overturned { color: #F87171; }
-  .badge.stub, .badge.beta { color: #C084FC; }
+  .badge.low, .badge.overturned { color: var(--bad); }
+  .badge.stub, .badge.beta { color: var(--exp); }
 
   ul { padding-left: 1.2rem; }
   li { margin: .3rem 0; }
@@ -279,12 +282,12 @@ const bottomLinks = [
   .statline a:hover strong { color: var(--accent); }
 
   /* the flagship widget — one accent bar, nothing else */
-  .card.pick { border-left: 3px solid var(--accent); }
+  .card.pick { border-left: 2px solid var(--accent); }
 
   /* buttons — primary solid, secondary ghost; rectangular soft corners, never pills */
   input, textarea, button, select { font: inherit; color: inherit; }
   button, .btn { display: inline-block; background: var(--primary); color: var(--on-primary); border: 1px solid transparent; border-radius: 4px; padding: .55rem 1.1rem; cursor: pointer; font-weight: 600; text-decoration: none; }
-  button:hover, .btn:hover { background: color-mix(in srgb, var(--primary) 88%, white); }
+  button:hover, .btn:hover { background: color-mix(in srgb, var(--primary) 86%, #0B0C0E); }
   .btn.ghost, button.ghost { background: transparent; color: var(--fg); border-color: var(--line-strong); }
   .btn.ghost:hover, button.ghost:hover { border-color: var(--muted); background: var(--card); }
   textarea { width: 100%; min-height: 12rem; background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: .8rem; font: 400 13px/1.55 var(--font-mono); }
