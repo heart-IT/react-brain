@@ -1,29 +1,57 @@
 ---
 import Base from '../layouts/Base.astro';
-import { corpus, scorecard, href } from '../lib/corpus.js';
+import { corpus, scorecard, href, BASE } from '../lib/corpus.js';
 const { meta, groups, entries } = corpus();
 const reviewed = entries.filter((e) => e.status === 'reviewed').length;
 const readingCount = entries.reduce((n, e) => n + (e.reading?.length || 0), 0);
+const libCount = new Set(entries.flatMap((e) => (e.detect || []).map((d) => d.pkg)).filter((p) => !p.includes('*'))).size;
 const sc = scorecard();
 const high = sc?.tiers?.high;
+const recent = [...entries].sort((a, b) => String(b.updated).localeCompare(String(a.updated))).slice(0, 3);
 ---
 <Base>
-  <div class="hero">
-    <h1>The React ecosystem, as an encyclopedia that shows its work.</h1>
-    <p>{meta.one_liner} Not a listicle: every recommendation is <strong>context-keyed</strong>
-    (“for server state at MVP+…”, never “X is best”), every load-bearing fact carries a
-    <strong>verified-on date and a primary source</strong>, and the corpus
-    <a href={href("scorecard/")}>grades its own forecasts</a>.</p>
-    <p class="muted">{entries.length} entries · {reviewed} reviewed long-form · {readingCount} vetted
-    deep-dive readings · digested from {meta.sources_digested.length} newsletter archives, cross-checked
-    {high?.score != null && <> · high-confidence picks currently scoring <strong>{high.score}%</strong> on resolved predictions</>}</p>
+  <div class="hero" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr)); gap:2rem; align-items:center;">
+    <div>
+      <p class="label-caps" style="color:var(--accent); margin:0">Decision engine · React &amp; React Native</p>
+      <h1>The React ecosystem, as an encyclopedia that shows its work.</h1>
+      <p class="muted">{meta.one_liner} Every recommendation is <strong style="color:var(--fg)">context-keyed</strong>,
+      every load-bearing fact carries a <strong style="color:var(--fg)">verified-on date and a primary source</strong>,
+      and the corpus <a href={href('scorecard/')}>grades its own forecasts</a>.</p>
+
+      <div class="stats">
+        <div class="stat"><div class="label">decisions</div><div class="value">{entries.length}</div></div>
+        <div class="stat"><div class="label">reviewed essays</div><div class="value">{reviewed}</div></div>
+        <div class="stat"><div class="label">libraries tracked</div><div class="value">{libCount}</div></div>
+        {high?.score != null && <div class="stat"><div class="label">calibration (high tier)</div><div class="value">{high.score}%</div></div>}
+      </div>
+
+      <p style="display:flex; gap:.7rem; flex-wrap:wrap">
+        <a class="btn" href={href('entries/')}>Browse entries →</a>
+        <a class="btn ghost" href={href('doctor/')}>Analyze package.json</a>
+      </p>
+    </div>
+    <img src={`${BASE}flow-diagram.png`} alt="react-brain flow: project inputs (package.json, code signals) feed the analysis engine (knowledge graph + article database), producing production-grade recommendations, a health score, and a decision matrix" style="width:100%; border-radius:8px; border:1px solid var(--line)" />
+  </div>
+
+  <h2>Recently updated</h2>
+  <div class="grid">
+    {recent.map((e) => (
+      <a class="card" href={href(`entries/${e.slug}/`)} style="text-decoration:none; color:inherit; margin:0">
+        <p style="margin:0; display:flex; justify-content:space-between; gap:.5rem; align-items:baseline">
+          <strong style="font-family:var(--font-head); color:var(--bright)">{e.slug}</strong>
+          <span class={`badge ${e.status}`}>{e.status}</span>
+        </p>
+        <p class="meta" style="margin:.3rem 0">{e.group} · verified {String(e.updated)}</p>
+        <p class="muted" style="margin:.3rem 0 0; font-size:.9rem">{e.topic}</p>
+      </a>
+    ))}
   </div>
 
   <h2>Browse by decision</h2>
   {groups.map((g) => (
     <div class="card">
-      <h3 style="margin-top:0">{g.label}</h3>
-      <p style="margin:.2rem 0 0">
+      <h3 style="margin:0 0 .1rem">{g.label} <span class="badge">{g.entries.length}</span></h3>
+      <p style="margin:.25rem 0 0">
         {g.entries.map((id, i) => {
           const e = entries.find((x) => x.id === id);
           return e && (<span>{i > 0 && ' · '}<a href={href(`entries/${e.slug}/`)}>{e.slug}</a></span>);
@@ -32,17 +60,29 @@ const high = sc?.tiers?.high;
     </div>
   ))}
 
-  <h2>What makes it different</h2>
-  <ul>
-    <li><strong>Decisions, not articles.</strong> Pages are organized by the choice you're making
-      (state, data, navigation, maps…) — the great articles are cited as evidence on each page and
-      <a href={href("reading/")}>linked to the originals</a>.</li>
-    <li><strong>A published track record.</strong> Every default is a dated, falsifiable prediction;
-      challenges and live npm data resolve them. See the <a href={href("scorecard/")}>scorecard</a>.</li>
-    <li><strong>It runs.</strong> The same corpus powers a CLI (<code>npx react-brain doctor .</code>),
-      an MCP server for coding agents, the <a href={href("doctor/")}>in-browser doctor</a> (paste a
-      package.json → fit report), and a <a href={href("stack/")}>stack composer</a> for greenfield apps.</li>
-    <li><strong>Nothing is asserted casually.</strong> Verification, adversarial challenge, calibration,
-      live-npm signals — the whole process is documented in the <a href={href("methodology/")}>methodology</a>.</li>
-  </ul>
+  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr)); gap:1.5rem; align-items:start">
+    <div>
+      <h2>What makes it different</h2>
+      <ul>
+        <li><strong>Decisions, not articles.</strong> Pages are organized by the choice you're making —
+          the {readingCount} great articles are cited as evidence and
+          <a href={href('reading/')}>linked to the originals</a>.</li>
+        <li><strong>A published track record.</strong> Every default is a dated, falsifiable prediction;
+          challenges and live npm data resolve them on the <a href={href('scorecard/')}>scorecard</a>.</li>
+        <li><strong>It runs.</strong> The same corpus powers a CLI, an MCP server for coding agents,
+          the <a href={href('doctor/')}>in-browser doctor</a>, and a
+          <a href={href('stack/')}>stack composer</a> for greenfield apps.</li>
+        <li><strong>Nothing asserted casually</strong> — see the <a href={href('methodology/')}>methodology</a>.</li>
+      </ul>
+    </div>
+    <div class="card" style="margin-top:2.2rem">
+      <p class="label-caps" style="margin:0 0 .6rem; color:var(--muted)">Quick start</p>
+      <p class="meta" style="margin:.2rem 0">1 · analyze a repo</p>
+      <pre style="margin:.2rem 0 .8rem">npx react-brain doctor .</pre>
+      <p class="meta" style="margin:.2rem 0">2 · compose a greenfield stack</p>
+      <pre style="margin:.2rem 0 .8rem">npx react-brain stack --rn --expo</pre>
+      <p class="meta" style="margin:.2rem 0">3 · get a personalized learning path</p>
+      <pre style="margin:.2rem 0">npx react-brain learn .</pre>
+    </div>
+  </div>
 </Base>

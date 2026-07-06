@@ -15,26 +15,28 @@ const related = entries.filter((x) => x.group === e.group && x.id !== id);
 const doc = docHtml(e);
 ---
 <Base title={`react-brain — ${e.slug}`} description={e.topic}>
-  <p class="muted" style="margin-bottom:0"><a href={href('entries/')}>entries</a> / {e.group}</p>
+  <p class="meta" style="margin-bottom:0"><a href={href('entries/')}>entries</a> / {e.group} · verified {String(e.updated)} · {(e.platforms || []).join(' + ')}</p>
   <h1>{e.topic}</h1>
   <p>
     <span class={`badge ${e.status}`}>{e.status}</span>
     <span class={`badge ${e.confidence}`}>confidence: {e.confidence}</span>
     {tr && <span class={`badge ${tr}`}>track: {tr}</span>}
-    <span class="badge">platforms: {(e.platforms || []).join(' + ')}</span>
-    <span class="badge">verified: {String(e.updated)}</span>
   </p>
 
-  <div class="card">
-    <strong>Recommendation</strong>
+  <div class="card rec">
+    <p class="label-caps" style="margin:0; color:var(--ok)">Recommendation</p>
     <p style="margin:.4rem 0 0">{e.recommend?.default}</p>
     {e.recommend?.when?.length > 0 && (
       <ul class="muted" style="margin-top:.6rem">
         {e.recommend.when.map((w) => <li>{w}</li>)}
       </ul>
     )}
-    {e.confidence === 'low' && <p class="muted" style="margin:.4rem 0 0"><em>Low confidence — treat as a vetted lead and prototype before committing.</em></p>}
   </div>
+  {e.confidence === 'low' && (
+    <div class="card caution">
+      <p style="margin:0" class="muted"><strong style="color:var(--warn)">Low confidence</strong> — fast-moving or lightly-vetted domain: treat the pick as a vetted lead and prototype before committing.</p>
+    </div>
+  )}
 
   <h2>Options &amp; tradeoffs</h2>
   <div class="tbl"><table>

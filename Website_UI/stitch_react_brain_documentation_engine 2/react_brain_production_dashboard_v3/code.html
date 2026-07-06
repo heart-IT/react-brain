@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>React Brain - Decision engine for React &amp; React Native</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-container": "#6001d1",
+                      "on-surface-variant": "#bec8ce",
+                      "on-primary-container": "#fcfdff",
+                      "surface-tint": "#79d1fb",
+                      "secondary": "#d2bbff",
+                      "inverse-primary": "#006686",
+                      "on-secondary-fixed": "#25005a",
+                      "tertiary": "#ffb86a",
+                      "surface-container-lowest": "#0c0e12",
+                      "on-error": "#690005",
+                      "recommend-green": "#22C55E",
+                      "warning-orange": "#F59E0B",
+                      "tertiary-fixed": "#ffdcbc",
+                      "surface-container": "#1e2024",
+                      "on-surface": "#e2e2e8",
+                      "primary-fixed-dim": "#79d1fb",
+                      "on-primary-fixed-variant": "#004d66",
+                      "error": "#ffb4ab",
+                      "on-error-container": "#ffdad6",
+                      "surface-bright": "#37393e",
+                      "on-secondary-container": "#c9aeff",
+                      "surface-variant": "#333539",
+                      "on-secondary-fixed-variant": "#5a00c6",
+                      "inverse-on-surface": "#2f3035",
+                      "secondary-fixed-dim": "#d2bbff",
+                      "on-background": "#ffffff",
+                      "on-primary": "#003547",
+                      "on-tertiary-container": "#fffcff",
+                      "on-tertiary-fixed": "#2c1700",
+                      "experimental-purple": "#A855F7",
+                      "outline": "#889298",
+                      "link-blue": "#38BDF8",
+                      "surface-card": "#161B22",
+                      "avoid-red": "#EF4444",
+                      "outline-variant": "#3f484e",
+                      "background": "#0a0a0c",
+                      "error-container": "#93000a",
+                      "border-subtle": "#1e293b",
+                      "inverse-surface": "#e2e2e8",
+                      "on-tertiary": "#492900",
+                      "surface-container-highest": "#333539",
+                      "secondary-fixed": "#eaddff",
+                      "primary": "#79d1fb",
+                      "surface-container-low": "#111827",
+                      "tertiary-container": "#a46717",
+                      "surface-dim": "#111317",
+                      "primary-fixed": "#c0e8ff",
+                      "surface-container-high": "#1f2937",
+                      "primary-container": "#087ea4",
+                      "on-tertiary-fixed-variant": "#683d00",
+                      "text-muted": "#94A3B8",
+                      "tertiary-fixed-dim": "#ffb86a",
+                      "on-secondary": "#3f008e",
+                      "surface": "#0f1115",
+                      "on-primary-fixed": "#001e2b"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "stack-xl": "64px",
+                      "container-max": "1320px",
+                      "gutter": "24px",
+                      "sidebar-width": "280px",
+                      "stack-sm": "8px",
+                      "stack-lg": "32px",
+                      "stack-md": "16px",
+                      "base": "4px"
+              },
+              "fontFamily": {
+                      "body-lg": ["Inter"],
+                      "label-caps": ["Inter"],
+                      "headline-md": ["Hanken Grotesk"],
+                      "headline-lg-mobile": ["Hanken Grotesk"],
+                      "body-md": ["Inter"],
+                      "code-sm": ["JetBrains Mono"],
+                      "headline-xl": ["Hanken Grotesk"],
+                      "headline-lg": ["Hanken Grotesk"]
+              },
+              "fontSize": {
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                      "body-md": ["15px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "code-sm": ["13px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "headline-xl": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+        }
+        
+        .nav-scroller {
+            scrollbar-width: none; /* Firefox */
+        }
+        .nav-scroller::-webkit-scrollbar {
+            display: none; /* Chrome, Safari and Opera */
+        }
+        
+        /* Subtle grid background for hero */
+        .hero-bg {
+            background-image: 
+                linear-gradient(to right, theme('colors.border-subtle') 1px, transparent 1px),
+                linear-gradient(to bottom, theme('colors.border-subtle') 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: center top;
+            mask-image: radial-gradient(circle at center, black, transparent 80%);
+            -webkit-mask-image: radial-gradient(circle at center, black, transparent 80%);
+            opacity: 0.15;
+        }
+
+        /* Count up animation */
+        @keyframes countUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .count-up-animated {
+            animation: countUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const counters = document.querySelectorAll('.count-up');
+            const speed = 200; // The lower the slower
+
+            counters.forEach(counter => {
+                const animate = () => {
+                    const target = +counter.getAttribute('data-target');
+                    const count = +counter.innerText;
+                    const inc = target / speed;
+
+                    if (count < target) {
+                        counter.innerText = Math.ceil(count + inc);
+                        setTimeout(animate, 1);
+                    } else {
+                        counter.innerText = target;
+                    }
+                }
+                animate();
+            });
+        });
+    </script>
+</head>
+<body class="antialiased min-h-screen flex flex-col font-body-md">
+<!-- TopNavBar -->
+<header class="w-full sticky top-0 z-50 bg-surface-container-low dark:bg-surface-container-low border-b border-border-subtle dark:border-border-subtle shadow-sm">
+<div class="flex justify-between items-center max-w-container-max mx-auto px-gutter h-stack-xl">
+<!-- Brand -->
+<div class="flex items-center gap-stack-sm cursor-pointer">
+<span class="material-symbols-outlined text-primary-container" data-icon="hub">hub</span>
+<span class="font-headline-md text-headline-md font-bold text-white">React Brain</span>
+</div>
+<!-- Search (Center, Desktop) -->
+<div class="hidden md:flex flex-1 max-w-3xl mx-gutter">
+<div class="relative w-full group">
+<div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+<span class="material-symbols-outlined text-primary-container text-[20px]" data-icon="search">search</span>
+</div>
+<input class="block w-full p-2.5 pl-11 text-sm text-on-surface bg-surface-container-high border-2 border-border-subtle rounded-lg focus:ring-primary-container focus:border-primary-container hover:border-outline-variant placeholder-text-muted transition-colors shadow-sm" placeholder="Search React Compiler, Zustand, Forms..." type="text"/>
+<div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+<kbd class="hidden sm:inline-block px-2 py-1 text-xs font-code-sm font-semibold text-text-muted bg-surface-container border border-border-subtle rounded rounded-sm shadow-sm">⌘K</kbd>
+</div>
+</div>
+</div>
+<!-- Navigation Links & Actions -->
+<nav class="hidden md:flex items-center gap-stack-lg">
+<div class="flex items-center gap-stack-md">
+<a class="font-body-md text-body-md text-text-muted font-medium hover:text-white transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Doctor</a>
+<a class="font-body-md text-body-md text-text-muted font-medium hover:text-white transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Libraries</a>
+<a class="font-body-md text-body-md text-text-muted font-medium hover:text-white transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Reading</a>
+<a class="font-body-md text-body-md text-text-muted font-medium hover:text-white transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Scorecard</a>
+<a class="font-body-md text-body-md text-text-muted font-medium hover:text-white transition-colors duration-200 cursor-pointer active:opacity-80" href="#">GitHub</a>
+</div>
+<div class="flex items-center gap-stack-sm border-l border-border-subtle pl-stack-md">
+<button aria-label="Settings" class="text-text-muted hover:text-white transition-colors p-1">
+<span class="material-symbols-outlined text-[20px]" data-icon="settings">settings</span>
+</button>
+<button aria-label="Dark Mode" class="text-text-muted hover:text-white transition-colors p-1">
+<span class="material-symbols-outlined text-[20px]" data-icon="dark_mode">dark_mode</span>
+</button>
+</div>
+</nav>
+<!-- Mobile Menu Toggle -->
+<div class="md:hidden flex items-center gap-2">
+<button class="text-text-muted hover:text-white p-1">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</button>
+<button class="text-text-muted hover:text-white p-1">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+</div>
+</div>
+</header>
+<div class="flex flex-1 max-w-container-max mx-auto w-full relative">
+<!-- SideNavBar -->
+<aside class="hidden lg:flex flex-col border-r border-border-subtle overflow-y-auto w-sidebar-width h-[calc(100vh-64px)] sticky top-stack-xl bg-surface-container-low py-stack-md shrink-0">
+<div class="px-stack-md mb-stack-md">
+<h2 class="font-label-caps text-label-caps text-white font-headline-md tracking-wider">Documentation</h2>
+<p class="font-body-md text-body-md text-outline text-sm mt-1">React Ecosystem v18.0</p>
+</div>
+<nav class="flex-1 px-stack-sm space-y-1">
+<!-- Highlight none as active here since this is Home -->
+<a class="group flex items-center gap-stack-sm px-stack-md py-stack-sm font-label-caps text-label-caps text-white bg-surface-container-high border-l-2 border-primary-container transition-all rounded-r-lg" href="#">
+<span class="material-symbols-outlined text-[18px] text-primary-container" data-icon="menu_book">menu_book</span>
+<span class="font-semibold">Foundations</span>
+<span class="ml-auto text-[10px] bg-surface-variant px-1.5 py-0.5 rounded text-white group-hover:bg-surface-variant transition-colors">14</span>
+</a>
+<a class="group flex items-center gap-stack-sm px-stack-md py-stack-sm font-label-caps text-label-caps text-text-muted hover:text-white hover:bg-surface-container-high hover:border-l-2 hover:border-outline-variant border-l-2 border-transparent transition-all rounded-r-lg" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="account_tree">account_tree</span>
+<span>Architecture</span>
+<span class="ml-auto text-[10px] bg-surface-container-high px-1.5 py-0.5 rounded text-outline group-hover:bg-surface-variant transition-colors">8</span>
+</a>
+<a class="group flex items-center gap-stack-sm px-stack-md py-stack-sm font-label-caps text-label-caps text-text-muted hover:text-white hover:bg-surface-container-high hover:border-l-2 hover:border-outline-variant border-l-2 border-transparent transition-all rounded-r-lg" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="layers">layers</span>
+<span>UI</span>
+<span class="ml-auto text-[10px] bg-surface-container-high px-1.5 py-0.5 rounded text-outline group-hover:bg-surface-variant transition-colors">22</span>
+</a>
+<a class="group flex items-center gap-stack-sm px-stack-md py-stack-sm font-label-caps text-label-caps text-text-muted hover:text-white hover:bg-surface-container-high hover:border-l-2 hover:border-outline-variant border-l-2 border-transparent transition-all rounded-r-lg" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="smartphone">smartphone</span>
+<span>Native</span>
+<span class="ml-auto text-[10px] bg-surface-container-high px-1.5 py-0.5 rounded text-outline group-hover:bg-surface-variant transition-colors">6</span>
+</a>
+<a class="group flex items-center gap-stack-sm px-stack-md py-stack-sm font-label-caps text-label-caps text-text-muted hover:text-white hover:bg-surface-container-high hover:border-l-2 hover:border-outline-variant border-l-2 border-transparent transition-all rounded-r-lg" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="construction">construction</span>
+<span>Build</span>
+<span class="ml-auto text-[10px] bg-surface-container-high px-1.5 py-0.5 rounded text-outline group-hover:bg-surface-variant transition-colors">11</span>
+</a>
+</nav>
+<div class="mt-auto px-stack-sm pt-stack-md space-y-1">
+<a class="group flex items-center gap-stack-sm px-stack-md py-stack-sm font-label-caps text-label-caps text-text-muted hover:text-white hover:bg-surface-container-high border-l-2 border-transparent transition-all rounded-r-lg" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="history">history</span>
+<span>Changelog</span>
+</a>
+<a class="group flex items-center gap-stack-sm px-stack-md py-stack-sm font-label-caps text-label-caps text-text-muted hover:text-white hover:bg-surface-container-high border-l-2 border-transparent transition-all rounded-r-lg" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="help_outline">help_outline</span>
+<span>Support</span>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 w-full min-w-0 px-gutter md:px-stack-lg py-stack-lg flex flex-col gap-stack-lg relative bg-background">
+<!-- Hero Section -->
+<section class="relative pt-12 pb-10 flex flex-col lg:flex-row items-center gap-stack-lg">
+<div class="absolute inset-0 hero-bg pointer-events-none -z-10"></div>
+<div class="flex-1 flex flex-col items-start gap-stack-md w-full">
+<h1 class="font-headline-xl text-headline-xl md:text-[64px] md:leading-[72px] font-extrabold text-white tracking-tight">
+                    React Brain
+                </h1>
+<p class="font-body-lg text-body-lg text-text-muted max-w-3xl mt-2 mb-6">
+                    Decision engine for React &amp; React Native. Navigate the ecosystem with high-signal, verified architectural decisions.
+                </p>
+<!-- Quick Stats -->
+<div class="flex flex-wrap gap-4 mb-6">
+<div class="group flex flex-col gap-1 bg-surface-container-low border border-border-subtle hover:border-outline-variant hover:-translate-y-0.5 transition-all duration-200 px-4 py-3 rounded-lg shadow-sm cursor-pointer min-w-[140px]">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container text-[16px]" data-icon="fact_check">fact_check</span>
+<span class="font-code-sm text-code-sm text-text-muted">Decisions</span>
+</div>
+<div class="flex items-end justify-between mt-1">
+<span class="font-headline-lg text-white font-bold count-up-animated"><span class="count-up" data-target="37">0</span></span>
+<span class="text-[10px] text-link-blue opacity-0 group-hover:opacity-100 transition-opacity font-medium">Browse all →</span>
+</div>
+</div>
+<div class="group flex flex-col gap-1 bg-surface-container-low border border-border-subtle hover:border-outline-variant hover:-translate-y-0.5 transition-all duration-200 px-4 py-3 rounded-lg shadow-sm cursor-pointer min-w-[140px]">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-recommend-green text-[16px]" data-icon="verified">verified</span>
+<span class="font-code-sm text-code-sm text-text-muted">Verified</span>
+</div>
+<div class="flex items-end justify-between mt-1">
+<span class="font-headline-lg text-white font-bold count-up-animated"><span class="count-up" data-target="98">0</span></span>
+<span class="text-[10px] text-link-blue opacity-0 group-hover:opacity-100 transition-opacity font-medium">Browse all →</span>
+</div>
+</div>
+<div class="group flex flex-col gap-1 bg-surface-container-low border border-border-subtle hover:border-outline-variant hover:-translate-y-0.5 transition-all duration-200 px-4 py-3 rounded-lg shadow-sm cursor-pointer min-w-[140px]">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary text-[16px]" data-icon="library_books">library_books</span>
+<span class="font-code-sm text-code-sm text-text-muted">Libraries</span>
+</div>
+<div class="flex items-end justify-between mt-1">
+<span class="font-headline-lg text-white font-bold count-up-animated"><span class="count-up" data-target="120">0</span></span>
+<span class="text-[10px] text-link-blue opacity-0 group-hover:opacity-100 transition-opacity font-medium">Browse all →</span>
+</div>
+</div>
+<div class="group flex flex-col gap-1 bg-surface-container-low border border-border-subtle hover:border-outline-variant hover:-translate-y-0.5 transition-all duration-200 px-4 py-3 rounded-lg shadow-sm cursor-pointer min-w-[140px]">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-experimental-purple text-[16px]" data-icon="query_stats">query_stats</span>
+<span class="font-code-sm text-code-sm text-text-muted">Accuracy</span>
+</div>
+<div class="flex items-end justify-between mt-1">
+<span class="font-headline-lg text-white font-bold count-up-animated"><span class="count-up" data-target="80">0</span>%</span>
+<span class="text-[10px] text-link-blue opacity-0 group-hover:opacity-100 transition-opacity font-medium">Browse all →</span>
+</div>
+</div>
+</div>
+<!-- CTAs -->
+<div class="flex flex-col sm:flex-row gap-4 mt-2">
+<button class="bg-primary hover:bg-primary-fixed-dim text-on-primary font-body-md font-semibold px-6 py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm">
+                        Browse Entries
+                        <span class="material-symbols-outlined text-[18px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+<button class="bg-transparent hover:bg-surface-container-high border border-border-subtle text-white font-body-md font-medium px-6 py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-primary-container" data-icon="analytics">analytics</span>
+                        Analyze package.json
+                    </button>
+</div>
+</div>
+<!-- Hero Image -->
+<div class="hidden lg:flex w-full max-w-[500px] justify-end mix-blend-screen opacity-90 rounded-xl overflow-hidden border border-border-subtle">
+<img alt="A technical flow diagram for React Brain. Left side: 'Project Inputs' (package.json, code signals). Middle: 'Analysis Engine' (Knowledge Graph, Article Database). Right side: 'Outcomes' (Production-grade Recommendations, Health Score, Decision Matrix). Style: minimal line art, slate and cyan color palette, professional technical documentation aesthetic, high contrast dark mode." class="w-full h-auto object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBhvKkeWmFxfpiVPYCM-c1QNDGkfKWCoiT7iDByMe1RLkv3Rq-MMW9JTc53PG0lOsQOuaRIIr7YnxhQR89HY6Y3VQUINOwqAgdGk1PmlwqLKJleAgpyyxXYf5VJ_BWLv5zr-4T2xJat6soBK7Jc1E3haHjk6CwuoyXgZaz9t63zG_dz2QfEvb_HdiOs4CseWkKTudDGq33U1EG5QyPUF7DHuvkFhTe7YTL4qJkR_PhA8d-Nn7iDWVwjpOuTcTyH_qt1Z5eeXwx8LHyN"/>
+</div>
+</section>
+<!-- Grid Content Area -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter pt-4">
+<!-- Left Column: Recently Updated (2/3 width on LG) -->
+<section class="lg:col-span-2 space-y-6">
+<div class="flex items-center justify-between pb-2">
+<h2 class="font-headline-md text-headline-md text-white flex items-center gap-2 font-bold tracking-tight">
+<span class="material-symbols-outlined text-primary-container text-[24px]" data-icon="update">update</span>
+                            Recently Updated
+                        </h2>
+<a class="text-sm font-medium text-link-blue hover:underline" href="#">View all →</a>
+</div>
+<div class="space-y-4">
+<!-- Card 1 -->
+<div class="group bg-surface-container-low border border-border-subtle rounded-xl p-5 hover:border-primary-container hover:shadow-lg hover:-translate-y-[2px] transition-all duration-300 cursor-pointer relative overflow-hidden">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline-md text-xl font-bold text-white group-hover:text-primary-container transition-colors tracking-tight">React Compiler</h3>
+<span class="inline-flex items-center gap-1 text-xs font-medium text-recommend-green bg-recommend-green/10 border border-recommend-green/20 px-2.5 py-1 rounded-full">
+<span class="material-symbols-outlined text-[14px]" data-icon="verified">verified</span>
+                                High Confidence
+                            </span>
+</div>
+<div class="flex items-center gap-3 mb-4 text-[13px] text-text-muted font-code-sm">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]" data-icon="schedule">schedule</span> 7 min read</span>
+<span>•</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]" data-icon="folder">folder</span> React Core</span>
+<span>•</span>
+<span class="text-recommend-green">Updated yesterday</span>
+</div>
+<p class="font-body-md text-body-md text-text-muted mb-4 line-clamp-2">Deep dive into Forget. Analysis of performance implications for large lists and memoization strategies.</p>
+<div class="flex items-center gap-3 mt-auto">
+<span class="inline-flex items-center gap-1 text-xs font-medium text-text-muted bg-surface-container-high px-2 py-1 rounded">
+                                    v19.0.0-rc
+                                </span>
+<span class="inline-flex items-center gap-1 text-xs font-medium text-text-muted bg-surface-container-high px-2 py-1 rounded">
+                                    Performance
+                                </span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="group bg-surface-container-low border border-border-subtle rounded-xl p-5 hover:border-primary-container hover:shadow-lg hover:-translate-y-[2px] transition-all duration-300 cursor-pointer relative overflow-hidden">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline-md text-xl font-bold text-white group-hover:text-primary-container transition-colors tracking-tight">React Native 0.83</h3>
+<span class="inline-flex items-center gap-1 text-xs font-medium text-link-blue bg-link-blue/10 border border-link-blue/20 px-2.5 py-1 rounded-full">
+<span class="material-symbols-outlined text-[14px]" data-icon="rate_review">rate_review</span>
+                                Reviewed
+                            </span>
+</div>
+<div class="flex items-center gap-3 mb-4 text-[13px] text-text-muted font-code-sm">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]" data-icon="schedule">schedule</span> 5 min read</span>
+<span>•</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]" data-icon="folder">folder</span> Architecture</span>
+<span>•</span>
+<span class="text-link-blue">Added 3 days ago</span>
+</div>
+<p class="font-body-md text-body-md text-text-muted mb-4 line-clamp-2">New architecture adoption metrics. Bridgeless mode defaults and impact on existing native modules.</p>
+<div class="flex items-center gap-3 mt-auto">
+<span class="inline-flex items-center gap-1 text-xs font-medium text-text-muted bg-surface-container-high px-2 py-1 rounded">
+                                    Native
+                                </span>
+<span class="inline-flex items-center gap-1 text-xs font-medium text-text-muted bg-surface-container-high px-2 py-1 rounded">
+                                    Migration
+                                </span>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="group bg-surface-container-low border border-border-subtle rounded-xl p-5 hover:border-primary-container hover:shadow-lg hover:-translate-y-[2px] transition-all duration-300 cursor-pointer relative overflow-hidden">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline-md text-xl font-bold text-white group-hover:text-primary-container transition-colors tracking-tight">Forms in Next.js 14</h3>
+<span class="inline-flex items-center gap-1 text-xs font-medium text-warning-orange bg-warning-orange/10 border border-warning-orange/20 px-2.5 py-1 rounded-full">
+<span class="material-symbols-outlined text-[14px]" data-icon="pending">pending</span>
+                                Draft
+                            </span>
+</div>
+<div class="flex items-center gap-3 mb-4 text-[13px] text-text-muted font-code-sm">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]" data-icon="schedule">schedule</span> 12 min read</span>
+<span>•</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]" data-icon="folder">folder</span> UI Patterns</span>
+<span>•</span>
+<span class="text-warning-orange">Updated 1 week ago</span>
+</div>
+<p class="font-body-md text-body-md text-text-muted mb-4 line-clamp-2">Comparison of React Hook Form vs Server Actions for form handling in Next.js 14.</p>
+<div class="flex items-center gap-3 mt-auto">
+<span class="inline-flex items-center gap-1 text-xs font-medium text-text-muted bg-surface-container-high px-2 py-1 rounded">
+                                    Next.js
+                                </span>
+<span class="inline-flex items-center gap-1 text-xs font-medium text-text-muted bg-surface-container-high px-2 py-1 rounded">
+                                    RHF
+                                </span>
+</div>
+</div>
+</div>
+</section>
+<!-- Right Column: Popular Topics & Quick Start (1/3 width on LG) -->
+<section class="space-y-8">
+<div>
+<div class="flex items-center justify-between pb-2 mb-4">
+<h2 class="font-headline-md text-headline-md text-white flex items-center gap-2 font-bold tracking-tight">
+<span class="material-symbols-outlined text-tertiary text-[24px]" data-icon="trending_up">trending_up</span>
+                                Popular Topics
+                            </h2>
+</div>
+<div class="flex flex-col gap-3">
+<a class="group flex flex-col p-3 rounded-lg border border-border-subtle bg-surface-container-low hover:border-primary-container hover:shadow-md hover:-translate-y-[1px] transition-all duration-200" href="#">
+<span class="font-semibold text-white group-hover:text-primary-container transition-colors">React Compiler</span>
+<span class="text-xs text-text-muted mt-1 font-code-sm">12 articles • High activity</span>
+</a>
+<a class="group flex flex-col p-3 rounded-lg border border-border-subtle bg-surface-container-low hover:border-primary-container hover:shadow-md hover:-translate-y-[1px] transition-all duration-200" href="#">
+<span class="font-semibold text-white group-hover:text-primary-container transition-colors">State Management</span>
+<span class="text-xs text-text-muted mt-1 font-code-sm">8 articles • Stable</span>
+</a>
+<a class="group flex flex-col p-3 rounded-lg border border-border-subtle bg-surface-container-low hover:border-primary-container hover:shadow-md hover:-translate-y-[1px] transition-all duration-200" href="#">
+<span class="font-semibold text-white group-hover:text-primary-container transition-colors">Data Fetching</span>
+<span class="text-xs text-text-muted mt-1 font-code-sm">15 articles • Trending</span>
+</a>
+<a class="group flex flex-col p-3 rounded-lg border border-border-subtle bg-surface-container-low hover:border-primary-container hover:shadow-md hover:-translate-y-[1px] transition-all duration-200" href="#">
+<span class="font-semibold text-white group-hover:text-primary-container transition-colors">Server Components</span>
+<span class="text-xs text-text-muted mt-1 font-code-sm">24 articles • Very High activity</span>
+</a>
+</div>
+</div>
+<!-- Quick Start Guide -->
+<div class="rounded-xl border border-border-subtle bg-surface-container/50 overflow-hidden shadow-sm hover:border-outline-variant transition-colors">
+<div class="flex items-center px-4 py-2 bg-surface-container-low/50">
+<span class="material-symbols-outlined text-text-muted text-[16px] mr-2" data-icon="rocket_launch">rocket_launch</span>
+<h3 class="font-medium text-text-muted text-sm tracking-wide">QUICK START</h3>
+</div>
+<div class="p-4 space-y-4">
+<div class="flex gap-3 items-start">
+<div class="w-5 h-5 rounded-md bg-surface-container-high flex items-center justify-center text-[10px] text-white font-bold border border-border-subtle shrink-0">1</div>
+<div>
+<p class="text-sm text-white font-medium">Install the CLI</p>
+<p class="text-xs text-text-muted font-code-sm mt-0.5">npm i -g react-brain-cli</p>
+</div>
+</div>
+<div class="flex gap-3 items-start">
+<div class="w-5 h-5 rounded-md bg-surface-container-high flex items-center justify-center text-[10px] text-white font-bold border border-border-subtle shrink-0">2</div>
+<div>
+<p class="text-sm text-white font-medium">Analyze your project</p>
+<p class="text-xs text-text-muted font-code-sm mt-0.5">rb analyze ./src</p>
+</div>
+</div>
+<div class="flex gap-3 items-start">
+<div class="w-5 h-5 rounded-md bg-surface-container-high flex items-center justify-center text-[10px] text-white font-bold border border-border-subtle shrink-0">3</div>
+<div>
+<p class="text-sm text-white font-medium">Review recommendations</p>
+<a class="text-xs text-link-blue hover:underline mt-0.5 inline-block" href="#">Read full guide →</a>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Footer / Trust Signals -->
+<footer class="mt-16 pt-8 pb-12 border-t border-border-subtle bg-surface-container-lowest">
+<div class="max-w-container-max mx-auto w-full">
+<div class="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
+<div class="flex items-center gap-6 text-xs font-code-sm text-outline">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]" data-icon="source">source</span>
+                            Sources reviewed: 142
+                        </span>
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]" data-icon="article">article</span>
+                            Articles analyzed: 700+
+                        </span>
+</div>
+<div class="flex items-center gap-2 text-xs font-code-sm text-outline bg-surface-container-low px-3 py-1.5 rounded-full border border-border-subtle">
+<span class="w-2 h-2 rounded-full bg-recommend-green animate-pulse"></span>
+                        Last corpus update: 2 hours ago
+                    </div>
+</div>
+<div class="flex flex-wrap gap-x-10 gap-y-4 text-sm font-medium text-text-muted justify-center md:justify-start">
+<a class="hover:text-primary-container transition-colors flex items-center gap-2" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="code">code</span> GitHub
+                    </a>
+<a class="hover:text-primary-container transition-colors flex items-center gap-2" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="forum">forum</span> Discord
+                    </a>
+<a class="hover:text-primary-container transition-colors flex items-center gap-2" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="volunteer_activism">volunteer_activism</span> Contributing
+                    </a>
+<a class="hover:text-primary-container transition-colors flex items-center gap-2" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="history_edu">history_edu</span> Changelog
+                    </a>
+<a class="hover:text-primary-container transition-colors flex items-center gap-2" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="map">map</span> Roadmap
+                    </a>
+</div>
+</div>
+</footer>
+</main>
+</div>
+</body></html>
