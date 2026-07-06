@@ -25,7 +25,7 @@ bash tools/install-cron.sh      # installs a Monday-09:00 weekly pulse, logs to 
 or by hand (crontab line it installs):
 
 ```cron
-0 9 * * 1  cd /Users/f1sh/odd-jobs/heartit/react-brain && /usr/bin/env node tools/cli.mjs pulse --today=$(date +\%F) ../ledgerhr ../ourpot ../bitbarter >> tools/pulse.log 2>&1
+0 9 * * 1  cd /Users/f1sh/odd-jobs/heartit/skills/react-brain && /usr/bin/env node tools/cli.mjs pulse --today=$(date +\%F) ../../ledgerhr ../../ourpot/ourpot ../../bitbarter >> tools/pulse.log 2>&1
 ```
 
 Read `tools/pulse.log` weekly; act on DEAD links + undated/aging entries + drift.
@@ -37,7 +37,7 @@ Runs the harvest + adversarial passes. Needs an LLM agent + the repo, so run it 
 
 ```sh
 # local headless run (example; adjust to your CLI):
-cd /Users/f1sh/odd-jobs/heartit/react-brain && claude -p "$(cat tools/upkeep-routine.md)"
+cd /Users/f1sh/odd-jobs/heartit/skills/react-brain && claude -p "$(cat tools/upkeep-routine.md)"
 ```
 
 The agent should, in order:
@@ -53,8 +53,12 @@ The agent should, in order:
 5. **Emit ONE reviewable delta** — dead links, undated/aging entries, drift, proposed new
    entries/reading/status-flips (with verified sources), new gaps, challenge verdicts. Order by
    leverage. Apply only the deterministic fixes automatically; queue knowledge changes for review.
-6. **Record** — append a one-line dated note to the memory file (issues processed, counts,
-   entries challenged) so the next run resumes cleanly.
+   Knowledge edits go in `skills/react-brain-mentor/entries/<ID>.yaml` (one file per entry; a NEW
+   entry = new file + a TOC slot in encyclopedia.yaml + `detect:`/`detect_source:` rows in the file).
+6. **Gate** — run `npm test` (lint invariants + the golden-fixture eval). A red gate means the
+   delta broke a corpus invariant or a known-good behavior; fix before recording.
+7. **Record** — append a one-line dated note to the memory file (issues processed, counts,
+   entries challenged) so the next run resumes cleanly, and commit the delta (repo is under git).
 
 ## Cadence
 

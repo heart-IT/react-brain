@@ -14,7 +14,7 @@ description: >
   "level up this codebase", evaluates an ecosystem choice, or wants a health read
   + roadmap for a React/RN project. For a pass/fail gate on a specific diff, use
   `review` instead.
-version: 0.2.0
+version: 0.3.0
 status: draft
 type: workflow
 scope: [function, module, component, system, project]
@@ -22,7 +22,7 @@ domains: [mentorship, architecture, performance, design_systems, testing, cross_
 languages: [js, ts, tsx, jsx]
 ---
 
-# react-brain Mentor (v0.2.0 — draft)
+# react-brain Mentor (v0.3.0 — draft)
 
 **Reference specification:** @react-brain-mentor.yaml
 **Encyclopedia index:** @encyclopedia.yaml
@@ -90,21 +90,26 @@ YAML's `output` section.
 
 ### The encyclopedia hook (how this grows)
 
-`encyclopedia.yaml` is the machine-readable index of the react-brain
-encyclopedia. As entries are written, update that file — move each along the
-`stub → drafted → reviewed` ladder, and (for long-form) add a matching
-`encyclopedia/<id>.md`. The mentor's breadth recommendations grow automatically;
-no other file changes. This is the "improve as time goes" mechanism: the mentor
-and the encyclopedia evolve together. Recommendations are **context-keyed**, not
-absolute — an entry says *"for server state at MVP+, X wins on invalidation,"*
-never *"X is best."*
+`encyclopedia.yaml` is the machine-readable **index** (meta + groups TOC +
+mentor_hints); each entry lives in its own file, `entries/<ID>.yaml`. As entries
+are written, edit only the entry's file — move it along the `stub → drafted →
+reviewed` ladder, and (for long-form) add a matching `encyclopedia/<id>.md`. A
+NEW entry = a new file + a TOC slot, with its `detect:` / `detect_source:`
+signals declared **in the entry itself** (the tools assemble their detection
+tables from them — no tool changes). Run `npm test` (lint invariants + golden
+eval) after any corpus edit. The mentor's breadth recommendations grow
+automatically. Recommendations are **context-keyed**, not absolute — an entry
+says *"for server state at MVP+, X wins on invalidation,"* never *"X is best."*
 
-**Current state (2026-06-25):** 34 entries across 6 groups, all `drafted`+ (0 stubs), 14
+**Current state (2026-07-06):** 37 entries across 6 groups, all `drafted`+ (0 stubs), 14
 `reviewed` with long-form `encyclopedia/<id>.md`, every entry with curated reading. Entries
-are reached two ways so none are orphaned: **cross-cutting** domains via the YAML's
-`assessment_dimensions`, and **feature/capability** domains via its `capability_map`
-(detected dep/need → entry) — so niche areas (media, payments, editors, charts, i18n,
-desktop, on-device AI…) are scanned only when the project actually has them.
+are reached two ways so none are orphaned (mechanized by `react-brain lint`): **cross-cutting**
+domains via the YAML's `assessment_dimensions`, and **feature/capability** domains via its
+`capability_map` (detected dep/need → entry) — so niche areas (media, maps, payments, editors,
+charts, i18n, desktop, on-device AI…) are scanned only when the project actually has them.
+For agents, the corpus is also consumable as **MCP tools** (`tools/mcp-server.mjs`: capsules /
+query / recommend / doctor / stack), and Phase 0 treats `react-brain doctor <repo> --json`
+as ground truth for platform/stage/deps.
 
 ## Relationship to existing skills
 

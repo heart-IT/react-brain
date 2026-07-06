@@ -12,7 +12,7 @@ keep the corpus *growing*, not just healthy. Wire it into `/schedule` (weekly). 
 
 ## Routine prompt
 
-You are the react-brain weekly pulse. Working dir: `~/odd-jobs/heartit/react-brain`.
+You are the react-brain weekly pulse. Working dir: `~/odd-jobs/heartit/skills/react-brain`.
 Goal: keep the encyclopedia fresh + growing and watch the heartit apps for drift.
 **Guardrail: PROPOSE knowledge changes as a reviewable delta; do NOT silently rewrite
 recommendations/status. Deterministic fixes (dead-link removal, adding an `updated:`

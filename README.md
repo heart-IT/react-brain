@@ -24,10 +24,19 @@ command, one verb per moment of a project's life (see [`tools/`](tools/)):
 | verb | command | moment |
 |------|---------|--------|
 | **choose** | `react-brain stack --rn --expo --p2p` | greenfield — compose a stack from intent, no repo |
-| **assess** | `react-brain doctor .` | you have a stack — fit vs the encyclopedia |
+| **assess** | `react-brain doctor .` (`--json` for agents) | you have a stack — fit vs the encyclopedia + source signals |
 | **master** | `react-brain learn .` | own it — a repo-personalized learning path |
 | query | `react-brain query "data fetching"` | look up one entry's recommendation |
-| *(corpus upkeep)* | `evidence` · `pulse` · `calibrate` · `signals` | self-audit · freshness · scored track record · live-npm reality check |
+| *(corpus upkeep)* | `evidence` · `pulse` · `calibrate` · `signals` · `lint` | self-audit · freshness · scored track record · live-npm reality check · mechanized invariants |
+
+**For agents (MCP):** `tools/mcp-server.mjs` serves the corpus as MCP tools — `capsules`
+(compact index) / `query` / `recommend` / `doctor` / `stack` — zero-dep stdio; `.mcp.json`
+wires it for Claude Code here, or `claude mcp add react-brain -- node <repo>/tools/mcp-server.mjs`.
+
+**Quality gate:** `npm test` = `lint` (schema, TOC, mentor-reachability, dup-URL, detect
+invariants) + `tests/eval.mjs` (golden fixtures asserting detection/fit/signals/routing/stack/MCP).
+Run after any corpus edit. Layout: `encyclopedia.yaml` is the index; entries live one-per-file
+in `skills/react-brain-mentor/entries/<ID>.yaml`, each owning its `detect:`/`detect_source:` signals.
 
 `stack`/`doctor`/`learn` share one intent-resolver + detection core, so they never
 disagree about what a recommendation means.

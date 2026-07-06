@@ -1,24 +1,28 @@
 # react-brain tools
 
-The **executable** layer of react-brain: the encyclopedia (`../skills/react-brain-mentor/
-encyclopedia.yaml`) is machine-readable knowledge; these tools *run* it against real code,
-let it *learn* from real code, and keep it *alive* over time. All share one detection core,
-so there is no drift between them.
+The **executable** layer of react-brain: the encyclopedia (index `../skills/react-brain-mentor/
+encyclopedia.yaml` + one file per entry in `../skills/react-brain-mentor/entries/`) is
+machine-readable knowledge; these tools *run* it against real code, let it *learn* from real
+code, and keep it *alive* over time. All share one detection core, so there is no drift
+between them.
 
 ```
-detect.mjs   ── shared core: encyclopedia loader + detection table + fit + intent resolver
+detect.mjs   ── shared core: encyclopedia loader + detection (deps + source) + intent resolver
 stack        ── knowledge → new project  (compose a greenfield stack from intent)
-doctor       ── knowledge → code   (advise an existing repo)
+doctor       ── knowledge → code   (advise an existing repo; --json for agents)
 evidence     ── code → knowledge   (correct the corpus from real repos)
 pulse        ── time / autonomy    (keep the corpus healthy + watch for drift)
 calibrate    ── trust / track record (score the corpus's predictions vs its confidence)
 signals      ── trust / empirical  (recommendations vs live npm downloads + staleness)
 learn        ── knowledge → human  (a repo-personalized learning path)
+lint         ── trust / invariants (mechanized corpus schema + reachability checks)
+mcp-server   ── distribution       (the corpus as MCP tools for any coding agent)
 ```
 
-> YAML is loaded via a `python3 + pyyaml` shim (swap for `npm i yaml` to be dep-clean).
-> The detection table lives in `detect.mjs`; the production step is migrating it into
-> per-entry `detect:` fields in the YAML so it's fully data-driven.
+> YAML loads via the `yaml` npm dep (python3+pyyaml shim as zero-install fallback). The
+> detection table is fully data-driven: each entry declares its own `detect:` (package
+> signals) and `detect_source:` (regex signals over repo source) — adding an entry never
+> touches the tools. `npm test` = `lint` + the golden-fixture eval (`../tests/eval.mjs`).
 
 ## `react-brain-stack.mjs` — knowledge → new project
 The **forward** direction the suite was missing. Every other tool is retrospective (it reads
@@ -44,10 +48,14 @@ client state; RN 0.83→0.86).
 ## `react-brain-doctor.mjs` — knowledge → code
 Reads a repo's `package.json`, maps actual deps to encyclopedia entries, and reports
 current-choice vs the entry's context recommendation (fit: ✓ aligned / ~ contextual /
-↗ review), plus gaps and a cross-app matrix. Deterministic; complements the LLM mentor
-(which owns the judgment dimensions: architecture, a11y, testing depth, security).
+↗ review), plus gaps, a MODERNIZATION scan (legacy core RN APIs → modern swaps, from
+modern-defaults.yaml), **SOURCE SIGNALS** (entry-owned `detect_source:` regexes — the smells
+a dep-scan can't see: ScrollView rendering a mapped array, secrets in AsyncStorage,
+fetch-in-useEffect, no error boundary at production stage), and a cross-app matrix.
+Deterministic; complements the LLM mentor (which owns the judgment dimensions).
 ```sh
-node tools/react-brain-doctor.mjs ../ledgerhr ../ourpot ../bitbarter
+node tools/react-brain-doctor.mjs ../../ledgerhr ../../ourpot/ourpot ../../bitbarter
+node tools/react-brain-doctor.mjs . --json     # machine-readable — agents / mentor Phase 0
 ```
 
 ## `react-brain-evidence.mjs` — code → knowledge
@@ -159,6 +167,34 @@ ledger as a `weakened` verdict (propose-only without the flag, per the project e
 the note carries the evidence). It's CLAIM-only — TRAILING/STALE are softer and stay printed. So
 a live-data divergence flows straight into the track record and then surfaces inline (`track: ~
 weakened`) in `stack`/`doctor`/`learn`: **live npm → calibrate → every recommendation.**
+
+## `react-brain-lint.mjs` — trust / invariants
+Every structural rule that used to live in session discipline, mechanized and offline:
+per-entry schema (required fields, status/confidence enums, `reviewed` ⇒ doc + sources,
+doc file exists, the every-entry-has-reading invariant), TOC consistency, **reachability**
+(every category visible to the mentor via assessment_dimensions ∪ capability_map — the
+orphan check), detect-pkg uniqueness across entries, `detect_source` regexes compile,
+duplicate URLs within a list, and stale count claims in prose (warns). Exit 1 on errors.
+Run after **any** corpus edit; `npm test` runs it first.
+```sh
+node tools/react-brain-lint.mjs        # or: npx react-brain lint · npm run lint
+```
+
+## `mcp-server.mjs` — distribution / agents
+The encyclopedia as **MCP tools** for any coding agent (zero-dep stdio JSON-RPC — no SDK).
+`capsules` (a ~40-line orientation index — the token-efficient way in), `query` (one full
+entry on demand), `recommend` (context-resolved via the shared resolver), `doctor` (repo
+analysis as JSON), `stack` (greenfield plan). `.mcp.json` registers it for Claude Code in
+this repo; anywhere else:
+```sh
+claude mcp add react-brain -- node <repo>/tools/mcp-server.mjs
+```
+
+## `../tests/eval.mjs` — golden-fixture eval (quality regression)
+Turns "the dry-run looked right" into assertions that run on every change: four committed
+fixtures (rn-smells, web-clean, p2p-pear, prod-no-boundary) checked via `doctor --json`
+(detection, fit, signals, stage heuristic, absent-rules), plus search routing, intent
+resolution (DATA+p2p → n/a), stack composition, and the MCP handshake. `npm test` = lint + eval.
 
 ## `challenge-routine.md` — adversarial validation (correctness)
 The judgment check: a challenger steelmans the case *against* each recommendation and tests
