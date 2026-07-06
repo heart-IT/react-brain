@@ -1,0 +1,7 @@
+{
+  "name": "rn-smells", "version": "0.1.0",
+  "dependencies": {
+    "react": "19.2.0", "react-native": "0.86.0",
+    "react-native-maps": "1.29.0", "@rnmapbox/maps": "10.3.2", "zustand": "5.0.0"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "prod-no-boundary", "version": "1.2.0", "private": true,
+  "scripts": { "test": "jest" },
+  "dependencies": { "react": "19.2.0", "react-native": "0.86.0" },
+  "devDependencies": { "typescript": "5.9.0", "eslint": "9.0.0", "husky": "9.0.0", "jest": "30.0.0" }
+}
