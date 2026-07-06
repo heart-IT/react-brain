@@ -12,7 +12,7 @@ const count = entries.reduce((n, e) => n + (e.reading?.length || 0), 0);
   canonical explanation for its topic; how-to content routes to depth skills instead.</p>
   <nav aria-label="Jump to group" style="display:flex; flex-wrap:wrap; gap:.45rem; margin:1rem 0 0">
     {groups.map((g) => (
-      <a href={`#${g.id}`} style="font-size:.85rem; padding:.35rem .7rem; background:var(--card); border:1px solid var(--line); border-radius:4px; text-decoration:none; color:var(--muted)">{g.label.split(' — ')[0].split(' (')[0]}</a>
+      <a href={`#${g.id}`} style="font-size:.85rem; padding:.35rem .7rem; background:var(--card); border:1px solid var(--line); border-radius:4px; text-decoration:none; color:var(--muted)">{g.label.split(' — ')[0].split(' (')[0]} <span style="opacity:.65">{g.entries.reduce((n, id) => n + (entries.find((x) => x.id === id)?.reading?.length || 0), 0)}</span></a>
     ))}
   </nav>
   {groups.map((g) => (

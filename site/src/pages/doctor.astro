@@ -10,7 +10,7 @@ const EXPECTED = {
 ---
 <Base title="react-brain — doctor (in browser)" description="Paste a package.json and get an ecosystem-fit report against the verified corpus — fully client-side.">
   <h1>Doctor <span class="badge">beta · runs in your browser</span></h1>
-  <p class="muted" style="max-width:44rem">Paste a <code>package.json</code> — your dependencies are matched
+  <p class="muted prose">Paste a <code>package.json</code> — your dependencies are matched
   against the encyclopedia's detection table, each detected choice is compared to the context-keyed
   recommendation, and expected-but-missing domains are flagged. Nothing leaves your browser. The full
   doctor (<code>npx react-brain doctor .</code>) adds what a browser can't: the legacy-API modernization
@@ -18,7 +18,11 @@ const EXPECTED = {
 
   <label for="pkg" class="label-caps" style="display:block; color:var(--muted); margin-bottom:.4rem">Your package.json</label>
   <textarea id="pkg" placeholder='{"dependencies": {"react": "19.2.0", "zustand": "5.0.0", ...}}'></textarea>
-  <p><button id="run">Analyze</button> <button id="copy" hidden>Copy report</button></p>
+  <p style="display:flex; gap:.7rem; align-items:center; flex-wrap:wrap">
+    <button id="run">Analyze</button>
+    <label class="btn ghost" style="cursor:pointer">Load a file<input id="file" type="file" accept=".json,application/json" style="display:none" /></label>
+    <button id="copy" hidden>Copy report</button>
+  </p>
   <div id="out" aria-live="polite"></div>
 
   <script is:inline define:vars={{ detectors, caps, EXPECTED, BASE }}>
@@ -90,6 +94,13 @@ const EXPECTED = {
       out.innerHTML = html;
       plainReport = lines.join('\n');
       document.getElementById('copy').hidden = false;
+    });
+
+    document.getElementById('file').addEventListener('change', async (ev) => {
+      const file = ev.target.files[0];
+      if (!file) return;
+      document.getElementById('pkg').value = await file.text();
+      document.getElementById('run').click();
     });
 
     document.getElementById('copy').addEventListener('click', async (ev) => {

@@ -15,6 +15,12 @@ rows.sort((a, b) => (b.weekly || 0) - (a.weekly || 0));
   Downloads are npm weekly figures from the corpus's last <code>signals</code> run — the same live
   check that keeps recommendations honest. A big number is popularity, <em>not</em> a verdict:
   click through to the entry for the context-keyed recommendation.</p>
+  <p>
+    <label for="lib-filter" class="label-caps" style="display:block; color:var(--muted); margin-bottom:.35rem">Filter</label>
+    <input id="lib-filter" type="search" placeholder="package, label, or decision…" autocomplete="off"
+      style="width:100%; max-width:26rem; background:var(--card); border:1px solid var(--line); border-radius:4px; padding:.5rem .7rem" />
+    <span id="lib-count" class="meta" style="margin-left:.7rem" aria-live="polite"></span>
+  </p>
   <div class="tbl"><table>
     <thead><tr><th>package</th><th>what the corpus calls it</th><th>decision</th><th>npm / week</th></tr></thead>
     <tbody>
@@ -28,4 +34,17 @@ rows.sort((a, b) => (b.weekly || 0) - (a.weekly || 0));
       ))}
     </tbody>
   </table></div>
+
+  <script is:inline>
+    const rows = [...document.querySelectorAll('tbody tr')].map((tr) => [tr, tr.textContent.toLowerCase()]);
+    const count = document.getElementById('lib-count');
+    const total = rows.length;
+    count.textContent = `${total} packages`;
+    document.getElementById('lib-filter').addEventListener('input', (e) => {
+      const q = e.target.value.trim().toLowerCase();
+      let shown = 0;
+      for (const [tr, text] of rows) { const hit = !q || text.includes(q); tr.hidden = !hit; if (hit) shown++; }
+      count.textContent = q ? `${shown} of ${total} packages` : `${total} packages`;
+    });
+  </script>
 </Base>

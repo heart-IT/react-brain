@@ -13,6 +13,20 @@ const tr = track()[id];
 const pkgs = (e.detect || []).filter((d) => !d.pkg.includes('*') && dl[d.pkg] != null);
 const related = entries.filter((x) => x.group === e.group && x.id !== id);
 const doc = docHtml(e);
+// sources render as host › path labels — raw URLs overflow small screens and are
+// miserable for screen readers; the full URL stays in href
+const srcLabel = (u) => {
+  try { const x = new URL(u); const p = x.pathname.replace(/\/$/, '');
+    return x.hostname.replace(/^www\./, '') + (p.length > 36 ? p.slice(0, 35) + '\u2026' : p); }
+  catch { return u; }
+};
+const toc = [
+  ['options', 'Options'],
+  e.note ? ['notes', 'Verified notes'] : null,
+  e.reading?.length ? ['reading', 'Reading'] : null,
+  e.sources?.length ? ['sources', 'Sources'] : null,
+  doc ? ['explanation', 'Full explanation'] : null,
+].filter(Boolean);
 ---
 <Base title={`react-brain — ${e.slug}`} description={e.topic} activeGroup={e.group}>
   <p class="meta" style="margin-bottom:0"><a href={href('entries/')}>entries</a> / <a href={href(`entries/#${e.group}`)} style="color:var(--muted)">{e.group}</a> · verified {String(e.updated)} · {(e.platforms || []).join(' + ')}</p>
@@ -22,6 +36,12 @@ const doc = docHtml(e);
     <span class={`badge ${e.confidence}`}>confidence: {e.confidence}</span>
     {tr && <span class={`badge ${tr}`}>track: {tr}</span>}
   </p>
+
+  <nav aria-label="On this page" style="display:flex; flex-wrap:wrap; gap:.45rem; margin:.4rem 0 0">
+    {toc.map(([id, label]) => (
+      <a href={`#${id}`} style="font-size:.82rem; padding:.3rem .65rem; background:var(--card); border:1px solid var(--line); border-radius:4px; text-decoration:none; color:var(--muted)">{label}</a>
+    ))}
+  </nav>
 
   <div class="card rec">
     <p class="label-caps" style="margin:0; color:var(--ok)">Recommendation</p>
@@ -38,7 +58,7 @@ const doc = docHtml(e);
     </div>
   )}
 
-  <h2>Options &amp; tradeoffs</h2>
+  <h2 id="options">Options &amp; tradeoffs</h2>
   <div class="tbl"><table>
     <thead><tr><th>option</th><th>tradeoff</th></tr></thead>
     <tbody>{(e.options || []).map((o) => <tr><td><strong>{o.name}</strong></td><td>{o.tradeoff}</td></tr>)}</tbody>
@@ -50,11 +70,11 @@ const doc = docHtml(e);
     </p>
   )}
 
-  {e.note && (<><h2>Verified notes</h2><p class="prose">{String(e.note).trim()}</p></>)}
+  {e.note && (<><h2 id="notes">Verified notes</h2><p class="prose">{String(e.note).trim()}</p></>)}
 
   {e.reading?.length > 0 && (
     <>
-      <h2>Canonical reading</h2>
+      <h2 id="reading">Canonical reading</h2>
       <p class="muted" style="font-size:.88rem">Editorial annotations on why each piece matters — the
       articles themselves are the originals; read them there.</p>
       {e.reading.map((r) => (
@@ -69,8 +89,8 @@ const doc = docHtml(e);
 
   {e.sources?.length > 0 && (
     <>
-      <h2>Sources</h2>
-      <ul>{e.sources.map((s) => <li><a href={s} rel="noopener">{s}</a></li>)}</ul>
+      <h2 id="sources">Sources</h2>
+      <ul>{e.sources.map((s) => <li><a href={s} rel="noopener">{srcLabel(s)}</a></li>)}</ul>
     </>
   )}
   {e.defer_to_skill && <p class="muted">Depth (in-domain rules) is owned by the <code>{e.defer_to_skill}</code> skill — this entry is selection breadth.</p>}

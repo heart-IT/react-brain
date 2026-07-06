@@ -1,0 +1,29 @@
+---
+import Base from '../layouts/Base.astro';
+import { corpus, href } from '../lib/corpus.js';
+const { groups, entries } = corpus();
+---
+<Base title="react-brain — page not found" description="That page doesn't exist — but the encyclopedia probably has what you were looking for.">
+  <div class="hero">
+    <p class="label-caps" style="color:var(--bad); margin:0">404 · not found</p>
+    <h1>No entry at this address.</h1>
+    <p class="muted prose">The page may have moved when the corpus was reorganized, or the URL has a
+    typo. Everything that exists is reachable from here:</p>
+    <p style="display:flex; gap:.7rem; flex-wrap:wrap">
+      <a class="btn" href={href('entries/')}>Browse all {entries.length} entries →</a>
+      <a class="btn ghost" href={href('search/')}>Search the corpus</a>
+    </p>
+  </div>
+  <h2>Or jump to a group</h2>
+  {groups.map((g) => (
+    <div class="card">
+      <h3 style="margin:0 0 .1rem">{g.label} <span class="badge">{g.entries.length}</span></h3>
+      <p style="margin:.25rem 0 0">
+        {g.entries.map((id, i) => {
+          const e = entries.find((x) => x.id === id);
+          return e && (<span>{i > 0 && ' · '}<a href={href(`entries/${e.slug}/`)}>{e.slug}</a></span>);
+        })}
+      </p>
+    </div>
+  ))}
+</Base>

@@ -4,10 +4,12 @@ import { corpus, scorecard, GITHUB, href } from '../lib/corpus.js';
 const sc = scorecard();
 const { byId } = corpus();
 const tierRows = ['high', 'medium', 'low'].map((t) => ({ t, ...sc.tiers[t] }));
+// ledger claims were stored truncated at 200 chars — show the cut honestly
+const claimText = (c) => /[.!?)\u2026\u201d"']$/.test(c.trim()) ? c : c + '\u2026';
 ---
 <Base title="react-brain — calibration scorecard">
   <h1>Calibration scorecard</h1>
-  <p class="muted" style="max-width:44rem">Every <code>recommend.default</code> in the encyclopedia is a
+  <p class="muted prose">Every <code>recommend.default</code> in the encyclopedia is a
   dated, falsifiable <strong>prediction</strong> with a check-by horizon (shorter for fast-moving,
   low-confidence domains). Adversarial challenges and live npm signals resolve them:
   <span class="badge held">held</span> = 1.0 · <span class="badge weakened">weakened</span> = 0.5 ·
@@ -39,7 +41,7 @@ const tierRows = ['high', 'medium', 'low'].map((t) => ({ t, ...sc.tiers[t] }));
           <span class="badge">{r.confidence}</span>
           <span class="muted" style="font-size:.85rem"> asserted {r.asserted} · resolved {r.outcome.on}</span>
         </p>
-        <p class="muted" style="margin:.4rem 0 0; font-size:.92rem">“{r.claim}”</p>
+        <p class="muted" style="margin:.4rem 0 0; font-size:.92rem">“{claimText(r.claim)}”</p>
         {r.outcome.note && <p style="margin:.4rem 0 0; font-size:.92rem">↳ {r.outcome.note}</p>}
       </div>
     );

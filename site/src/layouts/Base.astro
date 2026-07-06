@@ -130,6 +130,11 @@ const bottomLinks = [
       });
       pre.appendChild(b);
     }
+    // honest shortcut hint per platform (Ctrl+K works everywhere; the glyph is Mac-only)
+    if (!/Mac|iPhone|iPad/.test(navigator.platform)) {
+      const k = document.querySelector('.search kbd');
+      if (k) k.textContent = 'Ctrl K';
+    }
     document.addEventListener('keydown', (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
@@ -252,8 +257,10 @@ const bottomLinks = [
   .badge { display: inline-block; font: 600 .75rem/1.4 var(--font-body); text-transform: uppercase; letter-spacing: .05em; padding: .14em .55em; border-radius: 4px; color: var(--muted); background: color-mix(in srgb, var(--muted) 12%, transparent); vertical-align: middle; }
   .badge.reviewed, .badge.high, .badge.held { color: var(--ok); background: color-mix(in srgb, var(--ok) 12%, transparent); }
   .badge.drafted, .badge.medium, .badge.weakened { color: var(--warn); background: color-mix(in srgb, var(--warn) 12%, transparent); }
-  .badge.low, .badge.overturned { color: var(--bad); background: color-mix(in srgb, var(--bad) 12%, transparent); }
-  .badge.stub, .badge.beta { color: var(--exp); background: color-mix(in srgb, var(--exp) 12%, transparent); }
+  /* badge TEXT uses lightened variants — the base tokens measure 4.10:1 / 3.83:1
+     on the 12% tints at 12px, below AA; borders/bars keep the saturated tokens */
+  .badge.low, .badge.overturned { color: #F87171; background: color-mix(in srgb, var(--bad) 12%, transparent); }
+  .badge.stub, .badge.beta { color: #C084FC; background: color-mix(in srgb, var(--exp) 12%, transparent); }
 
   ul { padding-left: 1.2rem; }
   li { margin: .25rem 0; }
@@ -294,6 +301,15 @@ const bottomLinks = [
   .prose img { max-width: 100%; border-radius: 8px; }
   .prose h4 { font-size: .95rem; }
   .card p, .card ul { max-width: 78ch; }
+
+  @media print {
+    :root { --bg: #fff; --card: #f5f7f9; --code-bg: #f5f7f9; --line: #c8ccd2; --line-strong: #9aa1a9;
+      --fg: #111; --bright: #000; --muted: #444; --accent: #0645ad; }
+    html { color-scheme: light; }
+    header, aside, .mobile-nav, footer, .copy-btn, .skip, .search { display: none !important; }
+    .shell { display: block; }
+    a { text-decoration: underline; }
+  }
 
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
