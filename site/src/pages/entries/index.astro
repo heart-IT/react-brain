@@ -10,7 +10,7 @@ const tr = track();
   against primary sources + long-form explanation; <span class="badge drafted">drafted</span> = internally
   consistent, citable. Confidence is orthogonal — how settled the pick is.</p>
   {groups.map((g) => (
-    <section>
+    <section id={g.id}>
       <h2>{g.label}</h2>
       <table>
         <thead><tr><th>entry</th><th>topic</th><th>status</th><th>confidence</th><th>track</th><th>updated</th></tr></thead>

@@ -14,7 +14,15 @@ import { BASE } from '../lib/corpus.js';
   <script is:inline define:vars={{ BASE }}>
     const s = document.createElement('script');
     s.src = `${BASE}pagefind/pagefind-ui.js`;
-    s.onload = () => new PagefindUI({ element: '#search', showSubResults: true, pageSize: 8 });
+    s.onload = () => {
+      new PagefindUI({ element: '#search', showSubResults: true, pageSize: 8 });
+      // the top-bar search form lands here with ?q= — run it immediately
+      const q = new URLSearchParams(location.search).get('q');
+      if (q) setTimeout(() => {
+        const input = document.querySelector('#search input');
+        if (input) { input.value = q; input.dispatchEvent(new Event('input', { bubbles: true })); input.focus(); }
+      }, 60);
+    };
     s.onerror = () => { document.getElementById('search-hint').hidden = false; };
     document.head.appendChild(s);
   </script>

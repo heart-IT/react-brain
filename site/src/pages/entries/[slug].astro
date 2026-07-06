@@ -14,7 +14,7 @@ const pkgs = (e.detect || []).filter((d) => !d.pkg.includes('*') && dl[d.pkg] !=
 const related = entries.filter((x) => x.group === e.group && x.id !== id);
 const doc = docHtml(e);
 ---
-<Base title={`react-brain — ${e.slug}`} description={e.topic}>
+<Base title={`react-brain — ${e.slug}`} description={e.topic} activeGroup={e.group}>
   <p class="meta" style="margin-bottom:0"><a href={href('entries/')}>entries</a> / {e.group} · verified {String(e.updated)} · {(e.platforms || []).join(' + ')}</p>
   <h1>{e.topic}</h1>
   <p>
