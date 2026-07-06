@@ -15,7 +15,7 @@ const tierRows = ['high', 'medium', 'low'].map((t) => ({ t, ...sc.tiers[t] }));
   that keeps the word “confidence” honest — an assertion becomes a measurement.</p>
 
   <h2>Score by confidence tier</h2>
-  <table>
+  <div class="tbl"><table>
     <thead><tr><th>tier</th><th>predictions</th><th>resolved</th><th>held</th><th>weakened</th><th>overturned</th><th>score</th></tr></thead>
     <tbody>
       {tierRows.map((r) => (
@@ -26,7 +26,7 @@ const tierRows = ['high', 'medium', 'low'].map((t) => ({ t, ...sc.tiers[t] }));
         </tr>
       ))}
     </tbody>
-  </table>
+  </table></div>
 
   <h2>Resolved predictions</h2>
   {sc.resolved.map((r) => {

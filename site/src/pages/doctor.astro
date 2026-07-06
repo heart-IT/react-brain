@@ -16,9 +16,10 @@ const EXPECTED = {
   doctor (<code>npx react-brain doctor .</code>) adds what a browser can't: the legacy-API modernization
   scan and source-level signals.</p>
 
+  <label for="pkg" class="label-caps" style="display:block; color:var(--muted); margin-bottom:.4rem">Your package.json</label>
   <textarea id="pkg" placeholder='{"dependencies": {"react": "19.2.0", "zustand": "5.0.0", ...}}'></textarea>
   <p><button id="run">Analyze</button> <button id="copy" hidden>Copy report</button></p>
-  <div id="out"></div>
+  <div id="out" aria-live="polite"></div>
 
   <script is:inline define:vars={{ detectors, caps, EXPECTED, BASE }}>
     // ports of tools/detect.mjs matchDetector() + fit() — same table, same semantics

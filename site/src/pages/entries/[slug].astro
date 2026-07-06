@@ -15,7 +15,7 @@ const related = entries.filter((x) => x.group === e.group && x.id !== id);
 const doc = docHtml(e);
 ---
 <Base title={`react-brain — ${e.slug}`} description={e.topic} activeGroup={e.group}>
-  <p class="meta" style="margin-bottom:0"><a href={href('entries/')}>entries</a> / {e.group} · verified {String(e.updated)} · {(e.platforms || []).join(' + ')}</p>
+  <p class="meta" style="margin-bottom:0"><a href={href('entries/')}>entries</a> / <a href={href(`entries/#${e.group}`)} style="color:var(--muted)">{e.group}</a> · verified {String(e.updated)} · {(e.platforms || []).join(' + ')}</p>
   <h1>{e.topic}</h1>
   <p>
     <span class={`badge ${e.status}`}>{e.status}</span>
@@ -50,7 +50,7 @@ const doc = docHtml(e);
     </p>
   )}
 
-  {e.note && (<><h2>Verified notes</h2><p>{String(e.note).trim()}</p></>)}
+  {e.note && (<><h2>Verified notes</h2><p class="prose">{String(e.note).trim()}</p></>)}
 
   {e.reading?.length > 0 && (
     <>

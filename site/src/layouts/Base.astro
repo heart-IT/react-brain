@@ -54,10 +54,9 @@ const bottomLinks = [
         <kbd>⌘K</kbd>
       </form>
       <nav aria-label="Primary">
-        <a href={href('doctor/')}>Doctor</a>
-        <a href={href('libraries/')}>Libraries</a>
-        <a href={href('reading/')}>Reading</a>
-        <a href={href('scorecard/')}>Scorecard</a>
+        {[['doctor/', 'Doctor'], ['libraries/', 'Libraries'], ['reading/', 'Reading'], ['scorecard/', 'Scorecard']].map(([to, label]) => (
+          <a href={href(to)} class={path.startsWith(href(to)) ? 'active' : ''} aria-current={path.startsWith(href(to)) ? 'page' : undefined}>{label}</a>
+        ))}
         <a href={GITHUB} rel="noopener">GitHub</a>
       </nav>
     </div>
@@ -68,7 +67,7 @@ const bottomLinks = [
       <p class="label-caps side-head">Documentation</p>
       <p class="meta" style="margin:.1rem 0 .9rem">React ecosystem · corpus v{info.version}</p>
       {groups.map((g) => (
-        <a class={`side-item${activeGroup === g.id ? ' active' : ''}`} href={href(`entries/#${g.id}`)}>
+        <a class={`side-item${activeGroup === g.id ? ' active' : ''}`} aria-current={activeGroup === g.id ? 'location' : undefined} href={href(`entries/#${g.id}`)}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d={GLYPHS[g.id]} stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/></svg>
           <span>{g.label.split(' — ')[0].split(' (')[0]}</span>
           <span class="count">{g.entries.length}</span>
@@ -76,7 +75,7 @@ const bottomLinks = [
       ))}
       <div class="side-bottom">
         {bottomLinks.map((l) => (
-          <a class={`side-item${path.startsWith(href(l.to)) ? ' active' : ''}`} href={href(l.to)}>
+          <a class={`side-item${path.startsWith(href(l.to)) ? ' active' : ''}`} aria-current={path.startsWith(href(l.to)) ? 'page' : undefined} href={href(l.to)}>
             <span>{l.label}</span>
           </a>
         ))}
@@ -148,14 +147,15 @@ const bottomLinks = [
   .search input:focus { outline: none; box-shadow: none; border: 0; }
   .search kbd { font: 500 .7rem var(--font-mono); color: var(--muted); background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: .1em .4em; }
   header nav { margin-left: auto; display: flex; gap: 1.05rem; align-items: center; }
-  header nav a { color: var(--muted); text-decoration: none; font-size: .92rem; font-weight: 500; white-space: nowrap; }
+  header nav a { color: var(--muted); text-decoration: none; font-size: .92rem; font-weight: 500; white-space: nowrap; padding: .95rem .15rem; }
   header nav a:hover { color: var(--fg); }
+  header nav a.active { color: var(--bright); box-shadow: inset 0 -2px 0 var(--accent); }
 
   /* ── shell: sidebar + content ────────────────────────────────────────────── */
   .shell { max-width: 1500px; margin: 0 auto; display: grid; grid-template-columns: 250px minmax(0, 1fr); }
   aside { border-right: 1px solid var(--line); padding: 1.1rem .9rem 1.1rem 20px; position: sticky; top: var(--header-h); height: calc(100vh - var(--header-h)); overflow-y: auto; display: flex; flex-direction: column; }
   .side-head { color: var(--muted); margin: 0; }
-  .side-item { display: flex; align-items: center; gap: .55rem; color: var(--muted); text-decoration: none; font-size: .9rem; font-weight: 500; padding: .42rem .55rem; border-radius: 4px; border-left: 2px solid transparent; }
+  .side-item { display: flex; align-items: center; gap: .55rem; color: var(--muted); text-decoration: none; font-size: .9rem; font-weight: 500; padding: .6rem .55rem; border-radius: 4px; border-left: 2px solid transparent; }
   .side-item:hover { color: var(--fg); background: var(--card); }
   .side-item.active { color: var(--bright); background: var(--card); border-left-color: var(--accent); }
   .side-item .count { margin-left: auto; font: 500 .72rem var(--font-mono); color: var(--muted); background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: .05em .45em; }
@@ -206,7 +206,7 @@ const bottomLinks = [
   .card.caution { border-left: 3px solid var(--warn); }
 
   /* chips: high-contrast text on ~10% tinted background (never pills-with-borders) */
-  .badge { display: inline-block; font: 600 .72rem/1.4 var(--font-body); text-transform: uppercase; letter-spacing: .05em; padding: .14em .55em; border-radius: 4px; color: var(--muted); background: color-mix(in srgb, var(--muted) 12%, transparent); vertical-align: middle; }
+  .badge { display: inline-block; font: 600 .75rem/1.4 var(--font-body); text-transform: uppercase; letter-spacing: .05em; padding: .14em .55em; border-radius: 4px; color: var(--muted); background: color-mix(in srgb, var(--muted) 12%, transparent); vertical-align: middle; }
   .badge.reviewed, .badge.high, .badge.held { color: var(--ok); background: color-mix(in srgb, var(--ok) 12%, transparent); }
   .badge.drafted, .badge.medium, .badge.weakened { color: var(--warn); background: color-mix(in srgb, var(--warn) 12%, transparent); }
   .badge.low, .badge.overturned { color: var(--bad); background: color-mix(in srgb, var(--bad) 12%, transparent); }
@@ -249,4 +249,11 @@ const bottomLinks = [
   .prose h2 { font-size: 1.25rem; margin-top: 1.8rem; }
   .prose h3 { font-size: 1.05rem; }
   .prose img { max-width: 100%; border-radius: 8px; }
+  .prose h4 { font-size: .95rem; }
+  .card p, .card ul { max-width: 78ch; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+    html { scroll-behavior: auto !important; }
+  }
 </style>

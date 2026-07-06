@@ -105,6 +105,9 @@ export function docHtml(entry) {
   let md = readFileSync(p, 'utf8');
   md = md.replace(/^---[\s\S]*?\n---\n/, '');                  // frontmatter is index metadata
   let html = marked.parse(md);
+  // the essay renders INSIDE an entry page that already has its own h1 — demote
+  // every heading one level so the document keeps a single h1 and a clean outline
+  html = html.replace(/<(\/?)h3([ >])/g, '<$1h4$2').replace(/<(\/?)h2([ >])/g, '<$1h3$2').replace(/<(\/?)h1([ >])/g, '<$1h2$2');
   // cross-link sibling entries wherever the prose cites an id (RB-E-STATE → its page)
   const { byId } = corpus();
   html = html.replace(/RB-E-([A-Z0-9-]+)/g, (m, rest) => {

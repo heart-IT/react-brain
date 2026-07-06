@@ -15,7 +15,7 @@ rows.sort((a, b) => (b.weekly || 0) - (a.weekly || 0));
   Downloads are npm weekly figures from the corpus's last <code>signals</code> run — the same live
   check that keeps recommendations honest. A big number is popularity, <em>not</em> a verdict:
   click through to the entry for the context-keyed recommendation.</p>
-  <table>
+  <div class="tbl"><table>
     <thead><tr><th>package</th><th>what the corpus calls it</th><th>decision</th><th>npm / week</th></tr></thead>
     <tbody>
       {rows.map((r) => (
@@ -27,5 +27,5 @@ rows.sort((a, b) => (b.weekly || 0) - (a.weekly || 0));
         </tr>
       ))}
     </tbody>
-  </table>
+  </table></div>
 </Base>

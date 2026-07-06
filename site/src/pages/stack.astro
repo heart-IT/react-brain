@@ -36,7 +36,7 @@ const { recipe, stageRank, caps } = await stackData();
     <label><input type="checkbox" id="ssr" /> SSR / server-rendered</label>
   </fieldset>
   <p><button id="compose">Compose stack</button></p>
-  <div id="out"></div>
+  <div id="out" aria-live="polite"></div>
 
   <script is:inline define:vars={{ recipe, stageRank, caps, BASE }}>
     // port of detect.mjs resolveRecommendation (when-clause context matching)
