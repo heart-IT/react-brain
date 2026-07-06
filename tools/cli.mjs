@@ -31,7 +31,8 @@ usage: react-brain <command> [args]
   stack    [intent]    compose a greenfield stack from intent flags (no repo needed)
                        (flags: --rn|--web|--both, --expo, --p2p, --stage=…, --help)
   doctor   <repo...>   advise a repo: detected stack vs the encyclopedia's context recommendations
-                       + source scan for legacy core RN APIs → modern swaps (--no-scan, --files)
+                       + source scan for legacy core RN APIs → modern swaps + living-ADR premise
+                       checks (--no-scan, --files, --json, --ci = exit 1 on expired records)
   evidence <repo...>   corpus self-audit across repos: blind spots, contradictions, field evidence
   pulse    [repo...]   corpus health: dead links, stale entries, stack drift
                        (flags: --today=YYYY-MM-DD, --no-links)

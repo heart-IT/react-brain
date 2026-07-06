@@ -1,0 +1,158 @@
+---
+import Base from '../layouts/Base.astro';
+import { decideData, corpusInfo, href, BASE } from '../lib/corpus.js';
+const { groups, data } = decideData();
+const info = corpusInfo();
+---
+<Base title="react-brain — decision records" description="Generate an Architecture Decision Record with receipts: context-resolved pick, candidate table, evidence chain, and premises that react-brain doctor re-checks over time.">
+  <h1>Decision records <span class="badge">runs in your browser</span></h1>
+  <p class="muted prose">Turn a recommendation into the artifact your team reviews: an ADR with
+  <strong style="color:var(--fg)">receipts</strong> — the resolved context, the candidate table, sources with
+  verified-on dates, the pick's calibration track record — plus a machine-readable premise block.
+  Commit it to <code>docs/adr/</code> and <code>npx react-brain doctor . --ci</code> will tell you when the
+  premises move. <span class="muted">Nothing leaves your browser.</span></p>
+
+  <fieldset>
+    <legend>decision</legend>
+    <label for="entry">topic
+      <select id="entry">
+        {groups.map((g) => (
+          <optgroup label={g.label}>
+            {g.entries.map((id) => data[id] && <option value={id}>{data[id].slug} — {data[id].topic.slice(0, 60)}</option>)}
+          </optgroup>
+        ))}
+      </select>
+    </label>
+    <label>stage
+      <select id="stage">
+        <option value="prototype">prototype</option>
+        <option value="mvp" selected>mvp</option>
+        <option value="production">production</option>
+        <option value="scale">scale</option>
+      </select>
+    </label>
+    <label><input type="checkbox" id="rn" checked /> React Native</label>
+    <label><input type="checkbox" id="expo" checked /> Expo</label>
+    <label><input type="checkbox" id="p2p" /> P2P / Holepunch</label>
+  </fieldset>
+  <details style="margin:.8rem 0">
+    <summary class="meta" style="cursor:pointer">optional: paste package.json to auto-fill context + detect your current choice</summary>
+    <textarea id="pkg" style="margin-top:.5rem" placeholder='{"dependencies": {...}}'></textarea>
+  </details>
+  <p style="display:flex; gap:.7rem; flex-wrap:wrap">
+    <button id="gen">Generate record</button>
+    <button id="copy" class="ghost" hidden>Copy markdown</button>
+    <a id="dl" class="btn ghost" hidden download>Download .md</a>
+  </p>
+  <div id="out" aria-live="polite"></div>
+
+  <script is:inline define:vars={{ data, version: info.version, BASE }}>
+    const $ = (id) => document.getElementById(id);
+    const today = new Date().toISOString().slice(0, 10);
+    const fmt = (n) => (n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? Math.round(n / 1e3) + 'k' : String(n));
+    let deps = null;
+
+    $('pkg').addEventListener('input', () => {
+      try {
+        const pkg = JSON.parse($('pkg').value);
+        deps = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) };
+        $('rn').checked = 'react-native' in deps || 'expo' in deps;
+        $('expo').checked = 'expo' in deps;
+        $('p2p').checked = Object.keys(deps).some((d) => /^hyper|^autobase$|^corestore$|^hrpc$/.test(d));
+      } catch { deps = null; }
+    });
+
+    // same resolver the CLI uses (ported)
+    const resolve = (e, tokens) => {
+      const t = tokens.map((x) => x.toLowerCase());
+      for (const clause of e.when || []) {
+        const i = clause.indexOf('→'); if (i < 0) continue;
+        const ctx = clause.slice(0, i).trim(), choice = clause.slice(i + 1).trim();
+        if (t.some((tok) => ctx.toLowerCase().includes(tok)))
+          return { why: choice, ctx, via: 'when' };
+      }
+      return { why: e.def, ctx: 'default', via: 'default' };
+    };
+
+    $('gen').addEventListener('click', () => {
+      const e = data[$('entry').value];
+      const tokens = [];
+      if ($('rn').checked) tokens.push($('expo').checked ? 'expo app' : 'bare rn');
+      if ($('expo').checked) tokens.push('expo');
+      if ($('p2p').checked) tokens.push('p2p', 'holepunch', 'serverless');
+      tokens.push($('stage').value);
+      const r = resolve(e, tokens);
+      const current = deps ? e.pkgs.filter((p) => p.pkg in deps).map((p) => p.pkg) : [];
+      const dlLine = e.pkgs.filter((p) => p.dl != null).sort((a, b) => b.dl - a.dl).slice(0, 6)
+        .map((p) => '`' + p.pkg + '` ' + fmt(p.dl)).join(' · ');
+
+      const md = `---
+adr: 0                      # renumber to the next NNN in your docs/adr/
+title: ${JSON.stringify(e.topic)}
+status: proposed            # → accepted | superseded (edit after team review)
+date: ${today}
+react_brain:                # machine-readable premises — \`react-brain doctor\` re-checks these
+  entry: ${e.id}
+  entry_status: ${e.status}
+  confidence: ${e.confidence}
+  entry_updated: ${e.updated}
+  resolved_via: ${r.via}${r.via === 'when' ? '\n  matched_context: ' + JSON.stringify(r.ctx) : ''}
+  prediction_check_by: ${e.check_by || 'null'}
+  corpus_version: ${version}
+---
+
+# ${e.topic}
+
+## Context
+
+${current.length ? 'Current choice detected: **' + current.join(', ') + '**.' : 'Fresh pick — nothing detected for this domain yet.'}
+Context tokens resolved against the corpus: \`${tokens.join('\`, \`')}\`.
+
+## Decision
+
+${r.why}
+
+${r.via === 'when' ? '*(Resolved via the context clause: "' + r.ctx + ' → …")*' : "*(Resolved via the entry's default — no context clause overrode it.)*"}
+${e.confidence === 'low' ? '\n> ⚠ **Low confidence** — fast-moving domain. Prototype before committing.\n' : ''}
+## Options considered
+
+| option | tradeoff |
+|---|---|
+${e.options.map((o) => '| **' + o.name + '** | ' + String(o.tradeoff).replace(/\\|/g, '\\\\|') + ' |').join('\n')}
+
+## Evidence
+
+- **Corpus entry:** ${e.id} (\`${e.status}\` · confidence \`${e.confidence}\`, verified ${e.updated})
+${e.verdict ? '- **Track record:** prediction resolved **' + e.verdict + '**.' : e.check_by ? '- **Track record:** open prediction, scored on resolution — see the scorecard.' : ''}
+${e.note ? '- **Verified notes:** ' + e.note : ''}
+${dlLine ? '- **npm weekly downloads** (signals snapshot): ' + dlLine : ''}
+${e.sources.length ? '- **Primary sources:**\n' + e.sources.map((u) => '  - ' + u).join('\n') : ''}
+${e.reading.length ? '- **Canonical reading:**\n' + e.reading.map((x) => '  - [' + x.title + '](' + x.url + ')' + (x.by ? ' — ' + x.by : '')).join('\n') : ''}
+
+## Review by
+
+**${e.check_by || "the entry's next corpus verification"}** — or earlier if \`react-brain doctor\` flags moved premises.
+
+---
+*Generated by react-brain v${version} on ${today}. Re-check premises: \`npx react-brain doctor . --ci\`*
+`;
+      const pre = document.createElement('pre');
+      pre.textContent = md;
+      $('out').replaceChildren(pre);
+      $('copy').hidden = false;
+      const blob = new Blob([md], { type: 'text/markdown' });
+      const a = $('dl');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'NNN-' + e.slug + '.md';
+      a.hidden = false;
+      $('out').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      window.__lastMd = md;
+    });
+
+    $('copy').addEventListener('click', async (ev) => {
+      await navigator.clipboard.writeText(window.__lastMd || '');
+      ev.target.textContent = 'Copied ✓';
+      setTimeout(() => (ev.target.textContent = 'Copy markdown'), 1400);
+    });
+  </script>
+</Base>

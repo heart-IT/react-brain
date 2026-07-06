@@ -113,6 +113,12 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
   check(flags.some((x) => x.includes('premises moved')), 'doctor: flags moved premises (entry re-verified since ADR)');
   check(flags.some((x) => x.includes('review horizon passed')), 'doctor: flags passed review horizon');
   check(doctor('web-clean').adrs?.length === 0, 'doctor: no ADR false-positives on a repo without records');
+
+  // --ci gate: the stale fixture record must fail the build; a clean repo must pass
+  const ciFail = spawnSync(process.execPath, [join(ROOT, 'tools/react-brain-doctor.mjs'), FIX('rn-smells'), '--ci'], { encoding: 'utf8' });
+  check(ciFail.status === 1 && ciFail.stdout.includes('CI: FAIL'), 'doctor --ci: exits 1 on moved/expired decision records');
+  const ciPass = spawnSync(process.execPath, [join(ROOT, 'tools/react-brain-doctor.mjs'), FIX('web-clean'), '--ci'], { encoding: 'utf8' });
+  check(ciPass.status === 0 && ciPass.stdout.includes('CI: PASS'), 'doctor --ci: exits 0 on a clean repo');
 }
 
 // ── report ──────────────────────────────────────────────────────────────────────

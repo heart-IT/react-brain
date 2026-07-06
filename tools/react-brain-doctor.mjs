@@ -167,8 +167,9 @@ const argv = process.argv.slice(2);
 const NO_SCAN = argv.includes('--no-scan');       // skip the source-level scans (modernization + signals)
 const SHOW_FILES = argv.includes('--files');      // list the offending files per finding
 const AS_JSON = argv.includes('--json');          // machine-readable (agents / mentor Phase 0)
+const CI = argv.includes('--ci');                 // gate: exit 1 on expired/moved decision records or deprecated APIs
 const targets = argv.filter((x) => !x.startsWith('--'));
-if (!targets.length) { console.error('usage: node tools/react-brain-doctor.mjs <repoPath> [<repoPath> ...] [--no-scan] [--files] [--json]'); process.exit(1); }
+if (!targets.length) { console.error('usage: node tools/react-brain-doctor.mjs <repoPath> [<repoPath> ...] [--no-scan] [--files] [--json] [--ci]'); process.exit(1); }
 const entries = loadEntries();
 const analyses = targets.map(analyzeRepo);
 if (AS_JSON) {
@@ -178,4 +179,19 @@ if (AS_JSON) {
   for (const a of analyses) printReport(a, entries);
   if (analyses.filter((a) => !a.missing && !a.notReact).length > 1) printMatrix(analyses, entries);
   console.log('');
+}
+
+// ── CI gate: expired/moved decisions and deprecated APIs block the merge ───────
+if (CI) {
+  let staleAdrs = 0, deprecated = 0;
+  for (const a of analyses) {
+    if (a.missing || a.notReact) continue;
+    staleAdrs += checkAdrs(a.path, entries).filter((r) => r.flags.length).length;
+    if (!NO_SCAN && a.platform !== 'react')
+      deprecated += scanModernDefaults(a.path, a.deps).findings.filter((x) => x.strength === 'deprecated').length;
+  }
+  const fail = staleAdrs + deprecated > 0;
+  const msg = `CI: ${fail ? 'FAIL' : 'PASS'} — ${staleAdrs} decision record(s) with moved/expired premises · ${deprecated} deprecated API(s)`;
+  console[AS_JSON ? 'error' : 'log'](msg);
+  process.exit(fail ? 1 : 0);
 }

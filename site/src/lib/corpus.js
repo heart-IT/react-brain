@@ -133,6 +133,28 @@ export function changelog(limit = 60) {
   } catch { return []; }   // shallow clone / no git → page degrades gracefully
 }
 
+// ── data for the client-side ADR composer (/decide) ─────────────────────────────
+export function decideData() {
+  const { groups, entries } = corpus();
+  const dl = downloads();
+  const rows = (() => { const p = join(ROOT, 'tools/predictions.jsonl');
+    return existsSync(p) ? readFileSync(p, 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l)) : []; })();
+  const checkBy = {}, verdicts = {};
+  for (const r of rows) { if (r.k === 'P' && !(r.id in checkBy)) checkBy[r.id] = r.check_by; if (r.k === 'O') verdicts[r.id] = r.outcome; }
+  const data = Object.fromEntries(entries.map((e) => [e.id, {
+    id: e.id, slug: e.slug, topic: e.topic, group: e.group,
+    status: e.status, confidence: e.confidence, updated: String(e.updated),
+    def: e.recommend?.default || '', when: e.recommend?.when || [],
+    options: (e.options || []).map((o) => ({ name: o.name, tradeoff: o.tradeoff })),
+    note: e.note ? String(e.note).trim().replace(/\s+/g, ' ').slice(0, 400) : null,
+    sources: e.sources || [],
+    reading: (e.reading || []).slice(0, 3).map((r) => ({ title: r.title, url: r.url, by: r.by || null })),
+    pkgs: (e.detect || []).filter((d) => !d.pkg.includes('*')).map((d) => ({ pkg: d.pkg, dl: dl[d.pkg] ?? null })),
+    check_by: checkBy[e.id] || null, verdict: verdicts[e.id] || null,
+  }]));
+  return { groups: groups.map((g) => ({ id: g.id, label: g.label.split(' — ')[0].split(' (')[0], entries: g.entries })), data };
+}
+
 // ── data for the client-side stack composer (one source of truth: the stack tool) ─
 // Dynamic import from the real file path: a static relative import would make Vite
 // BUNDLE tools/*.mjs, relocating detect.mjs's import.meta.url anchor into dist/ and
