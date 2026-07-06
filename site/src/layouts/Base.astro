@@ -49,6 +49,7 @@ const bottomLinks = [
         <kbd>⌘K</kbd>
       </form>
       <nav aria-label="Primary">
+        <a class="search-link" href={href('search/')}>search</a>
         {[['doctor/', 'Doctor'], ['libraries/', 'Libraries'], ['reading/', 'Reading'], ['scorecard/', 'Scorecard']].map(([to, label]) => (
           <a href={href(to)} class={path.startsWith(href(to)) ? 'active' : ''} aria-current={path.startsWith(href(to)) ? 'page' : undefined}>{label}</a>
         ))}
@@ -162,6 +163,10 @@ const bottomLinks = [
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--fg); font: 400 16px/1.65 var(--font-body); }
+  body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(55% 38% at 62% -6%, rgba(80, 250, 123, .07), transparent 65%),
+      radial-gradient(40% 30% at 8% 12%, rgba(80, 250, 123, .03), transparent 60%); }
 
   /* ── top bar ─────────────────────────────────────────────────────────────── */
   header { border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(8px); position: sticky; top: 0; z-index: 5; }
@@ -207,7 +212,11 @@ const bottomLinks = [
     .search kbd { display: none; }
     header nav { gap: .8rem; }
   }
-  @media (max-width: 640px) { .search { display: none; } }
+  .search-link { display: none !important; }
+  @media (max-width: 640px) {
+    .search { display: none; }
+    .search-link { display: inline !important; }
+  }
 
   a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
@@ -216,7 +225,8 @@ const bottomLinks = [
 
   /* typography scale — headline-xl/lg/md from the design spec */
   h1, h2, h3 { font-family: var(--font-head); color: var(--bright); }
-  h1 { font-size: clamp(1.45rem, 1rem + 1.9vw, 2.3rem); font-weight: 700; letter-spacing: -0.03em; line-height: 1.22; margin: .5rem 0 .4rem; }
+  h1 { font-size: clamp(1.6rem, 1rem + 2.4vw, 2.7rem); font-weight: 700; letter-spacing: -0.035em; line-height: 1.18; margin: .5rem 0 .4rem;
+    background: linear-gradient(180deg, #FCFEFC 55%, #99A39B); -webkit-background-clip: text; background-clip: text; color: transparent; }
   h2 { font-size: 1.05rem; font-weight: 600; letter-spacing: -0.01em; margin: 3.2rem 0 .9rem; }
   main h2::before { content: "# " / ""; color: var(--accent); font-weight: 400; }
   h3 { font-size: .95rem; font-weight: 600; margin: 1.3rem 0 .35rem; }
@@ -240,9 +250,10 @@ const bottomLinks = [
   tbody tr:hover { background: color-mix(in srgb, var(--card) 45%, transparent); }
 
   .muted { color: var(--muted); }
-  .card { background: var(--card); border-radius: 10px; padding: 1.1rem 1.25rem; margin: 1rem 0; }
-  a.card { transition: background .15s; }
-  a.card:hover { background: color-mix(in srgb, var(--card) 80%, #1f2630); }
+  .card { background: linear-gradient(180deg, color-mix(in srgb, var(--card) 92%, white), var(--card)); border-radius: 10px; padding: 1.1rem 1.25rem; margin: 1rem 0;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 12px 32px -20px rgba(0,0,0,.9); }
+  a.card { transition: transform .16s ease-out, box-shadow .16s ease-out; }
+  a.card:hover { transform: translateY(-2px); box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 18px 40px -20px rgba(0,0,0,.95); }
   /* callouts: left color bar, per the functional palette */
   .card.rec { border-left: 2px solid var(--ok); }
   .card.caution { border-left: 2px solid var(--warn); }
@@ -260,6 +271,8 @@ const bottomLinks = [
   .rows > * { display: block; padding: .9rem 0; border-top: 1px solid var(--line); margin: 0; }
   .rows > *:last-child { border-bottom: 1px solid var(--line); }
   a.row { text-decoration: none; color: inherit; }
+  a.row { transition: background .14s; border-radius: 4px; }
+  a.row:hover { background: color-mix(in srgb, var(--card) 60%, transparent); }
   a.row:hover .row-title { color: var(--accent); }
   .hero { padding: 1.6rem 0 .5rem; }
   .hero p { max-width: 46rem; font-size: 1.06rem; }
@@ -276,9 +289,11 @@ const bottomLinks = [
 
   /* buttons — primary solid, secondary ghost; rectangular soft corners, never pills */
   input, textarea, button, select { font: inherit; color: inherit; }
-  button, .btn { display: inline-block; background: var(--primary); color: var(--on-primary); border: 1px solid transparent; border-radius: 3px; padding: .5rem 1rem; cursor: pointer; font: 600 .85rem var(--font-mono); text-decoration: none; }
-  button:hover, .btn:hover { background: color-mix(in srgb, var(--primary) 86%, #0B0C0E); }
-  .btn.ghost, button.ghost { background: transparent; color: var(--fg); border-color: var(--line-strong); font-weight: 500; }
+  button, .btn { display: inline-block; background: var(--primary); color: var(--on-primary); border: 1px solid transparent; border-radius: 4px; padding: .5rem 1rem; cursor: pointer; font: 600 .85rem var(--font-mono); text-decoration: none;
+    transition: box-shadow .16s ease-out, background .16s, transform .1s; box-shadow: 0 8px 24px -14px rgba(80,250,123,.5); }
+  button:hover, .btn:hover { background: color-mix(in srgb, var(--primary) 90%, white); box-shadow: 0 10px 32px -12px rgba(80,250,123,.65); }
+  button:active, .btn:active { transform: translateY(1px); }
+  .btn.ghost, button.ghost { background: transparent; color: var(--fg); border-color: var(--line-strong); font-weight: 500; box-shadow: none; }
   .btn.ghost:hover, button.ghost:hover { border-color: var(--muted); background: var(--card); }
   textarea { width: 100%; min-height: 12rem; background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: .8rem; font: 400 13px/1.55 var(--font-mono); }
   select { background: var(--card); border: 1px solid var(--line); border-radius: 4px; padding: .4rem .6rem; }
@@ -295,9 +310,11 @@ const bottomLinks = [
   .prose img { max-width: 100%; border-radius: 8px; }
 
   /* terminal window (the hero demo + doctor output) */
-  .term { background: var(--code-bg); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .term { background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; overflow: hidden;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 30px 70px -30px rgba(0,0,0,.95), 0 0 70px -28px rgba(80,250,123,.28); }
   .term-bar { display: flex; align-items: center; gap: .45rem; padding: .5rem .8rem; border-bottom: 1px solid var(--line); }
   .term-bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--line-strong); }
+  .term-bar i:nth-child(1) { background: #b3524d; } .term-bar i:nth-child(2) { background: #ad8a3b; } .term-bar i:nth-child(3) { background: #3f9954; }
   .term-bar span { margin-left: .4rem; font: 400 .72rem var(--font-mono); color: var(--muted); }
   .term pre { border: 0; border-radius: 0; margin: 0; font-size: 12.5px; line-height: 1.6; }
   .t-p { color: var(--accent); }          /* prompt / command */
@@ -326,6 +343,7 @@ const bottomLinks = [
     header, aside, .mobile-nav, footer, .copy-btn, .skip, .search { display: none !important; }
     .shell { display: block; }
     a { text-decoration: underline; }
+    h1 { background: none; color: var(--bright); -webkit-text-fill-color: initial; }
   }
 
   @media (prefers-reduced-motion: reduce) {

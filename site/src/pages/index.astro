@@ -23,7 +23,7 @@ const stats = [
 ];
 ---
 <Base>
-  <div class="hero" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr)); gap:2.5rem; align-items:center;">
+  <div class="hero hero-home" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr)); gap:2.5rem; align-items:center;">
     <div style="flex: 1.15">
       <p class="label-caps" style="margin:0">decision engine · react &amp; react native</p>
       <h1>The React ecosystem, as an encyclopedia that shows its work.<span class="blink" aria-hidden="true">▊</span></h1>
@@ -110,3 +110,14 @@ const stats = [
   </div>
 </Base>
 
+
+<style>
+  .hero-home { position: relative; }
+  .hero-home::before { content: ""; position: absolute; inset: -2rem -3rem; z-index: -1; pointer-events: none;
+    background-image: linear-gradient(rgba(255,255,255,.028) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.028) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(70% 80% at 55% 30%, black, transparent 75%); }
+  .hero-home > * { animation: rise .55s ease-out both; }
+  .hero-home > *:nth-child(2) { animation-delay: .12s; }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+</style>

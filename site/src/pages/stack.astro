@@ -88,7 +88,10 @@ const { recipe, stageRank, caps } = await stackData();
         checks: <code>npx react-brain stack --${platform === 'react-native' ? 'rn' : platform === 'react' ? 'web' : 'both'}${on('expo') ? ' --expo' : ''}${on('p2p') ? ' --p2p' : ''} --stage=${stage}</code></p>`;
       document.getElementById('out').innerHTML = html;
     };
-    document.getElementById('compose').addEventListener('click', compose);
+    document.getElementById('compose').addEventListener('click', () => {
+      compose();
+      document.getElementById('out').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
     compose();   // show the default intent immediately — no blank region
   </script>
 </Base>
