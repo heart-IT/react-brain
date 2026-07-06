@@ -1,0 +1,50 @@
+id: RB-E-STATE
+topic: "Client & server state management"
+category: state-and-data
+group: app-architecture
+status: reviewed   # first long-form entry written + source-checked → encyclopedia/RB-E-STATE.md
+confidence: high
+platforms: [react, react-native]
+options:
+  - { name: "useState/useReducer + Context", tradeoff: "zero-dep; re-render scope hard to control at scale" }
+  - { name: "Zustand", tradeoff: "tiny, selector-based; minimal boilerplate; a State-of-React-2025 favorite" }
+  - { name: "Jotai", tradeoff: "atomic, fine-grained subscriptions" }
+  - { name: "Redux Toolkit (2.x)", tradeoff: "structured, devtools, larger surface; React-Redux `connect` HOC deprecated → use hooks" }
+  - { name: "XState (5.x) / XState Store", tradeoff: "state machines / statecharts for complex flows; Store 4.0 is a lighter signal-style store" }
+  - { name: "TanStack Store / Signals", tradeoff: "fine-grained reactive store (alien-signals core); underpins TanStack Router/Table/Form" }
+  - { name: "Legend State", tradeoff: "fine-grained observables + built-in sync/persistence; decouples state ownership from subscription so re-renders push to leaf nodes; smaller ecosystem than Zustand/Jotai" }
+  - { name: "TanStack Query", tradeoff: "for SERVER state/caching — pairs with a client-state lib, doesn't replace it; State-of-React favorite" }
+recommend:
+  default: "Split the problem: TanStack Query for server state + Zustand for client/UI state. This is the common, low-regret 2026 pairing."
+  when:
+    - "tiny app / a few shared values → useState + Context (don't add a lib)"
+    - "complex multi-step flows / statecharts → XState"
+    - "already on Redux and it's fine → keep RTK; don't migrate without a concrete pain"
+    - "want fine-grained atoms → Jotai"
+note: "Separate server state (caching/sync) from client/UI state — different problems, different tools. State of React 2025 (3,760 devs): TanStack Query the #1 React library; Zustand crossed 50% usage + tops satisfaction; ~34% use no state library. Adversarially stress-tested 2026-06-25 (SURVIVES, high): nothing has overtaken Zustand, and local-first (TanStack DB) builds on TanStack Query rather than replacing it."
+defer_to_skill: react-native-best-practices  # re-render/perf rules (e.g. RN-RULE-ATOMIC-STATE)
+doc: "RB-E-STATE.md"   # long-form Explanation entry in content_dir
+updated: 2026-07-01
+reading:
+  - title: "How to Build the Fastest Apps: Break the Rules (App.js Conf 2026)"
+    url: "https://www.youtube.com/watch?v=K3flMIHS-cI"
+    by: "Jay Meistrich (Software Mansion) — author of Legend State / Legend List"
+    what: "The performance case for signal/observable state. React's `render` over-orchestrates: `useState`/`useContext` couple state *ownership* with *subscription*, so lifting state up and over-subscribed context cascade re-renders top-down — measured ~10x CPU vs updating one leaf node. The fix ('render once'): create state without subscribing (observables / Reanimated shared values), own it high in the tree, push subscription down so only leaf nodes re-render themselves; provide stable objects through Context so the provider never re-renders; subscribe to derived values, not raw ids. Vendor talk (his own Legend State), but the ownership-vs-subscription principle is framework-agnostic and transfers to Jotai atoms, TanStack Store/Signals, and use-context-selector."
+  - title: "React Query as a State Manager"
+    url: "https://tkdodo.eu/blog/react-query-as-a-state-manager"
+    by: "Dominik Dorfmeister (TkDodo), TanStack Query maintainer"
+    what: "The canonical case for treating server state as its own thing (stale-while-revalidate, staleTime, query-key sharing) so you stop replicating it in a client store. The source of the server-state-vs-client-state split."
+  - title: "Why React Context is Not a State Management Tool"
+    url: "https://blog.isquaredsoftware.com/2021/01/context-redux-differences/"
+    by: "Mark Erikson, Redux maintainer"
+    what: "Draws the precise line between dependency injection (Context), client-state stores (Redux/Zustand), and async/server state — the vocabulary that justifies splitting the problem instead of forcing one tool to do all three."
+  - title: "How is Linear so fast? A technical breakdown"
+    url: "https://performance.dev/how-is-linear-so-fast-a-technical-breakdown"
+    by: "Dennis Brotzky (performance.dev)"
+    what: "Breakdown of Linear's local-first architecture — IndexedDB as the primary store, optimistic updates, granular observables, aggressive code-splitting, GPU-only animation. The reference for building instant-feeling client-state apps."
+  - title: "Component Communication Patterns in React Applications"
+    url: "https://neciudan.dev/component-communication-patterns-in-react"
+    by: "Neciu Dan"
+    what: "A decision framework for WHERE state should live, keyed by component proximity × data type: props/callbacks for adjacent components, lifted state or composition for siblings, context for slow-changing globals, Zustand for frequently-updated client state, TanStack Query for server data, URL params for view state, events for fire-and-forget. 'Reach for the closest tool that can actually reach the problem, and only move outward when it stops working.' The how-to-choose guide that operationalizes this entry's server-vs-client-vs-view split."
+sources:
+  - "https://2025.stateofreact.com/en-US/libraries/state-management/"

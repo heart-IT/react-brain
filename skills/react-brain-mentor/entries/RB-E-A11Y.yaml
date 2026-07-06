@@ -1,0 +1,28 @@
+id: RB-E-A11Y
+topic: "Accessibility across web & native"
+category: accessibility
+group: ui
+status: drafted
+confidence: medium
+platforms: [react, react-native]
+options:
+  - { name: "semantic roles/labels", tradeoff: "web ARIA vs RN accessibility props" }
+  - { name: "focus management", tradeoff: "keyboard (web) vs screen-reader focus (native)" }
+recommend:
+  default: "Use semantic roles + labels, manage focus order, and announce dynamic updates; test with role-based queries, not data-testid."
+  when:
+    - "web → ARIA roles + keyboard focus management"
+    - "React Native → accessibilityRole/Label + screen-reader focus"
+    - "depth audit (contrast, intrinsics, dynamic type) → design-systems-governance"
+defer_to_skill: design-systems-governance
+doc: null
+updated: 2026-06-25
+reading:
+  - title: "Accessibility in React: Common Mistakes and How to Fix Them"
+    url: "https://certificates.dev/blog/accessibility-in-react-common-mistakes-and-how-to-fix-them"
+    by: "Aurora Scharff"
+    what: "A durable React a11y reference from a recognized expert: semantic HTML, labeling, focus management on route/modal changes, ARIA live regions, with concrete useId/useRef patterns and a WCAG-cited checklist."
+  - title: "AI-Generated UI Is Inaccessible by Default"
+    url: "https://frontendmasters.com/blog/ai-generated-ui-is-inaccessible-by-default/"
+    by: "Frontend Masters"
+    what: "Why LLM-generated components ship empty accessibility trees, and a five-layer enforcement system (prompt constraints, jsx-a11y lint, axe-core runtime tests, CI gates, headless primitives). Durable guidance as AI codegen becomes the default."

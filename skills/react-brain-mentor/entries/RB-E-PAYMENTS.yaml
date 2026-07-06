@@ -1,0 +1,34 @@
+id: RB-E-PAYMENTS
+topic: "In-app purchases & payments"
+category: payments
+group: platform-native
+status: drafted
+confidence: medium
+platforms: [react-native]
+options:
+  - { name: "expo-iap", tradeoff: "OpenIAP-compliant IAP; Google Play Billing v8 / Apple StoreKit; avoids ejecting" }
+  - { name: "react-native-iap", tradeoff: "long-standing community IAP wrapper; now deprecated/archived → folded into the OpenIAP monorepo, prefer expo-iap" }
+  - { name: "RevenueCat", tradeoff: "hosted subscription infra + entitlements across stores; fees vs less server work" }
+  - { name: "react-native-wallet", tradeoff: "Apple PassKit / Google Wallet passes (tickets, loyalty, coupons) — NOT tap-to-pay; iOS needs a Pass Type ID + entitlements" }
+recommend:
+  default: "Subscriptions → RevenueCat (it absorbs receipt validation + entitlement infra). Direct store billing without a third party → expo-iap (Expo) or react-native-iap."
+  when:
+    - "small team, subscriptions, don't want a billing backend → RevenueCat"
+    - "one-time purchases / avoid vendor fees → expo-iap / react-native-iap (you own validation)"
+    - "wallet passes (tickets/loyalty/coupons) → react-native-wallet (set up an Apple Pass Type ID + entitlements; not tap-to-pay)"
+note: "Store rules + receipt validation make IAP testing-heavy; hosted options (RevenueCat) trade fees for less backend."
+defer_to_skill: null
+doc: null
+updated: 2026-06-25
+sources:
+  - "https://github.com/hyochan/expo-iap"
+  - "https://github.com/premieroctet/react-native-wallet"
+reading:
+  - title: "Cross-platform subscription state: sharing entitlements between Android and iOS"
+    url: "https://www.revenuecat.com/blog/engineering/cross-platform-subscription/"
+    by: "Jaewoong Eum (RevenueCat)"
+    what: "Why unifying subscription entitlements across iOS/Android is hard — Apple signed-JWS vs Google purchase-token REST, HTTPS notifications vs Cloud Pub/Sub, subscription groups vs base plans/offers — and the four-part DIY architecture. The root reason IAP libraries/services exist."
+  - title: "Building the RC Fortress: protecting payments against outages"
+    url: "https://www.revenuecat.com/blog/engineering/building-the-rc-fortress/"
+    by: "RevenueCat Engineering"
+    what: "A resilience case study for keeping purchases working when subscription backends fail — cached paywall snapshots, temporary offline entitlements, buffered request log/replay — with tradeoffs made explicit. The realities of subscription infra regardless of library."

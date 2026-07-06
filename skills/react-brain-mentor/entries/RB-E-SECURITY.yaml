@@ -1,0 +1,50 @@
+id: RB-E-SECURITY
+topic: "App security — device trust, secrets, dependency risk"
+category: security
+group: tooling-ops
+status: reviewed   # long-form entry written + source-checked → encyclopedia/RB-E-SECURITY.md
+confidence: high
+platforms: [react, react-native]
+options:
+  - { name: "jail-monkey (v3)", tradeoff: "client-side jailbreak/root + mock-location + debug detection; v3 adds New-Arch support; NOT a substitute for server-side Play Integrity / DeviceCheck" }
+  - { name: "react-native-keychain / expo-secure-store", tradeoff: "store tokens/secrets in Keychain/Keystore, not AsyncStorage (see RB-E-STORAGE)" }
+  - { name: "dependency CVE scanning", tradeoff: "npm/pnpm audit; route depth to the review skill's security phase" }
+  - { name: "supply-chain hardening", tradeoff: "install-script blocking (npm v12 default), install-age gating (min-release-age / npmMinimalAgeGate), provenance — provenance alone is not enough" }
+  - { name: "Trusted Types (web)", tradeoff: "React integrates the browser Trusted Types API for XSS prevention; dangerouslySetInnerHTML needs an explicit policy" }
+recommend:
+  default: "Secrets in Keychain/secure-store (never AsyncStorage); harden the supply chain (block install scripts, gate install-age); device trust via server-side attestation; route per-diff secret/injection checks to the review skill."
+  when:
+    - "device-trust requirement → server-side Play Integrity / DeviceCheck (jail-monkey is client-side only, defeatable)"
+    - "web XSS surface → Trusted Types + sanitized dangerouslySetInnerHTML"
+    - "RSC/Server Functions on web → patch React to 19.2.5+ (DoS CVEs); does not affect RN"
+note: >
+  DURABLE SCOPING FACT: the React Server Components DoS family (CVE-2026-23864, CVSS 7.5;
+  React2DoS CVE-2026-23869) and the Dec-2025 RSC source-exposure/RCE issues are SERVER-SIDE
+  (react-server-dom-*; Next.js App Router) and do NOT affect React Native; patched across
+  React 19.0.5 / 19.1.6 / 19.2.5. The 2025–26 SUPPLY-CHAIN wave (Shai-Hulud worm, the
+  @tanstack/* npm compromise, axios RAT) is the bigger practical risk — hence npm v12 blocking
+  install scripts by default + install-age gating. Live CVEs belong in a security feed, not this
+  encyclopedia; for per-diff secret/injection/dependency checks defer to the review skill.
+defer_to_skill: review
+doc: "RB-E-SECURITY.md"   # long-form Explanation entry in content_dir
+updated: 2026-07-02
+reading:
+  - title: "The React2Shell Story"
+    url: "https://lachlan.nz/blog/the-react2shell-story"
+    by: "Lachlan Davidson"
+    what: "An RCE postmortem on CVE-2025-55182 in React's Flight protocol (thenable abuse, prototype-chain exploitation), with durable lessons on runtime-vs-build-time type safety and lenient-parsing attack surface. Canonical RSC security case study."
+  - title: "The Flight Protocol Made Your DoS My Problem"
+    url: "https://saschb2b.com/blog/flight-protocol-dos"
+    by: "Sascha Becker"
+    what: "A DoS deep-dive (CVE-2026-23870) in the RSC Flight deserializer, with the generalizable lesson that dissolving a network boundary into developer ergonomics still owes a threat model (applies to tRPC/GraphQL/WebSockets too)."
+  - title: "Shai-Hulud Postmortem (npm supply-chain worm)"
+    url: "https://trigger.dev/blog/shai-hulud-postmortem"
+    by: "Eric Allam (Trigger.dev)"
+    what: "A first-party postmortem of the Shai-Hulud worm (preinstall-script credential exfiltration) with concrete mitigations — disable npm install scripts, pnpm 10, OIDC publishing. The supply-chain reading this entry's own note calls for; applies to any React/RN delivery pipeline."
+  - title: "Blocking Install Scripts Is Not a Silver Bullet"
+    url: "https://nodesource.com/blog/npm-v12-install-scripts-not-a-silver-bullet"
+    by: "NodeSource"
+    what: "The nuance behind this entry's supply-chain note: npm v12's default block on preinstall/install/postinstall closes the INSTALL-TIME door but leaves the EXECUTION-TIME door open. Attackers already moved the payload into the module body as a top-level side effect (runs on first require), or ship a binding.gyp so npm's implicit node-gyp rebuild fires anyway (the June-2026 Miasma campaign). Removing a trigger isn't removing the capability — so layer defenses: Node's --permission model (--allow-net / --allow-child-process / --allow-fs-write to cap what running code may DO), CI egress allow-listing (Harden-Runner), and container/seccomp isolation. Install-script blocking raises the floor; it is not the ceiling."
+sources:
+  - "https://react.dev/blog/2025/12/11/denial-of-service-and-source-code-exposure-in-react-server-components"
+  - "https://github.com/advisories/GHSA-83fc-fqcc-2hmg"

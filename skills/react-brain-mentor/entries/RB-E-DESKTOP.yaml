@@ -1,0 +1,46 @@
+id: RB-E-DESKTOP
+topic: "Desktop apps & web-to-native shells (packaging a React web app)"
+category: desktop-shells
+group: app-architecture
+status: reviewed   # long-form entry written + source-checked → encyclopedia/RB-E-DESKTOP.md
+confidence: medium
+platforms: [react]
+options:
+  - { name: "Electron", tradeoff: "bundles its own Chromium + Node; largest ecosystem & most mature; deep Node/native access; heaviest install (~100–200MB)" }
+  - { name: "Tauri (2.x)", tradeoff: "Rust shell using the OS native webview (no bundled Chromium) → tiny builds (from ~600KB); desktop + mobile (iOS/Android); native logic in Rust" }
+  - { name: "Pake", tradeoff: "one-command wrapper that turns a web URL into a desktop app on Tauri; <10MB (~20x smaller than Electron); fast path to ship an existing site, not a full app framework" }
+  - { name: "Pear (Holepunch)", tradeoff: "P2P/serverless desktop+mobile runtime (Bare); no central server, content-addressed distribution; depth → holepunch-p2p-systems" }
+  - { name: "Capacitor (Ionic)", tradeoff: "wraps a web app into iOS/Android (and desktop via Electron) native shells; web-first teams shipping to mobile" }
+  - { name: "PWA (no shell)", tradeoff: "installable from the browser; least native integration but zero packaging — try this before reaching for a shell" }
+recommend:
+  default: "Lightweight desktop → Tauri 2 (native webview, tiny builds). Need maximum ecosystem / deep Node + native integration, or already on it → Electron. Just wrapping an existing web URL → Pake."
+  when:
+    - "wrap an existing web URL fast → Pake (Tauri under the hood)"
+    - "new lightweight desktop app, fine writing some Rust → Tauri 2"
+    - "deep Node/native integration, biggest plugin ecosystem, or existing Electron app → Electron"
+    - "P2P / serverless / local-first desktop → Pear (Holepunch); the backend architecture is RB-E-P2P, depth → holepunch-p2p-systems"
+    - "web-first team also shipping mobile → Capacitor; minimal need → ship a PWA, skip the shell"
+note: >
+  The durable selection axis is the renderer: Electron BUNDLES Chromium (large, uniform,
+  max ecosystem); Tauri (2.x stable) BORROWS the OS native webview (tiny — from ~600KB — but
+  rendering varies by platform webview) and adds iOS/Android. Pake (V3.12.0, 2026-06-21) is a
+  one-command web-URL→desktop wrapper built ON Tauri (<10MB, ~20x smaller than an Electron
+  equivalent) — great for shipping an existing site, not for a from-scratch app. Pear is the
+  heartit ecosystem's P2P desktop/mobile runtime (defer depth to holepunch-p2p-systems).
+  Tauri/Pake facts verified vs tauri.app + the Pake repo; Electron/Capacitor/PWA rows are
+  settled industry knowledge.
+defer_to_skill: engineering-principles   # shell↔web boundary; Pear depth → holepunch-p2p-systems; shell security → RB-E-SECURITY
+doc: "RB-E-DESKTOP.md"   # long-form Explanation entry in content_dir
+updated: 2026-06-25
+reading:
+  - title: "The Conductor Rewrite: what they changed to make it fast"
+    url: "https://performance.dev/the-conductor-rewrite"
+    by: "Dennis Brotzky (performance.dev)"
+    what: "A React + Tauri desktop performance postmortem — SQLite local-first, TanStack Router structural sharing (stable refs killing re-render cascades), virtualization — fixing root causes instead of papering over with useMemo. Directly relevant to React-on-desktop."
+  - title: "A Technical Deep Dive Into the New Raycast"
+    url: "https://www.raycast.com/blog/a-technical-deep-dive-into-the-new-raycast"
+    by: "Petr Nikolaev & Thomas Paul Mann (Raycast)"
+    what: "How Raycast ships one React + TypeScript codebase to both macOS and Windows via native shells (Swift/C#) plus WebKit — IPC design, memory breakdown, and concrete WebKit workarounds. A durable model for cross-platform desktop on React without Electron."
+sources:
+  - "https://tauri.app/"
+  - "https://github.com/tw93/Pake"

@@ -1,0 +1,32 @@
+id: RB-E-OBSERVABILITY
+topic: "Crash reporting, monitoring & observability"
+category: observability
+group: tooling-ops
+status: drafted
+confidence: medium
+platforms: [react, react-native]
+options:
+  - { name: "Sentry (v8)", tradeoff: "crash + perf; v8 captures crashes before RN bootstraps via sentry.options.json (fixes 'TestFlight instant death')" }
+  - { name: "EAS Observe (Expo)", tradeoff: "startup-metric sampling (open beta); traces regressions to a specific build / OTA update" }
+  - { name: "Firebase Crashlytics / Bugsnag", tradeoff: "established crash reporting" }
+recommend:
+  default: "Sentry for crash + performance monitoring (v8 catches pre-bootstrap crashes); add error boundaries and wire it up at the production stage."
+  when:
+    - "on Expo and want build/OTA regression tracing → add Expo Observe"
+    - "already on Firebase → Crashlytics is fine for crashes"
+note: "Production-stage concern (the mentor emphasizes observability + error boundaries at production)."
+defer_to_skill: null
+doc: null
+updated: 2026-07-06
+sources:
+  - "https://blog.sentry.io/react-native-sdk-8-is-here/"
+  - "https://docs.expo.dev/eas/observe/introduction/"
+reading:
+  - title: "Bringing Lighthouse to the App: Core Web Vitals for React Native"
+    url: "https://engineering.indeedblog.com/blog/2026/03/bringing-lighthouse-to-the-app-building-performance-metrics-for-react-native/"
+    by: "Ben Cripps (Indeed Engineering)"
+    what: "Adapts web Core Web Vitals (TTFF/TTI/FID) into a React Native performance hook with composite scoring, from a real ViewJob rollout. A durable blueprint for measuring (not just crash-reporting) RN performance in production."
+  - title: "The Hidden Cost of Hydration Mismatches"
+    url: "https://3perf.com/blog/hydration-mismatch/"
+    by: "Ivan Akulov (3perf, perf consultant)"
+    what: "Web-side production-perf diagnosis from real consulting: a single hydration mismatch makes React recreate the DOM, and because LCP only tracks NEW elements, the remounted (font-swapped, larger) text re-triggers LCP at hydration time — green→red with no obvious cause. Durable lessons: keep server/client renders identical, scope unavoidable mismatches with Suspense, and know how the metric itself measures (the metric mechanics are the observability half — the rendering-strategy background lives in RB-E-META-FRAMEWORKS's readings). The web counterpart to the Indeed RN piece above."

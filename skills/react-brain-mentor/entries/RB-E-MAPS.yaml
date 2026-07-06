@@ -1,0 +1,42 @@
+id: RB-E-MAPS
+topic: "Maps & geolocation UI"
+category: maps
+group: ui
+status: drafted
+confidence: low
+platforms: [react, react-native]
+options:
+  - { name: "react-native-maps (1.29)", tradeoff: "the long-standing RN default — Apple Maps on iOS / Google Maps on Android; simple markers/polylines; limited style customization, no programmatic offline-region API; Google Maps billing applies on Android (~$7/1k mobile map loads)" }
+  - { name: "expo-maps — ALPHA", tradeoff: "Expo's modern maps module (Apple Maps iOS / Google Maps Android, SDK-versioned); explicit alpha with frequent breaking changes, no Expo Go — watch, don't bet yet" }
+  - { name: "@rnmapbox/maps (10.x)", tradeoff: "Mapbox native SDK — custom vector/GL styles, offline region downloads, navigation stack; commercial usage pricing after the free tier" }
+  - { name: "@maplibre/maplibre-react-native (11.x)", tradeoff: "open-source Mapbox-SDK fork — Mapbox-compatible GL styles + offline, works with ANY tile source, no token or per-load pricing; you source (or pay for) tiles yourself" }
+  - { name: "react-native-better-maps (1.0, Nitro)", tradeoff: "NEW (2026-06) — MapKit + Google Maps on Nitro Modules, New-Arch-only (RN 0.78+); native marker clustering + POI taps; one release old" }
+  - { name: "web: react-map-gl / react-leaflet / mapcn", tradeoff: "react-map-gl (8.x) wraps MapLibre/Mapbox GL JS; react-leaflet = classic raster Leaflet; mapcn = shadcn-patterned map components on MapLibre + Tailwind (copy-paste model)" }
+recommend:
+  default: "React Native → react-native-maps for platform-native basics (markers, regions); switch to MapLibre RN when you need custom vector styles or offline without per-load billing, or @rnmapbox/maps when you want Mapbox's full commercial stack. Web → react-map-gl on MapLibre GL JS (mapcn for ready-made shadcn-style components). Lightly vetted (confidence: low) — prototype clustering + offline on-device before committing."
+  when:
+    - "basic platform-native map + a few markers (RN) → react-native-maps (expo-maps is the Expo-native successor but ALPHA — track it, don't ship it)"
+    - "custom map styling / offline regions / no per-load billing → MapLibre (@maplibre/maplibre-react-native on RN, react-map-gl on web) + any tile source"
+    - "turnkey commercial stack (style studio, navigation, support) and the pricing is acceptable → @rnmapbox/maps"
+    - "large marker sets needing native clustering on New Arch → react-native-better-maps (1.0, one release old — prototype first)"
+    - "shadcn-patterned web map UI fast → mapcn"
+note: >
+  The durable selection axis is the TILE/SDK PROVIDER, not the React wrapper: platform-native
+  (Apple/Google — free-ish but Google bills per load and styling is limited) vs Mapbox (powerful,
+  commercial) vs MapLibre + open tiles (free, self-hostable, Mapbox-compatible styles) — wrappers
+  are cheap to swap, the provider commitment (billing, offline rights, style ecosystem) is not.
+  NEW entry (2026-07-06): two independent signals in one week — react-native-better-maps 1.0
+  (TWiR #288) and mapcn (React Status #481) — exposed that maps, a common hard app need, had no
+  entry. Versions verified vs npm (react-native-maps 1.29, @rnmapbox/maps 10.3, maplibre-react-native
+  11.3, react-map-gl 8.1, better-maps 1.0.0); expo-maps ALPHA status verified vs the Expo docs.
+defer_to_skill: react-native-best-practices   # marker/cluster render perf
+doc: null
+updated: 2026-07-06
+reading:
+  - title: "react-native-maps vs Mapbox RN vs MapLibre RN (2026)"
+    url: "https://www.pkgpulse.com/guides/react-native-maps-vs-mapbox-rn-vs-maplibre-rn-mobile-2026"
+    by: "PkgPulse (team-authored)"
+    what: "The concrete three-way comparison behind this entry's axes: per-load pricing math (Google ~$7/1k mobile loads vs Mapbox $0.50/1k after free tier vs MapLibre free-but-BYO-tiles), which libraries actually expose offline region-download APIs (Mapbox/MapLibre yes, react-native-maps no), GL style customization, API-key requirements, and New-Architecture status — with code for each. Team-authored (no individual byline) but sourced and measured; use for the decision table, not authority."
+sources:
+  - "https://docs.expo.dev/versions/latest/sdk/maps/"
+  - "https://github.com/gmi-software/react-native-better-maps"

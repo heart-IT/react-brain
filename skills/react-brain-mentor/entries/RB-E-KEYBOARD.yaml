@@ -1,0 +1,30 @@
+id: RB-E-KEYBOARD
+topic: "Keyboard handling & avoidance (React Native)"
+category: keyboard
+group: platform-native
+status: drafted
+confidence: medium
+platforms: [react-native]
+options:
+  - { name: "KeyboardAvoidingView (core)", tradeoff: "built-in; smooth on iOS (scheduled animation w/ predefined curves) but SNAPS on Android (no per-frame insets); breaks under Android-15 edge-to-edge" }
+  - { name: "react-native-keyboard-controller (Kirill Zyusko)", tradeoff: "the modern de-facto fix — synced iOS/Android keyboard animations via WindowInsetsAnimationCallback; ships KeyboardAwareScrollView / KeyboardStickyView; handles edge-to-edge" }
+  - { name: "react-native-avoid-softinput", tradeoff: "alternative, Android-focused soft-input avoidance" }
+recommend:
+  default: "Core KeyboardAvoidingView is fine for simple iOS-first layouts; for cross-platform parity (especially Android + edge-to-edge) use react-native-keyboard-controller — KeyboardAwareScrollView for forms, KeyboardStickyView for footers."
+  when:
+    - "scrollable forms with multiple inputs → keyboard-controller KeyboardAwareScrollView"
+    - "footer/toolbar riding the keyboard → keyboard-controller KeyboardStickyView"
+    - "simple iOS-first spacing only → core KeyboardAvoidingView may suffice"
+note: >
+  Keyboard handling is a top RN pain point: iOS uses scheduled animation with predefined curves,
+  modern Android delivers per-frame insets (WindowInsetsAnimationCallback), and Android-15 edge-to-
+  edge breaks legacy adjustResize — which is why core KeyboardAvoidingView snaps on Android. New
+  entry surfaced from a Margelo deep-dive (see reading); pairs with RB-E-FORMS for form screens.
+defer_to_skill: react-native-best-practices
+doc: null
+updated: 2026-06-25
+reading:
+  - title: "The Go-To Guide for Understanding Keyboards in React Native (Part 1)"
+    url: "https://blog.margelo.com/deep-dive-in-keyboard-handling"
+    by: "Kirill Zyusko (Margelo; react-native-keyboard-controller maintainer)"
+    what: "Why keyboards behave differently per platform — iOS scheduled animation vs Android per-frame WindowInsetsAnimationCallback insets, why core KeyboardAvoidingView snaps on Android, Android-15 edge-to-edge breakage, and when to reach for KeyboardAvoidingView / KeyboardAwareScrollView / KeyboardStickyView."

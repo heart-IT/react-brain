@@ -1,0 +1,37 @@
+id: RB-E-AI-UI
+topic: "Generative UI & in-app AI"
+category: ai-ui
+group: ai
+status: drafted
+confidence: low
+platforms: [react, react-native]
+options:
+  - { name: "Vercel AI SDK / json-render", tradeoff: "streaming chat + tool-calling; json-render renders model output as components (now RN too)" }
+  - { name: "assistant-ui / Tambo", tradeoff: "prebuilt chat/generative-UI components; Tambo 1.0 adds state persistence + streaming, self-host or cloud" }
+  - { name: "Cedar / Streamdown", tradeoff: "Cedar = agent-UI toolkit; Streamdown = streaming-markdown renderer for LLM output" }
+recommend:
+  default: "Vercel AI SDK for streaming chat + tool-calling; assistant-ui/Tambo for prebuilt chat UI; Streamdown to render streaming markdown. Very fast-moving (confidence: low) — treat picks as current-best, not settled."
+  when:
+    - "render model output as live components → json-render"
+    - "agent-style UI → Cedar"
+note: >
+  Distinct from on-device inference (RB-E-ONDEVICE-AI) — this is cloud-LLM app UI. Very
+  fast-moving; recommend tentatively (confidence: low). Adjacent: Vercel's Eve is a file-based agent framework (an agent =
+  a folder of tools/connections/channels/schedules; MCP connections, human-approval gates,
+  sandboxed subagents) — that's the agent BACKEND you'd then surface through these UI libs,
+  not a React UI library itself.
+defer_to_skill: null
+doc: null
+updated: 2026-06-25
+sources:
+  - "https://json-render.dev/docs/ai-sdk"
+  - "https://github.com/tambo-ai/tambo"
+reading:
+  - title: "Generative User Interfaces — rendering UI with language models"
+    url: "https://ai-sdk.dev/docs/advanced/rendering-ui-with-language-models"
+    by: "Vercel (AI SDK)"
+    what: "The core generative-UI mental model: tools return structured JSON that maps to React component props; the client-side switch-statement scaling problem; and the server-side createStreamableUI/RSC solution for streaming components during generation."
+  - title: "How to Build a Performant AI Markdown Renderer"
+    url: "https://tigerabrodi.blog/how-to-build-a-performant-ai-markdown-renderer"
+    by: "Tiger Abrodi"
+    what: "The architecture behind streaming-markdown rendering (the Streamdown problem): repairing incomplete markdown before parsing, block-level memoization to avoid re-parsing every token, processor caching, and startTransition for smooth streaming."

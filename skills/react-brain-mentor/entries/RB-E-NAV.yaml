@@ -1,0 +1,46 @@
+id: RB-E-NAV
+topic: "Navigation & routing"
+category: navigation
+group: app-architecture
+status: reviewed   # long-form entry written + source-checked → encyclopedia/RB-E-NAV.md
+confidence: medium
+platforms: [react, react-native]
+options:
+  - { name: "React Navigation", tradeoff: "RN default; mature; imperative + declarative" }
+  - { name: "Expo Router", tradeoff: "file-based; great if on Expo; convention over config" }
+  - { name: "React Router (8.x)", tradeoff: "web routing; absorbed Remix; v8 (8.0.1, 2026-06) RELEASED — ESM-only (drops CJS + react-router-dom), future flags on by default; v7→v8 generally non-breaking if you're caught up on v7 future flags" }
+  - { name: "TanStack Router / Start", tradeoff: "type-safe web routing; signal-based core; Start is its RSC/SSR meta-framework (see RB-E-META-FRAMEWORKS)" }
+  - { name: "Next.js App Router", tradeoff: "web, full-framework routing + RSC (see RB-E-META-FRAMEWORKS)" }
+recommend:
+  default: "React Native → Expo Router if you're on Expo, else React Navigation. Web → use the meta-framework's router (see RB-E-META-FRAMEWORKS), or TanStack Router for a type-safe SPA."
+  when:
+    - "Expo app → Expo Router (file-based)"
+    - "bare RN → React Navigation"
+    - "type-safe web SPA without a meta-framework → TanStack Router"
+    - "React Navigation 8 is still ALPHA in 2026 — pin/verify before adopting its native tabs"
+note: >
+  React Navigation 8.0 (ALPHA, announced 2025-12) makes NATIVE bottom tabs the default
+  (via react-native-screens — native look incl. iOS 26 liquid glass), adds native icon
+  components (SFSymbol on iOS / MaterialSymbol on Android — smaller bundles), reworks
+  TypeScript inference, and adds screen-history APIs (pushParams, persistor, inactiveBehavior
+  via React.Activity). Reflects the trend toward honouring platform UI. Still ALPHA in
+  2026 — pin/verify before adopting. Verified vs the React Navigation blog.
+defer_to_skill: null
+doc: "RB-E-NAV.md"   # long-form Explanation entry in content_dir
+updated: 2026-06-25
+reading:
+  - title: "Exploring Inlined Requires: does Expo Router give you screen-level lazy loading?"
+    url: "https://andrei-calazans.com/posts/2026-06-04-expo-router-screen-level-lazy-loading/"
+    by: "Andrei Calazans"
+    what: "Instrumented proof that Expo Router defers screen loading by construction via require.context() getters wrapped in getComponent thunks — with the precise caveats (layouts/initial route load eagerly; sync require, not bundle-splitting). The canonical explanation of Expo Router's lazy-loading mechanism."
+  - title: "React Router loaders and actions as integration points"
+    url: "https://sergiodxa.com/articles/react-router-loaders-and-actions-as-integration-points"
+    by: "Sergio Xalambrí (React Router / Remix)"
+    what: "Frames loaders/actions as the HTTP-to-domain seam — keep business logic in testable services, reserve loaders/actions for the integration layer (E2E). A durable testing/architecture philosophy for React Router."
+  - title: "Untangling Dialogs in React Router"
+    url: "https://programmingarehard.com/2026/05/06/react-router-dialogs.html/"
+    by: "Dave Adams"
+    what: "Models modal dialogs as nested routes in React Router 7 instead of local useState/useEffect — covering revalidation, view transitions, flash sessions, and exit animations. A durable routing pattern that generalizes beyond the example."
+sources:
+  - "https://reactnavigation.org/blog/2025/12/19/react-navigation-8.0-alpha/"
+  - "https://reactrouter.com/"

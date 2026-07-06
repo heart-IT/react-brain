@@ -1,0 +1,45 @@
+id: RB-E-RN-VERSIONS
+topic: "React Native release timeline — what each version changed"
+category: rn-versions
+group: react-foundations
+status: drafted
+confidence: high
+platforms: [react-native]
+options:
+  - { name: "RN 0.76 (2024-10)", tradeoff: "New Arch ON by default; React Native DevTools; boxShadow + filter; iOS 15.1 / Android API 24 min; `react-native init` deprecated → Expo recommended" }
+  - { name: "RN 0.77", tradeoff: "CSS-ish styling (display:contents, box-sizing, mixBlendMode, outline); Android 15 16KB pages + edge-to-edge" }
+  - { name: "RN 0.78 (2025-02)", tradeoff: "React 19 (Actions, useActionState, useOptimistic, use, React Compiler); ref-as-prop (forwardRef deprecated)" }
+  - { name: "RN 0.79", tradeoff: "Metro ~3x faster cold start (deferred hashing); remote-JS Chrome debugging removed" }
+  - { name: "RN 0.80 (2025-06)", tradeoff: "opt-in Strict TypeScript API (types from source); Legacy Architecture FROZEN (2025-06-02)" }
+  - { name: "RN 0.81", tradeoff: "Android 16 (API 36) + mandatory edge-to-edge; SafeAreaView deprecated → safe-area-context; JavaScriptCore removed (Hermes-only); precompiled iOS opt-in; React Compiler in default template (RC)" }
+  - { name: "RN 0.82", tradeoff: "New Architecture MANDATORY (opt-out ignored); Hermes V1 experimental; debugOptimized Android variant; DOM Node APIs" }
+  - { name: "RN 0.83", tradeoff: "React 19.2 (<Activity>, useEffectEvent); Intersection Observer; DevTools network inspector; prebuilt artefacts" }
+  - { name: "RN 0.84 (2026-02-11) ✓", tradeoff: "Hermes V1 DEFAULT; precompiled iOS binaries default; Node 22.11+ min; Legacy-Arch stripped; bi-monthly cadence" }
+  - { name: "RN 0.85 (2026-04-07) ✓", tradeoff: "shared C++ animation backend; Jest preset → @react-native/jest-preset; layout-prop native driver (0.85.1)" }
+  - { name: "RN 0.86 (2026-06-11) ✓", tradeoff: "Android-15+ edge-to-edge in core (drop react-native-edge-to-edge); DevTools light/dark; 2nd zero-breaking-change release" }
+recommend:
+  default: "Target the latest stable RN (0.86); the New Architecture is non-optional from 0.82, so plan any migration around that line."
+  when:
+    - "on RN < 0.82 → budget a New-Arch migration; Legacy was frozen at 0.80 (no fixes)"
+    - "on RN ≥ 0.86 → drop react-native-edge-to-edge (now in core)"
+    - "quoting a pre-0.84 row as authoritative → verify against that version's RN blog first"
+note: >
+  Use this to tell a project what it gains/loses by moving RN versions. Rows marked ✓ (0.84–0.86)
+  are verified vs official RN blogs; 0.76–0.83 are from release history + RN Rewind — verify a
+  specific row against the RN blog before quoting it as authoritative. Expo SDK mapping: SDK 55 =
+  RN 0.83 + React 19.2; SDK 56 = RN 0.85 + Expo UI stable; SDK 57 = RN 0.86 + React 19.2 (2026-06,
+  verified vs the SDK 57 changelog — skipped the beta phase, since RN 0.86 was breaking-change-free;
+  Expo is testing near-immediate optional upgrades as RN moves to 6 releases/yr).
+defer_to_skill: react-native-jsi
+doc: null
+updated: 2026-07-02
+reading:
+  - title: "React Native Architecture: From Bridge to Fabric"
+    url: "https://blog.codeminer42.com/react-native-architecture-from-bridge-to-fabric/"
+    by: "Felipe Ramalho (Codeminer42)"
+    what: "Traces RN's architecture from the old async JSON bridge to the New Architecture (JSI, Fabric's immutable C++ shadow tree, Turbo Modules, Codegen), explaining why each piece exists. The 'why it changed' narrative behind the 0.76→0.82 version arc — not a release note."
+sources:
+  - "https://reactnative.dev/blog/2026/02/11/react-native-0.84"
+  - "https://reactnative.dev/blog/2026/04/07/react-native-0.85"
+  - "https://reactnative.dev/blog/2026/06/11/react-native-0.86"
+  - "https://expo.dev/changelog/sdk-57"

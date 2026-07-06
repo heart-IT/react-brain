@@ -1,0 +1,55 @@
+id: RB-E-MEDIA
+topic: "Camera, video & real-time media (WebRTC, frame processing, filters)"
+category: media
+group: platform-native
+status: drafted
+confidence: low
+platforms: [react, react-native]
+options:
+  - { name: "VisionCamera (v5, Nitro)", tradeoff: "RN camera with JSI frame processors; v5 rebuilt on Nitro; the base for custom real-time frame pipelines (see RB-E-NATIVE)" }
+  - { name: "expo-camera", tradeoff: "managed camera for Expo apps; simpler, fewer real-time hooks than VisionCamera" }
+  - { name: "react-native-webrtc", tradeoff: "low-level WebRTC bindings; you wire signaling/SFU yourself" }
+  - { name: "LiveKit / Daily / Agora / Stream Video", tradeoff: "WebRTC conferencing SDKs (RN + web); LiveKit is open-source + self-hostable, the others are hosted infra" }
+  - { name: "Skia / Metal + MediaPipe / Vision / ML Kit", tradeoff: "GPU compositing (Skia/Metal) + on-device segmentation/detection (MediaPipe on Android, Vision on iOS) for filters/effects" }
+  - { name: "expo-video / expo-av", tradeoff: "media PLAYBACK (not capture or calling)" }
+  - { name: "expo-image", tradeoff: "image DISPLAY — the modern replacement for core <Image>: disk/memory caching, blurhash/thumbhash placeholders, transitions, faster decode; works in bare RN, not just Expo" }
+recommend:
+  default: "Camera → VisionCamera (frame processors) or expo-camera (managed); video calling → LiveKit (open-source) or a hosted SDK (Daily/Agora/Stream); real-time filters → process VisionCamera frames + GPU-composite and inject into the WebRTC source; image display → expo-image over core <Image>. Calling-SDK specifics are lightly vetted (confidence: low) — prototype perf per-device before committing."
+  when:
+    - "custom real-time effects (blur / segmentation / virtual bg) → VisionCamera frame processors + Skia/Metal + MediaPipe/Vision"
+    - "self-hosted / open-source calling → LiveKit; fastest managed setup → Daily / Agora / Stream"
+    - "just capture photos / scan codes → expo-camera (or VisionCamera for advanced)"
+    - "displaying images (caching, blurhash placeholders, transitions) → expo-image, not core <Image>"
+    - "real-time pipeline correctness & perf → react-native-jsi (frame processors) + rt-audio-pipeline-audit (the real-time discipline transfers from audio)"
+note: >
+  NEW domain entry (2026-06-25), surfaced by a Margelo deep-dive (see `reading`) the index
+  previously had nowhere to put. Durable real-time lesson it teaches: DON'T fork the WebRTC
+  stack — intercept camera frames, run segmentation/detection OFF the hot path (~20-30ms,
+  "latest mask wins" rather than blocking), GPU-composite, and inject the result into the
+  EXISTING WebRTC VideoSource (the source doesn't care who produces frames). VisionCamera v5
+  (Nitro/JSI) is the frame-processor base (consistent with RB-E-NATIVE). Options are lightly
+  vetted — recommend tentatively (confidence: low) and prototype on-device; calling-SDK specifics
+  (pricing, features) are not yet verified here.
+defer_to_skill: react-native-jsi   # frame processors / native modules; real-time perf → rt-audio-pipeline-audit
+doc: null
+updated: 2026-07-01
+reading:
+  - title: "Building a video call app with filters"
+    url: "https://blog.margelo.com/building-videocall-app-with-filters"
+    by: "Ritesh Shukla (Margelo)"
+    what: >
+      Architecture deep-dive: real-time RN video-call filters (background blur, virtual
+      backgrounds, Center Stage auto-zoom, live drawing) by injecting processed VisionCamera
+      frames into LiveKit's WebRTC VideoSource without touching encoder/transport/signaling.
+      Covers off-thread segmentation (MediaPipe/Vision), Metal/Skia compositing, YUV↔I420/NV12
+      conversion, and the monotonic-timestamp + buffer-pooling gotchas.
+  - title: "MoQKit: a native mobile SDK for MoQ on iOS and Android"
+    url: "https://swmansion.com/blog/moqkit-native-mobile-sdk-moq-ios-android/"
+    by: "Jakub Perżyło (Software Mansion)"
+    what: "Architectural intro to Media over QUIC for mobile — the session/namespace/track model, why moq-lite over moq-transport, and where it sits between WebRTC and HLS. A durable real-time-media transport reference."
+  - title: "QR and Barcode Scanning in React Native with VisionCamera V5"
+    url: "https://blog.margelo.com/react-native-qr-barcode-scanner-visioncamera-v5"
+    by: "Marc Rousavy (Margelo; VisionCamera creator)"
+    what: "By VisionCamera's creator: three scanning APIs (CodeScanner / useBarcodeScannerOutput / frame processors), narrowing barcodeFormats and outputResolution for latency, the frame-vs-preview coordinate gotcha, and MLKit vs Apple's native AVCaptureMetadataOutput vs commercial SDKs. The reference for RN code scanning."
+sources:
+  - "https://blog.margelo.com/building-videocall-app-with-filters"

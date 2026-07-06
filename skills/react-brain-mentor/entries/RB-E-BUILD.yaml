@@ -1,0 +1,65 @@
+id: RB-E-BUILD
+topic: "Build tooling, bundlers & monorepo"
+category: build-tooling
+group: tooling-ops
+status: reviewed   # long-form entry written + source-checked → encyclopedia/RB-E-BUILD.md
+confidence: high
+platforms: [react, react-native]
+options:
+  - { name: "Metro", tradeoff: "RN bundler" }
+  - { name: "Vite 8 / Rspack 2 / webpack", tradeoff: "web bundlers; Vite 8 defaults to the Rust Rolldown bundler; Rspack 2 adds RSC + 2.1 ships the Rust React Compiler via its built-in SWC loader (7–13x the Babel plugin); Vite default for new web" }
+  - { name: "Turborepo / Nx + pnpm/yarn workspaces", tradeoff: "monorepo task graph + caching" }
+  - { name: "Expo vs bare RN", tradeoff: "managed velocity vs native control" }
+  - { name: "react-native-swc", tradeoff: "Rust/SWC Metro transform — faster than Babel; custom Babel plugins need SWC equivalents (e.g. worklets plugin for Reanimated)" }
+  - { name: "RNRepo (Software Mansion)", tradeoff: "prebuilt native binaries via Maven; cuts CI build time (~50% reported)" }
+  - { name: "Re.Pack 5 (Rspack)", tradeoff: "Metro alternative on Rust-based Rspack; module federation / super-apps" }
+  - { name: "Rock (Callstack)", tradeoff: "native build-artifact caching (reported 35min → <4min); works with Metro or Re.Pack" }
+  - { name: "Rollipop (early alpha)", tradeoff: "Metro replacement powered by Rolldown (the Vite team's Rust bundler) — inherits the Rollup/Rolldown plugin ecosystem, Yarn PnP by default, dev dashboard; bare RN CLI only (no Expo); early-alpha, not production" }
+recommend:
+  default: "Web: Vite 8 (Rolldown). React Native: Metro (+ Hermes V1, precompiled iOS binaries). Monorepo: pnpm workspaces + Turborepo. Expo for managed velocity."
+  when:
+    - "RN bundler alternative for module federation / super-apps → Re.Pack 5"
+    - "want the Rolldown/Rollup plugin ecosystem on RN (experimental) → Rollipop — early alpha, prototype only, not an Expo path"
+    - "slow RN CI → prebuilt binaries (RNRepo) and/or Rock build caching"
+    - "Babel is the Metro bottleneck → react-native-swc"
+    - "Pear app → esbuild-bundle to dist (desktop) or Metro + bare-pack for the Bare worker (mobile), not the web/Metro defaults — see RB-E-P2P"
+    - "new web project → Vite; legacy web → webpack/Rspack"
+note: >
+  ENGINE + BUILD (verified vs RN 0.84 blog): Hermes V1 is the DEFAULT JS engine since RN 0.84
+  (2026-02-11; experimental opt-in from 0.82, also opt-in in Expo SDK 55) — automatic if already
+  on Hermes. RN 0.84 also ships PRECOMPILED iOS binaries by default (fetched at pod install,
+  faster builds) and raised the minimum to Node 22.11+. RN is on a bi-monthly release cadence.
+  Prebuilt native libraries (RN 0.83 artefacts, RNRepo) are the broader trend. BUNDLERS: Metro
+  stays the RN default (RN 0.79 added ~3x faster cold start); Re.Pack 5 (on Rspack) is the main
+  alternative, and Rollipop (leegeunhyeok/rollipop, early alpha per its repo) now brings Rolldown —
+  the same Rust bundler behind Vite 8 — directly to the RN side; remote-JS Chrome debugging was
+  removed in RN 0.79 (use RN DevTools). Rollipop verified vs its repo 2026-06-30 (early-alpha, not production).
+  WEB TOOLCHAIN: a Rust wave — Vite 8 on Rolldown (1.0; ~10–30x Rollup), the Oxc family
+  (Oxlint/Oxfmt), Bun; Cloudflare acquired VoidZero (Vite/Vitest/Rolldown/Oxc) — tools stay MIT.
+  Adversarially stress-tested 2026-06-25 (SURVIVES, high): Vite 8 shipped stable (2026-03) with
+  Rolldown GA as the default; the Rust React-Compiler napi pullback affects only that compiler's
+  JS path, not Rolldown-as-bundler; Metro stays the RN default. UPDATE 2026-07-06: the Rust React
+  Compiler has since merged into SWC and ships in Rspack 2.1 (7–13x the Babel version, verified vs
+  the Rspack 2.1 blog) — Rolldown's pullback is a Rolldown-integration choice, not a dead Rust port.
+defer_to_skill: null
+doc: "RB-E-BUILD.md"   # long-form Explanation entry in content_dir
+updated: 2026-07-06
+reading:
+  - title: "Rust Is Eating JavaScript"
+    url: "https://leerob.com/rust"
+    by: "Lee Robinson"
+    what: "The first-principles explainer for WHY the JS toolchain is going Rust — memory safety, no GC, real parallelism, the redundant-parsing problem — mapping the whole landscape (esbuild, SWC, Oxc/Biome, Rspack, Rolldown). Durable cross-cutting context, not a single release."
+  - title: "Vite 8.0 is out!"
+    url: "https://vite.dev/blog/announcing-vite8"
+    by: "The Vite / VoidZero team"
+    what: "Why maintaining two pipelines (esbuild + Rollup) was unsustainable and how Rolldown unifies dev/prod on one Rust bundler (10-30x faster), with Oxc semantic analysis driving better tree-shaking. The primary source for the Vite+Rolldown+Oxc consolidation."
+  - title: "Exploring Inlined Requires: how they really work"
+    url: "https://andrei-calazans.com/posts/2026-06-02-how-metro-inlined-requires-work/"
+    by: "Andrei Calazans"
+    what: "Exactly what Metro's inlineRequires Babel transform does, why React/RN stay hoisted, why default imports aren't inlined, and how rnx-kit's esbuild path differs (real tree-shaking vs startup-only). The canonical Metro startup-mechanics reference."
+  - title: "The Complete Guide to React Native Build Optimization"
+    url: "https://themythicalengineer.com/the-complete-guide-to-react-native-build-optimization.html"
+    by: "The Mythical Engineer"
+    what: "Why RN Android builds are slow (conservative Gradle/Metro/C++ defaults) and how parallel Gradle, dynamic Metro workers, ccache, and single-architecture builds cut times from 20+ min to 2-5 min, with benchmarks. The RN-CI build-perf dimension the other readings here don't cover."
+sources:
+  - "https://reactnative.dev/blog/2026/02/11/react-native-0.84"

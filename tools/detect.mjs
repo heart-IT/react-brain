@@ -16,24 +16,41 @@ import { createRequire } from 'node:module';
 const __dir = dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
 export const ENC_PATH = resolve(__dir, '../skills/react-brain-mentor/encyclopedia.yaml');
+export const ENTRIES_DIR = resolve(__dir, '../skills/react-brain-mentor/entries');
 export const GROUP_ORDER = ['react-foundations', 'app-architecture', 'ui', 'platform-native', 'tooling-ops', 'ai'];
 
-function loadYamlPy(p) {
-  // dev fallback: python3 + pyyaml (default=str so unquoted dates serialize as strings)
+function loadYamlPy(paths) {
+  // dev fallback: python3 + pyyaml, ONE spawn for any number of files
+  // (default=str so unquoted dates serialize as strings)
   const src = execFileSync('python3',
-    ['-c', 'import sys,yaml,json;json.dump(yaml.safe_load(open(sys.argv[1])),sys.stdout,default=str)', p],
+    ['-c', 'import sys,yaml,json;json.dump([yaml.safe_load(open(p)) for p in sys.argv[1:]],sys.stdout,default=str)', ...paths],
     { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
   return JSON.parse(src);
 }
 
 // Prefer the `yaml` npm package (installed via npm/npx — the distributable path); fall back to a
 // python3+pyyaml shim so the repo's own dev tools run with zero `npm install`.
-export function loadYaml(p) {
-  try { return require('yaml').parse(readFileSync(p, 'utf8')); }
-  catch { return loadYamlPy(p); }
+export function loadYaml(p) { return loadYamlMany([p])[0]; }
+export function loadYamlMany(paths) {
+  try { const y = require('yaml'); return paths.map((p) => y.parse(readFileSync(p, 'utf8'))); }
+  catch { return loadYamlPy(paths); }
 }
 
-export function loadDoc() { return loadYaml(ENC_PATH); }
+// The encyclopedia is SPLIT: encyclopedia.yaml is the index (meta + groups TOC +
+// mentor_hints); entries live one-per-file in entries/<ID>.yaml, ordered here by
+// the TOC so consumers see the same sequence the monolith had. A monolith with an
+// inline `entries:` key still loads (back-compat for old checkouts / forks).
+export function loadDoc() {
+  const doc = loadYaml(ENC_PATH);
+  if (!doc.entries && existsSync(ENTRIES_DIR)) {
+    const files = readdirSync(ENTRIES_DIR).filter((f) => f.endsWith('.yaml')).sort();
+    const entries = loadYamlMany(files.map((f) => join(ENTRIES_DIR, f)));
+    const order = new Map((doc.groups || []).flatMap((g) => g.entries || []).map((id, i) => [id, i]));
+    entries.sort((a, b) => (order.get(a.id) ?? 1e9) - (order.get(b.id) ?? 1e9));
+    doc.entries = entries;
+  }
+  return doc;
+}
 export function loadEntries() { return Object.fromEntries(loadDoc().entries.map((e) => [e.id, e])); }
 
 // pattern -> [entry, human label, token to look for in the entry's recommend text]

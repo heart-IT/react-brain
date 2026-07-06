@@ -1,0 +1,31 @@
+id: RB-E-FORMS
+topic: "Forms & validation"
+category: forms
+group: app-architecture
+status: drafted
+confidence: medium
+platforms: [react, react-native]
+options:
+  - { name: "React Hook Form", tradeoff: "uncontrolled, performant; RN-compatible" }
+  - { name: "Formik", tradeoff: "controlled, popular, heavier re-renders" }
+  - { name: "TanStack Form (1.x)", tradeoff: "type-safe; FormGroup API for multi-step forms" }
+  - { name: "Conform / Formisch", tradeoff: "Conform = progressive-enhancement (web actions); Formisch = signal-based, schema-first (Valibot), pre-1.0 (v1.0.0-rc)" }
+  - { name: "Zod / Valibot (validation)", tradeoff: "schema validation via any form lib; Standard Schema lets libs accept either" }
+recommend:
+  default: "React Hook Form + Zod — the common, performant, RN-compatible default."
+  when:
+    - "want maximal type-safety / multi-step → TanStack Form"
+    - "server-action / progressive-enhancement web forms → Conform"
+    - "bundle-sensitive validation → Valibot instead of Zod (Standard Schema keeps it swappable)"
+    - "existing Formik that works → keep it unless re-render cost bites"
+defer_to_skill: null
+doc: null
+updated: 2026-06-25
+sources:
+  - "https://standardschema.dev/"
+  - "https://tanstack.com/form/latest/docs/framework/react/guides/form-groups"
+reading:
+  - title: "One core, six frameworks, zero runtime abstraction"
+    url: "https://formisch.dev/blog/one-core-six-frameworks/"
+    by: "Fabian Hiller (Formisch / Valibot)"
+    what: "Shows build-time framework abstraction (a tiny core swapped by a bundler plugin) instead of a runtime adapter layer, so form state uses each framework's native signals. A generalizable library-design pattern reframing portability vs integration."

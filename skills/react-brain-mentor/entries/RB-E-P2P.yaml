@@ -1,0 +1,41 @@
+id: RB-E-P2P
+topic: "Peer-to-peer / local-first backend (Holepunch · Pear)"
+category: p2p
+group: app-architecture
+status: drafted
+confidence: medium
+platforms: [react, react-native]
+options:
+  - { name: "Hypercore", tradeoff: "signed append-only log; the primitive everything builds on" }
+  - { name: "Autobase", tradeoff: "multiwriter — linearize many writers' Hypercores into one shared view (collaboration)" }
+  - { name: "Hyperbee", tradeoff: "ordered key-value / B-tree over a Hypercore; the queryable index/view layer" }
+  - { name: "Corestore", tradeoff: "manages many Hypercores (naming, lifecycle)" }
+  - { name: "Hyperswarm / HyperDHT", tradeoff: "peer discovery + encrypted connections over a DHT — no servers" }
+  - { name: "Hyperdrive / Hyperblobs", tradeoff: "P2P filesystem / blob store" }
+  - { name: "hrpc + Hyperschema", tradeoff: "typed RPC + binary schema between the app (UI thread) and a local Bare worker" }
+  - { name: "Pear / Bare", tradeoff: "Pear = the P2P runtime + content-addressed distribution (desktop & mobile); Bare = the lightweight JS runtime for mobile workers (bare-kit)" }
+recommend:
+  default: "Holepunch is a SERVERLESS, local-first alternative to the client-server + REST/GraphQL model: data is a local append-only log (Hypercore), merged across writers with Autobase, indexed in Hyperbee, synced peer-to-peer over Hyperswarm, and shipped by Pear. Choose it when serverless / offline-first / private / censorship-resistant matters; choose conventional client-server (RB-E-DATA + a hosted DB) when you want central control, SQL, and a familiar ops story."
+  when:
+    - "offline-first / local-first / no-backend-ops / private / P2P → Holepunch (Hypercore + Autobase + Hyperbee + Hyperswarm)"
+    - "multi-writer shared/collaborative state → Autobase over per-writer Hypercores"
+    - "conventional CRUD with a central server/team → REST/GraphQL + TanStack Query (RB-E-DATA), not this"
+    - "ANY Holepunch depth (replication, identity, schema, sessions, blind-pairing, Pear/Bare workflow) → holepunch-p2p-systems skill"
+note: >
+  The heartit ecosystem's backbone: ledgerhr (Pear desktop), ourpot + bitbarter (Pear mobile via
+  bare-kit) all run on Holepunch — so for these apps a conventional data-cache (TanStack Query),
+  hosted DB, REST API, and central server are N/A by design; the "data layer" is the Hypercore/
+  Autobase/Hyperbee stack queried locally via hrpc, and brittle (testing) + esbuild/bare-pack
+  (build) follow the Holepunch ecosystem, not the mainstream-React defaults. This entry exists so
+  the encyclopedia stops treating that stack as a deviation. Added 2026-06-25 after the
+  evidence-loop corpus self-audit found all three heartit apps on Holepunch with no entry to map
+  it to. DEPTH (correctness, replication, identity, sessions, Pear/Bare workflow) is owned by the
+  holepunch-p2p-systems skill.
+defer_to_skill: holepunch-p2p-systems
+doc: null
+updated: 2026-06-25
+reading:
+  - title: "Pear by Holepunch — building blocks & architecture (docs)"
+    url: "https://docs.pears.com/"
+    by: "Holepunch (Pear docs)"
+    what: "The canonical reference for the Holepunch stack — Hypercore (append-only log), Autobase (multiwriter), Hyperbee (B-tree index), Hyperswarm/HyperDHT (discovery), Hyperdrive (files), Corestore, and the Pear runtime. The 'why' behind P2P/local-first; pair with the holepunch-p2p-systems skill for build/review depth."

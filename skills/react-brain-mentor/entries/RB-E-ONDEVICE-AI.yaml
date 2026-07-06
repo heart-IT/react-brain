@@ -1,0 +1,29 @@
+id: RB-E-ONDEVICE-AI
+topic: "On-device AI / ML"
+category: ai-ml
+group: ai
+status: drafted
+confidence: low
+platforms: [react-native]
+options:
+  - { name: "react-native-executorch", tradeoff: "on-device models (Meta ExecuTorch); v0.8 adds VLM + runOnFrame worklet w/ Vision Camera; tool-calling/embeddings since 0.4, OCR since 0.3" }
+  - { name: "@react-native-ai/apple", tradeoff: "Apple on-device LLM + SpeechAnalyzer (iOS 26); zero cloud; RN 0.80+ (preview)" }
+  - { name: "react-native-rag", tradeoff: "on-device retrieval-augmented generation over ExecuTorchLLM; local vector store" }
+  - { name: "offline speech (expo-speech-recognition / whisper)", tradeoff: "speech-to-text without network" }
+recommend:
+  default: "Cross-platform on-device models → react-native-executorch; Apple-only → @react-native-ai/apple; local RAG → react-native-rag. Fast-moving (confidence: low) — validate on-device perf before committing."
+  when:
+    - "offline speech-to-text → expo-speech-recognition / whisper"
+    - "private/offline LLM over local docs → react-native-rag"
+note: "Fast-moving area surfaced across multiple RN Rewind issues; recommend tentatively (confidence: low) and validate on-device before committing."
+defer_to_skill: null
+doc: null
+updated: 2026-06-25
+sources:
+  - "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.8.0"
+  - "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.3.0"
+reading:
+  - title: "On-Device AI Beats Cloud for TTS — Here's Why"
+    url: "https://swmansion.com/blog/on-device-ai-beats-cloud-for-tts-heres-why/"
+    by: "Mateusz Kopciński (Software Mansion)"
+    what: "A reasoned cost/latency/privacy case for on-device TTS (Kokoro via react-native-executorch), with the economics and the tradeoffs (voice/language coverage, a custom C++ phonemizer). A durable framing for the on-device-vs-cloud decision."

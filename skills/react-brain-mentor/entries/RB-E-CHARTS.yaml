@@ -1,0 +1,35 @@
+id: RB-E-CHARTS
+topic: "Charting & data visualization"
+category: data-viz
+group: ui
+status: drafted
+confidence: low
+platforms: [react, react-native]
+options:
+  - { name: "Victory Native (XL)", tradeoff: "RN; Skia-backed; mature, broad chart types" }
+  - { name: "react-native-gifted-charts", tradeoff: "RN; declarative, quick to adopt" }
+  - { name: "react-native-skia (build-your-own)", tradeoff: "RN; max control + perf, more code" }
+  - { name: "react-native-livechart", tradeoff: "RN; Skia + Reanimated + Gesture Handler; realtime/finance focus, crosshair scrubbing — newer/niche" }
+  - { name: "Recharts / visx / Chart.js", tradeoff: "web; visx = low-level D3 primitives, Recharts = batteries-included" }
+recommend:
+  default: "RN: Victory Native (XL) for standard charts; react-native-skia when you need custom/realtime rendering. Web: Recharts (batteries-included) or visx (low-level D3)."
+  when:
+    - "realtime/finance RN charts → Skia-based (Victory Native XL or react-native-livechart, which is newer/niche)"
+    - "fully custom web viz → visx; quick standard charts → Recharts"
+    - "heavy Skia/Reanimated perf → react-native-best-practices"
+note: "Library picks are reasonable defaults but lightly vetted. Ignore react-native-livechart's satirical 'degen mode' framing — not a selection axis."
+defer_to_skill: react-native-best-practices  # Skia/Reanimated render-perf depth
+doc: null
+updated: 2026-06-25
+reading:
+  - title: "Introducing visx from Airbnb"
+    url: "https://medium.com/airbnb-engineering/introducing-visx-from-airbnb-fd6155ac4658"
+    by: "Airbnb Tech Blog"
+    what: "The architecture of web React charting — use D3 for math/layout while React owns the DOM, and compose low-level primitives instead of opinionated chart components. First-principles framing that applies to visx, Recharts, and any D3+React stack."
+  - title: "The Future of React Native Graphics: WebGPU, Skia, and Beyond"
+    url: "https://shopify.engineering/webgpu-skia-web-graphics"
+    by: "William Candillon (Shopify)"
+    what: "How RN Skia renders graphics — incl. the canonical high-density line-chart-as-GPU-texture example, JSI, immutable display lists, a unified WebGPU backend. The rendering model under Victory Native XL and build-your-own Skia charts."
+sources:
+  - "https://reactnativerewind.com/issues/react-native-0-86-charting-your-financial-ruin-and-the-junk-drawer-in-your-package-json"
+  - "https://github.com/FormidableLabs/victory-native-xl"

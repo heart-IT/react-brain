@@ -1,0 +1,53 @@
+id: RB-E-META-FRAMEWORKS
+topic: "Meta-frameworks (full-stack React)"
+category: meta-frameworks
+group: app-architecture
+status: reviewed   # long-form entry written + source-checked → encyclopedia/RB-E-META-FRAMEWORKS.md
+confidence: medium
+platforms: [react, react-native]
+options:
+  - { name: "Next.js (16.x)", tradeoff: "most-used; App Router + RSC + Server Actions; adapters API for non-Vercel hosts; frequent security patches" }
+  - { name: "TanStack Start", tradeoff: "Vite-based; RSC-as-protocol, SSR, Server Functions; deliberately omits Server Actions for security; less opinionated than Next" }
+  - { name: "React Router 7 (framework mode) / Remix", tradeoff: "Remix merged into React Router 7; full-stack loaders/actions; Remix 3 is a separate JSX-component pivot away from RR" }
+  - { name: "Expo Router", tradeoff: "the RN/universal meta-framework; SDK 56 decoupled from React Navigation; web SSR (alpha)" }
+  - { name: "Astro / Waku / RedwoodSDK", tradeoff: "Astro = content/islands; Waku 1.0-beta = minimal RSC; RedwoodSDK 1.0 = Vite+RSC+Cloudflare" }
+  - { name: "Vinext (Cloudflare)", tradeoff: "Vite-based Next.js rebuild; AI-generated, early — Vercel flagged security issues + low real test coverage; not production-ready" }
+recommend:
+  default: "Web: Next.js is the safe default; choose TanStack Start when you want a less-opinionated, Vite-native RSC stack. RN/universal: Expo Router."
+  when:
+    - "content/marketing site → Astro (ship less JS)"
+    - "Cloudflare-first stack → RedwoodSDK"
+    - "want minimal RSC, no lock-in → Waku (still beta)"
+    - "evaluating Vinext → not production-ready; don't bet on it yet"
+note: "Distinct from routing (RB-E-NAV): these own SSR/RSC/data/build. Context-key by hosting target + how much RSC you actually need."
+defer_to_skill: engineering-principles
+doc: "RB-E-META-FRAMEWORKS.md"   # long-form Explanation entry in content_dir
+updated: 2026-07-02
+reading:
+  - title: "Who Owns the Tree? RSC as a Protocol, Not an Architecture"
+    url: "https://tanstack.com/blog/who-owns-the-tree"
+    by: "TanStack"
+    what: "Argues RSC is a serialization protocol that enables both server-owned and client-owned trees, contrasting TanStack Start's inversion-of-control with Next.js's server-owned model. The durable mental model for reasoning about RSC across frameworks."
+  - title: "React Server Components in TanStack"
+    url: "https://frontendmasters.com/blog/react-server-components-in-tanstack/"
+    by: "Adam Rackis (Frontend Masters)"
+    what: "First-principles RSC tutorial grounded in TanStack Start's explicit API (createServerFn, renderServerComponent), contrasted with Next.js's implicit model, with honest use-case scoping and bundle-size results."
+  - title: "Moving Railway's frontend off Next.js"
+    url: "https://blog.railway.com/p/moving-railways-frontend-off-nextjs"
+    by: "Victor Ramirez (Railway)"
+    what: "Migration postmortem — 200+ routes off Next.js onto Vite + TanStack Start (10min→<2min builds), with the reasoning for when a client-centric app outgrows a server-first meta-framework. A concrete decision case study."
+  - title: "use client in Next.js"
+    url: "https://punits.dev/blog/use-client-in-nextjs/"
+    by: "Punit Sethi"
+    what: "The mental model for the use-client boundary — it does NOT disable SSR — plus its three real costs (bundle, hydration, fetch waterfalls), with measured comparisons and the server-component-as-prop technique. Durable RSC fundamentals."
+  - title: "Next.js 16.3: Instant Navigations (16.3 Preview)"
+    url: "https://nextjs.org/blog/next-16-3-instant-navigations"
+    by: "Andrew Clark & Josh Story (Next.js team)"
+    what: "How Next.js closes RSC's biggest UX gap — slow navigations — with Cache Components + a per-route Stream/Cache/Block choice and Partial Prefetching (one reusable per-route shell instead of a prefetch per link). The durable mental model for server-driven-but-instant navigation; covers a facet the other RSC readings don't. Gated behind cacheComponents/partialPrefetching flags (16.3 Preview, not yet stable — verify before quoting as GA)."
+  - title: "Different Hydration and Rendering Strategies"
+    url: "https://neciudan.dev/hydration-and-rendering-strategies"
+    by: "Neci Dan (neciudan.dev)"
+    what: "A systematic map of the whole rendering spectrum — CSR, SSG, ISR, SSR, streaming SSR + Suspense, RSC, islands, signal-based fine-grained reactivity, Qwik resumability, and Next 16.3 instant navigations — organized around ONE durable question: the gap between when a page LOOKS ready (HTML painted) and when it WORKS (JS hydrated/executing). Each strategy is a different trade on that window — ship less JS (islands/RSC), execute it faster (signals), or skip execution (resumability). The mental model that turns 'which meta-framework / rendering mode' into a reasoned choice instead of a checklist; the framing behind this entry's context-keys."
+sources:
+  - "https://tanstack.com/blog/who-owns-the-tree"
+  - "https://frontendmasters.com/blog/react-server-components-in-tanstack/"

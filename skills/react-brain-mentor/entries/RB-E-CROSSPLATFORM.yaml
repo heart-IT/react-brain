@@ -1,0 +1,46 @@
+id: RB-E-CROSSPLATFORM
+topic: "Sharing code across React (web) & React Native"
+category: cross-platform
+group: app-architecture
+status: reviewed   # long-form entry written + source-checked → encyclopedia/RB-E-CROSSPLATFORM.md
+confidence: high
+platforms: [react, react-native]
+options:
+  - { name: "shared logic/hooks package", tradeoff: "platform-agnostic core in a workspace package" }
+  - { name: "platform-extension files (.web.tsx/.native.tsx)", tradeoff: "one API, per-platform impl" }
+  - { name: "React Strict DOM (Meta)", tradeoff: "write strict HTML/CSS rendering web + native; Babel flattens to real DOM + static CSS on web; emerging RN-Web successor; involved setup" }
+  - { name: "react-native-web", tradeoff: "MAINTENANCE MODE (2026) — maps RN primitives to HTML; still works, no major features coming" }
+  - { name: "Tamagui", tradeoff: "cross-platform UI + optimizing compiler" }
+  - { name: "Expo Universal Components / @expo/ui", tradeoff: "single API → SwiftUI (iOS) / Jetpack Compose (Android) / react-dom (web); SDK 56 beta" }
+  - { name: "Solito", tradeoff: "shared routing across Expo + Next.js; v5 dropped the RN-Web core dep" }
+  - { name: "Expo DOM Components (`use dom`)", tradeoff: "render real web components inside RN via a webview wrapper (since Expo SDK 52); good for incremental web reuse" }
+recommend:
+  default: "Share a platform-agnostic logic/hooks package first (the highest-leverage, lowest-risk win). For shared UI on NEW projects, evaluate React Strict DOM or Expo Universal Components — not a fresh react-native-web bet."
+  when:
+    - "duplicated business logic across web + native → extract a shared workspace package now"
+    - "new universal UI → React Strict DOM or Expo Universal Components"
+    - "existing react-native-web app → keep it (still works); just don't expand the bet"
+    - "Expo + Next.js shared routing → Solito; incremental web reuse inside RN → Expo DOM Components"
+note: >
+  When logic or components are duplicated across a web app and a native app, that
+  duplication is the prime target — extract a shared package. VERIFIED SHIFT (2026):
+  react-native-web has entered MAINTENANCE-ONLY mode — creator Nicolas Gallagher and
+  Zalando pivoted to React Strict DOM, and Software Mansion sees "no major features on
+  the horizon". For NEW universal web+native work, evaluate React Strict DOM or Expo
+  Universal Components rather than a fresh react-native-web bet; existing RN-Web apps
+  keep working. Verified vs official RN sources, Callstack, and Gallagher's notes.
+defer_to_skill: engineering-principles  # boundaries/dependency direction
+doc: "RB-E-CROSSPLATFORM.md"   # long-form Explanation entry in content_dir
+updated: 2026-06-17
+reading:
+  - title: "use dom — incrementally migrating web UI to native with React"
+    url: "https://evanbacon.dev/blog/use-dom"
+    by: "Evan Bacon (Expo)"
+    what: "Deep-dive on Expo DOM Components and the `use dom` directive — run real web UI inside a native app and migrate to native views component-by-component; covers the Metro bundling, offline support, and honest WebView trade-offs. The primary source for the incremental-reuse path."
+  - title: "AI-Assisted React Native Migration for TV: Lessons From Zattoo"
+    url: "https://www.callstack.com/blog/ai-assisted-react-native-migration-for-tv-lessons-from-zattoo"
+    by: "Callstack (Zattoo case study)"
+    what: "TV/cross-platform RN case study: share until a platform gives a reason to split, telemetry-driven perf, team reorg, and a deflated, realistic account of AI's role. A concrete companion to this entry's share-by-layer thesis."
+sources:
+  - "https://nicolasgallagher.com/one-react-for-web-and-native/"
+  - "https://www.callstack.com/podcasts/from-react-native-web-to-react-strict-dom"

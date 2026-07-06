@@ -1,0 +1,39 @@
+id: RB-E-NATIVE-UI
+topic: "Native UI extensions — Live Activities, widgets, App Clips, portals"
+category: native-ui
+group: platform-native
+status: drafted
+confidence: medium
+platforms: [react-native]
+options:
+  - { name: "expo-widgets (Expo)", tradeoff: "iOS home-screen widgets + Live Activities from Expo UI components — no SwiftUI/native code; STABLE in Expo SDK 56 (alpha in SDK 55); full env access, no pre-render" }
+  - { name: "Voltra (Callstack)", tradeoff: "Live Activities + widgets; SwiftUI-style layout (VStack/HStack); v2.0 (2026-06-18) rewrote to Turbo Modules → now works in BARE RN (no Expo Modules); iOS 16.2+ (interactive 17+), iOS 18+ activity families; v2 migration required" }
+  - { name: "Expo Targets", tradeoff: "native targets (widgets, App Clips, share extensions) in Swift/Kotlin or RN; multi-step setup" }
+  - { name: "react-native-teleport", tradeoff: "portals rendering in the native layer (re-parenting); web + native" }
+recommend:
+  default: "On Expo → expo-widgets for iOS widgets/Live Activities (stable in SDK 56, no native code). Bare RN → Voltra 2 (now bare-RN capable). Custom native targets / App Clips / share extensions → Expo Targets."
+  when:
+    - "iOS widgets / Live Activities on Expo → expo-widgets (SDK 56, stable, no SwiftUI)"
+    - "Live Activities on bare RN → Voltra 2 (Turbo Modules; no longer Expo-only)"
+    - "widgets / App Clips / share extensions needing custom native → Expo Targets"
+note: >
+  Settling but still iOS-leaning. VERIFIED (2026-06): expo-widgets is STABLE in Expo SDK 56
+  (alpha in SDK 55) — iOS widgets + Live Activities from Expo UI components without SwiftUI;
+  Voltra 2.0 (2026-06-18) rewrote onto Turbo Modules and now runs in BARE RN (dropped the
+  Expo-Modules / Dev-Client requirement; v2 migration required). Android widgets and the
+  portal/other options remain less settled — prototype platform coverage before committing.
+defer_to_skill: null
+doc: null
+updated: 2026-06-25
+reading:
+  - title: "Apple Home Screen Widgets with Expo (Continuous Native Generation)"
+    url: "https://evanbacon.dev/blog/apple-home-screen-widgets"
+    by: "Evan Bacon (Expo)"
+    what: "Generating native Apple widget targets from Expo via CNG — pbxproj manipulation to keep SwiftUI targets editable yet outside /ios, App Group / NSUserDefaults data sharing, CSS-to-colorset conversion. The foundational mechanism behind Expo Targets / expo-widgets."
+  - title: "Using Live Activities in a React Native App"
+    url: "https://addjam.com/blog/2025-02-04/using-live-activities-react-native-app/"
+    by: "Michael Hayes (Add Jam)"
+    what: "End-to-end Live Activities in RN — the ActivityKit Attributes/ContentState model, a separate widget-extension target for Lock Screen + Dynamic Island, a native module bridging JS↔Swift, and the HTTP-refresh vs APNs-push tradeoff. Platform constraints that outlast any single library."
+sources:
+  - "https://expo.dev/blog/ios-widgets-and-live-activities-in-expo"
+  - "https://github.com/callstackincubator/voltra/releases/tag/v2.0.0"

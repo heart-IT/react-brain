@@ -1,0 +1,50 @@
+id: RB-E-DATA
+topic: "Data fetching & caching"
+category: state-and-data
+group: app-architecture
+status: reviewed   # long-form entry written + source-checked → encyclopedia/RB-E-DATA.md
+confidence: high
+platforms: [react, react-native]
+options:
+  - { name: "TanStack Query (5.x)", tradeoff: "cache, retries, invalidation; framework-agnostic" }
+  - { name: "SWR", tradeoff: "lighter, hook-first" }
+  - { name: "RTK Query", tradeoff: "if already on Redux Toolkit" }
+  - { name: "Apollo Client (4.x) / urql / Relay (21)", tradeoff: "GraphQL: Relay v21 adds first-party TS + experimental RSC; Apollo 4.2 type-safe defaults" }
+  - { name: "tRPC", tradeoff: "end-to-end type-safe RPC (no schema/codegen) when client + server are both TS; not for public/polyglot APIs" }
+  - { name: "TanStack DB / Zero / TinyBase / RSC", tradeoff: "local-first sync/stores (TanStack DB, Zero 1.0, TinyBase 9) and server-fetched RSC are emerging data-layer alternatives" }
+recommend:
+  default: "TanStack Query for REST/server-state caching — the default for client-side data fetching."
+  when:
+    - "GraphQL backend → Apollo Client (or Relay for first-party TS + scale)"
+    - "client + server both TypeScript, private API → tRPC (type-safety with no codegen)"
+    - "offline / local-first / collaborative → TanStack DB or Zero"
+    - "P2P / serverless / Holepunch backend → data lives in the Hypercore/Autobase stack queried locally via hrpc; a client cache (TanStack Query) is N/A by design — see RB-E-P2P"
+    - "server-rendered web → fetch in RSC and skip a client cache where you can"
+    - "already on Redux Toolkit → RTK Query"
+note: "Server state ≠ client state (see RB-E-STATE). TanStack Query is the #1 React library in State of React 2025; it's transport- and platform-agnostic, so the data layer is shared code across web + RN. Adversarially stress-tested 2026-06-25 (SURVIVES, high): RSC complements (doesn't displace) the cache; TanStack DB builds ON TanStack Query; Zero reached 1.0 (2026-06) with React Native support."
+defer_to_skill: null
+doc: "RB-E-DATA.md"   # long-form Explanation entry in content_dir
+updated: 2026-07-06   # TinyBase 8→9 verified vs npm; rest of entry unchanged since 2026-06-17 review
+reading:
+  - title: "Why You Want React Query"
+    url: "https://tkdodo.eu/blog/why-you-want-react-query"
+    by: "Dominik Dorfmeister (TkDodo), TanStack Query maintainer"
+    what: "Takes a naive fetch-in-useEffect and exposes the five real bugs it hides (race conditions, missing loading/empty states, stale data+error pairs, StrictMode double-fire), then shows how a server cache fixes them. The durable answer to why-not-just-useEffect."
+  - title: "From latency to instant: modernizing GitHub Issues navigation performance"
+    url: "https://github.blog/engineering/architecture-optimization/from-latency-to-instant-modernizing-github-issues-navigation-performance/"
+    by: "GitHub Engineering"
+    what: "Engineering case study on local-first caching, stale-while-revalidate, service-worker hard-navigation, and preheating vs naive prefetch, with measured percentile gains. Durable client-side data-caching patterns at scale."
+  - title: "The Best Loading States Are No Loading States"
+    url: "https://jjenzz.com/best-loading-states-are-no-loading-states/"
+    by: "Jenna Smith (jjenzz)"
+    what: "Argues loading UI belongs at the app/route level (transitions + preload-on-hover/intersection) rather than scattered component spinners, using blank regions as a preload diagnostic. Durable, framework-agnostic data-loading-UX thinking."
+  - title: "use(): the hook that breaks the rules (on purpose)"
+    url: "https://saschb2b.com/blog/use-hook-react"
+    by: "Sascha Becker"
+    what: "Deep-dive on the use() hook — unwrapping promises/context at render under Suspense, the promise-identity caching requirement, and why it can legally run conditionally unlike other hooks. The modern data-fetching primitive explained."
+  - title: "Real-time cache invalidation (SSE + tRPC + Redis + BullMQ)"
+    url: "https://armand-salle.fr/post/real-time-cache-invalidation-sse-trpc-redis-bullmq/"
+    by: "Armand Sallé"
+    what: "A full architecture for pushing invalidation EVENTS (not data) over SSE to drive TanStack Query cache updates, with reference-counted subscriptions and horizontal-scaling guidance. The real-time dimension the other DATA readings don't cover."
+sources:
+  - "https://2025.stateofreact.com/en-US/libraries/"

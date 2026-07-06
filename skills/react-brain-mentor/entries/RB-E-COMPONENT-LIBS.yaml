@@ -1,0 +1,41 @@
+id: RB-E-COMPONENT-LIBS
+topic: "Component & headless-UI libraries (web)"
+category: component-libs
+group: ui
+status: drafted
+confidence: medium
+platforms: [react]
+options:
+  - { name: "Base UI (1.x)", tradeoff: "unstyled accessible primitives (Radix/MUI lineage); render-prop customization" }
+  - { name: "React Aria Components (1.x, Adobe)", tradeoff: "accessibility-first headless primitives; `render` prop pattern (not asChild)" }
+  - { name: "Radix UI", tradeoff: "unstyled primitives; `asChild` composition; widely used under shadcn" }
+  - { name: "shadcn/ui", tradeoff: "copy-paste components (own the code) over Radix/Base UI + Tailwind; CLI + registries; 2026-06 added chat components + the first headless @shadcn/react package (tested behavior as a dep, styling stays copy-paste)" }
+  - { name: "MUI (9) / Chakra (3) / Mantine (9) / Ant Design (6)", tradeoff: "batteries-included styled systems; MUI v9 is incrementally adopting Base UI primitives for new components (NumberField, MenuBar), not a full migration" }
+  - { name: "HeroUI (3)", tradeoff: "React Aria + Tailwind; separate web + RN libraries sharing design tokens (not one cross-platform abstraction)" }
+  - { name: "Astryx (Meta)", tradeoff: "Meta's open-source design system on React + StyleX: 150+ accessible, themeable components, compile-time atomic styling, agent-ready scaffolding (CLI + MCP); grown 8 yrs internally, 13,000+ Meta apps; batteries-included; beta (2026)" }
+recommend:
+  default: "Own-the-code: shadcn/ui (on Radix/Base UI) + Tailwind — the default for product teams that want control."
+  when:
+    - "max accessibility / headless primitives → React Aria Components or Base UI"
+    - "want batteries-included + don't want to own styling → MUI / Mantine / Chakra"
+    - "internal admin/enterprise → Ant Design or MUI"
+    - "Meta/StyleX-native, agent-ready design system → Astryx (beta — vet component coverage before betting on it)"
+    - "React Native UI → this entry is web-only; see RB-E-STYLING / RB-E-CROSSPLATFORM"
+note: "Split three ways: headless/unstyled (Base UI, React Aria, Radix) vs batteries-included (MUI/Chakra/Mantine/Ant, plus Meta's StyleX-based Astryx) vs own-the-code (shadcn). Web only. Astryx (beta, 2026) pairs compile-time StyleX styling with agent-ready scaffolding (CLI + MCP) — Meta open-sourced its 8-yr internal system (13,000+ apps); see RB-E-STYLING for StyleX."
+defer_to_skill: design-systems-governance
+doc: null
+updated: 2026-07-06
+sources:
+  - "https://registry.npmjs.org/@mui/material/latest"
+  - "https://github.com/mui/base-ui"
+  - "https://astryx.atmeta.com/blog/how-astryx-works"
+  - "https://ui.shadcn.com/docs/changelog/2026-06-chat-components"
+reading:
+  - title: "Building an LLM-safe design system"
+    url: "https://polar.sh/blog/orbit-llm-safe-design-system"
+    by: "Polar"
+    what: "Argues a design system should become the only expressible decisions for LLM-authored code — token-only props, a polymorphic Box, StyleX compile-time enforcement. A durable take on component libraries in the AI-coding era."
+  - title: "Building design components with action props using async React"
+    url: "https://aurorascharff.no/posts/building-design-components-with-action-props-using-async-react/"
+    by: "Aurora Scharff"
+    what: "A pattern for design-system components that accept action props and run them in internal transitions (useTransition/useOptimistic) for built-in pending/optimistic UI. A durable component-API pattern for the async-React era."

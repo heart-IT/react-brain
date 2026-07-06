@@ -1,0 +1,31 @@
+id: RB-E-DX
+topic: "Developer experience — CI, lint/format, hooks, monorepo, onboarding"
+category: dx
+group: tooling-ops
+status: reviewed   # long-form entry written + source-checked → encyclopedia/RB-E-DX.md
+confidence: high
+platforms: [react, react-native]
+options:
+  - { name: "CI (GitHub Actions / similar)", tradeoff: "gate tests + typecheck + lint + build on every PR; the single highest-leverage DX baseline" }
+  - { name: "lint/format — Biome or ESLint (flat) + Prettier", tradeoff: "Biome = one fast Rust tool (lint+format); ESLint flat + Prettier = bigger plugin ecosystem (react-hooks, react-compiler rules)" }
+  - { name: "git hooks — husky + lint-staged / lefthook", tradeoff: "run lint/format/tests pre-commit/pre-push; catch issues before CI" }
+  - { name: "monorepo task runner — Turborepo / Nx + pnpm workspaces", tradeoff: "cached, parallel task graph across packages (see RB-E-BUILD)" }
+  - { name: "dependency hygiene — renovate/dependabot + audit", tradeoff: "automated updates + npm/pnpm audit + install-script blocking (see RB-E-SECURITY)" }
+recommend:
+  default: "Gate tests + typecheck + lint on every PR in CI, and enforce the same locally with a pre-commit hook. For lint/format, default to Biome (one fast tool) unless you need ESLint's plugin ecosystem (react-hooks, react-compiler)."
+  when:
+    - "has tests but no CI → add CI FIRST; invariants that aren't gated silently rot (a real finding in audited production apps)"
+    - "needs ESLint react-hooks / react-compiler rules → ESLint flat config + Prettier over Biome"
+    - "multi-package repo → pnpm workspaces + Turborepo for a cached task graph"
+    - "normative styleguide but no linter config → wire the rules into lint so they're enforced mechanically, not by review"
+note: "DX is cross-cutting — architecture/boundaries depth → engineering-principles; bundler choice → RB-E-BUILD; supply-chain → RB-E-SECURITY. This entry is the feedback loop (CI/lint/hooks/onboarding) that keeps the others honest."
+defer_to_skill: engineering-principles
+doc: "RB-E-DX.md"   # long-form Explanation entry in content_dir
+updated: 2026-06-25
+reading:
+  - title: "Expo without EAS: scaling the React Native DX of an app with 90M+ users"
+    url: "https://medium.com/doctolib/expo-without-eas-scaling-the-react-native-developer-experience-of-an-app-with-90m-users-2694ea841805"
+    by: "Doctolib"
+    what: "Large-scale case study adopting Expo's bare workflow (not EAS) with fingerprint caching + JS patching to halve CI builds and grow contributors 9→105. A durable enterprise RN build/CI-DX blueprint."
+sources:
+  - "https://medium.com/doctolib/expo-without-eas-scaling-the-react-native-developer-experience-of-an-app-with-90m-users-2694ea841805"

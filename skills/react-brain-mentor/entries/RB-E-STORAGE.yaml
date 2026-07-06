@@ -1,0 +1,35 @@
+id: RB-E-STORAGE
+topic: "On-device storage & persistence"
+category: storage
+group: platform-native
+status: drafted
+confidence: medium
+platforms: [react, react-native]
+options:
+  - { name: "@react-native-async-storage/async-storage", tradeoff: "simple async key-value; v3.x is instance-based (createAsyncStorage), getMany/setMany/removeMany, requires RN 0.76+; v2 default export kept for back-compat" }
+  - { name: "react-native-mmkv (v4)", tradeoff: "fast synchronous key-value; v4 is a full Nitro Modules rewrite (restores Old-Arch compat); common AsyncStorage replacement" }
+  - { name: "op-sqlite / expo-sqlite", tradeoff: "relational SQLite; op-sqlite is high-perf JSI" }
+  - { name: "react-native-keychain / expo-secure-store", tradeoff: "secure storage for tokens/secrets (Keychain/Keystore)" }
+recommend:
+  default: "Small key-value → react-native-mmkv (fast, synchronous). Relational/large → op-sqlite or expo-sqlite. Secrets/tokens → Keychain / secure-store, never AsyncStorage."
+  when:
+    - "simple persisted prefs, no perf concern → AsyncStorage is fine"
+    - "frequent synchronous reads → MMKV"
+    - "structured/queryable data → SQLite (op-sqlite for perf)"
+    - "P2P / local-first app → primary persistence is the Hypercore/Autobase/Hyperbee log, not KV/SQLite (KV like AsyncStorage is just for local prefs) — see RB-E-P2P"
+note: "AsyncStorage v3.x moved to instance-based storage (createAsyncStorage) and requires React Native 0.76+ (NOT New-Arch-only — that earlier claim was wrong; verified vs the v3 migration docs). react-native-mmkv v4 is a full Nitro rewrite (Oct 2025) that restored Old-Arch compat. Latest: async-storage 3.1.x, mmkv 4.3.x, op-sqlite 17.x (2026-06)."
+defer_to_skill: null
+doc: null
+updated: 2026-06-25
+sources:
+  - "https://react-native-async-storage.github.io/3.1/migration-to-3/"
+  - "https://github.com/mrousavy/react-native-mmkv/releases"
+reading:
+  - title: "SQLite for React Native, but 5x faster and 5x less memory"
+    url: "https://ospfranco.com/post/2023/11/09/sqlite-for-react-native,-but-5x-faster-and-5x-less-memory/"
+    by: "Oscar Franco (op-sqlite author)"
+    what: "The library author walks the JSI/C++ internals that make op-sqlite fast and memory-light — lazy HostObject conversion, std::variant over a custom struct, key-sharing across result rows — with benchmarks. The mechanics of high-performance JSI SQLite, not API usage."
+  - title: "An Interactive Guide to TanStack DB"
+    url: "https://frontendatscale.com/blog/tanstack-db/"
+    by: "Maxi Ferreira (Frontend at Scale)"
+    what: "Builds the local-first reactive-persistence mental model from first principles — Collections, live queries via differential dataflow, optimistic transactional mutations — contrasting it with request/response fetching. The shift to sync-engine thinking."

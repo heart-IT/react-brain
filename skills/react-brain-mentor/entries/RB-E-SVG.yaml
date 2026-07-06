@@ -1,0 +1,46 @@
+id: RB-E-SVG
+topic: "SVG, vector graphics & icons (React Native)"
+category: svg
+group: ui
+status: drafted
+confidence: medium
+platforms: [react, react-native]
+options:
+  - { name: "react-native-svg (Software Mansion)", tradeoff: "the de-facto RN SVG primitive (v15.x, RN 0.78+); declarative <Svg>/<Path>; underpins most RN charts + icon libs; iOS/Android/macOS/Windows + RN-Web" }
+  - { name: "react-native-svg-transformer (kristerkari)", tradeoff: "Metro transformer to import designer .svg files directly as React components; pairs with react-native-svg" }
+  - { name: "@shopify/react-native-skia", tradeoff: "GPU canvas — renders SVG (ImageSVG / Skia.SVG.MakeFromString, with limits: no CSS / <text> / <animate>) and does animated/custom vector drawing beyond declarative SVG; see RB-E-ANIMATION" }
+  - { name: "Redraw (William Candillon) — EXPERIMENTAL", tradeoff: "next-gen 2D graphics on WebGPU/TypeGPU: variable-stroke Bézier paths, vector feathering, physically-based 2D; shaders authored as typed TS functions. Technical preview — not on npm (subscriber early access), unstable API. Watch, not a production bet" }
+  - { name: "icon sets — lucide-react-native / @react-native-vector-icons/* / @expo/vector-icons", tradeoff: "lucide-react-native = Lucide (peer-deps react-native-svg); @expo/vector-icons = bundled sets for Expo (wraps react-native-vector-icons)" }
+  - { name: "react-native-vector-icons (legacy)", tradeoff: "the monolith is SUPERSEDED → split into per-family @react-native-vector-icons/* (v11+); a codemod migrates from it and from @expo/vector-icons" }
+  - { name: "web: native <svg>", tradeoff: "no library needed on React DOM; icon sets (Lucide etc.) ship as plain React components" }
+recommend:
+  default: "React Native → react-native-svg is the default for declarative vector graphics; import static .svg assets via react-native-svg-transformer, and pull icons from an icon set (lucide-react-native, or per-family @react-native-vector-icons/* — @expo/vector-icons on Expo). Drop to @shopify/react-native-skia only for GPU-accelerated / animated / custom canvas drawing beyond declarative SVG. Web → native <svg>, no library."
+  when:
+    - "declarative vector shapes → react-native-svg"
+    - "import designer .svg files as components → react-native-svg-transformer"
+    - "GPU / animated / custom drawing (charts, generative visuals) → react-native-skia (see RB-E-ANIMATION / RB-E-CHARTS)"
+    - "icons → lucide-react-native or per-family @react-native-vector-icons/* (avoid the legacy monolithic react-native-vector-icons for new work; a codemod exists)"
+    - "web → native <svg>; reuse the same icon set as React components"
+note: >
+  react-native-svg (Software Mansion, v15.x, RN 0.78+) is the de-facto RN SVG primitive — it
+  underpins most RN charts (Victory Native) and icon libraries (lucide-react-native peer-depends on
+  it). Skia renders SVG too but with limits (no CSS / <text> / <animate>); use it for GPU/custom
+  drawing, not as the default SVG renderer. ICON-LIB SHIFT: the monolithic react-native-vector-icons
+  is superseded by scoped @react-native-vector-icons/* packages (v11+, with a codemod). Added
+  2026-06-25 after the evidence-loop corpus self-audit flagged react-native-svg (used in ourpot +
+  bitbarter) with no entry to map it to. Verified vs npm + the maintainers' repos.
+defer_to_skill: react-native-best-practices
+doc: null
+updated: 2026-07-01
+reading:
+  - title: "Hello, Project Redraw"
+    url: "https://wcandillon.dev/article/hello-project-redraw"
+    by: "William Candillon (react-native-skia author)"
+    what: "Introduces Redraw — 2D primitives on WebGPU where shaders are TypeScript functions that receive geometry (tangent, arc length) to compute stroke width / feathering / material per-point, enabling physically-based 2D rendering. The Skia author's bet on WebGPU as the unified graphics runtime; experimental, but the direction RN GPU graphics is heading."
+  - title: "How to import SVG files in React Native using react-native-svg"
+    url: "https://blog.logrocket.com/use-svgs-react-native-tutorial/"
+    by: "Vijit Ail / Joseph Mawa (LogRocket)"
+    what: "Practical deep-dive on inline SVG, importing .svg as components via react-native-svg-transformer, SvgUri/SvgXml, and animating SVGs — the canonical how-to for the react-native-svg workflow."
+sources:
+  - "https://registry.npmjs.org/react-native-svg/latest"
+  - "https://github.com/oblador/react-native-vector-icons/blob/master/MIGRATION.md"

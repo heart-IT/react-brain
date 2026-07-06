@@ -1,0 +1,37 @@
+id: RB-E-TYPESCRIPT
+topic: "TypeScript rigor & public API typing"
+category: typescript
+group: react-foundations
+status: drafted
+confidence: medium
+platforms: [react, react-native]
+options:
+  - { name: "strict mode tiers", tradeoff: "strict vs gradual adoption; TS 6.0 makes strict:true the default" }
+  - { name: "exported type surface", tradeoff: "what a library/package should export" }
+  - { name: "TypeScript 7 (native/Go)", tradeoff: "Go rewrite of tsc (~10x faster than TS 6.0); 7.0 RC out 2026-06-18 (usable in CI today), stable expected within weeks; TS 6.0 is the JS-based 'bridge' release before it" }
+  - { name: "Flow (2026)", tradeoff: "Meta's type checker; syntax converged with TS, compiler ported to Rust; mostly Meta-internal now" }
+recommend:
+  default: "Run strict TypeScript (strict:true, the TS 6 default) and export a small, deliberate public type surface from libraries."
+  when:
+    - "library/package author → minimize + version the exported types; avoid leaking internals"
+    - "large repo with slow tsc → TS 7 (Go) RC is usable in CI now (~10x); pilot on typecheck/CI, stable imminent"
+    - "not at Meta → use TypeScript, not Flow"
+note: "TypeScript 7.0 (the Go/native rewrite of tsc) reached RC on 2026-06-18 — ~10x faster than TS 6.0, described as ready for daily/CI use, stable planned within ~a month. Pilot it on typecheck/CI now; treat as RC until the stable tag lands."
+defer_to_skill: engineering-principles
+doc: null
+updated: 2026-07-02
+reading:
+  - title: "Why does tsgo use so much memory?"
+    url: "https://zackoverflow.dev/writing/why-does-tsgo-use-so-much-memory"
+    by: "Zackary Radisic"
+    what: "A heap-level investigation of the Go TypeScript compiler — per-thread Checker duplication, never-freed types, symbol duplication, AST at 45% of heap, plus a fix. A durable deep-dive on TS7/tsgo internals and its concurrency model's cost."
+  - title: "TypeScript Performance in TanStack Table V9"
+    url: "https://tanstack.com/blog/tanstack-table-v9-typescript-performance"
+    by: "Kevin Van Cott (TanStack)"
+    what: "Concrete techniques to cut type-instantiation cost 62-86% (feature maps, materialized interfaces, in/out variance annotations, explicit type args), with measurements. The reference for heavy-generics library authors."
+  - title: "Iterating Faster with TypeScript 7"
+    url: "https://code.visualstudio.com/blogs/2026/06/26/iterating-faster-with-ts-7"
+    by: "VS Code team (Microsoft)"
+    what: "The production adoption case the tsgo-internals piece lacks: VS Code's ~50-extension codebase cut type-checking 36s→5s (~7x) and editor project-load 60s→10s by migrating INCREMENTALLY — TS 6.0 as a low-churn bridge, then TS 6-and-7 side-by-side in CI (TS 6 still emitting), then esbuild + TS 7 as the default. The surprising blocker wasn't type errors but formatter differences failing pre-commit checks. Evidence that TS 7 (Go-native tsc) is trustworthy for daily use on a large real codebase — if you bridge through TS 6 first."
+sources:
+  - "https://devblogs.microsoft.com/typescript/announcing-typescript-7-0-rc/"

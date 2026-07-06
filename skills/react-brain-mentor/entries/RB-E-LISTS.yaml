@@ -1,0 +1,46 @@
+id: RB-E-LISTS
+topic: "Lists & virtualization"
+category: lists-and-perf
+group: ui
+status: reviewed   # long-form entry written + source-checked → encyclopedia/RB-E-LISTS.md
+confidence: high
+platforms: [react, react-native]
+options:
+  - { name: "ScrollView/.map", tradeoff: "fine <20 static items only" }
+  - { name: "FlatList", tradeoff: "RN baseline virtualization" }
+  - { name: "FlashList", tradeoff: "recycling; large RN lists" }
+  - { name: "react-window / react-virtual / HighTable", tradeoff: "web virtualization; HighTable handles billion-row tables (viewport-only DOM + scrollbar downscaling)" }
+  - { name: "Legend List", tradeoff: "one virtualization engine for RN + web (v3.0 stable); SectionList + chat/anchoring APIs; signal-driven container pool → very small re-renders" }
+recommend:
+  default: "RN: FlashList for large lists, FlatList otherwise, ScrollView only for <20 static items. Web: react-virtual / react-window."
+  when:
+    - "huge web tables (100k+ rows) → HighTable"
+    - "one list engine across RN + web → Legend List"
+    - "exact thresholds / perf → react-native-best-practices owns the rules"
+defer_to_skill: react-native-best-practices  # RN-RULE-USE-FLASHLIST owns the thresholds
+doc: "RB-E-LISTS.md"   # long-form Explanation entry in content_dir
+updated: 2026-07-01
+reading:
+  - title: "How to Build the Fastest Apps: Break the Rules (App.js Conf 2026)"
+    url: "https://www.youtube.com/watch?v=K3flMIHS-cI"
+    by: "Jay Meistrich — author of Legend List"
+    what: "Why Legend List is fast, from its author: it mounts a fixed pool of absolutely-positioned containers once and never re-renders that array again — instead it *signals* individual containers to re-render themselves at a new position/item as you scroll, and turns frequent size changes into animated-style updates rather than list re-renders. The generalizable lesson ('render once'): keep each render tiny by pushing it to the leaf that actually changed. Complements the peterp.me engine walkthrough with the same-source mechanism; announces v3.0 stable (RN + web). Vendor talk."
+  - title: "FlashList v2: a ground-up rewrite for React Native's New Architecture"
+    url: "https://shopify.engineering/flashlist-v2"
+    by: "Talha Naqvi (Shopify Engineering)"
+    what: "The maintainer's architecture deep-dive on FlashList's New-Architecture rewrite — view recycling, progressive rendering, layout prediction, and pre-paint correction via synchronous measurement — explaining the recycling machinery from first principles, not just the API."
+  - title: "React windowing vs. component recycling"
+    url: "https://blog.logrocket.com/react-performance-optimization-windowing-vs-component-recycling/"
+    by: "Iskander Samatov (LogRocket)"
+    what: "Cleanly separates the two long-list strategies — windowing (render only the viewport, mount/unmount on scroll) vs recycling (reuse nodes by reassigning keys) — and when to escalate. Bridges web (react-window) and RN (FlashList)."
+  - title: "What's actually happening inside Legend List"
+    url: "https://www.peterp.me/articles/legend-list-engine-simulator/"
+    by: "Peter Piekarczyk"
+    what: "Explains Legend List's virtualization formula — estimated item size, draw distance, container-pool ratio, asymmetric 1.5x/0.5x buffering. A concrete mental model for list recycling performance (complements the FlashList piece)."
+  - title: "Virtual scrolling for billions of rows (techniques from HighTable)"
+    url: "https://rednegra.net/blog/20260212-virtual-scroll/"
+    by: "Sylvain Lesage"
+    what: "The five techniques behind HighTable — lazy slicing, the ~17M-px canvas-height ceiling with downscaled scrollbars, dual local/global scroll modes, decoupled axes. The web huge-table counterpart to the RN list pieces above (HighTable is a listed option here)."
+sources:
+  - "https://shopify.engineering/flashlist-v2"
+  - "https://rednegra.net/blog/20260212-virtual-scroll/"

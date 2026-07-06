@@ -1,0 +1,77 @@
+id: RB-E-REACT-CORE
+topic: "React core — version, Compiler, RSC, concurrent features"
+category: react-core
+group: react-foundations
+status: reviewed   # long-form entry written + source-checked → encyclopedia/RB-E-REACT-CORE.md
+confidence: high
+platforms: [react, react-native]
+options:
+  - { name: "React 19.2 (current line)", tradeoff: "latest 19.2.x; ships <Activity>, <ViewTransition>, useEffectEvent; RN 0.83+ runs React 19.2" }
+  - { name: "React Compiler 1.0 (STABLE)", tradeoff: "auto-memoizes — drops most useMemo/useCallback; stable since 2025-10 (Meta prod); Rust port MERGED into SWC — ships via Rspack 2.1's built-in loader (7–13x the Babel plugin); enable via Babel/SWC/Oxc/Vite-8 plugin" }
+  - { name: "React Server Components (RSC)", tradeoff: "server-rendered components over the Flight protocol; web-only; Server Functions = the mutation path (security-sensitive — see RB-E-SECURITY)" }
+  - { name: "<Activity>", tradeoff: "hide a subtree while preserving its state (defer/restore); 100% satisfaction in State-of-React 2025; pair with Effect cleanup" }
+  - { name: "<ViewTransition> / use()", tradeoff: "animated transitions (component or native startViewTransition); use() reads promises/context under Suspense" }
+  - { name: "alternative React runtimes", tradeoff: "Preact (small, drop-in-ish); experimental @tanstack/redact (~9KB, claims 2–3x, TanStack-Start-scoped); Million; TSRX = a JSX-successor compiling to React/Preact/Solid — mostly experimental" }
+recommend:
+  default: "Stay on React 19.2 and turn on React Compiler 1.0 for new code — let it handle memoization; keep existing useMemo/useCallback as escape hatches (don't strip them — removing can change the compiler's output), and pin the exact compiler version if test coverage is thin."
+  when:
+    - "new project → React 19.2 + Compiler from day one"
+    - "web data-fetching/SSR → RSC via a meta-framework (RB-E-META-FRAMEWORKS); React Native → RSC does not apply"
+    - "bundle-size-critical web → consider Preact; treat @tanstack/redact / Million / TSRX as experimental, not production bets"
+note: >
+  React Compiler reached 1.0 STABLE (2025-10-07) and is production-ready — new code can drop
+  most manual memoization. The Rust port LANDED: merged into SWC and shipping via Rspack 2.1's
+  built-in SWC loader (7–13x faster than the Babel version; verified vs the Rspack 2.1 blog,
+  2026-07-06) — while Rolldown pulled ITS integration over napi binary size (that caveat stands,
+  see RB-E-BUILD). React moved
+  to the independent React Foundation (Linux Foundation, Feb 2026; exec director Seth Webster);
+  repos moved facebook → react org (corroborated across React Status #464/#478 + TWiR). RSC/
+  Server Functions are a WEB concern (not RN) with an active DoS CVE history (see RB-E-SECURITY).
+  Compiler-1.0 + RSC-DoS verified this session; other rows from release history + newsletters.
+  Adversarially stress-tested 2026-06-25 (SURVIVES, caveats applied): 19.2 is still the stable line
+  (19.3 in active canary — re-verify before quoting "19.2"); don't strip existing memoization when
+  enabling the Compiler — useMemo/useCallback remain valid escape hatches.
+defer_to_skill: engineering-principles
+doc: "RB-E-REACT-CORE.md"   # long-form Explanation entry in content_dir
+updated: 2026-07-06
+reading:
+  - title: "How to Build the Fastest Apps: Break the Rules (App.js Conf 2026)"
+    url: "https://www.youtube.com/watch?v=K3flMIHS-cI"
+    by: "Jay Meistrich (Software Mansion)"
+    what: "Reframes rendering cost as the dominant hidden bottleneck: React's `render` doesn't just paint — it passes state down, updates context consumers, fires effects, and re-subscribes queries, so ordinary patterns (lift-state-up, effects-for-coordination, `useContext` on a whole value, deps-array callbacks) cascade renders top-down (measured ~10x CPU top-vs-leaf). The React Compiler can't save you when a prop *actually* changes. The prescribed toolkit — `useEffectEvent`/stable event callbacks (no deps-array cascades), imperative APIs over hooks (get-a-value + subscribe instead of re-render), `use-context-selector`, and providing *stable* objects through Context — extends the Erikson rendering guide below into a 'render once' discipline. Vendor angle (pitches Legend State), but the render-model reasoning is framework-agnostic. See RB-E-STATE for the state-architecture half."
+  - title: "A (Mostly) Complete Guide to React Rendering Behavior"
+    url: "https://blog.isquaredsoftware.com/2020/05/blogged-answers-a-mostly-complete-guide-to-react-rendering-behavior/"
+    by: "Mark Erikson, Redux maintainer"
+    what: "The end-to-end explanation of when and why React renders — render vs commit, reconciliation, the cascade to children, memo/useMemo/useCallback, Context behavior. The mental model that makes the React Compiler's auto-memoization comprehensible rather than magic."
+  - title: "Writing Custom Renderers for React"
+    url: "https://www.callstack.com/blog/writing-custom-renderers-for-react"
+    by: "Maciej Jastrzębski (Callstack)"
+    what: "How React's reconciler connects to a host environment (the renderer interface), and why React Native Testing Library needed its own renderer. The canonical explanation of React's renderer architecture."
+  - title: "Component Architecture for React Server Components"
+    url: "https://aurorascharff.no/posts/component-architecture-for-react-server-components/"
+    by: "Aurora Scharff"
+    what: "Traces the move from useEffect/React-Query/route-loaders to component-level RSC data fetching, with durable principles: component autonomy, deliberate Suspense boundaries, skeleton co-location. RSC architecture from a recognized educator."
+  - title: "Building Bulletproof React Components"
+    url: "https://shud.in/thoughts/build-bulletproof-react-components"
+    by: "Shu Ding (Vercel; SWR creator)"
+    what: "Ten component-design patterns for SSR/hydration, multiple instances, concurrent rendering, portals, view transitions, and tainting (useId, React.cache, taintUniqueValue). A durable component-API mental model from an authoritative author."
+  - title: "Understanding why React Fiber exists"
+    url: "https://inside-react.vercel.app/blog/understanding-why-react-fiber-exists"
+    by: "Sankalpa Acharya (inside-react)"
+    what: "Traces React 15's non-interruptible recursive reconciliation to Fiber's linked-list + time-slicing design — the 'why it exists' explainer for concurrent React. First in a React-internals series (key-prop, state-updates, out-of-order streaming also available)."
+  - title: "How does React Fiber render your UI"
+    url: "https://inside-react.vercel.app/blog/how-does-react-fiber-render-your-ui"
+    by: "Sankalpa Acharya (inside-react)"
+    what: "A first-principles walk through Fiber's four phases (trigger/schedule/render/commit), the fiber-node shape, time-slicing, and the bitmask lane-priority system. Durable internals knowledge that survives version churn."
+  - title: "Two React design choices developers don't like (but can't avoid)"
+    url: "https://dev.to/playfulprogramming/two-react-design-choices-developers-dont-like-but-cant-avoid-d6g"
+    by: "Ryan Carniato (Solid.js)"
+    what: "A competing-framework author argues deferred state commits and effect dependency arrays are forced by async UI, not arbitrary — even signal-based frameworks hit the same wall. An unusually credible mental model for React's most-griped-about choices."
+  - title: "React Compiler at Eighteen Months"
+    url: "https://saschb2b.com/blog/react-compiler-year-in-review"
+    by: "Sascha Becker"
+    what: "An 18-month retrospective: how auto-memoization retired the missing-dependency bug class, the five patterns where the compiler bails out, and a staged adoption path. The mental model for the compiler era (complements the official release post in sources)."
+sources:
+  - "https://react.dev/blog/2025/10/07/react-compiler-1"
+  - "https://react.dev/blog/2025/12/11/denial-of-service-and-source-code-exposure-in-react-server-components"
+  - "https://rspack.rs/blog/announcing-2-1"

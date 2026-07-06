@@ -1,0 +1,29 @@
+id: RB-E-GAMES
+topic: "Games & interactive / real-time rendering"
+category: games
+group: platform-native
+status: drafted
+confidence: low
+platforms: [react-native]
+options:
+  - { name: "react-native-skia", tradeoff: "GPU 2D drawing loop; common base for RN games/visuals" }
+  - { name: "react-native-godot (@borndotcom)", tradeoff: "embed the Godot engine (RTNGodotView; by Born & Migeran); runs off-thread (separate from RN's JS thread)" }
+  - { name: "WebGPU (react-native-webgpu, formerly react-native-wgpu)", tradeoff: "3D render pipelines on Google's Dawn (by William Candillon, not Software Mansion); UI-thread via Reanimated/worklets; advanced" }
+  - { name: "react-native-game-engine", tradeoff: "entity-component loop for simple 2D games; effectively unmaintained (last release v1.2.0, 2020)" }
+recommend:
+  default: "2D / interactive visuals → react-native-skia. Real game engine → embed Godot (react-native-godot). RN suits supplemental/interactive experiences more than AAA games."
+  when:
+    - "simple 2D game loop → react-native-game-engine"
+    - "3D / compute shaders → WebGPU (react-native-wgpu), advanced"
+note: "Niche; RN suits supplemental/interactive experiences more than AAA games."
+defer_to_skill: react-native-best-practices
+doc: null
+updated: 2026-06-25
+sources:
+  - "https://github.com/wcandillon/react-native-webgpu"
+  - "https://registry.npmjs.org/@borndotcom/react-native-godot"
+reading:
+  - title: "React Native Skia — For Us, For You, and For Fun"
+    url: "https://shopify.engineering/react-native-skia-shopify"
+    by: "Colin Gray (Shopify)"
+    what: "The foundational architecture of react-native-skia: JSI for direct C++/JS communication, a custom React reconciler powering the declarative API, and Reanimated-driven animation. The enduring design under RN's 2D GPU drawing — the base for RN games and interactive visuals."

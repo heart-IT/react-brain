@@ -1,0 +1,55 @@
+id: RB-E-NATIVE
+topic: "Native modules & the New Architecture"
+category: native
+group: platform-native
+status: reviewed   # long-form entry written + source-checked → encyclopedia/RB-E-NATIVE.md
+confidence: high
+platforms: [react-native]
+options:
+  - { name: "Expo modules", tradeoff: "managed, fast path for many needs" }
+  - { name: "Turbo Modules / Fabric (JSI)", tradeoff: "custom native; New Architecture" }
+  - { name: "Nitro Modules", tradeoff: "codegen-driven JSI; positioned as Turbo Modules' successor; vendor claims ~10x vs Turbo, ~100x vs Expo Modules" }
+recommend:
+  default: "Target the New Architecture (mandatory ≥ RN 0.82). Reach for Expo Modules for most native needs; use Nitro Modules for performance-critical custom native."
+  when:
+    - "most native integrations → Expo Modules (managed, fast path)"
+    - "perf-critical custom native (camera, audio, BLE) → Nitro Modules — but it's pre-1.0 (v0.36.x, 2026-07), third-party (not in RN core), and still ships breaking changes, so pin versions; for non-extreme needs, plain Turbo Modules are zero-dep, in-core, and stable"
+    - "standard custom native → Turbo Modules / Fabric"
+    - "still on Legacy Arch → migrate; it's frozen and being stripped from core"
+note: >
+  ARCHITECTURE: the New Architecture (Fabric + Turbo Modules over JSI, no async bridge)
+  was the default for new projects from RN 0.76, became the ONLY runtime option in RN 0.82,
+  and RN 0.84 keeps stripping Legacy-Arch code from iOS + Android — all new native work targets
+  it; Legacy is effectively gone. Nitro Modules is consolidating the custom-native ecosystem
+  (mmkv v4, device-info, image, video, fetch, healthkit, geolocation moved to it; VisionCamera
+  v5 rewrote ~3,000 lines of JSI/C++ onto Nitro).
+  EDGE-TO-EDGE: RN 0.86 (2026-06-11) moved Android-15+ edge-to-edge into core, fixing
+  KeyboardAvoidingView / Dimensions / StatusBar — projects on RN >= 0.86 can DROP the
+  standalone `react-native-edge-to-edge` (zoontek); on RN < 0.86 it is still required.
+  Arch facts verified vs the RN 0.84 blog; edge-to-edge vs the RN 0.86 blog. The bridge interop
+  layer was fully removed in RN 0.85. Adversarially stress-tested 2026-06-25 (SURVIVES; Nitro
+  stability caveat added — Nitro is pre-1.0/third-party, Turbo Modules stay the stable in-core option).
+defer_to_skill: react-native-jsi  # owns JSI memory/threading rules
+doc: "RB-E-NATIVE.md"   # long-form Explanation entry in content_dir
+updated: 2026-07-06   # Nitro version refreshed (0.36.x, npm); arch facts unchanged since 2026-06-25 stress-test
+reading:
+  - title: "How to Make Pure JSI Code Faster in React Native (Part 1)"
+    url: "https://blog.margelo.com/make-jsi-run-faster"
+    by: "Alex Shumihin (Margelo)"
+    what: "How JSI bindings actually work at the C++/Hermes boundary — HostFunction vs HostObject, the Object+NativeState pattern Nitro compiles down to, stack vs heap, minimizing JS-to-native crossings — with reproducible Hermes benchmarks. The runtime mechanics under Turbo/Nitro Modules."
+  - title: "Making JSI Faster with More Efficient Data Structures (Part 2)"
+    url: "https://blog.margelo.com/make-jsi-run-faster-2"
+    by: "Alex Shumihin (Margelo)"
+    what: "How data representation across the JSI boundary (array-of-objects vs flat array vs ArrayBuffer, numeric vs string contracts) can swing performance up to ~30x with no algorithmic change. First-principles guidance for New-Architecture native modules."
+  - title: "How Margelo Helped Discord Improve React Native's New Architecture Performance"
+    url: "https://blog.margelo.com/margelo-discord-react-native-performance"
+    by: "Hanno Gödecke (Margelo)"
+    what: "Low-level New-Architecture jank postmortem: Reanimated's cloneShadowTreeWithNewProps over-cloning the Fabric shadow tree plus redundant layout passes for non-layout props, with fixes upstreamed. Canonical Fabric / New-Arch internals."
+  - title: "Four Years of React Native Quick Crypto: From Wallets to Node Parity"
+    url: "https://blog.margelo.com/four-years-of-react-native-quick-crypto"
+    by: "Brad Anderson (Margelo)"
+    what: "A four-year native-library architecture case study: wrapping OpenSSL for Node behavior-parity, a sync-first threading model with async escape hatches, the hand-written-JSI to Nitro codegen migration, and security audit as architecture validation. Generalizable lessons for native-module authors."
+sources:
+  - "https://reactnative.dev/blog/2026/02/11/react-native-0.84"
+  - "https://reactnative.dev/blog/2026/06/11/react-native-0.86"
+  - "https://github.com/zoontek/react-native-edge-to-edge"

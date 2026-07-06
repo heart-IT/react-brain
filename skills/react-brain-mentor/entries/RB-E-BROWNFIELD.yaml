@@ -1,0 +1,33 @@
+id: RB-E-BROWNFIELD
+topic: "Brownfield integration & micro-frontends"
+category: brownfield
+group: platform-native
+status: drafted
+confidence: low
+platforms: [react-native]
+options:
+  - { name: "react-native-brownfield (Callstack)", tradeoff: "embed RN in an existing native app; self-contained iOS init via ReactNativeBrownfield.shared.startReactNative() (wraps RN core's RCTReactNativeFactory)" }
+  - { name: "Brownie (@callstack/brownie)", tradeoff: "share native↔JS state for brownfield; generates Swift + Kotlin types from .brownie.ts; iOS + Android; stable (v3.13.x, 2026-06)" }
+  - { name: "Granite (Toss)", tradeoff: "micro-frontend: each screen an independently deployable ~200KB bundle on CDN (ESBuild)" }
+  - { name: "Rock (Callstack)", tradeoff: "super-apps via micro-frontends + native build caching" }
+recommend:
+  default: "A scale-stage concern: embed RN into a native app with react-native-brownfield (+ ReactNativeFactory on iOS). For independently-deployable screens / super-apps, look at Granite or Rock."
+  when:
+    - "add RN screens to an existing native app → react-native-brownfield"
+    - "many teams shipping independent bundles → Granite (Toss) / Rock"
+note: "For embedding RN into native apps or splitting a super-app — a scale-stage concern; mostly Callstack/Toss tooling, several alpha."
+defer_to_skill: engineering-principles
+doc: null
+updated: 2026-06-25
+sources:
+  - "https://github.com/callstack/react-native-brownfield"
+  - "https://registry.npmjs.org/@callstack/brownie"
+reading:
+  - title: "Rebuilding the Doctolib Homepage from Webview to Native"
+    url: "https://medium.com/doctolib/rebuilding-the-doctolib-homepage-from-webview-to-native-27937ea71801"
+    by: "Doctolib"
+    what: "Production case study migrating a 115M-hits/month homepage from WebView to native RN with a BFF-driven section architecture (~50% TTI improvement, measurable conversion gains). Durable brownfield-integration lessons."
+  - title: "React Native production lessons from React Universe Meetup x Zalando"
+    url: "https://www.callstack.com/blog/react-native-production-lessons-from-react-universe-meetup-x-zalando"
+    by: "Callstack"
+    what: "Four hard-won production patterns — brownfield-handoff metrics (Meaningful Render), video-feed jank sequencing, native API bridging, on-device LLM hardware variance. Real-world scale-stage RN guidance."

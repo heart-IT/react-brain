@@ -1,0 +1,55 @@
+id: RB-E-ANIMATION
+topic: "Animation & gestures"
+category: animation
+group: ui
+status: drafted
+confidence: medium
+platforms: [react, react-native]
+options:
+  - { name: "Reanimated 4", tradeoff: "UI-thread + CSS-style animations/transitions; worklets split into react-native-worklets; requires New Arch" }
+  - { name: "Gesture Handler 3.0", tradeoff: "native gestures; v3 adds a hook-based API built for the React Compiler + Reanimated 4" }
+  - { name: "react-native-worklets 8.0", tradeoff: "the worklets runtime under Reanimated 4 (now its own package); Shareable values across isolated runtimes" }
+  - { name: "react-native-skia (2.x)", tradeoff: "GPU 2D drawing; v2.1 plays Lottie via Skottie; pairs with Reanimated" }
+  - { name: "lottie-react-native", tradeoff: "designer Lottie/JSON animations; v7 adds visionOS" }
+  - { name: "react-native-morph-view (Software Mansion)", tradeoff: "GPU image-morph transitions (Metal/AGSL shaders, metaball blend); RN 0.76+, iOS 15.1+/Android 13+; niche/new" }
+  - { name: "Animated (core)", tradeoff: "built-in; RN 0.85 shared backend allows layout-prop animation with the native driver (from 0.85.1)" }
+  - { name: "Moti / LayoutAnimation", tradeoff: "declarative transitions; Moti wraps Reanimated" }
+  - { name: "Motion / framer-motion (WEB)", tradeoff: "the web (React DOM) animation default — declarative layout/exit/gesture animation; Motion is framer-motion's successor; React Native uses Reanimated instead" }
+recommend:
+  default: "React Native → Reanimated 4 + Gesture Handler 3 for real UI-thread animation & gestures (core Animated only for trivial cases). Web (React DOM) → Motion (framer-motion's successor) for declarative layout/exit/gesture animation."
+  when:
+    - "web animation (React DOM) → Motion / framer-motion — Reanimated & Gesture Handler are React Native only"
+    - "custom/GPU drawing or visuals → react-native-skia"
+    - "designer-made animations → lottie-react-native (or Skia/Skottie)"
+    - "image-to-image morph transition → react-native-morph-view (GPU shader; niche, lead-level)"
+    - "simple fade/slide, want declarative → Moti / LayoutAnimation (RN); Motion (web)"
+    - "heavy animation perf → route to react-native-best-practices"
+note: >
+  RN 0.85 (2026-04) introduced a shared C++ animation backend so Animated and Reanimated
+  ride one engine (built with Software Mansion). Heavy-animation perf routes to
+  react-native-best-practices. WEB: Motion (the framer-motion successor) is the web
+  animation default — added 2026-06-25 after the evidence-loop corpus self-audit flagged
+  that this [react]-platform entry had options/recommend for React Native only, no web pick
+  (caught from ledgerhr's framer-motion usage). Verified vs the official RN 0.85 blog.
+defer_to_skill: react-native-best-practices
+doc: null
+updated: 2026-06-25
+reading:
+  - title: "CSS vs. JavaScript Animations"
+    url: "https://www.joshwcomeau.com/animation/css-vs-javascript/"
+    by: "Josh W. Comeau"
+    what: "First-principles explainer on the real distinction (main-thread contention, compositor-friendly properties, WAAPI) rather than the CSS-is-always-faster myth. A durable animation mental model that applies to web and RN reasoning alike."
+  - title: "How react-native-ease runs animations with no JavaScript loop"
+    url: "https://www.peterp.me/articles/how-react-native-ease-runs-animations-with-no-javascript-loop/"
+    by: "Peter Piekarczyk"
+    what: "Deep dive on driving animations entirely via Core Animation / ObjectAnimator with no per-frame JS, incl. iOS model vs presentation layers and cross-platform spring physics. The mental model for truly native-driven RN animation."
+  - title: "Chasing a Phantom Jump: making Skia + Reanimated smooth on low-end Android"
+    url: "https://blog.margelo.com/profiling-skia-reanimated-low-end-android"
+    by: "Vishesh Raheja (Margelo)"
+    what: "A low-end-Android profiling deep-dive: smoothness is frame-cadence timing, not curve math; the dominant fix is SurfaceView over TextureView (no per-frame texture upload, ~50-65% less RenderThread CPU), plus stable-reference buffer mutation and quantizing per-frame values. With profiler-triangulation methodology (gfxinfo/Perfetto/Hermes)."
+  - title: "A React trick to improve exit animations"
+    url: "https://barvian.me/react-exit-animations"
+    by: "Max Barvian"
+    what: "Uses Suspense to freeze exiting content during animations; explains Fragment refs, useInsertionEffect, and Suspense DOM-update behavior. A durable web exit-animation technique grounded in React internals."
+sources:
+  - "https://reactnative.dev/blog/2026/04/07/react-native-0.85"

@@ -1,0 +1,37 @@
+id: RB-E-ALT-FRAMEWORKS
+topic: "Alternatives to React Native (cross-platform frameworks)"
+category: alt-frameworks
+group: platform-native
+status: drafted
+confidence: low
+platforms: [react, react-native]
+options:
+  - { name: "Lynx (ByteDance)", tradeoff: "web-tech (HTML/CSS) + native render; dual-thread UI/logic; young ecosystem (open-sourced 2025); scaffold via create-rspeedy" }
+  - { name: "Valdi (Snap)", tradeoff: "declarative TypeScript compiling to native views on iOS/Android/macOS; beta (beta-0.1.0), open-sourced by Snap Nov 2025 after ~8 yrs internal use" }
+  - { name: "Flutter", tradeoff: "Dart; own render engine; large ecosystem; not React/JS" }
+  - { name: "Kotlin Multiplatform", tradeoff: "share business logic across platforms; native UI per platform" }
+recommend:
+  default: "Stay on React Native unless a specific driver pushes you off it — its decade of libraries is a major advantage; Lynx and Valdi are early."
+  when:
+    - "share only business logic, keep native UI → Kotlin Multiplatform"
+    - "team already invested in Dart / wants one render engine → Flutter (leaves React entirely)"
+note: "Context for teams weighing leaving the React/RN ecosystem. Newer entrants (Lynx, Valdi) are early — not endorsements."
+defer_to_skill: null
+doc: null
+updated: 2026-06-25
+sources:
+  - "https://github.com/lynx-family/lynx"
+  - "https://github.com/Snapchat/Valdi"
+reading:
+  - title: "Under the hood of MDN's new frontend"
+    url: "https://developer.mozilla.org/en-US/blog/mdn-front-end-deep-dive/"
+    by: "Leo McArdle (Mozilla / MDN)"
+    what: "Architecture case study replacing a React SPA with server-side templating + Lit web components (per-component CSS, Declarative Shadow DOM, Rspack). An authoritative counter-perspective on when NOT to ship a React SPA."
+  - title: "From React to native web with nanotags: a migration that saved 100 KB"
+    url: "https://evilmartians.com/chronicles/from-react-to-native-web-with-nanotags-a-migration-that-saved-100kb"
+    by: "Evil Martians"
+    what: "When a marketing/content site doesn't need React — migrating to Web Components (Custom Elements + Astro + nanostores, ~3KB vs ~63KB), with the boilerplate/accessibility trade-offs nanotags addresses. Durable do-you-even-need-React reasoning."
+  - title: "How We Rewrote 130K Lines from React to Svelte in Two Weeks"
+    url: "https://strawberrybrowser.com/blog/react-to-svelte"
+    by: "Strawberry Browser (Dendrite Systems)"
+    what: "A migration case study contrasting React's virtual-DOM overhead with Svelte's compiled reactivity for an AI-driven browser UI, including the LLM-migration ruleset that kept the Svelte idiomatic. A concrete framework-tradeoff data point for teams weighing leaving React."
