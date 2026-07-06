@@ -10,8 +10,13 @@ const count = entries.reduce((n, e) => n + (e.reading?.length || 0), 0);
   organized by the decision it informs, not by publish date. The annotations are our editorial take;
   <strong>the articles are the originals — read them there.</strong> A piece lands here only if it's the
   canonical explanation for its topic; how-to content routes to depth skills instead.</p>
+  <nav aria-label="Jump to group" style="display:flex; flex-wrap:wrap; gap:.45rem; margin:1rem 0 0">
+    {groups.map((g) => (
+      <a href={`#${g.id}`} style="font-size:.85rem; padding:.35rem .7rem; background:var(--card); border:1px solid var(--line); border-radius:4px; text-decoration:none; color:var(--muted)">{g.label.split(' — ')[0].split(' (')[0]}</a>
+    ))}
+  </nav>
   {groups.map((g) => (
-    <section>
+    <section id={g.id}>
       <h2>{g.label}</h2>
       {g.entries.map((id) => {
         const e = entries.find((x) => x.id === id);
