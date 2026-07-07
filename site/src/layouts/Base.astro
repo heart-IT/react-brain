@@ -5,7 +5,7 @@
 // the bottom), active-group highlighted on entry pages. Dark-first tonal layers,
 // Hanken Grotesk / Inter / JetBrains Mono, semantic color = categorization only.
 const { title = 'react-brain', description = 'A verified, context-keyed encyclopedia of the React + React Native ecosystem — what to use, when, and why.', activeGroup = null } = Astro.props;
-import { GITHUB, href, corpusInfo, corpus } from '../lib/corpus.js';
+import { GITHUB, href, corpusInfo, corpus, BASE } from '../lib/corpus.js';
 import interUrl from '../assets/fonts/Inter.woff2?url';
 import monoUrl from '../assets/fonts/JetBrainsMono.woff2?url';
 const fontFaces = [
@@ -107,6 +107,19 @@ const bottomLinks = [
     </div>
   </div>
 
+  <div id="console" hidden>
+    <div class="console-scrim"></div>
+    <div class="console-box" role="dialog" aria-modal="true" aria-label="react-brain console">
+      <div class="console-out" id="c-out" aria-live="polite"></div>
+      <form id="c-form" autocomplete="off">
+        <span class="prompt" id="c-prompt">❯</span>
+        <input id="c-in" type="text" spellcheck="false" autocomplete="off"
+          placeholder="try: help · query maps · stack --rn --expo · load" aria-label="Console command" />
+        <kbd>esc</kbd>
+      </form>
+    </div>
+  </div>
+
   <script is:inline>
     // DESIGN.md: "Code Blocks: … with a Copy action in the top right"
     for (const pre of document.querySelectorAll('pre')) {
@@ -126,14 +139,233 @@ const bottomLinks = [
       const k = document.querySelector('.search kbd');
       if (k) k.textContent = 'Ctrl K';
     }
-    document.addEventListener('keydown', (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        const q = document.getElementById('nav-q');
-        if (q) q.focus();
-      }
-    });
   </script>
+  <script is:inline define:vars={{ BASE }}>
+  // ═══ THE CONSOLE — the terminal identity, made functional ══════════════════
+  (() => {
+    const $ = (id) => document.getElementById(id);
+    const box = $('console'), out = $('c-out'), input = $('c-in'), promptEl = $('c-prompt');
+    let DATA = null, lastFocus = null, histIdx = -1;
+    const history = [];
+    const esc = (x) => String(x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const CTX_KEY = 'rb-console-ctx';
+    const ctx = () => { try { return JSON.parse(localStorage.getItem(CTX_KEY)); } catch { return null; } };
+    const setPrompt = () => { const c = ctx(); promptEl.textContent = c ? `~/${c.name} ❯` : '❯'; };
+
+    async function ensureData() {
+      if (DATA) return DATA;
+      print('<span class="t-dim">loading corpus…</span>');
+      DATA = await (await fetch(`${BASE}console-data.json`)).json();
+      out.lastChild?.remove();
+      return DATA;
+    }
+
+    function print(html, cmd) {
+      if (cmd != null) {
+        const c = document.createElement('div');
+        c.className = 'c-cmd'; c.textContent = `${promptEl.textContent} ${cmd}`;
+        out.appendChild(c);
+      }
+      if (html) { const d = document.createElement('div'); d.className = 'c-res'; d.innerHTML = html; out.appendChild(d); }
+      out.scrollTop = out.scrollHeight;
+    }
+
+    function open() {
+      lastFocus = document.activeElement;
+      box.hidden = false; setPrompt(); input.focus();
+      if (!out.childElementCount) print('<span class="t-dim">react-brain console — type <b>help</b>. ⌘K toggles, esc closes.</span>');
+    }
+    function close() { box.hidden = true; lastFocus?.focus?.(); }
+
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); box.hidden ? open() : close(); }
+      else if (e.key === '/' && box.hidden && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName)) { e.preventDefault(); open(); }
+      else if (e.key === 'Escape' && !box.hidden) close();
+    });
+    box.addEventListener('click', (e) => { if (e.target === box || e.target.classList.contains('console-scrim')) close(); });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowUp') { if (history.length) { histIdx = Math.max(0, (histIdx < 0 ? history.length : histIdx) - 1); input.value = history[histIdx]; e.preventDefault(); } }
+      if (e.key === 'ArrowDown') { if (histIdx >= 0) { histIdx = Math.min(history.length, histIdx + 1); input.value = history[histIdx] || ''; e.preventDefault(); } }
+    });
+
+    // ── ports of the corpus primitives (same semantics as tools/detect.mjs) ──
+    const matchDetector = (name, dets) => {
+      for (const d of dets) {
+        const p = d[0];
+        if (p.endsWith('*')) { if (name.startsWith(p.replace(/\*$/, ''))) return d; }
+        else if (name === p) return d;
+      }
+      return null;
+    };
+    const resolve = (e, tokens) => {
+      const t = tokens.map((x) => x.toLowerCase());
+      for (const clause of e.when || []) {
+        const i = clause.indexOf('→'); if (i < 0) continue;
+        if (t.some((tok) => clause.slice(0, i).toLowerCase().includes(tok)))
+          return { why: clause.slice(i + 1).trim(), ctx: clause.slice(0, i).trim(), via: 'when' };
+      }
+      return { why: e.def, ctx: 'default', via: 'default' };
+    };
+    const fit = (e, tokens) => {
+      const def = (e.def || '').toLowerCase(), when = (e.when || []).join('||').toLowerCase();
+      if (tokens.some((x) => def.includes(x))) return '✓ aligned';
+      if (tokens.some((x) => when.includes(x))) return '~ contextual';
+      return '↗ review';
+    };
+    const searchTop = (terms, entries, max = 3) => {
+      const q = terms.join(' ').toLowerCase().replace(/^rb-e-/, '');
+      return Object.values(entries).map((e) => {
+        const id = e.id.replace('RB-E-', '').toLowerCase();
+        const hay = [e.id, e.slug, e.topic, JSON.stringify(e.options), e.def].join(' ').toLowerCase();
+        let s = 0;
+        if (id === q || e.slug === q) s += 100;
+        if (id.includes(q) || e.topic.toLowerCase().includes(q)) s += 20;
+        for (const t of terms) if (hay.includes(t.toLowerCase())) s += 3;
+        return [s, e];
+      }).filter((x) => x[0] > 0).sort((a, b) => b[0] - a[0]).slice(0, max).map((x) => x[1]);
+    };
+    const ctxTokens = (c) => {
+      const t = [];
+      if (!c) return ['new project'];
+      if (c.platform === 'react-native') t.push(c.expo ? 'expo app' : 'bare rn');
+      if (c.expo) t.push('expo');
+      if (c.p2p) t.push('p2p', 'holepunch', 'serverless');
+      t.push(c.stage);
+      return t;
+    };
+    const entryHtml = (e, c) => {
+      const mine = c?.byEntry?.[e.id];
+      return `<div class="c-entry"><b><a href="${BASE}entries/${e.slug}/">${e.slug}</a></b> <span class="badge ${e.status}">${e.status}</span> <span class="badge ${e.confidence}">${e.confidence}</span> <span class="t-dim">verified ${e.updated}</span>` +
+        (mine ? `<br><span class="t-dim">in ~/${esc(c.name)}: ${esc(mine.labels.join(', '))} — ${fit(e, mine.tokens)}</span>` : '') +
+        `<br>${esc(e.def)}` +
+        (e.when?.length ? '<br>' + e.when.map((w) => `<span class="t-dim">· ${esc(w)}</span>`).join('<br>') : '') + '</div>';
+    };
+
+    const PAGES = ['entries', 'libraries', 'reading', 'stack', 'doctor', 'decide', 'scorecard', 'benchmark', 'architecture', 'changelog', 'methodology', 'search'];
+
+    async function exec(line) {
+      const [cmd, ...args] = line.trim().split(/\s+/);
+      const arg = args.join(' ');
+      const c = ctx();
+      switch ((cmd || '').toLowerCase()) {
+        case 'help':
+          print(`<span class="t-dim">query &lt;topic&gt;   the verified entry, inline
+go &lt;page|entry&gt; navigate (${PAGES.slice(0, 5).join(' · ')} …)
+search &lt;q&gt;      full-text search
+stack [--rn|--web] [--expo] [--p2p] [--stage=x]
+doctor          fit report for the loaded repo
+decide &lt;topic&gt;  decision record for the loaded repo
+load / unload   set the session repo (paste package.json) / clear
+context · clear · help</span>`); break;
+        case 'clear': out.replaceChildren(); break;
+        case 'go': {
+          const t = (args[0] || '').toLowerCase().replace(/\/$/, '');
+          if (!t) { print('<span class="t-warn">go where? try: go scorecard</span>'); break; }
+          if (t === 'home') { location.href = BASE; break; }
+          if (PAGES.includes(t)) { location.href = `${BASE}${t}/`; break; }
+          const D = await ensureData();
+          const hit = D.entries[`RB-E-${t.toUpperCase()}`] || Object.values(D.entries).find((e) => e.slug === t);
+          if (hit) location.href = `${BASE}entries/${hit.slug}/`;
+          else print(`<span class="t-warn">unknown page: ${esc(t)}</span>`);
+          break;
+        }
+        case 'search': location.href = `${BASE}search/?q=${encodeURIComponent(arg)}`; break;
+        case 'query': case 'q': {
+          if (!arg) { print('<span class="t-warn">query what? try: query maps</span>'); break; }
+          const D = await ensureData();
+          const hits = searchTop(args, D.entries);
+          print(hits.length ? hits.map((e) => entryHtml(e, c)).join('') : `<span class="t-warn">no entry matches — try</span> <a href="${BASE}search/?q=${encodeURIComponent(arg)}">search ${esc(arg)}</a>`);
+          break;
+        }
+        case 'stack': {
+          const D = await ensureData();
+          const has = (f) => args.includes(f);
+          const platform = has('--rn') ? 'react-native' : has('--web') ? 'react' : 'both';
+          const stage = (args.find((a) => a.startsWith('--stage=')) || '--stage=mvp').split('=')[1];
+          const tokens = ['new project'];
+          if (platform === 'react-native') tokens.push(has('--expo') ? 'expo app' : 'bare rn');
+          if (has('--expo')) tokens.push('expo');
+          if (has('--p2p')) tokens.push('p2p', 'holepunch', 'serverless');
+          const rank = D.stageRank;
+          const rows = D.recipe.filter((row) =>
+            (row.plat === 'any' || (row.plat === 'both' ? platform === 'both' : row.plat === 'rn' ? platform !== 'react' : platform !== 'react-native')) &&
+            rank[row.tier] <= rank[stage] && (row.onlyIf !== 'p2p' || has('--p2p')));
+          print(rows.map((row) => {
+            const e = D.entries[row.id]; if (!e) return '';
+            const r = resolve(e, tokens);
+            return `<div class="c-entry"><b><a href="${BASE}entries/${e.slug}/">${e.slug}</a></b> <span class="t-dim">${r.via === 'when' ? 'matched: ' + esc(r.ctx) : 'default'}</span><br>${esc(r.why)}</div>`;
+          }).join(''));
+          break;
+        }
+        case 'load': {
+          print('<span class="t-dim">paste a package.json below and press ⌘/ctrl+enter (or esc to cancel):</span>');
+          const ta = document.createElement('textarea');
+          ta.rows = 6; ta.className = 'c-paste'; ta.setAttribute('aria-label', 'package.json');
+          out.appendChild(ta); ta.focus(); out.scrollTop = out.scrollHeight;
+          ta.addEventListener('keydown', async (e) => {
+            if (e.key === 'Escape') { e.stopPropagation(); ta.remove(); input.focus(); }
+            if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+              try {
+                const pkg = JSON.parse(ta.value);
+                const D = await ensureData();
+                const deps = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) };
+                const byEntry = {};
+                for (const n of Object.keys(deps)) {
+                  const d = matchDetector(n, D.detectors);
+                  if (d) { (byEntry[d[1]] ||= { labels: [], tokens: [] }); if (!byEntry[d[1]].labels.includes(d[2])) byEntry[d[1]].labels.push(d[2]); if (d[3]) byEntry[d[1]].tokens.push(d[3]); }
+                }
+                const rn = 'react-native' in deps || 'expo' in deps;
+                const score = [!!pkg.scripts?.test, 'typescript' in deps, ['eslint', '@biomejs/biome', 'prettier'].some((x) => x in deps), ['husky', 'lefthook'].some((x) => x in deps), pkg.private === true, (parseInt(pkg.version, 10) || 0) >= 1].filter(Boolean).length;
+                const c2 = { name: pkg.name || 'app', deps: Object.keys(deps).length,
+                  platform: rn && 'react-dom' in deps ? 'both' : rn ? 'react-native' : 'react',
+                  expo: 'expo' in deps, p2p: Object.keys(deps).some((d) => /^hyper|^autobase$|^corestore$|^hrpc$/.test(d)),
+                  stage: score <= 1 ? 'prototype' : score <= 3 ? 'mvp' : 'production', byEntry };
+                localStorage.setItem(CTX_KEY, JSON.stringify(c2));
+                ta.remove(); setPrompt();
+                print(`<span class="t-ok">loaded ~/${esc(c2.name)}</span> <span class="t-dim">${c2.platform} · ${c2.stage} · ${c2.deps} deps · ${Object.keys(byEntry).length} decisions detected — try <b>doctor</b></span>`);
+                input.focus();
+              } catch { print('<span class="t-warn">not valid JSON</span>'); }
+            }
+          });
+          break;
+        }
+        case 'unload': localStorage.removeItem(CTX_KEY); setPrompt(); print('<span class="t-dim">session cleared</span>'); break;
+        case 'context':
+          print(c ? `<span class="t-dim">~/${esc(c.name)} — ${c.platform} · ${c.stage} · ${c.deps} deps · ${Object.keys(c.byEntry).length} decisions</span>` : '<span class="t-dim">no repo loaded — try <b>load</b></span>');
+          break;
+        case 'doctor': {
+          if (!c) { print('<span class="t-warn">no repo loaded — run <b>load</b> first (or use</span> <a href="' + BASE + 'doctor/">the doctor page</a><span class="t-warn">)</span>'); break; }
+          const D = await ensureData();
+          const rows = Object.keys(c.byEntry).map((id) => {
+            const e = D.entries[id]; if (!e) return '';
+            const f = fit(e, c.byEntry[id].tokens);
+            const cls = f.startsWith('✓') ? 't-ok' : f.startsWith('~') ? 't-warn' : 't-dim';
+            return `  <a href="${BASE}entries/${e.slug}/">${e.slug.padEnd(14)}</a> ${esc(c.byEntry[id].labels.join(', ')).padEnd(28)} <span class="${cls}">${f}</span>`;
+          }).filter(Boolean);
+          print(`<pre class="c-pre">~/${esc(c.name)} · ${c.platform} · ${c.stage}\n\n${rows.join('\n')}\n\n<span class="t-dim">full report incl. gaps + source signals: npx react-brain doctor .</span></pre>`);
+          break;
+        }
+        case 'decide': {
+          if (!arg) { print('<span class="t-warn">decide what? try: decide state</span>'); break; }
+          location.href = `${BASE}decide/`;
+          break;
+        }
+        case 'bench': location.href = `${BASE}benchmark/`; break;
+        case '': break;
+        default:
+          print(`<span class="t-warn">unknown: ${esc(cmd)}</span> <span class="t-dim">— try <b>help</b>, or</span> <a href="${BASE}search/?q=${encodeURIComponent(line)}">search “${esc(line)}”</a>`);
+      }
+    }
+
+    $('c-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const line = input.value; input.value = ''; histIdx = -1;
+      if (line.trim()) { history.push(line); print(null, line); await exec(line); }
+    });
+    setPrompt();
+  })();
+  </script>
+
 </body>
 </html>
 
@@ -337,6 +569,25 @@ const bottomLinks = [
   * { scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
   .prose h4 { font-size: .95rem; }
   .card p, .card ul { max-width: 78ch; }
+
+  /* ── the console (⌘K) ─────────────────────────────────────────────────── */
+  #console { position: fixed; inset: 0; z-index: 50; }
+  .console-scrim { position: absolute; inset: 0; background: rgba(0,0,0,.55); backdrop-filter: blur(3px); }
+  .console-box { position: relative; max-width: 46rem; margin: 9vh auto 0; background: var(--code-bg); border: 1px solid var(--line-strong); border-radius: 10px; overflow: hidden;
+    box-shadow: 0 40px 90px -30px rgba(0,0,0,1), 0 0 110px -30px rgba(80,250,123,.4); display: flex; flex-direction: column; max-height: 72vh; }
+  .console-out { overflow-y: auto; padding: .9rem 1rem 0; font: 400 12.5px/1.7 var(--font-mono); flex: 1; min-height: 3rem; }
+  .console-out:empty { min-height: 0; padding: 0; }
+  .c-cmd { color: var(--accent); margin-top: .6rem; }
+  .c-res { color: var(--fg); margin: .2rem 0 .4rem; }
+  .c-entry { border-top: 1px solid var(--line); padding: .5rem 0; }
+  .c-entry:first-child { border-top: 0; }
+  .c-pre { margin: 0; border: 0; padding: .3rem 0; background: none; white-space: pre; }
+  .c-paste { margin: .4rem 0; min-height: 6rem; }
+  #c-form { display: flex; align-items: center; gap: .55rem; padding: .7rem 1rem; border-top: 1px solid var(--line); }
+  #c-form .prompt { flex-shrink: 0; }
+  #c-in { flex: 1; background: none; border: 0; color: var(--fg); font: 400 .9rem var(--font-mono); }
+  #c-in:focus { outline: none; box-shadow: none; }
+  #c-form kbd { font: 500 .7rem var(--font-mono); color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: .1em .4em; }
 
   @media print {
     :root { --bg: #fff; --card: #f5f7f9; --code-bg: #f5f7f9; --line: #c8ccd2; --line-strong: #9aa1a9;

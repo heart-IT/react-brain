@@ -37,6 +37,7 @@ const toc = [
     {tr && <span class={`badge ${tr}`}>track: {tr}</span>}
   </p>
 
+  <div id="session-banner" hidden class="card" style="padding:.6rem .9rem; margin:.6rem 0 0"></div>
   <nav aria-label="On this page" style="display:flex; flex-wrap:wrap; gap:.45rem; margin:.4rem 0 0">
     {toc.map(([id, label]) => (
       <a href={`#${id}`} class="meta" style="text-decoration:none">{label}</a>
@@ -109,4 +110,21 @@ const toc = [
   {related.length > 0 && (
     <p class="muted">Related in {e.group}: {related.map((x, i) => <span>{i > 0 && ' · '}<a href={href(`entries/${x.slug}/`)}>{x.slug}</a></span>)}</p>
   )}
+
+  <script is:inline define:vars={{ entryId: e.id, def: e.recommend?.default || '', when: e.recommend?.when || [] }}>
+    // session context (set via the ⌘K console's `load`) personalizes this entry
+    try {
+      const ctx = JSON.parse(localStorage.getItem('rb-console-ctx'));
+      const mine = ctx?.byEntry?.[entryId];
+      if (mine) {
+        const tokens = mine.tokens || [];
+        const d = def.toLowerCase(), w = when.join('||').toLowerCase();
+        const fit = tokens.some((x) => d.includes(x)) ? '✓ aligned' : tokens.some((x) => w.includes(x)) ? '~ contextual' : '↗ review';
+        const cls = fit.startsWith('✓') ? 't-ok' : fit.startsWith('~') ? 't-warn' : 'muted';
+        const el = document.getElementById('session-banner');
+        el.innerHTML = `<span class="meta">~/${ctx.name}</span> · your choice here: <b>${mine.labels.join(', ').replace(/</g, '&lt;')}</b> — <span class="${cls}">${fit}</span>`;
+        el.hidden = false;
+      }
+    } catch {}
+  </script>
 </Base>

@@ -48,6 +48,16 @@ const info = corpusInfo();
 
   <script is:inline define:vars={{ data, version: info.version, BASE }}>
     const $ = (id) => document.getElementById(id);
+    // honor the console's session context (⌘K → load)
+    try {
+      const ctx = JSON.parse(localStorage.getItem('rb-console-ctx'));
+      if (ctx) {
+        $('rn').checked = ctx.platform !== 'react';
+        $('expo').checked = !!ctx.expo;
+        $('p2p').checked = !!ctx.p2p;
+        $('stage').value = ctx.stage || 'mvp';
+      }
+    } catch {}
     const today = new Date().toISOString().slice(0, 10);
     const fmt = (n) => (n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? Math.round(n / 1e3) + 'k' : String(n));
     let deps = null;
