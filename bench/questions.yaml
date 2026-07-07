@@ -1,0 +1,223 @@
+# ══════════════════════════════════════════════════════════════
+# react-brain STALENESS BENCHMARK — question bank
+# ══════════════════════════════════════════════════════════════
+# Every question derives from a VERIFIED, DATED fact in the corpus (entry: names
+# the source entry; verified: the fact-check date). Grading is deterministic:
+#   fresh_markers  — case-insensitive regexes; any match ⇒ the answer knows the
+#                    current truth (fresh WINS over stale when both match, since
+#                    good answers often mention the superseded thing by name).
+#   stale_markers  — any match (and no fresh match) ⇒ the answer asserts the
+#                    outdated state of the world.
+#   neither        ⇒ unclear (scored separately, not as stale).
+# A global hedge detector (knowledge cutoff / "verify the latest" / "as of …")
+# separates honest uncertainty from CONFIDENT staleness — the headline metric.
+# Questions are phrased factually so a regex rubric is fair; no judge model.
+# ══════════════════════════════════════════════════════════════
+questions:
+  - id: expo-e2e
+    entry: RB-E-TESTING
+    verified: 2026-07-01
+    question: "Which end-to-end testing tool does Expo recommend for React Native apps, Detox or Maestro?"
+    answer: "Maestro — Expo archived its Detox support and recommends Maestro."
+    fresh_markers: ["maestro"]
+    stale_markers: ["detox"]
+
+  - id: jest-preset
+    entry: RB-E-TESTING
+    verified: 2026-07-01
+    question: "In current React Native (0.85+), what value should the Jest `preset` field have?"
+    answer: "@react-native/jest-preset — RN 0.85 moved the preset out of the core package."
+    fresh_markers: ["@react-native/jest-preset"]
+    stale_markers: ["preset:\\s*['\\\"]react-native['\\\"]", "preset\\s+is\\s+['\\\"]?react-native['\\\"]?\\b"]
+
+  - id: hermes-default
+    entry: RB-E-BUILD
+    verified: 2026-07-06
+    question: "What is the default JavaScript engine in React Native 0.84 and later?"
+    answer: "Hermes V1 (default since RN 0.84, 2026-02)."
+    fresh_markers: ["hermes\\s*v1", "hermes"]
+    stale_markers: ["jsc\\b", "javascriptcore"]
+
+  - id: jsc-removed
+    entry: RB-E-RN-VERSIONS
+    verified: 2026-07-02
+    question: "Can I still choose JavaScriptCore as the JS engine in a new React Native app (0.81+)?"
+    answer: "No — JavaScriptCore was removed in RN 0.81; RN is Hermes-only."
+    fresh_markers: ["removed", "hermes[- ]only", "no longer (available|supported|an option)", "\\bno\\b.*0\\.81"]
+    stale_markers: ["yes[, ].*(jsc|javascriptcore)", "can (still )?use javascriptcore", "opt (in|out).*(jsc|javascriptcore)"]
+
+  - id: new-arch-mandatory
+    entry: RB-E-NATIVE
+    verified: 2026-07-06
+    question: "Is React Native's New Architecture optional in RN 0.82 and later?"
+    answer: "No — from RN 0.82 the New Architecture is the only runtime; the legacy architecture is frozen and being stripped."
+    fresh_markers: ["mandatory", "only (runtime|option)", "not optional", "no[,. ].*(0\\.82|new arch)", "opt[- ]?out.*(ignored|removed|no longer)"]
+    stale_markers: ["yes.*optional", "can (still )?opt out", "disable the new architecture"]
+
+  - id: safeareaview
+    entry: RB-E-RN-VERSIONS
+    verified: 2026-07-02
+    question: "What is the current status of the core SafeAreaView component in React Native?"
+    answer: "Deprecated (RN 0.81) — use react-native-safe-area-context."
+    fresh_markers: ["deprecated", "safe-area-context"]
+    stale_markers: ["recommended way", "still the (standard|default)", "not deprecated"]
+
+  - id: edge-to-edge
+    entry: RB-E-NATIVE
+    verified: 2026-07-06
+    question: "On React Native 0.86+, do I still need the react-native-edge-to-edge package for Android 15 edge-to-edge support?"
+    answer: "No — RN 0.86 moved Android-15+ edge-to-edge into core; the standalone package can be dropped."
+    fresh_markers: ["\\bno\\b.*(core|0\\.86|built[- ]?in)", "moved into core", "no longer (need|required)", "drop (it|the package)"]
+    stale_markers: ["yes[, ].*(need|required|install)", "must (install|add) react-native-edge-to-edge"]
+
+  - id: rn-init
+    entry: RB-E-RN-VERSIONS
+    verified: 2026-07-02
+    question: "Is `npx react-native init` still the standard way to start a new React Native app?"
+    answer: "No — it was deprecated (2024-12); Expo is the recommended framework for new apps."
+    fresh_markers: ["deprecated", "expo"]
+    stale_markers: ["yes[, ].*react-native init", "react-native init.*(standard|recommended)"]
+
+  - id: vector-icons
+    entry: RB-E-SVG
+    verified: 2026-07-01
+    question: "What is the current status of the monolithic react-native-vector-icons package?"
+    answer: "Superseded — split into per-family scoped @react-native-vector-icons/* packages (v11+, with a codemod)."
+    fresh_markers: ["supersed", "scoped", "@react-native-vector-icons/", "per[- ]family", "split into"]
+    stale_markers: ["still the (standard|recommended|default)", "actively maintained monolith"]
+
+  - id: styled-components
+    entry: RB-E-STYLING
+    verified: 2026-06-25
+    question: "What is the maintenance status of styled-components in 2026, and is it recommended for new web projects?"
+    answer: "Largely maintenance mode (v6.3 added RSC support); prefer zero-runtime approaches (StyleX/Tailwind) for new work."
+    fresh_markers: ["maintenance", "zero[- ]runtime", "not recommended for new"]
+    stale_markers: ["actively developed", "(great|excellent|solid|recommended) choice for new"]
+
+  - id: rn-web
+    entry: RB-E-CROSSPLATFORM
+    verified: 2026-06-17
+    question: "Is react-native-web still the recommended bet for NEW universal (web + native) React UI?"
+    answer: "No — react-native-web is in maintenance mode; evaluate React Strict DOM or Expo Universal Components for new shared UI."
+    fresh_markers: ["maintenance", "react strict dom", "strict[- ]dom", "expo universal"]
+    stale_markers: ["yes[, ].*react-native-web", "react-native-web is (still )?(the )?(standard|recommended|best)"]
+
+  - id: rn-iap
+    entry: RB-E-PAYMENTS
+    verified: 2026-06-25
+    question: "What is the current status of the react-native-iap package?"
+    answer: "Deprecated/archived — folded into the OpenIAP effort; prefer expo-iap."
+    fresh_markers: ["deprecat", "archiv", "openiap", "expo-iap"]
+    stale_markers: ["actively maintained", "still the (standard|go[- ]to|recommended)"]
+
+  - id: game-engine
+    entry: RB-E-GAMES
+    verified: 2026-06-25
+    question: "Is react-native-game-engine an actively maintained choice for RN games?"
+    answer: "No — effectively unmaintained (last release 2020); react-native-skia or embedding Godot are the current paths."
+    fresh_markers: ["unmaintained", "2020", "skia", "godot", "\\bno\\b.*maintained"]
+    stale_markers: ["actively maintained", "yes[, ].*good choice"]
+
+  - id: react-compiler
+    entry: RB-E-REACT-CORE
+    verified: 2026-07-06
+    question: "Is the React Compiler production-ready, and should new code still hand-write useMemo/useCallback everywhere?"
+    answer: "Compiler 1.0 is stable (2025-10, Meta prod) — new code can drop most manual memoization (keep existing ones as escape hatches)."
+    fresh_markers: ["1\\.0", "stable", "production[- ]ready", "drop most (manual )?memo"]
+    stale_markers: ["experimental", "not (yet )?(stable|production)", "beta"]
+
+  - id: rsc-rn
+    entry: RB-E-SECURITY
+    verified: 2026-07-02
+    question: "Do the React Server Components DoS CVEs (e.g. CVE-2026-23864) affect React Native apps?"
+    answer: "No — they are server-side (react-server-dom-*, Next.js App Router); RN is not affected."
+    fresh_markers: ["\\bno\\b", "server[- ]side", "not affect"]
+    stale_markers: ["yes[, ].*react native.*(affected|vulnerable)", "patch your (rn|react native) app"]
+
+  - id: npm-scripts
+    entry: RB-E-SECURITY
+    verified: 2026-07-02
+    question: "Does npm v12 run package install scripts (postinstall) by default?"
+    answer: "No — npm v12 blocks install scripts by default (supply-chain hardening)."
+    fresh_markers: ["\\bno\\b", "block", "disabled by default"]
+    stale_markers: ["yes[, ].*(runs|executes) (them|install scripts) by default"]
+
+  - id: react-router-v8
+    entry: RB-E-NAV
+    verified: 2026-06-25
+    question: "Has React Router v8 been released, and what module format does it ship?"
+    answer: "Yes — v8 released (2026-06), ESM-only (drops CJS and react-router-dom)."
+    fresh_markers: ["esm[- ]only", "v?8.*(released|out|stable)", "dropped? (cjs|commonjs)"]
+    stale_markers: ["not (yet )?released", "still (in )?(beta|alpha|pre[- ]?release)", "latest (stable )?(version )?is (v?7|v?6)"]
+
+  - id: vite-bundler
+    entry: RB-E-BUILD
+    verified: 2026-07-06
+    question: "What bundler does Vite 8 use under the hood by default?"
+    answer: "Rolldown — the Rust bundler (replacing the esbuild+Rollup pair)."
+    fresh_markers: ["rolldown"]
+    stale_markers: ["esbuild and rollup", "rollup (in|for) production", "esbuild (in|for) dev"]
+
+  - id: ts7
+    entry: RB-E-TYPESCRIPT
+    verified: 2026-07-02
+    question: "What is TypeScript 7, and roughly how much faster is it than the JavaScript-based compiler?"
+    answer: "The native Go rewrite of tsc (~10x faster); 7.0 RC as of 2026-06, usable in CI."
+    fresh_markers: ["\\bgo\\b", "native", "10x"]
+    stale_markers: ["typescript 7 (does not|doesn't) exist", "no (such|plans for) (version|typescript 7)"]
+
+  - id: mmkv-v4
+    entry: RB-E-STORAGE
+    verified: 2026-06-25
+    question: "What changed architecturally in react-native-mmkv v4?"
+    answer: "Full rewrite onto Nitro Modules (restoring old-architecture compatibility)."
+    fresh_markers: ["nitro"]
+    stale_markers: ["v4 (does not|doesn't) exist", "latest (major )?version is (v?3|v?2)"]
+
+  - id: async-storage-v3
+    entry: RB-E-STORAGE
+    verified: 2026-06-25
+    question: "Does @react-native-async-storage/async-storage v3 require the New Architecture?"
+    answer: "No — it requires React Native 0.76+, not New-Arch-only; v3 is instance-based (createAsyncStorage)."
+    fresh_markers: ["0\\.76", "\\bno\\b.*new arch", "not new[- ]arch[- ]only", "instance[- ]based", "createasyncstorage"]
+    stale_markers: ["yes[, ].*(requires|needs) the new architecture", "new[- ]architecture[- ]only"]
+
+  - id: zero-rn
+    entry: RB-E-DATA
+    verified: 2026-06-25
+    question: "Has Rocicorp's Zero sync engine reached 1.0, and does it support React Native?"
+    answer: "Yes — Zero hit 1.0 (2026-06) with React Native support."
+    fresh_markers: ["1\\.0", "yes"]
+    stale_markers: ["not (yet )?(at )?1\\.0", "alpha", "no react native support"]
+
+  - id: state-default
+    entry: RB-E-STATE
+    verified: 2026-07-01
+    question: "According to State of React 2025, which client-state library crossed 50% usage and tops satisfaction?"
+    answer: "Zustand."
+    fresh_markers: ["zustand"]
+    stale_markers: ["redux (crossed|tops|is the most)", "mobx (crossed|tops)"]
+
+  - id: rn-lists
+    entry: RB-E-LISTS
+    verified: 2026-07-01
+    question: "For large lists in React Native, which library does the ecosystem recommend over core FlatList?"
+    answer: "FlashList (Shopify; recycling) — Legend List if you want one engine across RN + web."
+    fresh_markers: ["flashlist", "legend list"]
+    stale_markers: ["flatlist is (the best|sufficient|recommended) for large", "no (better )?alternative"]
+
+  - id: keyboard-android
+    entry: RB-E-KEYBOARD
+    verified: 2026-06-25
+    question: "Why does core KeyboardAvoidingView feel janky on Android, and what is the modern fix?"
+    answer: "Android delivers per-frame insets that core KAV doesn't use (it snaps); react-native-keyboard-controller is the modern fix."
+    fresh_markers: ["keyboard-controller"]
+    stale_markers: ["keyboardavoidingview (works|behaves) (the same|identically)", "no (real )?difference between ios and android"]
+
+  - id: expo-sdk57
+    entry: RB-E-RN-VERSIONS
+    verified: 2026-07-02
+    question: "Which React Native version does Expo SDK 57 ship with?"
+    answer: "React Native 0.86 (with React 19.2)."
+    fresh_markers: ["0\\.86"]
+    stale_markers: ["0\\.7\\d", "0\\.8[0-5]\\b"]

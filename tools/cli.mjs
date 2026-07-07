@@ -47,6 +47,9 @@ usage: react-brain <command> [args]
                        and a machine-readable premise block that \`doctor\` re-checks
                        (flags: --out=docs/adr, --stdout)
   query    <term>      look up an entry's recommendation (id / category / keyword)
+  bench                the LLM STALENESS BENCHMARK: score models' React advice against
+                       the corpus's verified, dated facts (--list | --run --model=<id>
+                       [--with-corpus] — deterministic regex rubric, no judge model)
   lint                 mechanized corpus invariants: schema, TOC, reachability, dup URLs
                        (offline; exit 1 on errors — run after any corpus edit)
   help                 this
@@ -90,6 +93,7 @@ switch (cmd) {
   case 'signals': delegate('react-brain-signals.mjs'); break;
   case 'learn': delegate('react-brain-learn.mjs'); break;
   case 'decide': delegate('react-brain-decide.mjs'); break;
+  case 'bench': delegate('react-brain-bench.mjs'); break;
   case 'lint': delegate('react-brain-lint.mjs'); break;
   case 'query': query(rest); break;
   case undefined: case 'help': case '--help': case '-h': help(); break;

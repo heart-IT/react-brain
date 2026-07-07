@@ -8,6 +8,7 @@
   },
   "files": [
     "tools/",
+    "bench/",
     "skills/react-brain-mentor/",
     "encyclopedia/",
     "README.md"

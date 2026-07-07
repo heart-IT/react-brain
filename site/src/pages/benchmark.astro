@@ -1,0 +1,77 @@
+---
+import Base from '../layouts/Base.astro';
+import { benchData, corpus, href, GITHUB } from '../lib/corpus.js';
+const { bank, runs } = benchData();
+const { byId } = corpus();
+---
+<Base title="react-brain — LLM staleness benchmark" description="How stale is your AI's React advice? Frontier models scored against the corpus's verified, dated facts — deterministic rubric, published transcripts.">
+  <h1>The staleness benchmark</h1>
+  <p class="muted prose">LLMs are the world's largest distributor of React advice — and their training
+  cutoffs make much of it <strong style="color:var(--fg)">quietly wrong</strong>. This corpus is a dated,
+  verified answer key, so it can measure the rot: {bank.length} questions, every one derived from a
+  verified corpus fact, graded by a <strong style="color:var(--fg)">deterministic regex rubric</strong>
+  (no judge model, transcripts published). The headline metric is
+  <strong style="color:var(--fg)">confidently-stale%</strong> — asserting an outdated world without
+  hedging. Being wrong is forgivable; being confidently wrong burns users.</p>
+
+  <h2>Leaderboard</h2>
+  {runs.length === 0 ? (
+    <div class="card">
+      <p style="margin:0" class="muted">No runs committed yet — the bank and methodology are published;
+      results are reproducible from any machine with a key:</p>
+      <pre style="margin:.7rem 0 0"><span class="t-p">$</span> npx react-brain bench --run --model=claude-sonnet-5
+<span class="t-p">$</span> npx react-brain bench --run --model=claude-sonnet-5 --with-corpus  <span class="t-dim"># the delta IS the product</span></pre>
+    </div>
+  ) : (
+    <div class="tbl"><table>
+      <thead><tr><th>model</th><th>context</th><th>date</th><th>fresh</th><th>confidently stale</th><th>hedged</th><th>n</th></tr></thead>
+      <tbody>
+        {runs.map((r) => (
+          <tr>
+            <td><code>{r.model}</code></td>
+            <td>{r.with_corpus ? <span class="badge held">+ react-brain</span> : <span class="muted">alone</span>}</td>
+            <td class="meta">{r.date}</td>
+            <td><span class={r.summary.fresh_pct >= 80 ? 'mark-ok' : ''}>{r.summary.fresh_pct}%</span></td>
+            <td><span class={r.summary.confidently_stale_pct > 15 ? 'badge overturned' : ''}>{r.summary.confidently_stale_pct}%</span></td>
+            <td class="muted">{r.summary.hedged}/{r.summary.n}</td>
+            <td class="muted">{r.summary.n}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table></div>
+  )}
+
+  <h2>How it's graded</h2>
+  <ul class="prose">
+    <li><strong>fresh</strong> — the answer names the current truth (fresh markers win even when the
+      superseded thing is mentioned: “use Maestro — Expo archived Detox” is fresh).</li>
+    <li><strong>confidently stale</strong> — asserts the outdated state with no hedge.</li>
+    <li><strong>hedged</strong> — flagged its own uncertainty (“as of my knowledge cutoff…”). Scored
+      kindly on purpose: epistemic honesty is exactly what we want models to do.</li>
+    <li><strong>+ react-brain arm</strong> — same questions with the relevant corpus entry injected as
+      context (what an agent gets from the <a href={GITHUB}>MCP server</a>). The delta quantifies what a
+      maintained, verified knowledge layer is worth.</li>
+  </ul>
+  <p class="muted prose">The bank regenerates its authority weekly — every corpus harvest re-verifies the
+  answer key, so models drift staler against it over time. Rubric + runner:
+  <a href={`${GITHUB}/blob/main/bench/questions.yaml`}><code>bench/questions.yaml</code></a> ·
+  <a href={`${GITHUB}/blob/main/tools/react-brain-bench.mjs`}><code>tools/react-brain-bench.mjs</code></a>.</p>
+
+  <h2>The question bank</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>question</th><th>the current truth</th><th>source entry</th><th>verified</th></tr></thead>
+    <tbody>
+      {bank.map((q) => {
+        const e = byId[q.entry];
+        return (
+          <tr>
+            <td>{q.question}</td>
+            <td class="muted">{q.answer}</td>
+            <td>{e ? <a href={href(`entries/${e.slug}/`)}>{e.slug}</a> : q.entry}</td>
+            <td class="meta">{String(q.verified)}</td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table></div>
+</Base>

@@ -121,6 +121,31 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
   check(ciPass.status === 0 && ciPass.stdout.includes('CI: PASS'), 'doctor --ci: exits 0 on a clean repo');
 }
 
+// ── 9. staleness benchmark: bank integrity + deterministic grader ───────────────
+{
+  const b = await import(join(ROOT, 'tools/react-brain-bench.mjs'));
+  const { loadEntries } = await import(join(ROOT, 'tools/detect.mjs'));
+  const entries = loadEntries();
+  const bank = b.loadBank();
+  check(bank.length >= 20, `bench: bank has ${bank.length} questions (≥20)`);
+  const ids = new Set();
+  let ok = true;
+  for (const q of bank) {
+    if (ids.has(q.id) || !entries[q.entry] || !q.question || !q.answer || !(q.fresh_markers || []).length) ok = false;
+    ids.add(q.id);
+    for (const p of [...(q.fresh_markers || []), ...(q.stale_markers || [])]) {
+      try { new RegExp(p, 'i'); } catch { ok = false; }
+    }
+  }
+  check(ok, 'bench: every question has a unique id, a real entry, an answer, ≥1 fresh marker, and compiling regexes');
+  const q = bank.find((x) => x.id === 'expo-e2e');
+  check(b.grade(q, 'Use Maestro; Expo archived Detox.').verdict === 'fresh', 'bench grade: fresh wins when both named');
+  check(b.grade(q, 'Detox is the standard for Expo.').confidently_stale === true, 'bench grade: confident staleness detected');
+  check(b.grade(q, 'As of my knowledge cutoff, Detox was common.').confidently_stale === false, 'bench grade: hedged staleness is not confident');
+  const s9 = b.summarize([{ verdict: 'fresh', hedged: false, confidently_stale: false }, { verdict: 'stale', hedged: false, confidently_stale: true }]);
+  check(s9.fresh_pct === 50 && s9.confidently_stale_pct === 50, 'bench summarize: percentages');
+}
+
 // ── report ──────────────────────────────────────────────────────────────────────
 console.log(`react-brain eval — ${pass + fails.length} assertions`);
 if (fails.length) { for (const f of fails) console.log(`  ✗ ${f}`); console.log(`\n✗ ${fails.length} failed / ${pass} passed`); process.exit(1); }

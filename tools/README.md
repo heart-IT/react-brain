@@ -183,6 +183,23 @@ node tools/react-brain-decide.mjs state .            # writes docs/adr/NNN-state
 node tools/react-brain-decide.mjs "data fetching" . --stdout
 ```
 
+## `react-brain-bench.mjs` — the LLM STALENESS BENCHMARK
+The thesis, weaponized: LLMs distribute rotted React advice at scale, and the corpus is a
+dated, verified answer key that can **measure the rot**. The bank (`../bench/questions.yaml`)
+derives every question from a verified corpus fact; grading is a **deterministic regex
+rubric** (fresh-wins ordering, hedge detection — no judge model, transcripts published).
+Headline metric: **confidently-stale%** (asserting the outdated world without hedging).
+The `--with-corpus` arm injects the relevant entry as context — simulating an agent on the
+MCP server — and the fresh% delta quantifies what the maintained knowledge layer is worth.
+```sh
+node tools/react-brain-bench.mjs --list
+node tools/react-brain-bench.mjs --run --model=claude-sonnet-5              # needs ANTHROPIC_API_KEY
+node tools/react-brain-bench.mjs --run --model=claude-sonnet-5 --with-corpus
+```
+Results land in `bench/results/*.json` (committed; the site's /benchmark leaderboard renders
+whatever exists). Every weekly harvest re-verifies the answer key, so the benchmark
+self-refreshes — models drift staler against it over time.
+
 ## `react-brain-lint.mjs` — trust / invariants
 Every structural rule that used to live in session discipline, mechanized and offline:
 per-entry schema (required fields, status/confidence enums, `reviewed` ⇒ doc + sources,

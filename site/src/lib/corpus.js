@@ -133,6 +133,19 @@ export function changelog(limit = 60) {
   } catch { return []; }   // shallow clone / no git → page degrades gracefully
 }
 
+// ── staleness benchmark: bank + committed results ────────────────────────────────
+export function benchData() {
+  const bankPath = join(ROOT, 'bench/questions.yaml');
+  const bank = existsSync(bankPath) ? (parse(readFileSync(bankPath, 'utf8')).questions || []) : [];
+  const dir = join(ROOT, 'bench/results');
+  const runs = existsSync(dir)
+    ? readdirSync(dir).filter((f) => f.endsWith('.json'))
+        .map((f) => JSON.parse(readFileSync(join(dir, f), 'utf8')))
+        .sort((a, b) => (b.date + b.model).localeCompare(a.date + a.model))
+    : [];
+  return { bank, runs };
+}
+
 // ── data for the client-side ADR composer (/decide) ─────────────────────────────
 export function decideData() {
   const { groups, entries } = corpus();
