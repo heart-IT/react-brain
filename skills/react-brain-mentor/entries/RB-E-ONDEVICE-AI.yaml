@@ -8,6 +8,7 @@ platforms: [react-native]
 options:
   - { name: "react-native-executorch", tradeoff: "on-device models (Meta ExecuTorch); v0.8 adds VLM + runOnFrame worklet w/ Vision Camera; tool-calling/embeddings since 0.4, OCR since 0.3" }
   - { name: "@react-native-ai/apple", tradeoff: "Apple on-device LLM + SpeechAnalyzer (iOS 26); zero cloud; RN 0.80+ (preview)" }
+  - { name: "@react-native-ai/adk", tradeoff: "Google Gemini on ANDROID via the Agent Development Kit — on-device Gemini Nano + cloud models behind one Vercel-AI-SDK provider; tool calling + streaming; same react-native-ai family as the Apple provider (v0.12)" }
   - { name: "react-native-rag", tradeoff: "on-device retrieval-augmented generation over ExecuTorchLLM; local vector store" }
   - { name: "offline speech (expo-speech-recognition / whisper)", tradeoff: "speech-to-text without network" }
 recommend:
@@ -18,9 +19,10 @@ recommend:
 note: "Fast-moving area surfaced across multiple RN Rewind issues; recommend tentatively (confidence: low) and validate on-device before committing."
 defer_to_skill: null
 doc: null
-updated: 2026-06-25
+updated: 2026-07-07
 sources:
   - "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.8.0"
+  - "https://registry.npmjs.org/@react-native-ai/adk/latest"
   - "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.3.0"
 reading:
   - title: "On-Device AI Beats Cloud for TTS — Here's Why"
@@ -30,4 +32,5 @@ reading:
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "react-native-executorch", label: "ExecuTorch", token: "executorch" }
   - { pkg: "@react-native-ai/apple", label: "Apple on-device LLM", token: "apple" }
+  - { pkg: "@react-native-ai/adk", label: "Gemini ADK (Android)", token: "adk" }
   - { pkg: "react-native-rag", label: "react-native-rag", token: "rag" }

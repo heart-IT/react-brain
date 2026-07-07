@@ -1,0 +1,49 @@
+id: RB-E-CALENDARS
+topic: "Calendars, date pickers & event grids"
+category: calendars
+group: ui
+status: drafted
+confidence: low
+platforms: [react, react-native]
+options:
+  - { name: "react-native-calendars (Wix)", tradeoff: "the long-standing de-facto RN calendar/date-marking suite (v1.13xx); Agenda/Calendar/CalendarList; huge adoption, older architecture" }
+  - { name: "@marceloterreiro/flash-calendar (2.x)", tradeoff: "performance-first calendar born at Shopify — windowed via a FlashList peer dep, tiny (~18kb min), headless-ish theming for design systems; picker/marking focus, not an event grid" }
+  - { name: "@super-calendar/native (2.x)", tradeoff: "NEW (2026) gesture-driven EVENT GRID — month/week/day/3-day/schedule views, pinch-to-zoom time grid, drag-to-create/resize, recurring events, time zones; virtualized + paged; requires Reanimated 4 + Gesture Handler + Legend List; @super-calendar/dom renders the same core on web" }
+  - { name: "react-native-calendar-strip (2.x)", tradeoff: "horizontal week-strip header pattern; narrow, settled use case" }
+  - { name: "web: FullCalendar / react-big-calendar", tradeoff: "established web event-calendar components (react-big-calendar 1.20); FullCalendar is the batteries-included commercial-tier option" }
+recommend:
+  default: "Date picking / marked-dates UI → react-native-calendars (the de-facto) or @marceloterreiro/flash-calendar when performance and design-system theming matter. A full event-grid UX (native-calendar-style day/week views with drag and pinch) → @super-calendar/native — new in 2026, prototype first. Web event calendars → react-big-calendar or FullCalendar. Lightly vetted (confidence: low)."
+  when:
+    - "date picker / marked dates / agenda list → react-native-calendars"
+    - "design-system theming + list-perf discipline → @marceloterreiro/flash-calendar (FlashList-windowed, tiny)"
+    - "event grid with gestures (drag-to-create, resize, pinch-zoom day/week views) → @super-calendar/native (new — verify on-device perf; stack requires Reanimated 4 + Gesture Handler + Legend List)"
+    - "week-strip header UI → react-native-calendar-strip"
+    - "web scheduler/event calendar → react-big-calendar or FullCalendar"
+note: >
+  NEW entry (2026-07-07): calendars are a common, hard UI need with a real competing-options
+  landscape, surfaced by TWO independent signals in one week (Super Calendar in TWiR #288, then
+  headlining RN Rewind ~#48). The durable split is PICKER/MARKING calendars (react-native-calendars,
+  flash-calendar) vs full EVENT GRIDS (super-calendar; web's FullCalendar/react-big-calendar) — most
+  apps need the first, calendar-app UX needs the second. Versions verified vs npm
+  (react-native-calendars 1.1314 · flash-calendar 2.0.0 · @super-calendar/native 2.1.5 ·
+  calendar-strip 2.2.6 · react-big-calendar 1.20); Super Calendar's package names, views, and
+  Reanimated-4/Gesture-Handler/Legend-List requirements verified vs its docs. Lightly vetted
+  (confidence: low) — prototype gesture perf on low-end devices before committing.
+defer_to_skill: react-native-best-practices
+doc: null
+updated: 2026-07-07
+reading:
+  - title: "Super Calendar — docs (views, gestures & architecture)"
+    url: "https://super-calendar.afonsojramos.me/"
+    by: "Afonso Jorge Ramos"
+    what: "The reference for the new event-grid approach: a platform-free core with native (Reanimated 4 + Gesture Handler + Legend List) and DOM renderers, virtualized snap-paged views (month/week/day/3-day/schedule), and gesture semantics (pinch-to-zoom time grid, long-press drag, grip resize, drag-empty-space-to-create). Documents the stack a modern RN event grid actually requires — useful even if you pick something else."
+sources:
+  - "https://registry.npmjs.org/react-native-calendars/latest"
+  - "https://registry.npmjs.org/@super-calendar/native/latest"
+  - "https://marceloprado.github.io/flash-calendar/"
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "react-native-calendars", label: "react-native-calendars", token: "react-native-calendars" }
+  - { pkg: "@marceloterreiro/flash-calendar", label: "Flash Calendar", token: "flash-calendar" }
+  - { pkg: "@super-calendar/*", label: "Super Calendar", token: "super-calendar" }
+  - { pkg: "react-native-calendar-strip", label: "calendar-strip", token: "calendar-strip" }
+  - { pkg: "react-big-calendar", label: "react-big-calendar", token: "react-big-calendar" }

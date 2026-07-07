@@ -9,7 +9,7 @@ options:
   - { name: "Jest / Vitest", tradeoff: "unit; Vitest faster on web, Jest default on RN" }
   - { name: "React Testing Library (14)", tradeoff: "behavior-first component tests (web + RN variants); v14 adds React 19 support + async APIs" }
   - { name: "MSW (Mock Service Worker)", tradeoff: "network-level API mocking; same mocks reused across unit/e2e and dev" }
-  - { name: "Playwright / Maestro / Detox / Meticulous", tradeoff: "e2e: Playwright web; Maestro 2.0 (AI test-healing) is Expo's recommended native e2e (Expo archived Detox; Detox has a 'Copilot' beta); Meticulous = record-based AI e2e" }
+  - { name: "Playwright / Maestro / Detox / Meticulous", tradeoff: "e2e: Playwright web; Maestro 2.0 (AI test-healing) is Expo's recommended native e2e (Expo archived Detox; Detox has a 'Copilot' beta); Maestro now bundles an MCP server so coding agents can drive simulators/emulators/devices, inspect UI, and generate E2E flows (claude mcp add maestro -- maestro mcp); Meticulous = record-based AI e2e" }
   - { name: "Storybook 10", tradeoff: "component workshop; web + RN run side-by-side; Vite 8 + Playwright/Vitest test integration + MCP" }
   - { name: "Radon IDE (Software Mansion)", tradeoff: "VS Code / Cursor RN debugging — device panel, click-to-inspect, React Profiler" }
   - { name: "Argent (Software Mansion) — NEW/experimental", tradeoff: "agentic toolkit giving an AI assistant control of the iOS Simulator (drive + inspect the running app) to shorten the debug loop; new, niche" }
@@ -23,11 +23,13 @@ recommend:
 note: >
   RN 0.85 (2026-04-07) moved the Jest preset out of the core package — set
   `preset: '@react-native/jest-preset'` in jest.config.js (was `preset: 'react-native'`).
-  For native e2e, Expo now recommends Maestro (it archived its Detox support docs).
-  Jest-preset fact verified against the official RN 0.85 release blog.
+  For native e2e, Expo now recommends Maestro (it archived its Detox support docs). Maestro's
+  MCP server (verified vs docs.maestro.dev, 2026-07-07) puts device-driving + E2E-generation in
+  the hands of coding agents — the agent-driven-testing trend consolidating around the tool the
+  ecosystem already recommends. Jest-preset fact verified against the official RN 0.85 release blog.
 defer_to_skill: agentic-engineering-patterns  # TDD/verify discipline
 doc: "RB-E-TESTING.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-01
+updated: 2026-07-07
 reading:
   - title: "Write tests. Not too many. Mostly integration."
     url: "https://kentcdodds.com/blog/write-tests"
@@ -39,6 +41,7 @@ reading:
     what: "Why tests coupled to internals are brittle (false failures on refactor, false passes on breakage) and why to test behavior the way users use it. The mental model behind Testing Library."
 sources:
   - "https://reactnative.dev/blog/2026/04/07/react-native-0.85"
+  - "https://docs.maestro.dev/get-started/maestro-mcp"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "jest", label: "Jest", token: "jest" }
   - { pkg: "vitest", label: "Vitest", token: "vitest" }

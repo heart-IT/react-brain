@@ -41,3 +41,4 @@
 {"k":"O","id":"RB-E-NATIVE","outcome":"weakened","on":"2026-06-25","note":"Nitro pre-1.0 (pin); Turbo Modules stay in-core stable; bridge removed 0.85"}
 {"k":"O","id":"RB-E-STYLING","outcome":"weakened","on":"2026-06-25","note":"signals: styled-components published days ago vs a maintenance/deprecated claim"}
 {"k":"P","id":"RB-E-MAPS","claim":"React Native → react-native-maps for platform-native basics (markers, regions); switch to MapLibre RN when you need custom vector styles or offline without per-load billing, or @rnmapbox/maps when you","confidence":"low","category":"maps","asserted":"2026-07-06","check_by":"2026-10-06"}
+{"k":"P","id":"RB-E-CALENDARS","claim":"Date picking / marked-dates UI → react-native-calendars (the de-facto) or @marceloterreiro/flash-calendar when performance and design-system theming matter. A full event-grid UX (native-calendar-style","confidence":"low","category":"calendars","asserted":"2026-07-07","check_by":"2026-10-07"}

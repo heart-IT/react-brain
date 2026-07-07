@@ -12,7 +12,7 @@
 # (entries with `sources:` + `updated:`). Library picks in `recommend` are
 # editorial synthesis, not vendor claims.
 #
-# STATE (2026-07-06): 37 entries across 6 groups, ALL `drafted`+ (0 stubs) — breadth is fully
+# STATE (2026-07-07): 38 entries across 6 groups, ALL `drafted`+ (0 stubs) — breadth is fully
 # citable. 14 are `reviewed` with long-form encyclopedia/<id>.md. Every entry carries curated,
 # fetch-verified `reading`. Reachability: cross-cutting domains via the mentor's
 # assessment_dimensions; feature/capability domains via the mentor's `capability_map`.
@@ -63,8 +63,8 @@ encyclopedia:
   one_liner: "A curated encyclopedia of the React + React Native ecosystem — what to use, when, and why."
   content_dir: "../../encyclopedia"   # long-form entries land here as markdown, named <id>.md
   authoring_guide: "diataxis-documentation"
-  updated: 2026-07-06
-  sources_digested: ["React Native Rewind ×47", "This Week in React ×22", "React Status ×22", "React Digest ×16"]
+  updated: 2026-07-07
+  sources_digested: ["React Native Rewind ×48", "This Week in React ×22", "React Status ×22", "React Digest ×16"]
 
 # ------------------------------------------------------------------------------
 # GROUPS — table of contents. The mentor navigates by group, not by scanning all.
@@ -78,7 +78,7 @@ groups:
     entries: [RB-E-STATE, RB-E-DATA, RB-E-P2P, RB-E-NAV, RB-E-META-FRAMEWORKS, RB-E-FORMS, RB-E-CROSSPLATFORM, RB-E-DESKTOP]
   - id: ui
     label: "UI — styling, components, animation, lists, a11y, i18n, charts"
-    entries: [RB-E-STYLING, RB-E-COMPONENT-LIBS, RB-E-ANIMATION, RB-E-LISTS, RB-E-A11Y, RB-E-I18N, RB-E-CHARTS, RB-E-EDITORS, RB-E-SVG, RB-E-MAPS]
+    entries: [RB-E-STYLING, RB-E-COMPONENT-LIBS, RB-E-ANIMATION, RB-E-LISTS, RB-E-A11Y, RB-E-I18N, RB-E-CHARTS, RB-E-EDITORS, RB-E-SVG, RB-E-MAPS, RB-E-CALENDARS]
   - id: platform-native
     label: "Platform & native (RN)"
     entries: [RB-E-NATIVE, RB-E-MEDIA, RB-E-STORAGE, RB-E-NATIVE-UI, RB-E-KEYBOARD, RB-E-PAYMENTS, RB-E-BROWNFIELD, RB-E-GAMES, RB-E-ALT-FRAMEWORKS]
