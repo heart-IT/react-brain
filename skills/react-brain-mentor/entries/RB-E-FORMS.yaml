@@ -2,7 +2,7 @@ id: RB-E-FORMS
 topic: "Forms & validation"
 category: forms
 group: app-architecture
-status: drafted
+status: reviewed   # long-form entry written + source-checked → encyclopedia/RB-E-FORMS.md
 confidence: medium
 platforms: [react, react-native]
 options:
@@ -19,8 +19,8 @@ recommend:
     - "bundle-sensitive validation → Valibot instead of Zod (Standard Schema keeps it swappable)"
     - "existing Formik that works → keep it unless re-render cost bites"
 defer_to_skill: null
-doc: null
-updated: 2026-06-25
+doc: "RB-E-FORMS.md"   # long-form Explanation entry in content_dir
+updated: 2026-07-10
 sources:
   - "https://standardschema.dev/"
   - "https://tanstack.com/form/latest/docs/framework/react/guides/form-groups"

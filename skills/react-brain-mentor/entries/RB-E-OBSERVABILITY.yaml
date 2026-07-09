@@ -2,7 +2,7 @@ id: RB-E-OBSERVABILITY
 topic: "Crash reporting, monitoring & observability"
 category: observability
 group: tooling-ops
-status: drafted
+status: reviewed   # long-form entry written + source-checked → encyclopedia/RB-E-OBSERVABILITY.md
 confidence: medium
 platforms: [react, react-native]
 options:
@@ -17,7 +17,7 @@ recommend:
     - "already on Firebase → Crashlytics is fine for crashes"
 note: "Production-stage concern (the mentor emphasizes observability + error boundaries at production). @callstack/inspector added 2026-07-10 (verified vs npm) — profile React components in release builds; v0.1.x, treat as experimental."
 defer_to_skill: null
-doc: null
+doc: "RB-E-OBSERVABILITY.md"   # long-form Explanation entry in content_dir
 updated: 2026-07-10
 sources:
   - "https://blog.sentry.io/react-native-sdk-8-is-here/"

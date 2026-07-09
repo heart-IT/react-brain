@@ -2,7 +2,7 @@ id: RB-E-COMPONENT-LIBS
 topic: "Component & headless-UI libraries (web)"
 category: component-libs
 group: ui
-status: drafted
+status: reviewed   # long-form entry written + source-checked → encyclopedia/RB-E-COMPONENT-LIBS.md
 confidence: medium
 platforms: [react]
 options:
@@ -23,7 +23,7 @@ recommend:
     - "React Native UI → this entry is web-only; see RB-E-STYLING / RB-E-CROSSPLATFORM"
 note: "Split three ways: headless/unstyled (Base UI, React Aria, Radix) vs batteries-included (MUI/Chakra/Mantine/Ant, plus Meta's StyleX-based Astryx) vs own-the-code (shadcn). Web only. HEADLESS-LAYER SHIFT (verified vs the shadcn changelog, 2026-07-10): 'Base UI is the default component library in shadcn/ui' — Radix explicitly NOT deprecated (both supported), but the center of gravity for new shadcn work is now Base UI; MUI v9 is incrementally adopting the same primitives. Astryx (beta, 2026) pairs compile-time StyleX styling with agent-ready scaffolding (CLI + MCP) — Meta open-sourced its 8-yr internal system (13,000+ apps); see RB-E-STYLING for StyleX."
 defer_to_skill: design-systems-governance
-doc: null
+doc: "RB-E-COMPONENT-LIBS.md"   # long-form Explanation entry in content_dir
 updated: 2026-07-10
 sources:
   - "https://registry.npmjs.org/@mui/material/latest"

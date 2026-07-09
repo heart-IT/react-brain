@@ -333,9 +333,9 @@ encyclopedia_awareness:
   discovery_order:
     - "1. Read encyclopedia.yaml (the INDEX: `groups` table of contents + mentor_hints) + `capability_map` below — then open ONLY the ≤3 relevant entries/<ID>.yaml files (one file per entry); do NOT read all 42. If the react-brain MCP server is connected, `capsules` + `query` do this even cheaper."
     - "2. Two routes reach every entry: (a) cross-cutting domains via assessment_dimensions.encyclopedia_cat; (b) feature/capability domains via `capability_map` (detected dep/need → entry). Never skip a domain just because no dimension names it."
-    - "3. For a matched entry, cite `recommend.default` (no-context pick) + `recommend.when` (context → choice). `options` are the candidate set; `note`/`sources` carry verified facts. As of 2026-06-25 every entry is `drafted`+ (0 stubs), so breadth is fully citable; 14 are `reviewed` with long-form encyclopedia/<id>.md."
+    - "3. For a matched entry, cite `recommend.default` (no-context pick) + `recommend.when` (context → choice). `options` are the candidate set; `note`/`sources` carry verified facts. As of 2026-06-25 every entry is `drafted`+ (0 stubs), so breadth is fully citable; 19 are `reviewed` with long-form encyclopedia/<id>.md."
     - "4. `reading` (curated, fetch-verified deep-dive articles) is for the report's Suggested-learning-path section ONLY — do not load it for the recommend decision (keeps Phase 3 lean)."
-    - "5. When the user wants the full why, read encyclopedia/<id>.md (present for the 14 reviewed entries) for the reasoning + sources."
+    - "5. When the user wants the full why, read encyclopedia/<id>.md (present for the 19 reviewed entries) for the reasoning + sources."
   # Feature/capability entries are surfaced by DETECTING the relevant dependency or need
   # in Phase 0 — not scanned for every project. This makes every entry reachable AND keeps
   # assessment lean: signal seen ⇒ cite the entry; signal absent ⇒ skip it.

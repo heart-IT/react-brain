@@ -2,7 +2,7 @@ id: RB-E-RN-VERSIONS
 topic: "React Native release timeline — what each version changed"
 category: rn-versions
 group: react-foundations
-status: drafted
+status: reviewed   # long-form entry written + source-checked → encyclopedia/RB-E-RN-VERSIONS.md
 confidence: high
 platforms: [react-native]
 options:
@@ -36,7 +36,7 @@ note: >
   Store Connect uploads MUST be built with Xcode 26 / iOS-26-family SDKs — Expo SDK 54/55 EAS
   images already run Xcode 26, SDK ≤53 needs an explicit image opt-in; practically, stay ≥SDK 54.
 defer_to_skill: react-native-jsi
-doc: null
+doc: "RB-E-RN-VERSIONS.md"   # long-form Explanation entry in content_dir
 updated: 2026-07-10
 reading:
   - title: "React Native Architecture: From Bridge to Fabric"
