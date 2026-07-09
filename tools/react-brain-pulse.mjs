@@ -61,10 +61,11 @@ async function pool(items, n, fn) {
   return out;
 }
 
-const urlMap = new Map(); // url -> {entries:Set, kind:'reading'|'source'}
+const urlMap = new Map(); // url -> {entries:Set, kind:'reading'|'source'|'watching'}
 for (const e of list) {
   for (const u of (e.sources || [])) { (urlMap.get(u) || urlMap.set(u, { entries: new Set(), kind: 'source' }).get(u)).entries.add(e.id); }
   for (const r of (e.reading || [])) { (urlMap.get(r.url) || urlMap.set(r.url, { entries: new Set(), kind: 'reading' }).get(r.url)).entries.add(e.id); }
+  for (const w of (e.watching || [])) { (urlMap.get(w.url) || urlMap.set(w.url, { entries: new Set(), kind: 'watching' }).get(w.url)).entries.add(e.id); }
 }
 const urls = [...urlMap.keys()];
 

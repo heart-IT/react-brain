@@ -1,5 +1,5 @@
 id: RB-E-GAMES
-topic: "Games & interactive / real-time rendering"
+topic: "Games, 3D & AR/VR — interactive / real-time rendering"
 category: games
 group: platform-native
 status: drafted
@@ -10,18 +10,37 @@ options:
   - { name: "react-native-godot (@borndotcom)", tradeoff: "embed the Godot engine (RTNGodotView; by Born & Migeran); runs off-thread (separate from RN's JS thread)" }
   - { name: "WebGPU (react-native-webgpu, formerly react-native-wgpu)", tradeoff: "3D render pipelines on Google's Dawn (by William Candillon, not Software Mansion); UI-thread via Reanimated/worklets; advanced" }
   - { name: "react-native-game-engine", tradeoff: "entity-component loop for simple 2D games; effectively unmaintained (last release v1.2.0, 2020)" }
+  - { name: "@react-three/fiber (three.js)", tradeoff: "declarative 3D scenes as React components; v9 runs in RN via expo-gl — the 3D-in-an-app path without a game engine" }
+  - { name: "ReactVision (@reactvision/react-viro)", tradeoff: "AR/VR from one RN codebase (iPhone/Android AR + Meta Quest) — the maintained fork of react-viro; New Architecture (Fabric) REQUIRED; active (2.57.x, 2026-07)" }
+  - { name: "react-native-visionos (Callstack)", tradeoff: "full RN fork targeting Apple Vision Pro / visionOS SDK (~1.1k★); CAUTION: pinned to RN 0.78 (2025-03), lags core by ~a year — verify parity before betting" }
 recommend:
-  default: "2D / interactive visuals → react-native-skia. Real game engine → embed Godot (react-native-godot). RN suits supplemental/interactive experiences more than AAA games."
+  default: "2D / interactive visuals → react-native-skia. Declarative 3D inside a normal app → react-three-fiber (+expo-gl). Real game engine → embed Godot (react-native-godot). AR/VR → ReactVision. RN suits supplemental/interactive experiences more than AAA games."
   when:
     - "simple 2D game loop → react-native-game-engine"
     - "3D / compute shaders → WebGPU (react-native-wgpu), advanced"
-note: "Niche; RN suits supplemental/interactive experiences more than AAA games."
+    - "3D product views / scenes in an app → @react-three/fiber + expo-gl (no engine needed)"
+    - "mobile AR or cross-platform VR incl. Meta Quest → ReactVision (@reactvision/react-viro; New Arch required)"
+    - "Apple Vision Pro app → react-native-visionos (Callstack fork; check its RN-version lag first)"
+note: >
+  Niche; RN suits supplemental/interactive experiences more than AAA games. AR/VR + 3D options
+  added 2026-07-09 (gap flagged by Native Weekly #15's ReactVision feature, promoted on user's
+  call): ReactVision is the maintained Viro lineage (verified vs npm — Fabric required, published
+  2026-07); react-native-visionos verified vs the Callstack repo (latest v0.78.0, 2025-03 —
+  the version-lag caveat is the load-bearing fact); react-three-fiber v9 verified vs npm.
 defer_to_skill: react-native-best-practices
 doc: null
-updated: 2026-06-25
+updated: 2026-07-09
 sources:
   - "https://github.com/wcandillon/react-native-webgpu"
   - "https://registry.npmjs.org/@borndotcom/react-native-godot"
+  - "https://registry.npmjs.org/@reactvision/react-viro/latest"
+  - "https://github.com/callstack/react-native-visionos"
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "@reactvision/react-viro", label: "ReactVision (AR/VR)", token: "reactvision" }
+  - { pkg: "@react-three/fiber", label: "react-three-fiber", token: "react-three" }
+  - { pkg: "@borndotcom/react-native-godot", label: "Godot embed", token: "godot" }
+  - { pkg: "react-native-wgpu", label: "WebGPU", token: "webgpu" }
+  - { pkg: "react-native-game-engine", label: "game-engine (unmaintained)", token: "game loop" }
 reading:
   - title: "React Native Skia — For Us, For You, and For Fun"
     url: "https://shopify.engineering/react-native-skia-shopify"

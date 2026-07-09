@@ -24,11 +24,16 @@ stamp to an entry you actually re-verified) may be applied with a one-line note.
 
 2. **Growth (verified harvest).** Read the memory note `react-brain-mentor-skill.md` to
    find the last-processed issue numbers per source. Fetch only NEW issues since then from:
-   This Week in React, React Native Rewind, React Status, React Digest. For each, extract
-   durable SELECTION facts + canonical deep-dive ARTICLES. **Fetch-verify every URL before
+   This Week in React, React Native Rewind, React Status, React Digest, Native Weekly
+   (nativeweekly.beehiiv.com, ~6-weekly). For each, extract durable SELECTION facts +
+   canonical deep-dive ARTICLES (strong talks/podcasts/videos → the entry's optional
+   `watching:` list, verified via the episode/video page). **Fetch-verify every URL before
    keeping it** (no fabricated links; reject 404s/paywalls). Map each to an entry via the
    mentor's `capability_map` + `assessment_dimensions`, or flag a GAP (a real dep/topic with
-   no entry). De-dupe against existing `reading`/`sources`.
+   no entry). De-dupe against existing `reading`/`sources`. Fetch fallbacks: expo.dev/blog is
+   a JS shell — use expo.dev/changelog/sdk-NN instead; a WebFetch 403 (callstack.com etc.) is
+   often bot-gating — retry with a browser-UA `curl -sL -A "Mozilla/5.0 …"` before excluding
+   (full playbook in `tools/upkeep-routine.md`).
 
 3. **Self-audit.** Run the evidence loop and note new blind spots/contradictions:
    `node tools/react-brain-evidence.mjs ../ledgerhr ../ourpot ../bitbarter`

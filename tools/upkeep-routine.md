@@ -46,9 +46,23 @@ cd /Users/f1sh/odd-jobs/heartit/skills/react-brain && claude -p "$(cat tools/upk
 The agent should, in order:
 1. **Health** — run Tier 1 (`react-brain pulse … `) and read the deltas.
 2. **Growth** — follow `tools/pulse-routine.md`: from the memory note's last-processed issue
-   numbers, fetch only NEW issues (This Week in React, RN Rewind, React Status, React Digest),
+   numbers, fetch only NEW issues (This Week in React, RN Rewind, React Status, React Digest,
+   Native Weekly — archive at nativeweekly.beehiiv.com, ~6-weekly),
    extract durable selection facts + canonical articles, **fetch-verify every URL**, map via the
    mentor's `capability_map`/`assessment_dimensions` (or flag a GAP). De-dupe vs existing.
+   Strong TALKS/PODCASTS/VIDEOS go in the entry's optional `watching:` list (same shape as
+   `reading`; verify the episode/video page exists + corroborates — never annotate unwatched
+   content beyond what the verified page states).
+
+   **Fetch-verification playbook (learned 2026-07-09):**
+   - `expo.dev/blog/*` is a JS shell (unfetchable) but **`expo.dev/changelog/sdk-NN` fetches
+     fine** and usually carries the same load-bearing facts — source changelogs, not blog posts.
+   - A 403 from WebFetch (callstack.com, developerway.com, …) is often bot-gating, not a
+     paywall: retry with a **browser user-agent via curl** —
+     `curl -sL -A "Mozilla/5.0 (Macintosh...) Chrome/126.0 Safari/537.36" <url>` — then verify
+     against the extracted text. This recovered callstack.com articles previously excluded.
+   - Version/date/deprecation facts: `registry.npmjs.org/<pkg>` JSON beats any article.
+   - Only exclude a candidate after BOTH WebFetch and the curl-UA fallback fail.
 3. **Completeness** — run `react-brain evidence ../ledgerhr ../ourpot ../bitbarter`; note new
    blind spots / contradictions.
 4. **Correctness** — follow `tools/challenge-routine.md` on 2–3 rotating reviewed entries

@@ -12,7 +12,7 @@
 # sources (entries with `sources:` + `updated:`). Library picks in `recommend`
 # are editorial synthesis, not vendor claims.
 #
-# STATE (2026-07-09): 40 entries across 6 groups, ALL `drafted`+ (0 stubs) — breadth is fully
+# STATE (2026-07-09): 42 entries across 6 groups, ALL `drafted`+ (0 stubs) — breadth is fully
 # citable. 14 are `reviewed` with long-form encyclopedia/<id>.md. Every entry carries curated,
 # fetch-verified `reading`. Reachability: cross-cutting domains via the mentor's
 # assessment_dimensions; feature/capability domains via the mentor's `capability_map`.
@@ -52,6 +52,11 @@
 #                    a canonical article lives in the relevant entry's `reading`; an article with
 #                    no home has revealed a GAP → add the entry. Pure how-to depth still routes to
 #                    `defer_to_skill`, not here.
+#   watching       — OPTIONAL curated A/V (talks, podcasts, videos; same title/url/by/what shape;
+#                    added 2026-07-09). The A/V companion to `reading` — newsletters surface strong
+#                    podcasts/talks the text-only policy used to drop. Verification bar: confirm the
+#                    item exists (episode/video page fetch) + its claims corroborate corpus facts;
+#                    we cannot watch it, so annotate from the verified page, never invent content.
 #   detect         — package.json signals owned by THIS entry: [{pkg, label, token}]
 #                    (pkg: exact name | '@scope/*' | 'name*'). tools/detect.mjs assembles
 #                    these into the detection table — adding an entry never touches tools.
@@ -75,10 +80,10 @@ groups:
     entries: [RB-E-REACT-CORE, RB-E-RN-VERSIONS, RB-E-TYPESCRIPT]
   - id: app-architecture
     label: "App architecture — state, data, routing, frameworks"
-    entries: [RB-E-STATE, RB-E-DATA, RB-E-P2P, RB-E-NAV, RB-E-META-FRAMEWORKS, RB-E-FORMS, RB-E-CROSSPLATFORM, RB-E-DESKTOP]
+    entries: [RB-E-STATE, RB-E-DATA, RB-E-P2P, RB-E-NAV, RB-E-META-FRAMEWORKS, RB-E-FORMS, RB-E-NETWORKING, RB-E-CROSSPLATFORM, RB-E-DESKTOP]
   - id: ui
     label: "UI — styling, components, animation, lists, a11y, i18n, charts"
-    entries: [RB-E-STYLING, RB-E-COMPONENT-LIBS, RB-E-ANIMATION, RB-E-LISTS, RB-E-A11Y, RB-E-I18N, RB-E-CHARTS, RB-E-EDITORS, RB-E-SVG, RB-E-MAPS, RB-E-CALENDARS]
+    entries: [RB-E-STYLING, RB-E-COMPONENT-LIBS, RB-E-ANIMATION, RB-E-LISTS, RB-E-A11Y, RB-E-I18N, RB-E-CHARTS, RB-E-EDITORS, RB-E-SVG, RB-E-MAPS, RB-E-CALENDARS, RB-E-POLISH]
   - id: platform-native
     label: "Platform & native (RN)"
     entries: [RB-E-NATIVE, RB-E-MEDIA, RB-E-STORAGE, RB-E-NATIVE-UI, RB-E-KEYBOARD, RB-E-PAYMENTS, RB-E-BROWNFIELD, RB-E-GAMES, RB-E-ALT-FRAMEWORKS]
@@ -108,3 +113,4 @@ mentor_hints:
   - "A commonly-cited 2026 React-WEB default stack (React Digest, 'My frontend stack in 2026'): Vite + pnpm + TypeScript + Tailwind + Zustand + TanStack Query + Zod + Vitest + Playwright + Sentry (plus Oxlint/Oxfmt, MSW, Storybook). Use as a sanity-check baseline, not a mandate — still context-key it."
   - "`confidence: low` entries are fast-moving/niche — recommend tentatively and tell the user to prototype; `high` entries are safe to recommend directly."
   - "Articles matter, not just version facts. A strong deep-dive is captured in the relevant entry's `reading` list (annotated). If an article has no entry to live in, it has revealed a GAP — add the entry (RB-E-MEDIA came from a real-time-filters deep-dive). The mentor may surface a `reading` link when a project is doing exactly what the article covers. Pure how-to depth still routes to `defer_to_skill`, not the index."
+  - "`watching` (optional) is the A/V companion to `reading` — talks/podcasts/videos. Like reading, it belongs in the learning-path section of a report, never in the recommend decision."

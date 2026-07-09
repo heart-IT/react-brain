@@ -78,6 +78,11 @@ for (const { file, e } of entries) {
     for (const k of ['title', 'url', 'what']) if (!r?.[k]) err(`${id}: reading item missing '${k}' (${(r?.title || r?.url || '?').slice(0, 50)})`);
     if (r?.url && !/^https?:\/\//.test(r.url)) err(`${id}: reading url not http(s): ${r.url}`);
   }
+  // watching (optional, added 2026-07-09): curated A/V — same shape as reading, no ≥1 requirement
+  for (const w of e.watching || []) {
+    for (const k of ['title', 'url', 'what']) if (!w?.[k]) err(`${id}: watching item missing '${k}' (${(w?.title || w?.url || '?').slice(0, 50)})`);
+    if (w?.url && !/^https?:\/\//.test(w.url)) err(`${id}: watching url not http(s): ${w.url}`);
+  }
   for (const s of e.sources || []) if (!/^https?:\/\//.test(s)) err(`${id}: source not http(s): ${s}`);
 
   // reviewed entries carry their proof

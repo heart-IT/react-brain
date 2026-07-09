@@ -1,0 +1,53 @@
+id: RB-E-POLISH
+topic: "UX polish primitives — toasts, haptics, splash screens, image viewers (React Native)"
+category: polish
+group: ui
+status: drafted
+confidence: low
+platforms: [react-native]
+options:
+  - { name: "toasts — sonner-native", tradeoff: "port of Emil Kowalski's sonner (stacking, swipe, promise toasts); active (0.26.x, 2026-06); the design-led pick" }
+  - { name: "toasts — react-native-toast-message", tradeoff: "the JS incumbent (v2.4, still active 2026); simple, widely deployed, less polished motion" }
+  - { name: "toasts — burnt", tradeoff: "NATIVE toast/alert elements (SPIndicator on iOS, ToastAndroid); platform-authentic but less customizable; slower release cadence (0.13, 2025-03)" }
+  - { name: "haptics — expo-haptics", tradeoff: "the default — system haptics engine on iOS, vibration effects on Android; works in bare RN via Expo Modules" }
+  - { name: "haptics — react-native-haptic-feedback", tradeoff: "the bare-RN incumbent (v3.0, 2026-03); slightly lower-level trigger set" }
+  - { name: "splash — react-native-bootsplash", tradeoff: "the de-facto splash tool (v7.3) — asset generator CLI, edge-to-edge by default, works with Expo prebuild; imperative hide() when app is ready" }
+  - { name: "splash — expo-splash-screen", tradeoff: "the Expo default, ships with the template; config-plugin driven; fine unless you need bootsplash's generator/branding control" }
+  - { name: "image viewer — galeria (@nandorojo/galeria)", tradeoff: "native shared-element lightbox (v3, 2026-05; iOS 16+) — fluid pinch/dismiss transitions the JS viewers can't match" }
+  - { name: "image viewer — react-native-image-viewing", tradeoff: "the JS incumbent — unmaintained since 2022; works, but no native transitions and aging" }
+recommend:
+  default: "Toasts → sonner-native (or burnt for platform-native elements). Haptics → expo-haptics. Splash → react-native-bootsplash on bare RN, expo-splash-screen on Expo (switch to bootsplash when you need its generator/branding control). Image lightbox → galeria. Each sub-domain is small — pick once, move on; the polish is in the details, not the library hunt. Lightly vetted (confidence: low)."
+  when:
+    - "toast stack with real motion design → sonner-native; platform-authentic system toasts → burnt"
+    - "haptic feedback → expo-haptics (bare RN included); already on react-native-haptic-feedback → fine, don't churn"
+    - "splash/branding control or bare RN → react-native-bootsplash; stock Expo template → expo-splash-screen is already there"
+    - "tap-to-zoom image lightbox → galeria (native transitions); avoid starting new work on react-native-image-viewing (dormant since 2022)"
+note: >
+  NEW entry (2026-07-09): four recurring micro-domains that had no home — each surfaced by
+  Native Weekly's 2026 run (sonner-native, bootsplash 7, galeria, react-native-tickle) and
+  promoted on the user's call. All versions/dates verified vs npm 2026-07-09. Deliberately ONE
+  entry, not four: none of these carries enough selection weight alone, but together they are
+  the 'app feels finished' checklist. Skipped as too-early: react-native-tickle (Nitro haptics
+  w/ AHAP patterns — not yet on npm). expo-haptics/expo-splash-screen versions track the SDK.
+defer_to_skill: react-native-best-practices
+doc: null
+updated: 2026-07-09
+reading:
+  - title: "Building a toast component"
+    url: "https://emilkowal.ski/ui/building-a-toast-component"
+    by: "Emil Kowalski (sonner author)"
+    what: "The design rationale under sonner (and thus sonner-native): interruptible transitions over keyframes, index-scaled stacking, pause-on-hidden, momentum swiping, gap-filling hover pseudo-elements. Web-authored, but it is the canonical 'why good toasts feel good' — the taste this entry's toast pick imports."
+sources:
+  - "https://registry.npmjs.org/sonner-native/latest"
+  - "https://registry.npmjs.org/react-native-bootsplash/latest"
+  - "https://registry.npmjs.org/@nandorojo/galeria/latest"
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "sonner-native", label: "sonner-native (toasts)", token: "sonner-native" }
+  - { pkg: "react-native-toast-message", label: "toast-message", token: "toast" }
+  - { pkg: "burnt", label: "burnt (native toasts)", token: "burnt" }
+  - { pkg: "expo-haptics", label: "expo-haptics", token: "expo-haptics" }
+  - { pkg: "react-native-haptic-feedback", label: "haptic-feedback", token: "react-native-haptic-feedback" }
+  - { pkg: "react-native-bootsplash", label: "bootsplash", token: "bootsplash" }
+  - { pkg: "expo-splash-screen", label: "expo-splash-screen", token: "expo-splash-screen" }
+  - { pkg: "@nandorojo/galeria", label: "galeria (lightbox)", token: "galeria" }
+  - { pkg: "react-native-image-viewing", label: "image-viewing (dormant)", token: "image-viewing" }

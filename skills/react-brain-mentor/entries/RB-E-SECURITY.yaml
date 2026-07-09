@@ -11,12 +11,14 @@ options:
   - { name: "dependency CVE scanning", tradeoff: "npm/pnpm audit; route depth to the review skill's security phase" }
   - { name: "supply-chain hardening", tradeoff: "install-script blocking (npm v12 default), install-age gating (min-release-age / npmMinimalAgeGate), provenance — provenance alone is not enough" }
   - { name: "Trusted Types (web)", tradeoff: "React integrates the browser Trusted Types API for XSS prevention; dangerouslySetInnerHTML needs an explicit policy" }
+  - { name: "rnsec (RN/Expo security scanner)", tradeoff: "zero-config static scanner — 63 rules across storage/network/auth/secrets/crypto, CI-ready (exit codes, PR comments, JSON/HTML reports); young + single-author (~500★, v1.3) — a cheap CI layer, not a substitute for per-diff review" }
 recommend:
   default: "Secrets in Keychain/secure-store (never AsyncStorage); harden the supply chain (block install scripts, gate install-age); device trust via server-side attestation; route per-diff secret/injection checks to the review skill."
   when:
     - "device-trust requirement → server-side Play Integrity / DeviceCheck (jail-monkey is client-side only, defeatable)"
     - "web XSS surface → Trusted Types + sanitized dangerouslySetInnerHTML"
     - "RSC/Server Functions on web → patch React to 19.2.5+ (DoS CVEs); does not affect RN"
+    - "want a cheap CI gate for RN-specific security footguns → rnsec scan (young — treat findings as leads, route confirmations to the review skill)"
 note: >
   DURABLE SCOPING FACT: the React Server Components DoS family (CVE-2026-23864, CVSS 7.5;
   React2DoS CVE-2026-23869) and the Dec-2025 RSC source-exposure/RCE issues are SERVER-SIDE
@@ -25,9 +27,12 @@ note: >
   @tanstack/* npm compromise, axios RAT) is the bigger practical risk — hence npm v12 blocking
   install scripts by default + install-age gating. Live CVEs belong in a security feed, not this
   encyclopedia; for per-diff secret/injection/dependency checks defer to the review skill.
+  PROVENANCE (2026-07-09): rnsec was surfaced by Native Weekly — whose author ALSO authors rnsec —
+  so it was independently vetted before inclusion (repo checked: ~500★, 63 rules, CI integrations,
+  active v1.3 2026-04). Kept with the young/single-author caveat; watch whether it earns adoption.
 defer_to_skill: review
 doc: "RB-E-SECURITY.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-02
+updated: 2026-07-09
 reading:
   - title: "The React2Shell Story"
     url: "https://lachlan.nz/blog/the-react2shell-story"
@@ -48,6 +53,10 @@ reading:
 sources:
   - "https://react.dev/blog/2025/12/11/denial-of-service-and-source-code-exposure-in-react-server-components"
   - "https://github.com/advisories/GHSA-83fc-fqcc-2hmg"
+  - "https://github.com/adnxy/rnsec"
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "rnsec", label: "rnsec (security scanner)", token: "rnsec" }
+  - { pkg: "jail-monkey", label: "jail-monkey", token: "jail-monkey" }
 detect_source:   # source-level signals owned by this entry (regex over repo source)
   - pattern: "AsyncStorage\\.setItem\\(\\s*[`'\"][^`'\"]*(?:token|secret|password|jwt|api[_-]?key)"
     flags: "i"

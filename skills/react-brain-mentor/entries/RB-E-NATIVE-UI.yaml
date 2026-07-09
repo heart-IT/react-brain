@@ -38,6 +38,11 @@ reading:
     url: "https://vercel.com/blog/how-we-built-the-v0-ios-app"
     by: "Fernando Rojo (Vercel)"
     what: "Production case study of making RN feel truly native on iOS: Liquid Glass via @callstack/liquid-glass, native menus via Zeego/UIMenu, patching RCTUITextView for platform-correct text behavior, ~1,000 lines of keyboard logic on react-native-keyboard-controller (see RB-E-KEYBOARD), synchronous New-Arch measurements, LegendList — and the share-types-and-logic-not-UI lesson. What 'native feel' actually costs and where the wins come from."
+watching:
+  - title: "Building v0 iOS and Fixing React Native Along the Way"
+    url: "https://www.youtube.com/watch?v=rhLBFKlEXPM"
+    by: "Fernando Rojo, Szymon Rybczak & Oskar Kwaśniewski"
+    what: "The v0 iOS team on what shipping a native-feel RN app took — including the upstream RN fixes it produced. Video companion to the v0 case study in `reading`."
 sources:
   - "https://expo.dev/blog/ios-widgets-and-live-activities-in-expo"
   - "https://github.com/callstackincubator/voltra/releases/tag/v2.0.0"

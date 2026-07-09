@@ -53,6 +53,11 @@ reading:
     url: "https://blog.margelo.com/four-years-of-react-native-quick-crypto"
     by: "Brad Anderson (Margelo)"
     what: "A four-year native-library architecture case study: wrapping OpenSSL for Node behavior-parity, a sync-first threading model with async escape hatches, the hand-written-JSI to Nitro codegen migration, and security audit as architecture validation. Generalizable lessons for native-module authors."
+watching:
+  - title: "RNR 351 — Transforming Packages to Nitro with Marc Rousavy"
+    url: "https://infinite.red/react-native-radio/rnr-351-transforming-packages-to-nitro-with-marc-rousavy"
+    by: "React Native Radio (guest: Marc Rousavy, Nitro/VisionCamera author)"
+    what: "37-min episode (2026-01) from Nitro's author on why Nitro exists (JSI boilerplate), how it compares to Turbo Modules and Expo Modules, and the ecosystem's package-migration wave — the audio companion to this entry's Nitro-consolidation note."
 sources:
   - "https://reactnative.dev/blog/2026/02/11/react-native-0.84"
   - "https://reactnative.dev/blog/2026/06/11/react-native-0.86"

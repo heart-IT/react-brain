@@ -1,0 +1,50 @@
+id: RB-E-NETWORKING
+topic: "Networking & HTTP client layer"
+category: networking
+group: app-architecture
+status: drafted
+confidence: medium
+platforms: [react, react-native]
+options:
+  - { name: "fetch (built-in)", tradeoff: "the default on both platforms — RN's WHATWG polyfill over native networking, the browser's native fetch on web; fine for most apps" }
+  - { name: "expo/fetch", tradeoff: "WinterTC-compliant fetch with streaming — installed as the GLOBAL fetch since Expo SDK 56 (no import needed); the modern managed default" }
+  - { name: "react-native-nitro-fetch (Margelo)", tradeoff: "drop-in native fetch on Cronet (Android) / URLSession (iOS) — HTTP/1-2-3+QUIC, Brotli, disk cache, prefetch-before-navigation, worklet parsing off the JS thread; measured ~1.3x vs built-in; v1.5, ~900★, RN 0.75+" }
+  - { name: "axios", tradeoff: "the ubiquitous promise client (interceptors, defaults, wide team familiarity); runs over XHR in RN — no reason to churn OFF it, little reason to start ON it for new work" }
+  - { name: "ky / ofetch", tradeoff: "small fetch wrappers (retries, hooks, typed convenience) — web-leaning; ky 2.x, ofetch (unjs)" }
+recommend:
+  default: "Use fetch — on Expo SDK 56+ you are already on expo/fetch globally. The bigger win in most apps is the CACHE layer above it (TanStack Query, RB-E-DATA), not the client. Reach for react-native-nitro-fetch only when the network layer is a MEASURED hot path (cold-start requests, media, HTTP/3 backends) or you need prefetch/worklet parsing."
+  when:
+    - "team already on axios → keep it; interceptor ergonomics are real and migration buys little"
+    - "streaming responses (AI/chat tokens, SSE-style) → expo/fetch or nitro-fetch (streaming + TextDecoder) — see RB-E-AI-UI"
+    - "measured network hot path / prefetch-before-navigation / HTTP-3 backend → react-native-nitro-fetch (drop-in)"
+    - "server-state caching, retries, invalidation → that's TanStack Query territory (RB-E-DATA), regardless of client"
+    - "P2P / Holepunch app → there may be no HTTP layer at all; transport is Hyperswarm streams (RB-E-P2P)"
+note: >
+  NEW entry (2026-07-09): the fetch-layer choice had no home — flagged as a gap candidate in the
+  Native Weekly first-harvest (nitro-fetch featured twice; SDK 56 made expo/fetch the global
+  default, verified vs the SDK 56 changelog) and promoted on the user's call. The durable axis:
+  RN's built-in fetch is a JS polyfill over native networking; expo/fetch standardizes it
+  (WinterTC + streaming); nitro-fetch swaps the ENGINE (Cronet/URLSession, HTTP/3) behind the
+  same API. Client choice is low-stakes compared to cache design — hence the DATA cross-refs.
+  nitro-fetch facts verified vs its repo (benchmarks are vendor-run; ~23% on their harness).
+defer_to_skill: null
+doc: null
+updated: 2026-07-09
+reading:
+  - title: "react-native-nitro-fetch — architecture & benchmarks"
+    url: "https://github.com/margelo/react-native-nitro-fetch"
+    by: "Margelo"
+    what: "The README doubles as the layer's best explainer: what actually backs fetch on each platform (Cronet vs URLSession), what HTTP/3+QUIC/Brotli/disk-cache buy you, prefetch-before-navigation, and worklet-side parsing — with their benchmark methodology. Read it to understand the layer even if you keep built-in fetch."
+sources:
+  - "https://github.com/margelo/react-native-nitro-fetch"
+  - "https://expo.dev/changelog/sdk-56"
+  - "https://registry.npmjs.org/axios/latest"
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "axios", label: "axios", token: "axios" }
+  - { pkg: "react-native-nitro-fetch", label: "nitro-fetch", token: "nitro-fetch" }
+  - { pkg: "ky", label: "ky", token: "ky" }
+  - { pkg: "ofetch", label: "ofetch", token: "ofetch" }
+detect_source:   # source-level signals owned by this entry (regex over repo source)
+  - pattern: "new XMLHttpRequest\\("
+    signal: "raw XMLHttpRequest usage"
+    hint: "prefer fetch (or the app's chosen client) — raw XHR bypasses the fetch layer's streaming/abort semantics"
