@@ -9,20 +9,24 @@ options:
   - { name: "Lynx (ByteDance)", tradeoff: "web-tech (HTML/CSS) + native render; dual-thread UI/logic; young ecosystem (open-sourced 2025); scaffold via create-rspeedy" }
   - { name: "Valdi (Snap)", tradeoff: "declarative TypeScript compiling to native views on iOS/Android/macOS; beta (beta-0.1.0), open-sourced by Snap Nov 2025 after ~8 yrs internal use" }
   - { name: "Flutter", tradeoff: "Dart; own render engine; large ecosystem; not React/JS" }
-  - { name: "Kotlin Multiplatform", tradeoff: "share business logic across platforms; native UI per platform" }
+  - { name: "Kotlin Multiplatform", tradeoff: "share business logic across platforms; native UI per platform; SWM's same-app benchmark: KMP ~8x smaller + 2-4x faster startup on ANDROID, but iOS converges (RN uses 3-4x LESS memory there — UIKit rendering vs KMP's resident Skia)" }
 recommend:
   default: "Stay on React Native unless a specific driver pushes you off it — its decade of libraries is a major advantage; Lynx and Valdi are early."
   when:
     - "share only business logic, keep native UI → Kotlin Multiplatform"
     - "team already invested in Dart / wants one render engine → Flutter (leaves React entirely)"
-note: "Context for teams weighing leaving the React/RN ecosystem. Newer entrants (Lynx, Valdi) are early — not endorsements."
+note: "Context for teams weighing leaving the React/RN ecosystem. Newer entrants (Lynx, Valdi) are early — not endorsements. The KMP-vs-RN numbers come from Software Mansion's controlled same-app benchmark (see reading) — notable because an RN shop published results that favor KMP on Android."
 defer_to_skill: null
 doc: null
-updated: 2026-06-25
+updated: 2026-07-10
 sources:
   - "https://github.com/lynx-family/lynx"
   - "https://github.com/Snapchat/Valdi"
 reading:
+  - title: "We Built the Same App in KMP and React Native — Here's What We Found"
+    url: "https://swmansion.com/blog/we-built-the-same-app-in-kmp-and-react-native-here-s-what-we-found"
+    by: "Artur Gęsiarz, Karol Kąkol, Weronika Grzybowska (Software Mansion)"
+    what: "The controlled comparison this entry needed: identical unoptimized apps on 6 devices measuring size/startup/RAM/CPU/frames. KMP wins Android decisively (8x smaller, 2-4x startup, ~50% less RAM — no JS runtime); iOS converges, with RN using 3-4x LESS memory (UIKit rendering vs KMP's resident Skia). Credible precisely because an RN consultancy published the unflattering Android numbers; ends on the right frame — performance is one input, DX and ecosystem are others."
   - title: "Under the hood of MDN's new frontend"
     url: "https://developer.mozilla.org/en-US/blog/mdn-front-end-deep-dive/"
     by: "Leo McArdle (Mozilla / MDN)"

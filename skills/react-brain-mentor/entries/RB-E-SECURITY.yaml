@@ -36,6 +36,10 @@ note: >
   Workspace to decryption of customers' plaintext-decryptable "non-sensitive" env vars; npm
   packages unaffected. Lessons: mark platform env vars SENSITIVE, and treat AI dev-tools as
   supply-chain surface. The TanStack npm compromise now has its first-party postmortem (reading).
+  HARDENING TOOLKIT ADDITION (2026-07-10, verified vs the nuqs post): npm STAGED PUBLISHING
+  (draft → 2FA-gated validate → finalize) + local tarball-hash reproduction — the maintainer-side
+  countermeasure to the TanStack-style CI-compromise chain ("assume GitHub itself is compromised");
+  joins install-script blocking and install-age gating as the third supply-chain layer.
 defer_to_skill: review
 doc: "RB-E-SECURITY.md"   # long-form Explanation entry in content_dir
 updated: 2026-07-10
@@ -70,6 +74,7 @@ sources:
   - "https://github.com/adnxy/rnsec"
   - "https://vercel.com/kb/bulletin/vercel-april-2026-security-incident"
   - "https://vercel.com/blog/introducing-deepsec-find-and-fix-vulnerabilities-in-your-code-base"
+  - "https://nuqs.dev/blog/staged-publishing-for-supply-chain-security"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "rnsec", label: "rnsec (security scanner)", token: "rnsec" }
   - { pkg: "jail-monkey", label: "jail-monkey", token: "jail-monkey" }

@@ -19,7 +19,7 @@ options:
 recommend:
   default: "Web: Vite 8 (Rolldown). React Native: Metro (+ Hermes V1, precompiled iOS binaries). Monorepo: pnpm workspaces + Turborepo. Expo for managed velocity."
   when:
-    - "RN bundler alternative for module federation / super-apps → Re.Pack 5"
+    - "RN bundler alternative for module federation / super-apps → Re.Pack 5 (worth the complexity when independent teams need independent JS release cadences within one app — Callstack's own criterion)"
     - "want the Rolldown/Rollup plugin ecosystem on RN (experimental) → Rollipop — early alpha, prototype only, not an Expo path"
     - "slow RN CI → prebuilt binaries (RNRepo) and/or Rock build caching"
     - "Babel is the Metro bottleneck → react-native-swc (SWC) or facetpack (OXC; early — pin + keep the Babel fallback)"
@@ -73,6 +73,7 @@ sources:
   - "https://reactnative.dev/blog/2026/02/11/react-native-0.84"
   - "https://github.com/ecrindigital/facetpack"
   - "https://expo.dev/changelog/sdk-56"
+  - "https://www.callstack.com/blog/mobile-module-federation-with-re-pack-when-runtime-delivery-is-worth-the-complexity"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "vite", label: "Vite", token: "vite" }
   - { pkg: "@rspack/*", label: "Rspack", token: "rspack" }

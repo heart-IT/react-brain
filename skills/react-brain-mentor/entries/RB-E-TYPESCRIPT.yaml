@@ -8,18 +8,18 @@ platforms: [react, react-native]
 options:
   - { name: "strict mode tiers", tradeoff: "strict vs gradual adoption; TS 6.0 makes strict:true the default" }
   - { name: "exported type surface", tradeoff: "what a library/package should export" }
-  - { name: "TypeScript 7 (native/Go)", tradeoff: "Go rewrite of tsc (~10x faster than TS 6.0); 7.0 RC out 2026-06-18 (usable in CI today), stable expected within weeks; TS 6.0 is the JS-based 'bridge' release before it" }
+  - { name: "TypeScript 7 (native/Go)", tradeoff: "Go rewrite of tsc — 7.0 STABLE (7.0.2, 2026-07-08, verified vs npm): ~10x faster, up to 16x type-checking with parallelization, removes long-deprecated flags; TS 6.0 is the JS-based 'bridge' release to migrate through" }
   - { name: "Flow (2026)", tradeoff: "Meta's type checker; syntax converged with TS, compiler ported to Rust; mostly Meta-internal now" }
 recommend:
   default: "Run strict TypeScript (strict:true, the TS 6 default) and export a small, deliberate public type surface from libraries."
   when:
     - "library/package author → minimize + version the exported types; avoid leaking internals"
-    - "large repo with slow tsc → TS 7 (Go) RC is usable in CI now (~10x); pilot on typecheck/CI, stable imminent"
+    - "large repo with slow tsc → TS 7 (Go) is STABLE (~10x); migrate via the TS 6 bridge, following the VS Code pattern in reading"
     - "not at Meta → use TypeScript, not Flow"
-note: "TypeScript 7.0 (the Go/native rewrite of tsc) reached RC on 2026-06-18 — ~10x faster than TS 6.0, described as ready for daily/CI use, stable planned within ~a month. Pilot it on typecheck/CI now; treat as RC until the stable tag lands."
+note: "TypeScript 7.0 (the Go/native rewrite of tsc) is STABLE — npm latest = 7.0.2, published 2026-07-08 (verified vs the npm registry; RC was 2026-06-18, stable landed on schedule). ~10x vs TS 6.0, up to 16x type-checking with parallelization. Migrate incrementally through TS 6 (the bridge release) per the VS Code case study in reading."
 defer_to_skill: engineering-principles
 doc: null
-updated: 2026-07-02
+updated: 2026-07-10
 reading:
   - title: "Why does tsgo use so much memory?"
     url: "https://zackoverflow.dev/writing/why-does-tsgo-use-so-much-memory"
@@ -35,5 +35,6 @@ reading:
     what: "The production adoption case the tsgo-internals piece lacks: VS Code's ~50-extension codebase cut type-checking 36s→5s (~7x) and editor project-load 60s→10s by migrating INCREMENTALLY — TS 6.0 as a low-churn bridge, then TS 6-and-7 side-by-side in CI (TS 6 still emitting), then esbuild + TS 7 as the default. The surprising blocker wasn't type errors but formatter differences failing pre-commit checks. Evidence that TS 7 (Go-native tsc) is trustworthy for daily use on a large real codebase — if you bridge through TS 6 first."
 sources:
   - "https://devblogs.microsoft.com/typescript/announcing-typescript-7-0-rc/"
+  - "https://registry.npmjs.org/typescript/latest"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "typescript", label: "TypeScript", token: "typescript" }

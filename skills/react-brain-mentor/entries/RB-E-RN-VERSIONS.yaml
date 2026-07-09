@@ -17,11 +17,13 @@ options:
   - { name: "RN 0.84 (2026-02-11) ✓", tradeoff: "Hermes V1 DEFAULT; precompiled iOS binaries default; Node 22.11+ min; Legacy-Arch stripped; bi-monthly cadence" }
   - { name: "RN 0.85 (2026-04-07) ✓", tradeoff: "shared C++ animation backend; Jest preset → @react-native/jest-preset; layout-prop native driver (0.85.1)" }
   - { name: "RN 0.86 (2026-06-11) ✓", tradeoff: "Android-15+ edge-to-edge in core (drop react-native-edge-to-edge); DevTools light/dark; 2nd zero-breaking-change release" }
+  - { name: "RN 0.87 (RC.0, 2026-07-08)", tradeoff: "cleanup release (per TWiR #289; RC verified vs npm `next` tag): removes long-deprecated APIs (InteractionManager, SafeAreaView), restricts deep imports, deprecates ImageBackground — verify the row vs the release blog when stable lands" }
 recommend:
   default: "Target the latest stable RN (0.86); the New Architecture is non-optional from 0.82, so plan any migration around that line."
   when:
     - "on RN < 0.82 → budget a New-Arch migration; Legacy was frozen at 0.80 (no fixes)"
     - "on RN ≥ 0.86 → drop react-native-edge-to-edge (now in core)"
+    - "still importing InteractionManager / core SafeAreaView / deep paths → migrate now; RN 0.87 (RC) removes them"
     - "quoting a pre-0.84 row as authoritative → verify against that version's RN blog first"
 note: >
   Use this to tell a project what it gains/loses by moving RN versions. Rows marked ✓ (0.84–0.86)

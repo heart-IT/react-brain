@@ -21,7 +21,8 @@ note: >
   Callstack/Toss tooling (several alpha) plus, since SDK 55, a first-party Expo path.
   CAPABILITY FLIP (2026-07-10, verified vs the Callstack article body): Expo Updates now works
   in an ISOLATED brownfield architecture with SDK 55 — OTA for embedded RN screens was
-  previously a known limitation ("that limitation is a thing of the past"); see RB-E-OTA.
+  previously a known limitation ("that limitation is a thing of the past"); see RB-E-OTA. The
+  same prebuilt-XCFramework flow also cuts hybrid iOS compile times ~39% (Callstack, 2026-07).
 defer_to_skill: engineering-principles
 doc: null
 updated: 2026-07-10
@@ -29,6 +30,7 @@ sources:
   - "https://github.com/callstack/react-native-brownfield"
   - "https://registry.npmjs.org/@callstack/brownie"
   - "https://docs.expo.dev/brownfield/overview/"
+  - "https://www.callstack.com/blog/how-we-made-hybrid-ios-apps-compile-39-faster-with-react-native-brownfield"
 reading:
   - title: "Rebuilding the Doctolib Homepage from Webview to Native"
     url: "https://medium.com/doctolib/rebuilding-the-doctolib-homepage-from-webview-to-native-27937ea71801"

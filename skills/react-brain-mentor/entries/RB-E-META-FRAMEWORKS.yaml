@@ -11,7 +11,7 @@ options:
   - { name: "React Router 7 (framework mode) / Remix", tradeoff: "Remix merged into React Router 7; full-stack loaders/actions; Remix 3 is a separate JSX-component pivot away from RR" }
   - { name: "Expo Router", tradeoff: "the RN/universal meta-framework; SDK 56 decoupled from React Navigation; web SSR (alpha)" }
   - { name: "Astro / Waku / RedwoodSDK", tradeoff: "Astro = content/islands; Waku 1.0-beta = minimal RSC; RedwoodSDK 1.0 = Vite+RSC+Cloudflare" }
-  - { name: "Vinext (Cloudflare)", tradeoff: "Vite-based Next.js rebuild; AI-generated, early — Vercel flagged security issues + low real test coverage; not production-ready" }
+  - { name: "Vinext (Cloudflare)", tradeoff: "Vite-based Next.js rebuild; 1.0.0-beta (2026-07-04, verified vs npm) drops the experimental label — maturing, but AI-generated origins + the security issues Vercel flagged warrant re-verification before any production bet" }
 recommend:
   default: "Web: Next.js is the safe default; choose TanStack Start when you want a less-opinionated, Vite-native RSC stack. RN/universal: Expo Router."
   when:

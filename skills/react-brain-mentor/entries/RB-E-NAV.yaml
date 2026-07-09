@@ -25,6 +25,12 @@ note: >
   TypeScript inference, and adds screen-history APIs (pushParams, persistor, inactiveBehavior
   via React.Activity). Reflects the trend toward honouring platform UI. Still ALPHA in
   2026 — pin/verify before adopting. Verified vs the React Navigation blog.
+  RN8 JULY PROGRESS (2026-07-08, verified vs the React Navigation blog): still PRE-STABLE (next
+  tag) — adds Suspense-enabled navigation (interruptible, concurrent), experimental UNSTABLE_loader
+  data loaders (TanStack Query/Apollo prefetch), full parent-navigator type inference (drops
+  CompositeNavigationProp), and a cross-library STANDARD NAVIGATION API so custom navigators work
+  in both React Navigation AND Expo Router — the first bridge across the newly-decoupled stacks.
+  Requires screens 4.25+, gesture-handler 3.0+, TS 6+.
   UPDATE 2026-07-09: Expo Router v56 (SDK 56) NO LONGER DEPENDS on React Navigation —
   "expo-router no longer depends on react-navigation"; code importing @react-navigation/*
   directly breaks when adopting it (verified vs the SDK 56 changelog). The Expo-vs-bare
@@ -58,6 +64,7 @@ sources:
   - "https://reactnavigation.org/blog/2025/12/19/react-navigation-8.0-alpha/"
   - "https://reactrouter.com/"
   - "https://expo.dev/changelog/sdk-56"
+  - "https://reactnavigation.org/blog/2026/07/08/react-navigation-8.0-july-progress/"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "@react-navigation/*", label: "React Navigation", token: "react navigation" }
   - { pkg: "expo-router", label: "Expo Router", token: "expo router" }
