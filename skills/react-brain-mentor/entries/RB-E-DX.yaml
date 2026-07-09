@@ -11,6 +11,7 @@ options:
   - { name: "git hooks — husky + lint-staged / lefthook", tradeoff: "run lint/format/tests pre-commit/pre-push; catch issues before CI" }
   - { name: "monorepo task runner — Turborepo / Nx + pnpm workspaces", tradeoff: "cached, parallel task graph across packages (see RB-E-BUILD)" }
   - { name: "dependency hygiene — renovate/dependabot + audit", tradeoff: "automated updates + npm/pnpm audit + install-script blocking (see RB-E-SECURITY)" }
+  - { name: "react-doctor (Million)", tradeoff: "npx react-doctor — one-shot codebase scan for React footguns (state/effects/perf/a11y/security), CI mode + installable as an agent skill; 13.5k★, from the Million.js/react-scan team; positioned as the lint layer for agent-written React (see RB-E-AI-DEVTOOLS)" }
 recommend:
   default: "Gate tests + typecheck + lint on every PR in CI, and enforce the same locally with a pre-commit hook. For lint/format, default to Biome (one fast tool) unless you need ESLint's plugin ecosystem (react-hooks, react-compiler)."
   when:
@@ -18,17 +19,23 @@ recommend:
     - "needs ESLint react-hooks / react-compiler rules → ESLint flat config + Prettier over Biome"
     - "multi-package repo → pnpm workspaces + Turborepo for a cached task graph"
     - "normative styleguide but no linter config → wire the rules into lint so they're enforced mechanically, not by review"
+    - "lots of agent-written React landing in the repo → add a react-doctor pass (CI or agent skill) on top of lint"
 note: "DX is cross-cutting — architecture/boundaries depth → engineering-principles; bundler choice → RB-E-BUILD; supply-chain → RB-E-SECURITY. This entry is the feedback loop (CI/lint/hooks/onboarding) that keeps the others honest."
 defer_to_skill: engineering-principles
 doc: "RB-E-DX.md"   # long-form Explanation entry in content_dir
-updated: 2026-06-25
+updated: 2026-07-10
 reading:
+  - title: "Best CI/CD for mobile apps in 2026: a practical comparison"
+    url: "https://expo.dev/blog/best-ci-cd-for-mobile-apps"
+    by: "Expo (VENDOR — comparing its own EAS Workflows)"
+    what: "The only structured selection matrix for mobile CI platforms (EAS Workflows vs Bitrise vs Codemagic vs GitHub Actions): fingerprint-based repack turning 10–15min builds into ~2min JS-only builds, and GHA macOS runners measured ~2.4x slower than Codemagic M4s. READ AS A VENDOR DOC — Expo wins its own comparison; the evaluation axes (runner hardware, cache strategy, fingerprint/repack) are the durable part."
   - title: "Expo without EAS: scaling the React Native DX of an app with 90M+ users"
     url: "https://medium.com/doctolib/expo-without-eas-scaling-the-react-native-developer-experience-of-an-app-with-90m-users-2694ea841805"
     by: "Doctolib"
     what: "Large-scale case study adopting Expo's bare workflow (not EAS) with fingerprint caching + JS patching to halve CI builds and grow contributors 9→105. A durable enterprise RN build/CI-DX blueprint."
 sources:
   - "https://medium.com/doctolib/expo-without-eas-scaling-the-react-native-developer-experience-of-an-app-with-90m-users-2694ea841805"
+  - "https://github.com/millionco/react-doctor"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "husky", label: "husky (git hooks)", token: "husky" }
   - { pkg: "lefthook", label: "lefthook", token: "lefthook" }
@@ -39,3 +46,4 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "turbo", label: "Turborepo", token: "turborepo" }
   - { pkg: "nx", label: "Nx", token: "nx" }
   - { pkg: "lunte", label: "lunte (lint)", token: "lint" }
+  - { pkg: "react-doctor", label: "react-doctor", token: "react-doctor" }

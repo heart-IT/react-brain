@@ -6,8 +6,8 @@ status: reviewed   # long-form entry written + source-checked → encyclopedia/R
 confidence: medium
 platforms: [react, react-native]
 options:
-  - { name: "Next.js (16.x)", tradeoff: "most-used; App Router + RSC + Server Actions; adapters API for non-Vercel hosts; frequent security patches" }
-  - { name: "TanStack Start", tradeoff: "Vite-based; RSC-as-protocol, SSR, Server Functions; deliberately omits Server Actions for security; less opinionated than Next" }
+  - { name: "Next.js (16.x)", tradeoff: "most-used; App Router + RSC + Server Actions; Adapter API STABLE in 16.2 (co-designed w/ OpenNext/Netlify/Cloudflare — verified adapters: Vercel + Bun shipped, others in dev) settles off-Vercel portability; frequent security patches" }
+  - { name: "TanStack Start", tradeoff: "Vite-based (Rsbuild 2 also supported since 2026-06); RSC support EXPERIMENTAL (into early v1), SSR, Server Functions; deliberately omits Server Actions for security; less opinionated than Next" }
   - { name: "React Router 7 (framework mode) / Remix", tradeoff: "Remix merged into React Router 7; full-stack loaders/actions; Remix 3 is a separate JSX-component pivot away from RR" }
   - { name: "Expo Router", tradeoff: "the RN/universal meta-framework; SDK 56 decoupled from React Navigation; web SSR (alpha)" }
   - { name: "Astro / Waku / RedwoodSDK", tradeoff: "Astro = content/islands; Waku 1.0-beta = minimal RSC; RedwoodSDK 1.0 = Vite+RSC+Cloudflare" }
@@ -19,10 +19,16 @@ recommend:
     - "Cloudflare-first stack → RedwoodSDK"
     - "want minimal RSC, no lock-in → Waku (still beta)"
     - "evaluating Vinext → not production-ready; don't bet on it yet"
-note: "Distinct from routing (RB-E-NAV): these own SSR/RSC/data/build. Context-key by hosting target + how much RSC you actually need."
+note: >
+  Distinct from routing (RB-E-NAV): these own SSR/RSC/data/build. Context-key by hosting target +
+  how much RSC you actually need. UPDATE 2026-07-10 (React Weekly, verified): Next.js Adapter API
+  went STABLE in 16.2 with a shared public test suite + an Ecosystem Working Group — the durable
+  answer to "can I run Next off Vercel"; TanStack Start's RSC support is explicitly EXPERIMENTAL
+  into early v1 (don't sell Start as an RSC-parity Next alternative yet); adoption signal —
+  Lovable (the largest AI app-builder) defaults new projects to TanStack Start SSR since 2026-05.
 defer_to_skill: engineering-principles
 doc: "RB-E-META-FRAMEWORKS.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-02
+updated: 2026-07-10
 reading:
   - title: "Who Owns the Tree? RSC as a Protocol, Not an Architecture"
     url: "https://tanstack.com/blog/who-owns-the-tree"
@@ -51,6 +57,8 @@ reading:
 sources:
   - "https://tanstack.com/blog/who-owns-the-tree"
   - "https://frontendmasters.com/blog/react-server-components-in-tanstack/"
+  - "https://nextjs.org/blog/nextjs-across-platforms"
+  - "https://tanstack.com/blog/react-server-components"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "next", label: "Next.js", token: "next.js" }
   - { pkg: "@tanstack/react-start", label: "TanStack Start", token: "tanstack start" }

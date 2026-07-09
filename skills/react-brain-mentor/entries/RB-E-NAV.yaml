@@ -32,8 +32,12 @@ note: >
   which raises the cost of switching lanes later; weigh it at project setup.
 defer_to_skill: null
 doc: "RB-E-NAV.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-09
+updated: 2026-07-10
 reading:
+  - title: "TanStack Router's New Reactive Core: A Signal Graph"
+    url: "https://tanstack.com/blog/tanstack-router-signal-graph"
+    by: "Florian Pellet (TanStack)"
+    what: "The primary source behind this entry's 'signal-based core' claim: the monolithic router.state was decomposed into a graph of independent stores so route changes update only affected subscribers (React navigation 7ms→4.5ms in their measurements). The architecture under TanStack Router's fine-grained reactivity."
   - title: "Exploring Inlined Requires: does Expo Router give you screen-level lazy loading?"
     url: "https://andrei-calazans.com/posts/2026-06-04-expo-router-screen-level-lazy-loading/"
     by: "Andrei Calazans"

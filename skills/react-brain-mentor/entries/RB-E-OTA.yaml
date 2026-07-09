@@ -18,6 +18,7 @@ recommend:
     - "self-hosted / no-vendor requirement → hot-updater, or expo-updates protocol + your own server"
     - "legacy CodePush app → standalone code-push-server keeps it alive while you migrate; the hosted service is gone"
     - "the change touches native code → OTA cannot ship it; that's a store release (see RB-E-RN-VERSIONS)"
+    - "RN embedded in a native app (brownfield) → Expo Updates works in isolated brownfield since SDK 55 (see RB-E-BROWNFIELD)"
 note: >
   NEW entry (2026-07-09): OTA delivery was a corpus gap surfaced by Native Weekly's 2026 run
   (bundle-diffing, runtime channel-switching, and iteration-speed coverage across issues 12–14).
@@ -31,8 +32,12 @@ note: >
   a known-good update is the fastest production mitigation RN has.
 defer_to_skill: null
 doc: null
-updated: 2026-07-09
+updated: 2026-07-10
 reading:
+  - title: "The production playbook for OTA updates"
+    url: "https://expo.dev/blog/the-production-playbook-for-ota-updates"
+    by: "Expo"
+    what: "The operational canon for this entry: staged percentage rollouts as exposure control, what to monitor while an update bakes, and aborts vs republish-rollbacks as distinct mitigations — 'sometimes it helps to go a little slower.' Vendor-authored but the staged-rollout discipline is platform-agnostic. (Body verified via the page's embedded content JSON — the blog is a JS shell.)"
   - title: "EAS Update introduction (docs)"
     url: "https://docs.expo.dev/eas-update/introduction/"
     by: "Expo"

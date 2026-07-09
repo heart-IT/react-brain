@@ -6,9 +6,9 @@
 # and what to use when. This file is the machine-readable INDEX the mentor skill
 # reads to give breadth/selection advice (MP-VETTED-OVER-PROMOTION).
 #
-# SOURCES: facts are synthesized from 5 cross-checked newsletters (React Native
-# Rewind, This Week in React, React Status, React Digest, Native Weekly) as of
-# 2026-07-09; load-bearing version/security facts are verified against primary
+# SOURCES: facts are synthesized from 6 cross-checked newsletters (React Native
+# Rewind, This Week in React, React Status, React Digest, Native Weekly, React
+# Weekly) as of 2026-07-10; load-bearing version/security facts are verified against primary
 # sources (entries with `sources:` + `updated:`). Library picks in `recommend`
 # are editorial synthesis, not vendor claims.
 #
@@ -68,8 +68,8 @@ encyclopedia:
   one_liner: "A curated encyclopedia of the React + React Native ecosystem — what to use, when, and why."
   content_dir: "../../encyclopedia"   # long-form entries land here as markdown, named <id>.md
   authoring_guide: "diataxis-documentation"
-  updated: 2026-07-09
-  sources_digested: ["React Native Rewind ×48", "This Week in React ×22", "React Status ×22", "React Digest ×16", "Native Weekly ×6"]
+  updated: 2026-07-10
+  sources_digested: ["React Native Rewind ×48", "This Week in React ×22", "React Status ×22", "React Digest ×16", "Native Weekly ×6", "React Weekly ×20"]
 
 # ------------------------------------------------------------------------------
 # GROUPS — table of contents. The mentor navigates by group, not by scanning all.

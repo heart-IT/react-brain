@@ -33,7 +33,7 @@ note: >
   (pricing, features) are not yet verified here.
 defer_to_skill: react-native-jsi   # frame processors / native modules; real-time perf → rt-audio-pipeline-audit
 doc: null
-updated: 2026-07-09
+updated: 2026-07-10
 reading:
   - title: "Building a video call app with filters"
     url: "https://blog.margelo.com/building-videocall-app-with-filters"
@@ -48,6 +48,10 @@ reading:
     url: "https://swmansion.com/blog/moqkit-native-mobile-sdk-moq-ios-android/"
     by: "Jakub Perżyło (Software Mansion)"
     what: "Architectural intro to Media over QUIC for mobile — the session/namespace/track model, why moq-lite over moq-transport, and where it sits between WebRTC and HLS. A durable real-time-media transport reference."
+  - title: "What's New in VisionCamera V5?"
+    url: "https://blog.margelo.com/whats-new-in-visioncamera-v5"
+    by: "Marc Rousavy (Margelo; VisionCamera creator)"
+    what: "The canonical v5 reference for this entry's default camera pick: the full Nitro rewrite (−3k LOC of hand-written JSI, ~15x lower call latency vs Turbo Modules), the Constraints API replacing Formats, in-memory photo capture, depth/RAW/multi-cam, and modular frame-processor plugins. Read before betting real-time work on v5."
   - title: "QR and Barcode Scanning in React Native with VisionCamera V5"
     url: "https://blog.margelo.com/react-native-qr-barcode-scanner-visioncamera-v5"
     by: "Marc Rousavy (Margelo; VisionCamera creator)"

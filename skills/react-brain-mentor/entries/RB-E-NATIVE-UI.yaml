@@ -22,9 +22,12 @@ note: >
   Voltra 2.0 (2026-06-18) rewrote onto Turbo Modules and now runs in BARE RN (dropped the
   Expo-Modules / Dev-Client requirement; v2 migration required). Android widgets and the
   portal/other options remain less settled — prototype platform coverage before committing.
+  EXPO UI + WORKLETS (2026-07-10, verified vs the post's og:description): Expo UI integrates
+  react-native-worklets — SwiftUI and Compose state can be driven SYNCHRONOUSLY on the UI
+  thread, no JS round-trips; relevant when native-UI surfaces must track gestures/animation.
 defer_to_skill: null
 doc: null
-updated: 2026-07-09
+updated: 2026-07-10
 reading:
   - title: "Apple Home Screen Widgets with Expo (Continuous Native Generation)"
     url: "https://evanbacon.dev/blog/apple-home-screen-widgets"
@@ -46,3 +49,4 @@ watching:
 sources:
   - "https://expo.dev/blog/ios-widgets-and-live-activities-in-expo"
   - "https://github.com/callstackincubator/voltra/releases/tag/v2.0.0"
+  - "https://expo.dev/blog/worklet-integration-in-expo-ui-synchronously-controlling-swiftui-and-compose-state"

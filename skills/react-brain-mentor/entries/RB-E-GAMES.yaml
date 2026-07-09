@@ -27,14 +27,18 @@ note: >
   call): ReactVision is the maintained Viro lineage (verified vs npm — Fabric required, published
   2026-07); react-native-visionos verified vs the Callstack repo (latest v0.78.0, 2025-03 —
   the version-lag caveat is the load-bearing fact); react-three-fiber v9 verified vs npm.
+  FIRST-PARTY QUEST (2026-07-10, verified vs the official RN blog): React Native now supports
+  Meta Quest / Horizon OS directly via the `expo-horizon-core` config plugin, with Expo Go on
+  the Horizon Store — a first-party 2D-panel path beside ReactVision's immersive AR/VR.
 defer_to_skill: react-native-best-practices
 doc: null
-updated: 2026-07-09
+updated: 2026-07-10
 sources:
   - "https://github.com/wcandillon/react-native-webgpu"
   - "https://registry.npmjs.org/@borndotcom/react-native-godot"
   - "https://registry.npmjs.org/@reactvision/react-viro/latest"
   - "https://github.com/callstack/react-native-visionos"
+  - "https://reactnative.dev/blog/2026/02/24/react-native-comes-to-meta-quest"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "@reactvision/react-viro", label: "ReactVision (AR/VR)", token: "reactvision" }
   - { pkg: "@react-three/fiber", label: "react-three-fiber", token: "react-three" }

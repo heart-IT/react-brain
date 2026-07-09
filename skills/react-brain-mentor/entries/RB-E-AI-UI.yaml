@@ -9,11 +9,13 @@ options:
   - { name: "Vercel AI SDK / json-render", tradeoff: "streaming chat + tool-calling; json-render renders model output as components (now RN too)" }
   - { name: "assistant-ui / Tambo", tradeoff: "prebuilt chat/generative-UI components; Tambo 1.0 adds state persistence + streaming, self-host or cloud" }
   - { name: "Cedar / Streamdown", tradeoff: "Cedar = agent-UI toolkit; Streamdown = streaming-markdown renderer for LLM output" }
+  - { name: "TanStack AI (@tanstack/ai + ai-react)", tradeoff: "type-safe TS AI SDK — streaming chat, tool calling, agents, host-side MCP client, generation hooks (useGenerateImage/Speech/Video, useTranscription) beyond chat; 7-provider adapters; pre-1.0 (0.40, active 2026-07) — the first real Vercel-AI-SDK alternative" }
 recommend:
-  default: "Vercel AI SDK for streaming chat + tool-calling; assistant-ui/Tambo for prebuilt chat UI; Streamdown to render streaming markdown. Very fast-moving (confidence: low) — treat picks as current-best, not settled."
+  default: "Vercel AI SDK for streaming chat + tool-calling (TanStack AI is the emerging type-safe alternative — pre-1.0, watch it); assistant-ui/Tambo for prebuilt chat UI; Streamdown to render streaming markdown. Very fast-moving (confidence: low) — treat picks as current-best, not settled."
   when:
     - "render model output as live components → json-render"
     - "agent-style UI → Cedar"
+    - "already TanStack-stack (Query/Router/Start) or want image/speech/video generation hooks → TanStack AI (pre-1.0, pin)"
 note: >
   Distinct from on-device inference (RB-E-ONDEVICE-AI) — this is cloud-LLM app UI. Very
   fast-moving; recommend tentatively (confidence: low). Adjacent: Vercel's Eve is a file-based agent framework (an agent =
@@ -22,10 +24,12 @@ note: >
   not a React UI library itself.
 defer_to_skill: null
 doc: null
-updated: 2026-06-25
+updated: 2026-07-10   # TanStack AI added — three independent React Weekly signals (issues 11/16/23), verified vs npm
 sources:
   - "https://json-render.dev/docs/ai-sdk"
   - "https://github.com/tambo-ai/tambo"
+  - "https://registry.npmjs.org/@tanstack/ai/latest"
+  - "https://tanstack.com/blog/generation-hooks"
 reading:
   - title: "Generative User Interfaces — rendering UI with language models"
     url: "https://ai-sdk.dev/docs/advanced/rendering-ui-with-language-models"
@@ -39,3 +43,5 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "@ai-sdk/*", label: "Vercel AI SDK", token: "ai sdk" }
   - { pkg: "ai", label: "Vercel AI SDK", token: "ai sdk" }
   - { pkg: "@assistant-ui/*", label: "assistant-ui", token: "assistant-ui" }
+  - { pkg: "@tanstack/ai", label: "TanStack AI", token: "tanstack ai" }
+  - { pkg: "@tanstack/ai-react", label: "TanStack AI (React)", token: "tanstack ai" }

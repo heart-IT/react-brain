@@ -11,7 +11,7 @@ options:
   - { name: "RTK Query", tradeoff: "if already on Redux Toolkit" }
   - { name: "Apollo Client (4.x) / urql / Relay (21)", tradeoff: "GraphQL: Relay v21 adds first-party TS + experimental RSC; Apollo 4.2 type-safe defaults" }
   - { name: "tRPC", tradeoff: "end-to-end type-safe RPC (no schema/codegen) when client + server are both TS; not for public/polyglot APIs" }
-  - { name: "TanStack DB / Zero / TinyBase / RSC", tradeoff: "local-first sync/stores (TanStack DB, Zero 1.0, TinyBase 9) and server-fetched RSC are emerging data-layer alternatives" }
+  - { name: "TanStack DB / Zero / TinyBase / RSC", tradeoff: "local-first sync/stores (TanStack DB, Zero 1.0, TinyBase 9) and server-fetched RSC are emerging data-layer alternatives; TanStack DB 0.6 (2026-03) added SQLite-backed persistence (browser WASM, RN/Expo, Node, Electron) + offline transactions — real offline now, still 0.x" }
 recommend:
   default: "TanStack Query for REST/server-state caching — the default for client-side data fetching."
   when:
@@ -24,8 +24,16 @@ recommend:
 note: "Server state ≠ client state (see RB-E-STATE). TanStack Query is the #1 React library in State of React 2025; it's transport- and platform-agnostic, so the data layer is shared code across web + RN. Adversarially stress-tested 2026-06-25 (SURVIVES, high): RSC complements (doesn't displace) the cache; TanStack DB builds ON TanStack Query; Zero reached 1.0 (2026-06) with React Native support."
 defer_to_skill: null
 doc: "RB-E-DATA.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-06   # TinyBase 8→9 verified vs npm; rest of entry unchanged since 2026-06-17 review
+updated: 2026-07-10   # TanStack DB 0.6 persistence verified vs npm + tanstack blog; TkDodo readings added
 reading:
+  - title: "Creating Query Abstractions"
+    url: "https://tkdodo.eu/blog/creating-query-abstractions"
+    by: "Dominik Dorfmeister (TkDodo), TanStack Query maintainer"
+    what: "Maintainer-authored architecture guidance: queryOptions objects (not custom hooks) are THE abstraction layer for queries — composable, framework-portable, and reusable across useQuery/prefetch/suspense call sites. The how-to-structure companion to 'Why You Want React Query'."
+  - title: "TanStack Router and Query"
+    url: "https://tkdodo.eu/blog/tan-stack-router-and-query"
+    by: "Dominik Dorfmeister (TkDodo)"
+    what: "The selection question this entry's TanStack rows raise: Router's cache is per-route, Query's is global — when route-loader caching alone suffices, when you want the full query cache, and how to layer them without double-fetching. Maintainer-authored."
   - title: "Why You Want React Query"
     url: "https://tkdodo.eu/blog/why-you-want-react-query"
     by: "Dominik Dorfmeister (TkDodo), TanStack Query maintainer"

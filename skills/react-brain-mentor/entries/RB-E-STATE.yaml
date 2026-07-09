@@ -24,8 +24,12 @@ recommend:
 note: "Separate server state (caching/sync) from client/UI state — different problems, different tools. State of React 2025 (3,760 devs): TanStack Query the #1 React library; Zustand crossed 50% usage + tops satisfaction; ~34% use no state library. Adversarially stress-tested 2026-06-25 (SURVIVES, high): nothing has overtaken Zustand, and local-first (TanStack DB) builds on TanStack Query rather than replacing it."
 defer_to_skill: react-native-best-practices  # re-render/perf rules (e.g. RN-RULE-ATOMIC-STATE)
 doc: "RB-E-STATE.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-01
+updated: 2026-07-10
 reading:
+  - title: "Structural sharing, selectAtom, and why your Jotai atoms re-render too much"
+    url: "https://www.peterp.me/articles/jotai-structural-sharing-vs-selectatom/"
+    by: "Peter Piekarczyk"
+    what: "The first Jotai-specific deep-dive here, for the entry's 'fine-grained atoms → Jotai' clause: Object.is propagation mechanics, why selectAtom is a trap (decompose into primitive atoms instead), and write-layer structural sharing à la React Query. The re-render discipline that makes atomic state actually fine-grained."
   - title: "How to Build the Fastest Apps: Break the Rules (App.js Conf 2026)"
     url: "https://www.youtube.com/watch?v=K3flMIHS-cI"
     by: "Jay Meistrich (Software Mansion) — author of Legend State / Legend List"

@@ -12,6 +12,7 @@ options:
   - { name: "supply-chain hardening", tradeoff: "install-script blocking (npm v12 default), install-age gating (min-release-age / npmMinimalAgeGate), provenance — provenance alone is not enough" }
   - { name: "Trusted Types (web)", tradeoff: "React integrates the browser Trusted Types API for XSS prevention; dangerouslySetInnerHTML needs an explicit policy" }
   - { name: "rnsec (RN/Expo security scanner)", tradeoff: "zero-config static scanner — 63 rules across storage/network/auth/secrets/crypto, CI-ready (exit codes, PR comments, JSON/HTML reports); young + single-author (~500★, v1.3) — a cheap CI layer, not a substitute for per-diff review" }
+  - { name: "DeepSec (Vercel Labs)", tradeoff: "open-source AI security-scan harness — agents trace data flows on YOUR infra with YOUR Claude/Codex subscription; produces severity-rated findings (NOT auto-fix PRs), ~10–20% false-positive rate per Vercel; framework-agnostic, new" }
 recommend:
   default: "Secrets in Keychain/secure-store (never AsyncStorage); harden the supply chain (block install scripts, gate install-age); device trust via server-side attestation; route per-diff secret/injection checks to the review skill."
   when:
@@ -30,9 +31,14 @@ note: >
   PROVENANCE (2026-07-09): rnsec was surfaced by Native Weekly — whose author ALSO authors rnsec —
   so it was independently vetted before inclusion (repo checked: ~500★, 63 rules, CI integrations,
   active v1.3 2026-04). Kept with the young/single-author caveat; watch whether it earns adoption.
+  INCIDENT LEDGER UPDATE (2026-07-10): the Vercel April-2026 incident (verified vs Vercel's
+  bulletin) — a compromised third-party AI tool (Context.ai) led through an employee's Google
+  Workspace to decryption of customers' plaintext-decryptable "non-sensitive" env vars; npm
+  packages unaffected. Lessons: mark platform env vars SENSITIVE, and treat AI dev-tools as
+  supply-chain surface. The TanStack npm compromise now has its first-party postmortem (reading).
 defer_to_skill: review
 doc: "RB-E-SECURITY.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-09
+updated: 2026-07-10
 reading:
   - title: "The React2Shell Story"
     url: "https://lachlan.nz/blog/the-react2shell-story"
@@ -46,6 +52,14 @@ reading:
     url: "https://trigger.dev/blog/shai-hulud-postmortem"
     by: "Eric Allam (Trigger.dev)"
     what: "A first-party postmortem of the Shai-Hulud worm (preinstall-script credential exfiltration) with concrete mitigations — disable npm install scripts, pnpm 10, OIDC publishing. The supply-chain reading this entry's own note calls for; applies to any React/RN delivery pipeline."
+  - title: "Postmortem: TanStack npm supply-chain compromise"
+    url: "https://tanstack.com/blog/npm-supply-chain-compromise-postmortem"
+    by: "Tanner Linsley (TanStack)"
+    what: "First-party postmortem of the incident this entry's note cites: 84 versions across 42 @tanstack/* packages, via a pull_request_target 'Pwn Request' → pnpm store-cache poisoning → OIDC token extraction from the runner. The CI/CD-side attack chain — a different door than the install-script family covered by the Shai-Hulud and NodeSource readings."
+  - title: "RSC Server Functions Are Not An API Boundary"
+    url: "https://longho.dev/posts/rsc-server-functions-are-not-an-api-boundary/"
+    by: "Long Ho"
+    what: "The architectural half of this entry's RSC stance: compiler-generated server references are reachable via direct POST, so auth/authz must live INSIDE every server function — plus the rolling-deploy skew failure mode (generated function IDs drift across deploys and break old clients). Treat stable server functions as formal API boundaries. (Site is a JS shell; content verified via its RSS feed.)"
   - title: "Blocking Install Scripts Is Not a Silver Bullet"
     url: "https://nodesource.com/blog/npm-v12-install-scripts-not-a-silver-bullet"
     by: "NodeSource"
@@ -54,6 +68,8 @@ sources:
   - "https://react.dev/blog/2025/12/11/denial-of-service-and-source-code-exposure-in-react-server-components"
   - "https://github.com/advisories/GHSA-83fc-fqcc-2hmg"
   - "https://github.com/adnxy/rnsec"
+  - "https://vercel.com/kb/bulletin/vercel-april-2026-security-incident"
+  - "https://vercel.com/blog/introducing-deepsec-find-and-fix-vulnerabilities-in-your-code-base"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "rnsec", label: "rnsec (security scanner)", token: "rnsec" }
   - { pkg: "jail-monkey", label: "jail-monkey", token: "jail-monkey" }

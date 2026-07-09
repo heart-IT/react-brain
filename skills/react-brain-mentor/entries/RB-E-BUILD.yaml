@@ -31,7 +31,9 @@ note: >
   on Hermes. RN 0.84 also ships PRECOMPILED iOS binaries by default (fetched at pod install,
   faster builds) and raised the minimum to Node 22.11+. RN is on a bi-monthly release cadence.
   Prebuilt native libraries (RN 0.83 artefacts, RNRepo) are the broader trend. BUNDLERS: Metro
-  stays the RN default (RN 0.79 added ~3x faster cold start); Re.Pack 5 (on Rspack) is the main
+  stays the RN default (RN 0.79 added ~3x faster cold start); Expo SDK 56 extends the trend with
+  prebuilt XCFrameworks for its most complex modules (~16% faster median clean iOS builds,
+  verified vs the SDK 56 changelog); Re.Pack 5 (on Rspack) is the main
   alternative, and Rollipop (leegeunhyeok/rollipop, early alpha per its repo) now brings Rolldown —
   the same Rust bundler behind Vite 8 — directly to the RN side; remote-JS Chrome debugging was
   removed in RN 0.79 (use RN DevTools). Rollipop verified vs its repo 2026-06-30 (early-alpha, not production).
@@ -44,7 +46,12 @@ note: >
   the Rspack 2.1 blog) — Rolldown's pullback is a Rolldown-integration choice, not a dead Rust port.
 defer_to_skill: null
 doc: "RB-E-BUILD.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-09
+updated: 2026-07-10
+watching:
+  - title: "How React Native Builds Actually Work (APK, AAB, IPA, APP)"
+    url: "https://www.youtube.com/watch?v=1o0pEjYGUWM"
+    by: "Code with Beto"
+    what: "Walkthrough of what actually happens between `npx expo run` and an installable artifact — the Gradle/Xcode stages behind APK/AAB/IPA and where Metro's bundle lands in them. The A/V companion to this entry's build-pipeline facts. (Verified via YouTube oEmbed: title + author.)"
 reading:
   - title: "Rust Is Eating JavaScript"
     url: "https://leerob.com/rust"
@@ -65,6 +72,7 @@ reading:
 sources:
   - "https://reactnative.dev/blog/2026/02/11/react-native-0.84"
   - "https://github.com/ecrindigital/facetpack"
+  - "https://expo.dev/changelog/sdk-56"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "vite", label: "Vite", token: "vite" }
   - { pkg: "@rspack/*", label: "Rspack", token: "rspack" }

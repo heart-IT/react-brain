@@ -33,8 +33,12 @@ note: >
   enabling the Compiler — useMemo/useCallback remain valid escape hatches.
 defer_to_skill: engineering-principles
 doc: "RB-E-REACT-CORE.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-06
+updated: 2026-07-10
 reading:
+  - title: "The hidden cost of React.Activity"
+    url: "https://www.peterp.me/articles/hidden-cost-of-react-activity"
+    by: "Peter Piekarczyk"
+    what: "The when-NOT-to caveat behind this entry's <Activity> row: hiding preserves STATE but destroys and re-creates EFFECTS on every toggle — so effect-shaped work (keyboard subscriptions, analytics, listeners) piles up subscription/setState waves each time a hidden RN screen is shown again. Pair <Activity> with disciplined effect cleanup or don't use it for effect-heavy subtrees."
   - title: "How to Build the Fastest Apps: Break the Rules (App.js Conf 2026)"
     url: "https://www.youtube.com/watch?v=K3flMIHS-cI"
     by: "Jay Meistrich (Software Mansion)"

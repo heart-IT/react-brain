@@ -14,6 +14,8 @@ options:
   - { name: "react-native-morph-view (Software Mansion)", tradeoff: "GPU image-morph transitions (Metal/AGSL shaders, metaball blend); RN 0.76+, iOS 15.1+/Android 13+; niche/new" }
   - { name: "Animated (core)", tradeoff: "built-in; RN 0.85 shared backend allows layout-prop animation with the native driver (from 0.85.1)" }
   - { name: "Moti / LayoutAnimation", tradeoff: "declarative transitions; Moti wraps Reanimated" }
+  - { name: "react-native-screen-transitions", tradeoff: "custom screen/shared-element transitions FOR React Navigation (blank-stack navigator, bounds-driven navigation.zoom(), gesture choreography); featured on the official React Navigation blog; v3.8 active 2026-07, newer" }
+  - { name: "react-native-ease", tradeoff: "animations driven entirely by Core Animation/ObjectAnimator — no per-frame JS OR UI-thread worklet work; author-run benchmark shows it holding frame budget at view counts where Reanimated saturates; young, and see the benchmark-bias caveat in reading" }
   - { name: "Motion / framer-motion (WEB)", tradeoff: "the web (React DOM) animation default — declarative layout/exit/gesture animation; Motion is framer-motion's successor; React Native uses Reanimated instead" }
 recommend:
   default: "React Native → Reanimated 4 + Gesture Handler 3 for real UI-thread animation & gestures (core Animated only for trivial cases). Web (React DOM) → Motion (framer-motion's successor) for declarative layout/exit/gesture animation."
@@ -23,6 +25,8 @@ recommend:
     - "designer-made animations → lottie-react-native (or Skia/Skottie)"
     - "image-to-image morph transition → react-native-morph-view (GPU shader; niche, lead-level)"
     - "simple fade/slide, want declarative → Moti / LayoutAnimation (RN); Motion (web)"
+    - "custom screen / shared-element transitions on React Navigation → react-native-screen-transitions (new; pin)"
+    - "hundreds of concurrently-animating views blowing the frame budget → benchmark react-native-ease (fully native-driven; young)"
     - "heavy animation perf → route to react-native-best-practices"
 note: >
   RN 0.85 (2026-04) introduced a shared C++ animation backend so Animated and Reanimated
@@ -33,7 +37,7 @@ note: >
   (caught from ledgerhr's framer-motion usage). Verified vs the official RN 0.85 blog.
 defer_to_skill: react-native-best-practices
 doc: null
-updated: 2026-06-25
+updated: 2026-07-10
 reading:
   - title: "CSS vs. JavaScript Animations"
     url: "https://www.joshwcomeau.com/animation/css-vs-javascript/"
@@ -47,12 +51,18 @@ reading:
     url: "https://blog.margelo.com/profiling-skia-reanimated-low-end-android"
     by: "Vishesh Raheja (Margelo)"
     what: "A low-end-Android profiling deep-dive: smoothness is frame-cadence timing, not curve math; the dominant fix is SurfaceView over TextureView (no per-frame texture upload, ~50-65% less RenderThread CPU), plus stable-reference buffer mutation and quantizing per-frame values. With profiler-triangulation methodology (gfxinfo/Perfetto/Hermes)."
+  - title: "The real cost of React Native animations: benchmarking every approach"
+    url: "https://expo.dev/blog/the-real-cost-of-react-native-animations-benchmarking-every-approach"
+    by: "Janic Duplessis (Expo; react-native-ease author)"
+    what: "The only cross-library per-frame benchmark: UI-thread cost of core Animated vs Reanimated (shared values AND the CSS API) vs Ease on real devices — at ~500 animating views only the fully native-driven approach stays under frame budget (Reanimated SVs measured ~36ms/frame). CAVEAT: the author created Ease, the approach that wins — treat the numbers as vendor-run and re-measure on your own screens; the methodology and the per-frame cost model are the durable part."
   - title: "A React trick to improve exit animations"
     url: "https://barvian.me/react-exit-animations"
     by: "Max Barvian"
     what: "Uses Suspense to freeze exiting content during animations; explains Fragment refs, useInsertionEffect, and Suspense DOM-update behavior. A durable web exit-animation technique grounded in React internals."
 sources:
   - "https://reactnative.dev/blog/2026/04/07/react-native-0.85"
+  - "https://reactnavigation.org/blog/2026/04/27/building-custom-screen-transitions"
+  - "https://registry.npmjs.org/react-native-screen-transitions/latest"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "react-native-reanimated", label: "Reanimated", token: "reanimated" }
   - { pkg: "react-native-gesture-handler", label: "Gesture Handler", token: "gesture handler" }
@@ -62,6 +72,8 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "lottie-react-native", label: "Lottie", token: "lottie" }
   - { pkg: "@shopify/react-native-skia", label: "Skia", token: "skia" }
   - { pkg: "moti", label: "Moti", token: "moti" }
+  - { pkg: "react-native-screen-transitions", label: "screen-transitions", token: "screen-transitions" }
+  - { pkg: "react-native-ease", label: "react-native-ease", token: "react-native-ease" }
 detect_source:   # source-level signals owned by this entry (regex over repo source)
   - pattern: "useNativeDriver:\\s*false"
     signal: "JS-driven Animated animations (useNativeDriver: false)"

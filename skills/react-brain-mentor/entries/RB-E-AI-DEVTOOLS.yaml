@@ -12,7 +12,9 @@ options:
   - { name: "Argent (Software Mansion)", tradeoff: "MCP server + skills for iOS: simulator control, debugger attach (React tree + JS), console/HTTP monitoring, correlated React+iOS profiling; also listed in RB-E-TESTING" }
   - { name: "Maestro MCP / Maestro Viewer", tradeoff: "agents drive devices and GENERATE E2E flows on the tool the ecosystem already tests with — see RB-E-TESTING (which owns the testing depth)" }
   - { name: "Reactotron MCP", tradeoff: "the classic RN debugger exposes runtime state/network to coding agents via MCP (reactotron-core-server 3.3.0, 2026-05)" }
-  - { name: "Expo AI tooling", tradeoff: "SDK 55+ ships agent-focused tooling (Expo skills, MCP integration) for Claude/Cursor/Codex as part of the framework" }
+  - { name: "Expo AI tooling", tradeoff: "SDK 55+ ships agent-focused tooling (Expo skills, MCP integration) for Claude/Cursor/Codex as part of the framework; Expo Agent (waitlist beta, 2026-03) is their first-party app-building agent — track, don't bet" }
+  - { name: "TanStack Intent (ALPHA)", tradeoff: "a DISTRIBUTION mechanism, not a pack: agent skills ship INSIDE npm packages and are discovered via the node_modules dependency graph, version-pinned with staleness detection; rolling out in TanStack DB first" }
+  - { name: "React Native Evals (Callstack)", tradeoff: "open-source benchmark suite for WHICH MODEL writes good RN code — task dataset by category/library, TS+Bun runner, judge + methodology whitepaper; the model-selection layer under all the tools above" }
 recommend:
   default: "Give a coding agent two things: RN KNOWLEDGE — a curated skills pack (Callstack agent-skills is the broadest; add Margelo react-native-skills for camera/native depth) — and EYES+HANDS on the running app — Maestro MCP if you already test with Maestro (see RB-E-TESTING), else agent-device (cross-platform) or Argent (iOS debug/profile depth). Add Reactotron MCP when the agent needs runtime state. Fast-moving (confidence: low) — most of these tools are months old; trial on one workflow before standardizing."
   when:
@@ -32,8 +34,12 @@ note: >
   (GitHub repos, npm, SWM blog). Everything here is pre-1.0-culture — pin versions, expect churn.
 defer_to_skill: agentic-engineering-patterns
 doc: null
-updated: 2026-07-09
+updated: 2026-07-10
 reading:
+  - title: "How Expensify Uses Agent-Device for Mobile Bug Evidence and Profiling"
+    url: "https://www.callstack.com/blog/how-expensify-uses-agent-device-for-mobile-bug-evidence-and-profiling"
+    by: "Callstack (with Expensify)"
+    what: "The first named production-adopter case study for agent-device: agents run Sentry-span measurement loops across branches and drive the React profiler mid-session via react-devtools integration, returning named components and render counts as bug evidence. What agent-in-the-debug-loop looks like at a real company, beyond vendor demos."
   - title: "Meet Argent: Agentic Toolkit to Control, Debug and Profile iOS applications"
     url: "https://swmansion.com/blog/argent-agentic-toolkit-to-control-debug-and-profile-ios-applications/"
     by: "Kacper Kapuściak (Software Mansion)"
@@ -43,6 +49,8 @@ sources:
   - "https://github.com/margelo/react-native-skills"
   - "https://github.com/infinitered/reactotron/releases/tag/reactotron-core-server%403.3.0"
   - "https://github.com/callstack/agent-device"
+  - "https://tanstack.com/blog/from-docs-to-agents"
+  - "https://www.callstack.com/blog/announcing-react-native-evals"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "agent-device", label: "agent-device", token: "agent-device" }
   - { pkg: "reactotron-react-native", label: "Reactotron", token: "reactotron" }

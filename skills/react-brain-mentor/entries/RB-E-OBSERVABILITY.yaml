@@ -9,15 +9,16 @@ options:
   - { name: "Sentry (v8)", tradeoff: "crash + perf; v8 captures crashes before RN bootstraps via sentry.options.json (fixes 'TestFlight instant death')" }
   - { name: "EAS Observe (Expo)", tradeoff: "startup-metric sampling (open beta); traces regressions to a specific build / OTA update" }
   - { name: "Firebase Crashlytics / Bugsnag", tradeoff: "established crash reporting" }
+  - { name: "@callstack/inspector", tradeoff: "React-level component profiling in RELEASE builds via React DevTools, zero native changes — fills the release-profiling hole; VERY young (v0.1.x, 2026-06)" }
 recommend:
   default: "Sentry for crash + performance monitoring (v8 catches pre-bootstrap crashes); add error boundaries and wire it up at the production stage."
   when:
     - "on Expo and want build/OTA regression tracing → add Expo Observe"
     - "already on Firebase → Crashlytics is fine for crashes"
-note: "Production-stage concern (the mentor emphasizes observability + error boundaries at production)."
+note: "Production-stage concern (the mentor emphasizes observability + error boundaries at production). @callstack/inspector added 2026-07-10 (verified vs npm) — profile React components in release builds; v0.1.x, treat as experimental."
 defer_to_skill: null
 doc: null
-updated: 2026-07-06
+updated: 2026-07-10
 sources:
   - "https://blog.sentry.io/react-native-sdk-8-is-here/"
   - "https://docs.expo.dev/eas/observe/introduction/"
@@ -33,6 +34,7 @@ reading:
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "@sentry/*", label: "Sentry", token: "sentry" }
   - { pkg: "@bugsnag/*", label: "Bugsnag", token: "bugsnag" }
+  - { pkg: "@callstack/inspector", label: "inspector (release profiling)", token: "inspector" }
 detect_source:   # source-level signals owned by this entry (regex over repo source)
   - pattern: "componentDidCatch|ErrorBoundary|errorElement|getDerivedStateFromError"
     absent: true
