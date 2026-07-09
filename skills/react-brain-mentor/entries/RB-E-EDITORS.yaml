@@ -4,24 +4,38 @@ category: editors
 group: ui
 status: drafted
 confidence: low
-platforms: [react]
+platforms: [react, react-native]
 options:
   - { name: "TipTap", tradeoff: "headless editor on ProseMirror with first-class React bindings; rich extension ecosystem; the common React default" }
   - { name: "ProseMirror", tradeoff: "the powerful low-level toolkit (document model, transforms, plugins); max control, steeper curve; underpins TipTap/BlockNote" }
   - { name: "Lexical (Meta)", tradeoff: "extensible, performance-focused editor framework from Meta; strong for large docs + custom nodes" }
   - { name: "Slate / Plate", tradeoff: "React-first customizable framework (Slate); Plate adds a batteries-included plugin system on top" }
   - { name: "BlockNote", tradeoff: "Notion-style block editor on ProseMirror/TipTap; fast to adopt for block-based UX" }
+  - { name: "react-native-enriched (Software Mansion)", tradeoff: "RN rich-text EDITOR on native UITextView/EditText (not a WebView); v0.8 adds EnrichedText for HTML rendering + experimental web; pre-1.0, moving fast" }
+  - { name: "react-native-enriched-markdown (Software Mansion)", tradeoff: "native RN Markdown renderer/editor with STREAMING support (GFM tables/math, mentions) — built for AI-chat output; v0.7, pre-1.0" }
 recommend:
-  default: "Most React apps → TipTap (ProseMirror power with React ergonomics); large-scale / custom-node-heavy → Lexical; maximum control → ProseMirror directly; deeply custom React schemas → Slate/Plate; Notion-style blocks → BlockNote. Lightly vetted (confidence: low) — prototype against your real document model before committing."
+  default: "Most React apps → TipTap (ProseMirror power with React ergonomics); large-scale / custom-node-heavy → Lexical; maximum control → ProseMirror directly; deeply custom React schemas → Slate/Plate; Notion-style blocks → BlockNote. React Native → react-native-enriched for rich-text input, react-native-enriched-markdown for (streaming) Markdown display. Lightly vetted (confidence: low) — prototype against your real document model before committing."
   when:
     - "standard rich text with extensions → TipTap"
     - "Meta-scale performance / custom nodes → Lexical"
     - "block-based (Notion-like) UX → BlockNote"
     - "full control of the editing pipeline → ProseMirror"
-note: "NEW entry (2026-06-25): rich-text/content editing is a common, hard React need with real library choices and was previously uncovered. Most React editors build on ProseMirror (TipTap, BlockNote) or stand alone (Lexical, Slate). Lightly vetted (confidence: low) — prototype before committing."
+    - "RN rich-text input → react-native-enriched (native views, no WebView; pre-1.0 — pin)"
+    - "RN Markdown display, esp. streaming AI-chat output → react-native-enriched-markdown"
+note: >
+  NEW entry (2026-06-25): rich-text/content editing is a common, hard React need with real
+  library choices and was previously uncovered. Most React editors build on ProseMirror
+  (TipTap, BlockNote) or stand alone (Lexical, Slate). RN SIDE ADDED 2026-07-09: Software
+  Mansion's react-native-enriched family — surfaced in four consecutive Native Weekly issues
+  (v0.3→v0.8 across Feb–Jun 2026) — finally gives RN a native (non-WebView) rich-text editor
+  and a streaming Markdown renderer (both verified vs npm + the SWM repos; both pre-1.0).
+  Lightly vetted (confidence: low) — prototype before committing.
 defer_to_skill: null
 doc: null
-updated: 2026-06-25
+updated: 2026-07-09
+sources:
+  - "https://github.com/software-mansion/react-native-enriched"
+  - "https://github.com/software-mansion/react-native-enriched-markdown"
 reading:
   - title: "The Unreasonable Effectiveness of the ProseMirror Model in Rich Text Transformation"
     url: "https://smoores.dev/post/unreasonable_effectiveness_of_prosemirror/"
@@ -33,3 +47,5 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "lexical", label: "Lexical", token: "lexical" }
   - { pkg: "@blocknote/*", label: "BlockNote", token: "blocknote" }
   - { pkg: "slate", label: "Slate", token: "slate" }
+  - { pkg: "react-native-enriched", label: "react-native-enriched", token: "enriched" }
+  - { pkg: "react-native-enriched-markdown", label: "enriched-markdown", token: "enriched-markdown" }

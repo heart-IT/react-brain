@@ -10,16 +10,16 @@ options:
   - { name: "react-native-svg-transformer (kristerkari)", tradeoff: "Metro transformer to import designer .svg files directly as React components; pairs with react-native-svg" }
   - { name: "@shopify/react-native-skia", tradeoff: "GPU canvas — renders SVG (ImageSVG / Skia.SVG.MakeFromString, with limits: no CSS / <text> / <animate>) and does animated/custom vector drawing beyond declarative SVG; see RB-E-ANIMATION" }
   - { name: "Redraw (William Candillon) — EXPERIMENTAL", tradeoff: "next-gen 2D graphics on WebGPU/TypeGPU: variable-stroke Bézier paths, vector feathering, physically-based 2D; shaders authored as typed TS functions. Technical preview — not on npm (subscriber early access), unstable API. Watch, not a production bet" }
-  - { name: "icon sets — lucide-react-native / @react-native-vector-icons/* / @expo/vector-icons", tradeoff: "lucide-react-native = Lucide (peer-deps react-native-svg); @expo/vector-icons = bundled sets for Expo (wraps react-native-vector-icons)" }
+  - { name: "icon sets — lucide-react-native / @react-native-vector-icons/*", tradeoff: "lucide-react-native = Lucide (peer-deps react-native-svg); @react-native-vector-icons/* = per-family scoped sets; @expo/vector-icons is DEPRECATED in Expo SDK 56 — the wrapper became unnecessary, use the scoped packages directly" }
   - { name: "react-native-vector-icons (legacy)", tradeoff: "the monolith is SUPERSEDED → split into per-family @react-native-vector-icons/* (v11+); a codemod migrates from it and from @expo/vector-icons" }
   - { name: "web: native <svg>", tradeoff: "no library needed on React DOM; icon sets (Lucide etc.) ship as plain React components" }
 recommend:
-  default: "React Native → react-native-svg is the default for declarative vector graphics; import static .svg assets via react-native-svg-transformer, and pull icons from an icon set (lucide-react-native, or per-family @react-native-vector-icons/* — @expo/vector-icons on Expo). Drop to @shopify/react-native-skia only for GPU-accelerated / animated / custom canvas drawing beyond declarative SVG. Web → native <svg>, no library."
+  default: "React Native → react-native-svg is the default for declarative vector graphics; import static .svg assets via react-native-svg-transformer, and pull icons from an icon set (lucide-react-native, or per-family @react-native-vector-icons/* — on Expo too, since @expo/vector-icons is deprecated in SDK 56). Drop to @shopify/react-native-skia only for GPU-accelerated / animated / custom canvas drawing beyond declarative SVG. Web → native <svg>, no library."
   when:
     - "declarative vector shapes → react-native-svg"
     - "import designer .svg files as components → react-native-svg-transformer"
     - "GPU / animated / custom drawing (charts, generative visuals) → react-native-skia (see RB-E-ANIMATION / RB-E-CHARTS)"
-    - "icons → lucide-react-native or per-family @react-native-vector-icons/* (avoid the legacy monolithic react-native-vector-icons for new work; a codemod exists)"
+    - "icons → lucide-react-native or per-family @react-native-vector-icons/* (avoid the legacy monolithic react-native-vector-icons for new work; a codemod exists — and @expo/vector-icons is deprecated in SDK 56, same migration)"
     - "web → native <svg>; reuse the same icon set as React components"
 note: >
   react-native-svg (Software Mansion, v15.x, RN 0.78+) is the de-facto RN SVG primitive — it
@@ -29,9 +29,13 @@ note: >
   is superseded by scoped @react-native-vector-icons/* packages (v11+, with a codemod). Added
   2026-06-25 after the evidence-loop corpus self-audit flagged react-native-svg (used in ourpot +
   bitbarter) with no entry to map it to. Verified vs npm + the maintainers' repos.
+  UPDATE 2026-07-09: Expo SDK 56 DEPRECATES @expo/vector-icons — "it will be replaced by
+  @react-native-vector-icons/*" because "recent upstream work has made that wrapper unnecessary"
+  (verified vs the SDK 56 changelog). The icon-lib consolidation onto the scoped packages is
+  now complete on both bare RN and Expo.
 defer_to_skill: react-native-best-practices
 doc: null
-updated: 2026-07-01
+updated: 2026-07-09
 reading:
   - title: "Hello, Project Redraw"
     url: "https://wcandillon.dev/article/hello-project-redraw"
@@ -44,10 +48,11 @@ reading:
 sources:
   - "https://registry.npmjs.org/react-native-svg/latest"
   - "https://github.com/oblador/react-native-vector-icons/blob/master/MIGRATION.md"
+  - "https://expo.dev/changelog/sdk-56"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "react-native-svg-transformer", label: "svg-transformer", token: "svg-transformer" }
   - { pkg: "react-native-svg", label: "react-native-svg", token: "react-native-svg" }
   - { pkg: "@react-native-vector-icons/*", label: "vector-icons (scoped)", token: "vector-icons" }
   - { pkg: "react-native-vector-icons", label: "react-native-vector-icons (legacy)", token: "legacy" }
   - { pkg: "lucide-react-native", label: "Lucide icons", token: "lucide" }
-  - { pkg: "@expo/vector-icons", label: "@expo/vector-icons", token: "expo/vector-icons" }
+  - { pkg: "@expo/vector-icons", label: "@expo/vector-icons (deprecated SDK 56)", token: "deprecated" }

@@ -29,9 +29,13 @@ note: >
   Arch facts verified vs the RN 0.84 blog; edge-to-edge vs the RN 0.86 blog. The bridge interop
   layer was fully removed in RN 0.85. Adversarially stress-tested 2026-06-25 (SURVIVES; Nitro
   stability caveat added — Nitro is pre-1.0/third-party, Turbo Modules stay the stable in-core option).
+  EXPO SDK 56 (verified vs its changelog, 2026-07-09): expo-modules-core dropped the Objective-C++
+  intermediary for DIRECT Swift↔C++ JSI interop — "fewer hops means less call overhead", significant
+  native-module-call speedup, and Expo module authoring is "Swift all the way down". SDK 56 also lets
+  you write inline Expo Modules (Swift/Kotlin in-app with generated TypeScript).
 defer_to_skill: react-native-jsi  # owns JSI memory/threading rules
 doc: "RB-E-NATIVE.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-06   # Nitro version refreshed (0.36.x, npm); arch facts unchanged since 2026-06-25 stress-test
+updated: 2026-07-09   # SDK 56 Swift↔JSI interop fact added; arch facts unchanged since 2026-06-25 stress-test
 reading:
   - title: "How to Make Pure JSI Code Faster in React Native (Part 1)"
     url: "https://blog.margelo.com/make-jsi-run-faster"
@@ -53,6 +57,7 @@ sources:
   - "https://reactnative.dev/blog/2026/02/11/react-native-0.84"
   - "https://reactnative.dev/blog/2026/06/11/react-native-0.86"
   - "https://github.com/zoontek/react-native-edge-to-edge"
+  - "https://expo.dev/changelog/sdk-56"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "react-native-nitro-modules", label: "Nitro Modules", token: "nitro" }
   - { pkg: "expo-modules-core", label: "Expo Modules", token: "expo modules" }

@@ -1,0 +1,48 @@
+id: RB-E-OTA
+topic: "Over-the-air (OTA) JS updates & release channels (React Native)"
+category: ota-updates
+group: tooling-ops
+status: drafted
+confidence: medium
+platforms: [react-native]
+options:
+  - { name: "EAS Update (expo-updates client)", tradeoff: "the hosted default — channels, phased rollouts, republish-to-rollback; SDK 55 added bsdiff bytecode/bundle diffing (est. ~75% smaller update downloads; default in SDK 56)" }
+  - { name: "expo-updates + custom server", tradeoff: "the Expo Updates protocol is open — self-host the server, keep the battle-tested client; more ops work than EAS" }
+  - { name: "hot-updater", tradeoff: "self-hosted open-source OTA (gronxb) explicitly positioned as the CodePush successor; actively maintained (v0.35.x, 2026-07); younger than expo-updates" }
+  - { name: "code-push-server (standalone)", tradeoff: "Microsoft's open-sourced server, compatible with the legacy react-native-code-push client — a self-host stopgap for existing CodePush apps, not a bet for new ones" }
+  - { name: "react-native-code-push (RETIRED service)", tradeoff: "App Center + the hosted CodePush service shut down 2025-03-31; the client npm has been dormant since 2024-12 — migrate" }
+recommend:
+  default: "On Expo/EAS → EAS Update (channels + phased rollouts + rollback, and diffing makes updates dramatically smaller since SDK 55/56). Hard self-host requirement → hot-updater, or the open expo-updates protocol with your own server. Anything still pointed at the retired CodePush service is silently broken — migrate."
+  when:
+    - "Expo app → EAS Update (first-party; channels/rollouts/rollback built in)"
+    - "self-hosted / no-vendor requirement → hot-updater, or expo-updates protocol + your own server"
+    - "legacy CodePush app → standalone code-push-server keeps it alive while you migrate; the hosted service is gone"
+    - "the change touches native code → OTA cannot ship it; that's a store release (see RB-E-RN-VERSIONS)"
+note: >
+  NEW entry (2026-07-09): OTA delivery was a corpus gap surfaced by Native Weekly's 2026 run
+  (bundle-diffing, runtime channel-switching, and iteration-speed coverage across issues 12–14).
+  DURABLE FACTS, verified: Microsoft retired App Center AND the hosted CodePush service on
+  2025-03-31 (repo archived; standalone code-push-server open-sourced as the escape hatch);
+  EAS Update gained binary bsdiff patches for Hermes bytecode in SDK 55 — the client applies
+  diffs against previously installed bytecode instead of re-downloading whole bundles, an
+  estimated ~75% download reduction, opt-in in SDK 55 and default in SDK 56 (verified vs the
+  SDK 55 changelog). Store policy allows updating interpreted JS/assets within guidelines;
+  native changes always require a store release. OTA is also the rollback story: republishing
+  a known-good update is the fastest production mitigation RN has.
+defer_to_skill: null
+doc: null
+updated: 2026-07-09
+reading:
+  - title: "EAS Update introduction (docs)"
+    url: "https://docs.expo.dev/eas-update/introduction/"
+    by: "Expo"
+    what: "The reference for the hosted-default choice: how updates map to channels, phased rollouts to a percentage of users, and rollback-by-republish ('much like a new commit'). Read before designing a release-channel scheme."
+sources:
+  - "https://expo.dev/changelog/sdk-55"
+  - "https://github.com/microsoft/react-native-code-push"
+  - "https://registry.npmjs.org/hot-updater/latest"
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "expo-updates", label: "EAS Update / expo-updates", token: "eas update" }
+  - { pkg: "react-native-code-push", label: "CodePush (retired service)", token: "codepush" }
+  - { pkg: "hot-updater", label: "hot-updater", token: "hot-updater" }
+  - { pkg: "@hot-updater/*", label: "hot-updater", token: "hot-updater" }

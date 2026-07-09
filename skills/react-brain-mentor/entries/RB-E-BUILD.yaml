@@ -11,6 +11,7 @@ options:
   - { name: "Turborepo / Nx + pnpm/yarn workspaces", tradeoff: "monorepo task graph + caching" }
   - { name: "Expo vs bare RN", tradeoff: "managed velocity vs native control" }
   - { name: "react-native-swc", tradeoff: "Rust/SWC Metro transform — faster than Babel; custom Babel plugins need SWC equivalents (e.g. worklets plugin for Reanimated)" }
+  - { name: "facetpack (early)", tradeoff: "@ecrindigital/facetpack — Rust/OXC Metro transformer (claims ~36x Babel transforms), one-line metro.config, Babel fallback for Flow packages, Doctor CLI; v0.2 (2026-01), early-stage" }
   - { name: "RNRepo (Software Mansion)", tradeoff: "prebuilt native binaries via Maven; cuts CI build time (~50% reported)" }
   - { name: "Re.Pack 5 (Rspack)", tradeoff: "Metro alternative on Rust-based Rspack; module federation / super-apps" }
   - { name: "Rock (Callstack)", tradeoff: "native build-artifact caching (reported 35min → <4min); works with Metro or Re.Pack" }
@@ -21,7 +22,7 @@ recommend:
     - "RN bundler alternative for module federation / super-apps → Re.Pack 5"
     - "want the Rolldown/Rollup plugin ecosystem on RN (experimental) → Rollipop — early alpha, prototype only, not an Expo path"
     - "slow RN CI → prebuilt binaries (RNRepo) and/or Rock build caching"
-    - "Babel is the Metro bottleneck → react-native-swc"
+    - "Babel is the Metro bottleneck → react-native-swc (SWC) or facetpack (OXC; early — pin + keep the Babel fallback)"
     - "Pear app → esbuild-bundle to dist (desktop) or Metro + bare-pack for the Bare worker (mobile), not the web/Metro defaults — see RB-E-P2P"
     - "new web project → Vite; legacy web → webpack/Rspack"
 note: >
@@ -43,7 +44,7 @@ note: >
   the Rspack 2.1 blog) — Rolldown's pullback is a Rolldown-integration choice, not a dead Rust port.
 defer_to_skill: null
 doc: "RB-E-BUILD.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-06
+updated: 2026-07-09
 reading:
   - title: "Rust Is Eating JavaScript"
     url: "https://leerob.com/rust"
@@ -63,6 +64,7 @@ reading:
     what: "Why RN Android builds are slow (conservative Gradle/Metro/C++ defaults) and how parallel Gradle, dynamic Metro workers, ccache, and single-architecture builds cut times from 20+ min to 2-5 min, with benchmarks. The RN-CI build-perf dimension the other readings here don't cover."
 sources:
   - "https://reactnative.dev/blog/2026/02/11/react-native-0.84"
+  - "https://github.com/ecrindigital/facetpack"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "vite", label: "Vite", token: "vite" }
   - { pkg: "@rspack/*", label: "Rspack", token: "rspack" }
@@ -70,3 +72,4 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "@react-native/metro-config", label: "Metro", token: "metro" }
   - { pkg: "metro", label: "Metro", token: "metro" }
   - { pkg: "webpack", label: "webpack", token: "webpack" }
+  - { pkg: "@ecrindigital/facetpack", label: "facetpack", token: "facetpack" }

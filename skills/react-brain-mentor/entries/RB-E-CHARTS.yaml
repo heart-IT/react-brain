@@ -10,17 +10,18 @@ options:
   - { name: "react-native-gifted-charts", tradeoff: "RN; declarative, quick to adopt" }
   - { name: "react-native-skia (build-your-own)", tradeoff: "RN; max control + perf, more code" }
   - { name: "react-native-livechart", tradeoff: "RN; Skia + Reanimated + Gesture Handler; realtime/finance focus, crosshair scrubbing — newer/niche" }
+  - { name: "react-native-graph (Margelo)", tradeoff: "RN; Skia-based LINE graphs with gesture scrubbing; REBOOTED v1.2 (2026-04) onto current Skia APIs after ~2y dormancy — line-focused, check it covers your chart types" }
   - { name: "Recharts / visx / Chart.js", tradeoff: "web; visx = low-level D3 primitives, Recharts = batteries-included" }
 recommend:
   default: "RN: Victory Native (XL) for standard charts; react-native-skia when you need custom/realtime rendering. Web: Recharts (batteries-included) or visx (low-level D3)."
   when:
-    - "realtime/finance RN charts → Skia-based (Victory Native XL or react-native-livechart, which is newer/niche)"
+    - "realtime/finance RN charts → Skia-based (Victory Native XL, react-native-graph for scrubbing line charts, or react-native-livechart — the latter two newer/niche)"
     - "fully custom web viz → visx; quick standard charts → Recharts"
     - "heavy Skia/Reanimated perf → react-native-best-practices"
 note: "Library picks are reasonable defaults but lightly vetted. Ignore react-native-livechart's satirical 'degen mode' framing — not a selection axis."
 defer_to_skill: react-native-best-practices  # Skia/Reanimated render-perf depth
 doc: null
-updated: 2026-06-25
+updated: 2026-07-09
 reading:
   - title: "Introducing visx from Airbnb"
     url: "https://medium.com/airbnb-engineering/introducing-visx-from-airbnb-fd6155ac4658"
@@ -33,6 +34,7 @@ reading:
 sources:
   - "https://reactnativerewind.com/issues/react-native-0-86-charting-your-financial-ruin-and-the-junk-drawer-in-your-package-json"
   - "https://github.com/FormidableLabs/victory-native-xl"
+  - "https://github.com/margelo/react-native-graph/releases"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "victory-native", label: "Victory Native", token: "victory" }
   - { pkg: "victory", label: "Victory", token: "victory" }
@@ -40,5 +42,6 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "@visx/*", label: "visx", token: "visx" }
   - { pkg: "chart.js", label: "Chart.js", token: "chart.js" }
   - { pkg: "react-native-gifted-charts", label: "gifted-charts", token: "gifted-charts" }
+  - { pkg: "react-native-graph", label: "react-native-graph", token: "react-native-graph" }
   - { pkg: "d3-force", label: "d3-force", token: "visx" }
   - { pkg: "d3", label: "D3", token: "visx" }

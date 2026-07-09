@@ -7,7 +7,7 @@ confidence: medium
 platforms: [react, react-native]
 options:
   - { name: "React Navigation", tradeoff: "RN default; mature; imperative + declarative" }
-  - { name: "Expo Router", tradeoff: "file-based; great if on Expo; convention over config" }
+  - { name: "Expo Router", tradeoff: "file-based; great if on Expo; convention over config; v56 (SDK 56) DECOUPLED from React Navigation — its own native-first core; direct @react-navigation/* imports no longer work alongside it" }
   - { name: "React Router (8.x)", tradeoff: "web routing; absorbed Remix; v8 (8.0.1, 2026-06) RELEASED — ESM-only (drops CJS + react-router-dom), future flags on by default; v7→v8 generally non-breaking if you're caught up on v7 future flags" }
   - { name: "TanStack Router / Start", tradeoff: "type-safe web routing; signal-based core; Start is its RSC/SSR meta-framework (see RB-E-META-FRAMEWORKS)" }
   - { name: "Next.js App Router", tradeoff: "web, full-framework routing + RSC (see RB-E-META-FRAMEWORKS)" }
@@ -25,9 +25,14 @@ note: >
   TypeScript inference, and adds screen-history APIs (pushParams, persistor, inactiveBehavior
   via React.Activity). Reflects the trend toward honouring platform UI. Still ALPHA in
   2026 — pin/verify before adopting. Verified vs the React Navigation blog.
+  UPDATE 2026-07-09: Expo Router v56 (SDK 56) NO LONGER DEPENDS on React Navigation —
+  "expo-router no longer depends on react-navigation"; code importing @react-navigation/*
+  directly breaks when adopting it (verified vs the SDK 56 changelog). The Expo-vs-bare
+  split above now separates two DISTINCT navigation stacks, not one wrapper over the other —
+  which raises the cost of switching lanes later; weigh it at project setup.
 defer_to_skill: null
 doc: "RB-E-NAV.md"   # long-form Explanation entry in content_dir
-updated: 2026-06-25
+updated: 2026-07-09
 reading:
   - title: "Exploring Inlined Requires: does Expo Router give you screen-level lazy loading?"
     url: "https://andrei-calazans.com/posts/2026-06-04-expo-router-screen-level-lazy-loading/"
@@ -44,6 +49,7 @@ reading:
 sources:
   - "https://reactnavigation.org/blog/2025/12/19/react-navigation-8.0-alpha/"
   - "https://reactrouter.com/"
+  - "https://expo.dev/changelog/sdk-56"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "@react-navigation/*", label: "React Navigation", token: "react navigation" }
   - { pkg: "expo-router", label: "Expo Router", token: "expo router" }

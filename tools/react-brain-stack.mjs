@@ -57,7 +57,7 @@ export const RECIPE = [
   { id: 'RB-E-SECURITY',        plat: 'any', tier: 'production' },
   { id: 'RB-E-OBSERVABILITY',   plat: 'any', tier: 'production' },
 ];
-export const FEATURE_DOMAINS = ['media', 'maps', 'calendars', 'payments', 'charts', 'editors', 'games', 'on-device AI', 'AI UI', 'i18n', 'native-ui (widgets/Live Activities)', 'keyboard', 'desktop shell'];
+export const FEATURE_DOMAINS = ['media', 'maps', 'calendars', 'payments', 'charts', 'editors', 'games', 'on-device AI', 'AI UI', 'AI dev tooling', 'OTA updates', 'i18n', 'native-ui (widgets/Live Activities)', 'keyboard', 'desktop shell'];
 
 export function buildIntent(flags) {
   const has = (f) => flags.includes(`--${f}`);

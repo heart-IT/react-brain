@@ -24,7 +24,7 @@ note: >
   portal/other options remain less settled — prototype platform coverage before committing.
 defer_to_skill: null
 doc: null
-updated: 2026-06-25
+updated: 2026-07-09
 reading:
   - title: "Apple Home Screen Widgets with Expo (Continuous Native Generation)"
     url: "https://evanbacon.dev/blog/apple-home-screen-widgets"
@@ -34,6 +34,10 @@ reading:
     url: "https://addjam.com/blog/2025-02-04/using-live-activities-react-native-app/"
     by: "Michael Hayes (Add Jam)"
     what: "End-to-end Live Activities in RN — the ActivityKit Attributes/ContentState model, a separate widget-extension target for Lock Screen + Dynamic Island, a native module bridging JS↔Swift, and the HTTP-refresh vs APNs-push tradeoff. Platform constraints that outlast any single library."
+  - title: "How we built the v0 iOS app (React Native + Expo)"
+    url: "https://vercel.com/blog/how-we-built-the-v0-ios-app"
+    by: "Fernando Rojo (Vercel)"
+    what: "Production case study of making RN feel truly native on iOS: Liquid Glass via @callstack/liquid-glass, native menus via Zeego/UIMenu, patching RCTUITextView for platform-correct text behavior, ~1,000 lines of keyboard logic on react-native-keyboard-controller (see RB-E-KEYBOARD), synchronous New-Arch measurements, LegendList — and the share-types-and-logic-not-UI lesson. What 'native feel' actually costs and where the wins come from."
 sources:
   - "https://expo.dev/blog/ios-widgets-and-live-activities-in-expo"
   - "https://github.com/callstackincubator/voltra/releases/tag/v2.0.0"

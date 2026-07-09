@@ -11,7 +11,7 @@ options:
   - { name: "react-native-webrtc", tradeoff: "low-level WebRTC bindings; you wire signaling/SFU yourself" }
   - { name: "LiveKit / Daily / Agora / Stream Video", tradeoff: "WebRTC conferencing SDKs (RN + web); LiveKit is open-source + self-hostable, the others are hosted infra" }
   - { name: "Skia / Metal + MediaPipe / Vision / ML Kit", tradeoff: "GPU compositing (Skia/Metal) + on-device segmentation/detection (MediaPipe on Android, Vision on iOS) for filters/effects" }
-  - { name: "expo-video / expo-av", tradeoff: "media PLAYBACK (not capture or calling)" }
+  - { name: "expo-video / expo-audio", tradeoff: "media PLAYBACK (not capture or calling) — the replacements for expo-av, which is DEPRECATED (removed from Expo Go in SDK 55, no longer patched); expo-video splits player logic (VideoPlayer) from view (VideoView)" }
   - { name: "expo-image", tradeoff: "image DISPLAY — the modern replacement for core <Image>: disk/memory caching, blurhash/thumbhash placeholders, transitions, faster decode; works in bare RN, not just Expo" }
 recommend:
   default: "Camera → VisionCamera (frame processors) or expo-camera (managed); video calling → LiveKit (open-source) or a hosted SDK (Daily/Agora/Stream); real-time filters → process VisionCamera frames + GPU-composite and inject into the WebRTC source; image display → expo-image over core <Image>. Calling-SDK specifics are lightly vetted (confidence: low) — prototype perf per-device before committing."
@@ -20,6 +20,7 @@ recommend:
     - "self-hosted / open-source calling → LiveKit; fastest managed setup → Daily / Agora / Stream"
     - "just capture photos / scan codes → expo-camera (or VisionCamera for advanced)"
     - "displaying images (caching, blurhash placeholders, transitions) → expo-image, not core <Image>"
+    - "video/audio playback → expo-video / expo-audio; migrate off expo-av (deprecated, unpatched, out of Expo Go since SDK 55)"
     - "real-time pipeline correctness & perf → react-native-jsi (frame processors) + rt-audio-pipeline-audit (the real-time discipline transfers from audio)"
 note: >
   NEW domain entry (2026-06-25), surfaced by a Margelo deep-dive (see `reading`) the index
@@ -32,7 +33,7 @@ note: >
   (pricing, features) are not yet verified here.
 defer_to_skill: react-native-jsi   # frame processors / native modules; real-time perf → rt-audio-pipeline-audit
 doc: null
-updated: 2026-07-01
+updated: 2026-07-09
 reading:
   - title: "Building a video call app with filters"
     url: "https://blog.margelo.com/building-videocall-app-with-filters"
@@ -53,12 +54,13 @@ reading:
     what: "By VisionCamera's creator: three scanning APIs (CodeScanner / useBarcodeScannerOutput / frame processors), narrowing barcodeFormats and outputResolution for latency, the frame-vs-preview coordinate gotcha, and MLKit vs Apple's native AVCaptureMetadataOutput vs commercial SDKs. The reference for RN code scanning."
 sources:
   - "https://blog.margelo.com/building-videocall-app-with-filters"
+  - "https://expo.dev/changelog/sdk-55"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "react-native-vision-camera", label: "VisionCamera", token: "visioncamera" }
   - { pkg: "expo-camera", label: "expo-camera", token: "expo-camera" }
   - { pkg: "@livekit/*", label: "LiveKit", token: "livekit" }
   - { pkg: "react-native-webrtc", label: "react-native-webrtc", token: "webrtc" }
-  - { pkg: "expo-av", label: "expo-av (playback)", token: "expo-av" }
+  - { pkg: "expo-av", label: "expo-av (DEPRECATED → expo-video/expo-audio)", token: "expo-av" }
   - { pkg: "expo-video", label: "expo-video (playback)", token: "expo-video" }
   - { pkg: "react-native-qrcode-svg", label: "QR generation (qrcode-svg)", token: "scanning" }
   - { pkg: "expo-image-picker", label: "expo-image-picker", token: "camera" }

@@ -1,0 +1,49 @@
+id: RB-E-AI-DEVTOOLS
+topic: "AI-assisted development — agent skills, MCP tooling & device automation"
+category: ai-devtools
+group: ai
+status: drafted
+confidence: low
+platforms: [react, react-native]
+options:
+  - { name: "agent-skills (Callstack)", tradeoff: "curated skill packs for coding agents — RN best practices, upgrade playbook, brownfield migration, library scaffolding; installs into Claude Code / Cursor / Codex / Gemini CLI; the broadest pack (~1.5k★)" }
+  - { name: "react-native-skills (Margelo)", tradeoff: "RN-focused skills (VisionCamera and native-module depth) via `npx skills add margelo/react-native-skills`; younger/smaller than Callstack's" }
+  - { name: "agent-device (Callstack)", tradeoff: "agent-native CLI: AI agents drive real iOS/Android/tvOS/macOS/web devices & simulators — a11y snapshots, actions, replayable scripts; v0.19.x, iterating fast" }
+  - { name: "Argent (Software Mansion)", tradeoff: "MCP server + skills for iOS: simulator control, debugger attach (React tree + JS), console/HTTP monitoring, correlated React+iOS profiling; also listed in RB-E-TESTING" }
+  - { name: "Maestro MCP / Maestro Viewer", tradeoff: "agents drive devices and GENERATE E2E flows on the tool the ecosystem already tests with — see RB-E-TESTING (which owns the testing depth)" }
+  - { name: "Reactotron MCP", tradeoff: "the classic RN debugger exposes runtime state/network to coding agents via MCP (reactotron-core-server 3.3.0, 2026-05)" }
+  - { name: "Expo AI tooling", tradeoff: "SDK 55+ ships agent-focused tooling (Expo skills, MCP integration) for Claude/Cursor/Codex as part of the framework" }
+recommend:
+  default: "Give a coding agent two things: RN KNOWLEDGE — a curated skills pack (Callstack agent-skills is the broadest; add Margelo react-native-skills for camera/native depth) — and EYES+HANDS on the running app — Maestro MCP if you already test with Maestro (see RB-E-TESTING), else agent-device (cross-platform) or Argent (iOS debug/profile depth). Add Reactotron MCP when the agent needs runtime state. Fast-moving (confidence: low) — most of these tools are months old; trial on one workflow before standardizing."
+  when:
+    - "agent writes RN code → install a skills pack (agent-skills / react-native-skills) so it stops generating stale patterns"
+    - "agent must run and SEE the app (closed verify loop) → agent-device (cross-platform) or Argent (iOS debugger/profiler depth)"
+    - "agent-generated E2E tests → Maestro MCP (owned by RB-E-TESTING)"
+    - "agent needs runtime state / network inspection → Reactotron MCP"
+    - "how to WORK with agents (TDD, review discipline, cognitive debt) → agentic-engineering-patterns"
+note: >
+  NEW entry (2026-07-09): the dominant recurring theme of Native Weekly issues 11–16 (Jan–Jun
+  2026) — every single issue shipped agent-tooling news (agent-device ×3, two skills packs,
+  Reactotron MCP, Argent, Expo SDK 55/56 AI tooling, Xcode 26.3 'agentic coding') — and the
+  corpus had no home for the SELECTION question 'which agent tooling for RN development'.
+  Distinct from RB-E-AI-UI (AI in the product) and RB-E-ONDEVICE-AI (models on device): this
+  is AI at DEV time. Device-driving TESTING tools (Maestro MCP, Argent, Radon IDE) stay owned
+  by RB-E-TESTING; this entry is the cross-tool map. All options fetch-verified 2026-07-09
+  (GitHub repos, npm, SWM blog). Everything here is pre-1.0-culture — pin versions, expect churn.
+defer_to_skill: agentic-engineering-patterns
+doc: null
+updated: 2026-07-09
+reading:
+  - title: "Meet Argent: Agentic Toolkit to Control, Debug and Profile iOS applications"
+    url: "https://swmansion.com/blog/argent-agentic-toolkit-to-control-debug-and-profile-ios-applications/"
+    by: "Kacper Kapuściak (Software Mansion)"
+    what: "The clearest articulation of the closed loop this entry is about: the agent that writes the code also boots the simulator, drives the UI, attaches a debugger, and profiles React+iOS in the same session — with production numbers (~50% re-render reduction in a banking app) rather than demos."
+sources:
+  - "https://github.com/callstackincubator/agent-skills"
+  - "https://github.com/margelo/react-native-skills"
+  - "https://github.com/infinitered/reactotron/releases/tag/reactotron-core-server%403.3.0"
+  - "https://github.com/callstack/agent-device"
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "agent-device", label: "agent-device", token: "agent-device" }
+  - { pkg: "reactotron-react-native", label: "Reactotron", token: "reactotron" }
+  - { pkg: "@swmansion/argent", label: "Argent", token: "argent" }

@@ -13,12 +13,14 @@ options:
   - { name: "Storybook 10", tradeoff: "component workshop; web + RN run side-by-side; Vite 8 + Playwright/Vitest test integration + MCP" }
   - { name: "Radon IDE (Software Mansion)", tradeoff: "VS Code / Cursor RN debugging — device panel, click-to-inspect, React Profiler" }
   - { name: "Argent (Software Mansion) — NEW/experimental", tradeoff: "agentic toolkit giving an AI assistant control of the iOS Simulator (drive + inspect the running app) to shorten the debug loop; new, niche" }
+  - { name: "react-native-harness (Callstack) — NEW", tradeoff: "Jest-style describe/it tests running ON real devices/simulators (iOS/Android/web) with native-module access — the on-device unit/integration layer between Node-Jest and black-box Maestro; v1.3 (2026-05), early" }
 recommend:
   default: "Unit/component: Vitest (web) or Jest (RN) + React Testing Library. E2E: Playwright (web), Maestro (RN). MSW for API mocks; Storybook for component dev."
   when:
     - "RN e2e → Maestro (Expo's recommendation; it archived Detox)"
     - "API-heavy tests → MSW so the same mocks serve unit + e2e + dev"
     - "Holepunch / Bare app → brittle (the ecosystem's TAP runner) is idiomatic, not a deviation — see RB-E-P2P"
+    - "unit/integration tests that must exercise real NATIVE modules → react-native-harness (early; pin versions)"
     - "test discipline (what to test, TDD) → agentic-engineering-patterns"
 note: >
   RN 0.85 (2026-04-07) moved the Jest preset out of the core package — set
@@ -29,7 +31,7 @@ note: >
   ecosystem already recommends. Jest-preset fact verified against the official RN 0.85 release blog.
 defer_to_skill: agentic-engineering-patterns  # TDD/verify discipline
 doc: "RB-E-TESTING.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-07
+updated: 2026-07-09
 reading:
   - title: "Write tests. Not too many. Mostly integration."
     url: "https://kentcdodds.com/blog/write-tests"
@@ -42,6 +44,7 @@ reading:
 sources:
   - "https://reactnative.dev/blog/2026/04/07/react-native-0.85"
   - "https://docs.maestro.dev/get-started/maestro-mcp"
+  - "https://github.com/callstackincubator/react-native-harness"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "jest", label: "Jest", token: "jest" }
   - { pkg: "vitest", label: "Vitest", token: "vitest" }
@@ -52,3 +55,4 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "msw", label: "MSW", token: "msw" }
   - { pkg: "@storybook/*", label: "Storybook", token: "storybook" }
   - { pkg: "brittle", label: "brittle (Holepunch TAP)", token: "brittle" }
+  - { pkg: "react-native-harness", label: "react-native-harness", token: "harness" }
