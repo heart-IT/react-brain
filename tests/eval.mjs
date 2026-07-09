@@ -28,8 +28,13 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
   check(byEntry(d, 'RB-E-MAPS')?.fit === '✓ aligned', 'rn-smells: maps deps should detect as MAPS ✓ aligned');
   check(byEntry(d, 'RB-E-STATE')?.fit === '✓ aligned', 'rn-smells: zustand should detect as STATE ✓ aligned');
   check(byEntry(d, 'RB-E-RN-VERSIONS')?.labels.join() === 'RN 0.86.0', 'rn-smells: RN version row');
+  // 2026-07-10 entries: pin the new detect rows so harvest-era additions stay wired
+  check(byEntry(d, 'RB-E-OTA')?.fit === '✓ aligned', 'rn-smells: expo-updates should detect as OTA ✓ aligned');
+  check(byEntry(d, 'RB-E-POLISH')?.fit === '✓ aligned', 'rn-smells: sonner-native+bootsplash should detect as POLISH ✓ aligned');
+  check(byEntry(d, 'RB-E-NETWORKING')?.fit === '~ contextual', 'rn-smells: axios should be NETWORKING ~ contextual (keep-it clause), not review');
+  check(byEntry(d, 'RB-E-AI-DEVTOOLS')?.fit === '✓ aligned', 'rn-smells: agent-device should detect as AI-DEVTOOLS ✓ aligned');
   const s = signals(d);
-  for (const id of ['RB-E-LISTS', 'RB-E-ANIMATION', 'RB-E-SECURITY', 'RB-E-DATA', 'RB-E-KEYBOARD'])
+  for (const id of ['RB-E-LISTS', 'RB-E-ANIMATION', 'RB-E-SECURITY', 'RB-E-DATA', 'RB-E-KEYBOARD', 'RB-E-NETWORKING'])
     check(s.includes(id), `rn-smells: source signal ${id} should fire`);
   check(!s.includes('RB-E-OBSERVABILITY'), 'rn-smells: absent-boundary rule must NOT fire below production stage');
 }

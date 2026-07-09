@@ -14,3 +14,11 @@ export function Feed() {
     </KeyboardAvoidingView>
   );
 }
+
+// legacy networking helper (fixture smell: raw XHR bypasses the fetch layer)
+export function legacyPing(url) {
+  const xhr = new XMLHttpRequest();
+  xhr.open('GET', url);
+  xhr.send();
+  return xhr;
+}

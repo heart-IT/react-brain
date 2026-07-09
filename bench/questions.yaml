@@ -221,3 +221,76 @@ questions:
     answer: "React Native 0.86 (with React 19.2)."
     fresh_markers: ["0\\.86"]
     stale_markers: ["0\\.7\\d", "0\\.8[0-5]\\b"]
+
+  # ── 2026-07-10 additions: the July-2026 harvest's verified flips ──────────────
+  - id: ts7-stable
+    entry: RB-E-TYPESCRIPT
+    verified: 2026-07-10
+    question: "Is the Go-based TypeScript compiler (TypeScript 7) stable, or still in preview?"
+    answer: "Stable — TypeScript 7.0 shipped July 2026 (~10x faster native compiler; migrate via the TS 6 bridge)."
+    fresh_markers: ["(is|now|went) stable", "7\\.0.*(stable|released|shipped)", "stable.*7\\.0", "released.*(2026|7\\.0)"]
+    stale_markers: ["release candidate", "\\brc\\b", "preview", "beta", "not (yet )?(stable|released)", "expected (in|within|later)"]
+
+  - id: codepush-service
+    entry: RB-E-OTA
+    verified: 2026-07-09
+    question: "Can I still use Microsoft's hosted CodePush service (App Center) for React Native OTA updates?"
+    answer: "No — App Center and the hosted CodePush service were retired 2025-03-31; use EAS Update, or self-host (standalone code-push-server / hot-updater)."
+    fresh_markers: ["retired", "shut ?down", "no longer (available|running|operational|exists)", "discontinued", "sunset"]
+    stale_markers: ["yes[, ]", "you can (still )?use (the )?(hosted )?codepush", "app center (supports|provides|offers)"]
+
+  - id: expo-av-status
+    entry: RB-E-MEDIA
+    verified: 2026-07-09
+    question: "What should I use for video playback in a new Expo app: expo-av or something newer?"
+    answer: "expo-video (and expo-audio for audio) — expo-av is deprecated, removed from Expo Go in SDK 55 and no longer patched."
+    fresh_markers: ["expo-video"]
+    stale_markers: ["use expo-av", "expo-av is (the|a) (recommended|standard|good|solid)"]
+
+  - id: expo-router-decoupled
+    entry: RB-E-NAV
+    verified: 2026-07-09
+    question: "Does Expo Router still depend on React Navigation under the hood?"
+    answer: "No — since Expo Router v56 (SDK 56) it no longer depends on React Navigation; direct @react-navigation/* imports no longer work alongside it."
+    fresh_markers: ["no longer", "decoupled", "does ?n[o']t depend", "its own (navigation )?(core|implementation|stack)"]
+    stale_markers: ["yes[,. ]", "wraps react navigation", "built on (top of )?react navigation", "under the hood.*react navigation", "thin (layer|wrapper) (on|over) react navigation"]
+
+  - id: shadcn-headless
+    entry: RB-E-COMPONENT-LIBS
+    verified: 2026-07-10
+    question: "Which headless primitive library does shadcn/ui use by default today, Radix or Base UI?"
+    answer: "Base UI — the default since July 2026 (shadcn 4.13); Radix remains supported."
+    fresh_markers: ["base ui"]
+    stale_markers: ["radix"]
+
+  - id: vector-icons-expo
+    entry: RB-E-SVG
+    verified: 2026-07-09
+    question: "Is @expo/vector-icons still the recommended icon library for Expo apps?"
+    answer: "No — it is deprecated in Expo SDK 56; use the scoped @react-native-vector-icons/* packages directly."
+    fresh_markers: ["deprecated", "@react-native-vector-icons"]
+    stale_markers: ["yes[,. ]", "recommended (way|approach|library|choice)", "standard (way|choice|library)"]
+
+  - id: xcode-floor
+    entry: RB-E-RN-VERSIONS
+    verified: 2026-07-10
+    question: "What minimum Xcode version must a React Native iOS app be built with to upload to App Store Connect (as of mid-2026)?"
+    answer: "Xcode 26 (iOS 26-family SDKs) — required for App Store Connect uploads since 2026-04-28."
+    fresh_markers: ["xcode 26"]
+    stale_markers: ["xcode 1[456]"]
+
+  - id: test-renderer
+    entry: RB-E-TESTING
+    verified: 2026-07-10
+    question: "Should new React Native component tests use the react-test-renderer package?"
+    answer: "No — react-test-renderer is deprecated; React Native Testing Library v14 ships its own react-reconciler-based test renderer (host elements only)."
+    fresh_markers: ["deprecated", "testing library"]
+    stale_markers: ["yes[,. ]", "react-test-renderer is (the|a) (standard|recommended|typical)"]
+
+  - id: next-adapters
+    entry: RB-E-META-FRAMEWORKS
+    verified: 2026-07-10
+    question: "Is the Next.js Adapter API for deploying to non-Vercel hosts stable or experimental?"
+    answer: "Stable — since Next.js 16.2, with verified adapters (Vercel and Bun shipped; Netlify/Cloudflare/AWS via OpenNext in development) and a shared public test suite."
+    fresh_markers: ["stable", "16\\.2"]
+    stale_markers: ["experimental", "alpha", "not (yet )?stable", "vercel[- ]only", "only (works|deploys) (on|to) vercel"]

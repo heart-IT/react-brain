@@ -162,6 +162,25 @@ const mentorText = readFileSync(MENTOR_PATH, 'utf8');
 for (const m of mentorText.matchAll(/all (\d+)\b/g))
   if (Number(m[1]) !== n) warn(`mentor yaml says 'all ${m[1]}', actual ${n}`);
 
+// markdown docs drift too (the README sat 3 harvests stale claiming '29 entries'):
+// check every human-facing doc's entry-count and reviewed-count claims.
+const nReviewed = entries.filter(({ e }) => e?.status === 'reviewed').length;
+const DOC_PATHS = [
+  resolve(__dir, '../README.md'),
+  resolve(__dir, '../skills/react-brain-mentor/SKILL.md'),
+  MENTOR_PATH,
+  ENC_PATH,
+];
+for (const p of DOC_PATHS) {
+  if (!existsSync(p)) continue;
+  const rel = p.split('/').slice(-1)[0];
+  const txt = p === MENTOR_PATH ? mentorText : (p === ENC_PATH ? idxText : readFileSync(p, 'utf8'));
+  for (const m of txt.matchAll(/(\d+)[- ]entr(?:y|ies)(?:\s+grouped|\s+across)?/gi))
+    if (Number(m[1]) !== n && Number(m[1]) > 10) warn(`${rel}: claims '${m[0]}', actual ${n} entries`);
+  for (const m of txt.matchAll(/(\d+)\s+(?:are\s+)?`?reviewed`?/gi))
+    if (Number(m[1]) !== nReviewed) warn(`${rel}: claims '${m[0]}', actual ${nReviewed} reviewed`);
+}
+
 // ── report ──────────────────────────────────────────────────────────────────────
 const quiet = process.argv.includes('--quiet');
 console.log(`react-brain lint — ${n} entries · ${seenPkgs.size} detect patterns · ${urlOwners.size} reading URLs`);
