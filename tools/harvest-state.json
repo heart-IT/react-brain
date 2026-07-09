@@ -1,0 +1,60 @@
+{
+  "_readme": [
+    "Resume state for the newsletter harvest (tools/pulse-routine.md step 2, tools/upkeep-routine.md Tier 2).",
+    "Read this BEFORE a harvest pass; update `last_processed`/`count`/`updated` and COMMIT it after.",
+    "This file lives in the repo (not session memory) precisely so a CLOUD agent can clone, resume, and open a PR.",
+    "`react-brain lint` cross-checks each `count` against encyclopedia.yaml sources_digested — they must match.",
+    "Narrative harvest history (what each pass changed, process learnings) stays in the maintainer's memory ledger."
+  ],
+  "updated": "2026-07-10",
+  "sources": {
+    "this-week-in-react": {
+      "name": "This Week in React",
+      "archive": "https://thisweekinreact.com/newsletter",
+      "last_processed": "#289",
+      "count": 23,
+      "cadence": "weekly",
+      "notes": "issue pages fetch directly at /newsletter/<n>"
+    },
+    "react-status": {
+      "name": "React Status",
+      "archive": "https://react.statuscode.com/issues",
+      "last_processed": "#481",
+      "count": 22,
+      "cadence": "weekly",
+      "notes": "corroboration-heavy; headliners usually already held"
+    },
+    "react-digest": {
+      "name": "React Digest",
+      "archive": "https://reactdigest.net/digests",
+      "last_processed": "#2316",
+      "count": 16,
+      "cadence": "weekly",
+      "notes": "issues slug-titled by featured article; article/depth-driven — durable yield is usually one decision-guide reading"
+    },
+    "react-native-rewind": {
+      "name": "React Native Rewind",
+      "archive": "https://reactnativerewind.com/",
+      "last_processed": "~#48",
+      "count": 48,
+      "cadence": "weekly",
+      "notes": "slug-titled; fetchers hallucinate issue numbers — count sequentially from the last note"
+    },
+    "native-weekly": {
+      "name": "Native Weekly",
+      "archive": "https://nativeweekly.beehiiv.com/",
+      "last_processed": "#16",
+      "count": 6,
+      "cadence": "~6-weekly (irregular)",
+      "notes": "nativeweekly.com is a shell — use the beehiiv archive; author also authors rnsec (watch self-promotion); strongest beat = agentic dev tooling"
+    },
+    "react-weekly": {
+      "name": "React Weekly",
+      "archive": "https://react-weekly.dev/rss.xml",
+      "last_processed": "#27",
+      "count": 20,
+      "cadence": "weekly (Sundays)",
+      "notes": "site + api.react-weekly.dev are JS-shell/auth-gated — harvest via rss.xml content:encoded (FULL bodies). RSS window = latest 20: a backlog >20 issues loses them permanently (issues 1-7 already unreachable). TanStack-heavy."
+    }
+  }
+}

@@ -22,8 +22,9 @@ stamp to an entry you actually re-verified) may be applied with a one-line note.
    `node tools/react-brain-pulse.mjs --today=<today> ../ledgerhr ../ourpot ../bitbarter`
    Capture: dead links, aging/undated entries, and any app drift since last baseline.
 
-2. **Growth (verified harvest).** Read the memory note `react-brain-mentor-skill.md` to
-   find the last-processed issue numbers per source. Fetch only NEW issues since then from:
+2. **Growth (verified harvest).** Read **`tools/harvest-state.json`** (in-repo resume state —
+   last-processed issue number, count, archive URL, and access notes per source; update + commit
+   it after the pass). Fetch only NEW issues since then from:
    This Week in React, React Native Rewind, React Status, React Digest, Native Weekly
    (nativeweekly.beehiiv.com, ~6-weekly). For each, extract durable SELECTION facts +
    canonical deep-dive ARTICLES (strong talks/podcasts/videos → the entry's optional

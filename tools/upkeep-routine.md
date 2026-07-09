@@ -45,9 +45,10 @@ cd /Users/f1sh/odd-jobs/heartit/skills/react-brain && claude -p "$(cat tools/upk
 
 The agent should, in order:
 1. **Health** — run Tier 1 (`react-brain pulse … `) and read the deltas.
-2. **Growth** — follow `tools/pulse-routine.md`: from the memory note's last-processed issue
-   numbers, fetch only NEW issues (This Week in React, RN Rewind, React Status, React Digest,
-   Native Weekly — archive at nativeweekly.beehiiv.com, ~6-weekly),
+2. **Growth** — follow `tools/pulse-routine.md`: from **`tools/harvest-state.json`** (in-repo
+   resume state: last-processed issues + per-source access notes; update + commit after),
+   fetch only NEW issues (This Week in React, RN Rewind, React Status, React Digest,
+   Native Weekly, React Weekly),
    extract durable selection facts + canonical articles, **fetch-verify every URL**, map via the
    mentor's `capability_map`/`assessment_dimensions` (or flag a GAP). De-dupe vs existing.
    Strong TALKS/PODCASTS/VIDEOS go in the entry's optional `watching:` list (same shape as
@@ -74,8 +75,10 @@ The agent should, in order:
    entry = new file + a TOC slot in encyclopedia.yaml + `detect:`/`detect_source:` rows in the file).
 6. **Gate** — run `npm test` (lint invariants + the golden-fixture eval). A red gate means the
    delta broke a corpus invariant or a known-good behavior; fix before recording.
-7. **Record** — append a one-line dated note to the memory file (issues processed, counts,
-   entries challenged) so the next run resumes cleanly, and commit the delta (repo is under git).
+7. **Record** — update `tools/harvest-state.json` (last_processed + count + updated; lint
+   cross-checks the counts against sources_digested) and commit it WITH the delta (repo is under
+   git). Local sessions additionally append the narrative note to the maintainer's memory ledger;
+   cloud runs put the narrative in the PR description instead.
 
 ## Cadence
 

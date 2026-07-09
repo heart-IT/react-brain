@@ -131,6 +131,28 @@ for (const [cat, owners] of cats) {
   if (!reachable) err(`ORPHAN category '${cat}' (${owners.join(', ')}): no assessment_dimension and no capability_map row — invisible to the mentor`);
 }
 
+// ── harvest resume state ↔ sources_digested (the two must never drift) ──────────
+const HARVEST_PATH = resolve(__dir, 'harvest-state.json');
+if (existsSync(HARVEST_PATH)) {
+  try {
+    const hs = JSON.parse(readFileSync(HARVEST_PATH, 'utf8'));
+    const digested = new Map((index.encyclopedia?.sources_digested || []).map((s) => {
+      const m = String(s).match(/^(.*)\s+×(\d+)$/);
+      return m ? [m[1].trim(), Number(m[2])] : [String(s), NaN];
+    }));
+    for (const src of Object.values(hs.sources || {})) {
+      const want = digested.get(src.name);
+      if (want == null) err(`harvest-state: source '${src.name}' missing from encyclopedia sources_digested`);
+      else if (want !== src.count) err(`harvest-state: '${src.name}' count ${src.count} ≠ sources_digested ×${want}`);
+    }
+    for (const name of digested.keys())
+      if (![...Object.values(hs.sources || {})].some((s) => s.name === name))
+        err(`harvest-state: sources_digested lists '${name}' but harvest-state.json has no such source`);
+  } catch (ex) { err(`harvest-state.json does not parse: ${ex.message}`); }
+} else {
+  warn('tools/harvest-state.json missing — harvest resume state should live in the repo');
+}
+
 // ── stale count claims in prose (the "34 entries" class of drift) ───────────────
 const n = entries.length;
 const idxText = readFileSync(ENC_PATH, 'utf8');
