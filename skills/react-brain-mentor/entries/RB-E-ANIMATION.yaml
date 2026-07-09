@@ -13,7 +13,7 @@ options:
   - { name: "lottie-react-native", tradeoff: "designer Lottie/JSON animations; v7 adds visionOS" }
   - { name: "react-native-morph-view (Software Mansion)", tradeoff: "GPU image-morph transitions (Metal/AGSL shaders, metaball blend); RN 0.76+, iOS 15.1+/Android 13+; niche/new" }
   - { name: "Animated (core)", tradeoff: "built-in; RN 0.85 shared backend allows layout-prop animation with the native driver (from 0.85.1)" }
-  - { name: "Moti / LayoutAnimation", tradeoff: "declarative transitions; Moti wraps Reanimated" }
+  - { name: "Moti / LayoutAnimation", tradeoff: "declarative transitions; Moti wraps Reanimated — but last published 2025-01 (verified vs npm 2026-07): drifting toward maintenance; fine if installed, prefer plain Reanimated/LayoutAnimation for new work" }
   - { name: "react-native-screen-transitions", tradeoff: "custom screen/shared-element transitions FOR React Navigation (blank-stack navigator, bounds-driven navigation.zoom(), gesture choreography); featured on the official React Navigation blog; v3.8 active 2026-07, newer" }
   - { name: "react-native-ease", tradeoff: "animations driven entirely by Core Animation/ObjectAnimator — no per-frame JS OR UI-thread worklet work; author-run benchmark shows it holding frame budget at view counts where Reanimated saturates; young, and see the benchmark-bias caveat in reading" }
   - { name: "Motion / framer-motion (WEB)", tradeoff: "the web (React DOM) animation default — declarative layout/exit/gesture animation; Motion is framer-motion's successor; React Native uses Reanimated instead" }

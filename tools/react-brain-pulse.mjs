@@ -46,7 +46,10 @@ function classify(s) {
   return 'other';
 }
 async function checkUrl(url) {
-  const opt = (m, ms) => ({ method: m, redirect: 'follow', signal: AbortSignal.timeout(ms), headers: { 'user-agent': 'react-brain-pulse/0.1' } });
+  // Browser-ish UA: many hosts (medium.com, personal blogs behind bot-gates) 403/timeout a
+  // tool UA but serve a browser one fine — the same lesson as the harvest playbook's curl -A
+  // fallback (tools/upkeep-routine.md). Cuts false "unreachable/blocked" noise from §1.
+  const opt = (m, ms) => ({ method: m, redirect: 'follow', signal: AbortSignal.timeout(ms), headers: { 'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36 react-brain-pulse/0.1' } });
   try {
     let r = await fetch(url, opt('HEAD', 9000));
     if ([403, 405, 501, 0].includes(r.status)) { try { r = await fetch(url, opt('GET', 13000)); } catch { /* keep HEAD result */ } }

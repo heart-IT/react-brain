@@ -99,14 +99,23 @@ async function lastPublish(pkg) {
 }
 
 // ── resolve the corpus → the package candidate set ────────────────────────────────
+// A detect label that itself marks retirement ("CodePush (retired service)",
+// "@expo/vector-icons (deprecated SDK 56)", "(legacy)", "(dormant)") is the corpus
+// SAYING the package is dead — flagging it as a stale default or a trailing
+// alternative would contradict the corpus's own verdict, so those rows are
+// listed but never default-candidates and never flagged.
+const RETIRED_LABEL_RE = /retired|deprecated|legacy|dormant|unmaintained|superseded/i;
 const entries = loadDoc().entries;
-const rows = [];   // { entryId, group, pkg, label, isDefault }
+const rows = [];   // { entryId, group, pkg, label, isDefault, retired }
 for (const e of entries) {
   const pkgs = entryPackages(e.id);
   if (!pkgs.length) continue;
   const defSet = new Set(pkgsForPick(e.id, e.recommend?.default || ''));
   const text = [e.note, e.recommend?.default, ...(e.recommend?.when || [])].filter(Boolean).join(' ');
-  for (const { pkg, label } of pkgs) rows.push({ entryId: e.id, group: e.group, pkg, label, isDefault: defSet.has(pkg) });
+  for (const { pkg, label } of pkgs) {
+    const retired = RETIRED_LABEL_RE.test(label);
+    rows.push({ entryId: e.id, group: e.group, pkg, label, isDefault: !retired && defSet.has(pkg), retired });
+  }
   e._text = text;
 }
 const uniquePkgs = [...new Set(rows.map((r) => r.pkg))];
@@ -163,7 +172,7 @@ const ordered = Object.keys(byEntry).sort((a, b) => GROUP_ORDER.indexOf(byEntry[
 for (const id of ordered) {
   const opts = byEntry[id].filter((r) => dl[r.pkg] != null).sort((a, b) => (dl[b.pkg] || 0) - (dl[a.pkg] || 0));
   if (!opts.length) continue;
-  const top = opts[0];
+  const top = opts.find((r) => !r.retired) || opts[0];   // a retired pkg out-downloading the default is expected, not a flag
   const defs = opts.filter((r) => r.isDefault);
   const defTop = defs.sort((a, b) => (dl[b.pkg] || 0) - (dl[a.pkg] || 0))[0];
 

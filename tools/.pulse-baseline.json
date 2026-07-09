@@ -1,13 +1,28 @@
 {
-  "date": "2026-06-25",
+  "date": "2026-07-10",
   "fingerprints": {
+    "ledger-hr": {
+      "RB-E-COMPONENT-LIBS": "Radix UI",
+      "RB-E-DATA": "TanStack Query",
+      "RB-E-LISTS": "TanStack Table",
+      "RB-E-P2P": "Autobase (multiwriter), Corestore, Holepunch (Hypercore stack), blind-pairing",
+      "RB-E-CHARTS": "d3-force",
+      "RB-E-ANIMATION": "framer-motion / Motion",
+      "RB-E-DESKTOP": "Electron, Pear (Holepunch)",
+      "RB-E-STATE": "Redux (classic), Redux (react-redux)",
+      "RB-E-STYLING": "Tailwind",
+      "RB-E-TESTING": "brittle (Holepunch TAP)",
+      "RB-E-BUILD": "esbuild",
+      "RB-E-REACT-CORE": "React 19.2.4"
+    },
     "ourpot": {
-      "RB-E-SVG": "@expo/vector-icons, react-native-svg",
+      "RB-E-SVG": "@expo/vector-icons (deprecated SDK 56), react-native-svg",
       "RB-E-STORAGE": "AsyncStorage, expo-secure-store (secrets)",
       "RB-E-NAV": "React Navigation",
       "RB-E-P2P": "Autobase (multiwriter), Corestore, Holepunch (Hypercore stack), blind-pairing, hrpc",
       "RB-E-NATIVE": "Expo (managed native)",
       "RB-E-MEDIA": "QR generation (qrcode-svg), expo-camera, expo-image-picker",
+      "RB-E-POLISH": "expo-haptics",
       "RB-E-DESKTOP": "Pear (mobile, Holepunch)",
       "RB-E-ANIMATION": "Gesture Handler, Reanimated, Worklets",
       "RB-E-BUILD": "Metro",
@@ -16,6 +31,23 @@
       "RB-E-TYPESCRIPT": "TypeScript",
       "RB-E-REACT-CORE": "React 19.2.7",
       "RB-E-RN-VERSIONS": "RN 0.83.9"
+    },
+    "bitbarter": {
+      "RB-E-SVG": "@expo/vector-icons (deprecated SDK 56), react-native-svg",
+      "RB-E-STORAGE": "AsyncStorage, expo-secure-store (secrets)",
+      "RB-E-NAV": "React Navigation",
+      "RB-E-P2P": "Autobase (multiwriter), Corestore, Holepunch (Hypercore stack), blind-pairing, hrpc",
+      "RB-E-NATIVE": "Expo (managed native)",
+      "RB-E-MEDIA": "QR generation (qrcode-svg), expo-camera, expo-image-picker",
+      "RB-E-POLISH": "expo-haptics",
+      "RB-E-DESKTOP": "Pear (mobile, Holepunch)",
+      "RB-E-ANIMATION": "Gesture Handler, Reanimated, Worklets",
+      "RB-E-BUILD": "Metro",
+      "RB-E-TESTING": "brittle (Holepunch TAP)",
+      "RB-E-DX": "Prettier, husky (git hooks), lunte (lint)",
+      "RB-E-TYPESCRIPT": "TypeScript",
+      "RB-E-REACT-CORE": "React 19.2.0",
+      "RB-E-RN-VERSIONS": "RN 0.83.6"
     }
   }
 }

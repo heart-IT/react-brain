@@ -12,7 +12,7 @@ options:
   - { name: "code-push-server (standalone)", tradeoff: "Microsoft's open-sourced server, compatible with the legacy react-native-code-push client — a self-host stopgap for existing CodePush apps, not a bet for new ones" }
   - { name: "react-native-code-push (RETIRED service)", tradeoff: "App Center + the hosted CodePush service shut down 2025-03-31; the client npm has been dormant since 2024-12 — migrate" }
 recommend:
-  default: "On Expo/EAS → EAS Update (channels + phased rollouts + rollback, and diffing makes updates dramatically smaller since SDK 55/56). Hard self-host requirement → hot-updater, or the open expo-updates protocol with your own server. Anything still pointed at the retired CodePush service is silently broken — migrate."
+  default: "On Expo/EAS → EAS Update via the expo-updates client (channels + phased rollouts + rollback, and diffing makes updates dramatically smaller since SDK 55/56). Hard self-host requirement → hot-updater, or the open expo-updates protocol with your own server. Anything still pointed at the retired CodePush service is silently broken — migrate."
   when:
     - "Expo app → EAS Update (first-party; channels/rollouts/rollback built in)"
     - "self-hosted / no-vendor requirement → hot-updater, or expo-updates protocol + your own server"
@@ -47,7 +47,7 @@ sources:
   - "https://github.com/microsoft/react-native-code-push"
   - "https://registry.npmjs.org/hot-updater/latest"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
-  - { pkg: "expo-updates", label: "EAS Update / expo-updates", token: "eas update" }
+  - { pkg: "expo-updates", label: "EAS Update", token: "eas update" }
   - { pkg: "react-native-code-push", label: "CodePush (retired service)", token: "codepush" }
   - { pkg: "hot-updater", label: "hot-updater", token: "hot-updater" }
   - { pkg: "@hot-updater/*", label: "hot-updater", token: "hot-updater" }

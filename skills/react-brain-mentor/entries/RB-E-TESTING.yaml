@@ -29,10 +29,11 @@ note: >
   MCP server (verified vs docs.maestro.dev, 2026-07-07) puts device-driving + E2E-generation in
   the hands of coding agents — the agent-driven-testing trend consolidating around the tool the
   ecosystem already recommends. Jest-preset fact verified against the official RN 0.85 release blog.
-  RENDERER FLIP (2026-07-10, verified vs RNTL docs + the mdjastrzebski/test-renderer repo):
-  react-test-renderer is DEPRECATED; RN Testing Library v14 runs on its own react-reconciler-based
-  test-renderer that renders HOST elements only — which is WHY RNTL's query model moved to
-  host-element/role queries. Don't reach for react-test-renderer in new test code.
+  RENDERER FLIP (2026-07-10, verified vs the docs + the mdjastrzebski/test-renderer repo):
+  RN Testing Library v14 (actively maintained) runs on its own react-reconciler-based
+  test-renderer that renders HOST elements only — which is WHY its query model moved to
+  host-element/role queries. The old react-test-renderer package from React core is
+  deprecated — don't reach for it in new test code.
 defer_to_skill: agentic-engineering-patterns  # TDD/verify discipline
 doc: "RB-E-TESTING.md"   # long-form Explanation entry in content_dir
 updated: 2026-07-10

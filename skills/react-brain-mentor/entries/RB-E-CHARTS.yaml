@@ -18,7 +18,7 @@ recommend:
     - "realtime/finance RN charts → Skia-based (Victory Native XL, react-native-graph for scrubbing line charts, or react-native-livechart — the latter two newer/niche)"
     - "fully custom web viz → visx; quick standard charts → Recharts"
     - "heavy Skia/Reanimated perf → react-native-best-practices"
-note: "Library picks are reasonable defaults but lightly vetted. Ignore react-native-livechart's satirical 'degen mode' framing — not a selection axis."
+note: "Library picks are reasonable defaults but lightly vetted. Ignore react-native-livechart's satirical 'degen mode' framing — not a selection axis. FRESHNESS (signals, 2026-07-10): the ACTIVE Victory line is victory-native XL (41.26, 2026-06, verified vs npm) — the web `victory` package moves slowly; d3's 2-year publish gap is maturity, not abandonment (it's the stable substrate under visx)."
 defer_to_skill: react-native-best-practices  # Skia/Reanimated render-perf depth
 doc: null
 updated: 2026-07-09

@@ -24,6 +24,7 @@ const toc = [
   ['options', 'Options'],
   e.note ? ['notes', 'Verified notes'] : null,
   e.reading?.length ? ['reading', 'Reading'] : null,
+  e.watching?.length ? ['watching', 'Watching'] : null,
   e.sources?.length ? ['sources', 'Sources'] : null,
   doc ? ['explanation', 'Full explanation'] : null,
 ].filter(Boolean);
@@ -84,6 +85,22 @@ const toc = [
             <a href={r.url} rel="noopener"><strong>{r.title}</strong></a>
             {r.by && <span class="meta" style="margin-left:.5rem">{r.by}</span>}
             <p style="margin:.3rem 0 0; font-size:.9rem; max-width:78ch" class="muted">{r.what}</p>
+          </div>
+        ))}
+      </div>
+    </>
+  )}
+
+  {e.watching?.length > 0 && (
+    <>
+      <h2 id="watching">Watching</h2>
+      <p class="muted" style="font-size:.88rem">Curated talks, podcasts &amp; videos — the A/V companion to the reading list.</p>
+      <div class="rows">
+        {e.watching.map((w) => (
+          <div>
+            <a href={w.url} rel="noopener"><strong>{w.title}</strong></a>
+            {w.by && <span class="meta" style="margin-left:.5rem">{w.by}</span>}
+            <p style="margin:.3rem 0 0; font-size:.9rem; max-width:78ch" class="muted">{w.what}</p>
           </div>
         ))}
       </div>
