@@ -34,8 +34,10 @@ jobs:
           cache-dependency-path: site/package-lock.json
       - run: npm ci
         working-directory: site
-      - run: npm run build -- --base /react-brain/
+      - run: npm run build
         working-directory: site
+        env:
+          ASTRO_BASE: /react-brain/   # `npm run build -- --base` would hit pagefind, not astro
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site/dist
