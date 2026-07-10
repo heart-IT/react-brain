@@ -7,13 +7,13 @@ confidence: medium
 platforms: [react, react-native]
 options:
   - { name: "StyleSheet (RN)", tradeoff: "built-in; manual theming" }
-  - { name: "NativeWind (v5)", tradeoff: "Tailwind for RN; most-adopted utility approach" }
+  - { name: "NativeWind (v4 stable; v5/TW4 preview)", tradeoff: "Tailwind for RN; most-adopted (~1.3M dl/wk) — but the stable line is Tailwind v3-era; the Tailwind-v4 line (v5) is preview-only" }
   - { name: "Unistyles", tradeoff: "C++/Nitro styling engine; fast theming + variants" }
   - { name: "Uniwind", tradeoff: "Tailwind w/ C++ styling engine + animated themes; Pro is paid (~$99/seat/yr)" }
-  - { name: "react-native-tailwind", tradeoff: "Babel-plugin / zero-runtime Tailwind — no JS-side styling overhead" }
+  - { name: "@mgcrea/react-native-tailwind", tradeoff: "Babel-plugin / zero-runtime Tailwind — no JS-side styling overhead; micro-adoption (<1k dl/wk). (The unscoped npm name react-native-tailwind is a dead 2020 package — don't cite it)" }
   - { name: "Tamagui", tradeoff: "cross-platform design-system + optimizing compiler" }
   - { name: "StyleX (0.18, Meta)", tradeoff: "atomic compile-time CSS; sx={} prop; strong web story, RN support emerging" }
-  - { name: "styled-components", tradeoff: "largely maintenance (v6.4; v6.3 added RSC support); runtime CSS-in-JS — prefer zero-runtime/StyleX for new web work" }
+  - { name: "styled-components", tradeoff: "runtime CSS-in-JS — avoid for new web work on the per-render-cost axis, not abandonment: v7 is in active prerelease (2026-06, RN-parity features) but stays runtime; prefer zero-runtime/StyleX" }
   - { name: "CSS-in-JS (web)", tradeoff: "runtime cost; prefer zero-runtime variants" }
   - { name: "React Strict DOM", tradeoff: "strict HTML/CSS compiled to static CSS on web + RN styles on native; see RB-E-CROSSPLATFORM" }
 recommend:
@@ -22,7 +22,8 @@ recommend:
     - "design-system with variants/theming → Tamagui or Unistyles"
     - "Meta-style atomic CSS at scale → StyleX"
     - "web+native shared styling → React Strict DOM (RB-E-CROSSPLATFORM)"
-    - "new web CSS-in-JS → avoid runtime libs (styled-components is maintenance); use zero-runtime/StyleX"
+    - "new web CSS-in-JS → avoid runtime libs on the per-render-cost axis (styled-components v7 is actively developed but still runtime); use zero-runtime/StyleX"
+    - "RN needing Tailwind v4 parity with web today → NativeWind stable is TW3-era and its v5/TW4 line is preview-only; Uniwind (from the Unistyles authors, requires TW>=4) is the stable TW4 option"
 note: >
   Web+native: react-native-web is in maintenance mode (2026); React Strict DOM is the
   emerging successor (see RB-E-CROSSPLATFORM). The Tailwind-for-RN field is crowded
@@ -30,7 +31,7 @@ note: >
   selection axis is runtime cost — zero-runtime/compiler approaches avoid JS-side style work.
 defer_to_skill: design-systems-governance  # tokens, theme parity, a11y intrinsics
 doc: "RB-E-STYLING.md"   # long-form Explanation entry in content_dir
-updated: 2026-06-25
+updated: 2026-07-10   # challenge-pass: s-c v7-prerelease-but-still-runtime, NativeWind TW4 skew, dead-pkg row fixed
 reading:
   - title: "Why We're Breaking Up with CSS-in-JS"
     url: "https://www.spotvirtual.com/blog/why-were-breaking-up-with-css-in-js"
@@ -51,6 +52,8 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "@tailwindcss/*", label: "Tailwind", token: "tailwind" }
   - { pkg: "tailwindcss", label: "Tailwind", token: "tailwind" }
   - { pkg: "nativewind", label: "NativeWind", token: "nativewind" }
+  - { pkg: "uniwind", label: "Uniwind", token: "uniwind" }
+  - { pkg: "@mgcrea/react-native-tailwind", label: "zero-runtime Tailwind (Babel)", token: "zero-runtime" }
   - { pkg: "react-native-unistyles", label: "Unistyles", token: "unistyles" }
   - { pkg: "@tamagui/*", label: "Tamagui", token: "tamagui" }
   - { pkg: "tamagui", label: "Tamagui", token: "tamagui" }

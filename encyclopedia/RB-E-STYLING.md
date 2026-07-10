@@ -72,9 +72,10 @@ work entirely.
 **Tamagui** — a cross-platform design-system + optimizing compiler; a batteries-included route
 when you want a *component system with theming*, not just primitives (also `RB-E-CROSSPLATFORM`).
 
-**styled-components / runtime CSS-in-JS** — largely **maintenance** (v6.x; v6.3 added RSC
-support). It still works; just don't place a *new* web bet on runtime CSS-in-JS — prefer
-zero-runtime or StyleX.
+**styled-components / runtime CSS-in-JS** — still **runtime** CSS-in-JS. It's actively
+developed again (v7 prerelease, 2026-06, adds RN-parity features) — but v7 stays runtime, so
+the advice is unchanged: don't place a *new* web bet on runtime CSS-in-JS — prefer zero-runtime
+or StyleX.
 
 **React Strict DOM** — strict HTML/CSS compiled to static CSS on web and RN styles on native;
 it's simultaneously a *styling* strategy and a *code-sharing* one (`RB-E-CROSSPLATFORM`).
@@ -82,8 +83,9 @@ it's simultaneously a *styling* strategy and a *code-sharing* one (`RB-E-CROSSPL
 ## Tradeoffs and failure modes to name out loud
 
 - **New runtime CSS-in-JS bets.** Choosing styled-components/Emotion for a *new* web app in
-  2026 buys a known per-render cost and a maintenance-mode dependency. Reserve runtime CSS-in-
-  JS for genuinely dynamic styling that can't be precomputed.
+  2026 buys a known per-render cost — the objection is architectural (runtime style work),
+  not abandonment. Reserve runtime CSS-in-JS for genuinely dynamic styling that can't be
+  precomputed.
 - **"Tailwind fatigue" as a decision driver.** The RN field's churn (NativeWind vs Uniwind vs
   …) tempts novelty-driven choices. Decide on the durable axis (runtime cost, theming model),
   not the newest entrant.
@@ -111,7 +113,7 @@ it's simultaneously a *styling* strategy and a *code-sharing* one (`RB-E-CROSSPL
 ## In one paragraph
 
 Ignore the fashion and watch one axis: **when styles are computed.** Runtime CSS-in-JS pays on
-every render (and styled-components is now maintenance), so for new work prefer compile-time /
+every render (even an actively-developed styled-components v7 stays runtime), so for new work prefer compile-time /
 zero-runtime: **Tailwind + shadcn/ui** on the web (StyleX when you need atomic CSS at scale),
 and **NativeWind or StyleSheet/Unistyles** on React Native. Share styling with code via React
 Strict DOM when you go universal, and push tokens, theming, and accessibility down to

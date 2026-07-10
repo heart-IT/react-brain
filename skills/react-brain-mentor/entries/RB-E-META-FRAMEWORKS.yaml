@@ -13,7 +13,7 @@ options:
   - { name: "Astro / Waku / RedwoodSDK", tradeoff: "Astro = content/islands; Waku 1.0-beta = minimal RSC; RedwoodSDK 1.0 = Vite+RSC+Cloudflare" }
   - { name: "Vinext (Cloudflare)", tradeoff: "Vite-based Next.js rebuild; 1.0.0-beta (2026-07-04, verified vs npm) drops the experimental label — maturing, but AI-generated origins + the security issues Vercel flagged warrant re-verification before any production bet" }
 recommend:
-  default: "Web: Next.js is the safe default; choose TanStack Start when you want a less-opinionated, Vite-native RSC stack. RN/universal: Expo Router."
+  default: "Web: Next.js is the safe default; choose TanStack Start when you want a less-opinionated, Vite-native full-stack alternative (Server Functions stable; RSC opt-in and still experimental; Start itself is v1 RC). RN/universal: Expo Router."
   when:
     - "content/marketing site → Astro (ship less JS)"
     - "Cloudflare-first stack → RedwoodSDK"
@@ -26,6 +26,12 @@ note: >
   answer to "can I run Next off Vercel"; TanStack Start's RSC support is explicitly EXPERIMENTAL
   into early v1 (don't sell Start as an RSC-parity Next alternative yet); adoption signal —
   Lovable (the largest AI app-builder) defaults new projects to TanStack Start SSR since 2026-05.
+  CHALLENGE-PASS CAVEATS (2026-07-10, fetch-verified): Start's npm download surge (~60x since
+  Jan 2026) is inflated by Lovable's platform CI — raw downloads ≠ team adoption; Next held flat
+  (~160-175M/mo). And Next security releases DON'T BACKPORT: the May-2026 release (13 advisories,
+  7 High, incl. upstream RSC CVE-2026-23870) patched only 15.5.18/16.2.6 — choosing Next commits
+  you to tracking latest minors. Stress-tested 2026-07-10 (WEAKENED → caveats applied; the
+  Next-default and the how-much-RSC context-key both SURVIVED the migration-wave attack).
 defer_to_skill: engineering-principles
 doc: "RB-E-META-FRAMEWORKS.md"   # long-form Explanation entry in content_dir
 updated: 2026-07-10

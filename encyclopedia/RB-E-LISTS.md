@@ -61,7 +61,8 @@ majority of lists.
 
 **FlashList** — recycling for large RN lists. Wins when lists are long and rows are uniform
 enough to reuse; v2's ground-up New-Architecture rewrite handles recycling, progressive
-rendering, and layout prediction (reading). Reach for it at scale, not reflexively.
+rendering, and layout prediction (reading). Reach for it at scale, not reflexively. Note that
+v2 runs *only* on the New Architecture — old-arch apps must pin v1.x (or stay on FlatList).
 
 **react-window / react-virtual / HighTable (web)** — web windowing. react-window/react-virtual
 cover normal long lists; **HighTable** handles *billion-row* tables with tricks the others don't

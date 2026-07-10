@@ -8,7 +8,7 @@ platforms: [react, react-native]
 options:
   - { name: "ScrollView/.map", tradeoff: "fine <20 static items only" }
   - { name: "FlatList", tradeoff: "RN baseline virtualization" }
-  - { name: "FlashList", tradeoff: "recycling; large RN lists" }
+  - { name: "FlashList", tradeoff: "recycling; large RN lists (v2 = New Architecture ONLY; old arch → pin v1.x)" }
   - { name: "react-window / react-virtual / HighTable", tradeoff: "web virtualization; HighTable handles billion-row tables (viewport-only DOM + scrollbar downscaling)" }
   - { name: "Legend List", tradeoff: "one virtualization engine for RN + web (v3.0 stable); SectionList + chat/anchoring APIs; signal-driven container pool → very small re-renders" }
 recommend:
@@ -16,10 +16,11 @@ recommend:
   when:
     - "huge web tables (100k+ rows) → HighTable"
     - "one list engine across RN + web → Legend List"
+    - "old-architecture RN app → FlashList v2 is New-Arch-only; pin FlashList v1.x or stay on FlatList"
     - "exact thresholds / perf → react-native-best-practices owns the rules"
 defer_to_skill: react-native-best-practices  # RN-RULE-USE-FLASHLIST owns the thresholds
 doc: "RB-E-LISTS.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-01
+updated: 2026-07-10   # challenge-pass caveat: FlashList v2 = New-Arch-only (verified vs the Shopify README)
 reading:
   - title: "How to Build the Fastest Apps: Break the Rules (App.js Conf 2026)"
     url: "https://www.youtube.com/watch?v=K3flMIHS-cI"

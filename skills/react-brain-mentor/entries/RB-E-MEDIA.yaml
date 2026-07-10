@@ -8,7 +8,7 @@ platforms: [react, react-native]
 options:
   - { name: "VisionCamera (v5, Nitro)", tradeoff: "RN camera with JSI frame processors; v5 rebuilt on Nitro; the base for custom real-time frame pipelines (see RB-E-NATIVE)" }
   - { name: "expo-camera", tradeoff: "managed camera for Expo apps; simpler, fewer real-time hooks than VisionCamera" }
-  - { name: "react-native-webrtc", tradeoff: "low-level WebRTC bindings; you wire signaling/SFU yourself" }
+  - { name: "react-native-webrtc", tradeoff: "low-level WebRTC bindings; you wire signaling/SFU yourself; near-dormant (2 releases since mid-2024, pinned to Chromium M124) — strengthens the SDK-over-raw-WebRTC advice" }
   - { name: "LiveKit / Daily / Agora / Stream Video", tradeoff: "WebRTC conferencing SDKs (RN + web); LiveKit is open-source + self-hostable, the others are hosted infra" }
   - { name: "Skia / Metal + MediaPipe / Vision / ML Kit", tradeoff: "GPU compositing (Skia/Metal) + on-device segmentation/detection (MediaPipe on Android, Vision on iOS) for filters/effects" }
   - { name: "expo-video / expo-audio", tradeoff: "media PLAYBACK (not capture or calling) — the replacements for expo-av, which is DEPRECATED (removed from Expo Go in SDK 55, no longer patched); expo-video splits player logic (VideoPlayer) from view (VideoView)" }
@@ -20,6 +20,7 @@ recommend:
     - "custom real-time effects (blur / segmentation / virtual bg) → VisionCamera frame processors + Skia/Metal + MediaPipe/Vision"
     - "self-hosted / open-source calling → LiveKit; fastest managed setup → Daily / Agora / Stream"
     - "just capture photos / scan codes → expo-camera (or VisionCamera for advanced)"
+    - "shipping camera to prod NOW → VisionCamera v5 (GA 2026-04) is still stabilizing: open iOS-26 teardown/race crashes + an AE regression vs v4, and ~85% of installs remain on v4 (2026-07) — adopt v5 pinned-patch with a device-matrix pass; don't linger on v4 (frozen since 2025-11)"
     - "displaying images (caching, blurhash placeholders, transitions) → expo-image, not core <Image>"
     - "video/audio playback → expo-video / expo-audio; migrate off expo-av (deprecated, unpatched, out of Expo Go since SDK 55)"
     - "audio PROCESSING (graphs, effects, filters, real-time) → react-native-audio-api (Web Audio API); real-time discipline → rt-audio-pipeline-audit"
@@ -35,7 +36,7 @@ note: >
   (pricing, features) are not yet verified here.
 defer_to_skill: react-native-jsi   # frame processors / native modules; real-time perf → rt-audio-pipeline-audit
 doc: null
-updated: 2026-07-10
+updated: 2026-07-10   # challenge-pass: v5 stabilizing caveat + webrtc dormancy (fetch-verified)
 reading:
   - title: "Building a video call app with filters"
     url: "https://blog.margelo.com/building-videocall-app-with-filters"
