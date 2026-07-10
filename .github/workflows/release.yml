@@ -1,0 +1,56 @@
+# Release: push a version tag → verify the gate → publish to npm via TRUSTED
+# PUBLISHING (OIDC). No long-lived npm token anywhere — the workflow's identity
+# IS the credential (id-token: write), and npm attaches provenance automatically.
+# This is the supply-chain posture the corpus's own SECURITY entry prescribes.
+#
+# Cutting a release (from a green main):
+#   npm version minor            # bumps package.json + creates the vX.Y.Z tag
+#   git push --follow-tags       # tag push triggers this workflow
+#
+# One-time setup on npmjs.com (package @heart-it/react-brain → Settings →
+# Trusted Publisher): GitHub Actions · owner heart-IT · repo react-brain ·
+# workflow release.yml.
+name: release
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+  id-token: write   # the OIDC credential for npm trusted publishing
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: tag must match package.json version
+        run: |
+          PKG="v$(node -p "require('./package.json').version")"
+          TAG="${GITHUB_REF_NAME}"
+          if [ "$PKG" != "$TAG" ]; then
+            echo "::error::tag $TAG != package.json $PKG — bump with 'npm version', don't hand-tag"
+            exit 1
+          fi
+
+  publish:
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24   # bundles npm 11 (OIDC trusted publishing needs npm >= 11.5.1)
+          registry-url: 'https://registry.npmjs.org'
+      - name: ensure npm supports OIDC publishing
+        run: npm install -g npm@latest && npm --version
+      - run: npm ci
+      - run: npm publish
+        # no NODE_AUTH_TOKEN on purpose: trusted publishing exchanges the workflow's
+        # OIDC token at publish time; provenance is attached automatically.
