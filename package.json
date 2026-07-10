@@ -1,7 +1,7 @@
 {
   "name": "react-brain",
   "version": "0.3.0",
-  "description": "Executable React / React Native ecosystem encyclopedia — doctor (advise a repo), evidence (corpus self-audit), pulse (health/drift), query.",
+  "description": "Executable React / React Native ecosystem encyclopedia \u2014 doctor (advise a repo), evidence (corpus self-audit), pulse (health/drift), query.",
   "type": "module",
   "bin": {
     "react-brain": "tools/cli.mjs"
@@ -23,7 +23,8 @@
     "learn": "node tools/cli.mjs learn",
     "query": "node tools/cli.mjs query",
     "lint": "node tools/cli.mjs lint",
-    "test": "node tools/cli.mjs lint && node tests/eval.mjs"
+    "test": "node tools/cli.mjs lint && node tests/eval.mjs",
+    "census": "node tools/cli.mjs census"
   },
   "repository": {
     "type": "git",

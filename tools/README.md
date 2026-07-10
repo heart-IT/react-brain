@@ -14,6 +14,7 @@ evidence     ── code → knowledge   (correct the corpus from real repos)
 pulse        ── time / autonomy    (keep the corpus healthy + watch for drift)
 calibrate    ── trust / track record (score the corpus's predictions vs its confidence)
 signals      ── trust / empirical  (recommendations vs live npm downloads + staleness)
+census       ── trust / observed   (adoption measured in shipped production OSS apps)
 learn        ── knowledge → human  (a repo-personalized learning path)
 lint         ── trust / invariants (mechanized corpus schema + reachability checks)
 mcp-server   ── distribution       (the corpus as MCP tools for any coding agent)
@@ -256,3 +257,20 @@ And the **user-facing lifecycle**, one verb per moment of a project's life:
 **choose** (`stack` — greenfield, no repo) → **assess** (`doctor` — you have a stack) →
 **master** (`learn` — own it). `stack`/`doctor`/`learn` all run the same intent resolver +
 detection core, so they never disagree about what a recommendation means.
+
+## `react-brain census` — observed adoption in shipped apps
+
+`signals` asks npm; **census asks shipped software**. Downloads are gameable (the 2026-07
+TanStack-Start "60x surge" was one vendor's CI); the dependency choices of real, active,
+production OSS apps are not. Census fetches the `package.json` of a curated cohort
+(`tools/census-cohort.json` — 20 apps: Bluesky, Expensify, Mattermost, Rainbow, Ledger Live,
+Cal.com, Grafana, Signal Desktop…), runs the corpus's own detectors over them, and reports
+per-entry adoption with honest denominators (RN-only entries measure against RN apps).
+Snapshots diff against `tools/.census-baseline.json` (the pulse pattern), so repeated runs
+yield adoption *velocity* — "the cohort is migrating off X" as an observed fact. Read-only;
+feeds challenge (evidence beats download stats), signals (a second axis), and entry notes.
+
+```sh
+npx react-brain census            # adoption table + changes since last snapshot
+npx react-brain census --json     # machine-readable aggregate
+```

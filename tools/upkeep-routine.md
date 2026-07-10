@@ -65,7 +65,9 @@ The agent should, in order:
    - Version/date/deprecation facts: `registry.npmjs.org/<pkg>` JSON beats any article.
    - Only exclude a candidate after BOTH WebFetch and the curl-UA fallback fail.
 3. **Completeness** — run `react-brain evidence ../ledgerhr ../ourpot ../bitbarter`; note new
-   blind spots / contradictions.
+   blind spots / contradictions. Also run `react-brain census` — cohort adoption CHANGES since
+   the last snapshot are evidence-grade signals (an app dropping/adopting a tracked lib
+   outranks a download trend; feed notable deltas into challenge targets and entry notes).
 4. **Correctness** — follow `tools/challenge-routine.md` on 2–3 rotating reviewed entries
    (oldest `updated:` first); record SURVIVES / WEAKENED / OVERTURNED.
 5. **Emit ONE reviewable delta** — dead links, undated/aging entries, drift, proposed new

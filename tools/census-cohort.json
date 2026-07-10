@@ -1,0 +1,34 @@
+{
+  "_readme": [
+    "Cohort for `react-brain census` — real, active, production open-source React/RN apps whose",
+    "observed dependency choices ground the corpus in what working software actually uses",
+    "(downloads are gameable — the 2026-07 Lovable-CI inflation proved it; shipped apps aren't).",
+    "Every row was fetch-verified (raw.githubusercontent.com, package.json parses, react/react-native",
+    "present) before inclusion. Curation bar: a real end-user product, actively developed, not a",
+    "framework/library/demo. Add rows with a verified branch+path; census reports fetch failures",
+    "loudly, so a moved path shows up as a coverage drop, not a silent hole."
+  ],
+  "updated": "2026-07-10",
+  "apps": [
+    { "id": "bluesky",    "name": "Bluesky",            "repo": "bluesky-social/social-app",          "branch": "main",    "path": "package.json" },
+    { "id": "expensify",  "name": "Expensify",          "repo": "Expensify/App",                      "branch": "main",    "path": "package.json" },
+    { "id": "mattermost", "name": "Mattermost Mobile",  "repo": "mattermost/mattermost-mobile",       "branch": "main",    "path": "package.json" },
+    { "id": "rocketchat", "name": "Rocket.Chat RN",     "repo": "RocketChat/Rocket.Chat.ReactNative", "branch": "master",  "path": "package.json" },
+    { "id": "rainbow",    "name": "Rainbow Wallet",     "repo": "rainbow-me/rainbow",                 "branch": "master",  "path": "package.json" },
+    { "id": "artsy",      "name": "Artsy (eigen)",      "repo": "artsy/eigen",                        "branch": "main",    "path": "package.json" },
+    { "id": "ledger",     "name": "Ledger Live Mobile", "repo": "LedgerHQ/ledger-live",               "branch": "main",    "path": "apps/ledger-live-mobile/package.json" },
+    { "id": "joplin",     "name": "Joplin Mobile",      "repo": "laurent22/joplin",                   "branch": "dev",     "path": "packages/app-mobile/package.json" },
+    { "id": "uniswap",    "name": "Uniswap Mobile",     "repo": "Uniswap/interface",                  "branch": "main",    "path": "apps/mobile/package.json" },
+    { "id": "outline",    "name": "Outline",            "repo": "outline/outline",                    "branch": "main",    "path": "package.json" },
+    { "id": "calcom",     "name": "Cal.com",            "repo": "calcom/cal.com",                     "branch": "main",    "path": "apps/web/package.json" },
+    { "id": "excalidraw", "name": "Excalidraw (app)",   "repo": "excalidraw/excalidraw",              "branch": "master",  "path": "excalidraw-app/package.json" },
+    { "id": "supabase",   "name": "Supabase Studio",    "repo": "supabase/supabase",                  "branch": "master",  "path": "apps/studio/package.json" },
+    { "id": "twenty",     "name": "Twenty CRM",         "repo": "twentyhq/twenty",                    "branch": "main",    "path": "packages/twenty-front/package.json" },
+    { "id": "plane",      "name": "Plane",              "repo": "makeplane/plane",                    "branch": "develop", "path": "web/package.json" },
+    { "id": "appsmith",   "name": "Appsmith",           "repo": "appsmithorg/appsmith",               "branch": "master",  "path": "app/client/package.json" },
+    { "id": "metabase",   "name": "Metabase",           "repo": "metabase/metabase",                  "branch": "master",  "path": "package.json" },
+    { "id": "grafana",    "name": "Grafana",            "repo": "grafana/grafana",                    "branch": "main",    "path": "package.json" },
+    { "id": "signal",     "name": "Signal Desktop",     "repo": "signalapp/Signal-Desktop",           "branch": "main",    "path": "package.json" },
+    { "id": "mastodon",   "name": "Mastodon (web)",     "repo": "mastodon/mastodon",                  "branch": "main",    "path": "package.json" }
+  ]
+}

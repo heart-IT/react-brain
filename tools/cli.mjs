@@ -40,6 +40,8 @@ usage: react-brain <command> [args]
                        (--seed | --record <id> <held|weakened|overturned> | --today=…)
   signals  [...]       recommendations vs live npm reality (downloads, staleness, claims)
                        (flags: --record [log CLAIMs to ledger], --list, --no-registry, --today=…)
+  census   [...]       observed adoption across a cohort of production OSS apps
+                       (flags: --json, --cohort=path, --today=…)
   learn    <repo...>   a repo-personalized learning path through the encyclopedia
                        (flags: --stage=prototype|mvp|production|scale, --full)
   decide   <topic> [repo]  generate a LIVING DECISION RECORD (ADR with receipts): resolved
@@ -91,6 +93,7 @@ switch (cmd) {
   case 'pulse': delegate('react-brain-pulse.mjs'); break;
   case 'calibrate': delegate('react-brain-calibrate.mjs'); break;
   case 'signals': delegate('react-brain-signals.mjs'); break;
+  case 'census': delegate('react-brain-census.mjs'); break;
   case 'learn': delegate('react-brain-learn.mjs'); break;
   case 'decide': delegate('react-brain-decide.mjs'); break;
   case 'bench': delegate('react-brain-bench.mjs'); break;
