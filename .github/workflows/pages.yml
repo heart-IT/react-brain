@@ -24,8 +24,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true   # auto-enable Pages (source: GitHub Actions) if not already
+        # Pages source = "GitHub Actions", enabled once in repo Settings (2026-07-10).
+        # enablement:true was tried and rejected — the workflow token can't administer
+        # Pages; creation is a one-time human toggle.
       - uses: actions/setup-node@v4
         with:
           node-version: 22
