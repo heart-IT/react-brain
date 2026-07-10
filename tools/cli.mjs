@@ -45,6 +45,8 @@ usage: react-brain <command> [args]
   briefing <repo...>   what changed in the ecosystem that touches YOUR stack —
                        the corpus diff × your detected deps, with receipts
                        (flags: --since=YYYY-MM-DD, --write [BRIEFING.md], --today=…)
+  mcp                  run the stdio MCP server (for agents):
+                       claude mcp add react-brain -- npx -y @heart-it/react-brain mcp
   learn    <repo...>   a repo-personalized learning path through the encyclopedia
                        (flags: --stage=prototype|mvp|production|scale, --full)
   decide   <topic> [repo]  generate a LIVING DECISION RECORD (ADR with receipts): resolved
@@ -102,6 +104,7 @@ switch (cmd) {
   case 'decide': delegate('react-brain-decide.mjs'); break;
   case 'bench': delegate('react-brain-bench.mjs'); break;
   case 'lint': delegate('react-brain-lint.mjs'); break;
+  case 'mcp': delegate('mcp-server.mjs'); break;   // stdio MCP server: claude mcp add react-brain -- npx -y @heart-it/react-brain mcp
   case 'query': query(rest); break;
   case undefined: case 'help': case '--help': case '-h': help(); break;
   default: console.error(`unknown command: ${cmd}\n`); help(); process.exit(1);

@@ -1,6 +1,6 @@
 {
-  "name": "react-brain",
-  "version": "0.3.0",
+  "name": "@heart-it/react-brain",
+  "version": "0.4.0",
   "description": "Executable React / React Native ecosystem encyclopedia \u2014 doctor (advise a repo), evidence (corpus self-audit), pulse (health/drift), query.",
   "type": "module",
   "bin": {
@@ -11,7 +11,9 @@
     "bench/",
     "skills/react-brain-mentor/",
     "encyclopedia/",
-    "README.md"
+    "README.md",
+    "!tools/pulse.log",
+    "!tools/.briefing-state.json"
   ],
   "scripts": {
     "stack": "node tools/cli.mjs stack",
@@ -50,5 +52,8 @@
     "cli",
     "ecosystem-fit"
   ],
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  }
 }

@@ -18,7 +18,7 @@ projects.
 
 ## Executable layer (CLI)
 
-The encyclopedia is machine-readable, so it also *runs*. One `npx react-brain`
+The encyclopedia is machine-readable, so it also *runs*. One `npx @heart-it/react-brain`
 command, one verb per moment of a project's life (see [`tools/`](tools/)):
 
 | verb | command | moment |
@@ -35,7 +35,8 @@ command, one verb per moment of a project's life (see [`tools/`](tools/)):
 
 **For agents (MCP):** `tools/mcp-server.mjs` serves the corpus as MCP tools — `capsules`
 (compact index) / `query` / `recommend` / `doctor` / `decide` / `stack` — zero-dep stdio; `.mcp.json`
-wires it for Claude Code here, or `claude mcp add react-brain -- node <repo>/tools/mcp-server.mjs`.
+wires it for Claude Code here. From any other project:
+`claude mcp add react-brain -- npx -y @heart-it/react-brain mcp`.
 
 **Quality gate:** `npm test` = `lint` (schema, TOC, mentor-reachability, dup-URL, detect
 invariants) + `tests/eval.mjs` (golden fixtures asserting detection/fit/signals/routing/stack/MCP).

@@ -118,6 +118,8 @@ mentor_principles:
     rule: "Recommend an ecosystem swap/pattern only when a react-brain encyclopedia entry vets it FOR THIS CONTEXT (entry status `drafted` or `reviewed`) AND it beats the current choice on a stated axis. If the entry is a stub or the current choice is already context-appropriate, stay silent. Never recommend churn for novelty."
   - id: MP-RESPECT-CONSTRAINTS
     rule: "Honor existing project conventions and explicit user constraints (bundle budget, target OS versions, team size, deadline) over generic best-practice. Conflicts get surfaced, not overridden."
+  - id: MP-AGGRESSIVE-ON-REQUEST
+    rule: "When the user asks for an aggressive/deep/no-holds-barred review — or pushes back that the output is timid or lib-level — SHIFT MODE (added 2026-07-10 from direct user feedback): (1) read the ACTUAL SOURCE, not just deps — doctor/briefing are the warm-up, never the deliverable; (2) lead with the top 5 highest-impact CHANGES (rewrites, deletions, and architecture moves are in scope), each with file:line, the fix, and an estimated win; (3) DROP the strengths section (MP-STRENGTHS-FIRST is suspended; one clearance line at the end suffices); (4) no reading-list padding — an article or library only appears as the fix to a diagnosed problem; (5) no hedging: 'do X because Y', not 'consider X'. MP-GROUNDED still binds — aggression raises the impact bar, never the speculation tolerance."
 
 # ------------------------------------------------------------------------------
 # MATURITY STAGES — the mentor calibrates every suggestion to where the project is.
