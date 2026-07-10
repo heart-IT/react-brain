@@ -42,12 +42,19 @@ const groupRank = new Map(entriesNow.map((e, i) => [e.id, GROUP_ORDER.indexOf(e.
 
 // ── corpus diff since a date: structural YAML compare, not raw patch parsing ────
 function corpusDiff(since) {
-  const rev = git('rev-list', '-1', `--before=${since}T23:59:59`, 'HEAD');
-  const changes = [];   // { id, isNew, items: [..], receipts: [..], actionable: bool }
+  // clamp the window to the corpus's git history (entries/ split into one-per-file on the
+  // repo's first day) — a --since before that would mislabel every entry "new"
+  const historyStart = git('log', '--reverse', '--format=%cs').split('\n')[0];
+  const effSince = since < historyStart ? historyStart : since;
+  corpusDiff.clampedTo = since < historyStart ? historyStart : null;
+  const changes = [];   // { id, isNew, items: [..], receipts: [..], segments: [..] }
   for (const e of entriesNow) {
     const path = `skills/react-brain-mentor/entries/${e.id}.yaml`;
+    // per-file baseline: the file's last state on/before the window start. No such commit
+    // ⇒ the entry was born inside the window ⇒ genuinely NEW.
     let old = null;
-    if (rev) { try { old = parseYamlStr(git('show', `${rev}:${path}`)); } catch { /* new entry */ } }
+    const baseRev = git('rev-list', '-1', `--before=${effSince}T23:59:59`, 'HEAD', '--', path);
+    if (baseRev) { try { old = parseYamlStr(git('show', `${baseRev}:${path}`)); } catch { /* renamed/absent */ } }
     if (!old) { changes.push({ id: e.id, isNew: true, items: [`NEW ENTRY — ${e.topic}`], receipts: (e.sources || []).slice(0, 2), segments: [`${e.topic} ${e.note || ''}`] }); continue; }
     if (String(old.updated) === String(e.updated)) continue;   // untouched since `since`
 
@@ -118,6 +125,7 @@ for (const repoArg of repos) {
   emit(`📬  react-brain BRIEFING — ${repo.name}   (${since} → ${TODAY} · ${repo.platform} · ${repo.stage})`);
   emit('═'.repeat(78));
   emit(`the corpus changed in ${diff.length} entr${diff.length === 1 ? 'y' : 'ies'} over this window; here's what touches YOUR stack.`);
+  if (corpusDiff.clampedTo) emit(`(corpus git history starts ${corpusDiff.clampedTo} — entries are baselined at their state that day)`);
 
   const section = (title, rows, showLabels) => {
     emit(`\n${title}`);
