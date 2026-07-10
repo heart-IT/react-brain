@@ -50,8 +50,11 @@ jobs:
           # NO registry-url here on purpose: setup-node's registry-url writes an
           # .npmrc _authToken=${NODE_AUTH_TOKEN} line, and any token line makes npm
           # take the token-auth path instead of the OIDC exchange → publish 404s.
-      - name: ensure npm supports OIDC publishing
-        run: npm install -g npm@latest && npm --version
+      - name: bundled npm already supports OIDC (needs >= 11.5.1; Node 24 ships 11.6+)
+        # do NOT `npm install -g npm@latest` here — self-upgrading the bundled npm
+        # in-place corrupts its tree (observed: provenance.js failing on a missing
+        # 'sigstore' module mid-publish, AFTER the OIDC exchange had succeeded)
+        run: npm --version
       - run: npm ci
       - run: npm publish
         # no NODE_AUTH_TOKEN, no .npmrc: trusted publishing exchanges the workflow's
