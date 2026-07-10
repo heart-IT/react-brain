@@ -19,6 +19,7 @@ const FAVICON = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
 const bottomLinks = [
   { to: 'stack/', label: 'stack composer' },
   { to: 'decide/', label: 'decision records' },
+  { to: 'census/', label: 'census' },
   { to: 'benchmark/', label: 'staleness bench' },
   { to: 'architecture/', label: 'architecture' },
   { to: 'changelog/', label: 'changelog' },
@@ -241,7 +242,7 @@ const bottomLinks = [
         (e.when?.length ? '<br>' + e.when.map((w) => `<span class="t-dim">· ${esc(w)}</span>`).join('<br>') : '') + '</div>';
     };
 
-    const PAGES = ['entries', 'libraries', 'reading', 'stack', 'doctor', 'decide', 'scorecard', 'benchmark', 'architecture', 'changelog', 'methodology', 'search'];
+    const PAGES = ['entries', 'libraries', 'reading', 'stack', 'doctor', 'decide', 'scorecard', 'benchmark', 'census', 'architecture', 'changelog', 'methodology', 'search'];
 
     async function exec(line) {
       const [cmd, ...args] = line.trim().split(/\s+/);

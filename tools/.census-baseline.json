@@ -1,7 +1,14 @@
 {
  "date": "2026-07-10",
+ "cohort": {
+  "fetched": 34,
+  "total": 34,
+  "rn": 14,
+  "web": 20
+ },
  "apps": {
   "bluesky": {
+   "name": "Bluesky",
    "platform": "react-native",
    "labels": [
     "AsyncStorage",
@@ -33,6 +40,7 @@
    ]
   },
   "expensify": {
+   "name": "Expensify",
    "platform": "react-native",
    "labels": [
     "ESLint",
@@ -66,6 +74,7 @@
    ]
   },
   "mattermost": {
+   "name": "Mattermost Mobile",
    "platform": "react-native",
    "labels": [
     "ESLint",
@@ -95,6 +104,7 @@
    ]
   },
   "rocketchat": {
+   "name": "Rocket.Chat RN",
    "platform": "react-native",
    "labels": [
     "@expo/vector-icons (deprecated SDK 56)",
@@ -130,6 +140,7 @@
    ]
   },
   "rainbow": {
+   "name": "Rainbow Wallet",
    "platform": "react-native",
    "labels": [
     "AsyncStorage",
@@ -168,6 +179,7 @@
    ]
   },
   "artsy": {
+   "name": "Artsy (eigen)",
    "platform": "react-native",
    "labels": [
     "AsyncStorage",
@@ -201,6 +213,7 @@
    ]
   },
   "ledger": {
+   "name": "Ledger Live Mobile",
    "platform": "react-native",
    "labels": [
     "AsyncStorage",
@@ -236,6 +249,7 @@
    ]
   },
   "joplin": {
+   "name": "Joplin Mobile",
    "platform": "react-native",
    "labels": [
     "Expo (managed native)",
@@ -254,6 +268,7 @@
    ]
   },
   "uniswap": {
+   "name": "Uniswap Mobile",
    "platform": "react-native",
    "labels": [
     "Apollo Client",
@@ -293,6 +308,7 @@
    ]
   },
   "outline": {
+   "name": "Outline",
    "platform": "react",
    "labels": [
     "MSW",
@@ -318,6 +334,7 @@
    ]
   },
   "calcom": {
+   "name": "Cal.com",
    "platform": "react",
    "labels": [
     "Biome",
@@ -338,6 +355,7 @@
    ]
   },
   "excalidraw": {
+   "name": "Excalidraw (app)",
    "platform": "react",
    "labels": [
     "Jotai",
@@ -345,6 +363,7 @@
    ]
   },
   "supabase": {
+   "name": "Supabase Studio",
    "platform": "react",
    "labels": [
     "MSW",
@@ -370,6 +389,7 @@
    ]
   },
   "twenty": {
+   "name": "Twenty CRM",
    "platform": "react",
    "labels": [
     "Apollo Client",
@@ -394,6 +414,7 @@
    ]
   },
   "plane": {
+   "name": "Plane",
    "platform": "react",
    "labels": [
     "MobX",
@@ -407,6 +428,7 @@
    ]
   },
   "appsmith": {
+   "name": "Appsmith",
    "platform": "react",
    "labels": [
     "ESLint",
@@ -433,6 +455,7 @@
    ]
   },
   "metabase": {
+   "name": "Metabase",
    "platform": "react",
    "labels": [
     "D3",
@@ -462,6 +485,7 @@
    ]
   },
   "grafana": {
+   "name": "Grafana",
    "platform": "react",
    "labels": [
     "D3",
@@ -492,6 +516,7 @@
    ]
   },
   "signal": {
+   "name": "Signal Desktop",
    "platform": "react",
    "labels": [
     "ESLint",
@@ -511,6 +536,7 @@
    ]
   },
   "mastodon": {
+   "name": "Mastodon (web)",
    "platform": "react",
    "labels": [
     "ESLint",
@@ -528,6 +554,625 @@
     "lint-staged",
     "react-intl"
    ]
+  },
+  "metamask": {
+   "name": "MetaMask Mobile",
+   "platform": "react-native",
+   "labels": [
+    "AsyncStorage",
+    "Detox",
+    "EAS Update",
+    "ESLint",
+    "Expo (managed native)",
+    "FlashList",
+    "Gesture Handler",
+    "Jest",
+    "Keychain",
+    "Lottie",
+    "MMKV",
+    "Metro",
+    "Nitro Modules",
+    "Playwright",
+    "Prettier",
+    "QR generation (qrcode-svg)",
+    "RN Testing Library",
+    "React Navigation",
+    "React Testing Library",
+    "Reactotron",
+    "Reanimated",
+    "Redux (classic)",
+    "Redux (react-redux)",
+    "Redux Toolkit",
+    "Sentry",
+    "Storybook",
+    "Tailwind",
+    "TanStack Query",
+    "TypeScript",
+    "VisionCamera",
+    "Worklets",
+    "agent-device",
+    "axios",
+    "esbuild",
+    "expo-haptics",
+    "expo-splash-screen",
+    "husky (git hooks)",
+    "keyboard-controller",
+    "lint-staged",
+    "nitro-fetch",
+    "react-native-svg",
+    "react-native-vector-icons (legacy)",
+    "svg-transformer",
+    "webpack"
+   ]
+  },
+  "bluewallet": {
+   "name": "BlueWallet",
+   "platform": "react-native",
+   "labels": [
+    "AsyncStorage",
+    "Bugsnag",
+    "Detox",
+    "ESLint",
+    "Gesture Handler",
+    "Jest",
+    "Keychain",
+    "Lottie",
+    "Metro",
+    "Prettier",
+    "RN Testing Library",
+    "React Navigation",
+    "Reanimated",
+    "TypeScript",
+    "Worklets",
+    "haptic-feedback",
+    "react-native-svg",
+    "vector-icons (scoped)"
+   ]
+  },
+  "zeus": {
+   "name": "Zeus LN",
+   "platform": "react-native",
+   "labels": [
+    "AsyncStorage",
+    "ESLint",
+    "Gesture Handler",
+    "Jest",
+    "Keychain",
+    "Lottie",
+    "Metro",
+    "MobX",
+    "Prettier",
+    "QR generation (qrcode-svg)",
+    "React Navigation",
+    "Reanimated",
+    "TypeScript",
+    "VisionCamera",
+    "Worklets",
+    "haptic-feedback",
+    "react-native-svg",
+    "svg-transformer",
+    "vector-icons (scoped)"
+   ]
+  },
+  "berty": {
+   "name": "Berty",
+   "platform": "react-native",
+   "labels": [
+    "AsyncStorage",
+    "ESLint",
+    "Expo (managed native)",
+    "FlashList",
+    "Jest",
+    "Lottie",
+    "QR generation (qrcode-svg)",
+    "RN Testing Library",
+    "React Navigation",
+    "Redux (classic)",
+    "Redux (react-redux)",
+    "Redux Toolkit",
+    "Storybook",
+    "TypeScript",
+    "bootsplash",
+    "expo-camera",
+    "i18next",
+    "react-i18next",
+    "react-native-svg",
+    "react-native-vector-icons (legacy)",
+    "svg-transformer"
+   ]
+  },
+  "comm": {
+   "name": "Comm",
+   "platform": "react-native",
+   "labels": [
+    "@expo/vector-icons (deprecated SDK 56)",
+    "AsyncStorage",
+    "Expo (managed native)",
+    "Gesture Handler",
+    "Jest",
+    "Keychain",
+    "Lottie",
+    "QR generation (qrcode-svg)",
+    "React Navigation",
+    "Reactotron",
+    "Reanimated",
+    "Redux (classic)",
+    "Redux (react-redux)",
+    "VisionCamera",
+    "expo-haptics",
+    "expo-image-picker",
+    "expo-splash-screen",
+    "keyboard-controller",
+    "react-native-svg"
+   ]
+  },
+  "joplin-d": {
+   "name": "Joplin Desktop",
+   "platform": "react",
+   "labels": [
+    "Electron",
+    "Jest",
+    "Playwright",
+    "React Testing Library",
+    "Redux (classic)",
+    "Redux (react-redux)",
+    "Sentry",
+    "TypeScript",
+    "axios",
+    "esbuild",
+    "styled-components"
+   ]
+  },
+  "sentry": {
+   "name": "Sentry (frontend)",
+   "platform": "react",
+   "labels": [
+    "ESLint",
+    "Emotion",
+    "Jest",
+    "MobX",
+    "React Router",
+    "React Testing Library",
+    "Rspack",
+    "Sentry",
+    "TanStack Form",
+    "TanStack Query",
+    "TanStack Virtual",
+    "TypeScript",
+    "Zod",
+    "esbuild",
+    "framer-motion / Motion"
+   ]
+  },
+  "formbricks": {
+   "name": "Formbricks",
+   "platform": "react",
+   "labels": [
+    "Lexical",
+    "Next.js",
+    "Radix UI",
+    "React Hook Form",
+    "React Testing Library",
+    "Recharts",
+    "Sentry",
+    "Tailwind",
+    "TanStack Query",
+    "TanStack Table",
+    "Vite",
+    "Vitest",
+    "Zod",
+    "framer-motion / Motion",
+    "i18next",
+    "react-i18next"
+   ]
+  },
+  "documenso": {
+   "name": "Documenso",
+   "platform": "react",
+   "labels": [
+    "Lingui",
+    "React Hook Form",
+    "React Router",
+    "Recharts",
+    "Tailwind",
+    "TanStack Query",
+    "TypeScript",
+    "Vite",
+    "esbuild",
+    "framer-motion / Motion"
+   ]
+  },
+  "dub": {
+   "name": "Dub",
+   "platform": "react",
+   "labels": [
+    "Motion",
+    "Next.js",
+    "Playwright",
+    "Radix UI",
+    "React Hook Form",
+    "SWR",
+    "Tailwind",
+    "TanStack Table",
+    "TipTap",
+    "Turborepo",
+    "TypeScript",
+    "Vercel AI SDK",
+    "Vite",
+    "Vitest",
+    "Zod",
+    "react-window",
+    "visx"
+   ]
+  },
+  "infisical": {
+   "name": "Infisical",
+   "platform": "react",
+   "labels": [
+    "ESLint",
+    "Lexical",
+    "Prettier",
+    "Radix UI",
+    "React Hook Form",
+    "Recharts",
+    "Storybook",
+    "Tailwind",
+    "TanStack Query",
+    "TanStack Router",
+    "TanStack Table",
+    "TanStack Virtual",
+    "TypeScript",
+    "Vite",
+    "Zod",
+    "Zustand",
+    "axios",
+    "framer-motion / Motion",
+    "i18next",
+    "react-i18next"
+   ]
+  },
+  "ffprofiler": {
+   "name": "Firefox Profiler",
+   "platform": "react",
+   "labels": [
+    "ESLint",
+    "Jest",
+    "React Testing Library",
+    "Redux (classic)",
+    "Redux (react-redux)",
+    "TypeScript",
+    "Valibot",
+    "esbuild",
+    "husky (git hooks)"
+   ]
+  },
+  "tldraw": {
+   "name": "tldraw.com",
+   "platform": "react",
+   "labels": [
+    "Playwright",
+    "React Router",
+    "Sentry",
+    "Vite",
+    "Vitest",
+    "Zero",
+    "react-intl"
+   ]
+  },
+  "posthog": {
+   "name": "PostHog (frontend)",
+   "platform": "react",
+   "labels": [
+    "Chart.js",
+    "D3",
+    "Jest",
+    "MSW",
+    "Motion",
+    "Radix UI",
+    "React Testing Library",
+    "Storybook",
+    "Tailwind",
+    "TanStack Virtual",
+    "TipTap",
+    "TypeScript",
+    "Vite",
+    "Zod",
+    "husky (git hooks)",
+    "lint-staged",
+    "react-window"
+   ]
+  }
+ },
+ "agg": {
+  "RB-E-I18N": {
+   "appCount": 15,
+   "labels": {
+    "Lingui": 3,
+    "react-intl": 4,
+    "i18next": 8,
+    "react-i18next": 8
+   },
+   "denom": 34
+  },
+  "RB-E-STORAGE": {
+   "appCount": 12,
+   "labels": {
+    "AsyncStorage": 11,
+    "WatermelonDB": 2,
+    "Keychain": 8,
+    "MMKV": 5,
+    "expo-secure-store (secrets)": 1
+   },
+   "denom": 34
+  },
+  "RB-E-NAV": {
+   "appCount": 24,
+   "labels": {
+    "React Navigation": 13,
+    "Expo Router": 1,
+    "React Router": 9,
+    "TanStack Router": 2
+   },
+   "denom": 34
+  },
+  "RB-E-OBSERVABILITY": {
+   "appCount": 18,
+   "labels": {
+    "Sentry": 16,
+    "Bugsnag": 2
+   },
+   "denom": 34
+  },
+  "RB-E-DATA": {
+   "appCount": 15,
+   "labels": {
+    "TanStack Query": 11,
+    "Apollo Client": 2,
+    "SWR": 2,
+    "Zero": 1
+   },
+   "denom": 34
+  },
+  "RB-E-EDITORS": {
+   "appCount": 9,
+   "labels": {
+    "TipTap": 5,
+    "ProseMirror": 2,
+    "BlockNote": 1,
+    "Slate": 1,
+    "Lexical": 2
+   },
+   "denom": 34
+  },
+  "RB-E-NATIVE": {
+   "appCount": 12,
+   "labels": {
+    "Expo (managed native)": 12,
+    "Expo Modules": 2,
+    "Nitro Modules": 7
+   },
+   "denom": 14
+  },
+  "RB-E-MEDIA": {
+   "appCount": 12,
+   "labels": {
+    "expo-camera": 5,
+    "expo-image-picker": 3,
+    "expo-video (playback)": 2,
+    "QR generation (qrcode-svg)": 6,
+    "VisionCamera": 6,
+    "react-native-webrtc": 2,
+    "expo-av (DEPRECATED → expo-video/expo-audio)": 1
+   },
+   "denom": 34
+  },
+  "RB-E-POLISH": {
+   "appCount": 13,
+   "labels": {
+    "expo-haptics": 5,
+    "expo-splash-screen": 4,
+    "sonner-native (toasts)": 2,
+    "haptic-feedback": 6,
+    "bootsplash": 5
+   },
+   "denom": 14
+  },
+  "RB-E-OTA": {
+   "appCount": 3,
+   "labels": {
+    "EAS Update": 3
+   },
+   "denom": 14
+  },
+  "RB-E-ANIMATION": {
+   "appCount": 23,
+   "labels": {
+    "Gesture Handler": 12,
+    "Reanimated": 12,
+    "Skia": 3,
+    "Lottie": 7,
+    "Worklets": 8,
+    "Moti": 2,
+    "framer-motion / Motion": 7,
+    "Motion": 3
+   },
+   "denom": 34
+  },
+  "RB-E-KEYBOARD": {
+   "appCount": 9,
+   "labels": {
+    "keyboard-controller": 9
+   },
+   "denom": 14
+  },
+  "RB-E-SVG": {
+   "appCount": 14,
+   "labels": {
+    "react-native-svg": 14,
+    "vector-icons (scoped)": 4,
+    "@expo/vector-icons (deprecated SDK 56)": 2,
+    "svg-transformer": 4,
+    "react-native-vector-icons (legacy)": 2
+   },
+   "denom": 34
+  },
+  "RB-E-FORMS": {
+   "appCount": 21,
+   "labels": {
+    "Zod": 14,
+    "React Hook Form": 12,
+    "Formik": 2,
+    "TanStack Form": 1,
+    "Valibot": 1
+   },
+   "denom": 34
+  },
+  "RB-E-TESTING": {
+   "appCount": 31,
+   "labels": {
+    "RN Testing Library": 11,
+    "Jest": 22,
+    "Storybook": 11,
+    "Detox": 3,
+    "MSW": 9,
+    "React Testing Library": 14,
+    "Vitest": 6,
+    "Playwright": 8
+   },
+   "denom": 34
+  },
+  "RB-E-DX": {
+   "appCount": 25,
+   "labels": {
+    "ESLint": 19,
+    "husky (git hooks)": 11,
+    "lint-staged": 9,
+    "Prettier": 14,
+    "lefthook": 1,
+    "Biome": 1,
+    "Turborepo": 2,
+    "Nx": 1
+   },
+   "denom": 34
+  },
+  "RB-E-TYPESCRIPT": {
+   "appCount": 28,
+   "labels": {
+    "TypeScript": 28
+   },
+   "denom": 34
+  },
+  "RB-E-MAPS": {
+   "appCount": 2,
+   "labels": {
+    "Mapbox RN": 2,
+    "react-map-gl": 1
+   },
+   "denom": 34
+  },
+  "RB-E-LISTS": {
+   "appCount": 19,
+   "labels": {
+    "FlashList": 8,
+    "Legend List": 2,
+    "TanStack Table": 6,
+    "TanStack Virtual": 8,
+    "react-window": 5
+   },
+   "denom": 34
+  },
+  "RB-E-BUILD": {
+   "appCount": 28,
+   "labels": {
+    "Metro": 10,
+    "webpack": 8,
+    "Rspack": 3,
+    "esbuild": 10,
+    "Vite": 9
+   },
+   "denom": 34
+  },
+  "RB-E-CHARTS": {
+   "appCount": 11,
+   "labels": {
+    "Victory Native": 2,
+    "Recharts": 5,
+    "visx": 3,
+    "D3": 3,
+    "d3-force": 1,
+    "Chart.js": 1
+   },
+   "denom": 34
+  },
+  "RB-E-NETWORKING": {
+   "appCount": 7,
+   "labels": {
+    "axios": 7,
+    "nitro-fetch": 1
+   },
+   "denom": 34
+  },
+  "RB-E-STATE": {
+   "appCount": 24,
+   "labels": {
+    "Redux (react-redux)": 15,
+    "Redux (classic)": 13,
+    "Zustand": 4,
+    "Redux Toolkit": 8,
+    "Jotai": 4,
+    "MobX": 4,
+    "Valtio": 1
+   },
+   "denom": 34
+  },
+  "RB-E-STYLING": {
+   "appCount": 19,
+   "labels": {
+    "styled-components": 6,
+    "Tamagui": 1,
+    "Tailwind": 10,
+    "Emotion": 3
+   },
+   "denom": 34
+  },
+  "RB-E-AI-DEVTOOLS": {
+   "appCount": 4,
+   "labels": {
+    "Reactotron": 4,
+    "agent-device": 1
+   },
+   "denom": 34
+  },
+  "RB-E-COMPONENT-LIBS": {
+   "appCount": 11,
+   "labels": {
+    "Radix UI": 7,
+    "Mantine": 3,
+    "React Aria": 1
+   },
+   "denom": 20
+  },
+  "RB-E-META-FRAMEWORKS": {
+   "appCount": 5,
+   "labels": {
+    "Next.js": 5,
+    "TanStack Start": 1
+   },
+   "denom": 34
+  },
+  "RB-E-AI-UI": {
+   "appCount": 3,
+   "labels": {
+    "Vercel AI SDK": 3
+   },
+   "denom": 34
+  },
+  "RB-E-DESKTOP": {
+   "appCount": 2,
+   "labels": {
+    "Electron": 2
+   },
+   "denom": 20
   }
  }
 }

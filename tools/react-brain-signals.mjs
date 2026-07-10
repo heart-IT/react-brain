@@ -36,6 +36,8 @@ import { loadDoc, entryPackages, pkgsForPick, GROUP_ORDER, trunc, readLedger, LE
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 const BASELINE = resolve(__dir, '.signals-baseline.json');
+const CENSUS_PATH = resolve(__dir, '.census-baseline.json');
+const CENSUS = existsSync(CENSUS_PATH) ? JSON.parse(readFileSync(CENSUS_PATH, 'utf8')) : null;
 const MAINT_RE = /maintenance|deprecated|frozen|sunset|superseded|abandoned|unmaintained|no longer/i;
 const STALE_MONTHS = 12;       // a recommended default silent this long → early warning
 const FRESH_MONTHS = 6;        // "maintenance" claim contradicted if published within this
@@ -181,7 +183,11 @@ for (const id of ordered) {
     const a = age[r.pkg];
     const ageTxt = a == null ? '' : `  published ${ageStr(a)} ago`;
     const mark = r.isDefault ? '▸' : ' ';
-    console.log(`    ${mark} ${r.pkg.padEnd(34)} ${fmt(dl[r.pkg]).padStart(6)}/wk${delta(r.pkg).padEnd(2)}${ageTxt}`);
+    // second axis: census — how many SHIPPED cohort apps carry this label (downloads can be
+    // gamed; a production app's dependency list can't). Blank when no census baseline exists.
+    const shipped = CENSUS?.agg?.[id]?.labels?.[r.label];
+    const shipTxt = shipped ? `  ships in ${shipped}/${CENSUS.agg[id].denom} apps` : '';
+    console.log(`    ${mark} ${r.pkg.padEnd(34)} ${fmt(dl[r.pkg]).padStart(6)}/wk${delta(r.pkg).padEnd(2)}${ageTxt}${shipTxt}`);
   }
 
   // FLAG: trailing default (popularity ≠ fitness, but worth knowing)

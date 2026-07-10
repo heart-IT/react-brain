@@ -86,8 +86,13 @@ for (const [, a] of Object.entries(apps)) {
 for (const id of Object.keys(agg)) agg[id].denom = denomFor(entriesById[id]);
 
 // ── diff vs the last snapshot (adoption velocity) ───────────────────────────────
-const snapshot = { date: TODAY, apps: Object.fromEntries(Object.entries(apps).map(([id, a]) =>
-  [id, { platform: a.platform, labels: Object.values(a.matches).flatMap((s) => [...s]).sort() }])) };
+// snapshot carries the per-app label sets (for diffing) AND the aggregates + cohort meta
+// (so the site's /census page builds straight from this file, like /libraries does from
+// .signals-baseline.json). agg is attached after it's computed below.
+const snapshot = { date: TODAY, cohort: { fetched: ok.length, total: cohort.apps.length, rn: rnApps, web: webApps },
+  apps: Object.fromEntries(Object.entries(apps).map(([id, a]) =>
+    [id, { name: a.name, platform: a.platform, labels: Object.values(a.matches).flatMap((s) => [...s]).sort() }])) };
+snapshot.agg = agg;
 const changes = [];
 let baseline = null;
 if (existsSync(BASELINE_PATH)) {

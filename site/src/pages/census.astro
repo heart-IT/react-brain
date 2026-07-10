@@ -1,0 +1,68 @@
+---
+import Base from '../layouts/Base.astro';
+import { corpus, census, href } from '../lib/corpus.js';
+const { entries, byId, groups } = corpus();
+const snap = census();
+// order entries the corpus's way; only show entries the census actually observed
+const groupOrder = new Map(groups.flatMap((g, gi) => g.entries.map((id, i) => [id, gi * 1000 + i])));
+const rows = snap ? Object.entries(snap.agg)
+  .filter(([id]) => byId[id])
+  .sort((a, b) => (groupOrder.get(a[0]) ?? 1e9) - (groupOrder.get(b[0]) ?? 1e9))
+  .map(([id, a]) => ({
+    entry: byId[id],
+    appCount: a.appCount,
+    denom: a.denom,
+    pct: a.denom ? Math.round((100 * a.appCount) / a.denom) : 0,
+    labels: Object.entries(a.labels).sort((x, y) => y[1] - x[1]),
+  })) : [];
+const appList = snap ? Object.values(snap.apps).sort((a, b) => (a.platform > b.platform ? -1 : a.platform < b.platform ? 1 : a.name.localeCompare(b.name))) : [];
+---
+<Base title="react-brain — census">
+  <h1>Census — what shipped apps actually use</h1>
+  <p class="muted" style="max-width:78ch">Download counts can be gamed (a single vendor's CI once
+  produced a 60× "adoption surge"); the dependency choices of real, active, production
+  open-source apps can't. The census fetches each cohort app's <code>package.json</code>, runs
+  the corpus's own detectors over it, and reports observed adoption per decision — with honest
+  denominators: React-Native-only decisions are measured against the RN apps only. Counts are
+  <em>evidence, not verdicts</em> — mature apps carry legacy weight (Redux, styled-components)
+  that the context-keyed recommendations already account for.</p>
+
+  {!snap && (
+    <div class="card caution"><p class="muted" style="margin:0">No census snapshot yet — run
+    <code>npx react-brain census</code> and rebuild. This page renders from
+    <code>tools/.census-baseline.json</code>.</p></div>
+  )}
+
+  {snap && (
+    <>
+      <p class="meta">snapshot {snap.date} · {snap.cohort.fetched}/{snap.cohort.total} apps fetched
+      · {snap.cohort.rn} React Native · {snap.cohort.web} web/desktop</p>
+
+      <div class="tbl"><table>
+        <thead><tr><th>decision</th><th>apps using the domain</th><th>observed adoption (apps shipping each option)</th></tr></thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr>
+              <td><a href={href(`entries/${r.entry.slug}/`)}>{r.entry.slug}</a></td>
+              <td><strong>{r.appCount}/{r.denom}</strong> <span class="muted">({r.pct}%)</span></td>
+              <td>{r.labels.map(([l, n], i) => <span>{i > 0 && ' · '}{l} <strong>×{n}</strong></span>)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table></div>
+
+      <h2>The cohort</h2>
+      <p class="muted" style="font-size:.9rem">Curated in <code>tools/census-cohort.json</code>: real
+      end-user products, actively developed, fetch-verified before inclusion — not frameworks,
+      libraries, or demos.</p>
+      <p style="max-width:78ch">{appList.map((a, i) => <span>{i > 0 && ' · '}{a.name}<span class="meta"> ({a.platform === 'react-native' ? 'RN' : 'web'})</span></span>)}</p>
+
+      <h2>Reading the numbers</h2>
+      <ul class="muted">
+        <li>A high count for a non-default option usually means <em>legacy weight</em> in mature codebases — the entry's when-clauses ("already on X → keep it") are where that reconciles.</li>
+        <li>Repeated snapshots diff against the previous baseline, so the CLI reports <em>adoption velocity</em>: what the cohort adopted or dropped since last time.</li>
+        <li>This is the corpus's second empirical anchor: <code>signals</code> asks npm, the census asks production. The two disagreeing is a flag worth reading.</li>
+      </ul>
+    </>
+  )}
+</Base>

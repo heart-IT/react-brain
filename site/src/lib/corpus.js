@@ -38,6 +38,13 @@ export function downloads() {
   return existsSync(p) ? JSON.parse(readFileSync(p, 'utf8')) : {};
 }
 
+// Census snapshot (observed adoption in shipped production OSS apps) — written by
+// `react-brain census`; null when no snapshot exists yet (page degrades to methodology).
+export function census() {
+  const p = join(ROOT, 'tools/.census-baseline.json');
+  return existsSync(p) ? JSON.parse(readFileSync(p, 'utf8')) : null;
+}
+
 export const fmtDownloads = (n) =>
   n >= 1e6 ? `${(n / 1e6).toFixed(1)}M` : n >= 1e3 ? `${Math.round(n / 1e3)}k` : String(n);
 
