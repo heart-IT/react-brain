@@ -274,3 +274,20 @@ feeds challenge (evidence beats download stats), signals (a second axis), and en
 npx react-brain census            # adoption table + changes since last snapshot
 npx react-brain census --json     # machine-readable aggregate
 ```
+
+## `react-brain briefing <repo>` — the personalized, verified ecosystem changelog
+
+Six newsletters go in; one repo-specific page comes out. The corpus is a dated, fetch-verified
+stream of ecosystem *changes* (every entry edit is a git commit); `detect` knows what a repo
+uses. `briefing` intersects them: **what moved under YOUR stack since you last looked** —
+an `⚡ ACTION` section when a change explicitly names something the repo ships (deprecation,
+retirement, platform floor), `📦 CHANGES IN YOUR STACK` for the rest of the matched entries,
+and a `🔭 RADAR` of platform-relevant new coverage. Items carry the entry's newly-added source
+URLs as receipts. Deterministic (git + structural YAML diff, no LLM); per-repo resume state in
+`tools/.briefing-state.json`. The triad: **doctor = position · census = field · briefing =
+velocity.**
+
+```sh
+npx react-brain briefing ../my-app                 # since the last briefing (or 14 days)
+npx react-brain briefing ../my-app --since=2026-07-01 --write   # + commitable BRIEFING.md
+```

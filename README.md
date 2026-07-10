@@ -29,7 +29,8 @@ command, one verb per moment of a project's life (see [`tools/`](tools/)):
 | **decide** | `react-brain decide state .` | commit the choice — a living ADR with receipts, premise-checked by `doctor` over time |
 | query | `react-brain query "data fetching"` | look up one entry's recommendation |
 | **bench** | `react-brain bench --run --model=…` | score an LLM's React advice against the corpus (staleness benchmark; `--with-corpus` shows the delta) |
-| **census** | `react-brain census` | observed adoption across 20 production OSS apps (Bluesky, Expensify, Grafana…) — the ungameable counterpart to download stats, with snapshot-to-snapshot adoption velocity |
+| **census** | `react-brain census` | observed adoption across 34 production OSS apps (Bluesky, Expensify, MetaMask, Grafana…) — the ungameable counterpart to download stats, with snapshot-to-snapshot adoption velocity |
+| **briefing** | `react-brain briefing <repo>` | what changed in the ecosystem that touches *your* stack — the corpus diff × your detected deps, receipts included (doctor = position · census = field · briefing = velocity) |
 | *(corpus upkeep)* | `evidence` · `pulse` · `calibrate` · `signals` · `lint` | self-audit · freshness · scored track record · live-npm reality check · mechanized invariants |
 
 **For agents (MCP):** `tools/mcp-server.mjs` serves the corpus as MCP tools — `capsules`

@@ -24,7 +24,8 @@
     "query": "node tools/cli.mjs query",
     "lint": "node tools/cli.mjs lint",
     "test": "node tools/cli.mjs lint && node tests/eval.mjs",
-    "census": "node tools/cli.mjs census"
+    "census": "node tools/cli.mjs census",
+    "briefing": "node tools/cli.mjs briefing"
   },
   "repository": {
     "type": "git",

@@ -32,6 +32,8 @@ or by hand (crontab line it installs):
 ```
 
 Read `tools/pulse.log` weekly; act on DEAD links + undated/aging entries + drift.
+After a harvest lands, `react-brain briefing ../../ledgerhr ../../ourpot/ourpot ../../bitbarter`
+turns the week's corpus delta into a per-app action list (deterministic, cron-safe).
 
 ## Tier 2 — agentic upkeep (growth + correctness; weekly, LLM-driven)
 

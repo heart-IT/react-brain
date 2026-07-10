@@ -42,6 +42,9 @@ usage: react-brain <command> [args]
                        (flags: --record [log CLAIMs to ledger], --list, --no-registry, --today=…)
   census   [...]       observed adoption across a cohort of production OSS apps
                        (flags: --json, --cohort=path, --today=…)
+  briefing <repo...>   what changed in the ecosystem that touches YOUR stack —
+                       the corpus diff × your detected deps, with receipts
+                       (flags: --since=YYYY-MM-DD, --write [BRIEFING.md], --today=…)
   learn    <repo...>   a repo-personalized learning path through the encyclopedia
                        (flags: --stage=prototype|mvp|production|scale, --full)
   decide   <topic> [repo]  generate a LIVING DECISION RECORD (ADR with receipts): resolved
@@ -94,6 +97,7 @@ switch (cmd) {
   case 'calibrate': delegate('react-brain-calibrate.mjs'); break;
   case 'signals': delegate('react-brain-signals.mjs'); break;
   case 'census': delegate('react-brain-census.mjs'); break;
+  case 'briefing': delegate('react-brain-briefing.mjs'); break;
   case 'learn': delegate('react-brain-learn.mjs'); break;
   case 'decide': delegate('react-brain-decide.mjs'); break;
   case 'bench': delegate('react-brain-bench.mjs'); break;
