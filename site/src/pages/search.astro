@@ -67,8 +67,28 @@ import { BASE } from '../lib/corpus.js';
 </Base>
 
 <style is:global>
-  /* map Pagefind UI onto the site palette */
-  :root { --pagefind-ui-primary: var(--accent); --pagefind-ui-text: var(--fg);
-    --pagefind-ui-background: var(--bg); --pagefind-ui-border: var(--line);
-    --pagefind-ui-tag: var(--card); --pagefind-ui-font: inherit; }
+  /* Map Pagefind UI onto the site palette. Scoped to #search, NOT :root —
+     pagefind-ui.css loads after this style and re-declares its light-theme
+     defaults on :root, so a :root mapping loses the cascade (the broken white
+     input / dim text / yellow marks). Container-scoped vars always win. */
+  #search {
+    --pagefind-ui-primary: var(--accent);
+    --pagefind-ui-text: var(--fg);
+    --pagefind-ui-background: var(--card);
+    --pagefind-ui-border: var(--line);
+    --pagefind-ui-tag: var(--card);
+    --pagefind-ui-border-width: 1px;
+    --pagefind-ui-border-radius: 6px;
+    --pagefind-ui-font: inherit;
+  }
+  #search .pagefind-ui__search-input { color: var(--fg); font-weight: 400; }
+  #search .pagefind-ui__search-input::placeholder { color: var(--muted); opacity: 1; }
+  #search .pagefind-ui__search-clear { color: var(--muted); background: transparent; }
+  #search .pagefind-ui__message { color: var(--muted); font-weight: 400; }
+  #search .pagefind-ui__result { border-top: 1px solid var(--line); }
+  #search .pagefind-ui__result-link { color: var(--bright); font-family: var(--font-head); }
+  #search .pagefind-ui__result-link:hover { color: var(--accent); }
+  #search .pagefind-ui__result-excerpt, #search .pagefind-ui__result-nested { color: var(--muted); }
+  #search mark { background: rgba(80, 250, 123, .16); color: var(--accent); border-radius: 2px; padding: 0 .12em; }
+  #search .pagefind-ui__button { background: var(--card); color: var(--fg); border: 1px solid var(--line); }
 </style>
