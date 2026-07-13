@@ -28,7 +28,7 @@ bash tools/install-cron.sh      # installs a Monday-09:00 weekly pulse, logs to 
 or by hand (crontab line it installs):
 
 ```cron
-0 9 * * 1  cd /Users/f1sh/odd-jobs/heartit/skills/react-brain && /usr/bin/env node tools/cli.mjs pulse --today=$(date +\%F) ../../ledgerhr ../../ourpot/ourpot ../../bitbarter >> tools/pulse.log 2>&1
+0 9 * * 1  cd <repo-root> && /usr/bin/env node tools/cli.mjs pulse --today=$(date +\%F) ../../ledgerhr ../../ourpot/ourpot ../../bitbarter >> tools/pulse.log 2>&1
 ```
 
 Read `tools/pulse.log` weekly; act on DEAD links + undated/aging entries + drift.
@@ -42,7 +42,7 @@ Runs the harvest + adversarial passes. Needs an LLM agent + the repo, so run it 
 
 ```sh
 # local headless run (example; adjust to your CLI):
-cd /Users/f1sh/odd-jobs/heartit/skills/react-brain && claude -p "$(cat tools/upkeep-routine.md)"
+cd <repo-root> && claude -p "$(cat tools/upkeep-routine.md)"
 ```
 
 The agent should, in order:
