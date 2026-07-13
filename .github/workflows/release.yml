@@ -38,6 +38,14 @@ jobs:
             echo "::error::tag $TAG != package.json $PKG — bump with 'npm version', don't hand-tag"
             exit 1
           fi
+      - name: alias must be in lockstep (version-script syncs it on npm version)
+        run: |
+          ALIAS="$(node -p "require('./alias/package.json').version")"
+          PKG="$(node -p "require('./package.json').version")"
+          if [ "$ALIAS" != "$PKG" ]; then
+            echo "::error::alias/package.json $ALIAS != $PKG — run node alias/sync.mjs and commit"
+            exit 1
+          fi
 
   publish:
     needs: verify
@@ -59,3 +67,9 @@ jobs:
       - run: npm publish
         # no NODE_AUTH_TOKEN, no .npmrc: trusted publishing exchanges the workflow's
         # OIDC token at publish time; provenance is attached automatically.
+      - name: publish unscoped alias (react-brain)
+        # One-time setup on npmjs.com (package react-brain → Settings → Trusted
+        # Publisher): GitHub Actions · owner heart-IT · repo react-brain ·
+        # workflow release.yml — same publisher as the scoped package.
+        working-directory: alias
+        run: npm publish

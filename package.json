@@ -31,7 +31,8 @@
     "lint": "node tools/cli.mjs lint",
     "test": "node tools/cli.mjs lint && node tests/eval.mjs",
     "census": "node tools/cli.mjs census",
-    "briefing": "node tools/cli.mjs briefing"
+    "briefing": "node tools/cli.mjs briefing",
+    "version": "node alias/sync.mjs && git add alias/package.json"
   },
   "repository": {
     "type": "git",
