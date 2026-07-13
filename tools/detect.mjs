@@ -276,7 +276,9 @@ const STOPWORDS = new Set(('the a an is are was be been my our your this that th
   + 'before does do did how why what when where which it its as from by not no so if then than can could should would use using').split(' '));
 
 export function searchReadings(terms, max = 3) {
-  const toks = [...new Set(terms.map((t) => t.toLowerCase().replace(/[^\w-]/g, '')).filter((t) => t.length > 2 && !STOPWORDS.has(t)))];
+  // a caller may pass a quoted sentence as ONE term — split before tokenizing
+  const toks = [...new Set(terms.flatMap((t) => String(t).toLowerCase().split(/\s+/))
+    .map((t) => t.replace(/[^\w-]/g, '')).filter((t) => t.length > 2 && !STOPWORDS.has(t)))];
   if (!toks.length) return [];
   const docs = [];
   for (const e of loadDoc().entries) {

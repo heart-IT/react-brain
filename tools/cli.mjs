@@ -82,7 +82,8 @@ examples:
 `);
 }
 
-function query(terms) {
+function query(args) {
+  const terms = args.flatMap((t) => String(t).split(/\s+/)).filter(Boolean);   // quoted sentences arrive as one arg
   if (!terms.length) { console.error('usage: react-brain query <entry-id | category | keyword | free-form question>'); process.exit(1); }
   const ranked = searchEntries(terms);
   const reads = searchReadings(terms);

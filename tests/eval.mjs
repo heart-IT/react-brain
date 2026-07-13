@@ -84,6 +84,10 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
   check(top('keyboard snaps on android')?.entry === 'RB-E-KEYBOARD', 'searchReadings: keyboard question → the Margelo keyboard guide');
   check(top('supply chain npm attack')?.entry === 'RB-E-SECURITY', 'searchReadings: supply-chain question → SECURITY reading');
   check(searchReadings(['the', 'my', 'is']).length === 0, 'searchReadings: stopword-only query matches nothing');
+  check(searchReadings(['why is my LCP bad after SSR hydration'])?.[0]?.url.includes('3perf.com'),
+    'searchReadings: a quoted sentence passed as ONE term still routes (the 0.7.0 CLI bug)');
+  const cliQ = execFileSync(process.execPath, [join(ROOT, 'tools/cli.mjs'), 'query', 'why is my LCP bad after SSR hydration'], { encoding: 'utf8' });
+  check(cliQ.includes('READINGS MATCHED') && cliQ.includes('3perf.com'), 'cli query: quoted free-form question routes to the reading');
 
   // intent resolution honours context keys (the P2P N/A case that seeded contextFor)
   const { resolveRecommendation, loadEntries } = await import(join(ROOT, 'tools/detect.mjs'));
