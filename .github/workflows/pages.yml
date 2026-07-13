@@ -23,6 +23,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history: /changelog + per-entry re-verified dates are built from git log
       - uses: actions/configure-pages@v5
         # Pages source = "GitHub Actions", enabled once in repo Settings (2026-07-10).
         # enablement:true was tried and rejected — the workflow token can't administer
