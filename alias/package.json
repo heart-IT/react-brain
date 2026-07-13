@@ -1,0 +1,14 @@
+{
+  "name": "react-brain",
+  "version": "0.7.5",
+  "description": "Official alias for @heart-it/react-brain — engineering decisions for React & React Native, with receipts. Same CLI: doctor, migrate, review, stack, bench, mcp.",
+  "type": "module",
+  "bin": { "react-brain": "cli.mjs" },
+  "files": ["cli.mjs", "README.md"],
+  "dependencies": { "@heart-it/react-brain": "^0.7.5" },
+  "homepage": "https://heart-it.github.io/react-brain/",
+  "repository": { "type": "git", "url": "git+https://github.com/heart-IT/react-brain.git", "directory": "alias" },
+  "bugs": "https://github.com/heart-IT/react-brain/issues",
+  "license": "Apache-2.0",
+  "keywords": ["react", "react-native", "expo", "developer-tools", "cli", "mcp", "mcp-server", "knowledge-base", "dependencies", "migration"]
+}
