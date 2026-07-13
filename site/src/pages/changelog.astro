@@ -7,7 +7,7 @@ const days = changelog();
   <h1>Changelog</h1>
   <p class="muted" style="max-width:44rem">The corpus is kept alive by a weekly loop: harvest the React
   newsletters → fetch-verify every claim → apply a reviewable delta → re-run the invariants. This page is
-  that loop made visible — generated straight from the repo's git history for the encyclopedia files.</p>
+  that loop made visible — generated straight from the repo's git history for the corpus files.</p>
   {days.length === 0 && <p class="muted">No history available in this build (shallow checkout). See the
   <a href={`${GITHUB}/commits/main`}>commit log on GitHub</a>.</p>}
   <div class="rows">

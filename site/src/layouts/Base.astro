@@ -40,6 +40,11 @@ const bottomLinks = [...toolLinks, ...aboutLinks];   // mobile nav keeps the fla
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
   <meta property="og:type" content="website" />
+  {/* absolute URL required by scrapers — update alongside a future custom domain */}
+  <meta property="og:image" content={`https://heart-it.github.io${href('og.png')}`} />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
   <link rel="icon" href={FAVICON} />
   <link rel="preload" href={interUrl} as="font" type="font/woff2" crossorigin />
   <link rel="preload" href={monoUrl} as="font" type="font/woff2" crossorigin />
@@ -185,7 +190,7 @@ const bottomLinks = [...toolLinks, ...aboutLinks];   // mobile nav keeps the fla
     function open() {
       lastFocus = document.activeElement;
       box.hidden = false; setPrompt(); input.focus();
-      if (!out.childElementCount) print('<span class="t-dim">react-brain console — type <b>help</b>. ⌘K toggles, esc closes.</span>');
+      if (!out.childElementCount) print('<span class="t-dim">react-brain console — try <b>ask should I use zustand</b> · <b>doctor</b> (after <b>load</b>) · <b>query maps</b> · <b>help</b> for everything. ⌘K toggles, esc closes.</span>');
     }
     function close() { box.hidden = true; lastFocus?.focus?.(); }
 

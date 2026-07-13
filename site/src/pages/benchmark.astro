@@ -17,9 +17,14 @@ const { byId } = corpus();
   <h2>Leaderboard</h2>
   {runs.length === 0 ? (
     <div class="card">
-      <p style="margin:0" class="muted">No runs committed yet — the bank and methodology are published;
-      results are reproducible from any machine with a key:</p>
-      <pre style="margin:.7rem 0 0"><span class="t-p">$</span> npx react-brain bench --run --model=claude-sonnet-5
+      <p style="margin:0" class="muted"><strong style="color:var(--fg)">The leaderboard is waiting for its first run</strong> — the
+      question bank and the deterministic rubric are published; only the API spend hasn't happened yet.
+      What it will show: each model's <em>fresh%</em> and <em>confidently-stale%</em>, bare vs with the
+      corpus injected as context — that with-corpus delta is the product, quantified.</p>
+      <p class="muted" style="margin:.7rem 0 0; font-size:.9rem"><strong style="color:var(--fg)">One-click:</strong> maintainers run the
+      <code>bench</code> GitHub Action (Actions → bench → Run workflow; needs the <code>ANTHROPIC_API_KEY</code> repo secret) —
+      results commit themselves and this page fills in on the next deploy. <strong style="color:var(--fg)">Any machine:</strong></p>
+      <pre style="margin:.6rem 0 0"><span class="t-p">$</span> npx react-brain bench --run --model=claude-sonnet-5
 <span class="t-p">$</span> npx react-brain bench --run --model=claude-sonnet-5 --with-corpus  <span class="t-dim"># the delta IS the product</span></pre>
     </div>
   ) : (

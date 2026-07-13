@@ -3,6 +3,7 @@ import Base from '../../layouts/Base.astro';
 import { corpus, track, href } from '../../lib/corpus.js';
 const { groups, entries } = corpus();
 const tr = track();
+const fresh = (e) => e.updated && Date.now() - new Date(String(e.updated)).getTime() < 7 * 864e5;
 ---
 <Base title="react-brain — decisions">
   <h1>Decisions</h1>
@@ -22,7 +23,7 @@ const tr = track();
                 <td><a href={href(`entries/${e.slug}/`)}>{e.slug}</a></td>
                 <td>{e.topic}</td>
                 <td><span class={`badge ${e.status}`}>{e.status}</span></td>
-                <td class="meta">{String(e.updated)}</td>
+                <td class="meta">{String(e.updated)}{fresh(e) && <span class="mark-ok" title="re-verified this week" aria-label="re-verified this week"> ●</span>}</td>
               </tr>
             );
           })}

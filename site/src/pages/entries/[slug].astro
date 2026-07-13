@@ -1,6 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { corpus, downloads, fmtDownloads, track, docHtml, href, GITHUB, census, revisions } from '../../lib/corpus.js';
+import { corpus, downloads, fmtDownloads, track, docHtml, href, GITHUB, census, revisions, scorecard } from '../../lib/corpus.js';
 
 export function getStaticPaths() {
   return corpus().entries.map((e) => ({ params: { slug: e.slug }, props: { id: e.id } }));
@@ -14,9 +14,13 @@ const pkgs = (e.detect || []).filter((d) => !d.pkg.includes('*') && dl[d.pkg] !=
 const related = entries.filter((x) => x.group === e.group && x.id !== id);
 const doc = docHtml(e);
 // knowledge-graph edges: entries this one's own text cites (when-clauses, notes, tradeoffs)
-const textBlob = [e.note, e.recommend?.default, ...(e.recommend?.when || []), ...(e.options || []).map((o) => o.tradeoff)].join(' ');
-const refs = [...new Set([...String(textBlob).matchAll(/RB-E-[A-Z0-9-]+/g)].map((m) => m[0]))]
-  .filter((r) => r !== id && byId[r]).map((r) => byId[r]);
+const blobOf = (x) => [x.note, x.recommend?.default, ...(x.recommend?.when || []), ...(x.options || []).map((o) => o.tradeoff)].join(' ');
+const refsOf = (x) => [...new Set([...String(blobOf(x)).matchAll(/RB-E-[A-Z0-9-]+/g)].map((m) => m[0]))].filter((r) => r !== x.id);
+const refs = refsOf(e).filter((r) => byId[r]).map((r) => byId[r]);
+// …and the reverse edges: every decision whose own text cites THIS one
+const citedBy = entries.filter((x) => x.id !== id && refsOf(x).includes(id));
+// calibration: what this confidence tier has actually earned on the public scorecard
+const tier = scorecard()?.tiers?.[e.confidence];
 // verification history: the dates this entry's file changed in git
 const revs = revisions(id);
 // per-option evidence: map option → detect label (fuzzy) → census adoption + npm downloads
@@ -58,9 +62,15 @@ const toc = [
     <span class={`badge ${e.status}`}>{e.status}</span>
     <span class={`badge ${e.confidence}`}>confidence: {e.confidence}</span>
     {tr && <span class={`badge ${tr}`}>track: {tr}</span>}
+    {tier?.score != null && <a class="meta" href={href('scorecard/')} style="margin-left:.35rem">this tier holds {tier.score}% on the public scorecard ({tier.resolved}/{tier.total} graded) →</a>}
   </p>
   {refs.length > 0 && (
     <p class="meta" style="margin:.2rem 0 0">related decisions: {refs.map((r, i) => (
+      <>{i > 0 && ' · '}<a href={href(`entries/${r.slug}/`)}>{r.slug}</a></>
+    ))}</p>
+  )}
+  {citedBy.length > 0 && (
+    <p class="meta" style="margin:.2rem 0 0">cited by: {citedBy.map((r, i) => (
       <>{i > 0 && ' · '}<a href={href(`entries/${r.slug}/`)}>{r.slug}</a></>
     ))}</p>
   )}
