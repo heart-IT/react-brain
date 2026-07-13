@@ -33,6 +33,8 @@ reading:
     url: "https://medium.com/doctolib/expo-without-eas-scaling-the-react-native-developer-experience-of-an-app-with-90m-users-2694ea841805"
     by: "Doctolib"
     what: "Large-scale case study adopting Expo's bare workflow (not EAS) with fingerprint caching + JS patching to halve CI builds and grow contributors 9→105. A durable enterprise RN build/CI-DX blueprint."
+    claim: "You ship Expo at scale — Doctolib's blueprint runs the bare workflow without EAS: fingerprint caching + JS patching halved CI builds while contributors grew 9→105."
+    applies_when: { deps: ["expo"], stages: [scale] }
 sources:
   - "https://medium.com/doctolib/expo-without-eas-scaling-the-react-native-developer-experience-of-an-app-with-90m-users-2694ea841805"
   - "https://github.com/millionco/react-doctor"

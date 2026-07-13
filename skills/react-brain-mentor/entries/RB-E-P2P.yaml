@@ -39,6 +39,8 @@ reading:
     url: "https://docs.pears.com/"
     by: "Holepunch (Pear docs)"
     what: "The canonical reference for the Holepunch stack — Hypercore (append-only log), Autobase (multiwriter), Hyperbee (B-tree index), Hyperswarm/HyperDHT (discovery), Hyperdrive (files), Corestore, and the Pear runtime. The 'why' behind P2P/local-first; pair with the holepunch-p2p-systems skill for build/review depth."
+    claim: "You ship the Hypercore stack — data is a local append-only log merged by Autobase, indexed in Hyperbee, synced over Hyperswarm; a conventional client cache/REST layer is N/A by design, and these docs are the canonical reference."
+    applies_when: { deps: ["hyper*", "autobase", "corestore", "hrpc"] }
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "hyper*", label: "Holepunch (Hypercore stack)", token: "holepunch" }
   - { pkg: "autobase", label: "Autobase (multiwriter)", token: "autobase" }

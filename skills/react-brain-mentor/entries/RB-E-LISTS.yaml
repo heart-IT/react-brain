@@ -26,6 +26,8 @@ reading:
     url: "https://www.youtube.com/watch?v=K3flMIHS-cI"
     by: "Jay Meistrich — author of Legend List"
     what: "Why Legend List is fast, from its author: it mounts a fixed pool of absolutely-positioned containers once and never re-renders that array again — instead it *signals* individual containers to re-render themselves at a new position/item as you scroll, and turns frequent size changes into animated-style updates rather than list re-renders. The generalizable lesson ('render once'): keep each render tiny by pushing it to the leaf that actually changed. Complements the peterp.me engine walkthrough with the same-source mechanism; announces v3.0 stable (RN + web). Vendor talk."
+    claim: "You ship Legend List — it mounts a fixed pool of absolutely-positioned containers once and signals individual containers to re-render at new positions, so scrolling never re-renders the list array (v3.0 stable covers RN + web; vendor talk)."
+    applies_when: { deps: ["@legendapp/list"] }
   - title: "FlashList v2: a ground-up rewrite for React Native's New Architecture"
     url: "https://shopify.engineering/flashlist-v2"
     by: "Talha Naqvi (Shopify Engineering)"
@@ -40,10 +42,14 @@ reading:
     url: "https://www.peterp.me/articles/legend-list-engine-simulator/"
     by: "Peter Piekarczyk"
     what: "Explains Legend List's virtualization formula — estimated item size, draw distance, container-pool ratio, asymmetric 1.5x/0.5x buffering. A concrete mental model for list recycling performance (complements the FlashList piece)."
+    claim: "You ship Legend List — its tuning surface is the virtualization formula: estimated item size, draw distance, container-pool ratio, and asymmetric 1.5x/0.5x buffering."
+    applies_when: { deps: ["@legendapp/list"] }
   - title: "Virtual scrolling for billions of rows (techniques from HighTable)"
     url: "https://rednegra.net/blog/20260212-virtual-scroll/"
     by: "Sylvain Lesage"
     what: "The five techniques behind HighTable — lazy slicing, the ~17M-px canvas-height ceiling with downscaled scrollbars, dual local/global scroll modes, decoupled axes. The web huge-table counterpart to the RN list pieces above (HighTable is a listed option here)."
+    claim: "You ship TanStack Table — for huge web tables (100k+ rows) HighTable's techniques apply: lazy slicing, the ~17M-px canvas-height ceiling with downscaled scrollbars, dual local/global scroll modes, decoupled axes."
+    applies_when: { deps: ["@tanstack/react-table"], platforms: [react] }
 sources:
   - "https://shopify.engineering/flashlist-v2"
   - "https://rednegra.net/blog/20260212-virtual-scroll/"

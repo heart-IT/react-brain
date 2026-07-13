@@ -43,14 +43,20 @@ reading:
     url: "https://blog.margelo.com/make-jsi-run-faster"
     by: "Alex Shumihin (Margelo)"
     what: "How JSI bindings actually work at the C++/Hermes boundary — HostFunction vs HostObject, the Object+NativeState pattern Nitro compiles down to, stack vs heap, minimizing JS-to-native crossings — with reproducible Hermes benchmarks. The runtime mechanics under Turbo/Nitro Modules."
+    claim: "You ship Nitro Modules — the runtime mechanics it compiles down to: HostFunction vs HostObject, the Object+NativeState pattern, stack vs heap, and minimizing JS-to-native crossings, with reproducible Hermes benchmarks."
+    applies_when: { deps: ["react-native-nitro-modules"], platforms: [react-native] }
   - title: "Making JSI Faster with More Efficient Data Structures (Part 2)"
     url: "https://blog.margelo.com/make-jsi-run-faster-2"
     by: "Alex Shumihin (Margelo)"
     what: "How data representation across the JSI boundary (array-of-objects vs flat array vs ArrayBuffer, numeric vs string contracts) can swing performance up to ~30x with no algorithmic change. First-principles guidance for New-Architecture native modules."
+    claim: "You ship Nitro Modules — data representation across the JSI boundary (array-of-objects vs flat array vs ArrayBuffer, numeric vs string contracts) can swing performance up to ~30x with no algorithmic change."
+    applies_when: { deps: ["react-native-nitro-modules"], platforms: [react-native] }
   - title: "How Margelo Helped Discord Improve React Native's New Architecture Performance"
     url: "https://blog.margelo.com/margelo-discord-react-native-performance"
     by: "Hanno Gödecke (Margelo)"
     what: "Low-level New-Architecture jank postmortem: Reanimated's cloneShadowTreeWithNewProps over-cloning the Fabric shadow tree plus redundant layout passes for non-layout props, with fixes upstreamed. Canonical Fabric / New-Arch internals."
+    claim: "You ship Reanimated on the New Architecture — the canonical Fabric jank postmortem: cloneShadowTreeWithNewProps over-cloning the shadow tree plus redundant layout passes for non-layout props, with fixes upstreamed."
+    applies_when: { deps: ["react-native-reanimated"], platforms: [react-native] }
   - title: "Four Years of React Native Quick Crypto: From Wallets to Node Parity"
     url: "https://blog.margelo.com/four-years-of-react-native-quick-crypto"
     by: "Brad Anderson (Margelo)"

@@ -65,6 +65,8 @@ reading:
     url: "https://sergiodxa.com/articles/react-router-loaders-and-actions-as-integration-points"
     by: "Sergio Xalambrí (React Router / Remix)"
     what: "Frames loaders/actions as the HTTP-to-domain seam — keep business logic in testable services, reserve loaders/actions for the integration layer (E2E). A durable testing/architecture philosophy for React Router."
+    claim: "You ship React Router — treat loaders/actions as the HTTP-to-domain seam: keep business logic in testable services and reserve loaders/actions for the integration layer, tested E2E."
+    applies_when: { deps: ["react-router", "react-router-dom"], platforms: [react] }
   - title: "Deep Links With Authentication in React Navigation"
     url: "https://www.callstack.com/blog/deep-links-with-authentication-in-react-navigation"
     by: "Satyajit Sahoo (Callstack; React Navigation maintainer)"
@@ -75,6 +77,8 @@ reading:
     url: "https://programmingarehard.com/2026/05/06/react-router-dialogs.html/"
     by: "Dave Adams"
     what: "Models modal dialogs as nested routes in React Router 7 instead of local useState/useEffect — covering revalidation, view transitions, flash sessions, and exit animations. A durable routing pattern that generalizes beyond the example."
+    claim: "You ship React Router — model modal dialogs as nested routes instead of local useState/useEffect; revalidation, view transitions, flash sessions, and exit animations then ride the router."
+    applies_when: { deps: ["react-router", "react-router-dom"], platforms: [react] }
 sources:
   - "https://reactnavigation.org/blog/2025/12/19/react-navigation-8.0-alpha/"
   - "https://reactrouter.com/"

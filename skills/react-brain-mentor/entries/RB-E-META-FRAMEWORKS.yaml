@@ -44,14 +44,20 @@ reading:
     url: "https://frontendmasters.com/blog/react-server-components-in-tanstack/"
     by: "Adam Rackis (Frontend Masters)"
     what: "First-principles RSC tutorial grounded in TanStack Start's explicit API (createServerFn, renderServerComponent), contrasted with Next.js's implicit model, with honest use-case scoping and bundle-size results."
+    claim: "You ship TanStack Start — its RSC model is explicit (createServerFn, renderServerComponent) and still EXPERIMENTAL into early v1; this grounds what Start's RSC actually buys (use-case scoping, bundle-size results) before you lean on it."
+    applies_when: { deps: ["@tanstack/react-start"] }
   - title: "Moving Railway's frontend off Next.js"
     url: "https://blog.railway.com/p/moving-railways-frontend-off-nextjs"
     by: "Victor Ramirez (Railway)"
     what: "Migration postmortem — 200+ routes off Next.js onto Vite + TanStack Start (10min→<2min builds), with the reasoning for when a client-centric app outgrows a server-first meta-framework. A concrete decision case study."
+    claim: "You ship Next.js — Railway's 200+-route migration to Vite + TanStack Start (10min→<2min builds) is the concrete decision case for when a client-centric app outgrows a server-first meta-framework."
+    applies_when: { deps: ["next"] }
   - title: "use client in Next.js"
     url: "https://punits.dev/blog/use-client-in-nextjs/"
     by: "Punit Sethi"
     what: "The mental model for the use-client boundary — it does NOT disable SSR — plus its three real costs (bundle, hydration, fetch waterfalls), with measured comparisons and the server-component-as-prop technique. Durable RSC fundamentals."
+    claim: "You ship Next.js — 'use client' does NOT disable SSR; its real costs are bundle, hydration, and fetch waterfalls, and the server-component-as-prop technique keeps subtrees on the server."
+    applies_when: { deps: ["next"] }
   - title: "Next.js 16.3: Instant Navigations (16.3 Preview)"
     url: "https://nextjs.org/blog/next-16-3-instant-navigations"
     by: "Andrew Clark & Josh Story (Next.js team)"

@@ -37,6 +37,8 @@ reading:
     url: "https://super-calendar.afonsojramos.me/"
     by: "Afonso Jorge Ramos"
     what: "The reference for the new event-grid approach: a platform-free core with native (Reanimated 4 + Gesture Handler + Legend List) and DOM renderers, virtualized snap-paged views (month/week/day/3-day/schedule), and gesture semantics (pinch-to-zoom time grid, long-press drag, grip resize, drag-empty-space-to-create). Documents the stack a modern RN event grid actually requires — useful even if you pick something else."
+    claim: "You ship Super Calendar — the native renderer requires Reanimated 4 + Gesture Handler + Legend List; views are virtualized and snap-paged (month/week/day/3-day/schedule), and @super-calendar/dom renders the same core on web."
+    applies_when: { deps: ["@super-calendar/*"] }
 sources:
   - "https://registry.npmjs.org/react-native-calendars/latest"
   - "https://registry.npmjs.org/@super-calendar/native/latest"

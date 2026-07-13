@@ -30,6 +30,8 @@ reading:
     url: "https://www.peterp.me/articles/jotai-structural-sharing-vs-selectatom/"
     by: "Peter Piekarczyk"
     what: "The first Jotai-specific deep-dive here, for the entry's 'fine-grained atoms → Jotai' clause: Object.is propagation mechanics, why selectAtom is a trap (decompose into primitive atoms instead), and write-layer structural sharing à la React Query. The re-render discipline that makes atomic state actually fine-grained."
+    claim: "You ship Jotai — selectAtom is a trap; decompose objects into primitive atoms and use write-layer structural sharing so atomic state is actually fine-grained (Object.is propagation decides what re-renders)."
+    applies_when: { deps: ["jotai"] }
   - title: "How to Build the Fastest Apps: Break the Rules (App.js Conf 2026)"
     url: "https://www.youtube.com/watch?v=K3flMIHS-cI"
     by: "Jay Meistrich (Software Mansion) — author of Legend State / Legend List"
@@ -44,6 +46,8 @@ reading:
     url: "https://blog.isquaredsoftware.com/2021/01/context-redux-differences/"
     by: "Mark Erikson, Redux maintainer"
     what: "Draws the precise line between dependency injection (Context), client-state stores (Redux/Zustand), and async/server state — the vocabulary that justifies splitting the problem instead of forcing one tool to do all three."
+    claim: "You ship no client store — Context is dependency injection, not state management; every consumer re-renders on any value change, so frequently-changing shared state belongs in a selector-based store."
+    applies_when: { absent_deps: ["zustand", "jotai", "@reduxjs/toolkit", "react-redux", "redux", "mobx", "valtio", "xstate"] }
   - title: "How is Linear so fast? A technical breakdown"
     url: "https://performance.dev/how-is-linear-so-fast-a-technical-breakdown"
     by: "Dennis Brotzky (performance.dev)"

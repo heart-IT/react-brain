@@ -36,6 +36,8 @@ reading:
     url: "https://tkdodo.eu/blog/tan-stack-router-and-query"
     by: "Dominik Dorfmeister (TkDodo)"
     what: "The selection question this entry's TanStack rows raise: Router's cache is per-route, Query's is global — when route-loader caching alone suffices, when you want the full query cache, and how to layer them without double-fetching. Maintainer-authored."
+    claim: "You ship TanStack Router — its loader cache is per-route while Query's is global; the maintainer maps when route-loader caching alone suffices and how to layer both without double-fetching."
+    applies_when: { deps: ["@tanstack/react-router"] }
   - title: "Why You Want React Query"
     url: "https://tkdodo.eu/blog/why-you-want-react-query"
     by: "Dominik Dorfmeister (TkDodo), TanStack Query maintainer"

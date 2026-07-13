@@ -37,6 +37,8 @@ reading:
     url: "https://emilkowal.ski/ui/building-a-toast-component"
     by: "Emil Kowalski (sonner author)"
     what: "The design rationale under sonner (and thus sonner-native): interruptible transitions over keyframes, index-scaled stacking, pause-on-hidden, momentum swiping, gap-filling hover pseudo-elements. Web-authored, but it is the canonical 'why good toasts feel good' — the taste this entry's toast pick imports."
+    claim: "You ship sonner-native — the design rationale it imports: interruptible transitions over keyframes, index-scaled stacking, pause-on-hidden, momentum swiping, gap-filling hover pseudo-elements."
+    applies_when: { deps: ["sonner-native"] }
 sources:
   - "https://registry.npmjs.org/sonner-native/latest"
   - "https://registry.npmjs.org/react-native-bootsplash/latest"

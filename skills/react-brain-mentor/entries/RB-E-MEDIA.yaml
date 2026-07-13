@@ -47,6 +47,8 @@ reading:
       frames into LiveKit's WebRTC VideoSource without touching encoder/transport/signaling.
       Covers off-thread segmentation (MediaPipe/Vision), Metal/Skia compositing, YUV↔I420/NV12
       conversion, and the monotonic-timestamp + buffer-pooling gotchas.
+    claim: "You ship WebRTC calling (LiveKit / react-native-webrtc) — don't fork the stack for filters: segment off the hot path, GPU-composite, and inject processed VisionCamera frames into the existing VideoSource; mind YUV conversion and monotonic timestamps."
+    applies_when: { deps: ["@livekit/*", "react-native-webrtc"], platforms: [react-native] }
   - title: "MoQKit: a native mobile SDK for MoQ on iOS and Android"
     url: "https://swmansion.com/blog/moqkit-native-mobile-sdk-moq-ios-android/"
     by: "Jakub Perżyło (Software Mansion)"
@@ -61,6 +63,8 @@ reading:
     url: "https://blog.margelo.com/react-native-qr-barcode-scanner-visioncamera-v5"
     by: "Marc Rousavy (Margelo; VisionCamera creator)"
     what: "By VisionCamera's creator: three scanning APIs (CodeScanner / useBarcodeScannerOutput / frame processors), narrowing barcodeFormats and outputResolution for latency, the frame-vs-preview coordinate gotcha, and MLKit vs Apple's native AVCaptureMetadataOutput vs commercial SDKs. The reference for RN code scanning."
+    claim: "You ship VisionCamera and scan codes — three APIs (CodeScanner / useBarcodeScannerOutput / frame processors); narrow barcodeFormats and outputResolution for latency, and mind the frame-vs-preview coordinate gotcha."
+    applies_when: { deps: ["react-native-vision-camera"], platforms: [react-native] }
 sources:
   - "https://blog.margelo.com/building-videocall-app-with-filters"
   - "https://expo.dev/changelog/sdk-55"

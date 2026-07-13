@@ -27,10 +27,14 @@ reading:
     url: "https://next-intl.dev/blog/precompilation"
     by: "Jan Amann (next-intl author)"
     what: "Why and how ICU messages are precompiled at build time into minified ASTs evaluated by a ~650-byte runtime, weighing function-based vs AST strategies against bundle size. Teaches the compile-time-vs-runtime and bundle-size tradeoffs from first principles."
+    claim: "You ship next-intl — v4.8 precompiles ICU messages at build time into minified ASTs evaluated by a ~650-byte runtime, trading runtime message parsing for smaller bundles."
+    applies_when: { deps: ["next-intl"] }
   - title: "ICU Message Syntax (core concepts)"
     url: "https://formatjs.github.io/docs/core-concepts/icu-syntax/"
     by: "FormatJS (react-intl)"
     what: "The canonical, example-driven explanation of the ICU message format — interpolation, plurals/selectordinal, select, number/date skeletons, rich text. ICU is a stable Unicode standard, so this foundational reference doesn't go stale."
+    claim: "You ship an ICU-based i18n layer (react-intl/next-intl/Lingui) — your message strings are ICU syntax (interpolation, plurals/selectordinal, select, number/date skeletons); ICU is a stable Unicode standard, so this reference doesn't go stale."
+    applies_when: { deps: ["react-intl", "next-intl", "@lingui/*"] }
 detect_source:   # source-level signals owned by this entry (regex over repo source)
   - pattern: "useTranslation|i18next|formatMessage|react-intl|getLocales|lingui|next-intl|fbtee"
     absent: true

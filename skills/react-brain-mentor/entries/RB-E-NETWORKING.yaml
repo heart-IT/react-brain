@@ -35,6 +35,8 @@ reading:
     url: "https://github.com/margelo/react-native-nitro-fetch"
     by: "Margelo"
     what: "The README doubles as the layer's best explainer: what actually backs fetch on each platform (Cronet vs URLSession), what HTTP/3+QUIC/Brotli/disk-cache buy you, prefetch-before-navigation, and worklet-side parsing — with their benchmark methodology. Read it to understand the layer even if you keep built-in fetch."
+    claim: "You ship react-native-nitro-fetch — it swaps the fetch engine (Cronet/URLSession: HTTP/3+QUIC, Brotli, disk cache, prefetch, worklet parsing) behind the same API; benchmarks are vendor-run (~23% on their harness), so measure your own hot path."
+    applies_when: { deps: ["react-native-nitro-fetch"], platforms: [react-native] }
 sources:
   - "https://github.com/margelo/react-native-nitro-fetch"
   - "https://expo.dev/changelog/sdk-56"

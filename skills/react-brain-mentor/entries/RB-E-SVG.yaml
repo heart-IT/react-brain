@@ -45,6 +45,8 @@ reading:
     url: "https://blog.logrocket.com/use-svgs-react-native-tutorial/"
     by: "Vijit Ail / Joseph Mawa (LogRocket)"
     what: "Practical deep-dive on inline SVG, importing .svg as components via react-native-svg-transformer, SvgUri/SvgXml, and animating SVGs — the canonical how-to for the react-native-svg workflow."
+    claim: "You ship react-native-svg — the canonical workflow how-to: inline SVG, importing designer .svg files as components via react-native-svg-transformer, SvgUri/SvgXml, and animating SVGs."
+    applies_when: { deps: ["react-native-svg"], platforms: [react-native] }
 sources:
   - "https://registry.npmjs.org/react-native-svg/latest"
   - "https://github.com/oblador/react-native-vector-icons/blob/master/MIGRATION.md"

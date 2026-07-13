@@ -41,6 +41,8 @@ reading:
     url: "https://www.pkgpulse.com/guides/react-native-maps-vs-mapbox-rn-vs-maplibre-rn-mobile-2026"
     by: "PkgPulse (team-authored)"
     what: "The concrete three-way comparison behind this entry's axes: per-load pricing math (Google ~$7/1k mobile loads vs Mapbox $0.50/1k after free tier vs MapLibre free-but-BYO-tiles), which libraries actually expose offline region-download APIs (Mapbox/MapLibre yes, react-native-maps no), GL style customization, API-key requirements, and New-Architecture status — with code for each. Team-authored (no individual byline) but sourced and measured; use for the decision table, not authority."
+    claim: "You ship an RN map library — the decision table: Google ~$7/1k mobile loads vs Mapbox $0.50/1k after free tier vs MapLibre free-but-BYO-tiles; only Mapbox/MapLibre expose offline region-download APIs (react-native-maps does not)."
+    applies_when: { deps: ["react-native-maps", "@rnmapbox/maps", "@maplibre/maplibre-react-native"], platforms: [react-native] }
 sources:
   - "https://docs.expo.dev/versions/latest/sdk/maps/"
   - "https://github.com/gmi-software/react-native-better-maps"

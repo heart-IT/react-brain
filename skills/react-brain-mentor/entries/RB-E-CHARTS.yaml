@@ -27,10 +27,14 @@ reading:
     url: "https://medium.com/airbnb-engineering/introducing-visx-from-airbnb-fd6155ac4658"
     by: "Airbnb Tech Blog"
     what: "The architecture of web React charting — use D3 for math/layout while React owns the DOM, and compose low-level primitives instead of opinionated chart components. First-principles framing that applies to visx, Recharts, and any D3+React stack."
+    claim: "You ship a D3+React chart stack — the durable division of labor is D3 for math/layout while React owns the DOM, composing low-level primitives instead of opinionated chart components (applies to visx, Recharts, any D3+React stack)."
+    applies_when: { deps: ["@visx/*", "recharts", "d3"], platforms: [react] }
   - title: "The Future of React Native Graphics: WebGPU, Skia, and Beyond"
     url: "https://shopify.engineering/webgpu-skia-web-graphics"
     by: "William Candillon (Shopify)"
     what: "How RN Skia renders graphics — incl. the canonical high-density line-chart-as-GPU-texture example, JSI, immutable display lists, a unified WebGPU backend. The rendering model under Victory Native XL and build-your-own Skia charts."
+    claim: "You ship Skia-backed RN charts (Victory Native XL or raw react-native-skia) — the rendering model underneath: JSI, immutable display lists, a unified WebGPU backend, and the canonical high-density line-chart-as-GPU-texture pattern."
+    applies_when: { deps: ["victory-native", "@shopify/react-native-skia"], platforms: [react-native] }
 sources:
   - "https://reactnativerewind.com/issues/react-native-0-86-charting-your-financial-ruin-and-the-junk-drawer-in-your-package-json"
   - "https://github.com/FormidableLabs/victory-native-xl"

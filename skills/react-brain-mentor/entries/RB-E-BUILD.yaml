@@ -65,10 +65,14 @@ reading:
     url: "https://vite.dev/blog/announcing-vite8"
     by: "The Vite / VoidZero team"
     what: "Why maintaining two pipelines (esbuild + Rollup) was unsustainable and how Rolldown unifies dev/prod on one Rust bundler (10-30x faster), with Oxc semantic analysis driving better tree-shaking. The primary source for the Vite+Rolldown+Oxc consolidation."
+    claim: "You ship Vite — v8 unifies dev and prod on Rolldown (one Rust bundler, 10-30x faster) instead of the unsustainable esbuild+Rollup pair, with Oxc semantic analysis driving better tree-shaking."
+    applies_when: { deps: ["vite"], platforms: [react] }
   - title: "Exploring Inlined Requires: how they really work"
     url: "https://andrei-calazans.com/posts/2026-06-02-how-metro-inlined-requires-work/"
     by: "Andrei Calazans"
     what: "Exactly what Metro's inlineRequires Babel transform does, why React/RN stay hoisted, why default imports aren't inlined, and how rnx-kit's esbuild path differs (real tree-shaking vs startup-only). The canonical Metro startup-mechanics reference."
+    claim: "You bundle with Metro — inlineRequires mechanics: why React/RN stay hoisted, why default imports aren't inlined, and how rnx-kit's esbuild path differs (real tree-shaking vs startup-only)."
+    applies_when: { deps: ["metro", "@react-native/metro-config"], platforms: [react-native] }
   - title: "The Complete Guide to React Native Build Optimization"
     url: "https://themythicalengineer.com/the-complete-guide-to-react-native-build-optimization.html"
     by: "The Mythical Engineer"

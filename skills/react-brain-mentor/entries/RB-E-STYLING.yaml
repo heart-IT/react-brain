@@ -43,10 +43,14 @@ reading:
     url: "https://engineering.fb.com/2025/11/11/web/stylex-a-styling-library-for-css-at-scale/"
     by: "Meta Engineering"
     what: "Architecture explainer for the leading zero-runtime approach: a Babel compiler extracts styles into deterministic atomic CSS at build time (no runtime injection), resolving specificity/shorthands at compile time so CSS size stays flat at scale."
+    claim: "You ship StyleX — its Babel compiler extracts deterministic atomic CSS at build time (no runtime injection), resolving specificity/shorthands at compile time so CSS size stays flat at scale."
+    applies_when: { deps: ["@stylexjs/stylex"] }
   - title: "Moving Linear from styled-components to StyleX"
     url: "https://www.skovhus.dev/blog/moving-linear-from-styled-components-to-stylex"
     by: "Kenneth Skovhus (Linear)"
     what: "First-hand account of a large production CSS-in-JS to StyleX migration: build-time vs runtime styling, ~30% nav improvement, and agent-driven codemods at 100k-line scale. The migration companion to the runtime-cost argument above."
+    claim: "You ship styled-components — Linear's production migration to StyleX is the playbook: build-time vs runtime styling, ~30% nav improvement, agent-driven codemods at 100k-line scale."
+    applies_when: { deps: ["styled-components"] }
 sources:
   - "https://www.spotvirtual.com/blog/why-were-breaking-up-with-css-in-js"
   - "https://engineering.fb.com/2025/11/11/web/stylex-a-styling-library-for-css-at-scale/"

@@ -41,6 +41,8 @@ reading:
     url: "https://smoores.dev/post/unreasonable_effectiveness_of_prosemirror/"
     by: "Shane Friedman (Storyteller)"
     what: "Teaches ProseMirror's core abstractions (nodes, marks, positions, mappings) through a real parse→transform→serialize pipeline. Durable conceptual grounding for the document model under most React editors."
+    claim: "You ship a ProseMirror-family editor (TipTap/BlockNote/ProseMirror) — nodes, marks, positions, and mappings are the document model under your editor; this teaches them through a real parse→transform→serialize pipeline."
+    applies_when: { deps: ["@tiptap/*", "prosemirror-*", "@blocknote/*"] }
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "@tiptap/*", label: "TipTap", token: "tiptap" }
   - { pkg: "prosemirror-*", label: "ProseMirror", token: "prosemirror" }

@@ -31,6 +31,8 @@ reading:
     url: "https://swmansion.com/blog/on-device-ai-beats-cloud-for-tts-heres-why/"
     by: "Mateusz Kopciński (Software Mansion)"
     what: "A reasoned cost/latency/privacy case for on-device TTS (Kokoro via react-native-executorch), with the economics and the tradeoffs (voice/language coverage, a custom C++ phonemizer). A durable framing for the on-device-vs-cloud decision."
+    claim: "You ship react-native-executorch — the on-device-vs-cloud TTS case (Kokoro): cost, latency and privacy favor on-device, with the tradeoffs being voice/language coverage and a custom C++ phonemizer."
+    applies_when: { deps: ["react-native-executorch"], platforms: [react-native] }
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "react-native-executorch", label: "ExecuTorch", token: "executorch" }
   - { pkg: "@react-native-ai/apple", label: "Apple on-device LLM", token: "apple" }

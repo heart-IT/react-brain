@@ -47,14 +47,20 @@ reading:
     url: "https://www.peterp.me/articles/how-react-native-ease-runs-animations-with-no-javascript-loop/"
     by: "Peter Piekarczyk"
     what: "Deep dive on driving animations entirely via Core Animation / ObjectAnimator with no per-frame JS, incl. iOS model vs presentation layers and cross-platform spring physics. The mental model for truly native-driven RN animation."
+    claim: "You ship react-native-ease — animations run entirely via Core Animation/ObjectAnimator with no per-frame JS or UI-thread worklet work; the mental model is iOS model vs presentation layers plus cross-platform spring physics."
+    applies_when: { deps: ["react-native-ease"], platforms: [react-native] }
   - title: "Chasing a Phantom Jump: making Skia + Reanimated smooth on low-end Android"
     url: "https://blog.margelo.com/profiling-skia-reanimated-low-end-android"
     by: "Vishesh Raheja (Margelo)"
     what: "A low-end-Android profiling deep-dive: smoothness is frame-cadence timing, not curve math; the dominant fix is SurfaceView over TextureView (no per-frame texture upload, ~50-65% less RenderThread CPU), plus stable-reference buffer mutation and quantizing per-frame values. With profiler-triangulation methodology (gfxinfo/Perfetto/Hermes)."
+    claim: "You ship Skia — on low-end Android the dominant smoothness fix is SurfaceView over TextureView (no per-frame texture upload, ~50-65% less RenderThread CPU); smoothness is frame-cadence timing, not curve math."
+    applies_when: { deps: ["@shopify/react-native-skia"], platforms: [react-native] }
   - title: "The real cost of React Native animations: benchmarking every approach"
     url: "https://expo.dev/blog/the-real-cost-of-react-native-animations-benchmarking-every-approach"
     by: "Janic Duplessis (Expo; react-native-ease author)"
     what: "The only cross-library per-frame benchmark: UI-thread cost of core Animated vs Reanimated (shared values AND the CSS API) vs Ease on real devices — at ~500 animating views only the fully native-driven approach stays under frame budget (Reanimated SVs measured ~36ms/frame). CAVEAT: the author created Ease, the approach that wins — treat the numbers as vendor-run and re-measure on your own screens; the methodology and the per-frame cost model are the durable part."
+    claim: "You ship Reanimated — the only cross-library per-frame benchmark measured its shared values at ~36ms/frame at ~500 animating views; only the fully native-driven approach stayed under budget (vendor-run by the Ease author — re-measure)."
+    applies_when: { deps: ["react-native-reanimated"], platforms: [react-native] }
   - title: "A React trick to improve exit animations"
     url: "https://barvian.me/react-exit-animations"
     by: "Max Barvian"

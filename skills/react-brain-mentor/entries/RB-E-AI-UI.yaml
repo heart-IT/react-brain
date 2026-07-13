@@ -35,10 +35,14 @@ reading:
     url: "https://ai-sdk.dev/docs/advanced/rendering-ui-with-language-models"
     by: "Vercel (AI SDK)"
     what: "The core generative-UI mental model: tools return structured JSON that maps to React component props; the client-side switch-statement scaling problem; and the server-side createStreamableUI/RSC solution for streaming components during generation."
+    claim: "You ship the Vercel AI SDK — the generative-UI model: tools return structured JSON mapped to React component props; the client-side switch statement doesn't scale, so stream components during generation via createStreamableUI/RSC."
+    applies_when: { deps: ["ai", "@ai-sdk/*"], platforms: [react] }
   - title: "How to Build a Performant AI Markdown Renderer"
     url: "https://tigerabrodi.blog/how-to-build-a-performant-ai-markdown-renderer"
     by: "Tiger Abrodi"
     what: "The architecture behind streaming-markdown rendering (the Streamdown problem): repairing incomplete markdown before parsing, block-level memoization to avoid re-parsing every token, processor caching, and startTransition for smooth streaming."
+    claim: "You ship streaming LLM output — render markdown the Streamdown way: repair incomplete markdown before parsing, memoize at block level so every token doesn't re-parse, cache the processor, and wrap updates in startTransition."
+    applies_when: { deps: ["ai", "@ai-sdk/*", "@tanstack/ai"] }
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "@ai-sdk/*", label: "Vercel AI SDK", token: "ai sdk" }
   - { pkg: "ai", label: "Vercel AI SDK", token: "ai sdk" }
