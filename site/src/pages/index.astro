@@ -8,6 +8,10 @@ const libCount = new Set(entries.flatMap((e) => (e.detect || []).map((d) => d.pk
 const sc = scorecard();
 const high = sc?.tiers?.high;
 const recent = [...entries].sort((a, b) => String(b.updated).localeCompare(String(a.updated))).slice(0, 3);
+// freshness — computed from the corpus itself at build time (the site redeploys on every harvest)
+const lastVerified = recent[0] ? String(recent[0].updated) : '';
+const now = Date.now();
+const updated7 = entries.filter((e) => e.updated && now - new Date(String(e.updated)).getTime() < 7 * 864e5).length;
 // Recommendation of the week: deterministic — the most recently re-verified reviewed entry
 const pick = [...entries].filter((e) => e.status === 'reviewed')
   .sort((a, b) => String(b.updated).localeCompare(String(a.updated)))[0];
@@ -25,11 +29,13 @@ const stats = [
 <Base>
   <div class="hero hero-home" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr)); gap:2.5rem; align-items:center;">
     <div style="flex: 1.15">
-      <p class="label-caps" style="margin:0">decision engine · react &amp; react native</p>
-      <h1>The React ecosystem, as an encyclopedia that shows its work.<span class="blink" aria-hidden="true">▊</span></h1>
-      <p class="muted">{meta.one_liner} Every recommendation is <strong style="color:var(--fg)">context-keyed</strong>,
-      every load-bearing fact carries a <strong style="color:var(--fg)">verified-on date and a primary source</strong>,
-      and the corpus <a href={href('scorecard/')}>grades its own forecasts</a>.</p>
+      <p class="label-caps" style="margin:0">engineering intelligence · react &amp; react native</p>
+      <h1>React decisions, with receipts.<span class="blink" aria-hidden="true">▊</span></h1>
+      <p class="muted">Hundreds of libraries, conflicting takes, advice that quietly rots.
+      react-brain digests the ecosystem continuously and turns it into
+      <strong style="color:var(--fg)">context-keyed recommendations</strong> — every load-bearing fact
+      carries a <strong style="color:var(--fg)">verified-on date and a primary source</strong>, and every
+      default is a forecast <a href={href('scorecard/')}>graded on the public scorecard</a>.</p>
 
       <div class="statline">
         {stats.map((s) => (
@@ -38,13 +44,14 @@ const stats = [
       </div>
 
       <p style="display:flex; gap:.7rem; flex-wrap:wrap">
-        <a class="btn" href={href('entries/')}>Browse entries →</a>
-        <a class="btn ghost" href={href('doctor/')}>Analyze package.json</a>
+        <a class="btn" href={href('doctor/')}>Analyze your project →</a>
+        <a class="btn ghost" href={href('entries/')}>Browse decisions</a>
       </p>
+      <p class="meta" style="margin-top:.4rem">ecosystem pulse: last verification {lastVerified} · {updated7} decision{updated7 === 1 ? '' : 's'} re-verified this week · 6 sources digested</p>
     </div>
 
     <div style="max-width:34rem; justify-self:center; width:100%">
-      <div class="term" role="img" aria-label="Example react-brain doctor run: detected ecosystem choices compared against the encyclopedia, with fit marks and gaps">
+      <div class="term" role="img" aria-label="Example react-brain doctor run: detected ecosystem choices compared against the corpus, with fit marks and gaps">
         <div class="term-bar" aria-hidden="true"><i></i><i></i><i></i><span>react-brain — doctor</span></div>
         <pre aria-hidden="true"><span class="t-p">$ npx react-brain doctor .</span>
 
@@ -63,6 +70,17 @@ const stats = [
         <a href={href('architecture/')} style="color:var(--muted)">how it works →</a>
       </p>
     </div>
+  </div>
+
+  <div class="pipeline" aria-label="How knowledge flows through react-brain">
+    <span class="p-stage">6 newsletters · release notes · npm · 34 shipped apps</span>
+    <span class="p-arrow" aria-hidden="true">→</span>
+    <span class="p-stage">every claim fetch-verified &amp; dated</span>
+    <span class="p-arrow" aria-hidden="true">→</span>
+    <span class="p-stage">{entries.length} context-keyed decisions</span>
+    <span class="p-arrow" aria-hidden="true">→</span>
+    <span class="p-stage">doctor · migrate · review · MCP</span>
+    <a class="p-more" href={href('methodology/')}>methodology →</a>
   </div>
 
   <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr)); gap:0 4rem; align-items:start">
@@ -100,12 +118,41 @@ const stats = [
         <a href={href(`entries/${pick.slug}/#explanation`)}>Read the reasoning →</a>
       </div>
       <h2>Quick start</h2>
-      <pre><span class="t-p">$</span> npx react-brain doctor .      <span class="t-dim"># assess a repo</span>
-<span class="t-p">$</span> npx react-brain stack --rn    <span class="t-dim"># compose a stack</span>
-<span class="t-p">$</span> npx react-brain learn .       <span class="t-dim"># learning path</span></pre>
+      <pre><span class="t-p">$</span> npx react-brain doctor .      <span class="t-dim"># assess a repo, ranked priorities</span>
+<span class="t-p">$</span> npx react-brain migrate .     <span class="t-dim"># sequenced upgrade plan</span>
+<span class="t-p">$</span> npx react-brain review . --ci <span class="t-dim"># block dead deps in CI</span></pre>
       <p class="muted" style="font-size:.9rem">Organized by decision, not by article — {readingCount} deep-dives
       cited as evidence, every default a dated prediction on the
       <a href={href('scorecard/')}>scorecard</a>, and <a href={href('methodology/')}>nothing asserted casually</a>.</p>
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr)); gap:0 4rem; align-items:start">
+    <div>
+      <h2>One corpus, every surface</h2>
+      <pre><span class="t-dim"># this website — press ⌘K for the console</span>
+
+<span class="t-dim"># your terminal, zero install</span>
+<span class="t-p">$</span> npx -y @heart-it/react-brain doctor .
+
+<span class="t-dim"># your coding agent — 9 MCP tools</span>
+<span class="t-p">$</span> claude mcp add react-brain -- npx -y @heart-it/react-brain mcp
+
+<span class="t-dim"># your CI — dead/deprecated dep adds fail the build, with receipts</span>
+<span class="t-p">$</span> npx -y @heart-it/react-brain review . --base=origin/main --ci</pre>
+    </div>
+    <div>
+      <h2>Not another model answer</h2>
+      <div class="rows">
+        <div class="row"><span class="row-title vs-a">a model predicts from training data</span>
+          <span class="muted" style="display:block; font-size:.88rem; margin-top:.15rem">the corpus <strong style="color:var(--fg)">fetch-verifies against primary sources</strong>, and stamps the date</span></div>
+        <div class="row"><span class="row-title vs-a">a model's confidence is tone</span>
+          <span class="muted" style="display:block; font-size:.88rem; margin-top:.15rem">here confidence is a <strong style="color:var(--fg)">forecast graded in public</strong> — <a href={href('scorecard/')}>the scorecard</a></span></div>
+        <div class="row"><span class="row-title vs-a">a model's knowledge freezes at cutoff</span>
+          <span class="muted" style="display:block; font-size:.88rem; margin-top:.15rem">the corpus is <strong style="color:var(--fg)">re-verified weekly</strong> from 6 cross-checked sources — <a href={href('changelog/')}>changelog</a></span></div>
+      </div>
+      <p class="muted" style="font-size:.9rem">Don’t take the framing on faith — <a href={href('benchmark/')}>the staleness benchmark</a> scores
+      model answers against the corpus’s verified, dated facts with a deterministic rubric.</p>
     </div>
   </div>
 </Base>
@@ -120,4 +167,15 @@ const stats = [
   .hero-home > * { animation: rise .55s ease-out both; }
   .hero-home > *:nth-child(2) { animation-delay: .12s; }
   @keyframes rise { from { opacity: 0; transform: translateY(16px); } }
+
+  .pipeline { display: flex; flex-wrap: wrap; align-items: baseline; gap: .35rem .6rem;
+    margin: 2.6rem 0 2.2rem; padding: .85rem 1rem; border-block: 1px solid var(--line);
+    font: 500 .82rem/1.6 var(--font-mono); color: var(--muted); }
+  .pipeline .p-stage { white-space: nowrap; }
+  .pipeline .p-arrow { color: var(--accent); }
+  .pipeline .p-more { margin-left: auto; color: var(--muted); text-decoration: none; }
+  .pipeline .p-more:hover { color: var(--fg); }
+  @media (max-width: 640px) { .pipeline .p-stage { white-space: normal; } .pipeline .p-more { margin-left: 0; } }
+
+  .vs-a { font-family: var(--font-head); font-weight: 600; color: var(--bright); }
 </style>

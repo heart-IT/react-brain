@@ -4,7 +4,7 @@
 // left sidebar = the encyclopedia groups with entry counts (+ tools & meta pages at
 // the bottom), active-group highlighted on entry pages. Dark-first tonal layers,
 // Hanken Grotesk / Inter / JetBrains Mono, semantic color = categorization only.
-const { title = 'react-brain', description = 'A verified, context-keyed encyclopedia of the React + React Native ecosystem — what to use, when, and why.', activeGroup = null } = Astro.props;
+const { title = 'react-brain', description = 'Engineering decisions for React & React Native, with receipts — context-keyed recommendations, every fact dated and source-verified, every default a graded forecast. Analyze any repo with one command.', activeGroup = null } = Astro.props;
 import { GITHUB, href, corpusInfo, corpus, BASE } from '../lib/corpus.js';
 import interUrl from '../assets/fonts/Inter.woff2?url';
 import monoUrl from '../assets/fonts/JetBrainsMono.woff2?url';
@@ -48,7 +48,7 @@ const bottomLinks = [
       <a class="brand" href={href('')}><span aria-hidden="true" class="prompt">❯</span> react-brain</a>
       <form class="search" action={href('search/')} method="get" role="search">
         <span aria-hidden="true" class="prompt">❯</span>
-        <input id="nav-q" name="q" type="search" placeholder="search the corpus…" autocomplete="off" aria-label="Search the encyclopedia" />
+        <input id="nav-q" name="q" type="search" placeholder="ask — “should I use zustand?”" autocomplete="off" aria-label="Search the corpus" />
         <kbd>⌘K</kbd>
       </form>
       <nav aria-label="Primary">
