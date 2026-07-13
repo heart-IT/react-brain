@@ -112,8 +112,11 @@ Readings may carry `claim:` + `applies_when:` tags, which `doctor` matches again
 (FOR YOUR STACK / `advice[]` in --json) — pre-grounded, citation-ready suggestions — and
 doctor joins the production-app **census** for you-vs-field adoption with honest denominators.
 For agents, the corpus is also consumable as **MCP tools** (`tools/mcp-server.mjs`: capsules /
-query / recommend / doctor / decide / stack), and Phase 0 treats `react-brain doctor <repo> --json`
-as ground truth for platform/stage/deps.
+query / recommend / doctor / decide / stack / map). `query` defaults to a ~100-token capsule
+(depth:"full" for the whole entry); `map` is the repo pinboard — one deterministic index line
+per source file so agents locate code (~15 tokens/file) instead of grepping it into context.
+Phase 0 treats `react-brain doctor <repo> --json` as ground truth for platform/stage/deps and
+`map` as ground truth for where each domain lives.
 
 ## Relationship to existing skills
 

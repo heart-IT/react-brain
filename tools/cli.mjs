@@ -36,6 +36,9 @@ usage: react-brain <command> [args]
   doctor   <repo...>   advise a repo: detected stack vs the encyclopedia's context recommendations
                        + source scan for legacy core RN APIs → modern swaps + living-ADR premise
                        checks (--no-scan, --files, --json, --ci = exit 1 on expired records)
+  map      <repo>      the repo pinboard: one compact line per source file (domains, imports,
+                       exports, smells) + a DOMAINS→files index — code location for agents
+                       without grepping (--json, --dir=src/)
   evidence <repo...>   corpus self-audit across repos: blind spots, contradictions, field evidence
   pulse    [repo...]   corpus health: dead links, stale entries, stack drift
                        (flags: --today=YYYY-MM-DD, --no-links)
@@ -96,6 +99,7 @@ function query(terms) {
 
 switch (cmd) {
   case 'doctor': delegate('react-brain-doctor.mjs'); break;
+  case 'map': delegate('react-brain-map.mjs'); break;
   case 'evidence': delegate('react-brain-evidence.mjs'); break;
   case 'stack': delegate('react-brain-stack.mjs'); break;
   case 'pulse': delegate('react-brain-pulse.mjs'); break;

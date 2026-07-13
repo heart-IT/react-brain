@@ -477,6 +477,68 @@ export function adviseReadings(analysis, entries) {
   return out;
 }
 
+// ── repo map: the deterministic "pinboard" ─────────────────────────────────────
+// One compact index card per source file — imports (external, normalized to package
+// roots), exports, corpus-domain tags (imports → matchDetector; smells → per-file
+// detect_source hits), LOC — plus an inverted domain→files index. The Bytebell idea
+// minus the LLM summarizer: react-brain's questions are locate-and-classify, so the
+// index card is regex-extractable — zero ingest cost, nothing hallucinated. An agent
+// walks the map (~15 tokens/file) instead of grepping the repo into its context.
+const MAP_IMPORT_RE = /\b(?:import|export)\s+(?:[\w*{},\s$]+?from\s+)?['"]([^'"]+)['"]|\brequire\s*\(\s*['"]([^'"]+)['"]\s*\)|\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/g;
+const MAP_EXPORT_RE = /\bexport\s+(?:default\s+)?(?:async\s+)?(?:function\*?|class|const|let|var)\s+([A-Za-z_$][\w$]*)|\bexport\s*\{([^}]*)\}/g;
+
+function pkgRoot(spec) {
+  if (!spec || spec.startsWith('.') || spec.startsWith('/') || spec.startsWith('node:')) return null;
+  const parts = spec.split('/');
+  return spec.startsWith('@') ? parts.slice(0, 2).join('/') : parts[0];
+}
+
+export function mapRepo(repoPath, entries) {
+  const a = analyzeRepo(repoPath);
+  if (a.missing || a.notReact) return a;
+  const list = Array.isArray(entries) ? entries : Object.values(entries);
+  // per-file presence smells, gated the same way scanSourceSignals gates them
+  // (absent-rules are corpus-level statements, not per-file facts — skipped here)
+  const rules = [];
+  for (const e of list) {
+    const plats = e.platforms || [];
+    if (!(a.platform === 'both' || plats.includes(a.platform))) continue;
+    for (const r of e.detect_source || []) {
+      if (r.absent) continue;
+      const unless = Array.isArray(r.unless_dep) ? r.unless_dep : r.unless_dep ? [r.unless_dep] : [];
+      if (unless.some((d) => d in a.deps)) continue;
+      let re; try { re = new RegExp(r.pattern, r.flags || ''); } catch { continue; }
+      rules.push({ entry: e.id, re });
+    }
+  }
+  const root = resolve(repoPath);
+  const files = walkSource(root, []);
+  const out = [];
+  const domainFiles = {};   // entryId -> [relPath, …]
+  for (const f of files) {
+    let src;
+    try { if (statSync(f).size > MAX_BYTES) continue; src = readFileSync(f, 'utf8'); } catch { continue; }
+    const rel = f.startsWith(root) ? f.slice(root.length + 1) : f;
+    const ext = new Set(); const exps = new Set(); let m;
+    MAP_IMPORT_RE.lastIndex = 0;
+    while ((m = MAP_IMPORT_RE.exec(src))) { const p = pkgRoot(m[1] || m[2] || m[3]); if (p) ext.add(p); }
+    MAP_EXPORT_RE.lastIndex = 0;
+    while ((m = MAP_EXPORT_RE.exec(src))) {
+      if (m[1]) exps.add(m[1]);
+      else if (m[2]) for (let n of m[2].split(',')) { n = n.trim().split(/\s+as\s+/).pop().trim(); if (n && n !== 'default') exps.add(n); }
+    }
+    const domains = new Set(); const smells = new Set();
+    for (const p of ext) { const d = matchDetector(p); if (d) domains.add(d[1]); }
+    for (const r of rules) if (r.re.test(src)) { smells.add(r.entry); domains.add(r.entry); }
+    for (const id of domains) (domainFiles[id] ||= []).push(rel);
+    out.push({ path: rel, loc: src.split('\n').length, ext: [...ext].sort(),
+      exports: [...exps], domains: [...domains].sort(), smells: [...smells].sort() });
+  }
+  out.sort((x, y) => x.path.localeCompare(y.path));
+  return { name: a.name, path: a.path, platform: a.platform, stage: a.stage,
+    files: out, domains: domainFiles, scanned: files.length, capped: files.length >= MAX_FILES };
+}
+
 // ── census snapshot (observed adoption in shipped apps) ───────────────────────
 // Committed by `react-brain census`; doctor joins it per entry for "you vs the
 // field" framing. Honest denominators live IN the snapshot (RN-only entries ÷ RN apps).

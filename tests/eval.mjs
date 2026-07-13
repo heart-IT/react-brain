@@ -92,15 +92,22 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
   check(out.includes('maps'), 'stack: feature-domain footer mentions maps');
 }
 
-// ── 7. MCP server: handshake + tool list ────────────────────────────────────────
+// ── 7. MCP server: handshake + tool list + query depth tiers ────────────────────
 {
   const input = [
     '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18"}}',
-    '{"jsonrpc":"2.0","id":2,"method":"tools/list"}', ''].join('\n');
+    '{"jsonrpc":"2.0","id":2,"method":"tools/list"}',
+    '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"query","arguments":{"topic":"state"}}}',
+    '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"query","arguments":{"topic":"state","depth":"full"}}}',
+    ''].join('\n');
   const r = spawnSync(process.execPath, [join(ROOT, 'tools/mcp-server.mjs')], { input, encoding: 'utf8', timeout: 30000 });
   const lines = r.stdout.trim().split('\n').map((l) => JSON.parse(l));
   check(lines[0]?.result?.serverInfo?.name === 'react-brain', 'mcp: initialize returns serverInfo');
-  check(lines[1]?.result?.tools?.length === 6, 'mcp: six tools listed (incl. decide)');
+  check(lines[1]?.result?.tools?.length === 7, 'mcp: seven tools listed (incl. decide + map)');
+  const text = (i) => lines[i]?.result?.content?.[0]?.text || '';
+  check(text(2).includes('RECOMMEND:') && !text(2).includes('OPTIONS:'), 'mcp query: capsule depth is the default (no options dump)');
+  check(text(3).includes('OPTIONS:'), 'mcp query: depth "full" returns the whole entry');
+  check(text(2).length < text(3).length / 3, `mcp query: capsule is <1/3 the tokens of full (${text(2).length} vs ${text(3).length})`);
 }
 
 // ── 8. living decision records: decide generates, doctor re-checks premises ─────
@@ -173,6 +180,19 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
   const wData = (w.advice || []).filter((a) => a.entry === 'RB-E-DATA');
   check(wData.every((a) => a.title === 'Creating Query Abstractions'),
     'advice: why-you-want-react-query is suppressed when the cache is installed');
+}
+
+// ── 11. map: the repo pinboard is deterministic and correctly tagged ────────────
+{
+  const m = JSON.parse(execFileSync(process.execPath,
+    [join(ROOT, 'tools/react-brain-map.mjs'), FIX('rn-smells'), '--json'], { encoding: 'utf8' }));
+  const feed = m.files.find((f) => f.path === 'src/Feed.jsx');
+  check(!!feed, 'map: fixture source file indexed');
+  check(feed?.exports.includes('Feed') && feed?.exports.includes('legacyPing'), 'map: exports extracted');
+  check(feed?.ext.includes('@react-native-async-storage/async-storage'), 'map: scoped import normalized to package root');
+  check(feed?.domains.includes('RB-E-STORAGE'), 'map: import-based domain tag (AsyncStorage → STORAGE)');
+  check(feed?.smells.includes('RB-E-LISTS') && feed?.smells.includes('RB-E-KEYBOARD'), 'map: per-file smell tags fire');
+  check((m.domains['RB-E-KEYBOARD'] || []).includes('src/Feed.jsx'), 'map: inverted DOMAINS index lists the file');
 }
 
 // ── report ──────────────────────────────────────────────────────────────────────

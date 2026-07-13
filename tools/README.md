@@ -64,6 +64,20 @@ node tools/react-brain-doctor.mjs ../../ledgerhr ../../ourpot/ourpot ../../bitba
 node tools/react-brain-doctor.mjs . --json     # machine-readable — agents / mentor Phase 0
 ```
 
+## `react-brain-map.mjs` — the repo pinboard (code location for agents)
+One compact line per source file — corpus-domain tags (detector imports + per-file smell
+hits), external imports, exports, LOC — plus an inverted DOMAINS→files index. An agent
+answers "where does data fetching / forms / state live?" from ~15 tokens per file instead
+of grepping the repo into its context window. Deterministic regex extraction (zero LLM,
+zero network, no ingest step to cache): the Bytebell-style precompute-and-serve-compact
+idea, minus the LLM summarizer and the database stack — react-brain's questions are
+locate-and-classify, so the index card is extractable, not hallucinatable.
+Division of labor: **doctor = what the stack is · map = where it lives.**
+```sh
+node tools/react-brain-map.mjs ../../ledgerhr            # pinboard (~7K tokens for 217 files)
+node tools/react-brain-map.mjs . --dir=src/ --json       # filtered / machine-readable
+```
+
 ## `react-brain-evidence.mjs` — code → knowledge
 The inverse: runs detection across a *corpus* of repos and feeds the aggregate back at the
 corpus — §1 MISSING (deps with no entry = blind spots), §2 CONTRADICTION (real choice ≠

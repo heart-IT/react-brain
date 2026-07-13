@@ -67,10 +67,25 @@ function entryText(e) {
   return L.join('\n');
 }
 
-function query({ topic }) {
+// capsule: the ~100-token tier agents should default to — recommendation + top
+// when-clauses + tagged claims; `depth:"full"` returns the whole entry on demand.
+function entryCapsule(e) {
+  const L = [];
+  L.push(`${e.id} — ${e.topic}  (${e.status}·${e.confidence} · updated ${String(e.updated)})`);
+  L.push(`RECOMMEND: ${trunc(e.recommend?.default || '(none)', 260)}`);
+  for (const w of (e.recommend?.when || []).slice(0, 3)) L.push(`  WHEN: ${trunc(w, 150)}`);
+  for (const r of [...(e.reading || []), ...(e.watching || [])].filter((x) => x.claim).slice(0, 2))
+    L.push(`  CLAIM: ${trunc(r.claim, 200)}  (${r.url})`);
+  if (e.defer_to_skill) L.push(`  DEPTH: ${e.defer_to_skill} skill`);
+  L.push(`  (options/notes/all reading: re-query with depth:"full")`);
+  return L.join('\n');
+}
+
+function query({ topic, depth = 'capsule' }) {
   const ranked = searchEntries(String(topic || '').split(/\s+/).filter(Boolean));
   if (!ranked.length) return `no entry matches "${topic}". Try a category like: state, data, nav, styling, native, build, testing, security, maps, p2p …`;
-  return ranked.map(entryText).join('\n\n' + '═'.repeat(70) + '\n\n');
+  const render = depth === 'full' ? entryText : entryCapsule;
+  return ranked.map(render).join(depth === 'full' ? '\n\n' + '═'.repeat(70) + '\n\n' : '\n\n');
 }
 
 function recommend({ topic, context = [] }) {
@@ -98,6 +113,12 @@ function decide({ topic, path }) {
   return execFileSync(process.execPath, args, { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
 }
 
+function map({ path, dir }) {
+  const args = [resolve(__dir, 'react-brain-map.mjs'), String(path)];
+  if (dir) args.push(`--dir=${String(dir)}`);
+  return execFileSync(process.execPath, args, { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
+}
+
 function stack({ flags = '' }) {
   const args = String(flags).split(/\s+/).filter((f) => /^--[\w=-]+$/.test(f));   // flags only — no arbitrary args
   return execFileSync(process.execPath, [resolve(__dir, 'react-brain-stack.mjs'), ...args],
@@ -109,8 +130,8 @@ const TOOLS = [
     description: 'Compact orientation index of the react-brain encyclopedia: every entry as one line (id · status·confidence · platforms · default recommendation), grouped. Start here; then `query` the 1-3 relevant entries.',
     inputSchema: { type: 'object', properties: { group: { type: 'string', description: 'optional group filter: react-foundations | app-architecture | ui | platform-native | tooling-ops | ai' } } } },
   { name: 'query', fn: query,
-    description: 'Full encyclopedia entry lookup by id, category, or keyword (e.g. "state", "data fetching", "RB-E-MAPS"): options with tradeoffs, context-keyed recommendation, verified notes, vetted reading, sources.',
-    inputSchema: { type: 'object', properties: { topic: { type: 'string' } }, required: ['topic'] } },
+    description: 'Encyclopedia entry lookup by id, category, or keyword (e.g. "state", "data fetching", "RB-E-MAPS"). Default depth "capsule" (~100 tokens: recommendation, top when-clauses, tagged claims) — usually all you need; depth "full" adds every option/tradeoff, verified notes, all reading and sources.',
+    inputSchema: { type: 'object', properties: { topic: { type: 'string' }, depth: { type: 'string', enum: ['capsule', 'full'], description: 'capsule (default, compact) | full (whole entry)' } }, required: ['topic'] } },
   { name: 'recommend', fn: recommend,
     description: 'Resolve one entry\'s recommendation against a project context (tokens like "expo", "p2p", "production", "bare rn"). Returns the matched when-clause or the default, with confidence.',
     inputSchema: { type: 'object', properties: { topic: { type: 'string' }, context: { type: 'array', items: { type: 'string' } } }, required: ['topic'] } },
@@ -120,6 +141,9 @@ const TOOLS = [
   { name: 'decide', fn: decide,
     description: 'Generate a LIVING DECISION RECORD (ADR markdown with receipts) for a topic, optionally resolved against a repo path: context-resolved pick, candidate table, evidence chain (sources, calibration track record, npm signals), and a machine-readable premise block that react-brain doctor re-checks over time.',
     inputSchema: { type: 'object', properties: { topic: { type: 'string' }, path: { type: 'string', description: 'optional absolute repo path for context' } }, required: ['topic'] } },
+  { name: 'map', fn: map,
+    description: 'The repo PINBOARD — code location without grepping: one compact line per source file (corpus-domain tags via detectors + smell hits, external imports, exports, LOC) plus a DOMAINS→files index. Use it to decide WHICH files to read ("where does data fetching / forms / state live"), then read only those. Deterministic regex extraction, no LLM. doctor = what the stack is; map = where it lives.',
+    inputSchema: { type: 'object', properties: { path: { type: 'string', description: 'absolute path to the repo' }, dir: { type: 'string', description: 'optional path-prefix filter, e.g. "src/"' } }, required: ['path'] } },
   { name: 'stack', fn: stack,
     description: 'Compose a greenfield stack from intent flags (e.g. "--rn --expo --p2p --stage=mvp" or "--web --ssr"). Returns an explained, install-ready stack plan.',
     inputSchema: { type: 'object', properties: { flags: { type: 'string' } }, required: ['flags'] } },
