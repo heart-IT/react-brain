@@ -62,7 +62,9 @@ const toc = [
     <span class={`badge ${e.status}`}>{e.status}</span>
     <span class={`badge ${e.confidence}`}>confidence: {e.confidence}</span>
     {tr && <span class={`badge ${tr}`}>track: {tr}</span>}
-    {tier?.score != null && <a class="meta" href={href('scorecard/')} style="margin-left:.35rem">this tier holds {tier.score}% on the public scorecard ({tier.resolved}/{tier.total} graded) →</a>}
+    {tier?.score != null && (tier.resolved >= 3
+      ? <a class="meta" href={href('scorecard/')} style="margin-left:.35rem">this tier holds {tier.score}% on the public scorecard ({tier.resolved}/{tier.total} graded · {tier.overturned} overturned) →</a>
+      : <a class="meta" href={href('scorecard/')} style="margin-left:.35rem">early: {tier.resolved}/{tier.total} of this tier graded so far ({tier.overturned} overturned) — the public scorecard →</a>)}
   </p>
   {refs.length > 0 && (
     <p class="meta" style="margin:.2rem 0 0">related decisions: {refs.map((r, i) => (

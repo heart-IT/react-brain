@@ -24,11 +24,18 @@ const claimText = (c) => /[.!?)\u2026\u201d"']$/.test(c.trim()) ? c : c + '\u202
         <tr>
           <td><span class={`badge ${r.t}`}>{r.t}</span></td>
           <td>{r.total}</td><td>{r.resolved}</td><td>{r.held}</td><td>{r.weakened}</td><td>{r.overturned}</td>
-          <td>{r.score != null ? <strong>{r.score}%</strong> : <span class="muted">unproven — no resolutions yet</span>}</td>
+          <td>{r.score != null
+            ? <><strong>{r.score}%</strong>{r.resolved < 3 && <span class="meta"> (early — n={r.resolved})</span>}</>
+            : <span class="muted">unproven — no resolutions yet</span>}</td>
         </tr>
       ))}
     </tbody>
   </table></div>
+  <p class="muted" style="font-size:.9rem">Reading the numbers: <strong style="color:var(--fg)">{tierRows.reduce((n, r) => n + r.overturned, 0)} of {tierRows.reduce((n, r) => n + r.resolved, 0)} graded predictions have been overturned</strong> —
+  every “weakened” verdict means the default <em>survived</em> an adversarial challenge but gained a
+  real caveat, and it's deliberately scored harshly at 0.5. A modest score in the <span class="badge low">low</span> tier
+  is calibration working: low confidence <em>predicts</em> churn — the tiers earning their ordering
+  (high above low) is the claim this page tests. Tiers marked <em>early</em> have too few grades to read as a trend.</p>
 
   <h2>Resolved predictions</h2>
   <div class="rows">
