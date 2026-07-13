@@ -4,8 +4,9 @@
 
 A continuously verified decision corpus — every recommendation context-keyed,
 every load-bearing fact dated and source-verified, every default a forecast
-graded in public — served as a website, a zero-install CLI, and a 9-tool MCP
-server for coding agents. Under the hood: an **ecosystem encyclopedia**, its
+graded in public — served as a [website](https://heart-it.github.io/react-brain/),
+a zero-install CLI, and a 9-tool MCP server for coding agents
+(npm: [`@heart-it/react-brain`](https://www.npmjs.com/package/@heart-it/react-brain)). Under the hood: an **ecosystem encyclopedia**, its
 **tutorial**, and a Claude **mentor skill** that applies it to real projects.
 
 The name: it's a *brain* of React-ecosystem knowledge — which libraries, which

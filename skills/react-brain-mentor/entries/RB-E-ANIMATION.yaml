@@ -11,6 +11,7 @@ options:
   - { name: "react-native-worklets 8.0", tradeoff: "the worklets runtime under Reanimated 4 (now its own package); Shareable values across isolated runtimes" }
   - { name: "react-native-skia (2.x)", tradeoff: "GPU 2D drawing; v2.1 plays Lottie via Skottie; pairs with Reanimated" }
   - { name: "lottie-react-native", tradeoff: "designer Lottie/JSON animations; v7 adds visionOS" }
+  - { name: "Rive — @rive-app/react-native (Nitro) / rive-react-native (legacy)", tradeoff: "designer-driven INTERACTIVE vector animation (state machines) — the Lottie alternative; the SDK was rewritten on Nitro under Rive's official scope (@rive-app/react-native, 0.4.x EARLY line): files/view-models become shared typed HybridObjects — Margelo-measured up to 94× multi-view loads + ~4.7× lower memory vs legacy (rewrite authors' own benchmark); legacy unscoped pkg at 9.8.3, quiet since 2026-04" }
   - { name: "react-native-morph-view (Software Mansion)", tradeoff: "GPU image-morph transitions (Metal/AGSL shaders, metaball blend); RN 0.76+, iOS 15.1+/Android 13+; niche/new" }
   - { name: "Animated (core)", tradeoff: "built-in; RN 0.85 shared backend allows layout-prop animation with the native driver (from 0.85.1)" }
   - { name: "Moti / LayoutAnimation", tradeoff: "declarative transitions; Moti wraps Reanimated — but last published 2025-01 (verified vs npm 2026-07): drifting toward maintenance; fine if installed, prefer plain Reanimated/LayoutAnimation for new work" }
@@ -23,6 +24,7 @@ recommend:
     - "web animation (React DOM) → Motion / framer-motion — Reanimated & Gesture Handler are React Native only"
     - "custom/GPU drawing or visuals → react-native-skia"
     - "designer-made animations → lottie-react-native (or Skia/Skottie)"
+    - "designer animations that need INTERACTIVITY/state machines, or many Rive views sharing files → Rive; new work goes to the Nitro line @rive-app/react-native (0.4.x, early — pin), not the quiet legacy package"
     - "image-to-image morph transition → react-native-morph-view (GPU shader; niche, lead-level)"
     - "simple fade/slide, want declarative → Moti / LayoutAnimation (RN); Motion (web)"
     - "custom screen / shared-element transitions on React Navigation → react-native-screen-transitions (new; pin)"
@@ -31,13 +33,17 @@ recommend:
 note: >
   RN 0.85 (2026-04) introduced a shared C++ animation backend so Animated and Reanimated
   ride one engine (built with Software Mansion). Heavy-animation perf routes to
-  react-native-best-practices. WEB: Motion (the framer-motion successor) is the web
+  react-native-best-practices. RIVE (added 2026-07-13, Margelo blog pass): the RN SDK's
+  Nitro rewrite ships as NEW scoped @rive-app/react-native (0.4.14) while legacy
+  rive-react-native sits at 9.8.3 (both verified vs npm 2026-07-13) — a supersession in
+  progress; WATCH for the new line reaching 1.0 or a formal legacy deprecation before
+  adding a migrate rule. WEB: Motion (the framer-motion successor) is the web
   animation default — added 2026-06-25 after the evidence-loop corpus self-audit flagged
   that this [react]-platform entry had options/recommend for React Native only, no web pick
   (caught from ledgerhr's framer-motion usage). Verified vs the official RN 0.85 blog.
 defer_to_skill: react-native-best-practices
 doc: "RB-E-ANIMATION.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-10
+updated: 2026-07-13
 reading:
   - title: "CSS vs. JavaScript Animations"
     url: "https://www.joshwcomeau.com/animation/css-vs-javascript/"
@@ -65,8 +71,15 @@ reading:
     url: "https://barvian.me/react-exit-animations"
     by: "Max Barvian"
     what: "Uses Suspense to freeze exiting content during animations; explains Fragment refs, useInsertionEffect, and Suspense DOM-update behavior. A durable web exit-animation technique grounded in React internals."
+  - title: "Rewriting Rive React Native with Nitro Modules: up to 94× Faster Multi-View Loads"
+    url: "https://blog.margelo.com/rewriting-rive-react-native-with-nitro-modules"
+    by: "Miklós Fazekas (Margelo)"
+    what: "Why the Rive RN SDK's wins came from MODELING, not micro-optimization: the legacy module flattened files/view-models into a per-view God object, so every view re-parsed state; Nitro HybridObjects make them shared typed objects (parse once, render many) — 94× on a 24-view load, ~4.7× lower memory, ~0.3-0.4µs calls vs ~1.5µs TurboModule / ~21µs legacy bridge (iPhone 13 mini, release; the rewrite authors' own benchmark). A general lesson for native-module design: model objects, not modules."
+    claim: "You ship Rive — the Nitro line (@rive-app/react-native, 0.4.x early) makes files/view-models shared typed objects: parse once, render many views (94× multi-view loads, ~4.7× lower memory in the authors' benchmark); the legacy unscoped package is quiet."
+    applies_when: { deps: ["rive-react-native", "@rive-app/react-native"], platforms: [react-native] }
 sources:
   - "https://reactnative.dev/blog/2026/04/07/react-native-0.85"
+  - "https://registry.npmjs.org/@rive-app%2freact-native"
   - "https://reactnavigation.org/blog/2026/04/27/building-custom-screen-transitions"
   - "https://registry.npmjs.org/react-native-screen-transitions/latest"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
@@ -80,6 +93,8 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "moti", label: "Moti", token: "moti" }
   - { pkg: "react-native-screen-transitions", label: "screen-transitions", token: "screen-transitions" }
   - { pkg: "react-native-ease", label: "react-native-ease", token: "react-native-ease" }
+  - { pkg: "@rive-app/react-native", label: "Rive (Nitro line)", token: "rive" }
+  - { pkg: "rive-react-native", label: "Rive (legacy pkg)", token: "rive" }
 detect_source:   # source-level signals owned by this entry (regex over repo source)
   - pattern: "useNativeDriver:\\s*false"
     signal: "JS-driven Animated animations (useNativeDriver: false)"
