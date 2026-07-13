@@ -23,13 +23,11 @@ const appList = snap ? Object.values(snap.apps).sort((a, b) => (a.platform > b.p
   produced a 60× "adoption surge"); the dependency choices of real, active, production
   open-source apps can't. The census fetches each cohort app's <code>package.json</code>, runs
   the corpus's own detectors over it, and reports observed adoption per decision — with honest
-  denominators: React-Native-only decisions are measured against the RN apps only. Counts are
-  <em>evidence, not verdicts</em> — mature apps carry legacy weight (Redux, styled-components)
+  denominators: React-Native-only decisions are measured against the RN apps only. Counts are <em>evidence, not verdicts</em> — mature apps carry legacy weight (Redux, styled-components)
   that the context-keyed recommendations already account for.</p>
 
   {!snap && (
-    <div class="card caution"><p class="muted" style="margin:0">No census snapshot yet — run
-    <code>npx react-brain census</code> and rebuild. This page renders from
+    <div class="card caution"><p class="muted" style="margin:0">No census snapshot yet — run <code>npx react-brain census</code> and rebuild. This page renders from
     <code>tools/.census-baseline.json</code>.</p></div>
   )}
 

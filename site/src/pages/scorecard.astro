@@ -11,9 +11,7 @@ const claimText = (c) => /[.!?)\u2026\u201d"']$/.test(c.trim()) ? c : c + '\u202
   <h1>Calibration scorecard</h1>
   <p class="muted prose">Every <code>recommend.default</code> in the corpus is a
   dated, falsifiable <strong>prediction</strong> with a check-by horizon (shorter for fast-moving,
-  low-confidence domains). Adversarial challenges and live npm signals resolve them:
-  <span class="badge held">held</span> = 1.0 · <span class="badge weakened">weakened</span> = 0.5 ·
-  <span class="badge overturned">overturned</span> = 0.0, scored per confidence tier. This is the page
+  low-confidence domains). Adversarial challenges and live npm signals resolve them: <span class="badge held">held</span> = 1.0 · <span class="badge weakened">weakened</span> = 0.5 · <span class="badge overturned">overturned</span> = 0.0, scored per confidence tier. This is the page
   that keeps the word “confidence” honest — an assertion becomes a measurement.</p>
 
   <h2>Score by confidence tier</h2>
@@ -56,7 +54,6 @@ const claimText = (c) => /[.!?)\u2026\u201d"']$/.test(c.trim()) ? c : c + '\u202
   })}
   </div>
 
-  <p class="muted">Ledger: append-only <a href={`${GITHUB}/blob/main/tools/predictions.jsonl`}><code>tools/predictions.jsonl</code></a> —
-  {sc.totalPredictions} predictions to date. Unresolved ones aren't shown as wins; the score only counts
+  <p class="muted">Ledger: append-only <a href={`${GITHUB}/blob/main/tools/predictions.jsonl`}><code>tools/predictions.jsonl</code></a> — {sc.totalPredictions} predictions to date. Unresolved ones aren't shown as wins; the score only counts
   what has actually been re-examined.</p>
 </Base>

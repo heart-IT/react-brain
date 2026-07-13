@@ -22,14 +22,12 @@ const NEWSLETTERS = [
   checkable, dated, and eventually scored.</strong> Five mechanisms do the work:</p>
 
   <h2>1. Verified facts, not vibes</h2>
-  <p class="prose">Load-bearing facts (versions, maintenance status, breaking changes) are checked against
-  <em>primary sources</em> — official blogs, changelogs, the npm registry — before they enter an entry, and
+  <p class="prose">Load-bearing facts (versions, maintenance status, breaking changes) are checked against <em>primary sources</em> — official blogs, changelogs, the npm registry — before they enter an entry, and
   stamped with a <code>verified:</code> date you can see on every page. Newsletter claims are treated as
   leads, never as facts.</p>
 
   <h2>2. Context-keyed recommendations</h2>
-  <p class="prose">No entry says "X is best." Recommendations are written as <em>context → choice</em>
-  clauses ("GraphQL backend → Apollo"; "P2P/serverless app → a client cache is N/A by design"). The same
+  <p class="prose">No entry says "X is best." Recommendations are written as <em>context → choice</em> clauses ("GraphQL backend → Apollo"; "P2P/serverless app → a client cache is N/A by design"). The same
   resolver that renders these pages powers the CLI and the <a href={href('doctor/')}>doctor</a>, so the
   advice can't drift between surfaces.</p>
 
@@ -53,9 +51,7 @@ const NEWSLETTERS = [
   plus a golden-fixture eval in <a href={`${GITHUB}/actions`}>CI on every change</a>.</p>
 
   <h2>Editorial line on articles</h2>
-  <p class="prose">Great articles are cited with a short editorial annotation on <em>why they matter</em>
-  and linked prominently to the original. Nothing is republished or paraphrased at length —
-  <a href={href('reading/')}>the reading index</a> exists to send you to the canonical source with
+  <p class="prose">Great articles are cited with a short editorial annotation on <em>why they matter</em> and linked prominently to the original. Nothing is republished or paraphrased at length — <a href={href('reading/')}>the reading index</a> exists to send you to the canonical source with
   context, not to replace it.</p>
 
   <h2 id="sources">Sources &amp; thanks</h2>

@@ -9,9 +9,7 @@ const { byId } = corpus();
   <p class="muted prose">LLMs are the world's largest distributor of React advice — and their training
   cutoffs make much of it <strong style="color:var(--fg)">quietly wrong</strong>. This corpus is a dated,
   verified answer key, so it can measure the rot: {bank.length} questions, every one derived from a
-  verified corpus fact, graded by a <strong style="color:var(--fg)">deterministic regex rubric</strong>
-  (no judge model, transcripts published). The headline metric is
-  <strong style="color:var(--fg)">confidently-stale%</strong> — asserting an outdated world without
+  verified corpus fact, graded by a <strong style="color:var(--fg)">deterministic regex rubric</strong> (no judge model, transcripts published). The headline metric is <strong style="color:var(--fg)">confidently-stale%</strong> — asserting an outdated world without
   hedging. Being wrong is forgivable; being confidently wrong burns users.</p>
 
   <h2>Leaderboard</h2>
@@ -21,8 +19,7 @@ const { byId } = corpus();
       question bank and the deterministic rubric are published; only the API spend hasn't happened yet.
       What it will show: each model's <em>fresh%</em> and <em>confidently-stale%</em>, bare vs with the
       corpus injected as context — that with-corpus delta is the product, quantified.</p>
-      <p class="muted" style="margin:.7rem 0 0; font-size:.9rem"><strong style="color:var(--fg)">One-click:</strong> maintainers run the
-      <code>bench</code> GitHub Action (Actions → bench → Run workflow; needs the <code>ANTHROPIC_API_KEY</code> repo secret) —
+      <p class="muted" style="margin:.7rem 0 0; font-size:.9rem"><strong style="color:var(--fg)">One-click:</strong> maintainers run the <code>bench</code> GitHub Action (Actions → bench → Run workflow; needs the <code>ANTHROPIC_API_KEY</code> repo secret) —
       results commit themselves and this page fills in on the next deploy. <strong style="color:var(--fg)">Any machine:</strong></p>
       <pre style="margin:.6rem 0 0"><span class="t-p">$</span> npx react-brain bench --run --model=claude-sonnet-5
 <span class="t-p">$</span> npx react-brain bench --run --model=claude-sonnet-5 --with-corpus  <span class="t-dim"># the delta IS the product</span></pre>
@@ -61,9 +58,7 @@ const { byId } = corpus();
       maintained, verified knowledge layer is worth.</li>
   </ul>
   <p class="muted prose">The bank regenerates its authority weekly — every corpus harvest re-verifies the
-  answer key, so models drift staler against it over time. Rubric + runner:
-  <a href={`${GITHUB}/blob/main/bench/questions.yaml`}><code>bench/questions.yaml</code></a> ·
-  <a href={`${GITHUB}/blob/main/tools/react-brain-bench.mjs`}><code>tools/react-brain-bench.mjs</code></a>.</p>
+  answer key, so models drift staler against it over time. Rubric + runner: <a href={`${GITHUB}/blob/main/bench/questions.yaml`}><code>bench/questions.yaml</code></a> · <a href={`${GITHUB}/blob/main/tools/react-brain-bench.mjs`}><code>tools/react-brain-bench.mjs</code></a>.</p>
 
   <h2>The question bank</h2>
   <div class="tbl"><table>

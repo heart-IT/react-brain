@@ -138,8 +138,7 @@ const toc = [
   )}
 
   {pkgs.length > 0 && (
-    <p class="muted" style="font-size:.88rem">npm weekly downloads (from the corpus's last signals run):
-      {pkgs.map((d, i) => <span>{i > 0 && ' · '}<code>{d.pkg}</code> {fmtDownloads(dl[d.pkg])}</span>)}
+    <p class="muted" style="font-size:.88rem">npm weekly downloads (from the corpus's last signals run): {pkgs.map((d, i) => <span>{i > 0 && ' · '}<code>{d.pkg}</code> {fmtDownloads(dl[d.pkg])}</span>)}
     </p>
   )}
 
@@ -189,8 +188,7 @@ const toc = [
   {doc && (
     <>
       <h2 id="explanation">The full explanation</h2>
-      <p class="muted" style="font-size:.88rem">The reviewed long-form essay behind this entry — the
-      <em>why</em>, not a how-to. Also on <a href={`${GITHUB}/blob/main/encyclopedia/${e.doc}`} rel="noopener">GitHub</a>.</p>
+      <p class="muted" style="font-size:.88rem">The reviewed long-form essay behind this entry — the <em>why</em>, not a how-to. Also on <a href={`${GITHUB}/blob/main/encyclopedia/${e.doc}`} rel="noopener">GitHub</a>.</p>
       <article class="prose" set:html={doc} />
     </>
   )}

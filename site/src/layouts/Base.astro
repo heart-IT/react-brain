@@ -602,6 +602,9 @@ context · clear · help</span>`); break;
   li { margin: .3rem 0; }
   .rows > * { display: block; padding: .9rem 0; border-top: 1px solid var(--line); margin: 0; }
   .rows > *:last-child { border-bottom: 1px solid var(--line); }
+  /* Astro collapses whitespace between inline elements on separate source lines —
+     adjacent badges glue into "heldhigh" without this (scorecard, entry heroes, …) */
+  .badge + .badge { margin-left: .35rem; }
   a.row { text-decoration: none; color: inherit; padding-inline: .55rem; margin-inline: -.55rem; border-radius: 4px; }
   a.row:hover { background: var(--card); }
   a.row:hover .row-title { color: var(--accent); }
