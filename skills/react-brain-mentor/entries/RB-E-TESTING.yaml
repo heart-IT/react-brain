@@ -59,6 +59,13 @@ sources:
   - "https://docs.maestro.dev/get-started/maestro-mcp"
   - "https://github.com/callstackincubator/react-native-harness"
   - "https://github.com/mdjastrzebski/test-renderer"
+migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-brain migrate`)
+  - from: { pkg: "react-test-renderer" }
+    to: "React Native Testing Library v14 (host-element role/label queries)"
+    urgency: deprecated
+    effort: M
+    why: "react-test-renderer is deprecated by React core; RNTL v14 runs its own react-reconciler-based test renderer rendering host elements only — don't reach for react-test-renderer in new test code"
+    receipts: ["https://github.com/mdjastrzebski/test-renderer"]
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "jest", label: "Jest", token: "jest" }
   - { pkg: "vitest", label: "Vitest", token: "vitest" }

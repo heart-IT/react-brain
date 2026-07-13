@@ -74,3 +74,10 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "react-native-audio-api", label: "audio-api (Web Audio)", token: "audio-api" }
   - { pkg: "react-native-qrcode-svg", label: "QR generation (qrcode-svg)", token: "scanning" }
   - { pkg: "expo-image-picker", label: "expo-image-picker", token: "camera" }
+migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-brain migrate`)
+  - from: { pkg: "expo-av" }
+    to: "expo-video (playback) + expo-audio"
+    urgency: deprecated
+    effort: M
+    why: "expo-av is DEPRECATED — removed from Expo Go in SDK 55 and no longer patched; expo-video splits player logic (VideoPlayer) from view (VideoView), expo-audio covers audio playback"
+    receipts: ["https://expo.dev/changelog/sdk-55"]

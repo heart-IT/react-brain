@@ -78,6 +78,19 @@ node tools/react-brain-map.mjs ../../ledgerhr            # pinboard (~7K tokens 
 node tools/react-brain-map.mjs . --dir=src/ --json       # filtered / machine-readable
 ```
 
+## `react-brain-migrate.mjs` — the sequenced upgrade planner
+briefing = what moved · doctor = where you stand · **migrate = the plan.** Installed
+versions × per-entry `migrate:` rules (verified corpus facts: dead services, deprecations,
+supersessions, version ladders — each with receipts) + the modern-defaults source scan,
+sequenced into phases: DO FIRST (dead + gates others wait on) → deprecated/superseded →
+upgrades → blocked-until-gate (each blocked step names the exact requirement and installed
+version). Rules live in `entries/<ID>.yaml` `migrate:` (lint-validated), so the planner
+grows with every harvest and never touches tool code.
+```sh
+node tools/react-brain-migrate.mjs ../../ourpot/ourpot          # phased plan with receipts
+node tools/react-brain-migrate.mjs . --json                     # machine-readable
+```
+
 ## `react-brain-evidence.mjs` — code → knowledge
 The inverse: runs detection across a *corpus* of repos and feeds the aggregate back at the
 corpus — §1 MISSING (deps with no entry = blind spots), §2 CONTRADICTION (real choice ≠

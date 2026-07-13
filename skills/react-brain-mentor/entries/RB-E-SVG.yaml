@@ -56,3 +56,16 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "react-native-vector-icons", label: "react-native-vector-icons (legacy)", token: "legacy" }
   - { pkg: "lucide-react-native", label: "Lucide icons", token: "lucide" }
   - { pkg: "@expo/vector-icons", label: "@expo/vector-icons (deprecated SDK 56)", token: "deprecated" }
+migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-brain migrate`)
+  - from: { pkg: "react-native-vector-icons" }
+    to: "per-family @react-native-vector-icons/* packages (official codemod)"
+    urgency: superseded
+    effort: S
+    why: "the monolith is superseded by scoped per-family packages (v11+); the maintainer ships a codemod covering both this and @expo/vector-icons"
+    receipts: ["https://github.com/oblador/react-native-vector-icons/blob/master/MIGRATION.md"]
+  - from: { pkg: "@expo/vector-icons" }
+    to: "per-family @react-native-vector-icons/* packages (same codemod)"
+    urgency: deprecated
+    effort: S
+    why: "deprecated in Expo SDK 56 — upstream work made the wrapper unnecessary; use the scoped packages directly"
+    receipts: ["https://expo.dev/changelog/sdk-56"]

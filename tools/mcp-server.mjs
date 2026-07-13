@@ -119,6 +119,11 @@ function map({ path, dir }) {
   return execFileSync(process.execPath, args, { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
 }
 
+function migrate({ path }) {
+  return execFileSync(process.execPath, [resolve(__dir, 'react-brain-migrate.mjs'), String(path)],
+    { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
+}
+
 function stack({ flags = '' }) {
   const args = String(flags).split(/\s+/).filter((f) => /^--[\w=-]+$/.test(f));   // flags only — no arbitrary args
   return execFileSync(process.execPath, [resolve(__dir, 'react-brain-stack.mjs'), ...args],
@@ -144,6 +149,9 @@ const TOOLS = [
   { name: 'map', fn: map,
     description: 'The repo PINBOARD — code location without grepping: one compact line per source file (corpus-domain tags via detectors + smell hits, external imports, exports, LOC) plus a DOMAINS→files index. Use it to decide WHICH files to read ("where does data fetching / forms / state live"), then read only those. Deterministic regex extraction, no LLM. doctor = what the stack is; map = where it lives.',
     inputSchema: { type: 'object', properties: { path: { type: 'string', description: 'absolute path to the repo' }, dir: { type: 'string', description: 'optional path-prefix filter, e.g. "src/"' } }, required: ['path'] } },
+  { name: 'migrate', fn: migrate,
+    description: 'SEQUENCED upgrade plan for a repo: installed versions × the corpus\'s verified migration rules (dead services, deprecations, supersessions, version ladders) + the legacy-core-API source scan — phased so gates come first and blocked steps say exactly what unblocks them, every step with receipts. Use when asked "what should we upgrade/migrate, in what order?".',
+    inputSchema: { type: 'object', properties: { path: { type: 'string', description: 'absolute path to the repo' } }, required: ['path'] } },
   { name: 'stack', fn: stack,
     description: 'Compose a greenfield stack from intent flags (e.g. "--rn --expo --p2p --stage=mvp" or "--web --ssr"). Returns an explained, install-ready stack plan.',
     inputSchema: { type: 'object', properties: { flags: { type: 'string' } }, required: ['flags'] } },

@@ -314,7 +314,7 @@ prioritization:
 # MP-STAGE-CALIBRATED. Single source of truth: skills/react-brain-mentor/modern-defaults.yaml.
 # ------------------------------------------------------------------------------
 modernization_scan:
-  source: "`react-brain doctor <repo>` → MODERNIZATION section (tools/detect.mjs `scanModernDefaults`, driven by modern-defaults.yaml `match:` fields)."
+  source: "`react-brain doctor <repo>` → MODERNIZATION section (tools/detect.mjs `scanModernDefaults`, driven by modern-defaults.yaml `match:` fields). For the SEQUENCED whole-repo view, `react-brain migrate <repo>` (MCP tool `migrate`) merges these source findings with per-entry `migrate:` version rules into a phased plan — dead/gates first, blocked steps naming their unmet requirement — each step with receipts; when the user asks 'what should we upgrade and in what order', hand them that plan ranked, don't re-derive it."
   grounding: "Each row is PRE-GROUNDED (satisfies MP-GROUNDED): cite its target `entry` (RB-E-…) or `defer_to_skill` as the Source. Next step = 'replace <legacy> with <modern> in <file(s)>' — run with `--files` to name them."
   strength_policy:
     - id: deprecated        # e.g. SafeAreaView (RN 0.81 + Android edge-to-edge)

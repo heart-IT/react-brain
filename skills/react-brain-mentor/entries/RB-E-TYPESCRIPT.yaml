@@ -43,3 +43,10 @@ detect_source:   # source-level signals owned by this entry (regex over repo sou
     min_files: 10
     signal: "explicit 'any' in 10+ files"
     hint: "any turns the checker off exactly where bugs concentrate — prefer unknown + narrowing at boundaries; strict:true is the TS 6 default"
+migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-brain migrate`)
+  - from: { pkg: "typescript", below: "7.0.0" }
+    to: "TypeScript 7 (Go-native tsc) via the TS 6 bridge"
+    urgency: upgrade
+    effort: M
+    why: "TS 7.0 is STABLE (~10x, up to 16x type-checking with parallelization); migrate incrementally — TS 6 as the low-churn bridge, TS 6 and 7 side-by-side in CI, then TS 7 as default (the VS Code ~50-extension migration pattern; their blocker was formatter diffs, not type errors)"
+    receipts: ["https://registry.npmjs.org/typescript/latest", "https://code.visualstudio.com/blogs/2026/06/26/iterating-faster-with-ts-7"]

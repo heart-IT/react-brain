@@ -539,6 +539,16 @@ export function mapRepo(repoPath, entries) {
     files: out, domains: domainFiles, scanned: files.length, capped: files.length >= MAX_FILES };
 }
 
+// ── tiny semver-min helpers (zero-dep; ranges reduced to their first x.y[.z]) ──
+export function minVer(range) {
+  const m = String(range || '').match(/\d+(?:\.\d+){0,2}/);
+  return m ? m[0].split('.').map(Number) : null;
+}
+export function verLt(a, b) {   // a < b over [maj,min,patch]
+  for (let i = 0; i < 3; i++) { const x = a?.[i] || 0, y = b?.[i] || 0; if (x !== y) return x < y; }
+  return false;
+}
+
 // ── census snapshot (observed adoption in shipped apps) ───────────────────────
 // Committed by `react-brain census`; doctor joins it per entry for "you vs the
 // field" framing. Honest denominators live IN the snapshot (RN-only entries ÷ RN apps).

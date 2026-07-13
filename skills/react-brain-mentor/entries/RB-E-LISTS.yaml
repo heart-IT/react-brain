@@ -57,3 +57,11 @@ detect_source:   # source-level signals owned by this entry (regex over repo sou
   - pattern: "<ScrollView[\\s\\S]{0,600}?\\.map\\("
     signal: "ScrollView rendering a mapped array — virtualization likely bypassed"
     hint: "list cost scales with MOUNTED NODES, not data length — FlatList/FlashList (thresholds → react-native-best-practices)"
+migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-brain migrate`)
+  - from: { pkg: "@shopify/flash-list", below: "2.0.0" }
+    to: "FlashList v2"
+    urgency: upgrade
+    effort: M
+    requires: { pkg: "react-native", atleast: "0.82.0" }
+    why: "v2 is a ground-up New-Architecture rewrite (recycling, progressive rendering, pre-paint correction) and is New-Arch-ONLY — on the old architecture stay pinned to v1.x until the RN ladder is done"
+    receipts: ["https://shopify.engineering/flashlist-v2"]

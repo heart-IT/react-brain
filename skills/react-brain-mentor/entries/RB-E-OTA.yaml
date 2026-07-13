@@ -53,3 +53,10 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "react-native-code-push", label: "CodePush (retired service)", token: "codepush" }
   - { pkg: "hot-updater", label: "hot-updater", token: "hot-updater" }
   - { pkg: "@hot-updater/*", label: "hot-updater", token: "hot-updater" }
+migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-brain migrate`)
+  - from: { pkg: "react-native-code-push" }
+    to: "hot-updater (self-hosted successor) or expo-updates + EAS Update"
+    urgency: dead
+    effort: M
+    why: "the hosted CodePush service shut down 2025-03-31 and the client npm has been dormant since 2024-12 — anything still pointed at the service is silently broken; standalone code-push-server is a stopgap, not a destination"
+    receipts: ["https://github.com/microsoft/react-native-code-push"]

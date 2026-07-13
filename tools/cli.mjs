@@ -39,6 +39,9 @@ usage: react-brain <command> [args]
   map      <repo>      the repo pinboard: one compact line per source file (domains, imports,
                        exports, smells) + a DOMAINS→files index — code location for agents
                        without grepping (--json, --dir=src/)
+  migrate  <repo>      SEQUENCED upgrade plan: installed versions × per-entry migrate: rules
+                       + the legacy-API source scan — phased (dead/gates → deprecated →
+                       upgrades → blocked), every step with receipts (--json)
   evidence <repo...>   corpus self-audit across repos: blind spots, contradictions, field evidence
   pulse    [repo...]   corpus health: dead links, stale entries, stack drift
                        (flags: --today=YYYY-MM-DD, --no-links)
@@ -100,6 +103,7 @@ function query(terms) {
 switch (cmd) {
   case 'doctor': delegate('react-brain-doctor.mjs'); break;
   case 'map': delegate('react-brain-map.mjs'); break;
+  case 'migrate': delegate('react-brain-migrate.mjs'); break;
   case 'evidence': delegate('react-brain-evidence.mjs'); break;
   case 'stack': delegate('react-brain-stack.mjs'); break;
   case 'pulse': delegate('react-brain-pulse.mjs'); break;

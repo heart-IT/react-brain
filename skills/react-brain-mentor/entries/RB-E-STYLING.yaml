@@ -62,3 +62,10 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "@stylexjs/stylex", label: "StyleX", token: "stylex" }
   - { pkg: "styled-components", label: "styled-components", token: "styled-components" }
   - { pkg: "@emotion/*", label: "Emotion", token: "css-in-js" }
+migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-brain migrate`)
+  - from: { pkg: "react-native-tailwind" }
+    to: "@mgcrea/react-native-tailwind (zero-runtime Babel plugin) — or NativeWind/Uniwind per this entry"
+    urgency: dead
+    effort: S
+    why: "the unscoped react-native-tailwind npm package is a dead 2020 artifact; the maintained zero-runtime Babel-plugin package lives under the @mgcrea scope"
+    receipts: ["https://registry.npmjs.org/react-native-tailwind"]

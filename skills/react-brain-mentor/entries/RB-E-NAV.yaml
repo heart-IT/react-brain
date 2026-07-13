@@ -91,3 +91,16 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "react-router-dom", label: "React Router", token: "react router" }
   - { pkg: "react-router", label: "React Router", token: "react router" }
   - { pkg: "@tanstack/react-router", label: "TanStack Router", token: "tanstack router" }
+migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-brain migrate`)
+  - from: { pkg: "react-router-dom" }
+    to: "react-router v8 (single package — v8 drops react-router-dom)"
+    urgency: superseded
+    effort: M
+    why: "v8 (8.x, released 2026) is ESM-only and drops both CJS and the react-router-dom package; v7→v8 is generally non-breaking if you're caught up on v7 future flags"
+    receipts: ["https://reactrouter.com/"]
+  - from: { pkg: "react-router", below: "8.0.0" }
+    to: "react-router v8"
+    urgency: upgrade
+    effort: S
+    why: "ESM-only, future flags on by default; generally non-breaking from a flags-current v7"
+    receipts: ["https://reactrouter.com/"]

@@ -131,6 +131,22 @@ for (const { file, e } of entries) {
     }
   }
 
+  // migrate rules (added 2026-07-13): installed dep → sequenced upgrade knowledge
+  const URGENCIES = new Set(['dead', 'deprecated', 'superseded', 'upgrade', 'conditional']);
+  const EFFORTS = new Set(['S', 'M', 'L']);
+  const VER_RE = /^\d+\.\d+\.\d+$/;
+  for (const r of e.migrate || []) {
+    const label = r?.from?.pkg || '?';
+    if (!r?.from?.pkg) err(`${id}: migrate rule missing from.pkg`);
+    if (!r?.to) err(`${id}: migrate '${label}' missing to`);
+    if (!r?.why) err(`${id}: migrate '${label}' missing why`);
+    if (!URGENCIES.has(r?.urgency)) err(`${id}: migrate '${label}' bad urgency '${r?.urgency}' (dead|deprecated|superseded|upgrade|conditional)`);
+    if (!EFFORTS.has(r?.effort)) err(`${id}: migrate '${label}' bad effort '${r?.effort}' (S|M|L)`);
+    if (r?.from?.below && !VER_RE.test(String(r.from.below))) err(`${id}: migrate '${label}' from.below must be x.y.z`);
+    if (r?.requires && (!r.requires.pkg || !VER_RE.test(String(r.requires.atleast || '')))) err(`${id}: migrate '${label}' requires needs pkg + atleast x.y.z`);
+    if (!Array.isArray(r?.receipts) || !r.receipts.length || r.receipts.some((u) => !/^https?:\/\//.test(u))) err(`${id}: migrate '${label}' needs ≥1 http(s) receipt`);
+  }
+
   // detect_source rules: regex must compile, signal required
   for (const r of e.detect_source || []) {
     if (!r?.pattern || !r?.signal) err(`${id}: detect_source rule missing pattern/signal`);

@@ -103,7 +103,7 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
   const r = spawnSync(process.execPath, [join(ROOT, 'tools/mcp-server.mjs')], { input, encoding: 'utf8', timeout: 30000 });
   const lines = r.stdout.trim().split('\n').map((l) => JSON.parse(l));
   check(lines[0]?.result?.serverInfo?.name === 'react-brain', 'mcp: initialize returns serverInfo');
-  check(lines[1]?.result?.tools?.length === 7, 'mcp: seven tools listed (incl. decide + map)');
+  check(lines[1]?.result?.tools?.length === 8, 'mcp: eight tools listed (incl. decide + map + migrate)');
   const text = (i) => lines[i]?.result?.content?.[0]?.text || '';
   check(text(2).includes('RECOMMEND:') && !text(2).includes('OPTIONS:'), 'mcp query: capsule depth is the default (no options dump)');
   check(text(3).includes('OPTIONS:'), 'mcp query: depth "full" returns the whole entry');
@@ -193,6 +193,29 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
   check(feed?.domains.includes('RB-E-STORAGE'), 'map: import-based domain tag (AsyncStorage → STORAGE)');
   check(feed?.smells.includes('RB-E-LISTS') && feed?.smells.includes('RB-E-KEYBOARD'), 'map: per-file smell tags fire');
   check((m.domains['RB-E-KEYBOARD'] || []).includes('src/Feed.jsx'), 'map: inverted DOMAINS index lists the file');
+}
+
+// ── 12. migrate: sequenced plan — gates hoisted, blocked steps ordered after ────
+{
+  const p = JSON.parse(execFileSync(process.execPath,
+    [join(ROOT, 'tools/react-brain-migrate.mjs'), FIX('legacy-rn'), '--json'], { encoding: 'utf8' }));
+  const step = (pkg) => p.steps.find((s) => s.pkg === pkg);
+  check(step('react-native-code-push')?.urgency === 'dead' && step('react-native-code-push')?.phase === 1,
+    'migrate: dead CodePush lands in phase 1');
+  check(step('react-native')?.phase === 1,
+    'migrate: the RN ladder is hoisted to phase 1 (a blocked step waits on it)');
+  check(step('@shopify/flash-list')?.phase === 4 && step('@shopify/flash-list')?.blocked?.pkg === 'react-native',
+    'migrate: FlashList v2 is blocked by the RN gate with the requirement named');
+  check(p.steps.findIndex((s) => s.pkg === 'react-native') < p.steps.findIndex((s) => s.pkg === '@shopify/flash-list'),
+    'migrate: gate step ordered before the step it unblocks');
+  check(step('react-native-vector-icons')?.urgency === 'superseded' && step('typescript')?.phase === 3,
+    'migrate: supersession and upgrade steps classified');
+  check(step('react-native-code-push')?.receipts?.length >= 1, 'migrate: steps carry receipts');
+
+  const clean = JSON.parse(execFileSync(process.execPath,
+    [join(ROOT, 'tools/react-brain-migrate.mjs'), FIX('rn-smells'), '--json'], { encoding: 'utf8' }));
+  const depSteps = clean.steps.filter((s) => s.kind === 'dep');
+  check(depSteps.length === 0, `migrate: current stack (rn-smells) yields no dep migration steps, got ${depSteps.map((s) => s.pkg).join(',')}`);
 }
 
 // ── report ──────────────────────────────────────────────────────────────────────
