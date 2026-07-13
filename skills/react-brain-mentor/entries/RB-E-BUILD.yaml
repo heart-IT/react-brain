@@ -16,6 +16,7 @@ options:
   - { name: "Re.Pack 5 (Rspack)", tradeoff: "Metro alternative on Rust-based Rspack; module federation / super-apps" }
   - { name: "Rock (Callstack)", tradeoff: "native build-artifact caching (reported 35min → <4min); works with Metro or Re.Pack" }
   - { name: "Rollipop (early alpha)", tradeoff: "Metro replacement powered by Rolldown (the Vite team's Rust bundler) — inherits the Rollup/Rolldown plugin ecosystem, Yarn PnP by default, dev dashboard; bare RN CLI only (no Expo); early-alpha, not production" }
+  - { name: "Vite+ (beta)", tradeoff: "VoidZero's unified toolchain — one entry point over Vite, Vitest, Rolldown, tsdown, Oxlint, Oxfmt; MIT; framework-agnostic; BETA (2026-07) — 'stable, but not yet complete', migration command may need manual follow-up" }
 recommend:
   default: "Web: Vite 8 (Rolldown). React Native: Metro (+ Hermes V1, precompiled iOS binaries). Monorepo: pnpm workspaces + Turborepo. Expo for managed velocity."
   when:
@@ -39,6 +40,9 @@ note: >
   removed in RN 0.79 (use RN DevTools). Rollipop verified vs its repo 2026-06-30 (early-alpha, not production).
   WEB TOOLCHAIN: a Rust wave — Vite 8 on Rolldown (1.0; ~10–30x Rollup), the Oxc family
   (Oxlint/Oxfmt), Bun; Cloudflare acquired VoidZero (Vite/Vitest/Rolldown/Oxc) — tools stay MIT.
+  Vite+ BETA (2026-07-02, verified vs the VoidZero announcement; 2nd signal after TWiR #289's
+  watch flag): the consolidation made product — one CLI over the whole VoidZero stack, MIT,
+  framework-agnostic; beta, so watch rather than migrate existing multi-tool setups yet.
   Adversarially stress-tested 2026-06-25 (SURVIVES, high): Vite 8 shipped stable (2026-03) with
   Rolldown GA as the default; the Rust React-Compiler napi pullback affects only that compiler's
   JS path, not Rolldown-as-bundler; Metro stays the RN default. UPDATE 2026-07-06: the Rust React
@@ -46,7 +50,7 @@ note: >
   the Rspack 2.1 blog) — Rolldown's pullback is a Rolldown-integration choice, not a dead Rust port.
 defer_to_skill: null
 doc: "RB-E-BUILD.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-10
+updated: 2026-07-13
 watching:
   - title: "How React Native Builds Actually Work (APK, AAB, IPA, APP)"
     url: "https://www.youtube.com/watch?v=1o0pEjYGUWM"
@@ -71,6 +75,7 @@ reading:
     what: "Why RN Android builds are slow (conservative Gradle/Metro/C++ defaults) and how parallel Gradle, dynamic Metro workers, ccache, and single-architecture builds cut times from 20+ min to 2-5 min, with benchmarks. The RN-CI build-perf dimension the other readings here don't cover."
 sources:
   - "https://reactnative.dev/blog/2026/02/11/react-native-0.84"
+  - "https://voidzero.dev/posts/announcing-vite-plus-beta"
   - "https://github.com/ecrindigital/facetpack"
   - "https://expo.dev/changelog/sdk-56"
   - "https://www.callstack.com/blog/mobile-module-federation-with-re-pack-when-runtime-delivery-is-worth-the-complexity"

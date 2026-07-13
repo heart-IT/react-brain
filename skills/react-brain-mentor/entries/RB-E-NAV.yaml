@@ -43,8 +43,12 @@ note: >
   slot SURVIVED the 2.3x-downloads attack — RR's typegen is framework-mode-only).
 defer_to_skill: null
 doc: "RB-E-NAV.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-10
+updated: 2026-07-13
 reading:
+  - title: "Reverse Engineering ChatGPT Web: How OpenAI Built for a Billion Users"
+    url: "https://performance.dev/chatgpt"
+    by: "Dennis Brotzky (performance.dev)"
+    what: "Production evidence for React Router 7 framework mode at billion-user scale: ChatGPT migrated Next.js Pages Router → Remix (2024) → RR7 with streaming SSR, TanStack Query seeded from server render, Tailwind 4 tokens, ProseMirror composer — 84KB HTML document, 50-65ms TTFB. The concrete counterweight to 'serious apps need Next.js', and the highest-profile data point behind this entry's React Router when-clause. (4 independent newsletter signals in one week.)"
   - title: "TanStack Router's New Reactive Core: A Signal Graph"
     url: "https://tanstack.com/blog/tanstack-router-signal-graph"
     by: "Florian Pellet (TanStack)"

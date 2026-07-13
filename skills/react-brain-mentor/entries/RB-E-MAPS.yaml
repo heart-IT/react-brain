@@ -12,6 +12,7 @@ options:
   - { name: "@maplibre/maplibre-react-native (11.x)", tradeoff: "open-source Mapbox-SDK fork — Mapbox-compatible GL styles + offline, works with ANY tile source, no token or per-load pricing; you source (or pay for) tiles yourself" }
   - { name: "react-native-better-maps (1.0, Nitro)", tradeoff: "NEW (2026-06) — MapKit + Google Maps on Nitro Modules, New-Arch-only (RN 0.78+); native marker clustering + POI taps; one release old" }
   - { name: "web: react-map-gl / react-leaflet / mapcn", tradeoff: "react-map-gl (8.x) wraps MapLibre/Mapbox GL JS; react-leaflet = classic raster Leaflet; mapcn = shadcn-patterned map components on MapLibre + Tailwind (copy-paste model)" }
+  - { name: "web: @vis.gl/react-google-maps (1.9)", tradeoff: "the vis.gl/OpenJS-governed React wrapper for the Google Maps JS API — components + hooks, markers/drawing; the maintained pick when the product is committed to Google's tiles/Places stack (per-load billing applies)" }
 recommend:
   default: "React Native → react-native-maps for platform-native basics (markers, regions); switch to MapLibre RN when you need custom vector styles or offline without per-load billing, or @rnmapbox/maps when you want Mapbox's full commercial stack. Web → react-map-gl on MapLibre GL JS (mapcn for ready-made shadcn-style components). Lightly vetted (confidence: low) — prototype clustering + offline on-device before committing."
   when:
@@ -20,6 +21,7 @@ recommend:
     - "turnkey commercial stack (style studio, navigation, support) and the pricing is acceptable → @rnmapbox/maps"
     - "large marker sets needing native clustering on New Arch → react-native-better-maps (1.0, one release old — prototype first)"
     - "shadcn-patterned web map UI fast → mapcn"
+    - "web app committed to Google Maps (tiles, Places, Street View) → @vis.gl/react-google-maps"
 note: >
   The durable selection axis is the TILE/SDK PROVIDER, not the React wrapper: platform-native
   (Apple/Google — free-ish but Google bills per load and styling is limited) vs Mapbox (powerful,
@@ -29,9 +31,11 @@ note: >
   (TWiR #288) and mapcn (React Status #481) — exposed that maps, a common hard app need, had no
   entry. Versions verified vs npm (react-native-maps 1.29, @rnmapbox/maps 10.3, maplibre-react-native
   11.3, react-map-gl 8.1, better-maps 1.0.0); expo-maps ALPHA status verified vs the Expo docs.
+  ADDED 2026-07-13: @vis.gl/react-google-maps (1.9.0, verified vs npm) on its 2nd independent
+  signal (TWiR #289 bench → React Status #482) — the Google-committed web lane the web row lacked.
 defer_to_skill: react-native-best-practices   # marker/cluster render perf
 doc: null
-updated: 2026-07-06
+updated: 2026-07-13
 reading:
   - title: "react-native-maps vs Mapbox RN vs MapLibre RN (2026)"
     url: "https://www.pkgpulse.com/guides/react-native-maps-vs-mapbox-rn-vs-maplibre-rn-mobile-2026"
@@ -40,6 +44,7 @@ reading:
 sources:
   - "https://docs.expo.dev/versions/latest/sdk/maps/"
   - "https://github.com/gmi-software/react-native-better-maps"
+  - "https://github.com/visgl/react-google-maps"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "react-native-maps", label: "react-native-maps", token: "react-native-maps" }
   - { pkg: "expo-maps", label: "expo-maps (alpha)", token: "expo-maps" }
@@ -47,4 +52,5 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "@maplibre/maplibre-react-native", label: "MapLibre RN", token: "maplibre" }
   - { pkg: "react-native-better-maps", label: "Better Maps (Nitro)", token: "better-maps" }
   - { pkg: "react-map-gl", label: "react-map-gl", token: "react-map-gl" }
+  - { pkg: "@vis.gl/react-google-maps", label: "react-google-maps (vis.gl)", token: "react-google-maps" }
   - { pkg: "react-leaflet", label: "react-leaflet", token: "leaflet" }

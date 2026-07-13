@@ -6,7 +6,7 @@
     "`react-brain lint` cross-checks each `count` against encyclopedia.yaml sources_digested — they must match.",
     "Narrative harvest history (what each pass changed, process learnings) stays in the maintainer's memory ledger."
   ],
-  "updated": "2026-07-10",
+  "updated": "2026-07-13",
   "sources": {
     "this-week-in-react": {
       "name": "This Week in React",
@@ -19,18 +19,18 @@
     "react-status": {
       "name": "React Status",
       "archive": "https://react.statuscode.com/issues",
-      "last_processed": "#481",
-      "count": 22,
+      "last_processed": "#482",
+      "count": 23,
       "cadence": "weekly",
       "notes": "corroboration-heavy; headliners usually already held"
     },
     "react-digest": {
       "name": "React Digest",
       "archive": "https://reactdigest.net/digests",
-      "last_processed": "#2316",
-      "count": 16,
+      "last_processed": "#2320",
+      "count": 17,
       "cadence": "weekly",
-      "notes": "issues slug-titled by featured article; article/depth-driven — durable yield is usually one decision-guide reading"
+      "notes": "issues slug-titled by featured article; article/depth-driven — durable yield is usually one decision-guide reading. Archive moved: /digests 404s, use /newsletters. Slug numbers are NOT sequential (2316 → 2320 with nothing between)"
     },
     "react-native-rewind": {
       "name": "React Native Rewind",
@@ -51,8 +51,8 @@
     "react-weekly": {
       "name": "React Weekly",
       "archive": "https://react-weekly.dev/rss.xml",
-      "last_processed": "#27",
-      "count": 20,
+      "last_processed": "#28",
+      "count": 21,
       "cadence": "weekly (Sundays)",
       "notes": "site + api.react-weekly.dev are JS-shell/auth-gated — harvest via rss.xml content:encoded (FULL bodies). RSS window = latest 20: a backlog >20 issues loses them permanently (issues 1-7 already unreachable). TanStack-heavy."
     }
