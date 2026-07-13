@@ -1,6 +1,6 @@
 {
   "name": "@heart-it/react-brain",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Executable React / React Native ecosystem encyclopedia — doctor (advise a repo), evidence (corpus self-audit), pulse (health/drift), query.",
   "type": "module",
   "bin": {
