@@ -2,7 +2,7 @@ id: RB-E-KEYBOARD
 topic: "Keyboard handling & avoidance (React Native)"
 category: keyboard
 group: platform-native
-status: drafted
+status: reviewed   # long-form entry written + source-checked → encyclopedia/RB-E-KEYBOARD.md
 confidence: medium
 platforms: [react-native]
 options:
@@ -21,8 +21,8 @@ note: >
   edge breaks legacy adjustResize — which is why core KeyboardAvoidingView snaps on Android. New
   entry surfaced from a Margelo deep-dive (see reading); pairs with RB-E-FORMS for form screens.
 defer_to_skill: react-native-best-practices
-doc: null
-updated: 2026-06-25
+doc: "RB-E-KEYBOARD.md"   # long-form Explanation entry in content_dir
+updated: 2026-07-13
 reading:
   - title: "The Go-To Guide for Understanding Keyboards in React Native (Part 1)"
     url: "https://blog.margelo.com/deep-dive-in-keyboard-handling"
@@ -30,6 +30,8 @@ reading:
     what: "Why keyboards behave differently per platform — iOS scheduled animation vs Android per-frame WindowInsetsAnimationCallback insets, why core KeyboardAvoidingView snaps on Android, Android-15 edge-to-edge breakage, and when to reach for KeyboardAvoidingView / KeyboardAwareScrollView / KeyboardStickyView."
     claim: "You ship no keyboard library — core KeyboardAvoidingView snaps on Android (no per-frame insets) and breaks under Android-15 edge-to-edge; react-native-keyboard-controller is the modern parity fix."
     applies_when: { absent_deps: ["react-native-keyboard-controller", "react-native-avoid-softinput"], platforms: [react-native] }
+sources:
+  - "https://blog.margelo.com/deep-dive-in-keyboard-handling"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "react-native-keyboard-controller", label: "keyboard-controller", token: "keyboard-controller" }
   - { pkg: "react-native-avoid-softinput", label: "avoid-softinput", token: "avoid-softinput" }

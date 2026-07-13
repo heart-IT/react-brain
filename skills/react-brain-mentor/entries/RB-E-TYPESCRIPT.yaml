@@ -2,7 +2,7 @@ id: RB-E-TYPESCRIPT
 topic: "TypeScript rigor & public API typing"
 category: typescript
 group: react-foundations
-status: drafted
+status: reviewed   # long-form entry written + source-checked → encyclopedia/RB-E-TYPESCRIPT.md
 confidence: medium
 platforms: [react, react-native]
 options:
@@ -18,8 +18,8 @@ recommend:
     - "not at Meta → use TypeScript, not Flow"
 note: "TypeScript 7.0 (the Go/native rewrite of tsc) is STABLE — npm latest = 7.0.2, published 2026-07-08 (verified vs the npm registry; RC was 2026-06-18, stable landed on schedule). ~10x vs TS 6.0, up to 16x type-checking with parallelization. Migrate incrementally through TS 6 (the bridge release) per the VS Code case study in reading."
 defer_to_skill: engineering-principles
-doc: null
-updated: 2026-07-10
+doc: "RB-E-TYPESCRIPT.md"   # long-form Explanation entry in content_dir
+updated: 2026-07-13
 reading:
   - title: "Why does tsgo use so much memory?"
     url: "https://zackoverflow.dev/writing/why-does-tsgo-use-so-much-memory"

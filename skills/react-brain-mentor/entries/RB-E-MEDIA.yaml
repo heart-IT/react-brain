@@ -2,7 +2,7 @@ id: RB-E-MEDIA
 topic: "Camera, video & real-time media (WebRTC, frame processing, filters)"
 category: media
 group: platform-native
-status: drafted
+status: reviewed   # long-form entry written + source-checked → encyclopedia/RB-E-MEDIA.md
 confidence: low
 platforms: [react, react-native]
 options:
@@ -35,8 +35,8 @@ note: >
   vetted — recommend tentatively (confidence: low) and prototype on-device; calling-SDK specifics
   (pricing, features) are not yet verified here.
 defer_to_skill: react-native-jsi   # frame processors / native modules; real-time perf → rt-audio-pipeline-audit
-doc: null
-updated: 2026-07-10   # challenge-pass: v5 stabilizing caveat + webrtc dormancy (fetch-verified)
+doc: "RB-E-MEDIA.md"   # long-form Explanation entry in content_dir
+updated: 2026-07-13
 reading:
   - title: "Building a video call app with filters"
     url: "https://blog.margelo.com/building-videocall-app-with-filters"

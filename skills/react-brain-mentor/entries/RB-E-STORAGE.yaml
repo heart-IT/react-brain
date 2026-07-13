@@ -2,9 +2,9 @@ id: RB-E-STORAGE
 topic: "On-device storage & persistence"
 category: storage
 group: platform-native
-status: drafted
+status: reviewed   # long-form entry written + source-checked → encyclopedia/RB-E-STORAGE.md
 confidence: medium
-platforms: [react, react-native]
+platforms: [react-native]   # narrowed 2026-07-13: all options are RN; no web storage guidance held yet
 options:
   - { name: "@react-native-async-storage/async-storage", tradeoff: "simple async key-value; v3.x is instance-based (createAsyncStorage), getMany/setMany/removeMany, requires RN 0.76+; v2 default export kept for back-compat" }
   - { name: "react-native-mmkv (v4)", tradeoff: "fast synchronous key-value; v4 is a full Nitro Modules rewrite (restores Old-Arch compat); common AsyncStorage replacement" }
@@ -19,8 +19,8 @@ recommend:
     - "P2P / local-first app → primary persistence is the Hypercore/Autobase/Hyperbee log, not KV/SQLite (KV like AsyncStorage is just for local prefs) — see RB-E-P2P"
 note: "AsyncStorage v3.x moved to instance-based storage (createAsyncStorage) and requires React Native 0.76+ (NOT New-Arch-only — that earlier claim was wrong; verified vs the v3 migration docs). react-native-mmkv v4 is a full Nitro rewrite (Oct 2025) that restored Old-Arch compat. Latest: async-storage 3.1.x, mmkv 4.3.x, op-sqlite 17.x (2026-06)."
 defer_to_skill: null
-doc: null
-updated: 2026-06-25
+doc: "RB-E-STORAGE.md"   # long-form Explanation entry in content_dir
+updated: 2026-07-13
 sources:
   - "https://react-native-async-storage.github.io/3.1/migration-to-3/"
   - "https://github.com/mrousavy/react-native-mmkv/releases"
