@@ -21,7 +21,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { createRequire } from 'node:module';
-import { loadDoc, searchEntries, resolveRecommendation, trunc } from './detect.mjs';
+import { loadDoc, searchEntries, searchReadings, resolveRecommendation, trunc } from './detect.mjs';
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 const VERSION = createRequire(import.meta.url)('../package.json').version;
@@ -82,10 +82,20 @@ function entryCapsule(e) {
 }
 
 function query({ topic, depth = 'capsule' }) {
-  const ranked = searchEntries(String(topic || '').split(/\s+/).filter(Boolean));
-  if (!ranked.length) return `no entry matches "${topic}". Try a category like: state, data, nav, styling, native, build, testing, security, maps, p2p …`;
-  const render = depth === 'full' ? entryText : entryCapsule;
-  return ranked.map(render).join(depth === 'full' ? '\n\n' + '═'.repeat(70) + '\n\n' : '\n\n');
+  const terms = String(topic || '').split(/\s+/).filter(Boolean);
+  const ranked = searchEntries(terms);
+  const reads = searchReadings(terms);   // free-form questions route to the READING that answers them
+  const parts = [];
+  if (ranked.length) {
+    const render = depth === 'full' ? entryText : entryCapsule;
+    parts.push(ranked.map(render).join(depth === 'full' ? '\n\n' + '═'.repeat(70) + '\n\n' : '\n\n'));
+  }
+  if (reads.length) {
+    parts.push(['READINGS MATCHED (lexical over the corpus\'s annotations):',
+      ...reads.map((r) => `  • [${r.entry.replace('RB-E-', '')}] ${r.title} — ${r.url}\n    ${trunc(r.claim || r.what || '', 220)}`)].join('\n'));
+  }
+  if (!parts.length) return `no entry or reading matches "${topic}". Try a category like: state, data, nav, styling, native, build, testing, security, maps, p2p …`;
+  return parts.join('\n\n');
 }
 
 function recommend({ topic, context = [] }) {

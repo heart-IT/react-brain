@@ -16,7 +16,7 @@
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
-import { searchEntries } from './detect.mjs';
+import { searchEntries, searchReadings } from './detect.mjs';
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 const [cmd, ...rest] = process.argv.slice(2);
@@ -83,10 +83,11 @@ examples:
 }
 
 function query(terms) {
-  if (!terms.length) { console.error('usage: react-brain query <entry-id | category | keyword>'); process.exit(1); }
+  if (!terms.length) { console.error('usage: react-brain query <entry-id | category | keyword | free-form question>'); process.exit(1); }
   const ranked = searchEntries(terms);
-  if (!ranked.length) {
-    console.log(`no entry matches "${terms.join(' ')}". Try: state, data, nav, styling, native, build, testing, security, p2p, svg, animation, …`);
+  const reads = searchReadings(terms);
+  if (!ranked.length && !reads.length) {
+    console.log(`no entry or reading matches "${terms.join(' ')}". Try: state, data, nav, styling, native, build, testing, security, p2p, svg, animation, …`);
     return;
   }
   for (const e of ranked) {
@@ -99,6 +100,15 @@ function query(terms) {
     if (e.defer_to_skill) console.log(`depth → ${e.defer_to_skill} skill`);
     if (e.doc) console.log(`long-form → encyclopedia/${e.doc}`);
     if (e.reading?.length) { console.log(`READING:`); for (const r of e.reading) console.log(`  • ${r.title} — ${r.url}`); }
+  }
+  if (reads.length) {
+    console.log(`\n${'─'.repeat(72)}`);
+    console.log(`READINGS MATCHED (your words vs the corpus's annotations):`);
+    for (const r of reads) {
+      console.log(`  • [${r.entry.replace('RB-E-', '')}] ${r.title} — ${r.url}`);
+      const gist = r.claim || r.what || '';
+      if (gist) console.log(`    ${gist.length > 200 ? gist.slice(0, 199) + '…' : gist}`);
+    }
   }
   console.log('');
 }

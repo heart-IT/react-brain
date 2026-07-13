@@ -31,6 +31,49 @@ const EXPECTED = {
   both: ['RB-E-NATIVE'],
 };
 
+// ── TOP PRIORITIES — one deterministic impact×effort ranking across every section ──
+// impact by finding class (census-weighted for gaps) × entry confidence ÷ effort.
+// A pre-ranking heuristic, not judgment: the mentor re-ranks; sections carry the detail.
+function computePriorities({ entries, detected, gaps, advice, modern, sigs, stage = 'mvp' }) {
+  const CONF = { high: 1, medium: 0.85, low: 0.6 };
+  const EFF = { S: 1, M: 1.5, L: 2.5 };
+  // MP-STAGE-CALIBRATED: missing-domain pressure scales with maturity — a prototype's
+  // concrete code smells outrank "adopt CI/testing"; at production the gaps dominate.
+  const GAP_STAGE = { prototype: 0.55, mvp: 0.8, production: 1, scale: 1 };
+  const items = [];
+  for (const f of modern?.findings || []) {
+    const imp = f.strength === 'deprecated' ? 90 : f.strength === 'superseded' ? 60 : 30;
+    items.push({ kind: 'modernize', entry: f.entry, score: imp / (EFF[f.effort] || 1.5),
+      text: `replace ${f.legacy.replace(' (core)', '')} → ${trunc(f.modern, 46)}${f.count ? ` (${f.count} file${f.count === 1 ? '' : 's'})` : ''}`,
+      why: `${f.strength} legacy API` });
+  }
+  for (const s of sigs?.findings || []) {
+    const e = entries[s.entry];
+    items.push({ kind: 'smell', entry: s.entry, score: (50 + Math.min(s.count || 0, 20)) * (CONF[e?.confidence] || 0.85) / 1.5,
+      text: s.signal, why: s.hint ? trunc(s.hint, 100) : 'source signal' });
+  }
+  for (const g of gaps) {
+    const e = entries[g.entry];
+    const pct = g.field ? g.field.appCount / (g.field.denom || 1) : 0.3;
+    items.push({ kind: 'gap', entry: g.entry, score: (40 + pct * 45) * (GAP_STAGE[stage] ?? 0.8) * (CONF[e?.confidence] || 0.85) / 1.5,
+      text: `close the ${g.entry.replace('RB-E-', '')} gap — ${trunc(g.resolved?.pick || g.recommend || '', 70)}`,
+      why: g.field ? `${g.field.appCount}/${g.field.denom} census apps ship this domain` : 'expected domain, nothing detected' });
+  }
+  for (const d of detected) {
+    if (d.fitStr !== '↗ review') continue;
+    const e = entries[d.entry];
+    items.push({ kind: 'revisit', entry: d.entry, score: 45 * (CONF[e?.confidence] || 0.85) / 1.5,
+      text: `revisit ${d.labels.join(', ')} (${d.entry.replace('RB-E-', '')})`,
+      why: trunc(d.resolved?.pick || e?.recommend?.default || '', 100) });
+  }
+  for (const v of (advice || []).filter((x) => x.trigger)) {
+    items.push({ kind: 'read', entry: v.entry, score: 35 / 1.2,
+      text: trunc(v.claim, 90), why: `reading: ${trunc(v.title, 60)}` });
+  }
+  items.sort((x, y) => y.score - x.score);
+  return items.slice(0, 5).map((x) => ({ ...x, score: Math.round(x.score) }));
+}
+
 function printReport(a, entries) {
   if (a.missing) { console.log(`\n(skip ${a.name}: no package.json)`); return; }
   if (a.notReact) { console.log(`\n(skip ${a.name}: not a React/RN repo)`); return; }
@@ -43,6 +86,27 @@ function printReport(a, entries) {
 
   const detected = Object.keys(a.byEntry).map((id) => ({ id, e: entries[id], info: a.byEntry[id] }))
     .filter((x) => x.e).sort((x, y) => GROUP_ORDER.indexOf(x.e.group) - GROUP_ORDER.indexOf(y.e.group));
+
+  // compute every section's data first, so TOP PRIORITIES can lead the report
+  const advice = adviseReadings(a, entries);
+  const modern = (!NO_SCAN && a.platform !== 'react') ? scanModernDefaults(a.path, a.deps) : null;
+  const sigs = !NO_SCAN ? scanSourceSignals(a.path, entries, { stage: a.stage, platform: a.platform, deps: a.deps }) : null;
+  const expected = [...EXPECTED.always, ...(EXPECTED[a.platform] || [])];
+  const gapIds = expected.filter((id) => !a.byEntry[id]);
+  const resolvedPick = (e, toks) => { const r = resolveRecommendation(e, toks); return r.via !== 'default' ? { pick: r.why } : null; };
+  const priorities = computePriorities({ entries,
+    detected: detected.map(({ id, e, info }) => ({ entry: id, labels: [...info.labels], fitStr: fit(e, info.tokens), resolved: resolvedPick(e, [...ctxTokens(a), ...info.tokens]) })),
+    gaps: gapIds.map((id) => { const c = census?.agg?.[id]; return { entry: id, recommend: entries[id]?.recommend?.default || '',
+      resolved: entries[id] ? resolvedPick(entries[id], ctxTokens(a)) : null, field: c ? { appCount: c.appCount, denom: c.denom } : null }; }),
+    advice, modern, sigs, stage: a.stage });
+  if (priorities.length) {
+    console.log(`\n  ⚡ TOP PRIORITIES  (impact × effort heuristic — detail in the sections below)`);
+    console.log(`  ${'-'.repeat(74)}`);
+    priorities.forEach((p, i) => {
+      console.log(`  ${i + 1}. ${p.text}   [${p.kind} · ${p.entry.replace('RB-E-', '')} · ${p.score}]`);
+      console.log(`     ${p.why}`);
+    });
+  }
 
   console.log(`\n  DETECTED ECOSYSTEM CHOICES  (deterministic dep-scan)`);
   console.log(`  ${'-'.repeat(74)}`);
@@ -74,12 +138,10 @@ function printReport(a, entries) {
     }
   }
 
-  const expected = [...EXPECTED.always, ...(EXPECTED[a.platform] || [])];
-  const gaps = expected.filter((id) => !a.byEntry[id]);
-  if (gaps.length) {
+  if (gapIds.length) {
     console.log(`\n  GAPS  (expected domain, nothing detected — may be built-in / N/A; verify)`);
     console.log(`  ${'-'.repeat(74)}`);
-    for (const id of gaps) {
+    for (const id of gapIds) {
       const c = census?.agg?.[id];
       const field = c ? `  [${c.appCount}/${c.denom} census apps ship this domain]` : '';
       const r = entries[id] ? resolveRecommendation(entries[id], ctxTokens(a)) : null;
@@ -89,7 +151,6 @@ function printReport(a, entries) {
   }
 
   // FOR YOUR STACK — corpus readings whose tagged claims apply to this repo.
-  const advice = adviseReadings(a, entries);
   if (advice.length) {
     console.log(`\n  FOR YOUR STACK  (readings whose claims apply to what you ship)`);
     console.log(`  ${'-'.repeat(74)}`);
@@ -102,8 +163,8 @@ function printReport(a, entries) {
   }
 
   // MODERNIZATION — source-level scan for legacy core RN APIs (RN / cross-platform repos).
-  if (!NO_SCAN && a.platform !== 'react') {
-    const { findings, scanned, capped } = scanModernDefaults(a.path, a.deps);
+  if (modern) {
+    const { findings, scanned, capped } = modern;
     console.log(`\n  MODERNIZATION  (source scan — legacy core RN APIs → modern replacement)`);
     console.log(`  ${'-'.repeat(74)}`);
     if (!findings.length) {
@@ -126,8 +187,8 @@ function printReport(a, entries) {
   }
 
   // SOURCE SIGNALS — entry-owned regex signals over the source (all platforms).
-  if (!NO_SCAN) {
-    const { findings, scanned } = scanSourceSignals(a.path, entries, { stage: a.stage, platform: a.platform, deps: a.deps });
+  if (sigs) {
+    const { findings, scanned } = sigs;
     if (findings.length) {
       console.log(`\n  SOURCE SIGNALS  (patterns a dep-scan can't see — heuristic, verify in context)`);
       console.log(`  ${'-'.repeat(74)}`);
@@ -184,12 +245,15 @@ function jsonReport(a, entries) {
   const gaps = expected.filter((id) => !a.byEntry[id]).map((id) => ({ entry: id, recommend: entries[id]?.recommend?.default || null, resolved: resolved(id), field: fieldOf(id) }));
   const modernization = (!NO_SCAN && a.platform !== 'react') ? scanModernDefaults(a.path, a.deps) : null;
   const sourceSignals = !NO_SCAN ? scanSourceSignals(a.path, entries, { stage: a.stage, platform: a.platform, deps: a.deps }) : null;
+  const advice = adviseReadings(a, entries);
+  const priorities = computePriorities({ entries,
+    detected: detected.map((d) => ({ ...d, fitStr: d.fit })), gaps, advice, modern: modernization, sigs: sourceSignals, stage: a.stage });
   return {
     adrs: checkAdrs(a.path, entries),
     name: a.name, path: a.path, version: a.version || null, platform: a.platform,
     desktopShell: a.desktopShell || null, stage: a.stage, depCount: a.depCount,
     ts: a.ts, ci: a.ci, tests: a.tests, lintfmt: a.lintfmt, hooks: a.hooks,
-    detected, gaps, advice: adviseReadings(a, entries), modernization, sourceSignals, unmapped: a.unmapped,
+    priorities, detected, gaps, advice, modernization, sourceSignals, unmapped: a.unmapped,
   };
 }
 

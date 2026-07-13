@@ -77,6 +77,14 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
   check(first('keyboard') === 'RB-E-KEYBOARD', 'search: "keyboard" → KEYBOARD');
   check(first('rich text editor') === 'RB-E-EDITORS', 'search: "rich text editor" → EDITORS');
 
+  // free-form QUESTION routing over reading annotations (BM25-lite)
+  const { searchReadings } = await import(join(ROOT, 'tools/detect.mjs'));
+  const top = (q) => searchReadings(q.split(' '))[0];
+  check(top('why is my LCP bad after SSR hydration')?.url.includes('3perf.com'), 'searchReadings: LCP/SSR question → the hydration-mismatch reading');
+  check(top('keyboard snaps on android')?.entry === 'RB-E-KEYBOARD', 'searchReadings: keyboard question → the Margelo keyboard guide');
+  check(top('supply chain npm attack')?.entry === 'RB-E-SECURITY', 'searchReadings: supply-chain question → SECURITY reading');
+  check(searchReadings(['the', 'my', 'is']).length === 0, 'searchReadings: stopword-only query matches nothing');
+
   // intent resolution honours context keys (the P2P N/A case that seeded contextFor)
   const { resolveRecommendation, loadEntries } = await import(join(ROOT, 'tools/detect.mjs'));
   const data = loadEntries()['RB-E-DATA'];
@@ -99,6 +107,7 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
     '{"jsonrpc":"2.0","id":2,"method":"tools/list"}',
     '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"query","arguments":{"topic":"state"}}}',
     '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"query","arguments":{"topic":"state","depth":"full"}}}',
+    '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"query","arguments":{"topic":"hydration mismatch hurting LCP"}}}',
     ''].join('\n');
   const r = spawnSync(process.execPath, [join(ROOT, 'tools/mcp-server.mjs')], { input, encoding: 'utf8', timeout: 30000 });
   const lines = r.stdout.trim().split('\n').map((l) => JSON.parse(l));
@@ -108,6 +117,7 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
   check(text(2).includes('RECOMMEND:') && !text(2).includes('OPTIONS:'), 'mcp query: capsule depth is the default (no options dump)');
   check(text(3).includes('OPTIONS:'), 'mcp query: depth "full" returns the whole entry');
   check(text(2).length < text(3).length / 3, `mcp query: capsule is <1/3 the tokens of full (${text(2).length} vs ${text(3).length})`);
+  check(text(4).includes('READINGS MATCHED') && text(4).includes('3perf.com'), 'mcp query: free-form question routes to the answering reading');
 }
 
 // ── 8. living decision records: decide generates, doctor re-checks premises ─────
@@ -172,6 +182,13 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
   check(firstUntriggered === -1 || lastTriggered < firstUntriggered || lastTriggered === -1,
     'advice: dep-triggered claims rank before untriggered ones');
   check(byEntry(d, 'RB-E-STATE')?.field?.appCount > 0, 'census join: detected STATE row carries field adoption');
+
+  // TOP PRIORITIES: present, sorted, complete rows, stage-calibrated
+  const pr = d.priorities || [];
+  check(pr.length >= 3 && pr.length <= 5, `priorities: rn-smells yields a top list (got ${pr.length})`);
+  check(pr.every((p, i) => !i || pr[i - 1].score >= p.score), 'priorities: sorted by score desc');
+  check(pr.every((p) => p.kind && p.entry && p.text && p.score > 0), 'priorities: every row carries kind/entry/text/score');
+  check(['modernize', 'smell', 'revisit', 'read'].includes(pr[0].kind), 'priorities: prototype stage leads with concrete code findings, not adopt-a-domain gaps');
 
   const w = doctor('web-clean');
   const wIds = (w.advice || []).map((a) => a.entry);

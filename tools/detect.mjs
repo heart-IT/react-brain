@@ -267,6 +267,46 @@ export function searchEntries(terms, max = 3) {
     .sort((a, b) => b.s - a.s).slice(0, max).map((x) => x.e);
 }
 
+// ── reading-level lexical search (question routing) ─────────────────────────────
+// searchEntries routes by entry NAMES; this routes free-form questions ("why is my
+// LCP bad after SSR?") to the specific READING whose annotation answers them —
+// BM25-lite over title+what+claim (~130 docs, built on demand, zero-dep). Returns
+// the annotation with its citation so agents get the claim, not just an entry blob.
+const STOPWORDS = new Set(('the a an is are was be been my our your this that these of in on at to for and or but with without after '
+  + 'before does do did how why what when where which it its as from by not no so if then than can could should would use using').split(' '));
+
+export function searchReadings(terms, max = 3) {
+  const toks = [...new Set(terms.map((t) => t.toLowerCase().replace(/[^\w-]/g, '')).filter((t) => t.length > 2 && !STOPWORDS.has(t)))];
+  if (!toks.length) return [];
+  const docs = [];
+  for (const e of loadDoc().entries) {
+    for (const r of [...(e.reading || []), ...(e.watching || [])]) {
+      if (!r?.url) continue;
+      docs.push({ e: e.id, r, text: `${r.title} ${r.what || ''} ${r.claim || ''}`.toLowerCase() });
+    }
+  }
+  const N = docs.length;
+  const avgLen = docs.reduce((s, d) => s + d.text.length, 0) / (N || 1);
+  // fold trailing-s so "re-renders" matches "re-render isolation" and vice versa
+  const stem = (t) => (t.length > 3 && t.endsWith('s') ? t.slice(0, -1) : t);
+  const count = (text, t) => { const st = stem(t); return text.split(st).length - 1; };
+  const df = new Map(toks.map((t) => [t, docs.filter((d) => count(d.text, t) > 0).length]));
+  const scored = docs.map((d) => {
+    let s = 0, hits = 0;
+    for (const t of toks) {
+      const tf = count(d.text, t);
+      if (!tf) continue;
+      hits++;
+      const idf = Math.log(1 + (N - df.get(t) + 0.5) / (df.get(t) + 0.5));
+      s += idf * (tf / (tf + 1.5 * (0.25 + 0.75 * (d.text.length / avgLen))));
+    }
+    return { d, s, hits };
+  }).filter((x) => x.hits >= Math.min(2, toks.length));   // one stray word is not a match
+  scored.sort((a, b) => b.s - a.s);
+  return scored.slice(0, max).map(({ d, s }) => ({ entry: d.e, title: d.r.title, url: d.r.url,
+    by: d.r.by || null, what: d.r.what || null, claim: d.r.claim || null, score: +s.toFixed(2) }));
+}
+
 // ── the calibration track record ────────────────────────────────────────────────
 // The append-only ledger (written by `calibrate`/`challenge`) lives next to the tools.
 // Reading it here, in the shared core, lets stack/doctor/learn show calibration-weighted
