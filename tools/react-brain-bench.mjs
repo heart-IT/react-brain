@@ -49,13 +49,17 @@ export function grade(q, answer) {
   return { verdict, hedged, confidently_stale: verdict === 'stale' && !hedged };
 }
 
-export function summarize(results) {
+export function summarize(all) {
+  // API-error rows carry no model answer — scoring them as 'unclear' would silently
+  // deflate a published benchmark, so they're excluded and reported separately
+  const errors = all.filter((r) => r.error).length;
+  const results = all.filter((r) => !r.error);
   const n = results.length;
   const count = (f) => results.filter(f).length;
-  const pct = (x) => Math.round((x / n) * 100);
+  const pct = (x) => (n ? Math.round((x / n) * 100) : 0);
   const fresh = count((r) => r.verdict === 'fresh'), stale = count((r) => r.verdict === 'stale');
   const cs = count((r) => r.confidently_stale);
-  return { n, fresh, stale, unclear: n - fresh - stale, hedged: count((r) => r.hedged),
+  return { n, errors, fresh, stale, unclear: n - fresh - stale, hedged: count((r) => r.hedged),
     confidently_stale: cs, fresh_pct: pct(fresh), stale_pct: pct(stale), confidently_stale_pct: pct(cs) };
 }
 
@@ -75,6 +79,7 @@ async function askAnthropic(model, system, user) {
     method: 'POST',
     headers: { 'content-type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
     body: JSON.stringify({ model, max_tokens: 500, temperature: 0, system, messages: [{ role: 'user', content: user }] }),
+    signal: AbortSignal.timeout(60000),
   });
   if (!res.ok) throw new Error(`anthropic ${res.status}: ${(await res.text()).slice(0, 300)}`);
   const j = await res.json();
@@ -87,6 +92,7 @@ async function askOpenAI(model, system, user) {
     headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
     body: JSON.stringify({ model, temperature: 0, max_tokens: 500,
       messages: [{ role: 'system', content: system }, { role: 'user', content: user }] }),
+    signal: AbortSignal.timeout(60000),
   });
   if (!res.ok) throw new Error(`openai ${res.status}: ${(await res.text()).slice(0, 300)}`);
   const j = await res.json();
@@ -104,21 +110,27 @@ async function run({ model, withCorpus, limit, today }) {
   const bank = loadBank().slice(0, limit || undefined);
   const results = [];
   for (const q of bank) {
+    if (withCorpus && !entries[q.entry]) console.error(`  ⚠ ${q.id}: entry ${q.entry} not in corpus — running WITHOUT context (fix the bank)`);
     const ctx = withCorpus && entries[q.entry] ? `Consult this verified reference before answering:\n\n${entryContext(entries[q.entry])}\n\nQuestion: ` : '';
-    let answer;
+    let answer = null;
     try { answer = await ask(model, SYSTEM, ctx + q.question); }
-    catch (e) { console.error(`  ✗ ${q.id}: ${e.message}`); answer = ''; }
+    catch (e) { console.error(`  ✗ ${q.id}: ${e.message}`); }
+    if (answer == null) { results.push({ id: q.id, entry: q.entry, error: true }); console.log(`  ${'✗ API ERROR'.padEnd(20)} ${q.id}`); continue; }
     const g = grade(q, answer);
     results.push({ id: q.id, entry: q.entry, ...g, answer: trunc(answer.replace(/\s+/g, ' '), 600) });
     const glyph = g.confidently_stale ? '✗ CONFIDENTLY STALE' : g.verdict === 'fresh' ? '✓ fresh' : g.verdict === 'stale' ? '~ stale (hedged)' : g.hedged ? '· unclear (hedged)' : '· unclear';
     console.log(`  ${glyph.padEnd(20)} ${q.id}`);
   }
   const summary = summarize(results);
+  if (summary.errors > bank.length / 5) {   // >20% API failures = the run is not publishable
+    console.error(`\n✗ ${summary.errors}/${bank.length} questions failed at the API — results not written. Re-run when the provider is healthy.`);
+    process.exit(1);
+  }
   const out = { model, provider, with_corpus: !!withCorpus, date: today, bank_size: bank.length, summary, results };
   mkdirSync(RESULTS_DIR, { recursive: true });
   const file = join(RESULTS_DIR, `${model.replace(/[^\w.-]/g, '_')}${withCorpus ? '-with-corpus' : ''}-${today}.json`);
   writeFileSync(file, JSON.stringify(out, null, 2) + '\n');
-  console.log(`\n  ${model}${withCorpus ? ' + react-brain context' : ''}: ${summary.fresh_pct}% fresh · ${summary.confidently_stale_pct}% confidently stale · ${summary.hedged}/${summary.n} hedged`);
+  console.log(`\n  ${model}${withCorpus ? ' + react-brain context' : ''}: ${summary.fresh_pct}% fresh · ${summary.confidently_stale_pct}% confidently stale · ${summary.hedged}/${summary.n} hedged${summary.errors ? ` · ${summary.errors} API error(s) excluded` : ''}`);
   console.log(`  → ${file}\n`);
 }
 

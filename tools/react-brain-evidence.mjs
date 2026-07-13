@@ -39,7 +39,10 @@ const cls = (name) => {
   return 'candidate'; // a real ecosystem dep with no entry = blind-spot candidate
 };
 
-const corpus = process.argv.slice(2).map(analyzeRepo).filter((a) => a && !a.missing && !a.notReact);
+const analyzed = process.argv.slice(2).map((r) => [r, analyzeRepo(r)]);
+for (const [arg, a] of analyzed) if (!a || a.missing || a.notReact)
+  console.error(`(skip ${arg}: ${!a || a.missing ? (a?.malformed ? 'malformed package.json' : 'no package.json') : 'not a React/RN repo'})`);
+const corpus = analyzed.map(([, a]) => a).filter((a) => a && !a.missing && !a.notReact);
 if (!corpus.length) { console.error('no React/RN repos in corpus'); process.exit(1); }
 const entries = loadEntries();
 const tag = (a) => `${a.name}(${a.platform === 'react-native' ? 'rn' : a.platform},${a.stage})`;

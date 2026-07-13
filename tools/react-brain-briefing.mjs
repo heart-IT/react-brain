@@ -40,20 +40,28 @@ const ACTION_RE = /deprecat|retired|removed|frozen|superseded|no longer|shut ?do
 const entriesNow = loadDoc().entries;
 const groupRank = new Map(entriesNow.map((e, i) => [e.id, GROUP_ORDER.indexOf(e.group) * 1000 + i]));
 
-// ── corpus diff since a date: structural YAML compare, not raw patch parsing ────
+// briefing needs the corpus's git history (the diff IS git) — fail clearly outside a checkout
+let historyStart;   // first corpus commit date (entries/ split one-per-file that day)
+try { historyStart = git('log', '--reverse', '--format=%cs').split('\n')[0]; }
+catch { console.error('briefing needs the corpus git history — run from a git checkout of react-brain (an npx install has no .git)'); process.exit(1); }
+
+// ── corpus diff since a point in time: structural YAML compare, not patch parsing ──
+// `since` may be date-only (legacy state / --since / default window) or a full ISO
+// timestamp (state written from 2026-07-13 on). Date-only baselines at T00:00:00 —
+// over-showing that day's earlier edits once beats silently losing its later ones.
+const diffCache = new Map();   // effSince → result (identical for repos sharing a window)
 function corpusDiff(since) {
-  // clamp the window to the corpus's git history (entries/ split into one-per-file on the
-  // repo's first day) — a --since before that would mislabel every entry "new"
-  const historyStart = git('log', '--reverse', '--format=%cs').split('\n')[0];
-  const effSince = since < historyStart ? historyStart : since;
-  corpusDiff.clampedTo = since < historyStart ? historyStart : null;
+  const sinceTs = since.includes('T') ? since : `${since}T00:00:00`;
+  const clampedTo = since.slice(0, 10) < historyStart ? historyStart : null;
+  const effSince = clampedTo ? `${historyStart}T00:00:00` : sinceTs;
+  if (diffCache.has(effSince)) return { ...diffCache.get(effSince), clampedTo };
   const changes = [];   // { id, isNew, items: [..], receipts: [..], segments: [..] }
   for (const e of entriesNow) {
     const path = `skills/react-brain-mentor/entries/${e.id}.yaml`;
-    // per-file baseline: the file's last state on/before the window start. No such commit
+    // per-file baseline: the file's last state before the window start. No such commit
     // ⇒ the entry was born inside the window ⇒ genuinely NEW.
     let old = null;
-    const baseRev = git('rev-list', '-1', `--before=${effSince}T23:59:59`, 'HEAD', '--', path);
+    const baseRev = git('rev-list', '-1', `--before=${effSince}`, 'HEAD', '--', path);
     if (baseRev) { try { old = parseYamlStr(git('show', `${baseRev}:${path}`)); } catch { /* renamed/absent */ } }
     if (!old) { changes.push({ id: e.id, isNew: true, items: [`NEW ENTRY — ${e.topic}`], receipts: (e.sources || []).slice(0, 2), segments: [`${e.topic} ${e.note || ''}`] }); continue; }
     if (String(old.updated) === String(e.updated)) continue;   // untouched since `since`
@@ -81,7 +89,10 @@ function corpusDiff(since) {
     const receipts = (e.sources || []).filter((s) => !(old.sources || []).includes(s));
     changes.push({ id: e.id, isNew: false, items, receipts, segments: newText });
   }
-  return changes.sort((a, b) => (groupRank.get(a.id) ?? 1e9) - (groupRank.get(b.id) ?? 1e9));
+  changes.sort((a, b) => (groupRank.get(a.id) ?? 1e9) - (groupRank.get(b.id) ?? 1e9));
+  const result = { changes };
+  diffCache.set(effSince, result);
+  return { ...result, clampedTo };
 }
 
 // ── per-repo briefing: intersect the diff with the detected stack ───────────────
@@ -93,19 +104,20 @@ for (const repoArg of repos) {
   if (repo.missing || repo.notReact) { console.log(`\n${repoArg}: ${repo.missing ? 'no package.json' : 'not a React repo'} — skipped`); continue; }
   const key = repo.path;
   const since = SINCE_ARG || state[key] || daysAgo(14);
-  const diff = corpusDiff(since);
+  const { changes: diff, clampedTo } = corpusDiff(since);
 
   const action = [], stack = [], radar = [];
   let offPlatform = 0;
   // ACTION is precise on purpose: the action-marked sentence must NAME something the repo
   // ships (full label, or its leading word) — "deprecated" about someone else's option is
   // stack news, not your fire alarm.
+  const STOP_HEADS = new Set(['react', 'native', 'react-native', 'expo']);   // heads too common to signal a SPECIFIC dep
   const mentions = (seg, labels) => {
     const s = seg.toLowerCase();
     return labels.some((l) => {
       const full = l.toLowerCase();
       const head = full.split(/[\s(/]+/)[0];
-      return s.includes(full) || (head.length >= 4 && s.includes(head));
+      return s.includes(full) || (head.length >= 4 && !STOP_HEADS.has(head) && s.includes(head));
     });
   };
   for (const c of diff) {
@@ -122,10 +134,10 @@ for (const repoArg of repos) {
   const L = [];
   const emit = (s) => L.push(s);
   emit(`\n${'═'.repeat(78)}`);
-  emit(`📬  react-brain BRIEFING — ${repo.name}   (${since} → ${TODAY} · ${repo.platform} · ${repo.stage})`);
+  emit(`📬  react-brain BRIEFING — ${repo.name}   (${since.slice(0, 10)} → ${TODAY} · ${repo.platform} · ${repo.stage})`);
   emit('═'.repeat(78));
   emit(`the corpus changed in ${diff.length} entr${diff.length === 1 ? 'y' : 'ies'} over this window; here's what touches YOUR stack.`);
-  if (corpusDiff.clampedTo) emit(`(corpus git history starts ${corpusDiff.clampedTo} — entries are baselined at their state that day)`);
+  if (clampedTo) emit(`(corpus git history starts ${clampedTo} — entries are baselined at their state that day)`);
 
   const section = (title, rows, showLabels) => {
     emit(`\n${title}`);
@@ -145,6 +157,7 @@ for (const repoArg of repos) {
 
   console.log(L.join('\n'));
   if (WRITE) { writeFileSync(join(repo.path, 'BRIEFING.md'), '```\n' + L.join('\n') + '\n```\n'); console.log(`→ wrote ${join(repoArg, 'BRIEFING.md')}`); }
-  state[key] = TODAY;
+  // full timestamp so a same-day corpus commit after this run still lands in the next window
+  state[key] = ARGS.some((x) => x.startsWith('--today=')) ? `${TODAY}T23:59:59` : new Date().toISOString();
 }
 writeFileSync(STATE_PATH, JSON.stringify(state, null, 1));

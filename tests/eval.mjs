@@ -56,6 +56,7 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
   check(d.desktopShell === 'pear', 'p2p-pear: pear key should be recognized as the desktop shell');
   check(byEntry(d, 'RB-E-TESTING')?.labels.join().includes('brittle'), 'p2p-pear: brittle detected under TESTING');
   check(byEntry(d, 'RB-E-TESTING')?.fit !== '↗ review', 'p2p-pear: brittle must not be flagged ↗ review (idiomatic for Holepunch)');
+  check(byEntry(d, 'RB-E-TESTING')?.resolved?.via === 'when', 'p2p-pear: TESTING resolves to the Holepunch when-clause (context-keyed, not the generic default)');
 }
 
 // ── 4. prod-no-boundary: stage heuristic + absent-rule ──────────────────────────

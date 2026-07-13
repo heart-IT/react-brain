@@ -10,7 +10,19 @@
 // Shared detection lives in ./detect.mjs (one source of truth, also used by evidence).
 // ───────────────────────────────────────────────────────────────────────────────
 
-import { loadEntries, analyzeRepo, fit, trunc, GROUP_ORDER, trackRecord, TRACK_GLYPH, scanModernDefaults, scanSourceSignals, checkAdrs, adviseReadings, loadCensus } from './detect.mjs';
+import { loadEntries, analyzeRepo, fit, trunc, GROUP_ORDER, trackRecord, TRACK_GLYPH, scanModernDefaults, scanSourceSignals, checkAdrs, adviseReadings, loadCensus, resolveRecommendation } from './detect.mjs';
+
+// Situational context tokens for resolveRecommendation — matched against the
+// corpus's "context → choice" when-clauses, mirroring learn's contextFor logic.
+// No bare 'web' token: it substring-matches unrelated clauses ("huge web tables").
+function ctxTokens(a) {
+  const t = [a.stage];
+  if (a.platform !== 'react') t.push(a.deps?.expo ? 'expo' : 'bare rn');
+  if (a.byEntry?.['RB-E-P2P'] || String(a.desktopShell || '').startsWith('pear'))
+    t.push('p2p', 'holepunch', 'serverless', 'pear');
+  if (a.desktopShell && !String(a.desktopShell).startsWith('pear')) t.push(String(a.desktopShell));
+  return t;
+}
 
 const EXPECTED = {
   always: ['RB-E-STATE', 'RB-E-STYLING', 'RB-E-TESTING', 'RB-E-TYPESCRIPT', 'RB-E-DX', 'RB-E-NAV'],
@@ -42,14 +54,16 @@ function printReport(a, entries) {
     console.log(`  ${id.replace('RB-E-', '').padEnd(20)}${trunc([...info.labels].join(', '), 25).padEnd(26)}${fit(e, info.tokens).padEnd(14)}${e.status}·${e.confidence}${track}`);
   }
 
-  const census = loadCensus();
   const diverge = detected.filter((x) => fit(x.e, x.info.tokens) !== '✓ aligned');
   if (diverge.length) {
     console.log(`\n  WORTH A LOOK  (current choice ≠ entry default — not necessarily wrong)`);
     console.log(`  ${'-'.repeat(74)}`);
     for (const { id, e, info } of diverge) {
       console.log(`  • ${id.replace('RB-E-', '')}: you use ${[...info.labels].join(', ')}`);
-      console.log(`      encyclopedia (${e.status}·${e.confidence}): ${trunc(e.recommend?.default, 150)}`);
+      const r = resolveRecommendation(e, [...ctxTokens(a), ...info.tokens]);
+      if (r.via === 'when') console.log(`      for YOUR context (${trunc(r.ctx, 60)}): ${trunc(r.why, 145)}`);
+      else if (r.via === 'na') console.log(`      for YOUR context: N/A by design — ${trunc(r.why, 130)}`);
+      else console.log(`      encyclopedia (${e.status}·${e.confidence}): ${trunc(e.recommend?.default, 150)}`);
       const c = census?.agg?.[id];
       if (c) {
         const mine = [...info.labels].map((l) => `${l} ${c.labels[l] || 0}/${c.denom}`).join(' · ');
@@ -68,7 +82,9 @@ function printReport(a, entries) {
     for (const id of gaps) {
       const c = census?.agg?.[id];
       const field = c ? `  [${c.appCount}/${c.denom} census apps ship this domain]` : '';
-      console.log(`  • ${id.replace('RB-E-', '')}: none detected — ${trunc(entries[id]?.recommend?.default, 120)}${field}`);
+      const r = entries[id] ? resolveRecommendation(entries[id], ctxTokens(a)) : null;
+      const rec = r && r.via !== 'default' ? `${r.via === 'na' ? 'N/A here — ' : ''}${r.why}` : entries[id]?.recommend?.default;
+      console.log(`  • ${id.replace('RB-E-', '')}: none detected — ${trunc(rec, 120)}${field}`);
     }
   }
 
@@ -149,18 +165,23 @@ function printReport(a, entries) {
 function jsonReport(a, entries) {
   if (a.missing || a.notReact) return { name: a.name, path: a.path, skipped: a.missing ? 'no package.json' : 'not a React/RN repo' };
   const tr = trackRecord();
-  const census = loadCensus();
   const fieldOf = (id) => {
     const c = census?.agg?.[id];
     return c ? { labels: c.labels, appCount: c.appCount, denom: c.denom } : null;
   };
+  const ctx = ctxTokens(a);
+  const resolved = (id) => {
+    const toks = a.byEntry[id] ? [...ctx, ...a.byEntry[id].tokens] : ctx;
+    const r = entries[id] && resolveRecommendation(entries[id], toks);
+    return r && r.via !== 'default' ? { via: r.via, ctx: r.ctx, pick: r.why } : null;
+  };
   const detected = Object.keys(a.byEntry).filter((id) => entries[id]).map((id) => ({
     entry: id, labels: [...a.byEntry[id].labels], fit: fit(entries[id], a.byEntry[id].tokens),
     status: entries[id].status, confidence: entries[id].confidence, track: tr[id] || null,
-    recommend: entries[id].recommend?.default || null, field: fieldOf(id),
+    recommend: entries[id].recommend?.default || null, resolved: resolved(id), field: fieldOf(id),
   }));
   const expected = [...EXPECTED.always, ...(EXPECTED[a.platform] || [])];
-  const gaps = expected.filter((id) => !a.byEntry[id]).map((id) => ({ entry: id, recommend: entries[id]?.recommend?.default || null, field: fieldOf(id) }));
+  const gaps = expected.filter((id) => !a.byEntry[id]).map((id) => ({ entry: id, recommend: entries[id]?.recommend?.default || null, resolved: resolved(id), field: fieldOf(id) }));
   const modernization = (!NO_SCAN && a.platform !== 'react') ? scanModernDefaults(a.path, a.deps) : null;
   const sourceSignals = !NO_SCAN ? scanSourceSignals(a.path, entries, { stage: a.stage, platform: a.platform, deps: a.deps }) : null;
   return {
@@ -192,6 +213,8 @@ function printMatrix(analyses, entries) {
   console.log(`\n  Shared backend: Holepunch / Pear. RB-E-CROSSPLATFORM: logic/state/data share`);
   console.log(`  cleanly across siblings — duplicated domain logic is the extract-a-core target.`);
 }
+
+const census = loadCensus();   // one snapshot read, shared by both report paths across repos
 
 const argv = process.argv.slice(2);
 const NO_SCAN = argv.includes('--no-scan');       // skip the source-level scans (modernization + signals)

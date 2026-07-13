@@ -22,7 +22,7 @@
 // Usage:  node tools/react-brain-learn.mjs <repoPath> [--stage=prototype|mvp|production|scale] [--full]
 // ───────────────────────────────────────────────────────────────────────────────
 
-import { loadEntries, analyzeRepo, fit, trunc, GROUP_ORDER, trackRecord, TRACK_GLYPH } from './detect.mjs';
+import { loadEntries, analyzeRepo, fit, trunc, GROUP_ORDER, trackRecord, TRACK_GLYPH, readingApplies } from './detect.mjs';
 
 // Domains to GUIDE a learner toward as gaps, per stage (foundations surface early;
 // hardening surfaces as the project matures). Detected domains are ALWAYS included
@@ -183,7 +183,9 @@ function printPath(a, entries, opts) {
     if (kind === 'na') { console.log(`  do  : nothing — confirm the above holds for your app, then skip.`); return; }
     if (e.doc) console.log(`  read: encyclopedia/${e.doc}   (the long-form *why*)`);
     else console.log(`  read: query "${e.category}" — index recommendation (no long-form yet)`);
-    const r = (e.reading || [])[0];
+    // first reading whose applies_when gate passes for THIS repo (gated items may
+    // target repos that e.g. already ship the lib — wrong for a gap step)
+    const r = (e.reading || []).find((x) => readingApplies(x, a).pass) || (e.reading || [])[0];
     if (r) console.log(`  go  : ${trunc(r.title, 58)} — ${r.url}`);
     if (e.defer_to_skill) console.log(`  deep: ${e.defer_to_skill} skill (in-domain depth)`);
     const choice = s.info ? [...s.info.labels].join(', ') : null;
@@ -202,6 +204,10 @@ const argv = process.argv.slice(2);
 const flags = argv.filter((x) => x.startsWith('--'));
 const targets = argv.filter((x) => !x.startsWith('--'));
 const stageOverride = (flags.find((f) => f.startsWith('--stage=')) || '').split('=')[1] || null;
+if (stageOverride && !['prototype', 'mvp', 'production', 'scale'].includes(stageOverride)) {
+  console.error(`unknown --stage '${stageOverride}' (use prototype|mvp|production|scale)`);
+  process.exit(1);
+}
 const full = flags.includes('--full');
 if (!targets.length) {
   console.error('usage: node tools/react-brain-learn.mjs <repoPath> [--stage=prototype|mvp|production|scale] [--full]');

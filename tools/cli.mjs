@@ -20,7 +20,10 @@ import { searchEntries } from './detect.mjs';
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 const [cmd, ...rest] = process.argv.slice(2);
-const delegate = (script) => execFileSync(process.execPath, [resolve(__dir, script), ...rest], { stdio: 'inherit' });
+const delegate = (script) => {
+  try { execFileSync(process.execPath, [resolve(__dir, script), ...rest], { stdio: 'inherit' }); }
+  catch (e) { process.exit(e.status ?? 1); }   // child already printed its error; no stack trace on top
+};
 
 function help() {
   console.log(`

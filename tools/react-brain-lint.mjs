@@ -21,6 +21,8 @@ const MENTOR_PATH = resolve(__dir, '../skills/react-brain-mentor/react-brain-men
 const STATUSES = new Set(['stub', 'drafted', 'reviewed', 'stale']);
 const CONFIDENCES = new Set(['high', 'medium', 'low']);
 const PLATFORMS = new Set(['react', 'react-native']);
+const AW_KEYS = new Set(['deps', 'absent_deps', 'platforms', 'stages']);
+const STAGES = new Set(['prototype', 'mvp', 'production', 'scale']);
 
 const errors = [];
 const warns = [];
@@ -86,8 +88,6 @@ for (const { file, e } of entries) {
 
   // conditional advice (added 2026-07-13): claim + applies_when turn a reading into
   // repo-conditional advice. Both or neither; gates restricted + enum-checked.
-  const AW_KEYS = new Set(['deps', 'absent_deps', 'platforms', 'stages']);
-  const STAGES = new Set(['prototype', 'mvp', 'production', 'scale']);
   for (const r of [...(e.reading || []), ...(e.watching || [])]) {
     const label = (r?.title || r?.url || '?').slice(0, 50);
     if (!r?.applies_when && !r?.claim) continue;

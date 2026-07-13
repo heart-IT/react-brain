@@ -82,7 +82,9 @@ export function analyzeRepo(repoPath) {
   const p = resolve(repoPath);
   const pj = join(p, 'package.json');
   if (!existsSync(pj)) return { name: basename(p), path: p, missing: true };
-  const pkg = JSON.parse(readFileSync(pj, 'utf8'));
+  let pkg;
+  try { pkg = JSON.parse(readFileSync(pj, 'utf8')); }
+  catch { return { name: basename(p), path: p, missing: true, malformed: true }; }   // skip shape every caller handles
   const deps = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) };
   const has = (n) => n in deps;
   if (!(has('react') || has('react-native') || has('expo'))) {
@@ -439,23 +441,32 @@ function depGlobMatch(pat, deps) {
   return pat in deps ? pat : null;
 }
 
+// Does one reading/watching item's applies_when gate pass for this repo analysis?
+// Ungated items pass. Returns { pass, trigger } (trigger = the dep that fired, if any).
+export function readingApplies(r, analysis) {
+  const w = r?.applies_when;
+  if (!w) return { pass: true, trigger: null };
+  const deps = analysis.deps || {};
+  if (w.platforms && analysis.platform !== 'both' && !w.platforms.includes(analysis.platform)) return { pass: false, trigger: null };
+  if (w.stages && !w.stages.includes(analysis.stage)) return { pass: false, trigger: null };
+  let trigger = null;
+  if (w.deps) { trigger = w.deps.map((p) => depGlobMatch(p, deps)).find(Boolean) || null; if (!trigger) return { pass: false, trigger: null }; }
+  if (w.absent_deps && w.absent_deps.some((p) => depGlobMatch(p, deps))) return { pass: false, trigger: null };
+  return { pass: true, trigger };
+}
+
 export function adviseReadings(analysis, entries) {
   if (!analysis || analysis.missing || analysis.notReact) return [];
   const list = Array.isArray(entries) ? entries : Object.values(entries);
-  const deps = analysis.deps || {};
   const out = [];
   for (const e of list) {
     const plats = e.platforms || [];
     const platOK = analysis.platform === 'both' || plats.includes(analysis.platform);
     if (!platOK) continue;
     for (const r of [...(e.reading || []), ...(e.watching || [])]) {
-      const w = r?.applies_when;
-      if (!w || !r.claim) continue;
-      if (w.platforms && analysis.platform !== 'both' && !w.platforms.includes(analysis.platform)) continue;
-      if (w.stages && !w.stages.includes(analysis.stage)) continue;
-      let trigger = null;
-      if (w.deps) { trigger = w.deps.map((p) => depGlobMatch(p, deps)).find(Boolean) || null; if (!trigger) continue; }
-      if (w.absent_deps && w.absent_deps.some((p) => depGlobMatch(p, deps))) continue;
+      if (!r?.applies_when || !r.claim) continue;
+      const { pass, trigger } = readingApplies(r, analysis);
+      if (!pass) continue;
       out.push({ entry: e.id, title: r.title, url: r.url, by: r.by || null,
         claim: r.claim, trigger, confidence: e.confidence || 'low' });
     }

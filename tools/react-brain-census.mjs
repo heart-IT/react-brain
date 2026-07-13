@@ -11,7 +11,7 @@
 //   node tools/react-brain-census.mjs [--json] [--cohort=path] [--today=YYYY-MM-DD]
 // ───────────────────────────────────────────────────────────────────────────────
 
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, renameSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { matchDetector, loadEntries, GROUP_ORDER } from './detect.mjs';
@@ -93,10 +93,21 @@ const snapshot = { date: TODAY, cohort: { fetched: ok.length, total: cohort.apps
   apps: Object.fromEntries(Object.entries(apps).map(([id, a]) =>
     [id, { name: a.name, platform: a.platform, labels: Object.values(a.matches).flatMap((s) => [...s]).sort() }])) };
 snapshot.agg = agg;
+// total fetch failure: loud error, keep the committed baseline (the site + signals build from it)
+if (!ok.length) {
+  console.error(`\n✗ 0/${cohort.apps.length} cohort apps fetched — network down or GitHub unreachable. Baseline left untouched.`);
+  process.exit(1);
+}
 const changes = [];
 let baseline = null;
 if (existsSync(BASELINE_PATH)) {
-  baseline = JSON.parse(readFileSync(BASELINE_PATH, 'utf8'));
+  try { baseline = JSON.parse(readFileSync(BASELINE_PATH, 'utf8')); }
+  catch { console.error('  ⚠ baseline unreadable (corrupt/conflicted) — velocity resets this run'); }
+}
+if (baseline) {
+  // a transiently-failed app keeps its last-known stack instead of round-tripping
+  // through "left cohort" → "new in cohort" and losing its label history
+  for (const f of failed) if (baseline.apps?.[f.id] && !snapshot.apps[f.id]) snapshot.apps[f.id] = baseline.apps[f.id];
   for (const [id, cur] of Object.entries(snapshot.apps)) {
     const prev = baseline.apps?.[id];
     if (!prev) { changes.push(`+ ${id}: new in cohort`); continue; }
@@ -105,9 +116,13 @@ if (existsSync(BASELINE_PATH)) {
     if (added.length) changes.push(`~ ${id}: adopted ${added.join(', ')}`);
     if (removed.length) changes.push(`~ ${id}: dropped ${removed.join(', ')}`);
   }
-  for (const id of Object.keys(baseline.apps || {})) if (!snapshot.apps[id]) changes.push(`- ${id}: left cohort / fetch failed`);
+  for (const id of Object.keys(baseline.apps || {})) if (!snapshot.apps[id]) changes.push(`- ${id}: left cohort`);
 }
-writeFileSync(BASELINE_PATH, JSON.stringify(snapshot, null, 1));
+// --json is a READ — it must not move the diff anchor for the next real run
+if (!JSON_OUT) {
+  writeFileSync(BASELINE_PATH + '.tmp', JSON.stringify(snapshot, null, 1));
+  renameSync(BASELINE_PATH + '.tmp', BASELINE_PATH);
+}
 
 // ── report ──────────────────────────────────────────────────────────────────────
 if (JSON_OUT) { console.log(JSON.stringify({ date: TODAY, cohort: ok.length, rnApps, webApps, failed: failed.map((f) => f.id), agg }, null, 2)); process.exit(0); }

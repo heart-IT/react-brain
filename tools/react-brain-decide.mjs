@@ -36,6 +36,10 @@ if (!entry) { console.error(`no entry matches "${TOPIC}" — try: react-brain qu
 
 // ── repo context (same detection the doctor uses) ───────────────────────────────
 const a = analyzeRepo(REPO);
+if (pos[1] && a.missing) {   // an EXPLICIT repo arg that doesn't resolve is an error, not greenfield
+  console.error(`repo path '${pos[1]}' has no ${a.malformed ? 'parseable' : ''} package.json — fix the path or omit it for a greenfield decision`);
+  process.exit(1);
+}
 const hasRepo = !a.missing && !a.notReact;
 function contextTokens(an) {
   if (!hasRepo) return ['new project'];
@@ -54,7 +58,7 @@ const r = resolveRecommendation(entry, tokens);
 const current = hasRepo && a.byEntry[entry.id] ? [...a.byEntry[entry.id].labels].join(', ') : null;
 
 // ── evidence: ledger + live-npm snapshot ────────────────────────────────────────
-const pred = readLedger().find((row) => row.k === 'P' && row.id === entry.id) || null;
+const pred = readLedger().findLast((row) => row.k === 'P' && row.id === entry.id) || null;   // ledger is append-only — latest prediction wins
 const verdict = trackRecord()[entry.id] || null;
 const baselinePath = join(__dir, '.signals-baseline.json');
 const dl = existsSync(baselinePath) ? JSON.parse(readFileSync(baselinePath, 'utf8')) : {};
@@ -83,7 +87,7 @@ react_brain:                # machine-readable premises — \`react-brain doctor
   entry_status: ${entry.status}
   confidence: ${entry.confidence}
   entry_updated: ${String(entry.updated)}
-  resolved_via: ${r.via}${r.via === 'when' ? `\n  matched_context: ${JSON.stringify(r.ctx)}` : ''}
+  resolved_via: ${r.via}${r.via !== 'default' ? `\n  matched_context: ${JSON.stringify(r.ctx)}` : ''}
   prediction_check_by: ${pred?.check_by || 'null'}
   corpus_version: ${corpusVersion}
 ---
@@ -101,7 +105,9 @@ Context tokens resolved against the corpus: \`${tokens.join('`, `')}\`.
 
 ${r.why}
 
-${r.via === 'when' ? `*(Resolved via the context clause: "${r.ctx} → …" — not the generic default.)*` : '*(Resolved via the entry\'s default — no context clause overrode it.)*'}
+${r.via === 'when' ? `*(Resolved via the context clause: "${r.ctx} → …" — not the generic default.)*`
+  : r.via === 'na' ? `*(Resolved via the context clause: "${r.ctx} → …" — the corpus marks this domain **N/A by design** for your context; the decision is to NOT adopt a library here.)*`
+  : '*(Resolved via the entry\'s default — no context clause overrode it.)*'}
 ${entry.confidence === 'low' ? '\n> ⚠ **Low confidence** — fast-moving domain. Treat as a vetted lead; prototype before committing.\n' : ''}
 ## Options considered
 

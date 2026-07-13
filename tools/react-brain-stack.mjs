@@ -113,7 +113,7 @@ function compose(intent, entries) {
     if (STAGE_RANK[row.tier] > sRank) continue;
     if (row.onlyIf === 'p2p' && !intent.p2p) continue;
     const e = entries[row.id];
-    if (!e) continue;
+    if (!e) { console.error(`  ⚠ stack RECIPE references missing entry ${row.id} — plan is incomplete (fix the RECIPE)`); continue; }
     const r = resolveRecommendation(e, intent.tokens);
     // Extract install pkgs from the pick, but cut at the first ';' — the corpus writes
     // "Vite; legacy web → webpack" with the ';' separating the recommendation from its

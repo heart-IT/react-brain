@@ -29,7 +29,7 @@
 //   node tools/react-brain-signals.mjs --no-registry          skip last-publish (downloads only)
 // ───────────────────────────────────────────────────────────────────────────────
 
-import { readFileSync, writeFileSync, existsSync, appendFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, appendFileSync, renameSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { loadDoc, entryPackages, pkgsForPick, GROUP_ORDER, trunc, readLedger, LEDGER_PATH } from './detect.mjs';
@@ -37,7 +37,8 @@ import { loadDoc, entryPackages, pkgsForPick, GROUP_ORDER, trunc, readLedger, LE
 const __dir = dirname(fileURLToPath(import.meta.url));
 const BASELINE = resolve(__dir, '.signals-baseline.json');
 const CENSUS_PATH = resolve(__dir, '.census-baseline.json');
-const CENSUS = existsSync(CENSUS_PATH) ? JSON.parse(readFileSync(CENSUS_PATH, 'utf8')) : null;
+let CENSUS = null;   // a corrupt census baseline must not take signals down with it
+try { CENSUS = existsSync(CENSUS_PATH) ? JSON.parse(readFileSync(CENSUS_PATH, 'utf8')) : null; } catch { /* ships-in column simply absent */ }
 const MAINT_RE = /maintenance|deprecated|frozen|sunset|superseded|abandoned|unmaintained|no longer/i;
 const STALE_MONTHS = 12;       // a recommended default silent this long → early warning
 const FRESH_MONTHS = 6;        // "maintenance" claim contradicted if published within this
@@ -93,8 +94,9 @@ async function fetchDownloads(pkgs) {
   return out;
 }
 async function lastPublish(pkg) {
-  let doc = await getJSON(`https://registry.npmjs.org/${regName(pkg)}`);
-  if (!doc?.time) doc = await getJSON(`https://registry.npmjs.org/${regName(pkg)}`); // 1 retry
+  // full packuments for big packages (next, typescript, electron…) run tens of MB —
+  // one generous timeout beats a 9s abort + identical retry that doubles the cost
+  const doc = await getJSON(`https://registry.npmjs.org/${regName(pkg)}`, 30000);
   if (!doc?.time) return null;
   const latest = doc['dist-tags']?.latest;
   return doc.time[latest] || doc.time.modified || null;
@@ -149,7 +151,17 @@ if (!NO_REG) {
   (await mapLimit(list, 6, async (p) => [p, monthsBetween(await lastPublish(p))])).forEach(([p, m]) => { age[p] = m; });
 }
 
-const base = existsSync(BASELINE) ? JSON.parse(readFileSync(BASELINE, 'utf8')) : null;
+// total network failure must be a loud error, not a green report + clobbered baseline
+if (dlGotCount() === 0) {
+  console.error(`\n✗ 0/${uniquePkgs.length} download counts fetched — network down or npm API unreachable.`);
+  console.error('  No verdict possible; baseline left untouched. Re-run with connectivity.');
+  process.exit(1);
+}
+function dlGotCount() { return uniquePkgs.filter((p) => dl[p] != null).length; }
+
+let base = null;
+try { base = existsSync(BASELINE) ? JSON.parse(readFileSync(BASELINE, 'utf8')) : null; }
+catch { console.error('  ⚠ baseline unreadable (corrupt/conflicted) — trends reset this run'); }
 const delta = (pkg) => {
   if (!base || base[pkg] == null || dl[pkg] == null) return '';
   const d = dl[pkg] - base[pkg];
@@ -243,6 +255,9 @@ if (claims.length) {
 }
 
 if (!base) console.log(`\n  (baseline set — re-run later for ↑/↓ download trends)`);
-const fetched = Object.fromEntries(uniquePkgs.filter((p) => dl[p] != null).map((p) => [p, dl[p]]));
-writeFileSync(BASELINE, JSON.stringify(fetched, null, 0) + '\n');
+// merge over the previous baseline (a transiently-missed pkg keeps its last count instead
+// of losing trend history), and write atomically so a killed run can't truncate the file
+const fetched = { ...(base || {}), ...Object.fromEntries(uniquePkgs.filter((p) => dl[p] != null).map((p) => [p, dl[p]])) };
+writeFileSync(BASELINE + '.tmp', JSON.stringify(fetched, null, 0) + '\n');
+renameSync(BASELINE + '.tmp', BASELINE);
 console.log('');

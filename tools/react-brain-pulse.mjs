@@ -14,7 +14,7 @@
 // Usage:  node tools/react-brain-pulse.mjs [--today=YYYY-MM-DD] [--no-links] [repo ...]
 // ───────────────────────────────────────────────────────────────────────────────
 
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, renameSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { loadEntries, analyzeRepo } from './detect.mjs';
@@ -54,7 +54,12 @@ async function checkUrl(url) {
     let r = await fetch(url, opt('HEAD', 9000));
     if ([403, 405, 501, 0].includes(r.status)) { try { r = await fetch(url, opt('GET', 13000)); } catch { /* keep HEAD result */ } }
     return { url, status: r.status, klass: classify(r.status) };
-  } catch (e) { return { url, status: 0, klass: 'unreachable', err: e.code || e.name || String(e.message || e).slice(0, 32) }; }
+  } catch (e) {
+    // undici buries the real code in e.cause (TypeError w/ cause.code='ENOTFOUND');
+    // AbortSignal.timeout throws legacy numeric code 23 — prefer cause.code, name last
+    const err = e.cause?.code || (typeof e.code === 'string' ? e.code : null) || e.name || String(e.message || e).slice(0, 32);
+    return { url, status: 0, klass: 'unreachable', err: err === 'TimeoutError' || err === 'AbortError' ? 'timeout' : err };
+  }
 }
 async function pool(items, n, fn) {
   const out = []; let i = 0;
@@ -77,7 +82,7 @@ if (noLinks) {
   console.log('  (skipped: --no-links)');
 } else {
   const results = await pool(urls, 8, checkUrl);
-  const netErr = results.filter((r) => r.klass === 'unreachable' && ['ENOTFOUND', 'EAI_AGAIN', 'ECONNREFUSED'].includes(r.err)).length;
+  const netErr = results.filter((r) => r.klass === 'unreachable' && ['ENOTFOUND', 'EAI_AGAIN', 'ECONNREFUSED', 'ENETUNREACH', 'timeout'].includes(r.err)).length;
   if (netErr === results.length && results.length) {
     console.log(`  ⚠ network unavailable in this environment (all fetches failed: ${results[0]?.err}).`);
     console.log(`    Run where outbound HTTP is allowed to get the link report. Staleness + drift below still valid.`);
@@ -115,10 +120,15 @@ console.log(`\n${'─'.repeat(78)}\n§3  DRIFT — corpus recommendations vs you
 if (!repos.length) {
   console.log('  (no repos passed — give app paths to enable drift watch)');
 } else {
-  const live = repos.map(analyzeRepo).filter((a) => a && !a.missing && !a.notReact);
+  const analyzed = repos.map((r) => [r, analyzeRepo(r)]);
+  for (const [arg, a] of analyzed) if (!a || a.missing || a.notReact)
+    console.log(`  (skip ${arg}: ${!a || a.missing ? (a?.malformed ? 'malformed package.json' : 'no package.json') : 'not a React/RN repo'})`);
+  const live = analyzed.map(([, a]) => a).filter((a) => a && !a.missing && !a.notReact);
   const fp = {}; // repo -> { entryId: labels }
   for (const a of live) { fp[a.name] = {}; for (const [id, info] of Object.entries(a.byEntry)) fp[a.name][id] = [...info.labels].sort().join(', '); }
-  const prev = existsSync(BASELINE) ? JSON.parse(readFileSync(BASELINE, 'utf8')) : null;
+  let prev = null;
+  try { prev = existsSync(BASELINE) ? JSON.parse(readFileSync(BASELINE, 'utf8')) : null; }
+  catch { console.log('  ⚠ drift baseline unreadable (corrupt/conflicted) — re-baselining this run'); }
   if (!prev) {
     console.log(`  baseline established for ${live.length} repo(s): ${live.map((a) => a.name).join(', ')}.`);
     console.log(`  → drift (added/removed/changed ecosystem choices) will report on the next run.`);
@@ -137,7 +147,11 @@ if (!repos.length) {
     }
     if (!any) console.log(`  no stack drift since baseline (${prev.date}).`);
   }
-  writeFileSync(BASELINE, JSON.stringify({ date: today.toISOString().slice(0, 10), fingerprints: fp }, null, 2));
+  // keep fingerprints of repos NOT analyzed this run (skipped/failed) — deleting them
+  // would silently lose drift across the gap; write atomically
+  const merged = { ...(prev?.fingerprints || {}), ...fp };
+  writeFileSync(BASELINE + '.tmp', JSON.stringify({ date: today.toISOString().slice(0, 10), fingerprints: merged }, null, 2));
+  renameSync(BASELINE + '.tmp', BASELINE);
   console.log(`\n  baseline updated → ${BASELINE.replace(resolve(__dir, '..') + '/', '')}`);
 }
 

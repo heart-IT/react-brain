@@ -26,7 +26,9 @@ import { loadDoc, readLedger, LEDGER_PATH } from './detect.mjs';
 // Horizon to re-examine a prediction, by stated confidence; fast-moving domains get a
 // shorter leash (their leads rot faster, so we hold them accountable sooner).
 const HORIZON_MONTHS = { high: 9, medium: 5, low: 3 };
-const FAST = new Set(['native', 'rn-versions', 'build', 'react-core', 'ondevice-ai', 'ai-ui', 'alt-frameworks', 'games', 'native-ui', 'media', 'meta-frameworks']);
+// members MUST be real corpus `category:` values — seed() asserts this (a drifted name
+// silently hands fast-moving domains the slow horizon; happened to build-tooling/ai-ml)
+const FAST = new Set(['native', 'rn-versions', 'build-tooling', 'react-core', 'ai-ml', 'ai-ui', 'ai-devtools', 'alt-frameworks', 'games', 'native-ui', 'media', 'meta-frameworks']);
 const OUTCOMES = { held: 1, weakened: 0.5, overturned: 0 };   // calibration weight
 
 const flags = process.argv.slice(2);
@@ -42,6 +44,8 @@ const append = (rec) => appendFileSync(LEDGER_PATH, JSON.stringify(rec) + '\n');
 function seed() {
   const have = new Set(readLedger().filter((r) => r.k === 'P').map((r) => r.id));
   const entries = loadDoc().entries;
+  const cats = new Set(entries.map((e) => e.category));
+  for (const f of FAST) if (!cats.has(f)) { console.error(`FAST category '${f}' does not exist in the corpus — fix the set before seeding`); process.exit(1); }
   let n = 0;
   for (const e of entries) {
     if (have.has(e.id)) continue;
@@ -57,6 +61,10 @@ function seed() {
 function record(id, outcome, note) {
   if (!id || !OUTCOMES.hasOwnProperty(outcome)) {
     console.error('usage: calibrate --record <RB-E-ID> <held|weakened|overturned> [note…]');
+    process.exit(1);
+  }
+  if (!loadDoc().entries.some((e) => e.id === id)) {   // a typo'd id would append an orphan resolution
+    console.error(`unknown entry '${id}' — not recording. See \`react-brain query\` for ids.`);
     process.exit(1);
   }
   append({ k: 'O', id, outcome, on: today, note: note || '' });

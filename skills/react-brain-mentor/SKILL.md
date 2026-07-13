@@ -101,15 +101,18 @@ eval) after any corpus edit. The mentor's breadth recommendations grow
 automatically. Recommendations are **context-keyed**, not absolute — an entry
 says *"for server state at MVP+, X wins on invalidation,"* never *"X is best."*
 
-**Current state (2026-07-10):** 42 entries across 6 groups, all `drafted`+ (0 stubs), 19
+**Current state (2026-07-13):** 42 entries across 6 groups, all `drafted`+ (0 stubs), 19
 `reviewed` with long-form `encyclopedia/<id>.md`, every entry with curated reading (plus an
-optional A/V `watching` list, added 2026-07-09), synthesized from 6 cross-checked newsletters. Entries
+optional A/V `watching` list), synthesized from 6 cross-checked newsletters. Entries
 are reached two ways so none are orphaned (mechanized by `react-brain lint`): **cross-cutting**
 domains via the YAML's `assessment_dimensions`, and **feature/capability** domains via its
 `capability_map` (detected dep/need → entry) — so niche areas (media, maps, payments, editors,
 charts, i18n, desktop, on-device AI…) are scanned only when the project actually has them.
+Readings may carry `claim:` + `applies_when:` tags, which `doctor` matches against the repo
+(FOR YOUR STACK / `advice[]` in --json) — pre-grounded, citation-ready suggestions — and
+doctor joins the production-app **census** for you-vs-field adoption with honest denominators.
 For agents, the corpus is also consumable as **MCP tools** (`tools/mcp-server.mjs`: capsules /
-query / recommend / doctor / stack), and Phase 0 treats `react-brain doctor <repo> --json`
+query / recommend / doctor / decide / stack), and Phase 0 treats `react-brain doctor <repo> --json`
 as ground truth for platform/stage/deps.
 
 ## Relationship to existing skills

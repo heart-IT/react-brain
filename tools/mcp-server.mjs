@@ -55,7 +55,14 @@ function entryText(e) {
   if (e.note) L.push('', `NOTE: ${String(e.note).trim()}`);
   if (e.defer_to_skill) L.push(`DEPTH: defer to the '${e.defer_to_skill}' skill for in-domain rules`);
   if (e.doc) L.push(`LONG-FORM: encyclopedia/${e.doc}`);
-  if (e.reading?.length) { L.push('', 'READING (vetted deep-dives):'); for (const r of e.reading) L.push(`  • ${r.title} — ${r.url}\n    ${trunc(r.what, 220)}`); }
+  if (e.reading?.length) {
+    L.push('', 'READING (vetted deep-dives):');
+    for (const r of e.reading) {
+      L.push(`  • ${r.title} — ${r.url}\n    ${trunc(r.what, 220)}`);
+      if (r.claim) L.push(`    CLAIM: ${r.claim}`);
+    }
+  }
+  if (e.watching?.length) { L.push('', 'WATCHING (vetted A/V):'); for (const w of e.watching) L.push(`  • ${w.title} — ${w.url}\n    ${trunc(w.what, 220)}`); }
   if (e.sources?.length) { L.push('', 'SOURCES:'); for (const s of e.sources) L.push(`  • ${s}`); }
   return L.join('\n');
 }
@@ -108,7 +115,7 @@ const TOOLS = [
     description: 'Resolve one entry\'s recommendation against a project context (tokens like "expo", "p2p", "production", "bare rn"). Returns the matched when-clause or the default, with confidence.',
     inputSchema: { type: 'object', properties: { topic: { type: 'string' }, context: { type: 'array', items: { type: 'string' } } }, required: ['topic'] } },
   { name: 'doctor', fn: doctor,
-    description: 'Run the deterministic react-brain analyzer on a repo path: detected ecosystem choices vs encyclopedia fit, gaps, legacy-API modernization scan, and source-level signals. Returns JSON. Use as ground truth for platform/stage/deps.',
+    description: 'Run the deterministic react-brain analyzer on a repo path: detected ecosystem choices vs encyclopedia fit (with census field-adoption), gaps, legacy-API modernization scan, source-level signals, and advice[] — corpus readings whose tagged claims apply to this repo (pre-grounded, citation-ready). Returns JSON. Use as ground truth for platform/stage/deps.',
     inputSchema: { type: 'object', properties: { path: { type: 'string', description: 'absolute path to the repo' } }, required: ['path'] } },
   { name: 'decide', fn: decide,
     description: 'Generate a LIVING DECISION RECORD (ADR markdown with receipts) for a topic, optionally resolved against a repo path: context-resolved pick, candidate table, evidence chain (sources, calibration track record, npm signals), and a machine-readable premise block that react-brain doctor re-checks over time.',
