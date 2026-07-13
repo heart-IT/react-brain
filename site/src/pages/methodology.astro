@@ -1,6 +1,19 @@
 ---
 import Base from '../layouts/Base.astro';
-import { href, GITHUB } from '../lib/corpus.js';
+import { href, GITHUB, corpus } from '../lib/corpus.js';
+// digest counts pulled live from the corpus meta so this section never drifts
+const digested = new Map((corpus().meta.sources_digested || []).map((s) => {
+  const m = String(s).match(/^(.*)\s+×(\d+)$/);
+  return m ? [m[1].trim(), m[2]] : [String(s), null];
+}));
+const NEWSLETTERS = [
+  ['React Native Rewind', 'https://reactnativerewind.com/'],
+  ['This Week in React', 'https://thisweekinreact.com/'],
+  ['React Status', 'https://react.statuscode.com/'],
+  ['React Digest', 'https://reactdigest.net/'],
+  ['React Weekly', 'https://react-weekly.dev/'],
+  ['Native Weekly', 'https://nativeweekly.com/'],
+].map(([name, url]) => ({ name, url, n: digested.get(name) }));
 ---
 <Base title="react-brain — methodology" description="How the corpus stays true: verification, adversarial challenge, calibration, live-npm signals, mechanized invariants.">
   <h1>Methodology — how this stays true</h1>
@@ -44,6 +57,24 @@ import { href, GITHUB } from '../lib/corpus.js';
   and linked prominently to the original. Nothing is republished or paraphrased at length —
   <a href={href('reading/')}>the reading index</a> exists to send you to the canonical source with
   context, not to replace it.</p>
+
+  <h2 id="sources">Sources &amp; thanks</h2>
+  <p class="prose">The corpus's discovery layer is six excellent newsletters, digested issue by issue —
+  our genuine thanks to the people who curate them week after week:</p>
+  <div class="rows">
+    {NEWSLETTERS.map((s) => (
+      <a class="row" href={s.url} rel="noopener" style="display:flex; justify-content:space-between; gap:1rem; align-items:baseline">
+        <span class="row-title" style="font-family:var(--font-head); font-weight:600; color:var(--bright)">{s.name}</span>
+        {s.n && <span class="meta">{s.n} issues digested</span>}
+      </a>
+    ))}
+  </div>
+  <p class="muted" style="font-size:.9rem; margin-top:.6rem">To be precise about the division of labor:
+  newsletters surface the <em>leads</em> — every load-bearing fact is then independently
+  fetch-verified against primary sources (release notes, changelogs, the npm registry) before it
+  enters the corpus, and the newsletters have not reviewed or endorsed anything here. The same
+  gratitude extends to every author in <a href={href('reading/')}>the reading index</a>, credited
+  by name on their entries.</p>
 
   <p class="muted">Everything above is inspectable: the corpus, the tools, the ledger, and the tests are
   all in <a href={GITHUB}>the repo</a>.</p>

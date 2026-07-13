@@ -115,7 +115,7 @@ const bottomLinks = [...toolLinks, ...aboutLinks];   // mobile nav keeps the fla
         <p class="statusline" aria-label="Corpus status">
           <span class="mode">corpus v{info.version}</span>
           <span>{info.count} decisions</span><span>·</span><span>updated {info.updated}</span>
-          <span style="margin-left:auto"><a href={href('changelog/')} style="color:var(--muted)">changelog →</a></span>
+          <span style="margin-left:auto"><a href={href('methodology/#sources')} style="color:var(--muted)">sources</a> · <a href={href('changelog/')} style="color:var(--muted)">changelog →</a></span>
         </p>
         <p>Generated from the <a href={GITHUB}>react-brain corpus</a> — every fact carries a
         verified-on date; every recommendation is context-keyed and adversarially challenged
