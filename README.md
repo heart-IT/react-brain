@@ -1,3 +1,5 @@
+<img src="https://heart-it.github.io/react-brain/logo.png" alt="react-brain — circuit-brain logo" width="104" align="right" />
+
 # react-brain
 
 **Engineering decisions for React & React Native, with receipts.**

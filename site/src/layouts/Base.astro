@@ -15,7 +15,7 @@ const fontFaces = [
 const info = corpusInfo();
 const { groups } = corpus();
 const path = Astro.url.pathname;
-const FAVICON = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>";
+// brand mark (circuit-brain + React atom) extracted from the heartit brand sheet 2026-07-13
 const toolLinks = [
   { to: 'stack/', label: 'stack composer' },
   { to: 'decide/', label: 'decision records' },
@@ -45,7 +45,8 @@ const bottomLinks = [...toolLinks, ...aboutLinks];   // mobile nav keeps the fla
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
-  <link rel="icon" href={FAVICON} />
+  <link rel="icon" type="image/png" sizes="32x32" href={href('favicon-32.png')} />
+  <link rel="apple-touch-icon" href={href('apple-touch-icon.png')} />
   <link rel="preload" href={interUrl} as="font" type="font/woff2" crossorigin />
   <link rel="preload" href={monoUrl} as="font" type="font/woff2" crossorigin />
   <style set:html={fontFaces}></style>
