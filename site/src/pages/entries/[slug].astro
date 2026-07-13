@@ -43,6 +43,7 @@ const srcLabel = (u) => {
 };
 const toc = [
   ['options', 'Options'],
+  e.migrate?.length ? ['migrate', 'Migration lines'] : null,
   e.note ? ['notes', 'Verified notes'] : null,
   e.reading?.length ? ['reading', 'Reading'] : null,
   e.watching?.length ? ['watching', 'Watching'] : null,
@@ -104,6 +105,25 @@ const toc = [
     ))}</tbody>
   </table></div>
   {hasEvidence && <p class="meta" style="margin:.35rem 0 0">evidence: npm weekly downloads (<a href={href('libraries/')}>signals snapshot</a>) · “ships in n/D” = adoption across the <a href={href('census/')}>production-app census</a>, honest denominators</p>}
+
+  {e.migrate?.length > 0 && (
+    <>
+      <h2 id="migrate">Migration lines</h2>
+      <p class="meta" style="margin:-.35rem 0 .6rem">version and deprecation lines this decision tracks — for YOUR repo's sequenced plan: <a href={href('doctor/')}>the doctor</a> or <code>npx react-brain migrate .</code></p>
+      <div class="rows">
+        {e.migrate.map((r) => (
+          <div>
+            <p style="margin:0"><strong>{r.from.pkg}{r.from.below ? ` < ${r.from.below}` : ''}</strong> → {r.to}
+              <span class="meta"> [{r.urgency} · effort {r.effort}]</span></p>
+            <p class="muted" style="margin:.3rem 0 0; font-size:.88rem; max-width:78ch">{r.why}</p>
+            {r.receipts?.length > 0 && <p class="meta" style="margin:.25rem 0 0">{r.receipts.map((u, i) => (
+              <>{i > 0 && ' · '}<a href={u} rel="noopener">{srcLabel(u)}</a></>
+            ))}</p>}
+          </div>
+        ))}
+      </div>
+    </>
+  )}
 
   {pkgs.length > 0 && (
     <p class="muted" style="font-size:.88rem">npm weekly downloads (from the corpus's last signals run):

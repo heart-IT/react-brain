@@ -1,0 +1,34 @@
+---
+import Base from '../layouts/Base.astro';
+import { corpusInfo, href, GITHUB } from '../lib/corpus.js';
+const info = corpusInfo();
+---
+<Base title="react-brain — roadmap" description="What the project is doing now, what's next, and what's under research — honestly stated, no dates promised.">
+  <h1>Roadmap</h1>
+  <p class="muted prose">Honest and small — no dates, no vaporware. The corpus itself moves weekly
+  (<a href={href('changelog/')}>changelog</a>); this page tracks the platform around it.
+  Corpus v{info.version} · {info.count} decisions.</p>
+
+  <h2>Now — shipped and load-bearing</h2>
+  <div class="rows">
+    <div><strong>The decision corpus with receipts</strong><p class="muted" style="margin:.2rem 0 0; font-size:.9rem">context-keyed recommendations; every fact dated + source-verified; defaults graded as forecasts on the <a href={href('scorecard/')}>scorecard</a>; adoption evidence from the <a href={href('census/')}>production-app census</a>.</p></div>
+    <div><strong>The instrument suite</strong><p class="muted" style="margin:.2rem 0 0; font-size:.9rem"><code>doctor</code> (repo analysis + ranked priorities), <code>migrate</code> (sequenced upgrade plans), <code>review</code> (CI diff gate), <code>map</code> (repo pinboard for agents), <code>stack</code>, <code>decide</code> — all zero-install via <code>npx</code>, all also <a href={href('architecture/')}>MCP tools</a>.</p></div>
+    <div><strong>This site as a rendering of the corpus</strong><p class="muted" style="margin:.2rem 0 0; font-size:.9rem">never a separate content source — the in-browser doctor, the ⌘K console with question routing, and every evidence column build from the same YAML.</p></div>
+  </div>
+
+  <h2>Next</h2>
+  <div class="rows">
+    <div><strong>First public benchmark run</strong><p class="muted" style="margin:.2rem 0 0; font-size:.9rem">the <a href={href('benchmark/')}>staleness bench</a> scores model answers against verified, dated corpus facts — the harness and question bank are done; the first committed run populates the leaderboard.</p></div>
+    <div><strong>Fully automated weekly harvest</strong><p class="muted" style="margin:.2rem 0 0; font-size:.9rem">the newsletter digestion loop as a scheduled cloud job opening reviewable PRs; resume state already lives in-repo, CI already gates corpus invariants.</p></div>
+    <div><strong>Deeper corpus</strong><p class="muted" style="margin:.2rem 0 0; font-size:.9rem">graduate the next drafted decisions to reviewed long-forms; an AUTH decision when a second independent signal lands; structured React/RN version-compatibility fields per option.</p></div>
+  </div>
+
+  <h2>Research</h2>
+  <div class="rows">
+    <div><strong>Documented JSON API</strong><p class="muted" style="margin:.2rem 0 0; font-size:.9rem">the site already emits machine-readable data islands; a stable, documented surface for third-party tools is the next step.</p></div>
+    <div><strong>Per-decision change timelines</strong><p class="muted" style="margin:.2rem 0 0; font-size:.9rem">not just when an entry was re-verified but what moved — the briefing diff rendered per entry.</p></div>
+    <div><strong>Project memory in the browser doctor</strong><p class="muted" style="margin:.2rem 0 0; font-size:.9rem">the console already persists a loaded package.json per session; the doctor page could remember your repo and show what changed since your last visit.</p></div>
+  </div>
+
+  <p class="muted" style="font-size:.9rem">Want something here? <a href={GITHUB} rel="noopener">Open an issue.</a></p>
+</Base>

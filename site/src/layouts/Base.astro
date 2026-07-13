@@ -26,6 +26,7 @@ const aboutLinks = [
   { to: 'architecture/', label: 'architecture' },
   { to: 'changelog/', label: 'changelog' },
   { to: 'methodology/', label: 'methodology' },
+  { to: 'roadmap/', label: 'roadmap' },
 ];
 const bottomLinks = [...toolLinks, ...aboutLinks];   // mobile nav keeps the flat list
 ---
@@ -65,7 +66,7 @@ const bottomLinks = [...toolLinks, ...aboutLinks];   // mobile nav keeps the fla
   </header>
 
   <details class="mobile-nav">
-    <summary>Browse documentation</summary>
+    <summary>Browse decisions</summary>
     <div class="mobile-nav-items">
       {groups.map((g) => (
         <a href={href(`entries/#${g.id}`)}>{g.label.split(' — ')[0].split(' (')[0]} <span class="count">{g.entries.length}</span></a>
@@ -76,8 +77,8 @@ const bottomLinks = [...toolLinks, ...aboutLinks];   // mobile nav keeps the fla
   </details>
 
   <div class="shell">
-    <aside aria-label="Documentation">
-      <p class="label-caps side-head">Documentation</p>
+    <aside aria-label="Decisions">
+      <p class="label-caps side-head">Decisions</p>
       <p class="meta" style="margin:.1rem 0 .9rem">React ecosystem · corpus v{info.version}</p>
       {groups.map((g) => (
         <a class={`side-item${activeGroup === g.id ? ' active' : ''}`} aria-current={activeGroup === g.id ? 'location' : undefined} href={href(`entries/#${g.id}`)}>
@@ -252,7 +253,7 @@ const bottomLinks = [...toolLinks, ...aboutLinks];   // mobile nav keeps the fla
         (e.when?.length ? '<br>' + e.when.map((w) => `<span class="t-dim">· ${esc(w)}</span>`).join('<br>') : '') + '</div>';
     };
 
-    const PAGES = ['entries', 'libraries', 'reading', 'stack', 'doctor', 'decide', 'scorecard', 'benchmark', 'census', 'architecture', 'changelog', 'methodology', 'search'];
+    const PAGES = ['entries', 'libraries', 'reading', 'stack', 'doctor', 'decide', 'scorecard', 'benchmark', 'census', 'architecture', 'changelog', 'methodology', 'roadmap', 'search'];
 
     async function exec(line) {
       const [cmd, ...args] = line.trim().split(/\s+/);

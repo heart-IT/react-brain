@@ -1,7 +1,12 @@
 # react-brain
 
-A React + React Native **ecosystem encyclopedia**, its **tutorial**, and a Claude
-**mentor skill** that applies the encyclopedia to real projects.
+**Engineering decisions for React & React Native, with receipts.**
+
+A continuously verified decision corpus — every recommendation context-keyed,
+every load-bearing fact dated and source-verified, every default a forecast
+graded in public — served as a website, a zero-install CLI, and a 9-tool MCP
+server for coding agents. Under the hood: an **ecosystem encyclopedia**, its
+**tutorial**, and a Claude **mentor skill** that applies it to real projects.
 
 The name: it's a *brain* of React-ecosystem knowledge — which libraries, which
 patterns, the tradeoffs, what to use when. The three pillars are coupled: we

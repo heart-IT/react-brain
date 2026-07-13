@@ -21,6 +21,7 @@ const EXPECTED = {
   <p style="display:flex; gap:.7rem; align-items:center; flex-wrap:wrap">
     <button id="run">Analyze</button>
     <label class="btn ghost" style="cursor:pointer">Load a file<input id="file" type="file" accept=".json,application/json" style="display:none" /></label>
+    <button id="sample" class="btn ghost">Try a sample</button>
     <button id="copy" hidden>Copy report</button>
   </p>
   <div id="out" aria-live="polite"></div>
@@ -132,6 +133,20 @@ const EXPECTED = {
       out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       plainReport = lines.join('\n');
       document.getElementById('copy').hidden = false;
+    });
+
+    // the 30-second demo: a deliberately legacy RN app — dead CodePush, FlashList v1
+    // blocked behind the RN gate, deprecated expo-av, an HTTP client with no cache
+    document.getElementById('sample').addEventListener('click', () => {
+      document.getElementById('pkg').value = JSON.stringify({
+        name: 'legacy-rn-demo', version: '1.0.0',
+        dependencies: {
+          react: '18.3.1', 'react-native': '0.79.2', zustand: '5.0.0', axios: '^1.18.1',
+          '@shopify/flash-list': '^1.7.1', 'react-native-code-push': '^8.2.1',
+          'expo-av': '~13.10.0', 'react-native-vector-icons': '^10.0.3', typescript: '~5.5.4',
+        },
+      }, null, 2);
+      document.getElementById('run').click();
     });
 
     document.getElementById('file').addEventListener('change', async (ev) => {

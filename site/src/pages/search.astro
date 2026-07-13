@@ -7,6 +7,10 @@ import { BASE } from '../lib/corpus.js';
 <Base title="react-brain — search">
   <h1>Search</h1>
   <link rel="stylesheet" href={`${BASE}pagefind/pagefind-ui.css`} />
+  <div id="ask-out" hidden>
+    <p class="label-caps" style="margin:0 0 .3rem; color:var(--muted)">readings that answer this</p>
+    <div class="rows" id="ask-rows"></div>
+  </div>
   <div id="search"></div>
   <p id="search-hint" class="muted" hidden>Search is generated at build time — run
   <code>npm run build &amp;&amp; npm run preview</code> to use it locally (in <code>astro dev</code> the
@@ -25,6 +29,40 @@ import { BASE } from '../lib/corpus.js';
     };
     s.onerror = () => { document.getElementById('search-hint').hidden = false; };
     document.head.appendChild(s);
+
+    // question routing above full-text: the console's `ask` scorer over the corpus's
+    // reading annotations + claims (deterministic, same data island as the console)
+    let RB = null;
+    const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    async function ask(qs) {
+      if (!RB) { try { RB = await (await fetch(`${BASE}console-data.json`)).json(); } catch { return; } }
+      const STOP = new Set('the a an is are was be my our your this that these of in on at to for and or but with without after before does do did how why what when where which it its as from by not no so if then than can could should would use using i we you'.split(' '));
+      const toks = [...new Set(qs.toLowerCase().split(/\s+/).map((t) => t.replace(/[^\w-]/g, '')).filter((t) => t.length > 2 && !STOP.has(t)))];
+      const stem = (t) => (t.length > 3 && t.endsWith('s') ? t.slice(0, -1) : t);
+      const hits = (RB.readings || []).map((r) => {
+        const text = `${r.title} ${r.what} ${r.claim || ''}`.toLowerCase();
+        let sc = 0, h = 0;
+        for (const t of toks) { const tf = text.split(stem(t)).length - 1; if (tf) { h++; sc += Math.min(tf, 3); } }
+        return { r, sc, h };
+      }).filter((x) => x.h >= Math.min(2, toks.length)).sort((a, b) => b.sc - a.sc).slice(0, 3);
+      const out = document.getElementById('ask-out');
+      out.hidden = !hits.length;
+      document.getElementById('ask-rows').innerHTML = hits.map(({ r }) => {
+        const gist = r.claim || r.what || '';
+        return `<div><a href="${esc(r.url)}" rel="noopener" style="font:600 .95rem/1.4 var(--font-head); color:var(--bright); text-decoration:none">${esc(r.title)}</a>
+          <a class="meta" style="margin-left:.5rem" href="${BASE}entries/${esc(r.slug)}/">${esc(r.slug)}</a>
+          <p class="muted" style="margin:.25rem 0 0; font-size:.88rem; max-width:78ch">${esc(gist.length > 260 ? gist.slice(0, 259) + '…' : gist)}</p></div>`;
+      }).join('');
+    }
+    const q0 = new URLSearchParams(location.search).get('q');
+    if (q0) ask(q0);
+    let deb;
+    document.addEventListener('input', (ev) => {
+      if (!ev.target.matches('#search input')) return;
+      clearTimeout(deb);
+      const v = ev.target.value;
+      deb = setTimeout(() => ask(v), 350);
+    });
   </script>
 </Base>
 
