@@ -15,5 +15,12 @@ alias.version = pkg.version;
 alias.dependencies['@heart-it/react-brain'] = `^${pkg.version}`;
 alias.description = `${pkg.description} Official alias of @heart-it/react-brain.`;
 
+// the npm registry hard-truncates descriptions at 255 chars (both packages shipped
+// ending mid-phrase at "and a 9-tool" before this guard)
+if (alias.description.length > 255) {
+  console.error(`✗ alias description ${alias.description.length} chars — registry truncates at 255; shorten the root description`);
+  process.exit(1);
+}
+
 writeFileSync(aliasPath, JSON.stringify(alias, null, 2) + '\n');
 console.log(`alias synced → react-brain@${alias.version}`);
