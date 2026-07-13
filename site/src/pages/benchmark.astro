@@ -21,8 +21,8 @@ const { byId } = corpus();
       corpus injected as context — that with-corpus delta is the product, quantified.</p>
       <p class="muted" style="margin:.7rem 0 0; font-size:.9rem"><strong style="color:var(--fg)">One-click:</strong> maintainers run the <code>bench</code> GitHub Action (Actions → bench → Run workflow; needs the <code>ANTHROPIC_API_KEY</code> repo secret) —
       results commit themselves and this page fills in on the next deploy. <strong style="color:var(--fg)">Any machine:</strong></p>
-      <pre style="margin:.6rem 0 0"><span class="t-p">$</span> npx react-brain bench --run --model=claude-sonnet-5
-<span class="t-p">$</span> npx react-brain bench --run --model=claude-sonnet-5 --with-corpus  <span class="t-dim"># the delta IS the product</span></pre>
+      <pre style="margin:.6rem 0 0"><span class="t-p">$</span> npx -y @heart-it/react-brain bench --run --model=claude-sonnet-5
+<span class="t-p">$</span> npx -y @heart-it/react-brain bench --run --model=claude-sonnet-5 --with-corpus  <span class="t-dim"># the delta IS the product</span></pre>
     </div>
   ) : (
     <div class="tbl"><table>

@@ -27,7 +27,7 @@ const appList = snap ? Object.values(snap.apps).sort((a, b) => (a.platform > b.p
   that the context-keyed recommendations already account for.</p>
 
   {!snap && (
-    <div class="card caution"><p class="muted" style="margin:0">No census snapshot yet — run <code>npx react-brain census</code> and rebuild. This page renders from
+    <div class="card caution"><p class="muted" style="margin:0">No census snapshot yet — run <code>npx -y @heart-it/react-brain census</code> and rebuild. This page renders from
     <code>tools/.census-baseline.json</code>.</p></div>
   )}
 

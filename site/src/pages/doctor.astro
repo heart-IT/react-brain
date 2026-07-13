@@ -13,7 +13,7 @@ const EXPECTED = {
   <p class="muted prose">Paste a <code>package.json</code> — your dependencies are matched
   against the corpus's detection table, each detected choice is compared to the context-keyed
   recommendation, and expected-but-missing domains are flagged. Nothing leaves your browser. The full
-  doctor (<code>npx react-brain doctor .</code>) adds what a browser can't: the legacy-API modernization
+  doctor (<code>npx -y @heart-it/react-brain doctor .</code>) adds what a browser can't: the legacy-API modernization
   scan and source-level signals. Ready to commit a choice? <a href={`${BASE}decide/`}>Generate a decision record</a>.</p>
 
   <label for="pkg" class="label-caps" style="display:block; color:var(--muted); margin-bottom:.4rem">Your package.json</label>
@@ -115,7 +115,7 @@ const EXPECTED = {
       const URANK = { dead: 0, deprecated: 1, superseded: 2, upgrade: 3, conditional: 4 };
       steps.sort((a, b) => (a.blocked ? 1 : 0) - (b.blocked ? 1 : 0) || URANK[a.urgency] - URANK[b.urgency]);
       if (steps.length) {
-        html += '<h2>Migration plan</h2><p class="muted" style="font-size:.88rem">Installed versions crossed with the corpus\'s verified migration rules — sequenced, every step with receipts. Full plan incl. the legacy-API source scan: <code>npx react-brain migrate .</code></p>';
+        html += '<h2>Migration plan</h2><p class="muted" style="font-size:.88rem">Installed versions crossed with the corpus\'s verified migration rules — sequenced, every step with receipts. Full plan incl. the legacy-API source scan: <code>npx -y @heart-it/react-brain migrate .</code></p>';
         for (const s of steps) {
           const glyph = s.urgency === 'dead' || s.urgency === 'deprecated' ? '✗' : '→';
           lines.push(`MIGRATE [${s.urgency}] ${s.name}@${s.installed} -> ${s.to}`);
@@ -128,7 +128,7 @@ const EXPECTED = {
         }
       }
 
-      html += '<p class="muted" style="font-size:.88rem">✓ aligned = matches the recommendation for some context · ~ contextual = matches a when-clause · ↗ review = differs from the default (not necessarily wrong — check the entry\'s context keys). For modernization + source signals run <code>npx react-brain doctor .</code></p>';
+      html += '<p class="muted" style="font-size:.88rem">✓ aligned = matches the recommendation for some context · ~ contextual = matches a when-clause · ↗ review = differs from the default (not necessarily wrong — check the entry\'s context keys). For modernization + source signals run <code>npx -y @heart-it/react-brain doctor .</code></p>';
       out.innerHTML = html;
       out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       plainReport = lines.join('\n');
