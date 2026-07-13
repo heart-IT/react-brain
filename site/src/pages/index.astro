@@ -152,10 +152,10 @@ const stats = [
         <div class="row"><span class="row-title vs-a">a model's knowledge freezes at cutoff</span>
           <span class="muted" style="display:block; font-size:.88rem; margin-top:.15rem">the corpus is <strong style="color:var(--fg)">re-verified weekly</strong> from 6 cross-checked sources — <a href={href('changelog/')}>changelog</a></span></div>
       </div>
-      <p class="muted" style="font-size:.9rem">Don’t take the framing on faith — <a href={href('benchmark/')}>the staleness benchmark</a> is
-      published and reproducible: 35 questions built from verified, dated corpus facts, a deterministic
-      rubric (no judge model), one command with your own API key. First public results are pending —
-      run it before we do.</p>
+      <p class="muted" style="font-size:.9rem">Don’t take the framing on faith — <a href={href('benchmark/')}>the staleness benchmark</a> measured it:
+      claude-sonnet-5 alone answers <strong style="color:var(--fg)">70% fresh</strong> and hedges a third of the time;
+      with the corpus injected it hits <strong style="color:var(--fg)">94% fresh</strong> and barely hedges at all.
+      Deterministic rubric, conditions labeled, reproducible with your own key.</p>
     </div>
   </div>
 </Base>

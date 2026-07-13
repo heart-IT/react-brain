@@ -33,7 +33,7 @@ const { byId } = corpus();
       <tbody>
         {runs.map((r) => (
           <tr>
-            <td><code>{r.model}</code></td>
+            <td><code>{r.model}</code>{r.conditions && <span class="mark-warn" title={r.conditions}>*</span>}</td>
             <td>{r.with_corpus ? <span class="badge held">+ react-brain</span> : <span class="muted">alone</span>}</td>
             <td class="meta">{r.date}</td>
             <td><span class={r.summary.fresh_pct >= 80 ? 'mark-ok' : ''}>{r.summary.fresh_pct}%</span></td>
@@ -44,6 +44,9 @@ const { byId } = corpus();
         ))}
       </tbody>
     </table></div>
+  )}
+  {runs.some((r) => r.conditions) && (
+    <p class="meta" style="margin:.4rem 0 0">* {[...new Set(runs.filter((r) => r.conditions).map((r) => r.conditions))].join(' · ')}</p>
   )}
 
   <h2>How it's graded</h2>

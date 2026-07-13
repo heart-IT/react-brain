@@ -101,11 +101,35 @@ async function askOpenAI(model, system, user) {
 
 const SYSTEM = 'You are a senior React / React Native advisor. Answer the question directly and concisely (a few sentences). It is currently 2026.';
 
-async function run({ model, withCorpus, limit, today }) {
-  const provider = /^claude|^anthropic/i.test(model) ? 'anthropic' : 'openai';
-  const key = provider === 'anthropic' ? process.env.ANTHROPIC_API_KEY : process.env.OPENAI_API_KEY;
-  if (!key) { console.error(`no ${provider === 'anthropic' ? 'ANTHROPIC' : 'OPENAI'}_API_KEY in env — cannot run. (--list shows the bank; results can be contributed from any machine.)`); process.exit(1); }
-  const ask = provider === 'anthropic' ? askAnthropic : askOpenAI;
+// ── subscription fallback: ask via the Claude Code CLI (`claude -p`) ────────────
+// NON-REFERENCE conditions, labeled as such in the results: no temperature control,
+// answers ride the Claude Code wrapper (system prompt REPLACED to strip the coding-CLI
+// framing), and it consumes the operator's subscription quota. Isolation: runs in an
+// EMPTY scratch cwd with MCP + tools locked out so the model cannot read the corpus
+// it is being benchmarked against.
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+let _cliScratch = null;
+function askClaudeCli(model, system, user) {
+  if (!_cliScratch) _cliScratch = mkdtempSync(join(tmpdir(), 'rb-bench-'));
+  return execFileSync('claude', [
+    '-p', user,
+    '--model', model,
+    '--system-prompt', system,
+    '--max-turns', '3',   // room to recover from a DENIED tool attempt into a text answer
+    '--strict-mcp-config',                       // no MCP servers — the corpus MCP must not leak in
+    '--disallowedTools', 'Bash', 'Read', 'Write', 'Edit', 'Glob', 'Grep', 'WebFetch', 'WebSearch', 'Agent', 'Task',
+  ], { encoding: 'utf8', cwd: _cliScratch, timeout: 180000, maxBuffer: 4 * 1024 * 1024 }).trim();
+}
+
+async function run({ model, withCorpus, limit, today, viaCli = false }) {
+  const provider = viaCli ? 'claude-code-cli' : /^claude|^anthropic/i.test(model) ? 'anthropic' : 'openai';
+  if (!viaCli) {
+    const key = provider === 'anthropic' ? process.env.ANTHROPIC_API_KEY : process.env.OPENAI_API_KEY;
+    if (!key) { console.error(`no ${provider === 'anthropic' ? 'ANTHROPIC' : 'OPENAI'}_API_KEY in env — cannot run. (--list shows the bank; results can be contributed from any machine; --provider=claude-cli uses a Claude Code subscription under non-reference conditions.)`); process.exit(1); }
+  }
+  const ask = viaCli ? (m, s, u) => askClaudeCli(m, s, u) : provider === 'anthropic' ? askAnthropic : askOpenAI;
   const entries = loadEntries();
   const bank = loadBank().slice(0, limit || undefined);
   const results = [];
@@ -126,7 +150,9 @@ async function run({ model, withCorpus, limit, today }) {
     console.error(`\n✗ ${summary.errors}/${bank.length} questions failed at the API — results not written. Re-run when the provider is healthy.`);
     process.exit(1);
   }
-  const out = { model, provider, with_corpus: !!withCorpus, date: today, bank_size: bank.length, summary, results };
+  const out = { model, provider, with_corpus: !!withCorpus, date: today, bank_size: bank.length,
+    ...(viaCli ? { conditions: 'run via Claude Code CLI (subscription): no temperature control, Claude Code wrapper with replaced system prompt, tools/MCP disabled, empty cwd — indicative, not reference methodology; API runs are the reference' } : {}),
+    summary, results };
   mkdirSync(RESULTS_DIR, { recursive: true });
   const file = join(RESULTS_DIR, `${model.replace(/[^\w.-]/g, '_')}${withCorpus ? '-with-corpus' : ''}-${today}.json`);
   writeFileSync(file, JSON.stringify(out, null, 2) + '\n');
@@ -146,6 +172,7 @@ if (isMain) {
     const model = get('model', '');
     if (!model) { console.error('usage: react-brain bench --run --model=<id> [--with-corpus] [--limit=N]'); process.exit(1); }
     await run({ model, withCorpus: argv.includes('--with-corpus'),
+      viaCli: get('provider', '') === 'claude-cli',
       limit: parseInt(get('limit', '0'), 10) || 0, today: get('today', new Date().toISOString().slice(0, 10)) });
   } else {
     console.log('usage: react-brain bench --list | --run --model=<id> [--with-corpus] [--limit=N] [--today=YYYY-MM-DD]');

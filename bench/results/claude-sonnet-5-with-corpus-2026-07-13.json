@@ -1,0 +1,302 @@
+{
+  "model": "claude-sonnet-5",
+  "provider": "claude-code-cli",
+  "with_corpus": true,
+  "date": "2026-07-13",
+  "bank_size": 35,
+  "conditions": "run via Claude Code CLI (subscription): no temperature control, Claude Code wrapper with replaced system prompt, tools/MCP disabled, empty cwd — indicative, not reference methodology; API runs are the reference",
+  "summary": {
+    "n": 35,
+    "errors": 0,
+    "fresh": 33,
+    "stale": 2,
+    "unclear": 0,
+    "hedged": 2,
+    "confidently_stale": 2,
+    "fresh_pct": 94,
+    "stale_pct": 6,
+    "confidently_stale_pct": 6
+  },
+  "results": [
+    {
+      "id": "expo-e2e",
+      "entry": "RB-E-TESTING",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "Maestro. Expo has moved to recommending Maestro for RN e2e testing and archived its Detox support docs."
+    },
+    {
+      "id": "jest-preset",
+      "entry": "RB-E-TESTING",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "`preset: '@react-native/jest-preset'`"
+    },
+    {
+      "id": "hermes-default",
+      "entry": "RB-E-BUILD",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "Hermes V1 — default JS engine in RN 0.84+ (automatic if already on Hermes; was experimental opt-in from 0.82)."
+    },
+    {
+      "id": "jsc-removed",
+      "entry": "RB-E-RN-VERSIONS",
+      "verdict": "stale",
+      "hedged": false,
+      "confidently_stale": true,
+      "answer": "Yes — JSC is still selectable, but as of RN 0.74 it was pulled out of react-native core and split into the community-maintained `@react-native-community/javascriptcore` package, so you now install/link it explicitly instead of getting it by default. JSI itself is engine-agnostic, so JSC does work under the New Architecture (mandatory from 0.82 per your RN-VERSIONS reference), but it lacks Hermes's bytecode precompilation, smaller memory footprint, and the debugging/profiling tooling Meta actively optimizes for. Hermes is the default and the recommended choice for any new 0.81+ app; only reach…"
+    },
+    {
+      "id": "new-arch-mandatory",
+      "entry": "RB-E-NATIVE",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "No. Per the verified reference, RN 0.82 made the New Architecture the *only* runtime option — Legacy Architecture support is gone as of that release, and RN 0.84+ continues stripping remaining Legacy-Arch code from iOS/Android. So targeting the New Architecture isn't a choice anymore for anyone on ≥0.82; it's the sole path. Anything still on Legacy needs to migrate now."
+    },
+    {
+      "id": "safeareaview",
+      "entry": "RB-E-RN-VERSIONS",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "Core `SafeAreaView` (the one exported directly from `react-native`) is on its way out: it's deprecated and slated for removal in RN 0.87, which is currently in RC. If your code still does `import { SafeAreaView } from 'react-native'`, migrate now to `react-native-safe-area-context`'s `SafeAreaView`/`useSafeAreaInsets`, which is already the de facto standard and unaffected by the removal. This is grouped with `InteractionManager` and other deep-path imports being removed in the same release, so worth doing as one sweep rather than piecemeal."
+    },
+    {
+      "id": "edge-to-edge",
+      "entry": "RB-E-NATIVE",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "No — on RN 0.86+, edge-to-edge (Android 15+) support is now built into core, so you can drop `react-native-edge-to-edge` (zoontek) entirely. That package remains necessary only for apps still on RN < 0.86. If you're upgrading, remove the dependency and its setup code, then retest `KeyboardAvoidingView`, `Dimensions`, and `StatusBar` behavior since those were the pieces core fixed alongside the edge-to-edge move."
+    },
+    {
+      "id": "rn-init",
+      "entry": "RB-E-RN-VERSIONS",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "No — `react-native init` was removed from the core `react-native` package years ago. Today you either scaffold bare RN via `npx @react-native-community/cli init` (community-CLI-maintained), or — the officially recommended default per RN's own docs now — use a framework, i.e. `npx create-expo-app`. Given it's 2026, lean Expo unless you have a specific reason for bare RN: current SDK 57 maps to RN 0.86 + React 19.2, New Architecture is mandatory from 0.82 on so bare-RN setup now means confirming your native deps support New Arch anyway, and Expo abstracts most of that plus the Xcode-26/iOS-26-S…"
+    },
+    {
+      "id": "vector-icons",
+      "entry": "RB-E-SVG",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "The monolithic `react-native-vector-icons` package is superseded/legacy — new work should use the scoped `@react-native-vector-icons/*` packages (v11+) instead, with a codemod available for migration. This lines up with Expo's move too: `@expo/vector-icons` is deprecated as of SDK 56, with `@react-native-vector-icons/*` as its replacement, since upstream work made the Expo wrapper unnecessary."
+    },
+    {
+      "id": "styled-components",
+      "entry": "RB-E-STYLING",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "Styled-components is still actively maintained in 2026 (v7 shipped), so it's not abandoned — but it remains a runtime CSS-in-JS library, meaning it does style computation/injection on every render, which is the axis that matters now. For new web projects it's not recommended. Prefer Tailwind (paired with shadcn/ui), or if you want CSS-in-JS specifically, use a zero-runtime option (compiled at build time) or StyleX for Meta-scale atomic CSS. The industry direction in 2026 is away from runtime styling libraries toward zero-runtime/compiler approaches for per-render performance — styled-componen…"
+    },
+    {
+      "id": "rn-web",
+      "entry": "RB-E-CROSSPLATFORM",
+      "verdict": "fresh",
+      "hedged": true,
+      "confidently_stale": false,
+      "answer": "No — as of 2026, react-native-web is in maintenance-only mode. Creator Nicolas Gallagher and Zalando pivoted to React Strict DOM, and Software Mansion says there are \"no major features on the horizon\" for it. For a **new** universal web+native UI project, evaluate **React Strict DOM** or **Expo Universal Components** instead of starting a fresh react-native-web bet. If you already have an RN-Web app, it still works fine — just don't expand that bet further. Separately, regardless of which UI approach you pick: the highest-leverage move is extracting a platform-agnostic logic/hooks package for…"
+    },
+    {
+      "id": "rn-iap",
+      "entry": "RB-E-PAYMENTS",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "**Status: actively maintained, but development focus has shifted toward expo-iap.** react-native-iap (maintained by the hyochan/dooboolab team) went through a maintainership transition a couple years back and was rewritten for the New Architecture (TurboModules, StoreKit2 on iOS, Billing Library v5+/v6 on Android). It's still the go-to for **bare** React Native apps that need direct store billing without Expo. However, the same core team has since put most of their new-feature energy into **expo-iap**, which is the more actively developed, Expo-first sibling with a cleaner API — so for new Ex…"
+    },
+    {
+      "id": "game-engine",
+      "entry": "RB-E-GAMES",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "Not really, and the reference itself hints at this: it's listed as the option for a \"simple 2D game loop\" but flagged niche/drafted-low-confidence, with no maintenance-activity claim behind it — that's a gap, not a verified endorsement. From what I know independently: `react-native-game-engine` (bberak) has historically been a small, infrequently-updated project — long gaps between releases, thin maintainer bandwidth, no New Architecture guarantees. I don't have a verified 2026 commit-activity check, so treat \"actively maintained\" as unconfirmed rather than assume it either way. Practical gui…"
+    },
+    {
+      "id": "react-compiler",
+      "entry": "RB-E-REACT-CORE",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "Yes — React Compiler is production-ready (hit 1.0 stable Oct 2025). For new code, let the Compiler handle memoization by default rather than hand-writing `useMemo`/`useCallback` everywhere; that's largely why it exists. But don't strip memoization out of existing code — removing it can change what the Compiler infers/does — and keep them available as manual escape hatches for hot spots it doesn't optimize well. If your test coverage is thin, pin the exact Compiler version since its output can shift between releases."
+    },
+    {
+      "id": "rsc-rn",
+      "entry": "RB-E-SECURITY",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "No — that CVE family is server-side only. CVE-2026-23864 and React2DoS (CVE-2026-23869) live in `react-server-dom-*`, hitting Server Components/Server Functions runtimes (e.g., Next.js App Router). React Native apps don't run an RSC server — there's no `react-server-dom-*` in the client bundle — so this bug class doesn't apply to RN regardless of your React version. What actually matters for your RN app's security posture: keep secrets in Keychain/secure-store rather than AsyncStorage, and treat the 2025–26 supply-chain wave (Shai-Hulud, the @tanstack/* npm compromise, axios RAT) as the bigge…"
+    },
+    {
+      "id": "npm-scripts",
+      "entry": "RB-E-SECURITY",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "No — as of npm v12, install scripts (`preinstall`/`install`/`postinstall`) are **blocked by default** as part of the supply-chain hardening response to the 2025–26 attack wave (Shai-Hulud worm, the `@tanstack/*` compromise, axios RAT). This is a reversal from earlier npm versions, which ran lifecycle scripts automatically unless you passed `--ignore-scripts`. If you need scripts for specific trusted deps, allowlist them explicitly rather than re-enabling globally, and pair this with install-age gating (per RB-E-SECURITY) rather than relying on scripts being safe by default."
+    },
+    {
+      "id": "react-router-v8",
+      "entry": "RB-E-NAV",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "No — as of today (2026-07-13), React Router 8 has not been released. The reference note describes it in future/expected tense (\"released, ESM-only\" is listed as a characteristic to know once it lands, but nothing in verified RB-E-NAV confirms a shipped v8). Current stable is React Router 7. Given the pending v8, don't build new routing decisions around it yet: for a type-safe SPA without a meta-framework, use TanStack Router now; stick with React Router only if you're already on it or prioritize ecosystem familiarity over type safety — and re-check before upgrading, since v8 is expected to be…"
+    },
+    {
+      "id": "vite-bundler",
+      "entry": "RB-E-BUILD",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "Rolldown — a Rust-based bundler (a Rollup-compatible successor). That's the same engine Rollipop is now bringing over to React Native."
+    },
+    {
+      "id": "ts7",
+      "entry": "RB-E-TYPESCRIPT",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "TypeScript 7 is the native, Go-based rewrite of the TypeScript compiler (tsc) — it replaces the original JavaScript/Node implementation with a Go binary while keeping the same language semantics and type-checking behavior, so it's a drop-in performance upgrade rather than a new language version. It went stable on 2026-07-08 (npm `typescript@7.0.2`). Speed: roughly **10x faster** than the JS-based TS 6 compiler for typical builds, and up to **16x** on type-checking when parallelized across cores (Go's real threading vs. single-threaded JS). Practical note: migrate incrementally via TS 6 as the…"
+    },
+    {
+      "id": "mmkv-v4",
+      "entry": "RB-E-STORAGE",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "react-native-mmkv v4 (Oct 2025) is a full Nitro rewrite — it moved off the legacy JSI-binding codegen onto Nitro Modules, which regenerates the C++/Swift/Kotlin bindings from TypeScript specs. The practical payoff: it restored Old-Arch (non-Fabric/TurboModule) compatibility that had been dropped in earlier v3 New-Arch-only builds, so it works across both architectures again. It stays synchronous key-value access under the hood, same API shape — the rewrite is about the native binding layer/build tooling, not the storage semantics."
+    },
+    {
+      "id": "async-storage-v3",
+      "entry": "RB-E-STORAGE",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "No. That New-Arch-only requirement was an earlier, incorrect claim — corrected in the RB-E-STORAGE note. v3.x's instance-based storage (`createAsyncStorage`) just needs React Native 0.76+; it works on both Old and New Architecture. Latest is 3.1.x."
+    },
+    {
+      "id": "zero-rn",
+      "entry": "RB-E-DATA",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "Yes — per the reference (RB-E-DATA, verified 2026-07-10, adversarially stress-tested 2026-06-25): Zero reached 1.0 in June 2026 and includes React Native support."
+    },
+    {
+      "id": "state-default",
+      "entry": "RB-E-STATE",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "Zustand."
+    },
+    {
+      "id": "rn-lists",
+      "entry": "RB-E-LISTS",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "FlashList (from Shopify) — it's the ecosystem-recommended drop-in replacement for FlatList on large RN lists, with FlatList remaining fine for smaller lists and ScrollView reserved for under ~20 static items. Two caveats worth knowing before you reach for it: - If your app is still on the old (non-Fabric) architecture, use FlashList v1.x — v2 requires New Architecture. - If you need one list engine shared across RN and web, Legend List is the better fit than FlashList. For anything beyond \"which library,\" exact perf thresholds live in react-native-best-practices — worth checking if you're opt…"
+    },
+    {
+      "id": "keyboard-android",
+      "entry": "RB-E-KEYBOARD",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "**Why it's janky on Android:** `KeyboardAvoidingView` was designed around iOS's keyboard behavior — a single scheduled animation with a known duration/curve that fires once. Android's keyboard instead delivers per-frame inset updates via `WindowInsetsAnimationCallback`, so the library's single-shot height calculation can't track it smoothly — you get a snap/jump instead of a smooth follow. Android 15's edge-to-edge display also breaks the legacy `adjustResize` behavior the core view leans on, compounding the snapping. **Modern fix:** switch to `react-native-keyboard-controller`, which reads t…"
+    },
+    {
+      "id": "expo-sdk57",
+      "entry": "RB-E-RN-VERSIONS",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "Expo SDK 57 ships React Native 0.86 (with React 19.2), per the RB-E-RN-VERSIONS mapping — verified against the SDK 57 changelog."
+    },
+    {
+      "id": "ts7-stable",
+      "entry": "RB-E-TYPESCRIPT",
+      "verdict": "fresh",
+      "hedged": true,
+      "confidently_stale": false,
+      "answer": "Stable — TypeScript 7 (the Go-based tsc rewrite) shipped stable as of 2026-07-08 (npm latest 7.0.2), roughly 10x faster than TS 6, up to 16x with parallel type-checking. Migrate incrementally through TS 6 as the bridge release rather than jumping straight from an older version."
+    },
+    {
+      "id": "codepush-service",
+      "entry": "RB-E-OTA",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "No — the hosted CodePush service (App Center) was retired by Microsoft on 2025-03-31; the repo is archived. Anything still pointed at it is silently broken, not gracefully degraded, so treat this as urgent if you're still on it. Migration path depends on your setup: - **Expo/EAS app** → move to EAS Update (first-party, channels + phased rollouts + rollback built in; SDK 55+ also gets Hermes bytecode bsdiff patches, ~75% smaller downloads, default in SDK 56). - **Self-hosted / no-vendor requirement** → hot-updater, or the open expo-updates protocol against your own server. - **Need to keep a l…"
+    },
+    {
+      "id": "expo-av-status",
+      "entry": "RB-E-MEDIA",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "Use expo-video, not expo-av. expo-av is deprecated, unpatched, and being pulled from Expo Go starting SDK 55 — it's not a safe foundation for a new app. Same applies to audio playback: use expo-audio instead of expo-av's audio APIs. If you also need audio processing/effects (graphs, filters, real-time DSP) rather than plain playback, that's react-native-audio-api instead — expo-audio is playback-only."
+    },
+    {
+      "id": "expo-router-decoupled",
+      "entry": "RB-E-NAV",
+      "verdict": "stale",
+      "hedged": false,
+      "confidently_stale": true,
+      "answer": "Yes. Expo Router is built on top of React Navigation — it wraps React Navigation's native-stack, tabs, and drawer navigators and generates the navigation tree from your file structure, but the underlying navigation state/runtime is still React Navigation. So React Navigation version bumps (e.g. the RN8 changes noted above) still flow through to Expo Router apps once Expo Router adopts that version."
+    },
+    {
+      "id": "shadcn-headless",
+      "entry": "RB-E-COMPONENT-LIBS",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "Base UI. Since 2026-07, shadcn/ui uses Base UI as its default headless primitive layer (Radix remains supported, not deprecated, but new shadcn work centers on Base UI)."
+    },
+    {
+      "id": "vector-icons-expo",
+      "entry": "RB-E-SVG",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "No — as of Expo SDK 56, `@expo/vector-icons` is deprecated. Expo's own changelog says it's being replaced by `@react-native-vector-icons/*` (the scoped, per-family packages), since upstream changes made the `@expo/vector-icons` wrapper unnecessary. For new work: pull icons from `lucide-react-native` or the relevant `@react-native-vector-icons/*` package, and run the codemod if migrating an existing app off `@expo/vector-icons` or the legacy monolithic `react-native-vector-icons`. This applies on Expo too — it's not Expo-vs-bare specific anymore."
+    },
+    {
+      "id": "xcode-floor",
+      "entry": "RB-E-RN-VERSIONS",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "Xcode 26 (iOS-26-family SDK), minimum — required for App Store Connect uploads since 2026-04-28. Practically, stay on Expo SDK ≥54 (EAS images there already run Xcode 26; SDK ≤53 needs an explicit image opt-in to get it)."
+    },
+    {
+      "id": "test-renderer",
+      "entry": "RB-E-TESTING",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "No — as of RN Testing Library v14 (current standard), the react-test-renderer package is deprecated. RN Testing Library now ships its own react-reconciler-based test renderer that renders host elements only, which is also why the query model shifted to host-element/role queries rather than composite-component queries. For new component tests: use `@testing-library/react-native` (v14+) with Jest, `preset: '@react-native/jest-preset'` (RN 0.85+ moved this out of core), and query by role/host element rather than reaching into `react-test-renderer` internals. If a test needs to exercise real nati…"
+    },
+    {
+      "id": "next-adapters",
+      "entry": "RB-E-META-FRAMEWORKS",
+      "verdict": "fresh",
+      "hedged": false,
+      "confidently_stale": false,
+      "answer": "Stable — the Adapter API went stable in Next.js 16.2, backed by a shared public test suite and an Ecosystem Working Group. That's the current answer to \"can I run Next off Vercel.\" (Separately, note Next security patches don't backport, so pin to a patched minor regardless of host.)"
+    }
+  ]
+}
