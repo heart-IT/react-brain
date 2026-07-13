@@ -2,6 +2,8 @@
   "name": "@heart-it/react-brain",
   "version": "0.7.3",
   "description": "Engineering decisions for React & React Native, with receipts — a continuously verified decision corpus, plus doctor (repo analysis, ranked priorities), migrate (sequenced upgrade plans), review (CI diff gate), map (repo pinboard for agents), and a 9-tool MCP server.",
+  "author": "heartit (https://heartit.tech/)",
+  "homepage": "https://heart-it.github.io/react-brain/",
   "type": "module",
   "bin": {
     "react-brain": "tools/cli.mjs"
