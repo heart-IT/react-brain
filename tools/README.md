@@ -53,6 +53,11 @@ current-choice vs the entry's context recommendation (fit: ✓ aligned / ~ conte
 modern-defaults.yaml), **SOURCE SIGNALS** (entry-owned `detect_source:` regexes — the smells
 a dep-scan can't see: ScrollView rendering a mapped array, secrets in AsyncStorage,
 fetch-in-useEffect, no error boundary at production stage), and a cross-app matrix.
+**FOR YOUR STACK** (2026-07-13) surfaces readings whose tagged `claim:` applies to the repo —
+each reading may carry `applies_when:` gates ({deps, absent_deps, platforms, stages}) so the
+article library becomes repo-conditional advice with citations, not a link list. WORTH A LOOK
+and GAPS rows carry **census field adoption** ("you ship X n/D; most-shipped Y m/D") from the
+committed census snapshot, with honest denominators.
 Deterministic; complements the LLM mentor (which owns the judgment dimensions).
 ```sh
 node tools/react-brain-doctor.mjs ../../ledgerhr ../../ourpot/ourpot ../../bitbarter

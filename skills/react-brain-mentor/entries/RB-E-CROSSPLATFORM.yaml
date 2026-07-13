@@ -37,6 +37,8 @@ reading:
     url: "https://evanbacon.dev/blog/use-dom"
     by: "Evan Bacon (Expo)"
     what: "Deep-dive on Expo DOM Components and the `use dom` directive — run real web UI inside a native app and migrate to native views component-by-component; covers the Metro bundling, offline support, and honest WebView trade-offs. The primary source for the incremental-reuse path."
+    claim: "You ship react-native-web — it's in maintenance mode (2026); don't expand the bet. For incremental web-UI reuse inside native, Expo DOM Components (`use dom`) are the maintained migration path."
+    applies_when: { deps: ["react-native-web"] }
   - title: "AI-Assisted React Native Migration for TV: Lessons From Zattoo"
     url: "https://www.callstack.com/blog/ai-assisted-react-native-migration-for-tv-lessons-from-zattoo"
     by: "Callstack (Zattoo case study)"
@@ -44,3 +46,8 @@ reading:
 sources:
   - "https://nicolasgallagher.com/one-react-for-web-and-native/"
   - "https://www.callstack.com/podcasts/from-react-native-web-to-react-strict-dom"
+detect_source:   # source-level signals owned by this entry (regex over repo source)
+  - pattern: "Platform\\.OS\\s*===?"
+    min_files: 10
+    signal: "Platform.OS branching in 10+ files"
+    hint: "widespread inline platform forking suggests sharing at the wrong layer — share logic/state/data, split divergent UI by platform-extension files (.ios/.android/.web) so each file stays single-platform (see RB-E-CROSSPLATFORM doc)"

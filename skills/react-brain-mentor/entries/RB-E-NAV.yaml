@@ -49,6 +49,8 @@ reading:
     url: "https://performance.dev/chatgpt"
     by: "Dennis Brotzky (performance.dev)"
     what: "Production evidence for React Router 7 framework mode at billion-user scale: ChatGPT migrated Next.js Pages Router → Remix (2024) → RR7 with streaming SSR, TanStack Query seeded from server render, Tailwind 4 tokens, ProseMirror composer — 84KB HTML document, 50-65ms TTFB. The concrete counterweight to 'serious apps need Next.js', and the highest-profile data point behind this entry's React Router when-clause. (4 independent newsletter signals in one week.)"
+    claim: "You ship React Router — it runs ChatGPT's web app at billion-user scale (framework mode + streaming SSR), so the stack choice is production-proven; the teardown shows what a tuned RR7 deployment looks like."
+    applies_when: { deps: ["react-router", "react-router-dom"], platforms: [react] }
   - title: "TanStack Router's New Reactive Core: A Signal Graph"
     url: "https://tanstack.com/blog/tanstack-router-signal-graph"
     by: "Florian Pellet (TanStack)"
@@ -57,6 +59,8 @@ reading:
     url: "https://andrei-calazans.com/posts/2026-06-04-expo-router-screen-level-lazy-loading/"
     by: "Andrei Calazans"
     what: "Instrumented proof that Expo Router defers screen loading by construction via require.context() getters wrapped in getComponent thunks — with the precise caveats (layouts/initial route load eagerly; sync require, not bundle-splitting). The canonical explanation of Expo Router's lazy-loading mechanism."
+    claim: "You ship Expo Router — screens are lazy-loaded by construction, but layouts and the initial route load eagerly and it's sync require, not bundle-splitting; know the mechanism before optimizing startup."
+    applies_when: { deps: ["expo-router"], platforms: [react-native] }
   - title: "React Router loaders and actions as integration points"
     url: "https://sergiodxa.com/articles/react-router-loaders-and-actions-as-integration-points"
     by: "Sergio Xalambrí (React Router / Remix)"
@@ -65,6 +69,8 @@ reading:
     url: "https://www.callstack.com/blog/deep-links-with-authentication-in-react-navigation"
     by: "Satyajit Sahoo (Callstack; React Navigation maintainer)"
     what: "The redirect-after-login problem: a deep link that lands on the login screen should still deliver the user to the intended screen afterwards. Walks the manual approaches in older React Navigation and the new API that handles it (routeNamesChangeBehavior 'lastUnhandled' re-dispatching the unhandled link when auth state flips). From the library's own maintainer."
+    claim: "You ship React Navigation — if deep links can land behind auth, the maintainer's routeNamesChangeBehavior 'lastUnhandled' pattern replaces hand-rolled redirect-after-login plumbing."
+    applies_when: { deps: ["@react-navigation/*"], platforms: [react-native] }
   - title: "Untangling Dialogs in React Router"
     url: "https://programmingarehard.com/2026/05/06/react-router-dialogs.html/"
     by: "Dave Adams"
@@ -74,6 +80,11 @@ sources:
   - "https://reactrouter.com/"
   - "https://expo.dev/changelog/sdk-56"
   - "https://reactnavigation.org/blog/2026/07/08/react-navigation-8.0-july-progress/"
+detect_source:   # source-level signals owned by this entry (regex over repo source)
+  - pattern: "window\\.location\\.(?:href\\s*=|assign\\()"
+    min_files: 2
+    signal: "hard navigation via window.location in 2+ files"
+    hint: "full-page reloads drop client state and defeat route-level code-splitting — use the router's navigate()/Link for in-app moves; reserve window.location for external URLs"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "@react-navigation/*", label: "React Navigation", token: "react navigation" }
   - { pkg: "expo-router", label: "Expo Router", token: "expo router" }

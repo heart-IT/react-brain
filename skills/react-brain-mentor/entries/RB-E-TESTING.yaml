@@ -42,10 +42,14 @@ reading:
     url: "https://tkdodo.eu/blog/test-ids-are-an-a11y-smell"
     by: "Dominik Dorfmeister (TkDodo)"
     what: "The bridge between this entry and RB-E-A11Y: querying by data-testid silently hides inaccessible markup, while role/label queries fail exactly when a real assistive-tech user would — so accessible queries are both the better test AND a free a11y audit. Sharpens the Testing-Library philosophy the two Dodds pieces establish."
+    claim: "You ship Testing Library — query by role/label, not data-testid: accessible queries are both the stronger test and a free a11y audit; testid queries silently hide inaccessible markup."
+    applies_when: { deps: ["@testing-library/*"] }
   - title: "Write tests. Not too many. Mostly integration."
     url: "https://kentcdodds.com/blog/write-tests"
     by: "Kent C. Dodds"
     what: "The foundational testing-strategy essay: maximize confidence per effort by favoring integration tests over mock-heavy unit suites and coverage-chasing. The origin of the Testing-Trophy mindset."
+    claim: "You have a test runner — spend it on integration tests over mock-heavy unit suites: confidence per effort is the metric, not coverage."
+    applies_when: { deps: ["jest", "vitest"] }
   - title: "Testing Implementation Details"
     url: "https://kentcdodds.com/blog/testing-implementation-details"
     by: "Kent C. Dodds"

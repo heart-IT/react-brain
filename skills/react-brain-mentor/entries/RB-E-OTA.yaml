@@ -38,6 +38,8 @@ reading:
     url: "https://expo.dev/blog/the-production-playbook-for-ota-updates"
     by: "Expo"
     what: "The operational canon for this entry: staged percentage rollouts as exposure control, what to monitor while an update bakes, and aborts vs republish-rollbacks as distinct mitigations — 'sometimes it helps to go a little slower.' Vendor-authored but the staged-rollout discipline is platform-agnostic. (Body verified via the page's embedded content JSON — the blog is a JS shell.)"
+    claim: "You ship OTA updates — run them like releases: staged percentage rollouts, a monitored bake period, and know abort vs republish-rollback as distinct mitigations before you need one."
+    applies_when: { deps: ["expo-updates", "hot-updater", "@hot-updater/*"], platforms: [react-native] }
   - title: "EAS Update introduction (docs)"
     url: "https://docs.expo.dev/eas-update/introduction/"
     by: "Expo"

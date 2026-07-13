@@ -49,3 +49,8 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "slate", label: "Slate", token: "slate" }
   - { pkg: "react-native-enriched", label: "react-native-enriched", token: "enriched" }
   - { pkg: "react-native-enriched-markdown", label: "enriched-markdown", token: "enriched-markdown" }
+detect_source:   # source-level signals owned by this entry (regex over repo source)
+  - pattern: "contentEditable|contenteditable"
+    signal: "hand-rolled contentEditable editing surface"
+    hint: "contentEditable is quicksand (selection, IME, paste, undo) — the ProseMirror family (TipTap/BlockNote) or Lexical exist precisely for this (see reading: 'The Unreasonable Effectiveness of the ProseMirror Model')"
+    unless_dep: ["@tiptap/react", "lexical", "slate-react", "@blocknote/core", "prosemirror-view"]

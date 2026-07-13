@@ -55,6 +55,8 @@ reading:
     url: "https://blog.margelo.com/whats-new-in-visioncamera-v5"
     by: "Marc Rousavy (Margelo; VisionCamera creator)"
     what: "The canonical v5 reference for this entry's default camera pick: the full Nitro rewrite (−3k LOC of hand-written JSI, ~15x lower call latency vs Turbo Modules), the Constraints API replacing Formats, in-memory photo capture, depth/RAW/multi-cam, and modular frame-processor plugins. Read before betting real-time work on v5."
+    claim: "You ship VisionCamera — v5 is a full Nitro rewrite (Constraints API replaces Formats, ~15x lower call latency) but still stabilizing: adopt pinned-patch with a device-matrix pass; don't linger on frozen v4."
+    applies_when: { deps: ["react-native-vision-camera"], platforms: [react-native] }
   - title: "QR and Barcode Scanning in React Native with VisionCamera V5"
     url: "https://blog.margelo.com/react-native-qr-barcode-scanner-visioncamera-v5"
     by: "Marc Rousavy (Margelo; VisionCamera creator)"

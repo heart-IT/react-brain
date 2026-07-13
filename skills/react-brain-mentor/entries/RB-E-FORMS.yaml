@@ -29,10 +29,18 @@ reading:
     url: "https://upskills.dev/tutorials/react-forms-done-right"
     by: "Vu Nguyen (Upskills)"
     what: "The decision arc of this entry in interactive form: a four-jobs mental model (capture, verify, recover, commit), then three archetypes — a React 19 useActionState + server-action + Zod form with no client form lib, a TanStack Form multi-step wizard (schema composition, AbortController async checks), and a field-array editable table with row-level re-render isolation — closing with when native React 19 suffices vs when a client library earns its keep. Covers the native-actions end of the spectrum the other reading here doesn't."
+    claim: "You ship no form library — often right: React 19 native actions + Zod handle simple forms; a library earns its keep at multi-step wizards, async validation, and field-level re-render isolation. This walks the decision."
+    applies_when: { absent_deps: ["react-hook-form", "formik", "@tanstack/react-form"] }
   - title: "One core, six frameworks, zero runtime abstraction"
     url: "https://formisch.dev/blog/one-core-six-frameworks/"
     by: "Fabian Hiller (Formisch / Valibot)"
     what: "Shows build-time framework abstraction (a tiny core swapped by a bundler plugin) instead of a runtime adapter layer, so form state uses each framework's native signals. A generalizable library-design pattern reframing portability vs integration."
+detect_source:   # source-level signals owned by this entry (regex over repo source)
+  - pattern: "value=\\{[^}\\n]{1,80}\\}\\s*\\n?\\s*onChange(?:Text)?=\\{"
+    min_files: 4
+    signal: "hand-rolled controlled form fields in 4+ files"
+    hint: "every keystroke re-renders the whole form tree — RHF/TanStack Form isolate re-renders at the field and centralize validation; for simple forms React 19 native actions may suffice (see reading: 'React Forms Done Right')"
+    unless_dep: ["react-hook-form", "@tanstack/react-form", "formik"]
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "react-hook-form", label: "React Hook Form", token: "react hook form" }
   - { pkg: "formik", label: "Formik", token: "formik" }

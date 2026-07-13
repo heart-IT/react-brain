@@ -83,6 +83,28 @@ for (const { file, e } of entries) {
     for (const k of ['title', 'url', 'what']) if (!w?.[k]) err(`${id}: watching item missing '${k}' (${(w?.title || w?.url || '?').slice(0, 50)})`);
     if (w?.url && !/^https?:\/\//.test(w.url)) err(`${id}: watching url not http(s): ${w.url}`);
   }
+
+  // conditional advice (added 2026-07-13): claim + applies_when turn a reading into
+  // repo-conditional advice. Both or neither; gates restricted + enum-checked.
+  const AW_KEYS = new Set(['deps', 'absent_deps', 'platforms', 'stages']);
+  const STAGES = new Set(['prototype', 'mvp', 'production', 'scale']);
+  for (const r of [...(e.reading || []), ...(e.watching || [])]) {
+    const label = (r?.title || r?.url || '?').slice(0, 50);
+    if (!r?.applies_when && !r?.claim) continue;
+    if (!r.claim) err(`${id}: reading '${label}' has applies_when but no claim`);
+    if (!r.applies_when) err(`${id}: reading '${label}' has claim but no applies_when (untargeted advice)`);
+    if (r.claim && String(r.claim).length > 260) err(`${id}: reading '${label}' claim > 260 chars — distill it`);
+    const w = r.applies_when;
+    if (!w || typeof w !== 'object') continue;
+    const keys = Object.keys(w);
+    if (!keys.length) err(`${id}: reading '${label}' applies_when is empty`);
+    for (const k of keys) if (!AW_KEYS.has(k)) err(`${id}: reading '${label}' applies_when unknown key '${k}'`);
+    for (const k of ['deps', 'absent_deps'])
+      if (w[k] && (!Array.isArray(w[k]) || !w[k].length || w[k].some((d) => typeof d !== 'string' || !d)))
+        err(`${id}: reading '${label}' applies_when.${k} must be a non-empty string list`);
+    for (const p of w.platforms || []) if (!PLATFORMS.has(p)) err(`${id}: reading '${label}' applies_when bad platform '${p}'`);
+    for (const s of w.stages || []) if (!STAGES.has(s)) err(`${id}: reading '${label}' applies_when bad stage '${s}'`);
+  }
   for (const s of e.sources || []) if (!/^https?:\/\//.test(s)) err(`${id}: source not http(s): ${s}`);
 
   // reviewed entries carry their proof

@@ -30,6 +30,8 @@ reading:
     url: "https://tkdodo.eu/blog/creating-query-abstractions"
     by: "Dominik Dorfmeister (TkDodo), TanStack Query maintainer"
     what: "Maintainer-authored architecture guidance: queryOptions objects (not custom hooks) are THE abstraction layer for queries — composable, framework-portable, and reusable across useQuery/prefetch/suspense call sites. The how-to-structure companion to 'Why You Want React Query'."
+    claim: "You ship TanStack Query — the maintainer's guidance is to structure around queryOptions objects, not per-query custom hooks (composable across useQuery/prefetch/suspense)."
+    applies_when: { deps: ["@tanstack/react-query"] }
   - title: "TanStack Router and Query"
     url: "https://tkdodo.eu/blog/tan-stack-router-and-query"
     by: "Dominik Dorfmeister (TkDodo)"
@@ -38,6 +40,8 @@ reading:
     url: "https://tkdodo.eu/blog/why-you-want-react-query"
     by: "Dominik Dorfmeister (TkDodo), TanStack Query maintainer"
     what: "Takes a naive fetch-in-useEffect and exposes the five real bugs it hides (race conditions, missing loading/empty states, stale data+error pairs, StrictMode double-fire), then shows how a server cache fixes them. The durable answer to why-not-just-useEffect."
+    claim: "You ship an HTTP client but no server cache — hand-rolled fetching hides race conditions, StrictMode double-fires, and stale error states; a server cache (TanStack Query) fixes the class."
+    applies_when: { deps: ["axios", "ky", "ofetch", "graphql-request"], absent_deps: ["@tanstack/react-query", "swr", "@apollo/client", "urql", "@rocicorp/zero", "@trpc/*"] }
   - title: "From latency to instant: modernizing GitHub Issues navigation performance"
     url: "https://github.blog/engineering/architecture-optimization/from-latency-to-instant-modernizing-github-issues-navigation-performance/"
     by: "GitHub Engineering"

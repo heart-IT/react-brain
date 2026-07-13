@@ -378,7 +378,7 @@ export function scanModernDefaults(repoPath, deps = {}) {
 // no error boundary anywhere). Rule fields:
 //   pattern (JS regex source) · flags? · signal · hint? · min_files? (report only if ≥N)
 //   absent? (fire when the pattern matches NOWHERE) · min_stage? (gate absent-rules by
-//   repo stage) · unless_dep? (skip when the dep is present)
+//   repo stage) · unless_dep? (string or list — skip when any listed dep is present)
 // Rules from entries whose `platforms` exclude the repo's platform are skipped.
 const STAGE_ORDER = ['prototype', 'mvp', 'production', 'scale'];
 
@@ -390,7 +390,8 @@ export function scanSourceSignals(repoPath, entries, { stage = 'mvp', platform =
     const platOK = platform === 'both' || plats.includes(platform) || (platform === 'react-native' && plats.includes('react-native')) || (platform === 'react' && plats.includes('react'));
     if (!platOK) continue;
     for (const r of e.detect_source || []) {
-      if (r.unless_dep && r.unless_dep in deps) continue;
+      const unless = Array.isArray(r.unless_dep) ? r.unless_dep : r.unless_dep ? [r.unless_dep] : [];
+      if (unless.some((d) => d in deps)) continue;
       if (r.min_stage && STAGE_ORDER.indexOf(stage) < STAGE_ORDER.indexOf(r.min_stage)) continue;
       let re; try { re = new RegExp(r.pattern, r.flags || ''); } catch { continue; }
       rules.push({ entry: e.id, re, ...r });
@@ -420,4 +421,55 @@ export function scanSourceSignals(repoPath, entries, { stage = 'mvp', platform =
   }
   findings.sort((a, b) => (b.count - a.count));
   return { findings, scanned: files.length, capped };
+}
+
+// ── reading-level conditional advice ──────────────────────────────────────────
+// A reading/watching item may carry `claim:` (ONE machine-surfaceable sentence,
+// distilled from its `what:` — never a new assertion) plus `applies_when:` gates:
+//   deps: [...]         fire only when ≥1 listed dep is installed (detect glob semantics)
+//   absent_deps: [...]  suppress when ANY listed dep is installed (the fix is in place)
+//   platforms: [...]    narrow below the entry's own platforms
+//   stages: [...]       e.g. [production, scale]
+// adviseReadings() intersects tagged readings with an analyzeRepo() result so the
+// article library becomes repo-conditional advice ("you ship X → this claim applies"),
+// not a link list. Untagged readings are unaffected.
+function depGlobMatch(pat, deps) {
+  if (pat.endsWith('*'))   // "@scope/*" → "@scope/", "name*" → "name" (matchDetector semantics)
+    return Object.keys(deps).find((n) => n.startsWith(pat.slice(0, -1))) || null;
+  return pat in deps ? pat : null;
+}
+
+export function adviseReadings(analysis, entries) {
+  if (!analysis || analysis.missing || analysis.notReact) return [];
+  const list = Array.isArray(entries) ? entries : Object.values(entries);
+  const deps = analysis.deps || {};
+  const out = [];
+  for (const e of list) {
+    const plats = e.platforms || [];
+    const platOK = analysis.platform === 'both' || plats.includes(analysis.platform);
+    if (!platOK) continue;
+    for (const r of [...(e.reading || []), ...(e.watching || [])]) {
+      const w = r?.applies_when;
+      if (!w || !r.claim) continue;
+      if (w.platforms && analysis.platform !== 'both' && !w.platforms.includes(analysis.platform)) continue;
+      if (w.stages && !w.stages.includes(analysis.stage)) continue;
+      let trigger = null;
+      if (w.deps) { trigger = w.deps.map((p) => depGlobMatch(p, deps)).find(Boolean) || null; if (!trigger) continue; }
+      if (w.absent_deps && w.absent_deps.some((p) => depGlobMatch(p, deps))) continue;
+      out.push({ entry: e.id, title: r.title, url: r.url, by: r.by || null,
+        claim: r.claim, trigger, confidence: e.confidence || 'low' });
+    }
+  }
+  // dep-triggered advice is the most specific → first; then by entry confidence
+  const conf = { high: 0, medium: 1, low: 2 };
+  out.sort((a, b) => ((a.trigger ? 0 : 1) - (b.trigger ? 0 : 1)) || (conf[a.confidence] - conf[b.confidence]));
+  return out;
+}
+
+// ── census snapshot (observed adoption in shipped apps) ───────────────────────
+// Committed by `react-brain census`; doctor joins it per entry for "you vs the
+// field" framing. Honest denominators live IN the snapshot (RN-only entries ÷ RN apps).
+export const CENSUS_PATH = resolve(__dir, '.census-baseline.json');
+export function loadCensus() {
+  try { return JSON.parse(readFileSync(CENSUS_PATH, 'utf8')); } catch { return null; }
 }

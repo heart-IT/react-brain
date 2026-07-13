@@ -28,6 +28,8 @@ reading:
     url: "https://blog.margelo.com/deep-dive-in-keyboard-handling"
     by: "Kirill Zyusko (Margelo; react-native-keyboard-controller maintainer)"
     what: "Why keyboards behave differently per platform — iOS scheduled animation vs Android per-frame WindowInsetsAnimationCallback insets, why core KeyboardAvoidingView snaps on Android, Android-15 edge-to-edge breakage, and when to reach for KeyboardAvoidingView / KeyboardAwareScrollView / KeyboardStickyView."
+    claim: "You ship no keyboard library — core KeyboardAvoidingView snaps on Android (no per-frame insets) and breaks under Android-15 edge-to-edge; react-native-keyboard-controller is the modern parity fix."
+    applies_when: { absent_deps: ["react-native-keyboard-controller", "react-native-avoid-softinput"], platforms: [react-native] }
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "react-native-keyboard-controller", label: "keyboard-controller", token: "keyboard-controller" }
   - { pkg: "react-native-avoid-softinput", label: "avoid-softinput", token: "avoid-softinput" }

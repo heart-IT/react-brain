@@ -38,3 +38,8 @@ sources:
   - "https://registry.npmjs.org/typescript/latest"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "typescript", label: "TypeScript", token: "typescript" }
+detect_source:   # source-level signals owned by this entry (regex over repo source)
+  - pattern: ":\\s*any\\b"
+    min_files: 10
+    signal: "explicit 'any' in 10+ files"
+    hint: "any turns the checker off exactly where bugs concentrate — prefer unknown + narrowing at boundaries; strict:true is the TS 6 default"

@@ -30,6 +30,8 @@ reading:
     url: "https://shopify.engineering/flashlist-v2"
     by: "Talha Naqvi (Shopify Engineering)"
     what: "The maintainer's architecture deep-dive on FlashList's New-Architecture rewrite — view recycling, progressive rendering, layout prediction, and pre-paint correction via synchronous measurement — explaining the recycling machinery from first principles, not just the API."
+    claim: "You ship FlashList — v2 is New-Architecture-ONLY (old arch → pin v1.x), and the v2 rewrite changes the recycling machinery (progressive rendering, pre-paint correction)."
+    applies_when: { deps: ["@shopify/flash-list"], platforms: [react-native] }
   - title: "React windowing vs. component recycling"
     url: "https://blog.logrocket.com/react-performance-optimization-windowing-vs-component-recycling/"
     by: "Iskander Samatov (LogRocket)"

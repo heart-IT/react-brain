@@ -37,6 +37,8 @@ reading:
     url: "https://www.spotvirtual.com/blog/why-were-breaking-up-with-css-in-js"
     by: "Sam Magura (Emotion maintainer)"
     what: "The canonical runtime-cost argument against runtime CSS-in-JS, from an Emotion maintainer: per-render style serialization is slow (a benchmark shows ~48% faster renders after dropping Emotion). Motivates the move to compile-time / zero-runtime styling."
+    claim: "You ship runtime CSS-in-JS — per-render style serialization has a measured cost (~48% faster renders after dropping Emotion in this benchmark); compile-time styling (Tailwind/StyleX) moves that cost to build."
+    applies_when: { deps: ["styled-components", "@emotion/*"] }
   - title: "StyleX: A Styling Library for CSS at Scale"
     url: "https://engineering.fb.com/2025/11/11/web/stylex-a-styling-library-for-css-at-scale/"
     by: "Meta Engineering"

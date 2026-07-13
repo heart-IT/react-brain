@@ -31,6 +31,12 @@ reading:
     url: "https://formatjs.github.io/docs/core-concepts/icu-syntax/"
     by: "FormatJS (react-intl)"
     what: "The canonical, example-driven explanation of the ICU message format — interpolation, plurals/selectordinal, select, number/date skeletons, rich text. ICU is a stable Unicode standard, so this foundational reference doesn't go stale."
+detect_source:   # source-level signals owned by this entry (regex over repo source)
+  - pattern: "useTranslation|i18next|formatMessage|react-intl|getLocales|lingui|next-intl|fbtee"
+    absent: true
+    min_stage: "production"
+    signal: "no i18n layer found anywhere in source (production-stage repo)"
+    hint: "if localization is ever on the roadmap, retrofitting hardcoded strings is the expensive path — wire the message layer early (i18next for web+RN reach, Lingui/next-intl for AOT-compiled bundles)"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "next-intl", label: "next-intl", token: "next-intl" }
   - { pkg: "react-i18next", label: "react-i18next", token: "i18next" }

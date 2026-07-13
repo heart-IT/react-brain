@@ -26,3 +26,9 @@ reading:
     url: "https://frontendmasters.com/blog/ai-generated-ui-is-inaccessible-by-default/"
     by: "Frontend Masters"
     what: "Why LLM-generated components ship empty accessibility trees, and a five-layer enforcement system (prompt constraints, jsx-a11y lint, axe-core runtime tests, CI gates, headless primitives). Durable guidance as AI codegen becomes the default."
+detect_source:   # source-level signals owned by this entry (regex over repo source)
+  - pattern: "accessibilityLabel|accessibilityRole|aria-label|aria-labelledby|<[a-z]+[^>]*\\srole="
+    absent: true
+    min_stage: "production"
+    signal: "no accessibility annotations found anywhere in source (production-stage repo)"
+    hint: "screen-reader users get an empty tree — start with roles/labels on interactive elements and role-based test queries (see reading: 'Accessibility in React'); depth → design-systems-governance"

@@ -10,7 +10,7 @@
 // Shared detection lives in ./detect.mjs (one source of truth, also used by evidence).
 // ───────────────────────────────────────────────────────────────────────────────
 
-import { loadEntries, analyzeRepo, fit, trunc, GROUP_ORDER, trackRecord, TRACK_GLYPH, scanModernDefaults, scanSourceSignals, checkAdrs } from './detect.mjs';
+import { loadEntries, analyzeRepo, fit, trunc, GROUP_ORDER, trackRecord, TRACK_GLYPH, scanModernDefaults, scanSourceSignals, checkAdrs, adviseReadings, loadCensus } from './detect.mjs';
 
 const EXPECTED = {
   always: ['RB-E-STATE', 'RB-E-STYLING', 'RB-E-TESTING', 'RB-E-TYPESCRIPT', 'RB-E-DX', 'RB-E-NAV'],
@@ -42,6 +42,7 @@ function printReport(a, entries) {
     console.log(`  ${id.replace('RB-E-', '').padEnd(20)}${trunc([...info.labels].join(', '), 25).padEnd(26)}${fit(e, info.tokens).padEnd(14)}${e.status}·${e.confidence}${track}`);
   }
 
+  const census = loadCensus();
   const diverge = detected.filter((x) => fit(x.e, x.info.tokens) !== '✓ aligned');
   if (diverge.length) {
     console.log(`\n  WORTH A LOOK  (current choice ≠ entry default — not necessarily wrong)`);
@@ -49,6 +50,13 @@ function printReport(a, entries) {
     for (const { id, e, info } of diverge) {
       console.log(`  • ${id.replace('RB-E-', '')}: you use ${[...info.labels].join(', ')}`);
       console.log(`      encyclopedia (${e.status}·${e.confidence}): ${trunc(e.recommend?.default, 150)}`);
+      const c = census?.agg?.[id];
+      if (c) {
+        const mine = [...info.labels].map((l) => `${l} ${c.labels[l] || 0}/${c.denom}`).join(' · ');
+        const top = Object.entries(c.labels).sort((x, y) => y[1] - x[1])[0];
+        const rival = top && !info.labels.has(top[0]) ? `; most-shipped: ${top[0]} ${top[1]}/${c.denom}` : '';
+        console.log(`      the field (census): you ship ${mine}${rival}`);
+      }
     }
   }
 
@@ -57,7 +65,24 @@ function printReport(a, entries) {
   if (gaps.length) {
     console.log(`\n  GAPS  (expected domain, nothing detected — may be built-in / N/A; verify)`);
     console.log(`  ${'-'.repeat(74)}`);
-    for (const id of gaps) console.log(`  • ${id.replace('RB-E-', '')}: none detected — ${trunc(entries[id]?.recommend?.default, 120)}`);
+    for (const id of gaps) {
+      const c = census?.agg?.[id];
+      const field = c ? `  [${c.appCount}/${c.denom} census apps ship this domain]` : '';
+      console.log(`  • ${id.replace('RB-E-', '')}: none detected — ${trunc(entries[id]?.recommend?.default, 120)}${field}`);
+    }
+  }
+
+  // FOR YOUR STACK — corpus readings whose tagged claims apply to this repo.
+  const advice = adviseReadings(a, entries);
+  if (advice.length) {
+    console.log(`\n  FOR YOUR STACK  (readings whose claims apply to what you ship)`);
+    console.log(`  ${'-'.repeat(74)}`);
+    for (const v of advice.slice(0, 5)) {
+      const via = v.trigger ? ` · via ${v.trigger}` : '';
+      console.log(`  📖 ${v.claim}  [${v.entry.replace('RB-E-', '')}${via}]`);
+      console.log(`      ${trunc(v.title, 60)} — ${v.url}`);
+    }
+    if (advice.length > 5) console.log(`  (+${advice.length - 5} more — --json lists all)`);
   }
 
   // MODERNIZATION — source-level scan for legacy core RN APIs (RN / cross-platform repos).
@@ -124,13 +149,18 @@ function printReport(a, entries) {
 function jsonReport(a, entries) {
   if (a.missing || a.notReact) return { name: a.name, path: a.path, skipped: a.missing ? 'no package.json' : 'not a React/RN repo' };
   const tr = trackRecord();
+  const census = loadCensus();
+  const fieldOf = (id) => {
+    const c = census?.agg?.[id];
+    return c ? { labels: c.labels, appCount: c.appCount, denom: c.denom } : null;
+  };
   const detected = Object.keys(a.byEntry).filter((id) => entries[id]).map((id) => ({
     entry: id, labels: [...a.byEntry[id].labels], fit: fit(entries[id], a.byEntry[id].tokens),
     status: entries[id].status, confidence: entries[id].confidence, track: tr[id] || null,
-    recommend: entries[id].recommend?.default || null,
+    recommend: entries[id].recommend?.default || null, field: fieldOf(id),
   }));
   const expected = [...EXPECTED.always, ...(EXPECTED[a.platform] || [])];
-  const gaps = expected.filter((id) => !a.byEntry[id]).map((id) => ({ entry: id, recommend: entries[id]?.recommend?.default || null }));
+  const gaps = expected.filter((id) => !a.byEntry[id]).map((id) => ({ entry: id, recommend: entries[id]?.recommend?.default || null, field: fieldOf(id) }));
   const modernization = (!NO_SCAN && a.platform !== 'react') ? scanModernDefaults(a.path, a.deps) : null;
   const sourceSignals = !NO_SCAN ? scanSourceSignals(a.path, entries, { stage: a.stage, platform: a.platform, deps: a.deps }) : null;
   return {
@@ -138,7 +168,7 @@ function jsonReport(a, entries) {
     name: a.name, path: a.path, version: a.version || null, platform: a.platform,
     desktopShell: a.desktopShell || null, stage: a.stage, depCount: a.depCount,
     ts: a.ts, ci: a.ci, tests: a.tests, lintfmt: a.lintfmt, hooks: a.hooks,
-    detected, gaps, modernization, sourceSignals, unmapped: a.unmapped,
+    detected, gaps, advice: adviseReadings(a, entries), modernization, sourceSignals, unmapped: a.unmapped,
   };
 }
 

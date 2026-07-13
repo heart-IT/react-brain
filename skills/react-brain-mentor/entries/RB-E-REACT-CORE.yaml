@@ -75,6 +75,14 @@ reading:
     url: "https://saschb2b.com/blog/react-compiler-year-in-review"
     by: "Sascha Becker"
     what: "An 18-month retrospective: how auto-memoization retired the missing-dependency bug class, the five patterns where the compiler bails out, and a staged adoption path. The mental model for the compiler era (complements the official release post in sources)."
+    claim: "You ship the React Compiler — know the bail-out patterns and keep existing useMemo/useCallback in place (removal can change compiler output); this retrospective is the staged-adoption map."
+    applies_when: { deps: ["babel-plugin-react-compiler", "react-compiler-runtime"] }
+detect_source:   # source-level signals owned by this entry (regex over repo source)
+  - pattern: "\\buse(?:Memo|Callback)\\s*\\("
+    min_files: 8
+    signal: "manual memoization across 8+ files"
+    hint: "React Compiler 1.0 (stable) memoizes automatically — adopt it for new code instead of growing the hand-memoization surface; KEEP existing useMemo/useCallback when enabling (removal can change output — see reading: 'React Compiler at Eighteen Months')"
+    unless_dep: ["babel-plugin-react-compiler", "react-compiler-runtime"]
 sources:
   - "https://react.dev/blog/2025/10/07/react-compiler-1"
   - "https://react.dev/blog/2025/12/11/denial-of-service-and-source-code-exposure-in-react-server-components"

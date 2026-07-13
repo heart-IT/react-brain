@@ -57,6 +57,12 @@ The agent should, in order:
    `reading`; verify the episode/video page exists + corroborates — never annotate unwatched
    content beyond what the verified page states).
 
+   **When a kept reading/watching item has a repo-conditional lesson, TAG it:** add `claim:`
+   (one sentence distilled from the `what:` — never a new assertion) + `applies_when:`
+   ({deps, absent_deps, platforms, stages}; dep patterns use detect glob semantics). Tagged
+   readings surface in doctor's FOR YOUR STACK section for matching repos. Lint enforces
+   claim⇔applies_when pairing and the schema.
+
    **Fetch-verification playbook (learned 2026-07-09):**
    - `expo.dev/blog/*` is a JS shell (unfetchable) but **`expo.dev/changelog/sdk-NN` fetches
      fine** and usually carries the same load-bearing facts — source changelogs, not blog posts.

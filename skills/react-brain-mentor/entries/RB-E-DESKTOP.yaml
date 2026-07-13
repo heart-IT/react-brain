@@ -42,6 +42,8 @@ reading:
     url: "https://performance.dev/the-conductor-rewrite"
     by: "Dennis Brotzky (performance.dev)"
     what: "A React + Tauri desktop performance postmortem — SQLite local-first, TanStack Router structural sharing (stable refs killing re-render cascades), virtualization — fixing root causes instead of papering over with useMemo. Directly relevant to React-on-desktop."
+    claim: "You ship React in a Tauri shell — the Conductor postmortem's wins were structural (SQLite local-first, stable refs killing re-render cascades, virtualization), not memoization patches; fix root causes."
+    applies_when: { deps: ["@tauri-apps/*"] }
   - title: "A Technical Deep Dive Into the New Raycast"
     url: "https://www.raycast.com/blog/a-technical-deep-dive-into-the-new-raycast"
     by: "Petr Nikolaev & Thomas Paul Mann (Raycast)"

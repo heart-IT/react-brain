@@ -56,6 +56,8 @@ reading:
     url: "https://trigger.dev/blog/shai-hulud-postmortem"
     by: "Eric Allam (Trigger.dev)"
     what: "A first-party postmortem of the Shai-Hulud worm (preinstall-script credential exfiltration) with concrete mitigations — disable npm install scripts, pnpm 10, OIDC publishing. The supply-chain reading this entry's own note calls for; applies to any React/RN delivery pipeline."
+    claim: "You run a production pipeline — supply-chain is the real React-ecosystem risk: disable npm install scripts, use OIDC publishing, and layer defenses (the Shai-Hulud mitigations apply to every delivery pipeline)."
+    applies_when: { stages: [production, scale] }
   - title: "Postmortem: TanStack npm supply-chain compromise"
     url: "https://tanstack.com/blog/npm-supply-chain-compromise-postmortem"
     by: "Tanner Linsley (TanStack)"
@@ -64,6 +66,8 @@ reading:
     url: "https://longho.dev/posts/rsc-server-functions-are-not-an-api-boundary/"
     by: "Long Ho"
     what: "The architectural half of this entry's RSC stance: compiler-generated server references are reachable via direct POST, so auth/authz must live INSIDE every server function — plus the rolling-deploy skew failure mode (generated function IDs drift across deploys and break old clients). Treat stable server functions as formal API boundaries. (Site is a JS shell; content verified via its RSS feed.)"
+    claim: "You ship an RSC framework — server functions are reachable via direct POST regardless of UI: auth/authz must live INSIDE every server function, and deploy skew breaks old clients."
+    applies_when: { deps: ["next", "@tanstack/react-start"], platforms: [react] }
   - title: "Blocking Install Scripts Is Not a Silver Bullet"
     url: "https://nodesource.com/blog/npm-v12-install-scripts-not-a-silver-bullet"
     by: "NodeSource"

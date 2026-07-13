@@ -151,6 +151,29 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
   check(s9.fresh_pct === 50 && s9.confidently_stale_pct === 50, 'bench summarize: percentages');
 }
 
+// ── 10. conditional advice (claim + applies_when) + census join ─────────────────
+{
+  const d = doctor('rn-smells');
+  const adviceIds = (d.advice || []).map((a) => a.entry);
+  const dataAdv = (d.advice || []).find((a) => a.entry === 'RB-E-DATA');
+  check(dataAdv?.trigger === 'axios', 'advice: rn-smells axios-without-cache triggers the DATA claim via axios');
+  check(adviceIds.includes('RB-E-KEYBOARD'), 'advice: RN repo without keyboard-controller gets the KEYBOARD claim');
+  check(!adviceIds.includes('RB-E-SECURITY'), 'advice: production-gated SECURITY claim must NOT fire at prototype stage');
+  const firstUntriggered = (d.advice || []).findIndex((a) => !a.trigger);
+  const lastTriggered = (d.advice || []).map((a) => !!a.trigger).lastIndexOf(true);
+  check(firstUntriggered === -1 || lastTriggered < firstUntriggered || lastTriggered === -1,
+    'advice: dep-triggered claims rank before untriggered ones');
+  check(byEntry(d, 'RB-E-STATE')?.field?.appCount > 0, 'census join: detected STATE row carries field adoption');
+
+  const w = doctor('web-clean');
+  const wIds = (w.advice || []).map((a) => a.entry);
+  check(!wIds.includes('RB-E-KEYBOARD'), 'advice: RN-only KEYBOARD claim must NOT fire on a web repo');
+  check(wIds.includes('RB-E-DATA'), 'advice: web-clean on TanStack Query gets the queryOptions claim (not the why-you-want one)');
+  const wData = (w.advice || []).filter((a) => a.entry === 'RB-E-DATA');
+  check(wData.every((a) => a.title === 'Creating Query Abstractions'),
+    'advice: why-you-want-react-query is suppressed when the cache is installed');
+}
+
 // ── report ──────────────────────────────────────────────────────────────────────
 console.log(`react-brain eval — ${pass + fails.length} assertions`);
 if (fails.length) { for (const f of fails) console.log(`  ✗ ${f}`); console.log(`\n✗ ${fails.length} failed / ${pass} passed`); process.exit(1); }

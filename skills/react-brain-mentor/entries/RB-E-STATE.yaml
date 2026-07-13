@@ -38,6 +38,8 @@ reading:
     url: "https://tkdodo.eu/blog/react-query-as-a-state-manager"
     by: "Dominik Dorfmeister (TkDodo), TanStack Query maintainer"
     what: "The canonical case for treating server state as its own thing (stale-while-revalidate, staleTime, query-key sharing) so you stop replicating it in a client store. The source of the server-state-vs-client-state split."
+    claim: "You ship a client store but no server cache — server state (stale-while-revalidate, invalidation, retries) is a different problem; replicating it in the store is the classic mistake this piece dismantles."
+    applies_when: { deps: ["zustand", "jotai", "@reduxjs/toolkit", "react-redux", "redux", "mobx", "valtio"], absent_deps: ["@tanstack/react-query", "swr", "@apollo/client", "urql", "@rocicorp/zero"] }
   - title: "Why React Context is Not a State Management Tool"
     url: "https://blog.isquaredsoftware.com/2021/01/context-redux-differences/"
     by: "Mark Erikson, Redux maintainer"
