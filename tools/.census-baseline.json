@@ -1,5 +1,5 @@
 {
- "date": "2026-07-10",
+ "date": "2026-07-13",
  "cohort": {
   "fetched": 34,
   "total": 34,
@@ -13,7 +13,6 @@
    "labels": [
     "AsyncStorage",
     "EAS Update",
-    "ESLint",
     "Expo (managed native)",
     "Gesture Handler",
     "Jest",
@@ -57,6 +56,7 @@
     "RN Testing Library",
     "React Navigation",
     "Reanimated",
+    "Rspack",
     "Sentry",
     "Skia",
     "Storybook",
@@ -69,8 +69,7 @@
     "keyboard-controller",
     "lefthook",
     "react-map-gl",
-    "react-native-svg",
-    "webpack"
+    "react-native-svg"
    ]
   },
   "mattermost": {
@@ -1044,10 +1043,10 @@
   "RB-E-DX": {
    "appCount": 25,
    "labels": {
-    "ESLint": 19,
     "husky (git hooks)": 11,
     "lint-staged": 9,
     "Prettier": 14,
+    "ESLint": 18,
     "lefthook": 1,
     "Biome": 1,
     "Turborepo": 2,
@@ -1085,8 +1084,8 @@
    "appCount": 28,
    "labels": {
     "Metro": 10,
-    "webpack": 8,
-    "Rspack": 3,
+    "Rspack": 4,
+    "webpack": 7,
     "esbuild": 10,
     "Vite": 9
    },

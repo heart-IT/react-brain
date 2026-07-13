@@ -1,0 +1,55 @@
+# Staleness benchmark — manual trigger. Runs both arms (bare model vs model+corpus),
+# commits the results JSON; the pages workflow then redeploys /benchmark with the data.
+#
+# Requires the ANTHROPIC_API_KEY repository secret (Settings → Secrets → Actions).
+# Secrets are encrypted and write-only: this workflow can use the key but nothing —
+# including this workflow's logs — can display it. The key goes to api.anthropic.com
+# and nowhere else (tools/react-brain-bench.mjs, plain fetch); committed results
+# carry scores and truncated answer text, never credentials.
+name: bench
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: 'model id to benchmark'
+        default: 'claude-sonnet-5'
+        required: true
+
+permissions:
+  contents: write
+
+concurrency: bench
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          # no registry-url: — it writes an .npmrc token line (release.yml footgun)
+      - run: npm ci
+      - name: require the API key secret
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::error::ANTHROPIC_API_KEY repository secret is not set — add it under Settings → Secrets and variables → Actions, then re-run."
+            exit 1
+          fi
+      - name: bench — bare model
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node tools/react-brain-bench.mjs --run --model='${{ inputs.model }}'
+      - name: bench — model + corpus context
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node tools/react-brain-bench.mjs --run --model='${{ inputs.model }}' --with-corpus
+      - name: commit results
+        run: |
+          git config user.name 'react-brain bench'
+          git config user.email 'noreply@github.com'
+          git add bench/results/
+          git commit -m "bench: ${{ inputs.model }} — bare + with-corpus ($(date -u +%F))" || { echo 'no new results'; exit 0; }
+          git push
