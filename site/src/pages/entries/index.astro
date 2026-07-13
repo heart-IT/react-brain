@@ -31,3 +31,15 @@ const tr = track();
     </section>
   ))}
 </Base>
+
+<style>
+  /* scanning hierarchy: the entry name leads, topic supports, status/updated recede */
+  td:first-child a { font: 600 .92rem/1.5 var(--font-head); color: var(--bright); text-decoration: none; }
+  td:first-child a:hover { color: var(--accent); }
+  td:nth-child(2) { color: var(--muted); }
+  td:nth-child(4) { white-space: nowrap; }
+  /* mobile: entry + topic are the workflow; badges and dates return on the entry page */
+  @media (max-width: 600px) {
+    th:nth-child(n + 3), td:nth-child(n + 3) { display: none; }
+  }
+</style>

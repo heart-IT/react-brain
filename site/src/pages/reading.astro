@@ -3,6 +3,15 @@ import Base from '../layouts/Base.astro';
 import { corpus, href } from '../lib/corpus.js';
 const { groups, entries } = corpus();
 const count = entries.reduce((n, e) => n + (e.reading?.length || 0), 0);
+const host = (u) => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return ''; } };
+// Skim structure without hiding evidence: the LEAD line is the tagged claim when the
+// corpus has distilled one, else the annotation's first sentence; the rest stays
+// visible below it in muted text. Nothing is clamped away.
+const split = (r) => {
+  if (r.claim) return { lead: r.claim, rest: r.what };
+  const first = String(r.what || '').split(/(?<=\.)\s+/)[0] || '';
+  return { lead: first, rest: String(r.what || '').slice(first.length).trim() };
+};
 ---
 <Base title="react-brain — curated reading">
   <h1>Curated reading</h1>
@@ -24,13 +33,19 @@ const count = entries.reduce((n, e) => n + (e.reading?.length || 0), 0);
           <div>
             <h3><a href={href(`entries/${e.slug}/`)}>{e.slug}</a> <span class="muted">— {e.topic}</span></h3>
             <div class="rows">
-              {e.reading.map((r) => (
-                <div>
-                  <a href={r.url} rel="noopener"><strong>{r.title}</strong></a>
-                  {r.by && <span class="meta" style="margin-left:.5rem">{r.by}</span>}
-                  <p style="margin:.3rem 0 0; font-size:.9rem; max-width:78ch" class="muted">{r.what}</p>
-                </div>
-              ))}
+              {e.reading.map((r) => {
+                const { lead, rest } = split(r);
+                return (
+                  <div class="read-item">
+                    <p class="read-head">
+                      <a href={r.url} rel="noopener" class="read-title">{r.title}</a>
+                      <span class="meta">{[r.by, host(r.url)].filter(Boolean).join(' · ')}</span>
+                    </p>
+                    <p class="read-lead">{lead}</p>
+                    {rest && <p class="read-rest muted">{rest}</p>}
+                  </div>
+                );
+              })}
             </div>
           </div>
         );
@@ -38,3 +53,11 @@ const count = entries.reduce((n, e) => n + (e.reading?.length || 0), 0);
     </section>
   ))}
 </Base>
+
+<style>
+  .read-head { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: .25rem .6rem; }
+  .read-title { font: 600 .95rem/1.4 var(--font-head); color: var(--bright); text-decoration: none; }
+  .read-title:hover { color: var(--accent); }
+  .read-lead { margin: .3rem 0 0; font-size: .9rem; line-height: 1.55; color: var(--fg); max-width: 78ch; }
+  .read-rest { margin: .25rem 0 0; font-size: .86rem; line-height: 1.55; max-width: 78ch; }
+</style>

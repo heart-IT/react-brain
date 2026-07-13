@@ -16,15 +16,18 @@ const info = corpusInfo();
 const { groups } = corpus();
 const path = Astro.url.pathname;
 const FAVICON = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>";
-const bottomLinks = [
+const toolLinks = [
   { to: 'stack/', label: 'stack composer' },
   { to: 'decide/', label: 'decision records' },
   { to: 'census/', label: 'census' },
   { to: 'benchmark/', label: 'staleness bench' },
+];
+const aboutLinks = [
   { to: 'architecture/', label: 'architecture' },
   { to: 'changelog/', label: 'changelog' },
   { to: 'methodology/', label: 'methodology' },
 ];
+const bottomLinks = [...toolLinks, ...aboutLinks];   // mobile nav keeps the flat list
 ---
 <!doctype html>
 <html lang="en">
@@ -84,7 +87,14 @@ const bottomLinks = [
         </a>
       ))}
       <div class="side-bottom">
-        {bottomLinks.map((l) => (
+        <p class="label-caps side-sub">Tools</p>
+        {toolLinks.map((l) => (
+          <a class={`side-item${path.startsWith(href(l.to)) ? ' active' : ''}`} aria-current={path.startsWith(href(l.to)) ? 'page' : undefined} href={href(l.to)}>
+            <span>{l.label}</span>
+          </a>
+        ))}
+        <p class="label-caps side-sub">About</p>
+        {aboutLinks.map((l) => (
           <a class={`side-item${path.startsWith(href(l.to)) ? ' active' : ''}`} aria-current={path.startsWith(href(l.to)) ? 'page' : undefined} href={href(l.to)}>
             <span>{l.label}</span>
           </a>
@@ -480,7 +490,8 @@ context · clear · help</span>`); break;
   .side-item .tree { color: var(--line-strong); }
   .side-item.active .tree { color: var(--accent); }
   .side-item .count { margin-left: auto; font: 400 .75rem var(--font-mono); color: var(--muted); opacity: .75; }
-  .side-bottom { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--line); }
+  .side-bottom { margin-top: auto; padding-top: .4rem; border-top: 1px solid var(--line); }
+  .side-sub { margin: .85rem 0 .15rem; padding-left: .55rem; font-size: .62rem; opacity: .7; }
   .content main { max-width: 1140px; margin: 0 auto; padding: 2.4rem 28px 5rem; }
   footer { border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; }
   footer p { max-width: 1200px; margin: 0 auto; padding: 1rem 24px 2rem; }
@@ -557,7 +568,9 @@ context · clear · help</span>`); break;
   li { margin: .3rem 0; }
   .rows > * { display: block; padding: .9rem 0; border-top: 1px solid var(--line); margin: 0; }
   .rows > *:last-child { border-bottom: 1px solid var(--line); }
-  a.row { text-decoration: none; color: inherit; }
+  a.row { text-decoration: none; color: inherit; padding-inline: .55rem; margin-inline: -.55rem; border-radius: 4px; }
+  a.row:hover { background: var(--card); }
+  a.row:hover .row-title { color: var(--accent); }
   a.row { transition: background .14s; border-radius: 4px; }
   a.row:hover { background: color-mix(in srgb, var(--card) 60%, transparent); }
   a.row:hover .row-title { color: var(--accent); }
