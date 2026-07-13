@@ -54,9 +54,12 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "@tanstack/react-virtual", label: "TanStack Virtual", token: "react-virtual" }
   - { pkg: "@tanstack/react-table", label: "TanStack Table", token: "hightable" }
 detect_source:   # source-level signals owned by this entry (regex over repo source)
-  - pattern: "<ScrollView[\\s\\S]{0,600}?\\.map\\("
-    signal: "ScrollView rendering a mapped array — virtualization likely bypassed"
-    hint: "list cost scales with MOUNTED NODES, not data length — FlatList/FlashList (thresholds → react-native-best-practices)"
+  # horizontal ScrollViews are excluded: a bounded pill/chip bar is the LEGITIMATE
+  # ScrollView case (ourpot dogfood 2026-07-13: all 4 Search.tsx flags were horizontal
+  # filter bars while the results list was already on FlatList — pure false positives)
+  - pattern: "<ScrollView(?![^>]*\\bhorizontal\\b)[\\s\\S]{0,600}?\\.map\\("
+    signal: "vertical ScrollView rendering a mapped array — virtualization likely bypassed"
+    hint: "list cost scales with MOUNTED NODES, not data length — FlatList/FlashList for growing lists; bounded <20-item option lists are fine (thresholds → react-native-best-practices)"
 migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-brain migrate`)
   - from: { pkg: "@shopify/flash-list", below: "2.0.0" }
     to: "FlashList v2"
