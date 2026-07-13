@@ -42,6 +42,9 @@ usage: react-brain <command> [args]
   migrate  <repo>      SEQUENCED upgrade plan: installed versions × per-entry migrate: rules
                        + the legacy-API source scan — phased (dead/gates → deprecated →
                        upgrades → blocked), every step with receipts (--json)
+  review   <repo>      diff-scoped corpus review vs --base=<ref> (default HEAD): dep adds
+                       the corpus marks dead/deprecated BLOCK; smells/legacy APIs flagged
+                       only when INTRODUCED by the diff (--ci = exit 1 on blocking, --json)
   evidence <repo...>   corpus self-audit across repos: blind spots, contradictions, field evidence
   pulse    [repo...]   corpus health: dead links, stale entries, stack drift
                        (flags: --today=YYYY-MM-DD, --no-links)
@@ -104,6 +107,7 @@ switch (cmd) {
   case 'doctor': delegate('react-brain-doctor.mjs'); break;
   case 'map': delegate('react-brain-map.mjs'); break;
   case 'migrate': delegate('react-brain-migrate.mjs'); break;
+  case 'review': delegate('react-brain-review.mjs'); break;
   case 'evidence': delegate('react-brain-evidence.mjs'); break;
   case 'stack': delegate('react-brain-stack.mjs'); break;
   case 'pulse': delegate('react-brain-pulse.mjs'); break;

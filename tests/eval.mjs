@@ -103,7 +103,7 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
   const r = spawnSync(process.execPath, [join(ROOT, 'tools/mcp-server.mjs')], { input, encoding: 'utf8', timeout: 30000 });
   const lines = r.stdout.trim().split('\n').map((l) => JSON.parse(l));
   check(lines[0]?.result?.serverInfo?.name === 'react-brain', 'mcp: initialize returns serverInfo');
-  check(lines[1]?.result?.tools?.length === 8, 'mcp: eight tools listed (incl. decide + map + migrate)');
+  check(lines[1]?.result?.tools?.length === 9, 'mcp: nine tools listed (incl. decide + map + migrate + review)');
   const text = (i) => lines[i]?.result?.content?.[0]?.text || '';
   check(text(2).includes('RECOMMEND:') && !text(2).includes('OPTIONS:'), 'mcp query: capsule depth is the default (no options dump)');
   check(text(3).includes('OPTIONS:'), 'mcp query: depth "full" returns the whole entry');
@@ -216,6 +216,42 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
     [join(ROOT, 'tools/react-brain-migrate.mjs'), FIX('rn-smells'), '--json'], { encoding: 'utf8' }));
   const depSteps = clean.steps.filter((s) => s.kind === 'dep');
   check(depSteps.length === 0, `migrate: current stack (rn-smells) yields no dep migration steps, got ${depSteps.map((s) => s.pkg).join(',')}`);
+}
+
+// ── 13. review: diff-scoped — blocking adds, introduced-only smells, CI exits ───
+{
+  const { mkdtempSync, mkdirSync, writeFileSync: wf, rmSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const T = mkdtempSync(join(tmpdir(), 'rb-review-'));
+  const g = (...args) => execFileSync('git', ['-C', T, '-c', 'user.email=t@t', '-c', 'user.name=t', ...args], { encoding: 'utf8' });
+  try {
+    mkdirSync(join(T, 'src'), { recursive: true });
+    const basePkg = { name: 'demo', version: '1.0.0', dependencies: { react: '19.2.0', 'react-native': '0.86.0' } };
+    wf(join(T, 'package.json'), JSON.stringify(basePkg, null, 1));
+    // base already contains a smell — it must NOT be re-flagged after an unrelated edit
+    wf(join(T, 'src/old.jsx'), "import { KeyboardAvoidingView } from 'react-native';\nexport const Old = () => <KeyboardAvoidingView />;\n");
+    g('init', '-q'); g('add', '-A'); g('commit', '-qm', 'base');
+
+    const review = (...extra) => spawnSync(process.execPath,
+      [join(ROOT, 'tools/react-brain-review.mjs'), T, ...extra], { encoding: 'utf8' });
+    const clean = JSON.parse(review('--json').stdout);
+    check(clean.blocking === 0 && clean.added.length === 0, 'review: clean diff has nothing to report');
+    check(review('--ci').status === 0, 'review --ci: clean diff passes');
+
+    basePkg.dependencies['react-native-code-push'] = '^8.2.1';
+    basePkg.dependencies.axios = '^1.18.1';
+    wf(join(T, 'package.json'), JSON.stringify(basePkg, null, 1));
+    wf(join(T, 'src/feature.jsx'), "import { useEffect } from 'react';\nexport function F(){ useEffect(() => { fetch('/api'); }, []); return null; }\n");
+    wf(join(T, 'src/old.jsx'), "import { KeyboardAvoidingView } from 'react-native';\n// touched, smell pre-existing\nexport const Old = () => <KeyboardAvoidingView />;\n");
+
+    const r = JSON.parse(review('--json').stdout);
+    const codepush = r.added.find((f) => f.pkg === 'react-native-code-push');
+    check(codepush?.severity === 'blocking' && /dead/i.test(codepush?.note || ''), 'review: adding a corpus-dead dep is blocking, with the why');
+    check(r.added.find((f) => f.pkg === 'axios')?.severity === 'warn', 'review: axios add warns (claim/fit), not blocks');
+    check(r.smellsIntroduced.some((s) => s.file === 'src/feature.jsx' && s.entry === 'RB-E-DATA'), 'review: smell in a NEW file is flagged as introduced');
+    check(!r.smellsIntroduced.some((s) => s.file === 'src/old.jsx'), 'review: pre-existing smell in a touched file does NOT nag');
+    check(review('--ci').status === 1, 'review --ci: blocking add fails the gate');
+  } finally { rmSync(T, { recursive: true, force: true }); }
 }
 
 // ── report ──────────────────────────────────────────────────────────────────────

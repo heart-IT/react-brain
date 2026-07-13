@@ -91,6 +91,19 @@ node tools/react-brain-migrate.mjs ../../ourpot/ourpot          # phased plan wi
 node tools/react-brain-migrate.mjs . --json                     # machine-readable
 ```
 
+## `react-brain-review.mjs` — diff-scoped corpus review (the CI gate)
+doctor reviews the repo; **review reviews the change.** Dependency delta vs `--base`
+(default HEAD): adds the corpus marks dead/deprecated BLOCK with receipts (adding
+CodePush in 2026 fails CI); superseded/↗-fit adds warn with the context pick; adds that
+trigger a tagged reading claim surface it. Changed source files: detect_source smells and
+legacy core-RN-API imports flag only when INTRODUCED by the diff (match the new version,
+absent at base) — pre-existing debt in a touched file never nags. `--ci` exits 1 on
+blocking only.
+```sh
+node tools/react-brain-review.mjs . --base=origin/main --ci    # PR gate
+node tools/react-brain-review.mjs .                            # review uncommitted work
+```
+
 ## `react-brain-evidence.mjs` — code → knowledge
 The inverse: runs detection across a *corpus* of repos and feeds the aggregate back at the
 corpus — §1 MISSING (deps with no entry = blind spots), §2 CONTRADICTION (real choice ≠

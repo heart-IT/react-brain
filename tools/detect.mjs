@@ -321,6 +321,18 @@ function walkSource(dir, out) {
 // import { A, B as C } from 'react-native'  (also multi-line & `import type`)
 const RN_NAMED_IMPORT = /import\s+(?:type\s+)?(?:[\w$]+\s*,\s*)?\{([^}]*)\}\s*from\s*['"]react-native['"]/g;
 
+// named specifiers imported from 'react-native' in one source string (review diffs these)
+export function rnNamedImports(src) {
+  const specs = new Set(); let m; RN_NAMED_IMPORT.lastIndex = 0;
+  while ((m = RN_NAMED_IMPORT.exec(src))) {
+    for (let n of m[1].split(',')) {
+      n = n.trim().replace(/^type\s+/, '').split(/\s+as\s+/)[0].trim();
+      if (n) specs.add(n);
+    }
+  }
+  return specs;
+}
+
 // Scan a repo's source for the modern-defaults swaps. Returns { findings, scanned, capped }.
 // findings: [{ legacy, modern, entry, defer_to_skill, strength, effort, via, count, files }]
 export function scanModernDefaults(repoPath, deps = {}) {

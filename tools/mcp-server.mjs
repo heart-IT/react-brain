@@ -124,6 +124,12 @@ function migrate({ path }) {
     { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
 }
 
+function review({ path, base }) {
+  const args = [resolve(__dir, 'react-brain-review.mjs'), String(path)];
+  if (base) args.push(`--base=${String(base)}`);
+  return execFileSync(process.execPath, args, { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
+}
+
 function stack({ flags = '' }) {
   const args = String(flags).split(/\s+/).filter((f) => /^--[\w=-]+$/.test(f));   // flags only — no arbitrary args
   return execFileSync(process.execPath, [resolve(__dir, 'react-brain-stack.mjs'), ...args],
@@ -152,6 +158,9 @@ const TOOLS = [
   { name: 'migrate', fn: migrate,
     description: 'SEQUENCED upgrade plan for a repo: installed versions × the corpus\'s verified migration rules (dead services, deprecations, supersessions, version ladders) + the legacy-core-API source scan — phased so gates come first and blocked steps say exactly what unblocks them, every step with receipts. Use when asked "what should we upgrade/migrate, in what order?".',
     inputSchema: { type: 'object', properties: { path: { type: 'string', description: 'absolute path to the repo' } }, required: ['path'] } },
+  { name: 'review', fn: review,
+    description: 'Diff-scoped corpus review of a repo\'s change vs a base ref (default HEAD = uncommitted work): dependency ADDS the corpus marks dead/deprecated are BLOCKING (with receipts), fit/claim warnings on other adds, and source smells / legacy core-RN APIs flagged only when INTRODUCED by this diff (present in the new version of a changed file, absent at base). Use when reviewing a PR or pending change; doctor/migrate are the whole-repo views.',
+    inputSchema: { type: 'object', properties: { path: { type: 'string', description: 'absolute path to the repo' }, base: { type: 'string', description: 'base ref (default HEAD; e.g. origin/main, HEAD~1)' } }, required: ['path'] } },
   { name: 'stack', fn: stack,
     description: 'Compose a greenfield stack from intent flags (e.g. "--rn --expo --p2p --stage=mvp" or "--web --ssr"). Returns an explained, install-ready stack plan.',
     inputSchema: { type: 'object', properties: { flags: { type: 'string' } }, required: ['flags'] } },
