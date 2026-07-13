@@ -77,7 +77,8 @@ export const track = () => {
   return sc ? Object.fromEntries(sc.resolved.map((r) => [r.id, r.outcome.outcome])) : {};
 };
 
-// Data for the client-side doctor-lite: the detection table + per-entry capsule.
+// Data for the client-side doctor-lite: the detection table + per-entry capsule +
+// the migrate rules (same per-entry knowledge the CLI planner assembles).
 export function doctorData() {
   const { entries } = corpus();
   const detectors = entries.flatMap((e) => (e.detect || []).map((d) => [d.pkg, e.id, d.label, d.token]));
@@ -85,7 +86,32 @@ export function doctorData() {
     slug: e.slug, topic: e.topic, status: e.status, confidence: e.confidence,
     def: e.recommend?.default || '', when: e.recommend?.when || [],
   }]));
-  return { detectors, caps };
+  const migrations = entries.flatMap((e) => (e.migrate || []).map((r) => ({
+    entry: e.id, slug: e.slug, pkg: r.from.pkg, below: r.from.below || null,
+    to: r.to, urgency: r.urgency, effort: r.effort, why: r.why,
+    receipts: r.receipts || [], requires: r.requires || null,
+  })));
+  return { detectors, caps, migrations };
+}
+
+// All reading/watching annotations as one flat index — powers `ask` (deterministic
+// question routing, same idea as tools/detect.mjs searchReadings, ported client-side).
+export function readingIndex() {
+  const { entries } = corpus();
+  return entries.flatMap((e) => [...(e.reading || []), ...(e.watching || [])]
+    .filter((r) => r?.url)
+    .map((r) => ({ id: e.id, slug: e.slug, title: r.title, url: r.url, by: r.by || null,
+      what: r.what || '', claim: r.claim || null })));
+}
+
+// Per-entry verification history: the dates this entry's file changed in git.
+export function revisions(id, limit = 10) {
+  try {
+    const out = execSync(
+      `git log --date=short --format=%cs -n ${limit} -- skills/react-brain-mentor/entries/${id}.yaml`,
+      { cwd: ROOT, encoding: 'utf8' });
+    return [...new Set(out.split('\n').filter(Boolean))];
+  } catch { return []; }
 }
 
 export const GITHUB = 'https://github.com/heart-IT/react-brain';

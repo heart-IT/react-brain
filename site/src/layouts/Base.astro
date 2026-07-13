@@ -260,7 +260,8 @@ const bottomLinks = [...toolLinks, ...aboutLinks];   // mobile nav keeps the fla
       const c = ctx();
       switch ((cmd || '').toLowerCase()) {
         case 'help':
-          print(`<span class="t-dim">query &lt;topic&gt;   the verified entry, inline
+          print(`<span class="t-dim">ask &lt;question&gt; route a question to the entry + readings that answer it
+query &lt;topic&gt;   the verified entry, inline
 go &lt;page|entry&gt; navigate (${PAGES.slice(0, 5).join(' · ')} …)
 search &lt;q&gt;      full-text search
 stack [--rn|--web] [--expo] [--p2p] [--stage=x]
@@ -286,6 +287,29 @@ context · clear · help</span>`); break;
           const D = await ensureData();
           const hits = searchTop(args, D.entries);
           print(hits.length ? hits.map((e) => entryHtml(e, c)).join('') : `<span class="t-warn">no entry matches — try</span> <a href="${BASE}search/?q=${encodeURIComponent(arg)}">search ${esc(arg)}</a>`);
+          break;
+        }
+        case 'ask': {
+          // deterministic question routing (the site-side of the CLI's searchReadings):
+          // lexical scoring over every reading's title + annotation + tagged claim —
+          // grounded and zero-cost, not a chat model.
+          if (!arg) { print('<span class="t-warn">ask what? try: ask should I use zustand</span>'); break; }
+          const D = await ensureData();
+          const STOP = new Set('the a an is are was be my our your this that these of in on at to for and or but with without after before does do did how why what when where which it its as from by not no so if then than can could should would use using i we you'.split(' '));
+          const toks = [...new Set(arg.toLowerCase().split(/\s+/).map((t) => t.replace(/[^\w-]/g, '')).filter((t) => t.length > 2 && !STOP.has(t)))];
+          const stem = (t) => (t.length > 3 && t.endsWith('s') ? t.slice(0, -1) : t);
+          const reads = (D.readings || []).map((r) => {
+            const text = `${r.title} ${r.what} ${r.claim || ''}`.toLowerCase();
+            let s = 0, h = 0;
+            for (const t of toks) { const tf = text.split(stem(t)).length - 1; if (tf) { h++; s += Math.min(tf, 3); } }
+            return { r, s, h };
+          }).filter((x) => x.h >= Math.min(2, toks.length)).sort((a, b) => b.s - a.s).slice(0, 3);
+          const ents = searchTop(args, D.entries).slice(0, 1);
+          if (!ents.length && !reads.length) { print(`<span class="t-warn">nothing matched — try</span> <a href="${BASE}search/?q=${encodeURIComponent(arg)}">search ${esc(arg)}</a>`); break; }
+          let html = ents.map((e) => entryHtml(e, c)).join('');
+          if (reads.length) html += '<div class="c-entry"><span class="t-dim">readings that answer this:</span><br>' +
+            reads.map(({ r }) => `· <a href="${r.url}" rel="noopener">${esc(r.title)}</a> <span class="t-dim">[<a href="${BASE}entries/${r.slug}/">${r.slug}</a>]</span><br><span class="t-dim">&nbsp;&nbsp;${esc((r.claim || r.what).slice(0, 220))}${(r.claim || r.what).length > 220 ? '…' : ''}</span>`).join('<br>') + '</div>';
+          print(html);
           break;
         }
         case 'stack': {

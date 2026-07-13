@@ -1,6 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { corpus, downloads, fmtDownloads, track, docHtml, href, GITHUB } from '../../lib/corpus.js';
+import { corpus, downloads, fmtDownloads, track, docHtml, href, GITHUB, census, revisions } from '../../lib/corpus.js';
 
 export function getStaticPaths() {
   return corpus().entries.map((e) => ({ params: { slug: e.slug }, props: { id: e.id } }));
@@ -13,6 +13,27 @@ const tr = track()[id];
 const pkgs = (e.detect || []).filter((d) => !d.pkg.includes('*') && dl[d.pkg] != null);
 const related = entries.filter((x) => x.group === e.group && x.id !== id);
 const doc = docHtml(e);
+// knowledge-graph edges: entries this one's own text cites (when-clauses, notes, tradeoffs)
+const textBlob = [e.note, e.recommend?.default, ...(e.recommend?.when || []), ...(e.options || []).map((o) => o.tradeoff)].join(' ');
+const refs = [...new Set([...String(textBlob).matchAll(/RB-E-[A-Z0-9-]+/g)].map((m) => m[0]))]
+  .filter((r) => r !== id && byId[r]).map((r) => byId[r]);
+// verification history: the dates this entry's file changed in git
+const revs = revisions(id);
+// per-option evidence: map option → detect label (fuzzy) → census adoption + npm downloads
+const cen = census();
+const agg = cen?.agg?.[id] || null;
+const optEvidence = (e.options || []).map((o) => {
+  const on = o.name.toLowerCase().replace(/\s*\(.*/, '');
+  const d = (e.detect || []).find((x) => {
+    const l = x.label.toLowerCase().replace(/\s*\(.*/, '');
+    return l.length > 2 && (on.includes(l) || l.includes(on));
+  });
+  if (!d) return null;
+  const ships = agg?.labels?.[d.label] ?? null;
+  const wk = !d.pkg.includes('*') ? (dl[d.pkg] ?? null) : null;
+  return ships != null || wk != null ? { ships, denom: agg?.denom ?? null, wk } : null;
+});
+const hasEvidence = optEvidence.some(Boolean);
 // sources render as host › path labels — raw URLs overflow small screens and are
 // miserable for screen readers; the full URL stays in href
 const srcLabel = (u) => {
@@ -37,6 +58,14 @@ const toc = [
     <span class={`badge ${e.confidence}`}>confidence: {e.confidence}</span>
     {tr && <span class={`badge ${tr}`}>track: {tr}</span>}
   </p>
+  {refs.length > 0 && (
+    <p class="meta" style="margin:.2rem 0 0">related decisions: {refs.map((r, i) => (
+      <>{i > 0 && ' · '}<a href={href(`entries/${r.slug}/`)}>{r.slug}</a></>
+    ))}</p>
+  )}
+  {revs.length > 1 && (
+    <p class="meta" style="margin:.2rem 0 0">re-verified {revs.length}× — {revs.slice(0, 6).join(' · ')}{revs.length > 6 ? ` +${revs.length - 6}` : ''} · <a href={href('changelog/')}>changelog</a></p>
+  )}
 
   <div id="session-banner" hidden class="card" style="padding:.6rem .9rem; margin:.6rem 0 0"></div>
   <nav aria-label="On this page" style="display:flex; flex-wrap:wrap; gap:.45rem; margin:.4rem 0 0">
@@ -63,9 +92,18 @@ const toc = [
   <h2 id="options">Options &amp; tradeoffs</h2>
   <p class="meta" style="margin:-.35rem 0 .6rem">the field considered — and why each one isn’t the default here</p>
   <div class="tbl"><table>
-    <thead><tr><th>option</th><th>tradeoff</th></tr></thead>
-    <tbody>{(e.options || []).map((o) => <tr><td><strong>{o.name}</strong></td><td>{o.tradeoff}</td></tr>)}</tbody>
+    <thead><tr><th>option</th><th>tradeoff</th>{hasEvidence && <th>evidence</th>}</tr></thead>
+    <tbody>{(e.options || []).map((o, i) => (
+      <tr>
+        <td><strong>{o.name}</strong></td><td>{o.tradeoff}</td>
+        {hasEvidence && <td class="meta" style="white-space:nowrap">{optEvidence[i] ? [
+          optEvidence[i].wk != null ? `${fmtDownloads(optEvidence[i].wk)}/wk` : null,
+          optEvidence[i].ships != null ? `ships in ${optEvidence[i].ships}/${optEvidence[i].denom}` : null,
+        ].filter(Boolean).join(' · ') : ''}</td>}
+      </tr>
+    ))}</tbody>
   </table></div>
+  {hasEvidence && <p class="meta" style="margin:.35rem 0 0">evidence: npm weekly downloads (<a href={href('libraries/')}>signals snapshot</a>) · “ships in n/D” = adoption across the <a href={href('census/')}>production-app census</a>, honest denominators</p>}
 
   {pkgs.length > 0 && (
     <p class="muted" style="font-size:.88rem">npm weekly downloads (from the corpus's last signals run):

@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import { doctorData, BASE } from '../lib/corpus.js';
-const { detectors, caps } = doctorData();
+const { detectors, caps, migrations } = doctorData();
 // same expected-domain list as tools/react-brain-doctor.mjs
 const EXPECTED = {
   always: ['RB-E-STATE', 'RB-E-STYLING', 'RB-E-TESTING', 'RB-E-TYPESCRIPT', 'RB-E-DX', 'RB-E-NAV'],
@@ -25,7 +25,7 @@ const EXPECTED = {
   </p>
   <div id="out" aria-live="polite"></div>
 
-  <script is:inline define:vars={{ detectors, caps, EXPECTED, BASE }}>
+  <script is:inline define:vars={{ detectors, caps, migrations, EXPECTED, BASE }}>
     // ports of tools/detect.mjs matchDetector() + fit() — same table, same semantics
     const matchDetector = (name) => {
       for (const d of detectors) {
@@ -66,7 +66,10 @@ const EXPECTED = {
       }
       const ids = Object.keys(byEntry);
       const lines = [`react-brain doctor — ${pkg.name || 'your app'} · platform: ${platform} · ${names.length} deps`];
-      let html = `<p><strong>${esc(pkg.name || 'your app')}</strong> · platform: ${platform} · ${names.length} deps · ${ids.length} decisions detected</p>`;
+      const tally = { '✓': 0, '~': 0, '↗': 0 };
+      for (const id of ids) if (caps[id]) tally[fit(caps[id], [...byEntry[id].tokens])[0]]++;
+      let html = `<p><strong>${esc(pkg.name || 'your app')}</strong> · platform: ${platform} · ${names.length} deps · ${ids.length} decisions detected</p>` +
+        `<p class="meta">fit: <span class="mark-ok">${tally['✓']} aligned</span> · <span class="mark-warn">${tally['~']} contextual</span> · <span class="mark-dim">${tally['↗']} to review</span></p>`;
       html += '<div class="tbl"><table><thead><tr><th>decision</th><th>your choice</th><th>fit</th><th>the corpus says</th></tr></thead><tbody>';
       for (const id of ids) {
         const cap = caps[id]; if (!cap) continue;
@@ -90,6 +93,40 @@ const EXPECTED = {
             <span class="muted" style="font-size:.9rem"> — ${esc(cap.def.slice(0, 180))}${cap.def.length > 180 ? '…' : ''}</span></p></div>`;
         }
       }
+      // ── migration plan: the CLI planner's per-entry rules, matched in-browser ──
+      // (ports tools/detect.mjs minVer/verLt + react-brain-migrate.mjs matching)
+      const minVer = (range) => { const m = String(range || '').match(/\d+(?:\.\d+){0,2}/); return m ? m[0].split('.').map(Number) : null; };
+      const verLt = (a, b) => { for (let i = 0; i < 3; i++) { const x = a?.[i] || 0, y = b?.[i] || 0; if (x !== y) return x < y; } return false; };
+      const globFind = (pat) => pat.endsWith('*') ? names.find((n) => n.startsWith(pat.slice(0, -1))) || null : (pat in deps ? pat : null);
+      const steps = [];
+      for (const r of migrations) {
+        const name = globFind(r.pkg);
+        if (!name) continue;
+        if (r.below) { const iv = minVer(deps[name]); if (!iv || !verLt(iv, minVer(r.below))) continue; }
+        let blocked = null;
+        if (r.requires) {
+          const reqName = globFind(r.requires.pkg);
+          const rv = reqName ? minVer(deps[reqName]) : null;
+          if (!rv || verLt(rv, minVer(r.requires.atleast))) blocked = `${r.requires.pkg} ≥ ${r.requires.atleast} (installed: ${reqName ? deps[reqName] : 'absent'})`;
+        }
+        steps.push({ ...r, name, installed: String(deps[name]), blocked });
+      }
+      const URANK = { dead: 0, deprecated: 1, superseded: 2, upgrade: 3, conditional: 4 };
+      steps.sort((a, b) => (a.blocked ? 1 : 0) - (b.blocked ? 1 : 0) || URANK[a.urgency] - URANK[b.urgency]);
+      if (steps.length) {
+        html += '<h2>Migration plan</h2><p class="muted" style="font-size:.88rem">Installed versions crossed with the corpus\'s verified migration rules — sequenced, every step with receipts. Full plan incl. the legacy-API source scan: <code>npx react-brain migrate .</code></p>';
+        for (const s of steps) {
+          const glyph = s.urgency === 'dead' || s.urgency === 'deprecated' ? '✗' : '→';
+          lines.push(`MIGRATE [${s.urgency}] ${s.name}@${s.installed} -> ${s.to}`);
+          html += `<div class="card"><p style="margin:0"><span class="${s.urgency === 'dead' || s.urgency === 'deprecated' ? 'mark-warn' : 'mark-dim'}">${glyph}</span> <strong>${esc(s.name)}</strong><span class="meta"> ${esc(s.installed)}</span> → ${esc(s.to)}
+            <span class="meta">[${s.urgency} · effort ${s.effort} · <a href="${BASE}entries/${s.slug}/">${s.slug}</a>]</span></p>
+            <p class="muted" style="margin:.35rem 0 0; font-size:.88rem">${esc(s.why)}</p>` +
+            (s.blocked ? `<p class="muted" style="margin:.35rem 0 0; font-size:.88rem">⛔ blocked by: ${esc(s.blocked)} — do that step first</p>` : '') +
+            (s.receipts.length ? `<p class="meta" style="margin:.35rem 0 0">${s.receipts.slice(0, 2).map((u) => `<a href="${esc(u)}" rel="noopener">${esc(u.replace(/^https?:\/\/(www\.)?/, '').slice(0, 60))}</a>`).join(' · ')}</p>` : '') +
+            '</div>';
+        }
+      }
+
       html += '<p class="muted" style="font-size:.88rem">✓ aligned = matches the recommendation for some context · ~ contextual = matches a when-clause · ↗ review = differs from the default (not necessarily wrong — check the entry\'s context keys). For modernization + source signals run <code>npx react-brain doctor .</code></p>';
       out.innerHTML = html;
       out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
