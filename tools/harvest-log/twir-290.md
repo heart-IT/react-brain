@@ -27,7 +27,7 @@ corroboration · how-to (defer_to_skill) · pre-ship (RFC/beta) · too-early (0.
 | [Exporting Next.js Server Traces with OpenTelemetry](https://blog.sentry.io/nextjs-export-traces-opentelemetry/) | skipped: how-to (setup guide) |
 | [React Router 8.2](https://github.com/remix-run/react-router/releases/tag/react-router%408.2.0) | already-held: RB-E-NAV option row cites 8.2.0 + migrate rules |
 | [Storybook 10.5](https://github.com/storybookjs/storybook/releases/tag/v10.5.0) (Agentic Review, `storybook ai` MCP) | skipped: minor release; watch — if the agent-plugin direction recurs, RB-E-AI-DEVTOOLS is the home |
-| [Astryx 0.1.3](https://astryx.atmeta.com/blog/astryx-v0-1-3) (Meta design system on StyleX) | skipped: too-early (0.1.x); COMPONENT-LIBS candidate if it earns adoption |
+| [Astryx 0.1.3](https://astryx.atmeta.com/blog/astryx-v0-1-3) (Meta design system on StyleX) | already-held: RB-E-COMPONENT-LIBS already tracks Astryx as a beta option row (updated 2026-07-10, six days before this issue) — CORRECTED 2026-07-16b spot-check: originally skipped "too-early", missing that COMPONENT-LIBS already existed; this 0.1.3 post (Jul 4, 2026: tables, keyboard nav, a11y) is a routine changelog bump for the same @astryxdesign/core, not new-territory news |
 | [React Email 6.7](https://github.com/resend/react-email/releases/tag/react-email%406.7.0) | skipped: minor release, no entry owns email templating (no gap — niche) |
 | [video: Jack Herrington on Next.js](https://www.youtube.com/watch?v=PpyepQmLDTY) | skipped: opinion piece; META-FRAMEWORKS already carries the substantive migration case (Railway) |
 | [video: Ankita Kulkarni Next.js 16.3 navigations](https://www.youtube.com/watch?v=ngIdL-fNNzw) | skipped: corroboration of the held 16.3 reading |

@@ -35,10 +35,10 @@
     "react-native-rewind": {
       "name": "React Native Rewind",
       "archive": "https://reactnativerewind.com/",
-      "last_processed": "~#48",
+      "last_processed": "#48",
       "count": 48,
       "cadence": "weekly",
-      "notes": "slug-titled; fetchers hallucinate issue numbers — count sequentially from the last note"
+      "notes": "slug-titled; each issue page has an authoritative 'Issue #NN' label (near the title) — use THAT, not sequential guesswork, to resume (confirmed 2026-07-16: RSS + newsletter-rss.xml list newest-first; #48 = 'Zoomable Calendar Grids...', dated 2026-07-06, was the newest available and already fully corroborated in-corpus — RB-E-CALENDARS/RB-E-COMPONENT-LIBS/RB-E-ONDEVICE-AI/RB-E-BUILD/RB-E-DESKTOP/RB-E-ANIMATION between them cover every substantive item across issues #46-48)"
     },
     "native-weekly": {
       "name": "Native Weekly",

@@ -233,7 +233,7 @@
    "deprecated": false
   },
   "react-native-reanimated": {
-   "latest": "4.5.1",
+   "latest": "4.5.2",
    "deprecated": false
   },
   "react-native-gesture-handler": {
@@ -241,7 +241,7 @@
    "deprecated": false
   },
   "react-native-worklets": {
-   "latest": "0.10.2",
+   "latest": "0.11.0",
    "deprecated": false
   },
   "framer-motion": {
@@ -485,7 +485,7 @@
    "deprecated": false
   },
   "expo-camera": {
-   "latest": "57.0.2",
+   "latest": "57.0.3",
    "deprecated": false
   },
   "react-native-webrtc": {
@@ -557,11 +557,11 @@
    "deprecated": false
   },
   "react-native-iap": {
-   "latest": "15.5.0",
+   "latest": "15.5.1",
    "deprecated": false
   },
   "expo-iap": {
-   "latest": "4.5.0",
+   "latest": "4.5.1",
    "deprecated": false
   },
   "@reactvision/react-viro": {
@@ -709,7 +709,7 @@
    "deprecated": false
   },
   "hot-updater": {
-   "latest": "0.35.3",
+   "latest": "0.35.4",
    "deprecated": false
   },
   "react-native-executorch": {
