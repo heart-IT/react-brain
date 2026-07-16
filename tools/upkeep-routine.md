@@ -47,7 +47,16 @@ cd <repo-root> && claude -p "$(cat tools/upkeep-routine.md)"
 
 The agent should, in order:
 1. **Health** — run Tier 1 (`react-brain pulse … `) and read the deltas.
-2. **Growth** — follow `tools/pulse-routine.md`: from **`tools/harvest-state.json`** (in-repo
+2. **Growth** — start with the FIRST-PARTY layer (added 2026-07-16): `react-brain harvest
+   firsthand` polls the corpus-derived watch graph (npm dist-tags/deprecation flags for
+   every detect-row package, GitHub releases for every cited repo, RSS for every author
+   host cited ≥2×) and diffs vs the committed `.firsthand-state.json` — known-entity
+   events (version lines, deprecations, author posts) come from here with zero editorial
+   filter and zero latency; triage them with the same manifest discipline
+   (`tools/harvest-log/firsthand-<date>.md`, `--manifest` writes the skeleton). THEN
+   follow `tools/pulse-routine.md` for the newsletters — their irreplaceable job is
+   UNKNOWN UNKNOWNS (new libs/domains the corpus doesn't track yet) + corroboration:
+   from **`tools/harvest-state.json`** (in-repo
    resume state: last-processed issues + per-source access notes; update + commit after),
    fetch only NEW issues (This Week in React, RN Rewind, React Status, React Digest,
    Native Weekly, React Weekly),

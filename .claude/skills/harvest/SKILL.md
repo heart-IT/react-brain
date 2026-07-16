@@ -26,8 +26,15 @@ skill. One knowledge base, every session (local, resumed, or cloud-cloned).
 
 ## The sequence (details in the routine — do not improvise a different one)
 
-1. **Inventory first**: `node tools/cli.mjs harvest inventory <issue-url>` — build
-   triage from the mechanical link list, never from an LLM summary of the page.
+0. **Firsthand first**: `node tools/cli.mjs harvest firsthand` — the corpus-derived
+   watch graph (npm dist-tags + deprecation flags, GitHub releases, vetted-author RSS)
+   diffed against the committed `.firsthand-state.json`. Known-entity events come from
+   here, not from newsletters; triage them into `tools/harvest-log/firsthand-<date>.md`
+   (`--manifest` writes the skeleton) and commit the updated state WITH the delta.
+   Newsletters' job is unknown unknowns + corroboration.
+1. **Inventory first** (per newsletter issue): `node tools/cli.mjs harvest inventory
+   <issue-url>` — build triage from the mechanical link list, never from an LLM
+   summary of the page.
 2. Triage each link; **fetch-verify every keep**; dedupe vs the corpus
    (`grep -rn "<url>" skills/react-brain-mentor/entries/`).
 3. Write `tools/harvest-log/<source>-<issue>.md` — EVERY external link gets a row

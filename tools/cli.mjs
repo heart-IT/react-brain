@@ -48,10 +48,13 @@ usage: react-brain <command> [args]
   evidence <repo...>   corpus self-audit across repos: blind spots, contradictions, field evidence
   pulse    [repo...]   corpus health: dead links, stale entries, stack drift
                        (flags: --today=YYYY-MM-DD, --no-links)
-  harvest  <mode>      deterministic newsletter-scan scaffolding:
-                       inventory <url> (every link, mechanically) · coverage <url>
-                       <manifest.md> (exit 1 on unaccounted links) · watchlist
-                       (recurring skips + reopen signals across tools/harvest-log/)
+  harvest  <mode>      deterministic acquisition scaffolding:
+                       firsthand (corpus-derived watch graph — npm dist-tags, GitHub
+                       releases, author feeds — diffed vs .firsthand-state.json;
+                       --graph | --json | --manifest) · inventory <url> (every link,
+                       mechanically) · coverage <url> <manifest.md> (exit 1 on
+                       unaccounted links) · watchlist (recurring skips + reopen
+                       signals across tools/harvest-log/)
   calibrate [...]      scored prediction track record: is confidence earned?
                        (--seed | --record <id> <held|weakened|overturned> | --today=…)
   signals  [...]       recommendations vs live npm reality (downloads, staleness, claims)

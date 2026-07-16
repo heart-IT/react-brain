@@ -89,7 +89,10 @@ function manifestKeys(path) {
 
 const [mode, ...args] = process.argv.slice(2);
 
-if (mode === 'inventory') {
+if (mode === 'firsthand') {
+  process.argv = [process.argv[0], process.argv[1], ...args];   // pass flags through
+  await import('./react-brain-firsthand.mjs');
+} else if (mode === 'inventory') {
   if (!args[0]) { console.error('usage: harvest inventory <issue-url>'); process.exit(1); }
   const links = extractLinks(await fetchPage(args[0]), args[0]);
   const content = links.filter((l) => !l.sameSite), same = links.filter((l) => l.sameSite);
@@ -136,6 +139,6 @@ if (mode === 'inventory') {
   console.log(`\n${signals.length} standing reopen signal(s):`);
   signals.forEach((s) => console.log(`   [${s.file}] ${s.line}`));
 } else {
-  console.error('usage: react-brain harvest <inventory <url> | coverage <url> <manifest.md> | watchlist>');
+  console.error('usage: react-brain harvest <firsthand [--graph|--json|--manifest] | inventory <url> | coverage <url> <manifest.md> | watchlist>');
   process.exit(1);
 }
