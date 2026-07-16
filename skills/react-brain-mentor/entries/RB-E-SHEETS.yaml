@@ -1,0 +1,51 @@
+id: RB-E-SHEETS
+topic: "Bottom sheets & modal sheets (React Native)"
+category: sheets
+group: ui
+status: drafted
+confidence: low
+platforms: [react-native]
+options:
+  - { name: "@gorhom/bottom-sheet", tradeoff: "the JS incumbent (v5.2.x) — built on Reanimated + Gesture Handler, dynamic sizing, scrollable content handoff, huge deployed base; JS-driven look (not the OS sheet), most flexible for custom gesture-heavy sheets" }
+  - { name: "@swmansion/react-native-bottom-sheet", tradeoff: "Software Mansion's NEW true-native sheet components (inline AND modal, snap points; software-mansion-labs) — platform-authentic behavior; 0.16.x and moving fast (0.x — pin, expect churn)" }
+  - { name: "react-native-true-sheet (@lodev09)", tradeoff: "native sheets on both platforms (v3.11.x, active) — the lightweight platform-authentic option that pre-dates SWM's entrant; simpler API surface than gorhom" }
+  - { name: "react-native-screens FormSheet", tradeoff: "the sheet as a NAVIGATION DESTINATION — native-stack presents a route as a form sheet (detents); experimental in the screens v5 line (see RB-E-NAV); right shape when the sheet is conceptually a screen" }
+recommend:
+  default: "@gorhom/bottom-sheet is the safe default — mature, gesture-rich, works everywhere Reanimated does. Reach for a NATIVE sheet (react-native-true-sheet today; @swmansion/react-native-bottom-sheet once it stabilizes) when platform-authentic behavior — real detents, OS styling (iOS 26 Liquid Glass era) — matters more than custom gesture control. Lightly vetted (confidence: low) — the native-vs-JS split is fresh."
+  when:
+    - "custom gesture-heavy sheet UIs (drag handoff to inner scroll, dynamic snap logic) → @gorhom/bottom-sheet"
+    - "platform-authentic native sheet, stable today → react-native-true-sheet (v3)"
+    - "betting on the Software Mansion native line → @swmansion/react-native-bottom-sheet — 0.x, pin versions and expect breaking changes"
+    - "the sheet is really a SCREEN (deep-linkable, own route) → react-native-screens FormSheet via native-stack (experimental — pin; see RB-E-NAV)"
+note: >
+  NEW entry (2026-07-16), found by the TWiR #284–290 BACK-AUDIT: bottom sheets had NO corpus
+  home while three independent signals accumulated in seven issues — Software Mansion shipped
+  a NEW native bottom-sheet library (#284; 0.16 by #289), react-native-true-sheet 3.11 (#287),
+  and react-native-screens' experimental FormSheet (#290) — and the incumbent everyone deploys
+  (@gorhom/bottom-sheet) was never covered. Same failure shape as the AUTH gap: a domain with
+  no entry is invisible to triage until a sweep or recurrence surfaces it. Versions verified vs
+  npm 2026-07-16: gorhom 5.2.14 (2026-05), @swmansion 0.16.2 (2026-07-14), true-sheet 3.11.9
+  (2026-07-15). The selection axis mirrors RB-E-POLISH's toasts: JS-flexible incumbent vs
+  platform-authentic native entrants; the SWM line is the one to WATCH for 1.0 (tripwire below).
+defer_to_skill: react-native-best-practices
+doc: null
+updated: 2026-07-16
+reading:
+  - title: "Building a drawer component"
+    url: "https://emilkowal.ski/ui/building-a-drawer-component"
+    by: "Emil Kowalski (Vaul author)"
+    what: "The design rationale under good sheets/drawers, from the author of web's canonical drawer (Vaul): velocity-based dismissal over distance thresholds, snap-point logic, scroll-vs-drag handoff, and background scaling — the interaction details that decide whether a sheet feels native. Web-authored, but it is the why-good-sheets-feel-good reference, exactly as this corpus uses his toast piece in RB-E-POLISH."
+    claim: "You ship a bottom sheet — velocity-based dismissal, snap logic, and scroll-vs-drag handoff are design decisions, not library defaults; this is the canonical rationale to configure them against."
+    applies_when: { deps: ["@gorhom/bottom-sheet", "@swmansion/react-native-bottom-sheet", "@lodev09/react-native-true-sheet"], platforms: [react-native] }
+sources:
+  - "https://registry.npmjs.org/@gorhom%2Fbottom-sheet/latest"
+  - "https://registry.npmjs.org/@swmansion%2Freact-native-bottom-sheet/latest"
+  - "https://registry.npmjs.org/@lodev09%2Freact-native-true-sheet/latest"
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "@gorhom/bottom-sheet", label: "gorhom bottom-sheet", token: "gorhom" }
+  - { pkg: "@swmansion/react-native-bottom-sheet", label: "SWM native bottom-sheet (0.x)", token: "swmansion" }
+  - { pkg: "@lodev09/react-native-true-sheet", label: "true-sheet (native)", token: "true-sheet" }
+tripwires:   # standing caveats as executable conditions — evaluated by `harvest firsthand`; fired ⇒ do the then:, update prose, remove the row
+  - when: { pkg: "@swmansion/react-native-bottom-sheet", atleast: "1.0.0" }
+    then: "SWM's native bottom-sheet hit 1.0 — soften the '0.x, pin, expect churn' caveats in the option row + when-clause and reconsider the default split (native entrant now stable)"
+    added: 2026-07-16

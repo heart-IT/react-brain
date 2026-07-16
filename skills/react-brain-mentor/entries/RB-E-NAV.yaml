@@ -94,6 +94,7 @@ sources:
   - "https://expo.dev/changelog/sdk-56"
   - "https://reactnavigation.org/blog/2026/07/08/react-navigation-8.0-july-progress/"
   - "https://github.com/software-mansion/react-native-screens/releases/tag/4.26.0"
+  - "https://remix.run/blog/react-router-v8"
 detect_source:   # source-level signals owned by this entry (regex over repo source)
   - pattern: "window\\.location\\.(?:href\\s*=|assign\\()"
     min_files: 2

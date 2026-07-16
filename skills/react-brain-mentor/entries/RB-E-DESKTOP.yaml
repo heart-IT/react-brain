@@ -34,9 +34,11 @@ note: >
   microsoft/react-native-windows releases): this entry was structurally web-shell-only — for
   teams whose CODE is React Native (not a web app), react-native-windows/-macos is the
   share-your-RN-code answer; a different axis than the bundled-vs-borrowed-renderer choice.
+  LEAD (2026-07-16 back-audit, TWiR #284): shirakaba/expo-desktop targets Expo → macOS/Windows
+  directly — early and unproven, but a third RN-desktop lane (vs Microsoft's forks) to watch.
 defer_to_skill: engineering-principles   # shell↔web boundary; Pear depth → holepunch-p2p-systems; shell security → RB-E-SECURITY
 doc: "RB-E-DESKTOP.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-10
+updated: 2026-07-16
 reading:
   - title: "The Conductor Rewrite: what they changed to make it fast"
     url: "https://performance.dev/the-conductor-rewrite"
@@ -49,6 +51,7 @@ reading:
     by: "Petr Nikolaev & Thomas Paul Mann (Raycast)"
     what: "How Raycast ships one React + TypeScript codebase to both macOS and Windows via native shells (Swift/C#) plus WebKit — IPC design, memory breakdown, and concrete WebKit workarounds. A durable model for cross-platform desktop on React without Electron."
 sources:
+  - "https://github.com/shirakaba/expo-desktop"
   - "https://tauri.app/"
   - "https://github.com/tw93/Pake"
   - "https://github.com/microsoft/react-native-windows/releases"

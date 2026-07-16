@@ -46,6 +46,10 @@ note: >
   Vite+ BETA (2026-07-02, verified vs the VoidZero announcement; 2nd signal after TWiR #289's
   watch flag): the consolidation made product — one CLI over the whole VoidZero stack, MIT,
   framework-agnostic; beta, so watch rather than migrate existing multi-tool setups yet.
+  HERMES' OWN RELEASE LINE (2026-07-16, verified vs the static_h blog): Hermes now ships its
+  own stable releases decoupled from RN — the 2026-06 line (260318099.0.0) adds Set operations,
+  Object/Map.groupBy, iterator helpers, Promise.withResolvers, a built-in TextDecoder, and a
+  `--transform-ts` flag (native type-only stripping à la Node --strip-types — no Babel pass).
   Adversarially stress-tested 2026-06-25 (SURVIVES, high): Vite 8 shipped stable (2026-03) with
   Rolldown GA as the default; the Rust React-Compiler napi pullback affects only that compiler's
   JS path, not Rolldown-as-bundler; Metro stays the RN default. UPDATE 2026-07-06: the Rust React
@@ -53,13 +57,17 @@ note: >
   the Rspack 2.1 blog) — Rolldown's pullback is a Rolldown-integration choice, not a dead Rust port.
 defer_to_skill: null
 doc: "RB-E-BUILD.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-16
+updated: 2026-07-16   # Hermes release-line + Bacon reading added by the #284-289 back-audit
 watching:
   - title: "How React Native Builds Actually Work (APK, AAB, IPA, APP)"
     url: "https://www.youtube.com/watch?v=1o0pEjYGUWM"
     by: "Code with Beto"
     what: "Walkthrough of what actually happens between `npx expo run` and an installable artifact — the Gradle/Xcode stages behind APK/AAB/IPA and where Metro's bundle lands in them. The A/V companion to this entry's build-pipeline facts. (Verified via YouTube oEmbed: title + author.)"
 reading:
+  - title: "Things I Learned While Building Expo"
+    url: "https://evanbacon.dev/blog/expo"
+    by: "Evan Bacon (Expo core, 9 years; Expo Router creator — farewell essay, 2026-05)"
+    what: "The philosophical background behind this entry's Expo-vs-bare row, from the person who built much of it: dogfooding as the design tool, users articulating symptoms not solutions ('a runtime that was theirs, not ours' → dynamic runtime generation / prebuild), trust compounding through the expo-eject criticism years, and telemetry settling architecture debates. Durable platform-building judgment, found by the 2026-07-16 back-audit of TWiR #284."
   - title: "Rust Is Eating JavaScript"
     url: "https://leerob.com/rust"
     by: "Lee Robinson"
@@ -82,6 +90,7 @@ reading:
     what: "Why RN Android builds are slow (conservative Gradle/Metro/C++ defaults) and how parallel Gradle, dynamic Metro workers, ccache, and single-architecture builds cut times from 20+ min to 2-5 min, with benchmarks. The RN-CI build-perf dimension the other readings here don't cover."
 sources:
   - "https://reactnative.dev/blog/2026/02/11/react-native-0.84"
+  - "https://github.com/facebook/hermes/blob/static_h/doc/blog/2026-06-05-new-hermes-stable-release.md"
   - "https://voidzero.dev/posts/announcing-vite-plus-beta"
   - "https://github.com/ecrindigital/facetpack"
   - "https://expo.dev/changelog/sdk-56"

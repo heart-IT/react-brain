@@ -12,7 +12,7 @@
 # sources (entries with `sources:` + `updated:`). Library picks in `recommend`
 # are editorial synthesis, not vendor claims.
 #
-# STATE (2026-07-16): 43 entries across 6 groups, ALL `drafted`+ (0 stubs) — breadth is fully
+# STATE (2026-07-16): 44 entries across 6 groups, ALL `drafted`+ (0 stubs) — breadth is fully
 # citable. 24 are `reviewed` with long-form encyclopedia/<id>.md. Every entry carries curated,
 # fetch-verified `reading`. Reachability: cross-cutting domains via the mentor's
 # assessment_dimensions; feature/capability domains via the mentor's `capability_map`.
@@ -88,7 +88,7 @@ groups:
     entries: [RB-E-STATE, RB-E-DATA, RB-E-P2P, RB-E-NAV, RB-E-META-FRAMEWORKS, RB-E-FORMS, RB-E-AUTH, RB-E-NETWORKING, RB-E-CROSSPLATFORM, RB-E-DESKTOP]
   - id: ui
     label: "UI — styling, components, animation, lists, a11y, i18n, charts"
-    entries: [RB-E-STYLING, RB-E-COMPONENT-LIBS, RB-E-ANIMATION, RB-E-LISTS, RB-E-A11Y, RB-E-I18N, RB-E-CHARTS, RB-E-EDITORS, RB-E-SVG, RB-E-MAPS, RB-E-CALENDARS, RB-E-POLISH]
+    entries: [RB-E-STYLING, RB-E-COMPONENT-LIBS, RB-E-ANIMATION, RB-E-LISTS, RB-E-A11Y, RB-E-I18N, RB-E-CHARTS, RB-E-EDITORS, RB-E-SVG, RB-E-MAPS, RB-E-CALENDARS, RB-E-SHEETS, RB-E-POLISH]
   - id: platform-native
     label: "Platform & native (RN)"
     entries: [RB-E-NATIVE, RB-E-MEDIA, RB-E-STORAGE, RB-E-NATIVE-UI, RB-E-KEYBOARD, RB-E-PAYMENTS, RB-E-BROWNFIELD, RB-E-GAMES, RB-E-ALT-FRAMEWORKS]

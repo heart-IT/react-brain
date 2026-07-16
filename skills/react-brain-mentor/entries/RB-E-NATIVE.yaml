@@ -35,9 +35,12 @@ note: >
   you write inline Expo Modules (Swift/Kotlin in-app with generated TypeScript). Expo Modules also
   ships SHARED OBJECTS/REFS (verified vs docs.expo.dev/modules/shared-objects) — JS handles to live
   native objects instead of serialized copies; the next-gen MediaLibrary/Contacts APIs are built on it.
+  LEAD (2026-07-16 back-audit; recurrence-grade — TWiR #284 AND #285): margelo/react-native-runtimes
+  runs RN components/business logic in ISOLATED Hermes runtimes — young, watch for adoption before
+  citing as an option.
 defer_to_skill: react-native-jsi  # owns JSI memory/threading rules
 doc: "RB-E-NATIVE.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-10   # + Shared Objects/Refs fact; arch facts unchanged since 2026-06-25 stress-test
+updated: 2026-07-16   # + react-native-runtimes lead (back-audit); arch facts unchanged since 2026-06-25 stress-test
 reading:
   - title: "How to Make Pure JSI Code Faster in React Native (Part 1)"
     url: "https://blog.margelo.com/make-jsi-run-faster"
@@ -67,6 +70,7 @@ watching:
     by: "React Native Radio (guest: Marc Rousavy, Nitro/VisionCamera author)"
     what: "37-min episode (2026-01) from Nitro's author on why Nitro exists (JSI boilerplate), how it compares to Turbo Modules and Expo Modules, and the ecosystem's package-migration wave — the audio companion to this entry's Nitro-consolidation note."
 sources:
+  - "https://github.com/margelo/react-native-runtimes"
   - "https://reactnative.dev/blog/2026/02/11/react-native-0.84"
   - "https://reactnative.dev/blog/2026/06/11/react-native-0.86"
   - "https://github.com/zoontek/react-native-edge-to-edge"

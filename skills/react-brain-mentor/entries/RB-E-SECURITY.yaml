@@ -40,9 +40,12 @@ note: >
   (draft → 2FA-gated validate → finalize) + local tarball-hash reproduction — the maintainer-side
   countermeasure to the TanStack-style CI-compromise chain ("assume GitHub itself is compromised");
   joins install-script blocking and install-age gating as the third supply-chain layer.
+  PLATFORM-SIDE FIX (2026-07-16 back-audit, verified vs the GitHub changelog): actions/checkout
+  v7 ships safer pull_request_target defaults — closing the exact 'Pwn Request' door the
+  TanStack postmortem reading documents; pin checkout ≥7 in CI.
 defer_to_skill: review
 doc: "RB-E-SECURITY.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-10
+updated: 2026-07-16
 reading:
   - title: "The React2Shell Story"
     url: "https://lachlan.nz/blog/the-react2shell-story"
@@ -79,6 +82,7 @@ sources:
   - "https://vercel.com/kb/bulletin/vercel-april-2026-security-incident"
   - "https://vercel.com/blog/introducing-deepsec-find-and-fix-vulnerabilities-in-your-code-base"
   - "https://nuqs.dev/blog/staged-publishing-for-supply-chain-security"
+  - "https://github.blog/changelog/2026-06-18-safer-pull_request_target-defaults-for-github-actions-checkout/"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "rnsec", label: "rnsec (security scanner)", token: "rnsec" }
   - { pkg: "jail-monkey", label: "jail-monkey", token: "jail-monkey" }

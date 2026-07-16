@@ -10,7 +10,7 @@ options:
   - { name: "TanStack Start", tradeoff: "Vite-based (Rsbuild 2 also supported since 2026-06); RSC support EXPERIMENTAL (into early v1), SSR, Server Functions; deliberately omits Server Actions for security; less opinionated than Next" }
   - { name: "React Router 7 (framework mode) / Remix", tradeoff: "Remix merged into React Router 7; full-stack loaders/actions; Remix 3 is a separate JSX-component pivot away from RR" }
   - { name: "Expo Router", tradeoff: "the RN/universal meta-framework; SDK 56 decoupled from React Navigation; web SSR (alpha)" }
-  - { name: "Astro / Waku / RedwoodSDK", tradeoff: "Astro = content/islands; Waku 1.0-beta = minimal RSC; RedwoodSDK 1.0 = Vite+RSC+Cloudflare" }
+  - { name: "Astro / Waku / RedwoodSDK", tradeoff: "Astro = content/islands; Waku 1.0-beta = minimal RSC — its SLICES (reusable components w/ independent render config; lazy slices ≈ Astro server islands, mixable across static/dynamic pages) are its distinctive feature; RedwoodSDK 1.0 = Vite+RSC+Cloudflare" }
   - { name: "Vinext (Cloudflare)", tradeoff: "Vite-based Next.js rebuild; 1.0.0-beta (2026-07-04, verified vs npm) drops the experimental label — maturing, but AI-generated origins + the security issues Vercel flagged warrant re-verification before any production bet" }
 recommend:
   default: "Web: Next.js is the safe default; choose TanStack Start when you want a less-opinionated, Vite-native full-stack alternative (Server Functions stable; RSC opt-in and still experimental; Start itself is v1 RC). RN/universal: Expo Router."
@@ -32,9 +32,13 @@ note: >
   7 High, incl. upstream RSC CVE-2026-23870) patched only 15.5.18/16.2.6 — choosing Next commits
   you to tracking latest minors. Stress-tested 2026-07-10 (WEAKENED → caveats applied; the
   Next-default and the how-much-RSC context-key both SURVIVED the migration-wave attack).
+  LANDSCAPE (2026-07-16 back-audit, verified vs the Vercel post): Vercel and Shopify are
+  REBUILDING HYDROGEN together — Shopify's React meta-framework consolidating toward the
+  Vercel/Next stack rather than remaining an independent Remix-lineage framework; Waku's
+  slices fact verified vs Daishi Kato's first-party post.
 defer_to_skill: engineering-principles
 doc: "RB-E-META-FRAMEWORKS.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-10
+updated: 2026-07-16
 reading:
   - title: "Who Owns the Tree? RSC as a Protocol, Not an Architecture"
     url: "https://tanstack.com/blog/who-owns-the-tree"
@@ -67,6 +71,8 @@ reading:
     by: "Neci Dan (neciudan.dev)"
     what: "A systematic map of the whole rendering spectrum — CSR, SSG, ISR, SSR, streaming SSR + Suspense, RSC, islands, signal-based fine-grained reactivity, Qwik resumability, and Next 16.3 instant navigations — organized around ONE durable question: the gap between when a page LOOKS ready (HTML painted) and when it WORKS (JS hydrated/executing). Each strategy is a different trade on that window — ship less JS (islands/RSC), execute it faster (signals), or skip execution (resumability). The mental model that turns 'which meta-framework / rendering mode' into a reasoned choice instead of a checklist; the framing behind this entry's context-keys."
 sources:
+  - "https://newsletter.daishikato.com/p/waku-s-unique-feature-slices"
+  - "https://vercel.com/blog/vercel-and-shopify-are-rebuilding-hydrogen"
   - "https://tanstack.com/blog/who-owns-the-tree"
   - "https://frontendmasters.com/blog/react-server-components-in-tanstack/"
   - "https://nextjs.org/blog/nextjs-across-platforms"
