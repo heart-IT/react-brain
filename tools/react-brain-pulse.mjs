@@ -2,7 +2,7 @@
 // ── react-brain pulse ──────────────────────────────────────────────────────────
 // The autonomy layer: turns the corpus from a snapshot into a self-maintaining
 // system. Deterministic health + drift checks (no agents). Designed to run on a
-// schedule (see tools/pulse-routine.md for the agentic growth half).
+// schedule (the agentic growth half lives in tools/upkeep-routine.md, run weekly by tools/local-harvest.sh).
 //
 //   §1 LINK HEALTH — every reading/source URL: ok / DEAD(404) / blocked(403) / unreachable
 //   §2 STALENESS   — per-entry `updated:` age + entries with no freshness stamp
@@ -159,4 +159,4 @@ console.log(`\n${'─'.repeat(78)}\nNEXT ACTIONS (proposed — review, don't aut
 console.log(`  • Fix/replace any DEAD links; spot-check blocked ones.`);
 console.log(`  • Add \`updated:\` to undated entries so rot is trackable.`);
 console.log(`  • For autonomous growth (pull new newsletter issues + verify), wire`);
-console.log(`    tools/pulse-routine.md into /schedule (weekly). pulse stays propose-only.\n`);
+console.log(`    tools/upkeep-routine.md — run weekly by tools/local-harvest.sh (launchd). pulse stays propose-only.\n`);

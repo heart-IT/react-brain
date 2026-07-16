@@ -20,7 +20,16 @@ git rev-parse --verify -q "$BRANCH" >/dev/null && { echo "$BRANCH already exists
 [ -z "$(git status --porcelain)" ] || { echo "working tree dirty — refusing to run unattended; abort"; exit 1; }
 git checkout -q main && git checkout -q -b "$BRANCH"
 
-PROMPT="Run the weekly react-brain harvest pass. Follow .claude/skills/harvest/SKILL.md EXACTLY — read it first, then tools/harvest-state.json and tools/upkeep-routine.md step 2. You are ALREADY on branch $BRANCH: commit everything here, NEVER switch to or commit on main, NEVER push, never force anything. All gates must pass before your final commit (coverage, verify-diff --base=main, npm test); the advocate pass over your own skips is mandatory. This is a headless run: skip the maintainer-memory ledger steps — put the full narrative (issues processed, keeps with receipts, notable skips, counts before/after) in the final commit message instead. If there are no new issues AND no firsthand events, print a one-line summary and stop (an empty branch is fine)."
+# Tier-1 deterministic health (consolidated 2026-07-16 — was a separate Monday cron):
+# pulse (dead links/staleness/drift) + signals (recs vs live npm) + census (cohort
+# adoption). Zero LLM; baseline updates land on this branch for review like everything
+# else. Failures never block the harvest — the agent reads the logs either way.
+TODAY="$(date +%F)"
+node tools/cli.mjs pulse   --today="$TODAY" ../../ledgerhr ../../ourpot/ourpot ../../bitbarter >> tools/pulse.log   2>&1 || echo "pulse exited non-zero (see tools/pulse.log)"
+node tools/cli.mjs signals --today="$TODAY" >> tools/signals.log 2>&1 || echo "signals exited non-zero"
+node tools/cli.mjs census  --today="$TODAY" >> tools/census.log  2>&1 || echo "census exited non-zero"
+
+PROMPT="Run the weekly react-brain harvest pass. Follow .claude/skills/harvest/SKILL.md EXACTLY — read it first, then tools/harvest-state.json and tools/upkeep-routine.md step 2. Tier-1 (pulse/signals/census) already ran — read the tails of tools/pulse.log, tools/signals.log and tools/census.log and fold dead links / drift / adoption deltas into the pass. You are ALREADY on branch $BRANCH: commit everything here, NEVER switch to or commit on main, NEVER push, never force anything. All gates must pass before your final commit (coverage, verify-diff --base=main, npm test); the advocate pass over your own skips is mandatory. This is a headless run: skip the maintainer-memory ledger steps — put the full narrative (issues processed, keeps with receipts, notable skips, counts before/after) in the final commit message instead. If there are no new issues AND no firsthand events, print a one-line summary and stop (an empty branch is fine)."
 
 claude -p "$PROMPT" \
   --model claude-sonnet-5 \

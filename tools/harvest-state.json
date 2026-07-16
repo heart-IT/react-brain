@@ -1,6 +1,6 @@
 {
   "_readme": [
-    "Resume state for the newsletter harvest (tools/pulse-routine.md step 2, tools/upkeep-routine.md Tier 2).",
+    "Resume state for the newsletter harvest (tools/upkeep-routine.md step 2).",
     "Read this BEFORE a harvest pass; update `last_processed`/`count`/`updated` and COMMIT it after.",
     "This file lives in the repo (not session memory) precisely so a CLOUD agent can clone, resume, and open a PR.",
     "`react-brain lint` cross-checks each `count` against encyclopedia.yaml sources_digested — they must match.",

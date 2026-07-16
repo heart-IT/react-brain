@@ -19,13 +19,16 @@ human-reviewed diff.
 ## Tier 1 — deterministic health (automate NOW, zero agent, zero cost)
 
 Just runs `react-brain pulse`: dead-link scan + staleness + drift. No LLM, no network
-cost beyond HEAD requests. Wire it to local cron — one command:
+cost beyond HEAD requests. CONSOLIDATED 2026-07-16: Tier 1 (pulse + signals + census) now
+runs as the deterministic pre-step of the weekly harvest — `tools/local-harvest.sh`
+(launchd, Thu 09:00, installed via `bash tools/install-local-harvest.sh`). One scheduler,
+one review branch; the old separate Monday cron is retired. Run any time by hand:
 
 ```sh
-bash tools/install-cron.sh      # installs a Monday-09:00 weekly pulse, logs to tools/pulse.log
+node tools/cli.mjs pulse --today=$(date +%F) ../../ledgerhr ../../ourpot/ourpot ../../bitbarter
 ```
 
-or by hand (crontab line it installs):
+(retired crontab line, for reference):
 
 ```cron
 0 9 * * 1  cd <repo-root> && /usr/bin/env node tools/cli.mjs pulse --today=$(date +\%F) ../../ledgerhr ../../ourpot/ourpot ../../bitbarter >> tools/pulse.log 2>&1
@@ -53,6 +56,11 @@ The agent should, in order:
    App access; review = `git diff main...harvest/<date>`, merge --ff-only). The cloud/PR
    variant is PARKED by maintainer choice in tools/cloud-harvest-routine.json.
 
+   > **Why propose-only** (ported from the retired pulse-routine.md, 2026-07-16): the
+   > corpus's value is that it is *curated + verified*, not a popularity feed. Autonomy
+   > keeps it fresh; the human-reviewed delta keeps it correct. Deterministic facts
+   > (a 404 is a 404) are safe to auto-fix; judgments are not.
+
 2. **Growth** — start with the FIRST-PARTY layer (added 2026-07-16): `react-brain harvest
    firsthand` polls the corpus-derived watch graph (npm dist-tags/deprecation flags for
    every detect-row package, GitHub releases for every cited repo, RSS for every author
@@ -64,7 +72,7 @@ The agent should, in order:
    hits 1.0 → add the migrate rule") are MANDATORY work items: do the `then:`, update the
    prose, remove the fired row; new watch/revisit caveats get wired as tripwires at
    keep-time. THEN
-   follow `tools/pulse-routine.md` for the newsletters — their irreplaceable job is
+   the newsletters — their irreplaceable job is
    UNKNOWN UNKNOWNS (new libs/domains the corpus doesn't track yet) + corroboration:
    from **`tools/harvest-state.json`** (in-repo
    resume state: last-processed issues + per-source access notes; update + commit after),

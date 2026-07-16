@@ -20,6 +20,20 @@ lint         ── trust / invariants (mechanized corpus schema + reachability 
 mcp-server   ── distribution       (the corpus as MCP tools for any coding agent)
 ```
 
+**State files (one map — which file, who writes it, committed?):**
+
+| file | owner | committed | reset |
+|---|---|---|---|
+| `harvest-state.json` | newsletter harvest | ✓ (resume state) | edit last_processed |
+| `.firsthand-state.json` | `harvest firsthand` | ✓ (cloud/agent resume) | delete → rebaseline |
+| `.pulse-baseline.json` | `pulse` (drift) | ✓ | delete → next run rebaselines |
+| `.census-baseline.json` | `census` | ✓ | delete → next run rebaselines |
+| `.signals-baseline.json` | `signals` | ✓ | delete → next run rebaselines |
+| `predictions.jsonl` | `calibrate` (append-only ledger) | ✓ never rewrite | `--seed` adds; `--record` resolves |
+| `.registry-cache.json` | `doctor --preflight` (7d TTL) | ✗ gitignored | delete freely |
+| `.briefing-state.json` | `briefing` | ✗ gitignored | rewind after test runs |
+| `harvest-log/*.md` | disposition manifests (+ bench gold) | ✓ | never — they're the audit trail |
+
 > YAML loads via the `yaml` npm dep (python3+pyyaml shim as zero-install fallback). The
 > detection table is fully data-driven: each entry declares its own `detect:` (package
 > signals) and `detect_source:` (regex signals over repo source) — adding an entry never
@@ -170,7 +184,7 @@ node tools/react-brain-pulse.mjs --today=YYYY-MM-DD ../ledgerhr ../ourpot ../bit
 # writes tools/.pulse-baseline.json for drift detection on the next run
 ```
 The **agentic growth half** (pull new newsletter issues + verify + propose a delta) is
-`pulse-routine.md` — wire it into `/schedule` (weekly) for full autonomy.
+`upkeep-routine.md` step 2 — run weekly by `tools/local-harvest.sh` (launchd; propose-only branch).
 
 ## `react-brain-harvest.mjs` + `react-brain-firsthand.mjs` — deterministic acquisition
 Closes the two invisible failure points of knowledge acquisition. (1) The LLM
@@ -370,8 +384,9 @@ SURVIVES; OVERTURN needs concrete current evidence). Run on the highest-stakes r
 entries. Pairs with the dating pass (which checks *facts*, not *judgment*).
 
 ## Autonomy — keeping it alive
-- **Tier 1 (deterministic, now):** `bash tools/install-cron.sh` wires a weekly local cron
-  that runs `pulse` and logs to `tools/pulse.log`. Zero LLM, zero cost.
+- **Tier 1 (deterministic):** pulse + signals + census run as the pre-step of the weekly
+  local harvest (`tools/local-harvest.sh`, launchd Thu 09:00 — `bash tools/install-local-harvest.sh`).
+  Zero LLM; logs to tools/pulse.log · signals.log · census.log. (Separate Monday cron retired 2026-07-16.)
 - **Tier 2 (agentic, weekly):** `upkeep-routine.md` — growth (newsletter harvest) + evidence
   + rotating challenge, run by a local headless agent. (Cloud `/schedule` can't see the local
   repo / has no remote to commit to — keep upkeep local.)
