@@ -21,7 +21,7 @@ projects.
 
 | Pillar | What it is | Status |
 |--------|-----------|--------|
-| 🧠 **Encyclopedia** | Curated knowledge of the React + RN ecosystem — state, routing, data, lists, forms, styling, testing, native, OTA, AI tooling… with context-keyed recommendations and tradeoffs, synthesized from 6 cross-checked newsletters. | 44-entry grouped index ([`encyclopedia.yaml`](skills/react-brain-mentor/encyclopedia.yaml) + one file per entry in [`entries/`](skills/react-brain-mentor/entries/)) with `recommend` blocks, curated `reading` (and A/V `watching`); **36 `reviewed` long-form entries** in [`encyclopedia/`](encyclopedia/) |
+| 🧠 **Encyclopedia** | Curated knowledge of the React + RN ecosystem — state, routing, data, lists, forms, styling, testing, native, OTA, AI tooling… with context-keyed recommendations and tradeoffs, synthesized from 6 cross-checked newsletters. | 44-entry grouped index ([`encyclopedia.yaml`](skills/react-brain-mentor/encyclopedia.yaml) + one file per entry in [`entries/`](skills/react-brain-mentor/entries/)) with `recommend` blocks, curated `reading` (and A/V `watching`); **38 `reviewed` long-form entries** in [`encyclopedia/`](encyclopedia/) |
 | 📚 **Tutorial** | The guided learning path through the encyclopedia (Diataxis-structured). | **first form shipped** as the *adaptive* `react-brain learn` path — a curriculum computed as (encyclopedia graph) × your repo, not static prose ([`tools/react-brain-learn.mjs`](tools/react-brain-learn.mjs)) |
 | 🧠 **Mentor skill** | A Claude skill that reads any React/RN project and gives a ranked, grounded improvement roadmap — routes to depth knowledge skills **and** cites the encyclopedia for breadth. | **draft — started here** |
 

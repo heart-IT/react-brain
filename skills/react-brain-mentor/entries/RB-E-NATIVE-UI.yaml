@@ -2,7 +2,7 @@ id: RB-E-NATIVE-UI
 topic: "Native UI extensions — Live Activities, widgets, App Clips, portals"
 category: native-ui
 group: platform-native
-status: drafted
+status: reviewed   # long-form entry written + source-checked
 confidence: medium
 platforms: [react-native]
 options:
@@ -26,8 +26,8 @@ note: >
   react-native-worklets — SwiftUI and Compose state can be driven SYNCHRONOUSLY on the UI
   thread, no JS round-trips; relevant when native-UI surfaces must track gestures/animation.
 defer_to_skill: null
-doc: null
-updated: 2026-07-10
+doc: "RB-E-NATIVE-UI.md"   # long-form Explanation entry in content_dir
+updated: 2026-07-16
 reading:
   - title: "Apple Home Screen Widgets with Expo (Continuous Native Generation)"
     url: "https://evanbacon.dev/blog/apple-home-screen-widgets"

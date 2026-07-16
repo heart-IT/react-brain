@@ -2,7 +2,7 @@ id: RB-E-ALT-FRAMEWORKS
 topic: "Alternatives to React Native (cross-platform frameworks)"
 category: alt-frameworks
 group: platform-native
-status: drafted
+status: reviewed   # long-form entry written + source-checked
 confidence: low
 platforms: [react, react-native]
 options:
@@ -17,8 +17,8 @@ recommend:
     - "team already invested in Dart / wants one render engine → Flutter (leaves React entirely)"
 note: "Context for teams weighing leaving the React/RN ecosystem. Newer entrants (Lynx, Valdi) are early — not endorsements. The KMP-vs-RN numbers come from Software Mansion's controlled same-app benchmark (see reading) — notable because an RN shop published results that favor KMP on Android."
 defer_to_skill: null
-doc: null
-updated: 2026-07-10
+doc: "RB-E-ALT-FRAMEWORKS.md"   # long-form Explanation entry in content_dir
+updated: 2026-07-16
 sources:
   - "https://github.com/lynx-family/lynx"
   - "https://github.com/Snapchat/Valdi"
