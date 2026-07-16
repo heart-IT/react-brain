@@ -97,3 +97,7 @@ sources:
   - "https://react.dev/blog/2025/10/07/react-compiler-1"
   - "https://react.dev/blog/2025/12/11/denial-of-service-and-source-code-exposure-in-react-server-components"
   - "https://rspack.rs/blog/announcing-2-1"
+tripwires:   # standing caveats as executable conditions — evaluated by `harvest firsthand`; fired ⇒ do the then:, update prose, remove the row
+  - when: { pkg: "react", atleast: "19.3.0" }
+    then: "React 19.3 went stable (was 'active canary — re-verify before quoting 19.2') — update the current-line option row + note, and re-check <Activity>/<ViewTransition> status changes in the release post"
+    added: 2026-07-16

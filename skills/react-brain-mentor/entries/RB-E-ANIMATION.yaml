@@ -37,7 +37,7 @@ note: >
   Nitro rewrite ships as NEW scoped @rive-app/react-native (0.4.14) while legacy
   rive-react-native sits at 9.8.3 (both verified vs npm 2026-07-13) — a supersession in
   progress; WATCH for the new line reaching 1.0 or a formal legacy deprecation before
-  adding a migrate rule. WEB: Motion (the framer-motion successor) is the web
+  adding a migrate rule (wired as tripwires 2026-07-16 — firsthand fires when either lands). WEB: Motion (the framer-motion successor) is the web
   animation default — added 2026-06-25 after the evidence-loop corpus self-audit flagged
   that this [react]-platform entry had options/recommend for React Native only, no web pick
   (caught from ledgerhr's framer-motion usage). Verified vs the official RN 0.85 blog.
@@ -99,3 +99,10 @@ detect_source:   # source-level signals owned by this entry (regex over repo sou
   - pattern: "useNativeDriver:\\s*false"
     signal: "JS-driven Animated animations (useNativeDriver: false)"
     hint: "drive animations off the JS thread — native driver where supported, else Reanimated (perf depth → react-native-best-practices)"
+tripwires:   # standing caveats as executable conditions — evaluated by `harvest firsthand`; fired ⇒ do the then:, update prose, remove the row
+  - when: { pkg: "@rive-app/react-native", atleast: "1.0.0" }
+    then: "the Nitro Rive line hit 1.0 — add the rive-react-native → @rive-app/react-native migrate rule the note's WATCH promises, and drop the 'pin, 0.x' caveat from the option row"
+    added: 2026-07-16
+  - when: { pkg: "rive-react-native", deprecated: true }
+    then: "legacy Rive SDK formally deprecated on npm — add the migrate rule (urgency: deprecated) per the note's WATCH; receipts: this flag + the Margelo rewrite post"
+    added: 2026-07-16

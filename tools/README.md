@@ -141,7 +141,11 @@ feeds; hosts cited ≥2× → author blog RSS, with well-known-path probing for
 docusaurus-style sites) and diffs it against `.firsthand-state.json` (committed,
 like the other baselines). Known-entity events arrive with zero editorial filter
 and zero latency, routed by entry; newsletters demote to what they're
-irreplaceable for — unknown unknowns. Zero LLM, zero deps throughout.
+irreplaceable for — unknown unknowns. Entries' standing caveats ("watch for 1.0",
+"add the migrate rule when formally deprecated") are wired as **`tripwires:`**
+rows — executable release conditions firsthand evaluates each run (prerelease-safe;
+fired ⇒ ⚡ work item: do the `then:`, update the prose, remove the row). The
+corpus's hedges page you when they resolve. Zero LLM, zero deps throughout.
 (3) "Verified" was a claim the harvester wrote — **verify-diff** makes it a
 status CI computes: every URL the branch ADDS (entries, docs, manifest `kept`
 rows) is re-verified (direct fetch → Wayback; registry receipts checked for

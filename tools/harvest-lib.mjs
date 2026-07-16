@@ -91,6 +91,26 @@ export async function coverageCheck(issueUrl, manifestPath) {
   return { total: links.length, have: have.size, missing: links.filter((l) => !have.has(l.key)) };
 }
 
+// tripwires: an entry's standing caveat as an executable release condition.
+// Pure + offline-testable. Prerelease-safe: 1.0.0-beta.6 does NOT satisfy
+// atleast 1.0.0 (equal base + prerelease tag = not yet released), but a
+// prerelease of a HIGHER base (2.1.0-rc.1 vs atleast 1.0.0) does.
+function parseVer(v) {
+  const m = String(v || '').match(/^(\d+)\.(\d+)\.(\d+)(-.+)?/);
+  return m && { n: [+m[1], +m[2], +m[3]], pre: Boolean(m[4]) };
+}
+export function satisfiesTripwire(when, info) {
+  if (!info) return false;
+  if (when.deprecated === true) return info.deprecated === true;
+  if (when.atleast) {
+    const l = parseVer(info.latest), t = parseVer(when.atleast);
+    if (!l || !t) return false;
+    for (let i = 0; i < 3; i++) { if (l.n[i] > t.n[i]) return true; if (l.n[i] < t.n[i]) return false; }
+    return !l.pre;
+  }
+  return false;
+}
+
 // wayback: does an archived snapshot exist? (the third tier of the verify chain)
 export async function waybackSnapshot(url) {
   try {

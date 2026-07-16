@@ -275,6 +275,18 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
   } finally { rmSync(T, { recursive: true, force: true }); }
 }
 
+// ── tripwires: prerelease-safe condition evaluation (harvest firsthand) ─────────
+{
+  const { satisfiesTripwire } = await import(join(ROOT, 'tools/harvest-lib.mjs'));
+  check(satisfiesTripwire({ pkg: 'waku', atleast: '1.0.0' }, { latest: '1.0.0-beta.6' }) === false, 'tripwire: a prerelease does NOT satisfy atleast for its own base version');
+  check(satisfiesTripwire({ pkg: 'x', atleast: '1.0.0' }, { latest: '1.0.0' }) === true, 'tripwire: exact stable satisfies atleast');
+  check(satisfiesTripwire({ pkg: 'x', atleast: '19.3.0' }, { latest: '19.2.7' }) === false, 'tripwire: below threshold does not fire');
+  check(satisfiesTripwire({ pkg: 'x', atleast: '1.0.0' }, { latest: '2.1.0-rc.1' }) === true, 'tripwire: prerelease of a HIGHER base still satisfies');
+  check(satisfiesTripwire({ pkg: 'x', deprecated: true }, { latest: '9.8.3', deprecated: false }) === false
+     && satisfiesTripwire({ pkg: 'x', deprecated: true }, { latest: '9.8.3', deprecated: true }) === true, 'tripwire: deprecated-flag condition');
+  check(satisfiesTripwire({ pkg: 'x', atleast: '1.0.0' }, undefined) === false, 'tripwire: missing registry info never fires');
+}
+
 // ── report ──────────────────────────────────────────────────────────────────────
 console.log(`react-brain eval — ${pass + fails.length} assertions`);
 if (fails.length) { for (const f of fails) console.log(`  ✗ ${f}`); console.log(`\n✗ ${fails.length} failed / ${pass} passed`); process.exit(1); }

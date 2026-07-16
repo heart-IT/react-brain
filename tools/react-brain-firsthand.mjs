@@ -25,7 +25,7 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadEntries } from './detect.mjs';
-import { get as libGet, pool } from './harvest-lib.mjs';
+import { get as libGet, pool, satisfiesTripwire } from './harvest-lib.mjs';
 
 const TOOLS = dirname(fileURLToPath(import.meta.url));
 const STATE_FILE = join(TOOLS, '.firsthand-state.json');
@@ -42,6 +42,7 @@ function deriveGraph() {
   const npm = new Map();      // pkg → [entryIds]
   const github = new Map();   // owner/repo → [entryIds]
   const hostHits = new Map(); // host → { n, entries:Set }
+  const tripwires = [];       // {entry, when, then} — standing caveats as conditions
   let globsSkipped = 0;
 
   const urlsOf = (e) => [
@@ -59,6 +60,7 @@ function deriveGraph() {
     for (const m of e.migrate || []) {
       for (const p of [m.from?.pkg, m.requires?.pkg]) if (p && !/[*]/.test(p)) (npm.get(p) || npm.set(p, []).get(p)).push(e.id);
     }
+    for (const t of e.tripwires || []) tripwires.push({ entry: e.id, when: t.when, then: t.then });
     for (const u of urlsOf(e)) {
       const gh = u.match(/github\.com\/([\w.-]+)\/([\w.-]+)/);
       if (gh && !/^(advisories|orgs|topics|features|search)$/.test(gh[1])) {
@@ -77,7 +79,7 @@ function deriveGraph() {
   // a host cited ≥2× across the corpus is a vetted-author signal; one-off article hosts stay out
   const blogs = new Map([...hostHits].filter(([, v]) => v.n >= 2).map(([host, v]) => [host, [...v.entries]]));
   const uniq = (m) => new Map([...m].map(([k, v]) => [k, [...new Set(v)]]));
-  return { npm: uniq(npm), github: uniq(github), blogs: uniq(blogs), globsSkipped };
+  return { npm: uniq(npm), github: uniq(github), blogs: uniq(blogs), tripwires, globsSkipped };
 }
 
 // fetch + pool live in harvest-lib; keep the old (url, accept) call shape locally
@@ -121,13 +123,14 @@ async function probeFeed(host) {
 
 // ── main ────────────────────────────────────────────────────────────────────────
 const graph = deriveGraph();
-const stats = `npm ${graph.npm.size} packages (+${graph.globsSkipped} globs skipped) · github ${graph.github.size} repos · blogs ${graph.blogs.size} feeds (hosts cited ≥2×)`;
+const stats = `npm ${graph.npm.size} packages (+${graph.globsSkipped} globs skipped) · github ${graph.github.size} repos · blogs ${graph.blogs.size} feeds (hosts cited ≥2×) · tripwires ${graph.tripwires.length} armed`;
 
 if (GRAPH_ONLY) {
   console.log(`harvest firsthand — derived watch graph\n  ${stats}\n`);
   console.log('npm:', [...graph.npm.keys()].join(', '));
   console.log('\ngithub:', [...graph.github.keys()].join(', '));
   console.log('\nblogs:', [...graph.blogs.keys()].join(', '));
+  console.log('\ntripwires:', graph.tripwires.map((t) => `${t.entry} → ${t.when.pkg} ${t.when.atleast ? `≥${t.when.atleast}` : 'deprecated'}`).join(' · ') || '(none)');
   process.exit(0);
 }
 
@@ -135,8 +138,10 @@ const first = !existsSync(STATE_FILE);
 const state = first ? { npm: {}, github: {}, blogs: {} } : JSON.parse(readFileSync(STATE_FILE, 'utf8'));
 const events = [], failures = [];
 
-// npm — abbreviated metadata: dist-tags + per-version deprecated flag
-const npmKeys = [...graph.npm.keys()];
+// npm — abbreviated metadata: dist-tags + per-version deprecated flag.
+// Tripwire packages join the fetch set even when no detect row names them
+// (react, solid-js) — they're watched solely for their condition.
+const npmKeys = [...new Set([...graph.npm.keys(), ...graph.tripwires.map((t) => t.when.pkg)])];
 const npmRes = await pool(npmKeys.map((pkg) => async () => {
   if (state.npm[pkg]?.gone) return state.npm[pkg];   // 404'd before (renamed/unpublished) — reported once, stay quiet
   try {
@@ -153,12 +158,31 @@ npmKeys.forEach((pkg, i) => {
   if (r.err) return failures.push(`npm ${pkg}: ${r.err}`);
   if (r.gone && !state.npm[pkg]?.gone) failures.push(`npm ${pkg}: 404 (renamed/unpublished) — recorded as gone, won't re-report`);
   const prev = state.npm[pkg];
-  if (prev && r.latest && prev.latest !== r.latest)
-    events.push({ kind: 'npm', entries: graph.npm.get(pkg), what: `${pkg}  ${prev.latest} → ${r.latest}${r.deprecated ? '  (latest is DEPRECATED)' : ''}`, url: `https://registry.npmjs.org/${pkg}/latest` });
-  else if (prev && !prev.deprecated && r.deprecated)
-    events.push({ kind: 'npm', entries: graph.npm.get(pkg), what: `${pkg}  DEPRECATED flag flipped on npm (still ${r.latest})`, url: `https://registry.npmjs.org/${pkg}/latest` });
+  if (graph.npm.has(pkg)) {   // tripwire-only pkgs emit no version-change noise — only their condition matters
+    if (prev && r.latest && prev.latest !== r.latest)
+      events.push({ kind: 'npm', entries: graph.npm.get(pkg), what: `${pkg}  ${prev.latest} → ${r.latest}${r.deprecated ? '  (latest is DEPRECATED)' : ''}`, url: `https://registry.npmjs.org/${pkg}/latest` });
+    else if (prev && !prev.deprecated && r.deprecated)
+      events.push({ kind: 'npm', entries: graph.npm.get(pkg), what: `${pkg}  DEPRECATED flag flipped on npm (still ${r.latest})`, url: `https://registry.npmjs.org/${pkg}/latest` });
+  }
   state.npm[pkg] = r;
 });
+
+// ── tripwires — the corpus's standing caveats, evaluated against the fresh data ─
+// A fired tripwire is a WORK ITEM: do its `then:`, update the entry's prose, and
+// REMOVE the row (removal prunes the fired-memory below, keeping state clean).
+state.tripwires ||= {};
+const armed = new Set();
+for (const t of graph.tripwires) {
+  const cond = t.when.atleast ? `atleast:${t.when.atleast}` : 'deprecated';
+  const key = `${t.entry}:${t.when.pkg}:${cond}`;
+  armed.add(key);
+  const info = state.npm[t.when.pkg];
+  if (info && !info.gone && !info.err && satisfiesTripwire(t.when, info) && !state.tripwires[key]) {
+    state.tripwires[key] = { fired: TODAY, latest: info.latest };
+    events.push({ kind: '⚡TRIP', entries: [t.entry], what: `${t.when.pkg} ${t.when.deprecated ? 'DEPRECATED flag flipped' : `reached ${info.latest} (≥ ${t.when.atleast})`} — ACT: ${t.then}`, url: `https://registry.npmjs.org/${t.when.pkg}/latest` });
+  }
+}
+for (const k of Object.keys(state.tripwires)) if (!armed.has(k)) delete state.tripwires[k];
 
 // github — releases.atom newest entry
 const ghKeys = [...graph.github.keys()];
@@ -203,6 +227,8 @@ writeFileSync(STATE_FILE, JSON.stringify(state, null, 1) + '\n');
 if (JSON_OUT) { console.log(JSON.stringify({ baseline: first, stats, events, failures }, null, 1)); process.exit(0); }
 
 console.log(`harvest firsthand — ${stats}`);
+const awaiting = Object.keys(state.tripwires || {}).length;
+if (awaiting) console.log(`   ⚡ ${awaiting} fired tripwire(s) awaiting action — act on the then:, then remove the row from the entry`);
 if (first) {
   console.log(`\nbaseline established (${STATE_FILE.split('/').pop()}) — commit it; next run reports deltas.`);
 } else if (!events.length) {

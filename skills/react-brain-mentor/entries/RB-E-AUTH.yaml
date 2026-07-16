@@ -54,3 +54,7 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "react-native-auth0", label: "Auth0", token: "auth0" }
   - { pkg: "expo-auth-session", label: "expo-auth-session (DIY OAuth)", token: "expo-auth-session" }
   - { pkg: "@react-native-firebase/auth", label: "Firebase Auth", token: "firebase" }
+tripwires:   # standing caveats as executable conditions — evaluated by `harvest firsthand`; fired ⇒ do the then:, update prose, remove the row
+  - when: { pkg: "next-auth", deprecated: true }
+    then: "Auth.js/NextAuth formally deprecated on npm — the note's DELIBERATE NO-MIGRATE-RULE condition is met: add the next-auth → better-auth migrate rule (urgency: deprecated) with this flag as receipt"
+    added: 2026-07-16

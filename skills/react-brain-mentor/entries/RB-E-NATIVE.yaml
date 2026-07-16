@@ -76,3 +76,7 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "react-native-nitro-modules", label: "Nitro Modules", token: "nitro" }
   - { pkg: "expo-modules-core", label: "Expo Modules", token: "expo modules" }
   - { pkg: "expo", label: "Expo (managed native)", token: "expo modules" }
+tripwires:   # standing caveats as executable conditions — evaluated by `harvest firsthand`; fired ⇒ do the then:, update prose, remove the row
+  - when: { pkg: "react-native-nitro-modules", atleast: "1.0.0" }
+    then: "Nitro hit 1.0 — revisit the 'pre-1.0, pin versions, Turbo stays the stable in-core option' caveat in the when-clause + note (stress-test provenance line); re-verify breaking-change cadence before softening it"
+    added: 2026-07-16

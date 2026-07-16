@@ -53,7 +53,11 @@ The agent should, in order:
    host cited ≥2×) and diffs vs the committed `.firsthand-state.json` — known-entity
    events (version lines, deprecations, author posts) come from here with zero editorial
    filter and zero latency; triage them with the same manifest discipline
-   (`tools/harvest-log/firsthand-<date>.md`, `--manifest` writes the skeleton). THEN
+   (`tools/harvest-log/firsthand-<date>.md`, `--manifest` writes the skeleton). ⚡ TRIPWIRE
+   events (entry `tripwires:` — standing caveats as release conditions, e.g. "Rive line
+   hits 1.0 → add the migrate rule") are MANDATORY work items: do the `then:`, update the
+   prose, remove the fired row; new watch/revisit caveats get wired as tripwires at
+   keep-time. THEN
    follow `tools/pulse-routine.md` for the newsletters — their irreplaceable job is
    UNKNOWN UNKNOWNS (new libs/domains the corpus doesn't track yet) + corroboration:
    from **`tools/harvest-state.json`** (in-repo

@@ -31,6 +31,10 @@ skill. One knowledge base, every session (local, resumed, or cloud-cloned).
    diffed against the committed `.firsthand-state.json`. Known-entity events come from
    here, not from newsletters; triage them into `tools/harvest-log/firsthand-<date>.md`
    (`--manifest` writes the skeleton) and commit the updated state WITH the delta.
+   **⚡ TRIPWIRE events are mandatory work items** — an entry's standing caveat whose
+   release condition just came true (its `tripwires:` block): do the `then:` action,
+   update the prose caveat, and REMOVE the fired row. When a harvest lands a new
+   "watch/revisit when X ships" caveat, wire it as a tripwire row at keep-time.
    Newsletters' job is unknown unknowns + corroboration.
 1. **Inventory first** (per newsletter issue): `node tools/cli.mjs harvest inventory
    <issue-url>` — build triage from the mechanical link list, never from an LLM

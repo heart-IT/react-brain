@@ -755,6 +755,14 @@
   "@swmansion/argent": {
    "latest": "0.16.0",
    "deprecated": false
+  },
+  "react": {
+   "latest": "19.2.7",
+   "deprecated": false
+  },
+  "solid-js": {
+   "latest": "1.9.14",
+   "deprecated": false
   }
  },
  "github": {
@@ -1041,5 +1049,6 @@
    "lastId": "https://kentcdodds.com/blog/implementing-hybrid-semantic-lexical-search"
   }
  },
- "updated": "2026-07-16"
+ "updated": "2026-07-16",
+ "tripwires": {}
 }

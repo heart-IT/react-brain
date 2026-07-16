@@ -76,3 +76,7 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "@tanstack/react-start", label: "TanStack Start", token: "tanstack start" }
   - { pkg: "astro", label: "Astro", token: "astro" }
   - { pkg: "waku", label: "Waku", token: "waku" }
+tripwires:   # standing caveats as executable conditions — evaluated by `harvest firsthand`; fired ⇒ do the then:, update prose, remove the row
+  - when: { pkg: "waku", atleast: "1.0.0" }
+    then: "Waku hit 1.0 stable (option row says '1.0-beta = minimal RSC') — update the option row + the 'still beta' when-clause"
+    added: 2026-07-16

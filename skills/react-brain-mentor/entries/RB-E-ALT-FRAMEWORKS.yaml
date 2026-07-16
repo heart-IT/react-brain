@@ -39,3 +39,7 @@ reading:
     url: "https://strawberrybrowser.com/blog/react-to-svelte"
     by: "Strawberry Browser (Dendrite Systems)"
     what: "A migration case study contrasting React's virtual-DOM overhead with Svelte's compiled reactivity for an AI-driven browser UI, including the LLM-migration ruleset that kept the Svelte idiomatic. A concrete framework-tradeoff data point for teams weighing leaving React."
+tripwires:   # standing caveats as executable conditions — evaluated by `harvest firsthand`; fired ⇒ do the then:, update prose, remove the row
+  - when: { pkg: "solid-js", atleast: "2.0.0" }
+    then: "Solid 2.0 went stable — re-triage the skipped 'SolidJS 2.0: A React Developer's First Look' (twir-290 manifest reopen signal) and consider a Solid row in the web-alternatives reading thread"
+    added: 2026-07-16

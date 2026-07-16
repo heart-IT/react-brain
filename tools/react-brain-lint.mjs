@@ -147,6 +147,19 @@ for (const { file, e } of entries) {
     if (!Array.isArray(r?.receipts) || !r.receipts.length || r.receipts.some((u) => !/^https?:\/\//.test(u))) err(`${id}: migrate '${label}' needs ≥1 http(s) receipt`);
   }
 
+  // tripwires (added 2026-07-16): standing caveats as executable release conditions —
+  // `harvest firsthand` evaluates them against live npm; fired ⇒ do the `then:` and remove the row
+  for (const t of e.tripwires || []) {
+    const label = t?.when?.pkg || '?';
+    if (!t?.when?.pkg) err(`${id}: tripwire missing when.pkg`);
+    const conds = ['atleast', 'deprecated'].filter((k) => t?.when?.[k] !== undefined);
+    if (conds.length !== 1) err(`${id}: tripwire '${label}' needs exactly one of when.atleast | when.deprecated`);
+    if (t?.when?.atleast !== undefined && !VER_RE.test(String(t.when.atleast))) err(`${id}: tripwire '${label}' when.atleast must be x.y.z`);
+    if (t?.when?.deprecated !== undefined && t.when.deprecated !== true) err(`${id}: tripwire '${label}' when.deprecated must be true`);
+    if (!t?.then) err(`${id}: tripwire '${label}' missing then (the action the caveat promises)`);
+    if (!t?.added) err(`${id}: tripwire '${label}' missing added date`);
+  }
+
   // detect_source rules: regex must compile, signal required
   for (const r of e.detect_source || []) {
     if (!r?.pattern || !r?.signal) err(`${id}: detect_source rule missing pattern/signal`);
