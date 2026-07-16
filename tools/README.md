@@ -74,6 +74,16 @@ migration with a measured trend (files importing the legacy pkg now vs ~6 months
 in-progress / STALLED-since / regressing / done-remove-the-dep, with the remaining file
 list). `--no-history` skips it; non-git targets degrade gracefully.
 
+**Acknowledged findings (2026-07-16):** decisions can now QUIET findings. An ADR's
+`react_brain.quiets: [smell:RB-E-X, modernize:RB-E-Y, …]` (written via `decide <topic>
+<repo> --quiets=…`) folds those findings out of doctor's priorities into an ACKNOWLEDGED
+section while the decision's premise holds — and the moment the premise breaks (entry
+re-verified, prediction resolved, review horizon passed) the finding RE-OPENS in TOP
+PRIORITIES, boosted and labeled with exactly what changed. Kills the advisor death
+spiral (repeating overruled advice until nobody reads the report) without ever letting
+a stale decision hide a live problem; the mentor treats acknowledged items as settled
+and leads with re-opened ones.
+
 ## `react-brain-map.mjs` — the repo pinboard (code location for agents)
 One compact line per source file — corpus-domain tags (detector imports + per-file smell
 hits), external imports, exports, LOC — plus an inverted DOMAINS→files index. An agent

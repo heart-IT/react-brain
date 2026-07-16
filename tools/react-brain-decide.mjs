@@ -27,8 +27,12 @@ const TOPIC = pos[0];
 const REPO = pos[1] || '.';
 const OUT = (flags.find((f) => f.startsWith('--out=')) || '--out=docs/adr').split('=')[1];
 const STDOUT = flags.includes('--stdout');
+// finding keys this decision ACKNOWLEDGES (kind:RB-E-X, e.g. smell:RB-E-CROSSPLATFORM) —
+// doctor folds matching findings out of its priorities while the premise holds,
+// and RE-OPENS them boosted when it breaks
+const QUIETS = ((flags.find((f) => f.startsWith('--quiets=')) || '').split('=')[1] || '').split(',').filter(Boolean);
 const TODAY = (flags.find((f) => f.startsWith('--today=')) || '').split('=')[1] || new Date().toISOString().slice(0, 10);
-if (!TOPIC) { console.error('usage: react-brain decide <topic> [repoPath] [--out=docs/adr] [--stdout]'); process.exit(1); }
+if (!TOPIC) { console.error('usage: react-brain decide <topic> [repoPath] [--out=docs/adr] [--stdout] [--quiets=kind:RB-E-X,…]'); process.exit(1); }
 
 // ── resolve topic → entry ───────────────────────────────────────────────────────
 const [entry] = searchEntries(TOPIC.split(/\s+/));
@@ -89,7 +93,7 @@ react_brain:                # machine-readable premises — \`react-brain doctor
   entry_updated: ${String(entry.updated)}
   resolved_via: ${r.via}${r.via !== 'default' ? `\n  matched_context: ${JSON.stringify(r.ctx)}` : ''}
   prediction_check_by: ${pred?.check_by || 'null'}
-  corpus_version: ${corpusVersion}
+  corpus_version: ${corpusVersion}${QUIETS.length ? `\n  quiets:              # findings this decision overrules — doctor quiets them while the premise holds\n${QUIETS.map((q) => `    - ${JSON.stringify(q)}`).join('\n')}` : ''}
 ---
 
 # ${num}. ${title}

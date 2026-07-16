@@ -34,7 +34,24 @@ const EXPECTED = {
 // ── TOP PRIORITIES — one deterministic impact×effort ranking across every section ──
 // impact by finding class (census-weighted for gaps) × entry confidence ÷ effort.
 // A pre-ranking heuristic, not judgment: the mentor re-ranks; sections carry the detail.
-function computePriorities({ entries, detected, gaps, advice, modern, sigs, traj, stage = 'mvp' }) {
+// Decisions can QUIET findings: an ADR whose react_brain.quiets lists a finding key
+// (kind:RB-E-X) and whose premise still HOLDS folds that finding out of the priorities
+// (→ acknowledged). A BROKEN premise re-opens it, boosted — the advisor remembers being
+// overruled and knows exactly when the reason stopped being true.
+function acksOf(adrRecords) {
+  const acks = {};
+  for (const r of adrRecords || []) {
+    if (!/accepted|proposed/i.test(r.status || '')) continue;   // superseded/rejected records quiet nothing
+    for (const q of r.quiets || []) {
+      const cur = acks[q];
+      const cand = { adr: r.adr, title: r.title, file: r.file, broken: r.flags.length > 0, flag: r.flags[0] || null };
+      if (!cur || (cur.broken && !cand.broken)) acks[q] = cand;   // any valid decision outranks a broken one
+    }
+  }
+  return acks;
+}
+
+function computePriorities({ entries, detected, gaps, advice, modern, sigs, traj, acks, stage = 'mvp' }) {
   const CONF = { high: 1, medium: 0.85, low: 0.6 };
   const EFF = { S: 1, M: 1.5, L: 2.5 };
   // MP-STAGE-CALIBRATED: missing-domain pressure scales with maturity — a prototype's
@@ -90,8 +107,20 @@ function computePriorities({ entries, detected, gaps, advice, modern, sigs, traj
     items.push({ kind: 'read', entry: v.entry, score: 35 / 1.2,
       text: trunc(v.claim, 90), why: `reading: ${trunc(v.title, 60)}` });
   }
-  items.sort((x, y) => y.score - x.score);
-  return items.slice(0, 5).map((x) => ({ ...x, score: Math.round(x.score) }));
+  // fold in the recorded decisions: valid premise → acknowledged (out of the ranking);
+  // broken premise → re-opened with a boost (something CHANGED — re-litigate now)
+  const acknowledged = [];
+  const live = items.filter((x) => {
+    const ack = acks?.[`${x.kind}:${x.entry}`];
+    if (!ack) return true;
+    if (!ack.broken) { acknowledged.push({ key: `${x.kind}:${x.entry}`, text: x.text, adr: ack.adr, title: ack.title, file: ack.file }); return false; }
+    x.score = Math.max(x.score * 1.5, 85);
+    x.reopened = true;
+    x.why = `RE-OPENED — ${trunc(ack.flag || 'decision premise broke', 90)} (was acknowledged: ADR-${ack.adr} ${trunc(ack.title, 40)})`;
+    return true;
+  });
+  live.sort((x, y) => y.score - x.score);
+  return { top: live.slice(0, 5).map((x) => ({ ...x, score: Math.round(x.score) })), acknowledged };
 }
 
 function printReport(a, entries) {
@@ -112,19 +141,21 @@ function printReport(a, entries) {
   const modern = (!NO_SCAN && a.platform !== 'react') ? scanModernDefaults(a.path, a.deps) : null;
   const sigs = !NO_SCAN ? scanSourceSignals(a.path, entries, { stage: a.stage, platform: a.platform, deps: a.deps }) : null;
   const traj = (!NO_SCAN && !NO_HISTORY) ? trajectoryScan(a.path, a.deps, entries) : null;
+  const adrs = checkAdrs(a.path, entries);
+  const acks = acksOf(adrs);
   const expected = [...EXPECTED.always, ...(EXPECTED[a.platform] || [])];
   const gapIds = expected.filter((id) => !a.byEntry[id]);
   const resolvedPick = (e, toks) => { const r = resolveRecommendation(e, toks); return r.via !== 'default' ? { pick: r.why } : null; };
-  const priorities = computePriorities({ entries,
+  const { top: priorities, acknowledged } = computePriorities({ entries,
     detected: detected.map(({ id, e, info }) => ({ entry: id, labels: [...info.labels], fitStr: fit(e, info.tokens), resolved: resolvedPick(e, [...ctxTokens(a), ...info.tokens]) })),
     gaps: gapIds.map((id) => { const c = census?.agg?.[id]; return { entry: id, recommend: entries[id]?.recommend?.default || '',
       resolved: entries[id] ? resolvedPick(entries[id], ctxTokens(a)) : null, field: c ? { appCount: c.appCount, denom: c.denom } : null }; }),
-    advice, modern, sigs, traj, stage: a.stage });
+    advice, modern, sigs, traj, acks, stage: a.stage });
   if (priorities.length) {
     console.log(`\n  ⚡ TOP PRIORITIES  (impact × effort heuristic — detail in the sections below)`);
     console.log(`  ${'-'.repeat(74)}`);
     priorities.forEach((p, i) => {
-      console.log(`  ${i + 1}. ${p.text}   [${p.kind} · ${p.entry.replace('RB-E-', '')} · ${p.score}]`);
+      console.log(`  ${i + 1}. ${p.reopened ? '⚡ ' : ''}${p.text}   [${p.kind} · ${p.entry.replace('RB-E-', '')} · ${p.score}]`);
       console.log(`     ${p.why}`);
     });
   }
@@ -189,6 +220,14 @@ function printReport(a, entries) {
     }
   }
 
+  // ACKNOWLEDGED — findings a recorded decision overrules while its premise holds.
+  if (acknowledged.length) {
+    console.log(`\n  ACKNOWLEDGED  (overruled by recorded decisions — premise holds, not re-argued)`);
+    console.log(`  ${'-'.repeat(74)}`);
+    for (const k of acknowledged)
+      console.log(`  ☑ ${trunc(k.text, 78)}  [ADR-${k.adr} "${trunc(k.title, 36)}" · ${k.file}]`);
+  }
+
   // FOR YOUR STACK — corpus readings whose tagged claims apply to this repo.
   if (advice.length) {
     console.log(`\n  FOR YOUR STACK  (readings whose claims apply to what you ship)`);
@@ -242,7 +281,6 @@ function printReport(a, entries) {
   }
 
   // DECISION RECORDS — living ADRs (react-brain decide) re-checked against the corpus.
-  const adrs = checkAdrs(a.path, entries);
   if (adrs.length) {
     console.log(`\n  DECISION RECORDS  (docs/adr — premises re-checked against the current corpus)`);
     console.log(`  ${'-'.repeat(74)}`);
@@ -286,12 +324,13 @@ function jsonReport(a, entries) {
   const sourceSignals = !NO_SCAN ? scanSourceSignals(a.path, entries, { stage: a.stage, platform: a.platform, deps: a.deps }) : null;
   const advice = adviseReadings(a, entries);
   const traj = (!NO_SCAN && !NO_HISTORY) ? trajectoryScan(a.path, a.deps, entries) : null;
-  const priorities = computePriorities({ entries,
-    detected: detected.map((d) => ({ ...d, fitStr: d.fit })), gaps, advice, modern: modernization, sigs: sourceSignals, traj, stage: a.stage });
+  const adrs = checkAdrs(a.path, entries);
+  const { top: priorities, acknowledged } = computePriorities({ entries,
+    detected: detected.map((d) => ({ ...d, fitStr: d.fit })), gaps, advice, modern: modernization, sigs: sourceSignals, traj, acks: acksOf(adrs), stage: a.stage });
   const trajectory = traj?.git ? { oldRefDate: traj.oldRefDate, migrations: traj.migrations,
     recentlyAdopted: Object.fromEntries(Object.entries(traj.adoption).filter(([, t]) => traj.now - t <= 90 * 86400)) } : null;
   return {
-    adrs: checkAdrs(a.path, entries),
+    adrs, acknowledged,
     name: a.name, path: a.path, version: a.version || null, platform: a.platform,
     desktopShell: a.desktopShell || null, stage: a.stage, depCount: a.depCount,
     ts: a.ts, ci: a.ci, tests: a.tests, lintfmt: a.lintfmt, hooks: a.hooks,

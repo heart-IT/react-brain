@@ -243,7 +243,8 @@ export function checkAdrs(repoPath, entriesById, today = new Date().toISOString(
       }
       if (rb.prediction_check_by && String(rb.prediction_check_by) !== 'null' && String(today) > String(rb.prediction_check_by))
         flags.push(`review horizon passed (${rb.prediction_check_by})`);
-      records.push({ file: `${dir}/${name}`, adr: fm.adr ?? null, title: fm.title || name, entry: rb.entry, status: fm.status || '?', flags });
+      records.push({ file: `${dir}/${name}`, adr: fm.adr ?? null, title: fm.title || name, entry: rb.entry, status: fm.status || '?', flags,
+        quiets: Array.isArray(rb.quiets) ? rb.quiets.map(String) : [] });   // finding keys (kind:RB-E-X) this decision acknowledges
     }
   }
   return records;

@@ -76,7 +76,10 @@ usage: react-brain <command> [args]
                        (flags: --stage=prototype|mvp|production|scale, --full)
   decide   <topic> [repo]  generate a LIVING DECISION RECORD (ADR with receipts): resolved
                        context, candidate table, evidence chain, calibration track record,
-                       and a machine-readable premise block that \`doctor\` re-checks
+                       and a machine-readable premise block that \`doctor\` re-checks;
+                       --quiets=kind:RB-E-X,… acknowledges findings: doctor folds them
+                       out of priorities while the premise holds, RE-OPENS them boosted
+                       (⚡) the moment it breaks — advice that remembers being overruled
                        (flags: --out=docs/adr, --stdout)
   query    <term>      look up an entry's recommendation (id / category / keyword)
   bench                the LLM STALENESS BENCHMARK: score models' React advice against

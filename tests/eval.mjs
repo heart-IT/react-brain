@@ -337,6 +337,23 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
     check(d.priorities.some((p) => p.kind === 'finish' && /unstick|finish|STOP/i.test(p.text)), 'trajectory: stalled migration surfaces as a finish-priority');
     const noH = JSON.parse(execFileSync(process.execPath, [join(ROOT, 'tools/react-brain-doctor.mjs'), T, '--json', '--no-history'], { encoding: 'utf8' }));
     check(noH.trajectory === null, 'trajectory: --no-history skips the scan');
+
+    // acknowledged findings: a recorded decision quiets the finding while its premise
+    // holds, and RE-OPENS it boosted when the premise breaks
+    const { loadEntries } = await import(join(ROOT, 'tools/detect.mjs'));
+    const svgUpdated = String(loadEntries()['RB-E-SVG'].updated);
+    const adr = (entryUpdated) => `---\nadr: 1\ntitle: "vector icons stay legacy for now"\nstatus: accepted\nreact_brain:\n  entry: RB-E-SVG\n  entry_updated: ${entryUpdated}\n  quiets:\n    - "finish:RB-E-SVG"\n---\nbody\n`;
+    mkdirSync(join(T, 'docs/adr'), { recursive: true });
+    wf(join(T, 'docs/adr/0001-icons.md'), adr(svgUpdated));
+    const ack = doctorPath(T);
+    check(!ack.priorities.some((p) => p.kind === 'finish') && ack.acknowledged.some((k) => k.key === 'finish:RB-E-SVG'),
+      'acks: valid-premise decision quiets the finish finding into acknowledged[]');
+    wf(join(T, 'docs/adr/0001-icons.md'), adr('2020-01-01'));
+    const re = doctorPath(T);
+    const reItem = re.priorities.find((p) => p.kind === 'finish');
+    check(reItem?.reopened === true && reItem.score >= 85 && /RE-OPENED/i.test(reItem.why),
+      `acks: broken premise RE-OPENS the finding boosted (got ${reItem?.score}/${reItem?.reopened})`);
+    check(re.acknowledged.length === 0, 'acks: broken-premise decision acknowledges nothing');
   } finally { rmSync(T, { recursive: true, force: true }); }
 }
 function doctorPath(p) { return JSON.parse(execFileSync(process.execPath, [join(ROOT, 'tools/react-brain-doctor.mjs'), p, '--json'], { encoding: 'utf8' })); }
