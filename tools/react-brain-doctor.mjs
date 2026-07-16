@@ -14,6 +14,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadEntries, analyzeRepo, fit, trunc, GROUP_ORDER, trackRecord, TRACK_GLYPH, scanModernDefaults, scanSourceSignals, checkAdrs, adviseReadings, loadCensus, resolveRecommendation, trajectoryScan, matchDetector, minVer } from './detect.mjs';
 import { fetchDepDocs, classifyDepHealth, preflightVerdict } from './harvest-lib.mjs';
+import { pkgsForPick } from './detect.mjs';
 
 // Situational context tokens for resolveRecommendation — matched against the
 // corpus's "context → choice" when-clauses, mirroring learn's contextFor logic.
@@ -54,7 +55,7 @@ function acksOf(adrRecords) {
   return acks;
 }
 
-function computePriorities({ entries, detected, gaps, advice, modern, sigs, traj, acks, reg, stage = 'mvp' }) {
+function computePriorities({ entries, detected, gaps, advice, modern, sigs, traj, acks, reg, sw, stage = 'mvp' }) {
   const CONF = { high: 1, medium: 0.85, low: 0.6 };
   const EFF = { S: 1, M: 1.5, L: 2.5 };
   // MP-STAGE-CALIBRATED: missing-domain pressure scales with maturity — a prototype's
@@ -82,6 +83,19 @@ function computePriorities({ entries, detected, gaps, advice, modern, sigs, traj
     const cf = churnFactor(s.files);
     items.push({ kind: 'smell', entry: s.entry, score: (50 + Math.min(s.count || 0, 20)) * cf.mult * (CONF[e?.confidence] || 0.85) / 1.5,
       text: s.signal, why: (s.hint ? trunc(s.hint, 100) : 'source signal') + cf.tag });
+  }
+  // aggressive swaps: you use X, the pick beats it on a stated axis (quantified > argued);
+  // swaps are M/L by MP-RANKED discipline, so effort divides honestly
+  for (const s of sw?.swaps || []) {
+    items.push({ kind: 'swap', entry: s.entry,
+      score: (s.quantified ? 58 : 46) * (CONF[entries[s.entry]?.confidence] || 0.85) / (EFF[s.effort] || 1.8),
+      text: `swap ${trunc(s.yours, 26)} → ${trunc(s.pkgs.slice(0, 2).join(' ') || s.axis, 42)} (${s.entry.replace('RB-E-', '')})`,
+      why: trunc(s.axis || s.pick, 100) });
+  }
+  for (const u of sw?.upside || []) {
+    items.push({ kind: 'upside', entry: u.entry,
+      score: 38 * (CONF[entries[u.entry]?.confidence] || 0.85) / 1.8,
+      text: `unclaimed upside: ${trunc(u.option, 42)} (${u.entry.replace('RB-E-', '')})`, why: trunc(u.axis, 100) });
   }
   // registry health: the world beyond the curation boundary (deprecated ≫ abandoned > lag)
   for (const h of reg?.health || []) {
@@ -140,6 +154,90 @@ function computePriorities({ entries, detected, gaps, advice, modern, sigs, traj
   return { top: live.slice(0, 5).map((x) => ({ ...x, score: Math.round(x.score) })), acknowledged };
 }
 
+// ── SWAPS & UPSIDE — the aggressive layer ───────────────────────────────────────
+// Timid: "current choice ≠ default, not necessarily wrong". Aggressive: "you use X;
+// the corpus pick beats it on THIS axis". Every claim is quoted from the entry's own
+// option tradeoffs (grounded, never invented); migration cost comes from migrate rules
+// when the corpus has priced it. UPSIDE goes further: even ALIGNED entries surface
+// options with a QUANTIFIED win the repo hasn't claimed (5x lists, ~30x storage…).
+const QUANT_RE = /\b\d+(?:\.\d+)?\s*[x×%]/;
+const EXPERIMENTAL_RE = /experimental|early alpha|technical preview|not (?:a )?production|watch, not/i;
+function axisOf(text) {
+  const clauses = String(text || '').split(/[;·]|\.\s/);
+  return (clauses.find((c) => QUANT_RE.test(c)) || clauses[0] || '').trim();
+}
+const normName = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+function optionsUsed(e, labels) {
+  return (e.options || []).filter((o) => {
+    const on = normName(o.name);
+    return [...labels].some((l) => {
+      const ln = normName(l);
+      return on.includes(ln) || ln.includes(on.split(' ')[0]) || on.split(' ').some((w) => w.length > 3 && ln.includes(w));
+    });
+  });
+}
+function swapsAndUpside(a, detectedRows, census) {
+  const swaps = [], upside = [];
+  for (const { id, e, info } of detectedRows) {
+    const fitStr = fit(e, info.tokens);
+    const r = resolveRecommendation(e, [...ctxTokens(a), ...info.tokens]);
+    if (r.via === 'na') continue;
+    const used = optionsUsed(e, info.labels);
+    const pickText = r.via === 'when' ? r.why : (e.recommend?.default || '');
+    const pickL = pickText.toLowerCase();
+    const defL = (e.recommend?.default || '').toLowerCase();
+    // identity matching runs on detect-row LABEL HEADS with word boundaries — labels
+    // are precise by design where option prose is not ("toast-message"'s head 'toast'
+    // must not match the word "Toasts" in a clause; 'metro' must match "Metro (+…")
+    const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const labelIn = (label, text) => {
+      const h = normName(label).split(' ').find((w) => w.length > 2);
+      return Boolean(h) && new RegExp(`\\b${esc(h)}\\b`).test(text);
+    };
+    const usedLabels = [...info.labels];
+    // a when-clause endorsing the incumbent names it in its CONTEXT half ("already on
+    // axios → keep it") — test ctx+choice, not the choice alone
+    const usedInPick = usedLabels.some((l) => labelIn(l, `${(r.ctx || '').toLowerCase()} ${pickL}`));
+    const usedInDefault = usedLabels.some((l) => labelIn(l, defL));
+    // version-row guard: "target 0.86" is not a swap for a repo already on 0.86
+    const usedVer = usedLabels.join(' ').match(/\d+\.\d+/)?.[0];
+    const alreadyAtPick = Boolean(usedVer && pickText.includes(usedVer));
+    const optForText = (text) => (e.options || []).find((o) => !used.includes(o) &&
+      normName(o.name).split(' ').some((w) => w.length > 4 && new RegExp(`\\b${esc(w)}\\b`).test(text)));
+    const mkSwap = (grade, text, note) => {
+      const pickOpt = optForText(text.toLowerCase());
+      const effort = (e.migrate || []).find((m) => a.deps?.[m.from?.pkg])?.effort || null;
+      swaps.push({ entry: id, grade, yours: usedLabels.join(', '),
+        yoursAxis: used.length ? axisOf(used[0].tradeoff) : null, note: note || null,
+        pick: trunc(text, 120), axis: axisOf(pickOpt?.tradeoff || text),
+        quantified: QUANT_RE.test(pickOpt?.tradeoff || text),
+        pkgs: pkgsForPick(id, text), effort,
+        confidence: e.confidence, status: e.status,
+        field: census?.agg?.[id] ? { top: Object.entries(census.agg[id].labels).sort((x, y) => y[1] - x[1])[0], denom: census.agg[id].denom } : null });
+    };
+    if (!alreadyAtPick && (fitStr === '↗ review' || (used.length && !usedInPick && !usedInDefault))) {
+      mkSwap('swap', pickText);
+    } else if (!alreadyAtPick && r.via === 'when' && usedInPick && !usedInDefault && used.length) {
+      // the clause ENDORSES the incumbent ("already on axios → fine, don't churn") —
+      // honor the anti-churn call but still show the fresh-start head-to-head
+      mkSwap('fresh-start', e.recommend?.default || '', `corpus for your context: ${trunc(r.why, 90)}`);
+    } else if (fitStr === '✓ aligned') {
+      // upside precision (the ourpot rule — leads must survive contact):
+      // aligned entries ONLY (a ~contextual choice is deliberate — don't pitch its rivals);
+      // no <Feature> rows (parts of what's already used, not alternatives);
+      // no cross-platform lane offers (web bundlers to an RN repo)
+      const wrongLane = a.platform === 'react-native' ? /\bweb\b/i : /react[ -]native|\bRN\b/;
+      const challenger = (e.options || []).find((o) => !used.includes(o) &&
+        QUANT_RE.test(o.tradeoff || '') && !EXPERIMENTAL_RE.test(o.tradeoff || '') &&
+        !o.name.startsWith('<') && !wrongLane.test(`${o.name} ${(o.tradeoff || '').slice(0, 60)}`) &&
+        !/legacy|deprecated|superseded/i.test(`${o.name} ${o.tradeoff}`));
+      if (challenger) upside.push({ entry: id, yours: [...info.labels].join(', '),
+        option: challenger.name, axis: axisOf(challenger.tradeoff), confidence: e.confidence });
+    }
+  }
+  return { swaps, upside };
+}
+
 function printReport(a, entries) {
   if (a.missing) { console.log(`\n(skip ${a.name}: no package.json)`); return; }
   if (a.notReact) { console.log(`\n(skip ${a.name}: not a React/RN repo)`); return; }
@@ -161,6 +259,7 @@ function printReport(a, entries) {
   const adrs = checkAdrs(a.path, entries);
   const acks = acksOf(adrs);
   const reg = registryReport(a);
+  const sw = swapsAndUpside(a, detected, census);
   const expected = [...EXPECTED.always, ...(EXPECTED[a.platform] || [])];
   const gapIds = expected.filter((id) => !a.byEntry[id]);
   const resolvedPick = (e, toks) => { const r = resolveRecommendation(e, toks); return r.via !== 'default' ? { pick: r.why } : null; };
@@ -168,7 +267,7 @@ function printReport(a, entries) {
     detected: detected.map(({ id, e, info }) => ({ entry: id, labels: [...info.labels], fitStr: fit(e, info.tokens), resolved: resolvedPick(e, [...ctxTokens(a), ...info.tokens]) })),
     gaps: gapIds.map((id) => { const c = census?.agg?.[id]; return { entry: id, recommend: entries[id]?.recommend?.default || '',
       resolved: entries[id] ? resolvedPick(entries[id], ctxTokens(a)) : null, field: c ? { appCount: c.appCount, denom: c.denom } : null }; }),
-    advice, modern, sigs, traj, acks, reg, stage: a.stage });
+    advice, modern, sigs, traj, acks, reg, sw, stage: a.stage });
   if (priorities.length) {
     console.log(`\n  ⚡ TOP PRIORITIES  (impact × effort heuristic — detail in the sections below)`);
     console.log(`  ${'-'.repeat(74)}`);
@@ -188,25 +287,28 @@ function printReport(a, entries) {
     console.log(`  ${id.replace('RB-E-', '').padEnd(20)}${trunc([...info.labels].join(', '), 25).padEnd(26)}${fit(e, info.tokens).padEnd(14)}${e.status}·${e.confidence}${track}`);
   }
 
-  const diverge = detected.filter((x) => fit(x.e, x.info.tokens) !== '✓ aligned');
-  if (diverge.length) {
-    console.log(`\n  WORTH A LOOK  (current choice ≠ entry default — not necessarily wrong)`);
+  const { swaps, upside } = sw;
+  if (swaps.length || upside.length) {
+    console.log(`\n  SWAPS & UPSIDE  (aggressive, corpus-grounded head-to-heads — weigh migration honestly)`);
     console.log(`  ${'-'.repeat(74)}`);
-    for (const { id, e, info } of diverge) {
-      console.log(`  • ${id.replace('RB-E-', '')}: you use ${[...info.labels].join(', ')}`);
-      const r = resolveRecommendation(e, [...ctxTokens(a), ...info.tokens]);
-      if (r.via === 'when') console.log(`      for YOUR context (${trunc(r.ctx, 60)}): ${trunc(r.why, 145)}`);
-      else if (r.via === 'na') console.log(`      for YOUR context: N/A by design — ${trunc(r.why, 130)}`);
-      else console.log(`      encyclopedia (${e.status}·${e.confidence}): ${trunc(e.recommend?.default, 150)}`);
-      const c = census?.agg?.[id];
-      if (c) {
-        const mine = [...info.labels].map((l) => `${l} ${c.labels[l] || 0}/${c.denom}`).join(' · ');
-        const top = Object.entries(c.labels).sort((x, y) => y[1] - x[1])[0];
-        const rival = top && !info.labels.has(top[0]) ? `; most-shipped: ${top[0]} ${top[1]}/${c.denom}` : '';
-        console.log(`      the field (census): you ship ${mine}${rival}`);
-      }
+    for (const s of swaps) {
+      if (s.grade === 'fresh-start') console.log(`  ≈ ${s.entry.replace('RB-E-', '')}: you use ${s.yours} — corpus says don't churn, but a fresh start would pick differently:`);
+      else console.log(`  ⇄ ${s.entry.replace('RB-E-', '')}: you use ${s.yours} — the corpus pick beats it here:`);
+      if (s.note) console.log(`      ${trunc(s.note, 112)}`);
+      if (s.yoursAxis) console.log(`      yours: ${trunc(s.yoursAxis, 110)}`);
+      console.log(`      pick : ${trunc(s.pick, 118)}`);
+      if (s.axis && s.axis !== s.pick) console.log(`      axis : ${trunc(s.axis, 110)}`);
+      const bits = [`${s.status}·${s.confidence}`, s.effort ? `migration ${s.effort}` : null,
+        s.pkgs.length ? `npm i ${s.pkgs.slice(0, 3).join(' ')}` : null,
+        s.field?.top ? `field ships ${s.field.top[0]} ${s.field.top[1]}/${s.field.denom}` : null].filter(Boolean);
+      console.log(`      [${bits.join(' · ')}]`);
     }
+    for (const u of upside)
+      console.log(`  ↑ ${u.entry.replace('RB-E-', '')} upside (you're aligned on ${trunc(u.yours, 30)}, but unclaimed): ${trunc(u.option, 40)} — ${trunc(u.axis, 90)}`);
   }
+  const naRows = detected.filter((x) => resolveRecommendation(x.e, [...ctxTokens(a), ...x.info.tokens]).via === 'na');
+  for (const { id, e, info } of naRows)
+    console.log(`  — ${id.replace('RB-E-', '')}: ${[...info.labels].join(', ')} — N/A by design for your context (${trunc(resolveRecommendation(e, [...ctxTokens(a), ...info.tokens]).why, 100)})`);
 
   // TRAJECTORY — the time axis: migrations in flight, live vs frozen habits.
   if (traj?.git && (traj.migrations.length || Object.keys(traj.adoption).length)) {
@@ -364,8 +466,9 @@ function jsonReport(a, entries) {
   const traj = (!NO_SCAN && !NO_HISTORY) ? trajectoryScan(a.path, a.deps, entries) : null;
   const adrs = checkAdrs(a.path, entries);
   const reg = registryReport(a);
+  const sw = swapsAndUpside(a, Object.keys(a.byEntry).filter((id) => entries[id]).map((id) => ({ id, e: entries[id], info: a.byEntry[id] })), census);
   const { top: priorities, acknowledged } = computePriorities({ entries,
-    detected: detected.map((d) => ({ ...d, fitStr: d.fit })), gaps, advice, modern: modernization, sigs: sourceSignals, traj, acks: acksOf(adrs), reg, stage: a.stage });
+    detected: detected.map((d) => ({ ...d, fitStr: d.fit })), gaps, advice, modern: modernization, sigs: sourceSignals, traj, acks: acksOf(adrs), reg, sw, stage: a.stage });
   const trajectory = traj?.git ? { oldRefDate: traj.oldRefDate, migrations: traj.migrations,
     recentlyAdopted: Object.fromEntries(Object.entries(traj.adoption).filter(([, t]) => traj.now - t <= 90 * 86400)) } : null;
   return {
@@ -374,6 +477,7 @@ function jsonReport(a, entries) {
     desktopShell: a.desktopShell || null, stage: a.stage, depCount: a.depCount,
     ts: a.ts, ci: a.ci, tests: a.tests, lintfmt: a.lintfmt, hooks: a.hooks,
     priorities, detected, gaps, advice, modernization, sourceSignals, trajectory,
+    swaps: sw.swaps, upside: sw.upside,
     depHealth: reg?.health || null, preflight: reg?.preflight || null, unmapped: a.unmapped,
   };
 }

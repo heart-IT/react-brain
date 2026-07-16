@@ -94,6 +94,21 @@ teams currently run as a three-day broken branch. Network opt-in, 7-day cache
 (tools/.registry-cache.json, gitignored), offline runs untouched. First live answer:
 ourpot → RN 0.86.0 has ZERO peer blockers; blind-pairing flagged abandoned (21mo).
 
+**Swaps & upside — the aggressive layer (2026-07-16, maintainer feedback "aggressive over
+timid"):** the old "WORTH A LOOK (not necessarily wrong)" hedge is gone. Doctor now emits
+head-to-head SWAP CANDIDATES — "you use X; the corpus pick beats it here" with BOTH sides'
+tradeoffs quoted verbatim from the entry, the winning axis extracted (quantified claims
+rank higher), migration effort from migrate rules, an `npm i` line via pkgsForPick, and
+the census field position. When a when-clause endorses the incumbent ("already on axios →
+don't churn"), the anti-churn call is honored but shown as `≈ fresh-start` with what a new
+project would pick. UPSIDE goes further: even ALIGNED entries surface options carrying an
+unclaimed QUANTIFIED win (Nitro ~10x/~100x, facetpack ~36x) — precision-filtered by the
+ourpot rule (aligned-only, no <Feature> rows, no cross-platform lane offers, no
+experimental/legacy). Identity matching uses detect-label heads with word boundaries
+("toast" ≠ "Toasts"); a repo already at the pick's version is never nagged. New priority
+kinds: swap (quantified 58 / argued 46, ÷ honest M-L effort) and upside (38). Everything
+is quotable corpus text — aggressive, never invented.
+
 ## `react-brain-map.mjs` — the repo pinboard (code location for agents)
 One compact line per source file — corpus-domain tags (detector imports + per-file smell
 hits), external imports, exports, LOC — plus an inverted DOMAINS→files index. An agent

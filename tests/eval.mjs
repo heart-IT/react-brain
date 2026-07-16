@@ -358,6 +358,24 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
 }
 function doctorPath(p) { return JSON.parse(execFileSync(process.execPath, [join(ROOT, 'tools/react-brain-doctor.mjs'), p, '--json'], { encoding: 'utf8' })); }
 
+// ── swaps & upside: the aggressive layer (you use X — pick beats it on an axis) ──
+{
+  const { mkdtempSync, writeFileSync: wf, rmSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const T = mkdtempSync(join(tmpdir(), 'rb-swap-'));
+  try {
+    wf(join(T, 'package.json'), JSON.stringify({ name: 'swap-fix', version: '1.0.0', dependencies: {
+      react: '19.2.0', 'react-native': '0.86.0', axios: '1.7.0', 'react-native-toast-message': '2.4.0', expo: '57.0.0' } }));
+    const d = JSON.parse(execFileSync(process.execPath, [join(ROOT, 'tools/react-brain-doctor.mjs'), T, '--json', '--no-scan', '--no-history'], { encoding: 'utf8' }));
+    const net = d.swaps.find((s) => s.entry === 'RB-E-NETWORKING');
+    check(Boolean(net) && net.axis.length > 0 && /axios/i.test(net.yours), 'swaps: axios → head-to-head with a stated axis');
+    check(d.swaps.some((s) => s.entry === 'RB-E-POLISH'), 'swaps: toast-message diverges → swap candidate');
+    check(d.swaps.length >= 2 && d.swaps.every((s) => s.pick.length > 0), 'swaps: every candidate carries the pick text');
+    check(!d.upside.some((u) => u.option.startsWith('<')), 'upside: no <Feature> rows offered as alternatives');
+    check(d.upside.every((u) => !/\bweb\b/i.test(u.option)) || d.platform !== 'react-native', 'upside: no web-lane offers to an RN repo');
+  } finally { rmSync(T, { recursive: true, force: true }); }
+}
+
 // ── registry preflight: range parsing + feasibility + health (offline, pure) ────
 {
   const { satisfiesRange, preflightVerdict, classifyDepHealth } = await import(join(ROOT, 'tools/harvest-lib.mjs'));
