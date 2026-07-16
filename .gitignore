@@ -1,5 +1,6 @@
 node_modules/
 tools/pulse.log
+tools/harvest.log
 tools/signals.log
 tools/census.log
 .DS_Store

@@ -1,7 +1,7 @@
 {
  "_readme": [
   "The weekly cloud-harvest routine config (propose-only PR flow), ready to POST via the /schedule skill's RemoteTrigger create action.",
-  "Blocked 2026-07-16 on GitHub auth: connect GitHub at https://claude.ai/code/onboarding?magic=github-app-setup (install the app on heart-IT/react-brain), then any session can create this verbatim.",
+  "PARKED 2026-07-16 by maintainer choice — declined granting the Claude GitHub App repo access. The LOCAL equivalent runs instead: tools/install-local-harvest.sh (launchd Thu 09:00, headless claude -p on subscription, propose-only harvest/<date> branch, no push). Revive this config only if that choice changes (connect GitHub first, then POST via RemoteTrigger).",
   "Schedule: 30 3 * * 4 = Thursday 09:00 Asia/Calcutta — TWiR ships Tue, React Status Wed, so Thursday catches both fresh.",
   "Regenerate events[0].data.uuid (any lowercase v4) before POSTing."
  ],

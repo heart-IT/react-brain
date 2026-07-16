@@ -47,6 +47,12 @@ cd <repo-root> && claude -p "$(cat tools/upkeep-routine.md)"
 
 The agent should, in order:
 1. **Health** — run Tier 1 (`react-brain pulse … `) and read the deltas.
+   ► AUTONOMY: this whole Tier runs LOCALLY, unattended — `bash tools/install-local-harvest.sh`
+   (launchd, Thu 09:00 local, catches up after sleep) runs a headless `claude -p` session
+   through the /harvest skill on a propose-only `harvest/<date>` branch (no push, no GitHub
+   App access; review = `git diff main...harvest/<date>`, merge --ff-only). The cloud/PR
+   variant is PARKED by maintainer choice in tools/cloud-harvest-routine.json.
+
 2. **Growth** — start with the FIRST-PARTY layer (added 2026-07-16): `react-brain harvest
    firsthand` polls the corpus-derived watch graph (npm dist-tags/deprecation flags for
    every detect-row package, GitHub releases for every cited repo, RSS for every author
