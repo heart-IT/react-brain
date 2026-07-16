@@ -40,6 +40,7 @@ reading:
     url: "https://bun.com/blog/bun-in-rust"
     by: "Jarred Sumner (Bun)"
     what: "The largest published agent-driven port to date, and the methodology reading for agent fleets: Bun v1.4 ships a Zig→Rust rewrite of 535,496 lines executed by ~64 parallel Claude agents across 4 worktrees in ~50 workflows over 11 days (2026-05), ~$165k in API cost vs an estimated blocked engineer-year — with the load-bearing discipline that each implementer agent was paired with TWO adversarial reviewers in separate context windows told to assume the code was wrong. Results: every instrumentable memory leak resolved (one bundler workload: 609MB stable vs 6.7GB before), ~20% smaller binaries, 2–5% faster. Not RN-specific, but the concrete data point for what adversarially-reviewed agent fleets can do to a production codebase — the review-pairing pattern transfers to any repo using the tools in this entry."
+  - title: "How Expensify Uses Agent-Device for Mobile Bug Evidence and Profiling"
     url: "https://www.callstack.com/blog/how-expensify-uses-agent-device-for-mobile-bug-evidence-and-profiling"
     by: "Callstack (with Expensify)"
     what: "The first named production-adopter case study for agent-device: agents run Sentry-span measurement loops across branches and drive the React profiler mid-session via react-devtools integration, returning named components and render counts as bug evidence. What agent-in-the-debug-loop looks like at a real company, beyond vendor demos."

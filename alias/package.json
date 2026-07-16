@@ -1,6 +1,6 @@
 {
   "name": "react-brain",
-  "version": "0.7.7",
+  "version": "0.8.0",
   "description": "Engineering decisions for React & React Native, with receipts — a continuously verified corpus with doctor (repo analysis), migrate (upgrade plans), review (CI gate), and an MCP server for agents. Official alias of @heart-it/react-brain.",
   "type": "module",
   "bin": {
@@ -11,7 +11,7 @@
     "README.md"
   ],
   "dependencies": {
-    "@heart-it/react-brain": "^0.7.7"
+    "@heart-it/react-brain": "^0.8.0"
   },
   "homepage": "https://heart-it.github.io/react-brain/",
   "repository": {

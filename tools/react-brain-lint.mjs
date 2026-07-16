@@ -12,6 +12,7 @@
 
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
 import { dirname, join, resolve } from 'node:path';
 import { loadYaml, loadYamlMany, ENC_PATH, ENTRIES_DIR, GROUP_ORDER } from './detect.mjs';
 
@@ -28,6 +29,20 @@ const errors = [];
 const warns = [];
 const err = (m) => errors.push(m);
 const warn = (m) => warns.push(m);
+
+// ── strict-YAML parity with the SITE (added 2026-07-16) ─────────────────────────
+// A duplicate map key broke the pages build for DAYS while this lint stayed green:
+// the tools' loader tolerates duplicates (last-wins — it silently served a reading
+// with one item's title and another's url), the site's parser rejects them.
+// Anything the strictest downstream parser rejects must fail HERE.
+try {
+  const YAML = createRequire(import.meta.url)('yaml');
+  for (const f of [ENC_PATH, ...(existsSync(ENTRIES_DIR) ? readdirSync(ENTRIES_DIR).filter((x) => x.endsWith('.yaml')).map((x) => join(ENTRIES_DIR, x)) : [])]) {
+    const doc = YAML.parseDocument(readFileSync(f, 'utf8'));
+    for (const p of [...doc.errors, ...doc.warnings])
+      err(`${f.split('/').pop()}: strict-yaml — ${String(p.message).split('\n')[0]}`);
+  }
+} catch { /* yaml pkg unavailable (pyyaml-only env) — site CI still enforces strictness */ }
 
 // ── load ────────────────────────────────────────────────────────────────────────
 const index = loadYaml(ENC_PATH);
