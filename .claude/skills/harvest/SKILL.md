@@ -37,9 +37,11 @@ skill. One knowledge base, every session (local, resumed, or cloud-cloned).
    summary of the page.
 2. Triage each link; **fetch-verify every keep**; dedupe vs the corpus
    (`grep -rn "<url>" skills/react-brain-mentor/entries/`).
-3. Write `tools/harvest-log/<source>-<issue>.md` — EVERY external link gets a row
-   carrying its URL: `kept` (→ entry/field) / `already-held` (→ where) / `skipped`
-   (reason class + reopen signal for cap/pre-ship/too-early).
+3. Write `tools/harvest-log/<source>-<issue>.md` — line 2 is `issue: <issue-url>`
+   (CI re-runs coverage from it; firsthand manifests use `issue: firsthand`), then
+   EVERY external link gets a row carrying its URL: `kept` (→ entry/field) /
+   `already-held` (→ where) / `skipped` (reason class + reopen signal for
+   cap/pre-ship/too-early).
 4. Apply the delta to `skills/react-brain-mentor/entries/<ID>.yaml` (one file per
    entry; bump `updated:`). A NEW entry needs the full wiring: entry file (+ `detect:`
    rows) · TOC slot in `encyclopedia.yaml` · `capability_map` row in
@@ -50,6 +52,8 @@ skill. One knowledge base, every session (local, resumed, or cloud-cloned).
    supersession-IN-PROGRESS (no formal deprecation) gets a watch note, NOT a rule
    (Rive and next-auth precedents).
 5. **Gates**: `node tools/cli.mjs harvest coverage <issue-url> <manifest>` must exit 0;
+   `node tools/cli.mjs harvest verify-diff --base=main` must exit 0 (the receipts gate —
+   every added URL machine-re-verified; CI runs it on the PR too);
    `node tools/cli.mjs harvest watchlist` (re-triage recurring skips); spot-check ALL
    `cap` skips + 2 random skips from the PREVIOUS issue's manifest; then `npm test`.
 6. Commit delta + manifest + `harvest-state.json` together.

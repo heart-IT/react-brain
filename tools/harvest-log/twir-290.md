@@ -1,4 +1,5 @@
 # Harvest manifest — This Week in React #290 (2026-07-15)
+issue: https://thisweekinreact.com/newsletter/290
 
 Processed 2026-07-16 (commits b324d66 → this one). EVERY external link in the issue gets a
 disposition row CARRYING ITS URL — `kept` (where it landed), `already-held` (where it already

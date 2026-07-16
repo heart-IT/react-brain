@@ -53,7 +53,9 @@ usage: react-brain <command> [args]
                        releases, author feeds — diffed vs .firsthand-state.json;
                        --graph | --json | --manifest) · inventory <url> (every link,
                        mechanically) · coverage <url> <manifest.md> (exit 1 on
-                       unaccounted links) · watchlist (recurring skips + reopen
+                       unaccounted links) · verify-diff [--base=main] (the receipts
+                       gate: re-verify every URL the branch adds — CI-enforced on
+                       harvest PRs) · watchlist (recurring skips + reopen
                        signals across tools/harvest-log/)
   calibrate [...]      scored prediction track record: is confidence earned?
                        (--seed | --record <id> <held|weakened|overturned> | --today=…)

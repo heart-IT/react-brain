@@ -142,10 +142,19 @@ docusaurus-style sites) and diffs it against `.firsthand-state.json` (committed,
 like the other baselines). Known-entity events arrive with zero editorial filter
 and zero latency, routed by entry; newsletters demote to what they're
 irreplaceable for — unknown unknowns. Zero LLM, zero deps throughout.
+(3) "Verified" was a claim the harvester wrote — **verify-diff** makes it a
+status CI computes: every URL the branch ADDS (entries, docs, manifest `kept`
+rows) is re-verified (direct fetch → Wayback; registry receipts checked for
+existence; deprecation claims cross-checked against the firsthand npm flags),
+and changed manifests with an `issue:` header get coverage re-run.
+`.github/workflows/harvest-verify.yml` enforces it on every harvest PR — the
+guardrail under the weekly cloud routine. Shared primitives live in
+`harvest-lib.mjs`.
 ```sh
 node tools/react-brain-harvest.mjs firsthand            # poll + diff (~45s; --graph = no network)
 node tools/react-brain-harvest.mjs inventory https://thisweekinreact.com/newsletter/290
 node tools/react-brain-harvest.mjs coverage <issue-url> tools/harvest-log/twir-290.md
+node tools/react-brain-harvest.mjs verify-diff --base=main
 node tools/react-brain-harvest.mjs watchlist
 ```
 The manifest convention + spot-check discipline live in `upkeep-routine.md` (step 2).

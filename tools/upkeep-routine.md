@@ -69,13 +69,18 @@ The agent should, in order:
    - `react-brain harvest inventory <issue-url>` — the DETERMINISTIC link list (regex over
      HTML, handles unquoted minified hrefs — the quoted-only assumption once missed ~80% of
      a TWiR page). Build the manifest FROM this list, not from an LLM summary.
-   - Write `tools/harvest-log/<source>-<issue>.md`: EVERY external link gets a disposition
-     row CARRYING ITS URL — `kept` (→ which entry/field), `already-held` (→ where), or
-     `skipped` (reason class: corroboration · how-to · pre-ship · too-early · cap ·
-     unverifiable · off-scope · sponsor). `cap`/`pre-ship`/`too-early` note the reopen
+   - Write `tools/harvest-log/<source>-<issue>.md`: line 2 is `issue: <issue-url>` (lets CI
+     re-run coverage; firsthand manifests use `issue: firsthand`), then EVERY external link
+     gets a disposition row CARRYING ITS URL — `kept` (→ which entry/field), `already-held`
+     (→ where), or `skipped` (reason class: corroboration · how-to · pre-ship · too-early ·
+     cap · unverifiable · off-scope · sponsor). `cap`/`pre-ship`/`too-early` note the reopen
      signal that would flip them.
    - `react-brain harvest coverage <issue-url> <manifest.md>` must exit 0 — an unaccounted
      link is a red gate, not a silent hole.
+   - `react-brain harvest verify-diff --base=main` must exit 0 before the PR/commit — the
+     RECEIPTS gate: every URL the branch adds is machine re-verified (direct → Wayback;
+     a Wayback-only receipt must say so in the text). CI enforces the same gate on harvest
+     PRs (`.github/workflows/harvest-verify.yml`) — "verified" is computed, not claimed.
    - `react-brain harvest watchlist` — re-triage anything skipped in ≥2 issues and review
      the standing reopen signals.
    - **Spot-check (each pass):** re-adjudicate ALL `cap` skips + 2 random skips from the

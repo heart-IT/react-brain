@@ -25,10 +25,10 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadEntries } from './detect.mjs';
+import { get as libGet, pool } from './harvest-lib.mjs';
 
 const TOOLS = dirname(fileURLToPath(import.meta.url));
 const STATE_FILE = join(TOOLS, '.firsthand-state.json');
-const UA = 'react-brain-firsthand (+https://github.com/heart-it/react-brain)';
 const argv = process.argv.slice(2);
 const GRAPH_ONLY = argv.includes('--graph'), JSON_OUT = argv.includes('--json'), MANIFEST = argv.includes('--manifest');
 const TODAY = ((argv.find((a) => a.startsWith('--today=')) || '').split('=')[1]) || new Date().toISOString().slice(0, 10);
@@ -80,24 +80,8 @@ function deriveGraph() {
   return { npm: uniq(npm), github: uniq(github), blogs: uniq(blogs), globsSkipped };
 }
 
-// ── polite fetch pool ───────────────────────────────────────────────────────────
-async function pool(tasks, size = 8) {
-  const out = []; let i = 0;
-  await Promise.all(Array.from({ length: Math.min(size, tasks.length) }, async () => {
-    while (i < tasks.length) { const n = i++; out[n] = await tasks[n]().catch((err) => ({ err: String(err).slice(0, 120) })); }
-  }));
-  return out;
-}
-const get = async (url, accept, attempt = 1) => {
-  try {
-    const res = await fetch(url, { headers: { 'user-agent': UA, ...(accept ? { accept } : {}) }, redirect: 'follow', signal: AbortSignal.timeout(20000) });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.text();
-  } catch (err) {
-    if (attempt < 2 && !/HTTP 4\d\d/.test(String(err))) { await new Promise((r) => setTimeout(r, 500)); return get(url, accept, attempt + 1); }
-    throw err;
-  }
-};
+// fetch + pool live in harvest-lib; keep the old (url, accept) call shape locally
+const get = (url, accept) => libGet(url, { accept });
 const unesc = (s) => (s || '').replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#0?39;|&apos;/g, "'").replace(/&quot;/g, '"').trim();
 
 // newest-first items from an Atom or RSS feed (both appear in the wild)
@@ -239,6 +223,6 @@ if (MANIFEST && events.length) {
   const path = join(TOOLS, 'harvest-log', `firsthand-${TODAY}.md`);
   if (existsSync(path)) { console.error(`\nrefusing to overwrite ${path}`); process.exit(1); }
   const rows = [...new Set(events)].map((ev) => `| [${ev.what.replace(/\|/g, '·')}](${ev.url}) → ${ev.entries.join(', ')} | TODO |`).join('\n');
-  writeFileSync(path, `# Harvest manifest — firsthand watch (${TODAY})\n\nEvents from the corpus-derived watch graph (npm dist-tags · GitHub releases · author feeds).\nSame disposition discipline as newsletter manifests; verify before keeping.\n\n| event | disposition |\n|---|---|\n${rows}\n`);
+  writeFileSync(path, `# Harvest manifest — firsthand watch (${TODAY})\nissue: firsthand\n\nEvents from the corpus-derived watch graph (npm dist-tags · GitHub releases · author feeds).\nSame disposition discipline as newsletter manifests; verify before keeping.\n\n| event | disposition |\n|---|---|\n${rows}\n`);
   console.log(`\nwrote ${path}`);
 }

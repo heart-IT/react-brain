@@ -1,0 +1,26 @@
+# The receipts gate for harvest PRs: every URL the branch ADDS to the corpus or
+# to a manifest `kept` row is re-verified by machine (direct fetch → Wayback),
+# and changed manifests with an `issue:` header get the coverage gate re-run.
+# "Verified" stops being a claim the harvester writes and becomes a status CI
+# computes — the enforcement layer under the weekly cloud-harvest routine.
+# (npm test runs in ci.yml on every PR already; this job is only the receipts.)
+name: harvest-verify
+on:
+  pull_request:
+    paths:
+      - 'skills/react-brain-mentor/**'
+      - 'encyclopedia/**'
+      - 'tools/harvest-log/**'
+jobs:
+  receipts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: node tools/cli.mjs harvest verify-diff --base=origin/${{ github.base_ref }}
