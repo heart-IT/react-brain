@@ -110,6 +110,7 @@ The agent should, in order:
    - **Spot-check (each pass):** re-adjudicate ALL `cap` skips + 2 random skips from the
      PREVIOUS issue's manifest; corrections are committed amendments. (First run corrected
      2 of 2 examined reasons and reopened the react-compiler-explained + thoughtbot keeps.)
+   - **Bench gold compounds automatically:** `harvest prep` freezes each issue's fixture at prep time (pre-harvest corpus by construction). Re-run `harvest bench` monthly across fixtures as n grows — that is when advocate-pass value and cheaper-model swaps become answerable.
    - **Model/prompt changes to the harvester get benched first:** `react-brain harvest
      bench --model=<id>` replays a frozen issue against its adjudicated manifest (judgment
      score; false skips ×3; corpus context pinned pre-harvest). Baseline on record:

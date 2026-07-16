@@ -88,7 +88,23 @@ if (mode === 'firsthand') {
   const md = `# Harvest manifest — ${src.name} #${issue} (prepped ${new Date().toISOString().slice(0, 10)})\nissue: ${url}\n\nPre-triaged by \`harvest prep\`: ${rows.length} external links · ${rows.length - todo.length} pre-dispositioned (corpus + prior-manifest cross-ref) · **${todo.length} TODO**.\nJudge ONLY the TODO rows; carried rows re-open only on their reopen signals. Advocate pass, verify-diff and coverage gates apply as usual.\n\n| item | disposition |\n|---|---|\n${[...todo, ...rows.filter((r) => r.pre !== 'todo')].map(line).join('\n')}\n`;
   if (args.includes('--stdout')) console.log(md);
   else if (existsSync(out)) { console.error(`refusing to overwrite ${out} — use --stdout to preview`); process.exit(1); }
-  else { writeFileSync(out, md); console.log(`wrote ${out} — ${todo.length} TODO of ${rows.length} links (${rows.length - todo.length} pre-dispositioned)`); }
+  else {
+    writeFileSync(out, md);
+    console.log(`wrote ${out} — ${todo.length} TODO of ${rows.length} links (${rows.length - todo.length} pre-dispositioned)`);
+    // BENCH GOLD AUTO-FREEZE: prep runs BEFORE any corpus edits, so the corpus is
+    // pre-harvest by construction — exactly the contamination guard the triage
+    // bench needs. Every prepped issue becomes a future judgment test case for free.
+    const fixDir = join(TOOLS, '../tests/fixtures/harvest');
+    const fix = join(fixDir, `${PREFIX[key] || key}-${issue}-inventory.json`);
+    if (!existsSync(fix)) {
+      const entriesAll = Object.values(loadEntries());
+      const corpus = { commit: 'pre-harvest (frozen at prep time)', entries: entriesAll.length,
+        index: entriesAll.map((e) => `${e.id} — ${e.topic} [${e.category}] (${(e.reading || []).length + (e.watching || []).length} readings held)`),
+        held: [...new Set(entriesAll.flatMap((e) => [...(e.sources || []), ...(e.reading || []).map((r) => r.url), ...(e.watching || []).map((w) => w.url), ...(e.migrate || []).flatMap((m) => m.receipts || [])]).values())].filter(Boolean) };
+      writeFileSync(fix, JSON.stringify({ source: key, issue, url, captured: new Date().toISOString().slice(0, 10), gold: `tools/harvest-log/${PREFIX[key] || key}-${issue}.md`, corpus, links: links.map(({ url: u, text }) => ({ url: u, text })) }, null, 1) + '\n');
+      console.log(`froze bench fixture ${fix.split('/').slice(-1)[0]} (gold compounds — re-bench monthly: harvest bench --fixture=${PREFIX[key] || key}-${issue})`);
+    }
+  }
 } else if (mode === 'inventory') {
   if (!args[0]) { console.error('usage: harvest inventory <issue-url>'); process.exit(1); }
   const links = extractLinks(await fetchPage(args[0]), args[0]);
