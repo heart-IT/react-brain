@@ -20,7 +20,7 @@ disagreement, not a silent miss. Reason classes: corroboration · how-to (defer_
 | "useOptimistic Already Handles Rollback" (dev.to) | skipped: how-to, single-API behavior note |
 | "HTMX and Web Components Instead of React" | skipped: cap — ALT-FRAMEWORKS already holds 3 "do you need React" pieces (MDN/Lit, nanotags, Svelte) |
 | "Async hydration in Preact" (jovidecroock) | skipped: cap + narrow — Preact internals; Preact is one option row in REACT-CORE |
-| "SolidJS 2.0: A React Developer's First Look" | skipped: cap — ALT-FRAMEWORKS full; revisit if Solid 2.0 recurs across sources |
+| "SolidJS 2.0: A React Developer's First Look" | skipped: pre-ship — Solid 2.0 is NOT released (npm 2026-07-16: latest 1.9.14, next 2.0.0-beta.18); reason corrected from `cap` on spot-check. Revisit at 2.0 stable |
 | "Exporting Next.js Server Traces with OpenTelemetry" (Sentry) | skipped: how-to (setup guide) |
 | React Router 8.2 | already-held: RB-E-NAV option row cites 8.2.0 + migrate rules |
 | Storybook 10.5 (Agentic Review, `storybook ai` MCP) | skipped: minor release; watch — if the agent-plugin direction recurs, RB-E-AI-DEVTOOLS is the home |
@@ -40,7 +40,7 @@ disagreement, not a silent miss. Reason classes: corroboration · how-to (defer_
 | Margelo "Rewriting Rive RN with Nitro Modules" | already-held: RB-E-ANIMATION reading + option row + detect rows (added 2026-07-13, Margelo blog pass — pre-dates this issue) |
 | Expo "nesting tabs and drawers with Expo Router" | skipped: how-to |
 | "Notification Actions in Expo" (codewithbeto) | skipped: how-to; no notifications entry (no recurring selection signal yet) |
-| thoughtbot "native stack navigation + iOS 26 surprise" | skipped: cap + transition-period (UIDesignRequiresCompatibility is a temporary opt-out); NAV at 6 readings — flag if iOS-26 Liquid Glass migration recurs |
+| thoughtbot "native stack navigation + iOS 26 surprise" | skipped: UNVERIFIABLE (WebFetch 403 + browser-UA curl → Cloudflare JS wall, 2026-07-16 — no-unverified-URL rule) + cap (NAV at 7 readings). Facet note: no NAV reading covers the JS-stack-vs-native-stack choice — reopen if a FETCHABLE piece on it (or iOS-26 Liquid Glass nav adaptation) recurs |
 | Expo "Moving away from @expo/vector-icons" | already-held: RB-E-SVG deprecation fact + migrate rule (SDK-56 changelog pass, 2026-07-09) |
 | Expo Demos gallery | skipped: showcase, not selection knowledge |
 | react-native-screens 4.26 (Tabs stable, RN 0.84+) | **kept** → RB-E-NAV note + source |
