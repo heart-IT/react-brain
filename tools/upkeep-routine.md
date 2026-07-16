@@ -53,6 +53,16 @@ The agent should, in order:
    Native Weekly, React Weekly),
    extract durable selection facts + canonical articles, **fetch-verify every URL**, map via the
    mentor's `capability_map`/`assessment_dimensions` (or flag a GAP). De-dupe vs existing.
+
+   **Disposition manifest (MANDATORY per issue, learned 2026-07-16):** write
+   `tools/harvest-log/<source>-<issue>.md` giving EVERY item/link in the issue a disposition —
+   `kept` (→ which entry/field), `already-held` (→ where), or `skipped` (reason class:
+   corroboration · how-to · pre-ship · too-early · cap · off-scope · sponsor). Triage judgment
+   is fallible; the manifest is what makes it REVIEWABLE — a wrong skip becomes a visible
+   disagreement the maintainer can overturn (see twir-290.md: a cap skip on the
+   react-compiler-explained deep-dive was overturned on review) instead of a silent miss.
+   Commit the manifest WITH the delta. `cap`/`too-early` skips are re-openable: note what
+   recurrence signal would flip them.
    Strong TALKS/PODCASTS/VIDEOS go in the entry's optional `watching:` list (same shape as
    `reading`; verify the episode/video page exists + corroborates — never annotate unwatched
    content beyond what the verified page states).

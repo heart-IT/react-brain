@@ -74,6 +74,12 @@ reading:
     url: "https://dev.to/playfulprogramming/two-react-design-choices-developers-dont-like-but-cant-avoid-d6g"
     by: "Ryan Carniato (Solid.js)"
     what: "A competing-framework author argues deferred state commits and effect dependency arrays are forced by async UI, not arbitrary — even signal-based frameworks hit the same wall. An unusually credible mental model for React's most-griped-about choices."
+  - title: "The React Compiler (explained via its actual output)"
+    url: "https://neciudan.dev/react-compiler-explained"
+    by: "Neci Dan (neciudan.dev)"
+    what: "The what-does-it-actually-emit explainer the other compiler readings skip: a TodoList compiled into cache-slot code (_c() slots + reference-equality checks — a custom caching system, NOT inserted useMemo/useCallback), dependencies inferred from code FLOW rather than manual arrays, memoization applied where hooks are prohibited (behind early returns), and why identical cached JSX objects stop child re-renders without memo wrappers. Plus a staged adoption path (gradual gating, canary) grounded in Meta/Sanity/Wakelet production numbers. Pairs with the saschb2b retrospective (adoption/bail-outs) — this one is the transformation mechanics."
+    claim: "You hand-memoize without the React Compiler — this shows the emitted cache-slot output that replaces useMemo/useCallback (and memoizes where hooks can't, e.g. behind early returns); the concrete before/after for adopting it."
+    applies_when: { absent_deps: ["babel-plugin-react-compiler", "react-compiler-runtime"] }
   - title: "React Compiler at Eighteen Months"
     url: "https://saschb2b.com/blog/react-compiler-year-in-review"
     by: "Sascha Becker"
