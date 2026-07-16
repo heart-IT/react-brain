@@ -266,7 +266,7 @@ protocol:
   phase_3_encyclopedia:
     description: "Match the project's ecosystem choices against the react-brain encyclopedia (BREADTH). MP-VETTED-OVER-PROMOTION."
     steps:
-      - "Read encyclopedia.yaml (the INDEX: meta + `groups` TOC + mentor_hints) + `encyclopedia_awareness.capability_map` — then read ONLY the relevant entries/<ID>.yaml files (entries are one-per-file since 2026-07-06); do NOT scan all 42. Two reach paths cover every entry."
+      - "Read encyclopedia.yaml (the INDEX: meta + `groups` TOC + mentor_hints) + `encyclopedia_awareness.capability_map` — then read ONLY the relevant entries/<ID>.yaml files (entries are one-per-file since 2026-07-06); do NOT scan all 43. Two reach paths cover every entry."
       - "CROSS-CUTTING domains: for each in-scope assessment_dimension that has an encyclopedia_cat, find the matching entry (arch, react-core, state/data, perf/lists, styling, types, nav, a11y, testing, dx, build, observability, security, native)."
       - "CAPABILITY domains: for each dependency/feature detected in Phase 0, look it up in `capability_map` and pull the matching entry — this is how media/payments/editors/charts/i18n/desktop/keyboard/meta-frameworks/etc. (which no dimension names) get surfaced. Skip a capability entry whose domain the project doesn't have (efficiency)."
       - "Compare the project's current choice (Phase 0) against the entry's context-appropriate recommendation for this project's stage + platform + constraints."
@@ -334,7 +334,7 @@ encyclopedia_awareness:
   index: "encyclopedia.yaml (this directory)"
   what_it_covers: "BREADTH — ecosystem selection + cross-cutting patterns across the React/RN world. NOT depth rules owned by knowledge skills."
   discovery_order:
-    - "1. Read encyclopedia.yaml (the INDEX: `groups` table of contents + mentor_hints) + `capability_map` below — then open ONLY the ≤3 relevant entries/<ID>.yaml files (one file per entry); do NOT read all 42. If the react-brain MCP server is connected, `capsules` + `query` do this even cheaper."
+    - "1. Read encyclopedia.yaml (the INDEX: `groups` table of contents + mentor_hints) + `capability_map` below — then open ONLY the ≤3 relevant entries/<ID>.yaml files (one file per entry); do NOT read all 43. If the react-brain MCP server is connected, `capsules` + `query` do this even cheaper."
     - "2. Two routes reach every entry: (a) cross-cutting domains via assessment_dimensions.encyclopedia_cat; (b) feature/capability domains via `capability_map` (detected dep/need → entry). Never skip a domain just because no dimension names it."
     - "3. For a matched entry, cite `recommend.default` (no-context pick) + `recommend.when` (context → choice). `options` are the candidate set; `note`/`sources` carry verified facts. As of 2026-06-25 every entry is `drafted`+ (0 stubs), so breadth is fully citable; 24 are `reviewed` with long-form encyclopedia/<id>.md."
     - "4. `reading` (curated, fetch-verified deep-dive articles) is for the report's Suggested-learning-path section ONLY — do not load it for the recommend decision (keeps Phase 3 lean)."
@@ -360,6 +360,7 @@ encyclopedia_awareness:
     - { entry: RB-E-PAYMENTS, signal: "in-app purchases / subscriptions (react-native-purchases/RevenueCat, react-native-iap, expo-iap, react-native-wallet)" }
     - { entry: RB-E-BROWNFIELD, signal: "RN embedded in an existing native app, super-app, or micro-frontends (react-native-brownfield, granite, rock)" }
     - { entry: RB-E-GAMES, signal: "games / 3D / AR/VR / real-time interactive rendering (skia game loop, react-native-godot, react-native-wgpu, @react-three/fiber, @reactvision/react-viro, react-native-visionos)" }
+    - { entry: RB-E-AUTH, signal: "authentication / identity (better-auth, next-auth / @auth/*, @clerk/*, react-native-auth0, expo-auth-session, @react-native-firebase/auth) or a login/SSO requirement" }
     - { entry: RB-E-NETWORKING, signal: "HTTP client layer (axios, ky, ofetch, react-native-nitro-fetch) or streaming/prefetch networking needs" }
     - { entry: RB-E-POLISH, signal: "UX polish primitives (sonner-native, react-native-toast-message, burnt, expo-haptics, react-native-haptic-feedback, react-native-bootsplash, expo-splash-screen, @nandorojo/galeria)" }
     - { entry: RB-E-ALT-FRAMEWORKS, signal: "team weighing leaving React/RN, or comparing Flutter / Lynx / Valdi / Kotlin-Multiplatform / Web Components" }

@@ -1,0 +1,56 @@
+id: RB-E-AUTH
+topic: "Authentication & identity — sessions, OAuth, managed vs self-hosted"
+category: auth
+group: app-architecture
+status: drafted
+confidence: low
+platforms: [react, react-native]
+options:
+  - { name: "Better Auth", tradeoff: "TS-first, framework-agnostic, self-hosted (your DB owns the users); 2FA/passkeys/organizations via plugins; acquired Auth.js and JOINED VERCEL 2026-07 with a stated open-source + framework-agnostic commitment; 1.6.x, very active" }
+  - { name: "Auth.js / NextAuth (maintenance)", tradeoff: "the long-time Next.js default — now under Better Auth's stewardship: security + bug fixes continue but the stated path is transitioning users to Better Auth; registry shows the cadence (@auth/core last publish 2025-10)" }
+  - { name: "Clerk", tradeoff: "managed auth SaaS with prebuilt React components (sign-in, orgs, MFA) + a first-class Expo SDK (@clerk/clerk-expo); fastest to ship; per-MAU pricing + vendor dependency" }
+  - { name: "Auth0 (react-native-auth0)", tradeoff: "the enterprise IdP — SSO/SAML/federation; RN SDK active (v5.9, 2026-07, adds passwordless OTP for database connections)" }
+  - { name: "backend-bundled — Supabase Auth / Firebase Auth", tradeoff: "already included with the backend (@react-native-firebase/auth on RN); use it rather than bolting on a second identity system" }
+  - { name: "expo-auth-session (DIY)", tradeoff: "Expo's browser-based OAuth/OIDC primitive — the hand-rolled lane on RN; you own token/session handling (Keychain via RB-E-STORAGE) and the correctness burden (see reading)" }
+recommend:
+  default: "Self-hosted TypeScript auth → Better Auth; managed auth with prebuilt UI and orgs/MFA out of the box → Clerk (web + Expo SDKs). If the backend already bundles auth (Supabase / Firebase), use that instead of adding a second identity system. Lightly vetted as an entry (confidence: low) — though the options themselves are mature."
+  when:
+    - "new self-hosted / own-database auth → Better Auth (TS-first, framework-agnostic; 2FA/passkeys/orgs via plugins)"
+    - "already on NextAuth / Auth.js → maintenance under Better Auth's stewardship (security + bug fixes continue); plan the migration to Better Auth rather than deepening the investment"
+    - "managed service / fastest ship / prebuilt sign-in UI → Clerk (per-MAU pricing; @clerk/clerk-expo on RN)"
+    - "enterprise SSO / SAML / an existing IdP → Auth0 (react-native-auth0 on RN)"
+    - "backend is Supabase or Firebase → its bundled auth"
+    - "hand-rolling OAuth/sessions (expo-auth-session or custom) → read the Copenhagen Book first; session tokens live in Keychain/Keystore (RB-E-STORAGE), never AsyncStorage (RB-E-SECURITY)"
+    - "P2P / Holepunch app → no auth server: identity is keypair-based → RB-E-P2P"
+    - "agent-facing product (AI agents authenticating to your app) → watch Agent Auth Protocol (Better Auth × Vercel) — early, not a bet yet"
+note: >
+  NEW entry (2026-07-16), triggered by TWiR #290: Better Auth JOINED VERCEL (2026-07-07,
+  verified vs the first-party announcement — open-source + framework/platform-agnostic
+  commitment stated; their Agent Auth Protocol work continues under Vercel). This completes
+  a stewardship consolidation: Better Auth had ALREADY acquired Auth.js/NextAuth and commits
+  to maintaining it (security/bugs) while transitioning users toward Better Auth. The
+  registry corroborates the two lanes (2026-07-16): better-auth 1.6.23 active vs @auth/core
+  last published 2025-10, next-auth 4.24.x 2026-04. DELIBERATE NO-MIGRATE-RULE (same policy
+  as ANIMATION's Rive case): Auth.js is NOT formally deprecated — add the next-auth →
+  better-auth migrate rule if/when a formal deprecation or EOL lands; until then it is a
+  when-clause, not churn. Auth was a domain GAP — no entry covered it among the prior 42.
+defer_to_skill: null
+doc: null
+updated: 2026-07-16
+reading:
+  - title: "The Copenhagen Book"
+    url: "https://thecopenhagenbook.com/"
+    by: "Pilcrow (Lucia Auth author)"
+    what: "The free, open, community-maintained guideline for implementing auth from first principles — server-side tokens, sessions, password auth + reset, email verification, OAuth, MFA, WebAuthn, CSRF, open redirects — meant to be read alongside the OWASP cheat sheets. THE canonical reference when you hand-roll any part of auth instead of adopting a library above; its author sunset the Lucia auth library INTO this book, the lesson being that auth is a design problem more than a dependency."
+sources:
+  - "https://better-auth.com/blog/better-auth-joins-vercel"
+  - "https://registry.npmjs.org/better-auth/latest"
+  - "https://registry.npmjs.org/@auth%2Fcore/latest"
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "better-auth", label: "Better Auth", token: "better auth" }
+  - { pkg: "next-auth", label: "NextAuth / Auth.js (maintenance)", token: "auth.js" }
+  - { pkg: "@auth/*", label: "Auth.js (maintenance)", token: "auth.js" }
+  - { pkg: "@clerk/*", label: "Clerk", token: "clerk" }
+  - { pkg: "react-native-auth0", label: "Auth0", token: "auth0" }
+  - { pkg: "expo-auth-session", label: "expo-auth-session (DIY OAuth)", token: "expo-auth-session" }
+  - { pkg: "@react-native-firebase/auth", label: "Firebase Auth", token: "firebase" }

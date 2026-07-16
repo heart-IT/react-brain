@@ -6,13 +6,13 @@
     "`react-brain lint` cross-checks each `count` against encyclopedia.yaml sources_digested — they must match.",
     "Narrative harvest history (what each pass changed, process learnings) stays in the maintainer's memory ledger."
   ],
-  "updated": "2026-07-13",
+  "updated": "2026-07-16",
   "sources": {
     "this-week-in-react": {
       "name": "This Week in React",
       "archive": "https://thisweekinreact.com/newsletter",
-      "last_processed": "#289",
-      "count": 23,
+      "last_processed": "#290",
+      "count": 24,
       "cadence": "weekly",
       "notes": "issue pages fetch directly at /newsletter/<n>"
     },

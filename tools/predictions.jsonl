@@ -51,3 +51,4 @@
 {"k":"O","id":"RB-E-NAV","outcome":"weakened","on":"2026-07-09","note":"TanStack holds type-safe-SPA axis (RR typegen framework-mode-only); but RR8 8.2.0, 50M/wk, absent from when-clauses"}
 {"k":"O","id":"RB-E-STYLING","outcome":"weakened","on":"2026-07-09","note":"challenge: s-c v7 prerelease active but still runtime (advice holds); NativeWind TW4 skew caveat; dead react-native-tailwind pkg row fixed"}
 {"k":"O","id":"RB-E-MEDIA","outcome":"weakened","on":"2026-07-09","note":"challenge: v5 pin ahead of reality — 85% installs on frozen v4, open iOS26/race crashes; ship-now camera caveat added"}
+{"k":"P","id":"RB-E-AUTH","claim":"Self-hosted TypeScript auth → Better Auth; managed auth with prebuilt UI and orgs/MFA out of the box → Clerk (web + Expo SDKs). If the backend already bundles auth (Supabase / Firebase), use that inst","confidence":"low","category":"auth","asserted":"2026-07-16","check_by":"2026-10-16"}

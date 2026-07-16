@@ -16,8 +16,14 @@ recommend:
     - "depth audit (contrast, intrinsics, dynamic type) → design-systems-governance"
 defer_to_skill: design-systems-governance
 doc: null
-updated: 2026-06-25
+updated: 2026-07-16
 reading:
+  - title: "The Siren Song of ariaNotify()"
+    url: "https://css-tricks.com/the-siren-song-of-arianotify/"
+    by: "Mat Marquis (CSS-Tricks)"
+    what: "The coming primitive for this entry's 'announce dynamic updates' facet: ariaNotify() (WAI-ARIA 1.3) pushes screen-reader announcements from JS — document.ariaNotify(str, {priority}) — replacing the hidden aria-live-region hacks whose timing/support failures the piece catalogs. Two durable caveats: it ships in Firefox ONLY as of mid-2026 (keep aria-live fallbacks), and it invites alert()-style overuse — narrating what existing semantics already convey interrupts screen-reader users who were navigating fine."
+    claim: "You announce dynamic updates to screen readers — ariaNotify() (WAI-ARIA 1.3) is the coming replacement for aria-live hacks, but it's Firefox-only as of mid-2026 and invites alert()-style over-narration; keep semantic signals first."
+    applies_when: { platforms: [react] }
   - title: "Accessibility in React: Common Mistakes and How to Fix Them"
     url: "https://certificates.dev/blog/accessibility-in-react-common-mistakes-and-how-to-fix-them"
     by: "Aurora Scharff"

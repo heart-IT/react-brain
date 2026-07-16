@@ -39,7 +39,10 @@ note: >
   the same Rust bundler behind Vite 8 — directly to the RN side; remote-JS Chrome debugging was
   removed in RN 0.79 (use RN DevTools). Rollipop verified vs its repo 2026-06-30 (early-alpha, not production).
   WEB TOOLCHAIN: a Rust wave — Vite 8 on Rolldown (1.0; ~10–30x Rollup), the Oxc family
-  (Oxlint/Oxfmt), Bun; Cloudflare acquired VoidZero (Vite/Vitest/Rolldown/Oxc) — tools stay MIT.
+  (Oxlint/Oxfmt), and now Bun itself: v1.4 ships the Zig→Rust rewrite (2026-07, verified vs the
+  Bun post — ~20% smaller binaries, every instrumentable memory leak resolved; the agentic-port
+  story behind it lives in RB-E-AI-DEVTOOLS reading); Cloudflare acquired VoidZero
+  (Vite/Vitest/Rolldown/Oxc) — tools stay MIT.
   Vite+ BETA (2026-07-02, verified vs the VoidZero announcement; 2nd signal after TWiR #289's
   watch flag): the consolidation made product — one CLI over the whole VoidZero stack, MIT,
   framework-agnostic; beta, so watch rather than migrate existing multi-tool setups yet.
@@ -50,7 +53,7 @@ note: >
   the Rspack 2.1 blog) — Rolldown's pullback is a Rolldown-integration choice, not a dead Rust port.
 defer_to_skill: null
 doc: "RB-E-BUILD.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-13
+updated: 2026-07-16
 watching:
   - title: "How React Native Builds Actually Work (APK, AAB, IPA, APP)"
     url: "https://www.youtube.com/watch?v=1o0pEjYGUWM"

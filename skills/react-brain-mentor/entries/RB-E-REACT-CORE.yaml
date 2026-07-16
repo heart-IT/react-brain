@@ -25,7 +25,10 @@ note: >
   2026-07-06) — while Rolldown pulled ITS integration over napi binary size (that caveat stands,
   see RB-E-BUILD). React moved
   to the independent React Foundation (Linux Foundation, Feb 2026; exec director Seth Webster);
-  repos moved facebook → react org (corroborated across React Status #464/#478 + TWiR). RSC/
+  repos moved facebook → react org (corroborated across React Status #464/#478 + TWiR). The
+  governance is now concrete (2026-07-16, verified vs react.dev/community/team): work is split
+  into 7 WORKING GROUPS (Server, DOM, Fiber, Docs & Community, Compiler, DevX, React Native),
+  each seated on a Leadership Council that coordinates direction. RSC/
   Server Functions are a WEB concern (not RN) with an active DoS CVE history (see RB-E-SECURITY).
   Compiler-1.0 + RSC-DoS verified this session; other rows from release history + newsletters.
   Adversarially stress-tested 2026-06-25 (SURVIVES, caveats applied): 19.2 is still the stable line
@@ -33,7 +36,7 @@ note: >
   enabling the Compiler — useMemo/useCallback remain valid escape hatches.
 defer_to_skill: engineering-principles
 doc: "RB-E-REACT-CORE.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-10
+updated: 2026-07-16
 reading:
   - title: "The hidden cost of React.Activity"
     url: "https://www.peterp.me/articles/hidden-cost-of-react-activity"
@@ -84,6 +87,7 @@ detect_source:   # source-level signals owned by this entry (regex over repo sou
     hint: "React Compiler 1.0 (stable) memoizes automatically — adopt it for new code instead of growing the hand-memoization surface; KEEP existing useMemo/useCallback when enabling (removal can change output — see reading: 'React Compiler at Eighteen Months')"
     unless_dep: ["babel-plugin-react-compiler", "react-compiler-runtime"]
 sources:
+  - "https://react.dev/community/team"
   - "https://react.dev/blog/2025/10/07/react-compiler-1"
   - "https://react.dev/blog/2025/12/11/denial-of-service-and-source-code-exposure-in-react-server-components"
   - "https://rspack.rs/blog/announcing-2-1"

@@ -41,9 +41,12 @@ note: >
   over the other — which raises the cost of switching lanes later; weigh it at project setup.
   Stress-tested 2026-07-10 (WEAKENED → React Router when-clause added; the TanStack type-safe-SPA
   slot SURVIVED the 2.3x-downloads attack — RR's typegen is framework-mode-only).
+  UPDATE 2026-07-16 (TWiR #290, verified vs the release): react-native-screens 4.26 marks the
+  Tabs API STABLE (requires RN 0.84+; FormSheet + Stack-v5 toolbar menus stay experimental) —
+  the native layer under RN8's native bottom tabs firms up while RN8 itself remains pre-stable.
 defer_to_skill: null
 doc: "RB-E-NAV.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-13
+updated: 2026-07-16
 reading:
   - title: "Reverse Engineering ChatGPT Web: How OpenAI Built for a Billion Users"
     url: "https://performance.dev/chatgpt"
@@ -84,6 +87,7 @@ sources:
   - "https://reactrouter.com/"
   - "https://expo.dev/changelog/sdk-56"
   - "https://reactnavigation.org/blog/2026/07/08/react-navigation-8.0-july-progress/"
+  - "https://github.com/software-mansion/react-native-screens/releases/tag/4.26.0"
 detect_source:   # source-level signals owned by this entry (regex over repo source)
   - pattern: "window\\.location\\.(?:href\\s*=|assign\\()"
     min_files: 2

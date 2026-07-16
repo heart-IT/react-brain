@@ -12,7 +12,7 @@
 # sources (entries with `sources:` + `updated:`). Library picks in `recommend`
 # are editorial synthesis, not vendor claims.
 #
-# STATE (2026-07-09): 42 entries across 6 groups, ALL `drafted`+ (0 stubs) — breadth is fully
+# STATE (2026-07-16): 43 entries across 6 groups, ALL `drafted`+ (0 stubs) — breadth is fully
 # citable. 24 are `reviewed` with long-form encyclopedia/<id>.md. Every entry carries curated,
 # fetch-verified `reading`. Reachability: cross-cutting domains via the mentor's
 # assessment_dimensions; feature/capability domains via the mentor's `capability_map`.
@@ -68,8 +68,8 @@ encyclopedia:
   one_liner: "A curated encyclopedia of the React + React Native ecosystem — what to use, when, and why."
   content_dir: "../../encyclopedia"   # long-form entries land here as markdown, named <id>.md
   authoring_guide: "diataxis-documentation"
-  updated: 2026-07-13
-  sources_digested: ["React Native Rewind ×48", "This Week in React ×23", "React Status ×23", "React Digest ×17", "Native Weekly ×6", "React Weekly ×21"]
+  updated: 2026-07-16
+  sources_digested: ["React Native Rewind ×48", "This Week in React ×24", "React Status ×23", "React Digest ×17", "Native Weekly ×6", "React Weekly ×21"]
 
 # ------------------------------------------------------------------------------
 # GROUPS — table of contents. The mentor navigates by group, not by scanning all.
@@ -80,7 +80,7 @@ groups:
     entries: [RB-E-REACT-CORE, RB-E-RN-VERSIONS, RB-E-TYPESCRIPT]
   - id: app-architecture
     label: "App architecture — state, data, routing, frameworks"
-    entries: [RB-E-STATE, RB-E-DATA, RB-E-P2P, RB-E-NAV, RB-E-META-FRAMEWORKS, RB-E-FORMS, RB-E-NETWORKING, RB-E-CROSSPLATFORM, RB-E-DESKTOP]
+    entries: [RB-E-STATE, RB-E-DATA, RB-E-P2P, RB-E-NAV, RB-E-META-FRAMEWORKS, RB-E-FORMS, RB-E-AUTH, RB-E-NETWORKING, RB-E-CROSSPLATFORM, RB-E-DESKTOP]
   - id: ui
     label: "UI — styling, components, animation, lists, a11y, i18n, charts"
     entries: [RB-E-STYLING, RB-E-COMPONENT-LIBS, RB-E-ANIMATION, RB-E-LISTS, RB-E-A11Y, RB-E-I18N, RB-E-CHARTS, RB-E-EDITORS, RB-E-SVG, RB-E-MAPS, RB-E-CALENDARS, RB-E-POLISH]
