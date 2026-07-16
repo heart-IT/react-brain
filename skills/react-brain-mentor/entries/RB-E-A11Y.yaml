@@ -2,7 +2,7 @@ id: RB-E-A11Y
 topic: "Accessibility across web & native"
 category: accessibility
 group: ui
-status: drafted
+status: reviewed   # long-form entry written + source-checked
 confidence: medium
 platforms: [react, react-native]
 options:
@@ -15,8 +15,11 @@ recommend:
     - "React Native → accessibilityRole/Label + screen-reader focus"
     - "depth audit (contrast, intrinsics, dynamic type) → design-systems-governance"
 defer_to_skill: design-systems-governance
-doc: null
+doc: "RB-E-A11Y.md"   # long-form Explanation entry in content_dir
 updated: 2026-07-16
+sources:
+  - "https://css-tricks.com/the-siren-song-of-arianotify/"
+  - "https://certificates.dev/blog/accessibility-in-react-common-mistakes-and-how-to-fix-them"
 reading:
   - title: "The Siren Song of ariaNotify()"
     url: "https://css-tricks.com/the-siren-song-of-arianotify/"

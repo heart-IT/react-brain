@@ -2,7 +2,7 @@ id: RB-E-I18N
 topic: "Internationalization (i18n)"
 category: i18n
 group: ui
-status: drafted
+status: reviewed   # long-form entry written + source-checked
 confidence: medium
 platforms: [react, react-native]
 options:
@@ -17,8 +17,8 @@ recommend:
     - "bundle-size-sensitive → next-intl / Lingui (AOT-compiled messages)"
     - "need maximum plugin ecosystem / RN + web parity → i18next"
 defer_to_skill: null
-doc: null
-updated: 2026-06-25
+doc: "RB-E-I18N.md"   # long-form Explanation entry in content_dir
+updated: 2026-07-16
 sources:
   - "https://github.com/amannn/next-intl/releases/tag/v4.8.0"
   - "https://github.com/nkzw-tech/fbtee"

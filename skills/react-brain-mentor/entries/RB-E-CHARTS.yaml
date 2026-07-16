@@ -2,7 +2,7 @@ id: RB-E-CHARTS
 topic: "Charting & data visualization"
 category: data-viz
 group: ui
-status: drafted
+status: reviewed   # long-form entry written + source-checked
 confidence: low
 platforms: [react, react-native]
 options:
@@ -20,8 +20,8 @@ recommend:
     - "heavy Skia/Reanimated perf → react-native-best-practices"
 note: "Library picks are reasonable defaults but lightly vetted. Ignore react-native-livechart's satirical 'degen mode' framing — not a selection axis. FRESHNESS (signals, 2026-07-10): the ACTIVE Victory line is victory-native XL (41.26, 2026-06, verified vs npm) — the web `victory` package moves slowly; d3's 2-year publish gap is maturity, not abandonment (it's the stable substrate under visx)."
 defer_to_skill: react-native-best-practices  # Skia/Reanimated render-perf depth
-doc: null
-updated: 2026-07-09
+doc: "RB-E-CHARTS.md"   # long-form Explanation entry in content_dir
+updated: 2026-07-16
 reading:
   - title: "Introducing visx from Airbnb"
     url: "https://medium.com/airbnb-engineering/introducing-visx-from-airbnb-fd6155ac4658"
