@@ -76,6 +76,12 @@ reading:
     what: "The redirect-after-login problem: a deep link that lands on the login screen should still deliver the user to the intended screen afterwards. Walks the manual approaches in older React Navigation and the new API that handles it (routeNamesChangeBehavior 'lastUnhandled' re-dispatching the unhandled link when auth state flips). From the library's own maintainer."
     claim: "You ship React Navigation — if deep links can land behind auth, the maintainer's routeNamesChangeBehavior 'lastUnhandled' pattern replaces hand-rolled redirect-after-login plumbing."
     applies_when: { deps: ["@react-navigation/*"], platforms: [react-native] }
+  - title: "Migrating to native stack navigation, with a surprise from iOS 26"
+    url: "https://thoughtbot.com/blog/migrating-to-native-stack-navigation-with-a-surprise-from-ios-26"
+    by: "Jose Blanco (thoughtbot)"
+    what: "The JS-stack-vs-native-stack behavioral difference no other reading here covers, learned in a real 0.77→New-Arch migration: moving to native-stack means the REAL platform components apply — the app suddenly inherited iOS 26 Liquid Glass styling (opt out with UIDesignRequiresCompatibility in Info.plist while unready), and a 55pt header logo got clipped because the native bar is a hard 44pt. The durable frame: JS-stack headers merely TOLERATED overflow the platform never allowed; native-stack enforces what iOS actually permits, so audit header content heights when migrating. (Live URL is bot-walled — content verified via Wayback snapshot 2026-07-15.)"
+    claim: "You ship React Navigation — native-stack applies platform constraints JS-stack merely tolerated: iOS 26 Liquid Glass is inherited (UIDesignRequiresCompatibility opts out) and the 44pt native bar clips taller header content."
+    applies_when: { deps: ["@react-navigation/*"], platforms: [react-native] }
   - title: "Untangling Dialogs in React Router"
     url: "https://programmingarehard.com/2026/05/06/react-router-dialogs.html/"
     by: "Dave Adams"

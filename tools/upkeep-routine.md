@@ -54,15 +54,27 @@ The agent should, in order:
    extract durable selection facts + canonical articles, **fetch-verify every URL**, map via the
    mentor's `capability_map`/`assessment_dimensions` (or flag a GAP). De-dupe vs existing.
 
-   **Disposition manifest (MANDATORY per issue, learned 2026-07-16):** write
-   `tools/harvest-log/<source>-<issue>.md` giving EVERY item/link in the issue a disposition —
-   `kept` (→ which entry/field), `already-held` (→ where), or `skipped` (reason class:
-   corroboration · how-to · pre-ship · too-early · cap · off-scope · sponsor). Triage judgment
-   is fallible; the manifest is what makes it REVIEWABLE — a wrong skip becomes a visible
-   disagreement the maintainer can overturn (see twir-290.md: a cap skip on the
-   react-compiler-explained deep-dive was overturned on review) instead of a silent miss.
-   Commit the manifest WITH the delta. `cap`/`too-early` skips are re-openable: note what
-   recurrence signal would flip them.
+   **Inventory FIRST, manifest, then the coverage gate (MANDATORY per issue, learned
+   2026-07-16):** the LLM extraction layer was the last invisible failure point — a dropped
+   item never even reached triage. So:
+   - `react-brain harvest inventory <issue-url>` — the DETERMINISTIC link list (regex over
+     HTML, handles unquoted minified hrefs — the quoted-only assumption once missed ~80% of
+     a TWiR page). Build the manifest FROM this list, not from an LLM summary.
+   - Write `tools/harvest-log/<source>-<issue>.md`: EVERY external link gets a disposition
+     row CARRYING ITS URL — `kept` (→ which entry/field), `already-held` (→ where), or
+     `skipped` (reason class: corroboration · how-to · pre-ship · too-early · cap ·
+     unverifiable · off-scope · sponsor). `cap`/`pre-ship`/`too-early` note the reopen
+     signal that would flip them.
+   - `react-brain harvest coverage <issue-url> <manifest.md>` must exit 0 — an unaccounted
+     link is a red gate, not a silent hole.
+   - `react-brain harvest watchlist` — re-triage anything skipped in ≥2 issues and review
+     the standing reopen signals.
+   - **Spot-check (each pass):** re-adjudicate ALL `cap` skips + 2 random skips from the
+     PREVIOUS issue's manifest; corrections are committed amendments. (First run corrected
+     2 of 2 examined reasons and reopened the react-compiler-explained + thoughtbot keeps.)
+   Triage judgment is fallible; the manifest is what makes it REVIEWABLE — a wrong skip
+   becomes a visible disagreement the maintainer can overturn instead of a silent miss.
+   Commit the manifest WITH the delta.
    Strong TALKS/PODCASTS/VIDEOS go in the entry's optional `watching:` list (same shape as
    `reading`; verify the episode/video page exists + corroborates — never annotate unwatched
    content beyond what the verified page states).
@@ -81,7 +93,14 @@ The agent should, in order:
      `curl -sL -A "Mozilla/5.0 (Macintosh...) Chrome/126.0 Safari/537.36" <url>` — then verify
      against the extracted text. This recovered callstack.com articles previously excluded.
    - Version/date/deprecation facts: `registry.npmjs.org/<pkg>` JSON beats any article.
-   - Only exclude a candidate after BOTH WebFetch and the curl-UA fallback fail.
+   - **Wayback fallback (learned 2026-07-16):** when WebFetch AND curl-UA both fail
+     (Cloudflare JS walls — thoughtbot.com), query
+     `archive.org/wayback/available?url=<url>` and curl the snapshot URL (note: WebFetch
+     cannot reach web.archive.org — use curl). A reading verified via snapshot keeps the
+     LIVE url + a "(content verified via Wayback snapshot <date>)" note in `what:` —
+     same precedent as longho.dev's RSS-verified reading. This recovered the thoughtbot
+     native-stack piece previously excluded as unverifiable.
+   - Only exclude a candidate after WebFetch, curl-UA, AND the Wayback fallback all fail.
 3. **Completeness** — run `react-brain evidence ../ledgerhr ../ourpot ../bitbarter`; note new
    blind spots / contradictions. Also run `react-brain census` — cohort adoption CHANGES since
    the last snapshot are evidence-grade signals (an app dropping/adopting a tracked lib

@@ -48,6 +48,10 @@ usage: react-brain <command> [args]
   evidence <repo...>   corpus self-audit across repos: blind spots, contradictions, field evidence
   pulse    [repo...]   corpus health: dead links, stale entries, stack drift
                        (flags: --today=YYYY-MM-DD, --no-links)
+  harvest  <mode>      deterministic newsletter-scan scaffolding:
+                       inventory <url> (every link, mechanically) · coverage <url>
+                       <manifest.md> (exit 1 on unaccounted links) · watchlist
+                       (recurring skips + reopen signals across tools/harvest-log/)
   calibrate [...]      scored prediction track record: is confidence earned?
                        (--seed | --record <id> <held|weakened|overturned> | --today=…)
   signals  [...]       recommendations vs live npm reality (downloads, staleness, claims)
@@ -129,6 +133,7 @@ switch (cmd) {
   case 'learn': delegate('react-brain-learn.mjs'); break;
   case 'decide': delegate('react-brain-decide.mjs'); break;
   case 'bench': delegate('react-brain-bench.mjs'); break;
+  case 'harvest': delegate('react-brain-harvest.mjs'); break;
   case 'lint': delegate('react-brain-lint.mjs'); break;
   case 'mcp': delegate('mcp-server.mjs'); break;   // stdio MCP server: claude mcp add react-brain -- npx -y @heart-it/react-brain mcp
   case 'query': query(rest); break;

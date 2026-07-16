@@ -127,6 +127,22 @@ node tools/react-brain-pulse.mjs --today=YYYY-MM-DD ../ledgerhr ../ourpot ../bit
 The **agentic growth half** (pull new newsletter issues + verify + propose a delta) is
 `pulse-routine.md` — wire it into `/schedule` (weekly) for full autonomy.
 
+## `react-brain-harvest.mjs` — deterministic newsletter-scan scaffolding
+Closes the last invisible failure point of a harvest pass: the LLM extraction layer
+decided what the harvester even saw, so a dropped newsletter item never reached triage.
+Three modes (regex over fetched HTML, zero LLM): **inventory** — every link on an issue
+page, mechanically (handles minified/unquoted hrefs; content vs same-site vs chrome);
+**coverage** — set-difference against the issue's disposition manifest in
+`tools/harvest-log/` (an unaccounted link = exit 1, a red gate); **watchlist** — URLs
+skipped in ≥2 manifests + standing reopen signals ("revisit at 2.0 stable"), so
+`cap`/`pre-ship` skips are deferred, not terminal.
+```sh
+node tools/react-brain-harvest.mjs inventory https://thisweekinreact.com/newsletter/290
+node tools/react-brain-harvest.mjs coverage <issue-url> tools/harvest-log/twir-290.md
+node tools/react-brain-harvest.mjs watchlist
+```
+The manifest convention + spot-check discipline live in `upkeep-routine.md` (step 2).
+
 ## `react-brain-learn.mjs` — knowledge → human
 The **Tutorial pillar, made adaptive.** A learning path isn't authored — it's *computed*
 as **(encyclopedia graph) × (your repo)**, which no other React learning resource can do
