@@ -2,7 +2,7 @@ id: RB-E-NETWORKING
 topic: "Networking & HTTP client layer"
 category: networking
 group: app-architecture
-status: drafted
+status: reviewed   # long-form entry written + source-checked
 confidence: medium
 platforms: [react, react-native]
 options:
@@ -28,8 +28,8 @@ note: >
   same API. Client choice is low-stakes compared to cache design — hence the DATA cross-refs.
   nitro-fetch facts verified vs its repo (benchmarks are vendor-run; ~23% on their harness).
 defer_to_skill: null
-doc: null
-updated: 2026-07-09
+doc: "RB-E-NETWORKING.md"   # long-form Explanation entry in content_dir
+updated: 2026-07-16
 reading:
   - title: "react-native-nitro-fetch — architecture & benchmarks"
     url: "https://github.com/margelo/react-native-nitro-fetch"

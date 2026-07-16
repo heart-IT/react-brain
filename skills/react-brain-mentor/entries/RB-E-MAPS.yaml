@@ -2,7 +2,7 @@ id: RB-E-MAPS
 topic: "Maps & geolocation UI"
 category: maps
 group: ui
-status: drafted
+status: reviewed   # long-form entry written + source-checked
 confidence: low
 platforms: [react, react-native]
 options:
@@ -34,8 +34,8 @@ note: >
   ADDED 2026-07-13: @vis.gl/react-google-maps (1.9.0, verified vs npm) on its 2nd independent
   signal (TWiR #289 bench → React Status #482) — the Google-committed web lane the web row lacked.
 defer_to_skill: react-native-best-practices   # marker/cluster render perf
-doc: null
-updated: 2026-07-13
+doc: "RB-E-MAPS.md"   # long-form Explanation entry in content_dir
+updated: 2026-07-16
 reading:
   - title: "react-native-maps vs Mapbox RN vs MapLibre RN (2026)"
     url: "https://www.pkgpulse.com/guides/react-native-maps-vs-mapbox-rn-vs-maplibre-rn-mobile-2026"
