@@ -36,6 +36,10 @@ usage: react-brain <command> [args]
   doctor   <repo...>   advise a repo: detected stack vs the encyclopedia's context recommendations
                        + TRAJECTORY (git history): stalled/regressing migrations, live-vs-
                        dormant churn weighting on priorities, recent adoptions (--no-history)
+                       + REGISTRY preflight (network, 7d cache): --preflight = whole-tree
+                       dep health (deprecated/abandoned/major-lag, incl. corpus-unmapped
+                       deps); --target=react-native@0.86.0 adds upgrade FEASIBILITY —
+                       per-dep peer-range verdicts: ok / bump-to / BLOCKER
                        + source scan for legacy core RN APIs → modern swaps + living-ADR premise
                        checks (--no-scan, --files, --json, --ci = exit 1 on expired records)
   map      <repo>      the repo pinboard: one compact line per source file (domains, imports,

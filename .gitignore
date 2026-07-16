@@ -8,3 +8,4 @@ site/node_modules/
 site/dist/
 site/.astro/
 tools/.briefing-state.json
+tools/.registry-cache.json

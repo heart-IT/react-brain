@@ -84,6 +84,16 @@ spiral (repeating overruled advice until nobody reads the report) without ever l
 a stale decision hide a live problem; the mentor treats acknowledged items as settled
 and leads with re-opened ones.
 
+**Registry preflight (2026-07-16):** the corpus curates opinions on ~200 packages; the
+registry knows facts about ALL of them. `doctor --preflight` sweeps the whole runtime
+dependency tree (including corpus-unmapped deps) for npm deprecation flags, abandonment
+(>18mo publish silence), and major-version lag — version-locked families (expo-*) fold to
+one row. `--target=react-native@0.86.0` adds UPGRADE FEASIBILITY: per-dep peer-range
+verdicts (ok / bump-to-X / BLOCKER: nothing released supports the target) — the pre-flight
+teams currently run as a three-day broken branch. Network opt-in, 7-day cache
+(tools/.registry-cache.json, gitignored), offline runs untouched. First live answer:
+ourpot → RN 0.86.0 has ZERO peer blockers; blind-pairing flagged abandoned (21mo).
+
 ## `react-brain-map.mjs` — the repo pinboard (code location for agents)
 One compact line per source file — corpus-domain tags (detector imports + per-file smell
 hits), external imports, exports, LOC — plus an inverted DOMAINS→files index. An agent

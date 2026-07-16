@@ -10,7 +10,10 @@
 // Shared detection lives in ./detect.mjs (one source of truth, also used by evidence).
 // ───────────────────────────────────────────────────────────────────────────────
 
-import { loadEntries, analyzeRepo, fit, trunc, GROUP_ORDER, trackRecord, TRACK_GLYPH, scanModernDefaults, scanSourceSignals, checkAdrs, adviseReadings, loadCensus, resolveRecommendation, trajectoryScan } from './detect.mjs';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { loadEntries, analyzeRepo, fit, trunc, GROUP_ORDER, trackRecord, TRACK_GLYPH, scanModernDefaults, scanSourceSignals, checkAdrs, adviseReadings, loadCensus, resolveRecommendation, trajectoryScan, matchDetector, minVer } from './detect.mjs';
+import { fetchDepDocs, classifyDepHealth, preflightVerdict } from './harvest-lib.mjs';
 
 // Situational context tokens for resolveRecommendation — matched against the
 // corpus's "context → choice" when-clauses, mirroring learn's contextFor logic.
@@ -51,7 +54,7 @@ function acksOf(adrRecords) {
   return acks;
 }
 
-function computePriorities({ entries, detected, gaps, advice, modern, sigs, traj, acks, stage = 'mvp' }) {
+function computePriorities({ entries, detected, gaps, advice, modern, sigs, traj, acks, reg, stage = 'mvp' }) {
   const CONF = { high: 1, medium: 0.85, low: 0.6 };
   const EFF = { S: 1, M: 1.5, L: 2.5 };
   // MP-STAGE-CALIBRATED: missing-domain pressure scales with maturity — a prototype's
@@ -79,6 +82,20 @@ function computePriorities({ entries, detected, gaps, advice, modern, sigs, traj
     const cf = churnFactor(s.files);
     items.push({ kind: 'smell', entry: s.entry, score: (50 + Math.min(s.count || 0, 20)) * cf.mult * (CONF[e?.confidence] || 0.85) / 1.5,
       text: s.signal, why: (s.hint ? trunc(s.hint, 100) : 'source signal') + cf.tag });
+  }
+  // registry health: the world beyond the curation boundary (deprecated ≫ abandoned > lag)
+  for (const h of reg?.health || []) {
+    const IMP = { deprecated: 85, abandoned: 42, 'major-lag': 38 };
+    items.push({ kind: 'health', entry: h.entry || 'RB-E-DX',
+      score: (IMP[h.kind] || 35) / 1.2,
+      text: h.kind === 'deprecated' ? `${h.pkg} is DEPRECATED on npm — replace it${h.entry ? ` (see ${h.entry.replace('RB-E-', '')})` : ''}` : `${h.pkg}: ${h.detail}`,
+      why: h.kind === 'deprecated' ? trunc(h.detail, 100) : `${h.kind} signal from the registry — verify intent` });
+  }
+  if (reg?.preflight?.blockers?.length) {
+    items.push({ kind: 'preflight', entry: 'RB-E-RN-VERSIONS',
+      score: 60,
+      text: `${reg.preflight.target} upgrade BLOCKED by ${reg.preflight.blockers.length} dep(s): ${trunc(reg.preflight.blockers.map((b) => b.pkg).join(', '), 60)}`,
+      why: 'no released version of these deps supports the target (peer ranges) — see UPGRADE PREFLIGHT' });
   }
   for (const m of (traj?.migrations || []).filter((x) => x.kind === 'migration')) {
     const IMP = { regressing: 95, stalled: 78, done: 62, 'in-progress': 55, 'unknown-age': 50 };
@@ -143,6 +160,7 @@ function printReport(a, entries) {
   const traj = (!NO_SCAN && !NO_HISTORY) ? trajectoryScan(a.path, a.deps, entries) : null;
   const adrs = checkAdrs(a.path, entries);
   const acks = acksOf(adrs);
+  const reg = registryReport(a);
   const expected = [...EXPECTED.always, ...(EXPECTED[a.platform] || [])];
   const gapIds = expected.filter((id) => !a.byEntry[id]);
   const resolvedPick = (e, toks) => { const r = resolveRecommendation(e, toks); return r.via !== 'default' ? { pick: r.why } : null; };
@@ -150,7 +168,7 @@ function printReport(a, entries) {
     detected: detected.map(({ id, e, info }) => ({ entry: id, labels: [...info.labels], fitStr: fit(e, info.tokens), resolved: resolvedPick(e, [...ctxTokens(a), ...info.tokens]) })),
     gaps: gapIds.map((id) => { const c = census?.agg?.[id]; return { entry: id, recommend: entries[id]?.recommend?.default || '',
       resolved: entries[id] ? resolvedPick(entries[id], ctxTokens(a)) : null, field: c ? { appCount: c.appCount, denom: c.denom } : null }; }),
-    advice, modern, sigs, traj, acks, stage: a.stage });
+    advice, modern, sigs, traj, acks, reg, stage: a.stage });
   if (priorities.length) {
     console.log(`\n  ⚡ TOP PRIORITIES  (impact × effort heuristic — detail in the sections below)`);
     console.log(`  ${'-'.repeat(74)}`);
@@ -218,6 +236,26 @@ function printReport(a, entries) {
       const rec = r && r.via !== 'default' ? `${r.via === 'na' ? 'N/A here — ' : ''}${r.why}` : entries[id]?.recommend?.default;
       console.log(`  • ${id.replace('RB-E-', '')}: none detected — ${trunc(rec, 120)}${field}`);
     }
+  }
+
+  // REGISTRY — dep health beyond the curation boundary + upgrade feasibility.
+  if (reg) {
+    if (reg.health.length) {
+      console.log(`\n  DEP HEALTH  (registry facts for the WHOLE tree — including corpus-unmapped deps)`);
+      console.log(`  ${'-'.repeat(74)}`);
+      for (const h of reg.health)
+        console.log(`  ${h.kind === 'deprecated' ? '✗' : '•'} ${h.pkg}  [${h.kind}${h.entry ? ` · ${h.entry.replace('RB-E-', '')}` : ''}]\n      ${trunc(h.detail, 118)}`);
+    }
+    if (reg.preflight) {
+      const p = reg.preflight;
+      console.log(`\n  UPGRADE PREFLIGHT — ${p.target}`);
+      console.log(`  ${'-'.repeat(74)}`);
+      console.log(`  ${p.blockers.length ? `✗ BLOCKED by ${p.blockers.length} dep(s)` : '✓ no peer-range blockers'} · ${p.bump.length} need a bump · ${p.ok} ok as installed · ${p.noPeer} unconstrained`);
+      for (const b of p.blockers) console.log(`     ✗ ${b.pkg} — latest (${b.latest}) peers "${b.peer}"; nothing released supports the target`);
+      for (const b of p.bump.slice(0, 12)) console.log(`     ↑ ${b.pkg} → ${b.to}  (peers "${b.peer}")`);
+      if (p.bump.length > 12) console.log(`     … +${p.bump.length - 12} more bumps (--json lists all)`);
+    }
+    if (reg.failed.length) console.log(`  (registry unreachable for: ${reg.failed.join(', ')})`);
   }
 
   // ACKNOWLEDGED — findings a recorded decision overrules while its premise holds.
@@ -325,8 +363,9 @@ function jsonReport(a, entries) {
   const advice = adviseReadings(a, entries);
   const traj = (!NO_SCAN && !NO_HISTORY) ? trajectoryScan(a.path, a.deps, entries) : null;
   const adrs = checkAdrs(a.path, entries);
+  const reg = registryReport(a);
   const { top: priorities, acknowledged } = computePriorities({ entries,
-    detected: detected.map((d) => ({ ...d, fitStr: d.fit })), gaps, advice, modern: modernization, sigs: sourceSignals, traj, acks: acksOf(adrs), stage: a.stage });
+    detected: detected.map((d) => ({ ...d, fitStr: d.fit })), gaps, advice, modern: modernization, sigs: sourceSignals, traj, acks: acksOf(adrs), reg, stage: a.stage });
   const trajectory = traj?.git ? { oldRefDate: traj.oldRefDate, migrations: traj.migrations,
     recentlyAdopted: Object.fromEntries(Object.entries(traj.adoption).filter(([, t]) => traj.now - t <= 90 * 86400)) } : null;
   return {
@@ -334,7 +373,8 @@ function jsonReport(a, entries) {
     name: a.name, path: a.path, version: a.version || null, platform: a.platform,
     desktopShell: a.desktopShell || null, stage: a.stage, depCount: a.depCount,
     ts: a.ts, ci: a.ci, tests: a.tests, lintfmt: a.lintfmt, hooks: a.hooks,
-    priorities, detected, gaps, advice, modernization, sourceSignals, trajectory, unmapped: a.unmapped,
+    priorities, detected, gaps, advice, modernization, sourceSignals, trajectory,
+    depHealth: reg?.health || null, preflight: reg?.preflight || null, unmapped: a.unmapped,
   };
 }
 
@@ -367,10 +407,61 @@ const NO_HISTORY = argv.includes('--no-history'); // skip the git trajectory sca
 const SHOW_FILES = argv.includes('--files');      // list the offending files per finding
 const AS_JSON = argv.includes('--json');          // machine-readable (agents / mentor Phase 0)
 const CI = argv.includes('--ci');                 // gate: exit 1 on expired/moved decision records or deprecated APIs
+// registry preflight (network, opt-in; 7d cache): --preflight = whole-tree dep health;
+// --target=pkg@x.y adds upgrade feasibility (peer-range blockers). Keeps default runs offline.
+const TARGET_STR = (argv.find((x) => x.startsWith('--target=')) || '').split('=')[1] || null;
+const TARGET = TARGET_STR ? (() => { const i = TARGET_STR.lastIndexOf('@'); const v = TARGET_STR.slice(i + 1).split('.');
+  return { pkg: TARGET_STR.slice(0, i), version: [v[0] || '0', v[1] || '0', v[2] || '0'].join('.') }; })() : null;
+const PREFLIGHT = argv.includes('--preflight') || Boolean(TARGET);
+const REG_CACHE = new URL('.registry-cache.json', import.meta.url).pathname;
 const targets = argv.filter((x) => !x.startsWith('--'));
 if (!targets.length) { console.error('usage: node tools/react-brain-doctor.mjs <repoPath> [<repoPath> ...] [--no-scan] [--files] [--json] [--ci]'); process.exit(1); }
 const entries = loadEntries();
 const analyses = targets.map(analyzeRepo);
+
+// registry docs per repo (runtime deps only) — fetched once, cached 7d
+const registryByPath = {};
+if (PREFLIGHT) {
+  for (const a of analyses) {
+    if (a.missing || a.notReact) continue;
+    let rt = {}; try { rt = JSON.parse(readFileSync(join(a.path, 'package.json'), 'utf8')).dependencies || {}; } catch { /* no runtime deps */ }
+    const { docs, failed } = await fetchDepDocs(Object.keys(rt), { cachePath: REG_CACHE });
+    registryByPath[a.path] = { docs, failed, runtime: rt };
+  }
+}
+function registryReport(a) {
+  const reg = registryByPath[a.path];
+  if (!reg) return null;
+  const health = [];
+  const pf = TARGET ? { target: `${TARGET.pkg}@${TARGET.version}`, ok: 0, noPeer: 0, bump: [], blockers: [] } : null;
+  for (const [pkg, doc] of Object.entries(reg.docs)) {
+    const inst = minVer(reg.runtime[pkg]);
+    for (const h of classifyDepHealth(pkg, doc, inst)) {
+      if (h.kind === 'deprecated') { const m = matchDetector(pkg); if (m) h.entry = m[1]; }   // route back into the corpus when it has an opinion
+      health.push(h);
+    }
+    if (TARGET && pkg !== TARGET.pkg) {
+      const v = preflightVerdict(pkg, doc, TARGET.pkg, TARGET.version, inst);
+      if (v.verdict === 'ok') pf.ok++;
+      else if (v.verdict === 'no-peer') pf.noPeer++;
+      else if (v.verdict === 'bump') pf.bump.push(v);
+      else pf.blockers.push(v);
+    }
+  }
+  // fold version-locked families (expo-*, @scope/*) — 15 rows of "expo-x: 2 majors
+  // behind" is ONE fact (the SDK is behind) shouted 15 times
+  const fam = (p) => (p.startsWith('@') ? p.split('/')[0] : p.split('-')[0]);
+  const lagRows = health.filter((h) => h.kind === 'major-lag');
+  const byFam = {};
+  for (const h of lagRows) (byFam[fam(h.pkg)] ||= []).push(h);
+  for (const [f, rows] of Object.entries(byFam)) {
+    if (rows.length < 3) continue;
+    for (const r of rows) health.splice(health.indexOf(r), 1);
+    health.push({ pkg: `${f}* (${rows.length} pkgs)`, kind: 'major-lag',
+      detail: `version-locked family behind together — e.g. ${rows[0].pkg}: ${rows[0].detail}` });
+  }
+  return { health, preflight: pf, failed: reg.failed };
+}
 if (AS_JSON) {
   const out = analyses.map((a) => jsonReport(a, entries));
   console.log(JSON.stringify(out.length === 1 ? out[0] : out, null, 2));

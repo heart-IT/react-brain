@@ -201,3 +201,110 @@ export async function waybackSnapshot(url) {
     return d.archived_snapshots?.closest?.available ? d.archived_snapshots.closest.url : null;
   } catch { return null; }
 }
+
+// ── registry analysis (doctor --preflight / --target) ──────────────────────────
+// The corpus curates opinions on ~200 packages; the REGISTRY knows facts about
+// all of them. These primitives extend analysis past the curation boundary:
+// whole-tree dep health (deprecated / abandoned / major-lag) and upgrade
+// FEASIBILITY (which installed deps' peer ranges accept a target version).
+// Pure functions are offline-testable; fetchDepDocs caches (7d TTL).
+
+function pv(v) {
+  const m = String(v || '').match(/^v?(\d+)(?:\.(\d+))?(?:\.(\d+))?(-.+)?/);
+  return m && { n: [+m[1], +(m[2] || 0), +(m[3] || 0)], pre: Boolean(m[4]), wild: m[2] === undefined ? 1 : m[3] === undefined ? 2 : 3 };
+}
+const cmp = (a, b) => { for (let i = 0; i < 3; i++) { if (a.n[i] !== b.n[i]) return a.n[i] - b.n[i]; } return 0; };
+
+// pragmatic npm-range subset: || · space-AND · hyphen ranges · ^ ~ >= > <= < = ·
+// bare/wildcard versions ('*', '19', '0.84', '0.84.x'). Prereleases never satisfy.
+export function satisfiesRange(version, range) {
+  const v = pv(version);
+  if (!v || v.pre) return false;
+  const r = String(range ?? '').trim();
+  if (r === '' || r === '*' || r === 'x') return true;
+  return r.split('||').some((clause) => {
+    clause = clause.trim().replace(/\s+-\s+/g, '~~~');   // protect hyphen ranges before AND-split
+    return clause.split(/\s+/).every((c) => {
+      if (c.includes('~~~')) {
+        const [lo, hi] = c.split('~~~').map(pv);
+        if (!lo || !hi) return false;
+        const hiTop = hi.wild < 3 ? { n: hi.wild === 1 ? [hi.n[0] + 1, 0, 0] : [hi.n[0], hi.n[1] + 1, 0] } : null;
+        return cmp(v, lo) >= 0 && (hiTop ? cmp(v, hiTop) < 0 : cmp(v, hi) <= 0);
+      }
+      const m = c.match(/^(>=|<=|>|<|\^|~|=)?\s*(.+)$/);
+      const op = m[1] || '', b = pv(m[2]);
+      if (!b) return /^[x*]/i.test(m[2] || '');
+      switch (op) {
+        case '>=': return cmp(v, b) >= 0;
+        case '>': return cmp(v, b) > 0;
+        case '<=': return cmp(v, b) <= 0;
+        case '<': return cmp(v, b) < 0;
+        case '^': {
+          const i = b.n[0] > 0 ? 0 : b.n[1] > 0 ? 1 : 2;
+          const top = [...b.n]; top[i] += 1; for (let j = i + 1; j < 3; j++) top[j] = 0;
+          return cmp(v, b) >= 0 && cmp(v, { n: top }) < 0;
+        }
+        case '~': return cmp(v, b) >= 0 && cmp(v, { n: [b.n[0], b.n[1] + 1, 0] }) < 0;
+        default: {   // bare: exact at its precision ('19' → >=19 <20; '0.84' → >=0.84 <0.85)
+          if (b.wild === 3) return cmp(v, b) === 0;
+          const top = b.wild === 1 ? [b.n[0] + 1, 0, 0] : [b.n[0], b.n[1] + 1, 0];
+          return cmp(v, b) >= 0 && cmp(v, { n: top }) < 0;
+        }
+      }
+    });
+  });
+}
+
+// slim per-dep extract: latest + deprecation + modified + peerDeps for the last
+// ~40 stable versions (enough to answer feasibility without caching 1400 versions)
+export function slimDoc(doc) {
+  const latest = doc['dist-tags']?.latest;
+  const stable = Object.keys(doc.versions || {}).filter((v) => !pv(v)?.pre)
+    .sort((a, b) => cmp(pv(b), pv(a))).slice(0, 40);
+  const versions = {};
+  for (const v of stable) {
+    const d = doc.versions[v];
+    if (d?.peerDependencies || d?.deprecated) versions[v] = { peerDependencies: d.peerDependencies, deprecated: Boolean(d.deprecated) };
+  }
+  return { latest, modified: doc.modified || null,
+    deprecatedLatest: doc.versions?.[latest]?.deprecated || null, versions };
+}
+
+export async function fetchDepDocs(depNames, { cachePath, ttlDays = 7 } = {}) {
+  const { readFileSync: rf, writeFileSync: wfs, existsSync: ex } = await import('node:fs');
+  let cache = {};
+  if (cachePath && ex(cachePath)) { try { cache = JSON.parse(rf(cachePath, 'utf8')); } catch { cache = {}; } }
+  const nowMs = Date.now();
+  const need = depNames.filter((p) => !cache[p] || nowMs - cache[p].at > ttlDays * 864e5);
+  const res = await pool(need.map((p) => async () => {
+    const doc = JSON.parse(await get(`https://registry.npmjs.org/${p.replace('/', '%2F')}`, { accept: 'application/vnd.npm.install-v1+json' }));
+    return slimDoc(doc);
+  }));
+  need.forEach((p, i) => { if (!res[i]?.err) cache[p] = { at: nowMs, ...res[i] }; });
+  if (cachePath) { try { wfs(cachePath, JSON.stringify(cache)); } catch { /* read-only fs */ } }
+  const out = {}; for (const p of depNames) if (cache[p]) out[p] = cache[p];
+  return { docs: out, failed: need.filter((p, i) => res[i]?.err) };
+}
+
+const MONTHS = (ms) => Math.round(ms / (30 * 864e5));
+export function classifyDepHealth(pkg, doc, installedMin, nowMs = Date.now()) {
+  const out = [];
+  if (doc.deprecatedLatest) out.push({ pkg, kind: 'deprecated', detail: String(doc.deprecatedLatest).slice(0, 140) });
+  else if (doc.modified && nowMs - Date.parse(doc.modified) > 18 * 30 * 864e5)
+    out.push({ pkg, kind: 'abandoned', detail: `no publish in ${MONTHS(nowMs - Date.parse(doc.modified))} months (last: ${doc.modified.slice(0, 10)})` });
+  const lag = (pv(doc.latest)?.n[0] ?? 0) - (installedMin?.[0] ?? 0);
+  if (lag >= 2) out.push({ pkg, kind: 'major-lag', detail: `installed ~${(installedMin || []).join('.')} vs latest ${doc.latest} (${lag} majors behind)` });
+  return out;
+}
+
+// can this dep ride an upgrade of targetPkg → targetVersion?
+export function preflightVerdict(pkg, doc, targetPkg, targetVersion, installedMin) {
+  const peersAt = (v) => doc.versions?.[v]?.peerDependencies?.[targetPkg];
+  const latestPeer = peersAt(doc.latest);
+  if (latestPeer === undefined) return { pkg, verdict: 'no-peer' };
+  if (!satisfiesRange(targetVersion, latestPeer)) return { pkg, verdict: 'blocker', peer: latestPeer, latest: doc.latest };
+  const instKey = installedMin ? installedMin.join('.') : null;
+  const instPeer = instKey ? peersAt(instKey) : undefined;
+  if (instPeer !== undefined && satisfiesRange(targetVersion, instPeer)) return { pkg, verdict: 'ok' };
+  return { pkg, verdict: 'bump', to: doc.latest, peer: latestPeer };
+}

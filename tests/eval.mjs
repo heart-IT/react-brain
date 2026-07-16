@@ -358,6 +358,24 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
 }
 function doctorPath(p) { return JSON.parse(execFileSync(process.execPath, [join(ROOT, 'tools/react-brain-doctor.mjs'), p, '--json'], { encoding: 'utf8' })); }
 
+// ── registry preflight: range parsing + feasibility + health (offline, pure) ────
+{
+  const { satisfiesRange, preflightVerdict, classifyDepHealth } = await import(join(ROOT, 'tools/harvest-lib.mjs'));
+  check(satisfiesRange('0.86.0', '0.83 - 0.86') && !satisfiesRange('0.87.0', '0.83 - 0.86'), 'preflight: hyphen ranges (reanimated live shape)');
+  check(satisfiesRange('0.86.0', '>=0.76 <1.0') && !satisfiesRange('0.86.0', '^0.84.0') && satisfiesRange('19.2.7', '19'), 'preflight: AND-clauses, caret, bare-major');
+  check(!satisfiesRange('1.0.0-beta.6', '>=0.5') && satisfiesRange('0.86.0', '0.84 || 0.86'), 'preflight: prereleases never satisfy; OR works');
+  const doc = { latest: '4.5.2', modified: '2026-07-16T00:00:00Z', deprecatedLatest: null,
+    versions: { '4.5.2': { peerDependencies: { 'react-native': '0.83 - 0.86' } }, '3.0.0': { peerDependencies: { 'react-native': '0.76 - 0.82' } } } };
+  check(preflightVerdict('x', doc, 'react-native', '0.86.0', [3, 0, 0]).verdict === 'bump', 'preflight: old installed peers → bump to latest');
+  check(preflightVerdict('x', doc, 'react-native', '0.87.0', [4, 5, 2]).verdict === 'blocker', 'preflight: nothing released supports target → BLOCKER');
+  check(preflightVerdict('x', doc, 'react-native', '0.86.0', [4, 5, 2]).verdict === 'ok', 'preflight: installed already satisfies → ok');
+  check(preflightVerdict('x', { latest: '1.0.0', versions: {} }, 'react-native', '0.86.0', [1, 0, 0]).verdict === 'no-peer', 'preflight: no peer constraint → unconstrained');
+  const NOW = Date.parse('2026-07-16');
+  check(classifyDepHealth('dead', { latest: '2.0.0', deprecatedLatest: 'use other-pkg', modified: '2026-01-01' }, [2, 0, 0], NOW)[0]?.kind === 'deprecated', 'health: npm deprecated flag surfaces');
+  check(classifyDepHealth('old', { latest: '1.2.0', deprecatedLatest: null, modified: '2024-06-01T00:00:00Z' }, [1, 0, 0], NOW)[0]?.kind === 'abandoned', 'health: >18mo publish silence flags abandonment');
+  check(classifyDepHealth('lag', { latest: '5.0.0', deprecatedLatest: null, modified: '2026-07-01' }, [3, 1, 0], NOW)[0]?.kind === 'major-lag', 'health: ≥2 majors behind flags lag');
+}
+
 // ── report ──────────────────────────────────────────────────────────────────────
 console.log(`react-brain eval — ${pass + fails.length} assertions`);
 if (fails.length) { for (const f of fails) console.log(`  ✗ ${f}`); console.log(`\n✗ ${fails.length} failed / ${pass} passed`); process.exit(1); }
