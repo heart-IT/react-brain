@@ -10,7 +10,7 @@
 // Shared detection lives in ./detect.mjs (one source of truth, also used by evidence).
 // ───────────────────────────────────────────────────────────────────────────────
 
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadEntries, analyzeRepo, fit, trunc, GROUP_ORDER, trackRecord, TRACK_GLYPH, scanModernDefaults, scanSourceSignals, checkAdrs, adviseReadings, loadCensus, resolveRecommendation, trajectoryScan, matchDetector, minVer } from './detect.mjs';
 import { fetchDepDocs, classifyDepHealth, preflightVerdict } from './harvest-lib.mjs';
@@ -238,6 +238,30 @@ function swapsAndUpside(a, detectedRows, census) {
   return { swaps, upside };
 }
 
+// ── OUTCOME MEMORY — the advisor remembers its last visit ───────────────────────
+// Doctor re-derived everything from scratch each run and never knew what happened
+// to last visit's advice. Baseline the priority keys per repo: RESOLVED (gone since
+// last visit — confirmed, trust), PERSISTING (n visits — escalate toward a decision
+// instead of repeating), NEW. Store commits with the repo like the other baselines.
+const MEM_PATH = new URL('.doctor-memory.json', import.meta.url).pathname;
+function outcomeMemory(a, priorities) {
+  let mem = {}; try { mem = JSON.parse(readFileSync(MEM_PATH, 'utf8')); } catch { /* first ever run */ }
+  const prev = mem[a.name] || { items: {} };
+  const nowKeys = new Map(priorities.map((p) => [`${p.kind}:${p.entry}`, p]));
+  const resolved = Object.keys(prev.items).filter((k) => !nowKeys.has(k));
+  const outcomes = { resolved, persisting: [], fresh: [] };
+  const items = {};
+  for (const [k, p] of nowKeys) {
+    const seen = (prev.items[k]?.seen || 0) + 1;
+    items[k] = { seen, text: p.text, last: new Date().toISOString().slice(0, 10) };
+    (seen > 1 ? outcomes.persisting : outcomes.fresh).push({ key: k, seen, text: p.text });
+  }
+  mem[a.name] = { items, visits: (prev.visits || 0) + 1, resolvedTotal: (prev.resolvedTotal || 0) + resolved.length };
+  try { writeFileSync(MEM_PATH, JSON.stringify(mem, null, 1)); } catch { /* read-only */ }
+  outcomes.visits = mem[a.name].visits; outcomes.hitRate = mem[a.name].resolvedTotal;
+  return outcomes;
+}
+
 function printReport(a, entries) {
   if (a.missing) { console.log(`\n(skip ${a.name}: no package.json)`); return; }
   if (a.notReact) { console.log(`\n(skip ${a.name}: not a React/RN repo)`); return; }
@@ -275,6 +299,14 @@ function printReport(a, entries) {
       console.log(`  ${i + 1}. ${p.reopened ? '⚡ ' : ''}${p.text}   [${p.kind} · ${p.entry.replace('RB-E-', '')} · ${p.score}]`);
       console.log(`     ${p.why}`);
     });
+  }
+  const outcomes = outcomeMemory(a, priorities);
+  if (outcomes.visits > 1) {
+    console.log(`\n  SINCE LAST VISIT  (visit #${outcomes.visits} — the advisor remembers)`);
+    console.log(`  ${'-'.repeat(74)}`);
+    for (const k of outcomes.resolved) console.log(`  ✓ resolved: ${k} — last visit's finding is gone; nice.`);
+    for (const p of outcomes.persisting.filter((x) => x.seen >= 3)) console.log(`  ⏳ ${p.key} — visit #${p.seen} with no movement: decide it (react-brain decide … --quiets=${p.key.split(':').slice(0,2).join(':')}) or schedule it`);
+    if (!outcomes.resolved.length && !outcomes.persisting.some((x) => x.seen >= 3)) console.log(`  (no resolutions; nothing persisting ≥3 visits)`);
   }
 
   console.log(`\n  DETECTED ECOSYSTEM CHOICES  (deterministic dep-scan)`);
@@ -472,7 +504,7 @@ function jsonReport(a, entries) {
   const trajectory = traj?.git ? { oldRefDate: traj.oldRefDate, migrations: traj.migrations,
     recentlyAdopted: Object.fromEntries(Object.entries(traj.adoption).filter(([, t]) => traj.now - t <= 90 * 86400)) } : null;
   return {
-    adrs, acknowledged,
+    adrs, acknowledged, outcomes: outcomeMemory(a, priorities),
     name: a.name, path: a.path, version: a.version || null, platform: a.platform,
     desktopShell: a.desktopShell || null, stage: a.stage, depCount: a.depCount,
     ts: a.ts, ci: a.ci, tests: a.tests, lintfmt: a.lintfmt, hooks: a.hooks,
