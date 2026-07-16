@@ -1,0 +1,515 @@
+{
+ "source": "this-week-in-react",
+ "issue": 290,
+ "url": "https://thisweekinreact.com/newsletter/290",
+ "captured": "2026-07-16",
+ "gold": "tools/harvest-log/twir-290.md",
+ "links": [
+  {
+   "url": "https://swmansion.com/",
+   "text": "Software Mansion"
+  },
+  {
+   "url": "https://www.meticulous.ai/",
+   "text": ""
+  },
+  {
+   "url": "https://svar.dev/react/gantt/",
+   "text": "SVAR React Gantt \u2014 A modern React Gantt chart for project scheduling, from simple timeline"
+  },
+  {
+   "url": "https://react.dev/community/team",
+   "text": "Meet the new React Team - Reorganized by Working Groups"
+  },
+  {
+   "url": "https://react.dev/reference/react/Suspense",
+   "text": "React Docs - What activates a Suspense boundary"
+  },
+  {
+   "url": "https://nextjs.org/blog/next-security-release-program",
+   "text": "Next.js Security Release and Our Next Patch Release"
+  },
+  {
+   "url": "https://better-auth.com/blog/better-auth-joins-vercel",
+   "text": "Better Auth is joining Vercel"
+  },
+  {
+   "url": "https://certificates.dev/blog/cache-components-in-nextjs",
+   "text": "Cache Components in Next.js 16"
+  },
+  {
+   "url": "https://neciudan.dev/react-compiler-explained",
+   "text": "React Compiler explained"
+  },
+  {
+   "url": "https://dev.to/shubhradev/my-nextjs-16-optimistic-ui-looked-perfect-then-someone-clicked-it-five-times-fast-b2c",
+   "text": "useOptimistic Already Handles Rollback in Next.js 16"
+  },
+  {
+   "url": "https://kore-nordmann.de/blog/htmx-and-web-components-instead-of-react.html",
+   "text": "HTMX and Web Components Instead of React"
+  },
+  {
+   "url": "https://jovidecroock.com/blog/resumed-hydration-preact/",
+   "text": "Async hydration in Preact"
+  },
+  {
+   "url": "https://morello.dev/blog/solidjs-2-react-developers-first-look",
+   "text": "SolidJS 2.0: A React Developer's First Look"
+  },
+  {
+   "url": "https://blog.sentry.io/nextjs-export-traces-opentelemetry/",
+   "text": "Exporting Next.js Server Traces with OpenTelemetry"
+  },
+  {
+   "url": "https://formity.app/",
+   "text": "Formity \u2013 Build onboarding, checkout, surveys, lead generation, and more with programmable"
+  },
+  {
+   "url": "https://github.com/remix-run/react-router/releases/tag/react-router%408.2.0",
+   "text": "React Router 8.2 - adds a Web Streams default server entry for non-Node Framework mode app"
+  },
+  {
+   "url": "https://github.com/storybookjs/storybook/releases/tag/v10.5.0",
+   "text": "Storybook 10.5 - Agentic Review, one-click Claude/Codex plugins, storybook ai MCP command,"
+  },
+  {
+   "url": "https://astryx.atmeta.com/blog/astryx-v0-1-3",
+   "text": "Astryx 0.1.3 - Meta design system, built with StyleX - Better tables, keyboard navigation,"
+  },
+  {
+   "url": "https://github.com/resend/react-email/releases/tag/react-email%406.7.0",
+   "text": "React Email 6.7 - Enable custom export extensions via --extension"
+  },
+  {
+   "url": "https://www.youtube.com/watch?v=PpyepQmLDTY",
+   "text": "Jack Herrington Can\u2019t Think of a Reason to Choose Next.js Anymore"
+  },
+  {
+   "url": "https://www.youtube.com/watch?v=ngIdL-fNNzw",
+   "text": "Ankita Kulkarni - Next.js 16.3 Finally Fixed Slow Navigations"
+  },
+  {
+   "url": "https://podrocket.logrocket.com/async-react-with-vercels-aurora-scharff",
+   "text": "Podrocket - Async React with Vercel's Aurora Scharff"
+  },
+  {
+   "url": "https://www.youtube.com/clip/UgkxDdNASo6xNS710ODcjMx0WW4HtTxIYbrA",
+   "text": "One of the few things I regularly read to keep up with the React world."
+  },
+  {
+   "url": "https://www.agent.sh/",
+   "text": ""
+  },
+  {
+   "url": "https://go.posthog.com/twir-jul15",
+   "text": "PostHog - A guide to growth metrics for startups that don't fit in"
+  },
+  {
+   "url": "https://github.com/react-native-community/discussions-and-proposals/pull/1010",
+   "text": "RFC - Media query support in StyleSheet"
+  },
+  {
+   "url": "https://github.com/react-native-community/discussions-and-proposals/pull/1011",
+   "text": "RFC - ViewTransition support in React Native"
+  },
+  {
+   "url": "https://github.com/react-native-community/discussions-and-proposals/discussions/1009",
+   "text": "Proposal - React Native out-of-tree platform API"
+  },
+  {
+   "url": "https://expo.dev/demos",
+   "text": "Expo Demos - Gallery of 30 community-built UI demos"
+  },
+  {
+   "url": "https://blog.margelo.com/rewriting-rive-react-native-with-nitro-modules",
+   "text": "Rewriting Rive React Native with Nitro Modules: up to 94\u00d7 Faster Multi-View Loads"
+  },
+  {
+   "url": "https://expo.dev/blog/nesting-tabs-and-drawers-with-expo",
+   "text": "Building balanced mobile layouts: nesting tabs and drawers with Expo Router"
+  },
+  {
+   "url": "https://codewithbeto.dev/blog/expo-notification-actions",
+   "text": "Notification Actions in Expo: Let Users Respond Without Opening Your App"
+  },
+  {
+   "url": "https://thoughtbot.com/blog/migrating-to-native-stack-navigation-with-a-surprise-from-ios-26",
+   "text": "Migrating to native stack navigation, with a surprise from iOS 26"
+  },
+  {
+   "url": "https://expo.dev/blog/moving-away-from-expo-vector-icons",
+   "text": "Expo - Moving away from @expo/vector-icons"
+  },
+  {
+   "url": "https://www.drizz.dev/",
+   "text": "Drizz - One test suite for Android and iOS. No platform-specific selectors, no XPaths. Pla"
+  },
+  {
+   "url": "https://github.com/software-mansion/react-native-screens/releases/tag/4.26.0",
+   "text": "React Native Screens 4.26 - Stable Tabs API, faster iOS header updates, requires React Nat"
+  },
+  {
+   "url": "https://github.com/kirillzyusko/react-native-keyboard-controller/releases/tag/1.22.0",
+   "text": "Keyboard Controller 1.22 - New KeyboardEffects component to customize the iOS keyboard bac"
+  },
+  {
+   "url": "https://github.com/getsentry/sentry-react-native/releases/tag/8.18.0",
+   "text": "Sentry React Native 8.18 - Consume sentry-cocoa as a prebuilt xcframework on iOS"
+  },
+  {
+   "url": "https://github.com/auth0/react-native-auth0/releases/tag/v5.9.0",
+   "text": "React Native Auth0 5.9 - Passwordless OTP for database connections"
+  },
+  {
+   "url": "https://github.com/jpudysz/react-native-unistyles/releases/tag/v3.3.0",
+   "text": "Unistyles 3.3 - transformOrigin support for shadow tree updates, background image props on"
+  },
+  {
+   "url": "https://github.com/react-native-webview/react-native-webview/releases/tag/v16.0.0",
+   "text": "React Native Webview 16.0 - Removes legacy architecture support"
+  },
+  {
+   "url": "https://github.com/calintamas/react-native-toast-message/releases/tag/v2.4.0",
+   "text": "React Native Toast Message 2.4 - Configurable enter/exit animations via animationConfig , "
+  },
+  {
+   "url": "https://github.com/Shopify/react-native-skia/releases/tag/v2.8.0",
+   "text": "React Native Skia 2.8 - Paragraph.getPath() and extendedVisit() , Reanimated is now option"
+  },
+  {
+   "url": "https://github.com/callstack/react-native-bottom-tabs/releases/tag/react-native-bottom-tabs%401.4.0",
+   "text": "React Native Bottom Tabs 1.4 - Icon rendering mode to preserve original icon colors, focus"
+  },
+  {
+   "url": "https://github.com/kuatsu/react-native-boost/releases/tag/v1.6.0",
+   "text": "React Native Boost 1.6 - Babel optimizing plugin - Add opt-in Image optimizer"
+  },
+  {
+   "url": "https://github.com/tc39/agendas/blob/main/2026/07.md",
+   "text": "TC39 - Agenda for the 115th meeting - July 20-23"
+  },
+  {
+   "url": "https://github.com/pnpm/rfcs/pull/18",
+   "text": "pnpm RFC - Native Monorepo Versioning"
+  },
+  {
+   "url": "https://bun.com/blog/bun-in-rust",
+   "text": "Rewriting Bun in Rust"
+  },
+  {
+   "url": "https://nubjs.com/blog/unblocking-the-global-virtual-store",
+   "text": "Node\u2019s phantom dependency problem and the path to a 5x faster package manager"
+  },
+  {
+   "url": "https://www.jasnell.me/posts/fetch-needs-error-codes",
+   "text": "Fetch Needs Error Codes"
+  },
+  {
+   "url": "https://css-tricks.com/the-siren-song-of-arianotify/",
+   "text": "The Siren Song of ariaNotify()"
+  },
+  {
+   "url": "https://olliewilliams.xyz/blog/no-build/",
+   "text": "Do we still need build tools?"
+  },
+  {
+   "url": "https://piccalil.li/blog/proxy-and-reflect/",
+   "text": "Proxy and Reflect"
+  },
+  {
+   "url": "https://native-sdk.dev/",
+   "text": "Native SDK - Author native desktop apps in TypeScript or Zig"
+  },
+  {
+   "url": "https://socket.dev/blog/npm-12",
+   "text": "npm 12.0 - Install scripts opt-in by default, 2FA-bypass token deprecation"
+  },
+  {
+   "url": "https://twitter.com/jherr/status/1666578571912171520",
+   "text": "People always ask how I keep up to date, it's This Week In React."
+  },
+  {
+   "url": "https://sebastienlorber.com/",
+   "text": "Website"
+  }
+ ],
+ "corpus": {
+  "commit": "136ab76",
+  "entries": 42,
+  "index": [
+   "RB-E-REACT-CORE \u2014 React core \u2014 version, Compiler, RSC, concurrent features [react-core] (10 readings held)",
+   "RB-E-RN-VERSIONS \u2014 React Native release timeline \u2014 what each version changed [rn-versions] (1 readings held)",
+   "RB-E-TYPESCRIPT \u2014 TypeScript rigor & public API typing [typescript] (3 readings held)",
+   "RB-E-STATE \u2014 Client & server state management [state-and-data] (6 readings held)",
+   "RB-E-DATA \u2014 Data fetching & caching [state-and-data] (7 readings held)",
+   "RB-E-P2P \u2014 Peer-to-peer / local-first backend (Holepunch \u00b7 Pear) [p2p] (1 readings held)",
+   "RB-E-NAV \u2014 Navigation & routing [navigation] (6 readings held)",
+   "RB-E-META-FRAMEWORKS \u2014 Meta-frameworks (full-stack React) [meta-frameworks] (6 readings held)",
+   "RB-E-FORMS \u2014 Forms & validation [forms] (2 readings held)",
+   "RB-E-NETWORKING \u2014 Networking & HTTP client layer [networking] (1 readings held)",
+   "RB-E-CROSSPLATFORM \u2014 Sharing code across React (web) & React Native [cross-platform] (2 readings held)",
+   "RB-E-DESKTOP \u2014 Desktop apps & web-to-native shells (packaging a React web app) [desktop-shells] (2 readings held)",
+   "RB-E-STYLING \u2014 Styling & theming [styling] (3 readings held)",
+   "RB-E-COMPONENT-LIBS \u2014 Component & headless-UI libraries (web) [component-libs] (2 readings held)",
+   "RB-E-ANIMATION \u2014 Animation & gestures [animation] (6 readings held)",
+   "RB-E-LISTS \u2014 Lists & virtualization [lists-and-perf] (5 readings held)",
+   "RB-E-A11Y \u2014 Accessibility across web & native [accessibility] (2 readings held)",
+   "RB-E-I18N \u2014 Internationalization (i18n) [i18n] (2 readings held)",
+   "RB-E-CHARTS \u2014 Charting & data visualization [data-viz] (2 readings held)",
+   "RB-E-EDITORS \u2014 Rich-text & content editors [editors] (1 readings held)",
+   "RB-E-SVG \u2014 SVG, vector graphics & icons (React Native) [svg] (2 readings held)",
+   "RB-E-MAPS \u2014 Maps & geolocation UI [maps] (1 readings held)",
+   "RB-E-CALENDARS \u2014 Calendars, date pickers & event grids [calendars] (1 readings held)",
+   "RB-E-POLISH \u2014 UX polish primitives \u2014 toasts, haptics, splash screens, image viewers (React Native) [polish] (1 readings held)",
+   "RB-E-NATIVE \u2014 Native modules & the New Architecture [native] (5 readings held)",
+   "RB-E-MEDIA \u2014 Camera, video & real-time media (WebRTC, frame processing, filters) [media] (4 readings held)",
+   "RB-E-STORAGE \u2014 On-device storage & persistence [storage] (2 readings held)",
+   "RB-E-NATIVE-UI \u2014 Native UI extensions \u2014 Live Activities, widgets, App Clips, portals [native-ui] (4 readings held)",
+   "RB-E-KEYBOARD \u2014 Keyboard handling & avoidance (React Native) [keyboard] (1 readings held)",
+   "RB-E-PAYMENTS \u2014 In-app purchases & payments [payments] (2 readings held)",
+   "RB-E-BROWNFIELD \u2014 Brownfield integration & micro-frontends [brownfield] (3 readings held)",
+   "RB-E-GAMES \u2014 Games, 3D & AR/VR \u2014 interactive / real-time rendering [games] (1 readings held)",
+   "RB-E-ALT-FRAMEWORKS \u2014 Alternatives to React Native (cross-platform frameworks) [alt-frameworks] (4 readings held)",
+   "RB-E-BUILD \u2014 Build tooling, bundlers & monorepo [build-tooling] (5 readings held)",
+   "RB-E-TESTING \u2014 Testing strategy & tooling [testing] (3 readings held)",
+   "RB-E-DX \u2014 Developer experience \u2014 CI, lint/format, hooks, monorepo, onboarding [dx] (2 readings held)",
+   "RB-E-OBSERVABILITY \u2014 Crash reporting, monitoring & observability [observability] (2 readings held)",
+   "RB-E-SECURITY \u2014 App security \u2014 device trust, secrets, dependency risk [security] (6 readings held)",
+   "RB-E-OTA \u2014 Over-the-air (OTA) JS updates & release channels (React Native) [ota-updates] (2 readings held)",
+   "RB-E-ONDEVICE-AI \u2014 On-device AI / ML [ai-ml] (1 readings held)",
+   "RB-E-AI-UI \u2014 Generative UI & in-app AI [ai-ui] (2 readings held)",
+   "RB-E-AI-DEVTOOLS \u2014 AI-assisted development \u2014 agent skills, MCP tooling & device automation [ai-devtools] (2 readings held)"
+  ],
+  "held": [
+   "https://react.dev/blog/2025/10/07/react-compiler-1",
+   "https://react.dev/blog/2025/12/11/denial-of-service-and-source-code-exposure-in-react-server-components",
+   "https://rspack.rs/blog/announcing-2-1",
+   "https://www.peterp.me/articles/hidden-cost-of-react-activity",
+   "https://www.youtube.com/watch?v=K3flMIHS-cI",
+   "https://blog.isquaredsoftware.com/2020/05/blogged-answers-a-mostly-complete-guide-to-react-rendering-behavior/",
+   "https://www.callstack.com/blog/writing-custom-renderers-for-react",
+   "https://aurorascharff.no/posts/component-architecture-for-react-server-components/",
+   "https://shud.in/thoughts/build-bulletproof-react-components",
+   "https://inside-react.vercel.app/blog/understanding-why-react-fiber-exists",
+   "https://inside-react.vercel.app/blog/how-does-react-fiber-render-your-ui",
+   "https://dev.to/playfulprogramming/two-react-design-choices-developers-dont-like-but-cant-avoid-d6g",
+   "https://saschb2b.com/blog/react-compiler-year-in-review",
+   "https://reactnative.dev/blog/2026/02/11/react-native-0.84",
+   "https://reactnative.dev/blog/2026/04/07/react-native-0.85",
+   "https://reactnative.dev/blog/2026/06/11/react-native-0.86",
+   "https://expo.dev/changelog/sdk-57",
+   "https://expo.dev/blog/app-store-connect-minimum-sdk-26",
+   "https://blog.codeminer42.com/react-native-architecture-from-bridge-to-fabric/",
+   "https://devblogs.microsoft.com/typescript/announcing-typescript-7-0-rc/",
+   "https://registry.npmjs.org/typescript/latest",
+   "https://zackoverflow.dev/writing/why-does-tsgo-use-so-much-memory",
+   "https://tanstack.com/blog/tanstack-table-v9-typescript-performance",
+   "https://code.visualstudio.com/blogs/2026/06/26/iterating-faster-with-ts-7",
+   "https://2025.stateofreact.com/en-US/libraries/state-management/",
+   "https://www.peterp.me/articles/jotai-structural-sharing-vs-selectatom/",
+   "https://tkdodo.eu/blog/react-query-as-a-state-manager",
+   "https://blog.isquaredsoftware.com/2021/01/context-redux-differences/",
+   "https://performance.dev/how-is-linear-so-fast-a-technical-breakdown",
+   "https://neciudan.dev/component-communication-patterns-in-react",
+   "https://2025.stateofreact.com/en-US/libraries/",
+   "https://tkdodo.eu/blog/creating-query-abstractions",
+   "https://tkdodo.eu/blog/tan-stack-router-and-query",
+   "https://tkdodo.eu/blog/why-you-want-react-query",
+   "https://github.blog/engineering/architecture-optimization/from-latency-to-instant-modernizing-github-issues-navigation-performance/",
+   "https://jjenzz.com/best-loading-states-are-no-loading-states/",
+   "https://saschb2b.com/blog/use-hook-react",
+   "https://armand-salle.fr/post/real-time-cache-invalidation-sse-trpc-redis-bullmq/",
+   "https://docs.pears.com/",
+   "https://reactnavigation.org/blog/2025/12/19/react-navigation-8.0-alpha/",
+   "https://reactrouter.com/",
+   "https://expo.dev/changelog/sdk-56",
+   "https://reactnavigation.org/blog/2026/07/08/react-navigation-8.0-july-progress/",
+   "https://performance.dev/chatgpt",
+   "https://tanstack.com/blog/tanstack-router-signal-graph",
+   "https://andrei-calazans.com/posts/2026-06-04-expo-router-screen-level-lazy-loading/",
+   "https://sergiodxa.com/articles/react-router-loaders-and-actions-as-integration-points",
+   "https://www.callstack.com/blog/deep-links-with-authentication-in-react-navigation",
+   "https://programmingarehard.com/2026/05/06/react-router-dialogs.html/",
+   "https://tanstack.com/blog/who-owns-the-tree",
+   "https://frontendmasters.com/blog/react-server-components-in-tanstack/",
+   "https://nextjs.org/blog/nextjs-across-platforms",
+   "https://tanstack.com/blog/react-server-components",
+   "https://blog.railway.com/p/moving-railways-frontend-off-nextjs",
+   "https://punits.dev/blog/use-client-in-nextjs/",
+   "https://nextjs.org/blog/next-16-3-instant-navigations",
+   "https://neciudan.dev/hydration-and-rendering-strategies",
+   "https://standardschema.dev/",
+   "https://tanstack.com/form/latest/docs/framework/react/guides/form-groups",
+   "https://upskills.dev/tutorials/react-forms-done-right",
+   "https://formisch.dev/blog/one-core-six-frameworks/",
+   "https://github.com/margelo/react-native-nitro-fetch",
+   "https://registry.npmjs.org/axios/latest",
+   "https://nicolasgallagher.com/one-react-for-web-and-native/",
+   "https://www.callstack.com/podcasts/from-react-native-web-to-react-strict-dom",
+   "https://evanbacon.dev/blog/use-dom",
+   "https://www.callstack.com/blog/ai-assisted-react-native-migration-for-tv-lessons-from-zattoo",
+   "https://tauri.app/",
+   "https://github.com/tw93/Pake",
+   "https://github.com/microsoft/react-native-windows/releases",
+   "https://performance.dev/the-conductor-rewrite",
+   "https://www.raycast.com/blog/a-technical-deep-dive-into-the-new-raycast",
+   "https://www.spotvirtual.com/blog/why-were-breaking-up-with-css-in-js",
+   "https://engineering.fb.com/2025/11/11/web/stylex-a-styling-library-for-css-at-scale/",
+   "https://www.skovhus.dev/blog/moving-linear-from-styled-components-to-stylex",
+   "https://registry.npmjs.org/react-native-tailwind",
+   "https://registry.npmjs.org/@mui/material/latest",
+   "https://github.com/mui/base-ui",
+   "https://astryx.atmeta.com/blog/how-astryx-works",
+   "https://ui.shadcn.com/docs/changelog/2026-06-chat-components",
+   "https://ui.shadcn.com/docs/changelog",
+   "https://polar.sh/blog/orbit-llm-safe-design-system",
+   "https://aurorascharff.no/posts/building-design-components-with-action-props-using-async-react/",
+   "https://registry.npmjs.org/@rive-app%2freact-native",
+   "https://reactnavigation.org/blog/2026/04/27/building-custom-screen-transitions",
+   "https://registry.npmjs.org/react-native-screen-transitions/latest",
+   "https://www.joshwcomeau.com/animation/css-vs-javascript/",
+   "https://www.peterp.me/articles/how-react-native-ease-runs-animations-with-no-javascript-loop/",
+   "https://blog.margelo.com/profiling-skia-reanimated-low-end-android",
+   "https://expo.dev/blog/the-real-cost-of-react-native-animations-benchmarking-every-approach",
+   "https://barvian.me/react-exit-animations",
+   "https://blog.margelo.com/rewriting-rive-react-native-with-nitro-modules",
+   "https://shopify.engineering/flashlist-v2",
+   "https://rednegra.net/blog/20260212-virtual-scroll/",
+   "https://blog.logrocket.com/react-performance-optimization-windowing-vs-component-recycling/",
+   "https://www.peterp.me/articles/legend-list-engine-simulator/",
+   "https://certificates.dev/blog/accessibility-in-react-common-mistakes-and-how-to-fix-them",
+   "https://frontendmasters.com/blog/ai-generated-ui-is-inaccessible-by-default/",
+   "https://github.com/amannn/next-intl/releases/tag/v4.8.0",
+   "https://github.com/nkzw-tech/fbtee",
+   "https://next-intl.dev/blog/precompilation",
+   "https://formatjs.github.io/docs/core-concepts/icu-syntax/",
+   "https://reactnativerewind.com/issues/react-native-0-86-charting-your-financial-ruin-and-the-junk-drawer-in-your-package-json",
+   "https://github.com/FormidableLabs/victory-native-xl",
+   "https://github.com/margelo/react-native-graph/releases",
+   "https://medium.com/airbnb-engineering/introducing-visx-from-airbnb-fd6155ac4658",
+   "https://shopify.engineering/webgpu-skia-web-graphics",
+   "https://github.com/software-mansion/react-native-enriched",
+   "https://github.com/software-mansion/react-native-enriched-markdown",
+   "https://smoores.dev/post/unreasonable_effectiveness_of_prosemirror/",
+   "https://registry.npmjs.org/react-native-svg/latest",
+   "https://github.com/oblador/react-native-vector-icons/blob/master/MIGRATION.md",
+   "https://wcandillon.dev/article/hello-project-redraw",
+   "https://blog.logrocket.com/use-svgs-react-native-tutorial/",
+   "https://docs.expo.dev/versions/latest/sdk/maps/",
+   "https://github.com/gmi-software/react-native-better-maps",
+   "https://github.com/visgl/react-google-maps",
+   "https://www.pkgpulse.com/guides/react-native-maps-vs-mapbox-rn-vs-maplibre-rn-mobile-2026",
+   "https://registry.npmjs.org/react-native-calendars/latest",
+   "https://registry.npmjs.org/@super-calendar/native/latest",
+   "https://marceloprado.github.io/flash-calendar/",
+   "https://super-calendar.afonsojramos.me/",
+   "https://registry.npmjs.org/sonner-native/latest",
+   "https://registry.npmjs.org/react-native-bootsplash/latest",
+   "https://registry.npmjs.org/@nandorojo/galeria/latest",
+   "https://emilkowal.ski/ui/building-a-toast-component",
+   "https://github.com/zoontek/react-native-edge-to-edge",
+   "https://docs.expo.dev/modules/shared-objects/",
+   "https://blog.margelo.com/make-jsi-run-faster",
+   "https://blog.margelo.com/make-jsi-run-faster-2",
+   "https://blog.margelo.com/margelo-discord-react-native-performance",
+   "https://blog.margelo.com/four-years-of-react-native-quick-crypto",
+   "https://infinite.red/react-native-radio/rnr-351-transforming-packages-to-nitro-with-marc-rousavy",
+   "https://blog.margelo.com/building-videocall-app-with-filters",
+   "https://expo.dev/changelog/sdk-55",
+   "https://swmansion.com/blog/moqkit-native-mobile-sdk-moq-ios-android/",
+   "https://blog.margelo.com/whats-new-in-visioncamera-v5",
+   "https://blog.margelo.com/react-native-qr-barcode-scanner-visioncamera-v5",
+   "https://react-native-async-storage.github.io/3.1/migration-to-3/",
+   "https://github.com/mrousavy/react-native-mmkv/releases",
+   "https://ospfranco.com/post/2023/11/09/sqlite-for-react-native,-but-5x-faster-and-5x-less-memory/",
+   "https://frontendatscale.com/blog/tanstack-db/",
+   "https://expo.dev/blog/ios-widgets-and-live-activities-in-expo",
+   "https://github.com/callstackincubator/voltra/releases/tag/v2.0.0",
+   "https://expo.dev/blog/worklet-integration-in-expo-ui-synchronously-controlling-swiftui-and-compose-state",
+   "https://evanbacon.dev/blog/apple-home-screen-widgets",
+   "https://addjam.com/blog/2025-02-04/using-live-activities-react-native-app/",
+   "https://vercel.com/blog/how-we-built-the-v0-ios-app",
+   "https://www.youtube.com/watch?v=rhLBFKlEXPM",
+   "https://blog.margelo.com/deep-dive-in-keyboard-handling",
+   "https://github.com/hyochan/expo-iap",
+   "https://github.com/premieroctet/react-native-wallet",
+   "https://www.revenuecat.com/blog/engineering/cross-platform-subscription/",
+   "https://www.revenuecat.com/blog/engineering/building-the-rc-fortress/",
+   "https://github.com/callstack/react-native-brownfield",
+   "https://registry.npmjs.org/@callstack/brownie",
+   "https://docs.expo.dev/brownfield/overview/",
+   "https://www.callstack.com/blog/how-we-made-hybrid-ios-apps-compile-39-faster-with-react-native-brownfield",
+   "https://medium.com/doctolib/rebuilding-the-doctolib-homepage-from-webview-to-native-27937ea71801",
+   "https://www.callstack.com/blog/unlocking-expo-updates-in-an-isolated-brownfield-architecture-with-sdk-55",
+   "https://www.callstack.com/blog/react-native-production-lessons-from-react-universe-meetup-x-zalando",
+   "https://github.com/wcandillon/react-native-webgpu",
+   "https://registry.npmjs.org/@borndotcom/react-native-godot",
+   "https://registry.npmjs.org/@reactvision/react-viro/latest",
+   "https://github.com/callstack/react-native-visionos",
+   "https://reactnative.dev/blog/2026/02/24/react-native-comes-to-meta-quest",
+   "https://shopify.engineering/react-native-skia-shopify",
+   "https://github.com/lynx-family/lynx",
+   "https://github.com/Snapchat/Valdi",
+   "https://swmansion.com/blog/we-built-the-same-app-in-kmp-and-react-native-here-s-what-we-found",
+   "https://developer.mozilla.org/en-US/blog/mdn-front-end-deep-dive/",
+   "https://evilmartians.com/chronicles/from-react-to-native-web-with-nanotags-a-migration-that-saved-100kb",
+   "https://strawberrybrowser.com/blog/react-to-svelte",
+   "https://voidzero.dev/posts/announcing-vite-plus-beta",
+   "https://github.com/ecrindigital/facetpack",
+   "https://www.callstack.com/blog/mobile-module-federation-with-re-pack-when-runtime-delivery-is-worth-the-complexity",
+   "https://leerob.com/rust",
+   "https://vite.dev/blog/announcing-vite8",
+   "https://andrei-calazans.com/posts/2026-06-02-how-metro-inlined-requires-work/",
+   "https://themythicalengineer.com/the-complete-guide-to-react-native-build-optimization.html",
+   "https://www.youtube.com/watch?v=1o0pEjYGUWM",
+   "https://docs.maestro.dev/get-started/maestro-mcp",
+   "https://github.com/callstackincubator/react-native-harness",
+   "https://github.com/mdjastrzebski/test-renderer",
+   "https://tkdodo.eu/blog/test-ids-are-an-a11y-smell",
+   "https://kentcdodds.com/blog/write-tests",
+   "https://kentcdodds.com/blog/testing-implementation-details",
+   "https://medium.com/doctolib/expo-without-eas-scaling-the-react-native-developer-experience-of-an-app-with-90m-users-2694ea841805",
+   "https://github.com/millionco/react-doctor",
+   "https://expo.dev/blog/best-ci-cd-for-mobile-apps",
+   "https://blog.sentry.io/react-native-sdk-8-is-here/",
+   "https://docs.expo.dev/eas/observe/introduction/",
+   "https://engineering.indeedblog.com/blog/2026/03/bringing-lighthouse-to-the-app-building-performance-metrics-for-react-native/",
+   "https://3perf.com/blog/hydration-mismatch/",
+   "https://github.com/advisories/GHSA-83fc-fqcc-2hmg",
+   "https://github.com/adnxy/rnsec",
+   "https://vercel.com/kb/bulletin/vercel-april-2026-security-incident",
+   "https://vercel.com/blog/introducing-deepsec-find-and-fix-vulnerabilities-in-your-code-base",
+   "https://nuqs.dev/blog/staged-publishing-for-supply-chain-security",
+   "https://lachlan.nz/blog/the-react2shell-story",
+   "https://saschb2b.com/blog/flight-protocol-dos",
+   "https://trigger.dev/blog/shai-hulud-postmortem",
+   "https://tanstack.com/blog/npm-supply-chain-compromise-postmortem",
+   "https://longho.dev/posts/rsc-server-functions-are-not-an-api-boundary/",
+   "https://nodesource.com/blog/npm-v12-install-scripts-not-a-silver-bullet",
+   "https://github.com/microsoft/react-native-code-push",
+   "https://registry.npmjs.org/hot-updater/latest",
+   "https://expo.dev/blog/the-production-playbook-for-ota-updates",
+   "https://docs.expo.dev/eas-update/introduction/",
+   "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.8.0",
+   "https://registry.npmjs.org/@react-native-ai/adk/latest",
+   "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.3.0",
+   "https://github.com/corasan/react-native-nitro-mlx",
+   "https://swmansion.com/blog/on-device-ai-beats-cloud-for-tts-heres-why/",
+   "https://json-render.dev/docs/ai-sdk",
+   "https://github.com/tambo-ai/tambo",
+   "https://registry.npmjs.org/@tanstack/ai/latest",
+   "https://tanstack.com/blog/generation-hooks",
+   "https://ai-sdk.dev/docs/advanced/rendering-ui-with-language-models",
+   "https://tigerabrodi.blog/how-to-build-a-performant-ai-markdown-renderer",
+   "https://github.com/callstackincubator/agent-skills",
+   "https://github.com/margelo/react-native-skills",
+   "https://github.com/infinitered/reactotron/releases/tag/reactotron-core-server%403.3.0",
+   "https://github.com/callstack/agent-device",
+   "https://tanstack.com/blog/from-docs-to-agents",
+   "https://www.callstack.com/blog/announcing-react-native-evals",
+   "https://www.callstack.com/blog/how-expensify-uses-agent-device-for-mobile-bug-evidence-and-profiling",
+   "https://swmansion.com/blog/argent-agentic-toolkit-to-control-debug-and-profile-ios-applications/"
+  ]
+ }
+}

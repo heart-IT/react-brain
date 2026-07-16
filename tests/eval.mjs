@@ -287,6 +287,24 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
   check(satisfiesTripwire({ pkg: 'x', atleast: '1.0.0' }, undefined) === false, 'tripwire: missing registry info never fires');
 }
 
+// ── harvest bench: gold-manifest parsing + asymmetric judgment scoring ──────────
+{
+  const { parseGoldManifest, scoreTriage, normalize } = await import(join(ROOT, 'tools/harvest-lib.mjs'));
+  const { readFileSync } = await import('node:fs');
+  const gold = parseGoldManifest(readFileSync(join(ROOT, 'tools/harvest-log/twir-290.md'), 'utf8'));
+  check(gold.length > 50, 'bench: gold manifest parses >50 URL rows');
+  const screens = gold.find((r) => r.key === normalize('https://github.com/software-mansion/react-native-screens/releases/tag/4.26.0'));
+  check(screens?.disposition === 'kept' && screens.entries.includes('RB-E-NAV'), 'bench: screens 4.26 row parses as kept → RB-E-NAV');
+  const solid = gold.find((r) => r.key === normalize('https://morello.dev/blog/solidjs-2-react-developers-first-look'));
+  check(solid?.disposition === 'skipped' && solid.reason === 'pre-ship', 'bench: solidjs row parses as skipped/pre-ship');
+  const g = [{ key: 'a', disposition: 'kept', entries: ['RB-E-X'], reason: null }, { key: 'b', disposition: 'skipped', entries: [], reason: 'how-to' }];
+  const perfect = scoreTriage(g, [{ key: 'a', disposition: 'kept', entry: 'RB-E-X' }, { key: 'b', disposition: 'skipped', reason: 'how-to' }], ['a', 'b']);
+  check(perfect.score === 100 && perfect.routing.ok === 1 && perfect.reason.ok === 1, 'bench: perfect candidate scores 100 w/ routing + reason credit');
+  const falseSkip = scoreTriage(g, [{ key: 'a', disposition: 'skipped' }, { key: 'b', disposition: 'skipped', reason: 'how-to' }], ['a', 'b']).score;
+  const overKeep = scoreTriage(g, [{ key: 'a', disposition: 'kept', entry: 'RB-E-X' }, { key: 'b', disposition: 'kept' }], ['a', 'b']).score;
+  check(falseSkip === 25 && overKeep === 75 && falseSkip < overKeep, 'bench: a false skip costs 3× an over-keep (25 vs 75)');
+}
+
 // ── report ──────────────────────────────────────────────────────────────────────
 console.log(`react-brain eval — ${pass + fails.length} assertions`);
 if (fails.length) { for (const f of fails) console.log(`  ✗ ${f}`); console.log(`\n✗ ${fails.length} failed / ${pass} passed`); process.exit(1); }

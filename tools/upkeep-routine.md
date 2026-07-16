@@ -90,6 +90,12 @@ The agent should, in order:
    - **Spot-check (each pass):** re-adjudicate ALL `cap` skips + 2 random skips from the
      PREVIOUS issue's manifest; corrections are committed amendments. (First run corrected
      2 of 2 examined reasons and reopened the react-compiler-explained + thoughtbot keeps.)
+   - **Model/prompt changes to the harvester get benched first:** `react-brain harvest
+     bench --model=<id>` replays a frozen issue against its adjudicated manifest (judgment
+     score; false skips ×3; corpus context pinned pre-harvest). Baseline on record:
+     claude-sonnet-5 single-shot scored 59/100 on twir-290 — keep-averse (skipped all 8
+     gold keeps), so the weekly agent's triage needs the full routine context, not a
+     one-shot prompt; re-bench before trusting any cheaper model.
    Triage judgment is fallible; the manifest is what makes it REVIEWABLE — a wrong skip
    becomes a visible disagreement the maintainer can overturn instead of a silent miss.
    Commit the manifest WITH the delta.

@@ -55,8 +55,10 @@ usage: react-brain <command> [args]
                        mechanically) · coverage <url> <manifest.md> (exit 1 on
                        unaccounted links) · verify-diff [--base=main] (the receipts
                        gate: re-verify every URL the branch adds — CI-enforced on
-                       harvest PRs) · watchlist (recurring skips + reopen
-                       signals across tools/harvest-log/)
+                       harvest PRs) · bench (judgment benchmark: replay a frozen
+                       issue vs the adjudicated manifest; false skips ×3;
+                       --model=<id> | --provider=claude-cli | --candidate=<json>)
+                       · watchlist (recurring skips + reopen signals)
   calibrate [...]      scored prediction track record: is confidence earned?
                        (--seed | --record <id> <held|weakened|overturned> | --today=…)
   signals  [...]       recommendations vs live npm reality (downloads, staleness, claims)

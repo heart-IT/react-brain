@@ -48,6 +48,9 @@ if (mode === 'firsthand') {
 } else if (mode === 'verify-diff') {
   process.argv = [process.argv[0], process.argv[1], ...args];
   await import('./react-brain-verify-diff.mjs');
+} else if (mode === 'bench') {
+  process.argv = [process.argv[0], process.argv[1], ...args];
+  await import('./react-brain-triage-bench.mjs');
 } else if (mode === 'inventory') {
   if (!args[0]) { console.error('usage: harvest inventory <issue-url>'); process.exit(1); }
   const links = extractLinks(await fetchPage(args[0]), args[0]);
@@ -93,6 +96,6 @@ if (mode === 'firsthand') {
   console.log(`\n${signals.length} standing reopen signal(s):`);
   signals.forEach((s) => console.log(`   [${s.file}] ${s.line}`));
 } else {
-  console.error('usage: react-brain harvest <firsthand [--graph|--json|--manifest] | inventory <url> | coverage <url> <manifest.md> | verify-diff [--base=main] | watchlist>');
+  console.error('usage: react-brain harvest <firsthand [--graph|--json|--manifest] | inventory <url> | coverage <url> <manifest.md> | verify-diff [--base=main] | bench [--model=id|--candidate=file] | watchlist>');
   process.exit(1);
 }

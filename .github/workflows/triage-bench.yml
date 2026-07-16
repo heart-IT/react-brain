@@ -1,0 +1,30 @@
+# The judgment benchmark — manual trigger. Replays a frozen issue inventory
+# against a candidate model and scores disposition agreement vs the adjudicated
+# manifest (false skips ×3). Use before changing the cloud-harvest routine's
+# model or triage prompt: "does it triage as well?" becomes a number in the log.
+# Requires the ANTHROPIC_API_KEY repository secret (same as bench.yml).
+name: triage-bench
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: 'model id to benchmark'
+        default: 'claude-sonnet-5'
+        required: true
+      fixture:
+        description: 'frozen issue fixture (tests/fixtures/harvest/<name>-inventory.json)'
+        default: 'twir-290'
+        required: true
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: node tools/cli.mjs harvest bench --model='${{ inputs.model }}' --fixture='${{ inputs.fixture }}'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

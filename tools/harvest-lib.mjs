@@ -111,6 +111,76 @@ export function satisfiesTripwire(when, info) {
   return false;
 }
 
+// ── triage scoring (harvest bench) — manifests are gold data ────────────────────
+// Adjudicated disposition manifests double as a judgment benchmark: parse the
+// gold rows, score a candidate's dispositions against them. Pure + offline.
+export function coarseReason(cell) {
+  const c = String(cell).toLowerCase();
+  if (/pre-ship/.test(c)) return 'pre-ship';
+  if (/too-early/.test(c)) return 'too-early';
+  if (/corroborat|covered/.test(c)) return 'corroboration';
+  if (/how-to|setup guide/.test(c)) return 'how-to';
+  if (/\bcap\b/.test(c)) return 'cap';
+  if (/unverifiable/.test(c)) return 'unverifiable';
+  if (/off-scope|showcase|testimonial|affiliation/.test(c)) return 'off-scope';
+  if (/sponsor/.test(c)) return 'sponsor';
+  if (/minor[ -](feature[ -])?release/.test(c)) return 'minor-release';
+  return 'other';
+}
+
+export function parseGoldManifest(md) {
+  const rows = [];
+  for (const line of md.split('\n')) {
+    const t = line.trim();
+    if (!t.startsWith('|') || /^\|\s*(item|event|-{3})/i.test(t)) continue;
+    const urls = [...t.matchAll(/https?:\/\/[^\s)|\]"'`]+/g)].map((m) => m[0].replace(/[.,;:]+$/, ''));
+    if (!urls.length) continue;
+    const cell = (t.split('|')[2] || '');
+    const disposition = /\*\*kept/i.test(cell) ? 'kept' : /already-held/i.test(cell) ? 'already-held' : 'skipped';
+    const entries = [...new Set([...t.matchAll(/RB-E-[A-Z0-9-]+/g)].map((m) => m[0]))];
+    const reason = disposition === 'skipped' ? coarseReason(cell) : null;
+    for (const u of urls) rows.push({ key: normalize(u), url: u, disposition, entries, reason });
+  }
+  return rows;
+}
+
+// keys = the fixture's link set (what the candidate was actually asked about).
+// False skips (gold kept, candidate skipped) are the feared failure — gold-kept
+// links carry 3× weight, so silently dropping a keeper costs triple.
+// knownIds (optional): entry ids that existed when the candidate judged — a gold
+// keep routed to an entry CREATED BY the gold pass (a gap-fill) is excluded from
+// routing scoring, since no candidate could have named it.
+export function scoreTriage(goldRows, candRows, keys, knownIds) {
+  const gold = new Map(goldRows.map((r) => [r.key, r]));
+  const cand = new Map(candRows.map((r) => [r.key ?? normalize(r.url), r]));
+  const s = { n: 0, weighted: 0, weightTotal: 0, falseSkips: [], overKeeps: [], mismatches: [], unanswered: [],
+    routing: { n: 0, ok: 0, misses: [] }, reason: { n: 0, ok: 0 } };
+  for (const key of keys) {
+    const g = gold.get(key); if (!g) continue;
+    s.n++;
+    const w = g.disposition === 'kept' ? 3 : 1;
+    s.weightTotal += w;
+    const c = cand.get(key);
+    if (!c) { s.unanswered.push(key); continue; }
+    const cd = /kept/i.test(c.disposition) ? 'kept' : /already/i.test(c.disposition) ? 'already-held' : 'skipped';
+    if (cd === g.disposition) s.weighted += w;
+    else if (g.disposition === 'kept' && cd === 'skipped') s.falseSkips.push(key);
+    else if (g.disposition !== 'kept' && cd === 'kept') s.overKeeps.push(key);
+    else s.mismatches.push(`${key}: gold ${g.disposition} vs candidate ${cd}`);
+    if (g.disposition === 'kept' && cd === 'kept' && (!knownIds || g.entries.some((id) => knownIds.has(id)))) {
+      s.routing.n++;
+      if (c.entry && g.entries.includes(c.entry)) s.routing.ok++;
+      else s.routing.misses.push(`${key}: ${c.entry || '(none)'} vs gold ${g.entries.join('/') || '(none)'}`);
+    }
+    if (g.disposition === 'skipped' && cd === 'skipped' && g.reason && g.reason !== 'other' && c.reason) {
+      s.reason.n++;
+      if (coarseReason(c.reason) === g.reason) s.reason.ok++;
+    }
+  }
+  s.score = s.weightTotal ? Math.round((100 * s.weighted) / s.weightTotal) : 0;
+  return s;
+}
+
 // wayback: does an archived snapshot exist? (the third tier of the verify chain)
 export async function waybackSnapshot(url) {
   try {

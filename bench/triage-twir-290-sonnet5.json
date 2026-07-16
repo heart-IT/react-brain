@@ -1,0 +1,39 @@
+{
+ "model": "claude-sonnet-5",
+ "fixture": "twir-290",
+ "ran": "2026-07-16",
+ "n": 57,
+ "weighted": 43,
+ "weightTotal": 73,
+ "falseSkips": [
+  "react.dev/community/team",
+  "better-auth.com/blog/better-auth-joins-vercel",
+  "neciudan.dev/react-compiler-explained",
+  "thoughtbot.com/blog/migrating-to-native-stack-navigation-with-a-surprise-from-ios-26",
+  "github.com/software-mansion/react-native-screens/releases/tag/4.26.0",
+  "github.com/auth0/react-native-auth0/releases/tag/v5.9.0",
+  "bun.com/blog/bun-in-rust",
+  "css-tricks.com/the-siren-song-of-arianotify"
+ ],
+ "overKeeps": [
+  "nextjs.org/blog/next-security-release-program",
+  "expo.dev/blog/moving-away-from-expo-vector-icons",
+  "github.com/react-native-webview/react-native-webview/releases/tag/v16.0.0"
+ ],
+ "mismatches": [
+  "github.com/remix-run/react-router/releases/tag/react-router%408.2.0: gold already-held vs candidate skipped",
+  "youtube.com/watch?v=ngIdL-fNNzw: gold skipped vs candidate already-held",
+  "github.com/calintamas/react-native-toast-message/releases/tag/v2.4.0: gold already-held vs candidate skipped"
+ ],
+ "unanswered": [],
+ "routing": {
+  "n": 0,
+  "ok": 0,
+  "misses": []
+ },
+ "reason": {
+  "n": 37,
+  "ok": 26
+ },
+ "score": 59
+}

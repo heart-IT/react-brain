@@ -162,6 +162,14 @@ node tools/react-brain-harvest.mjs verify-diff --base=main
 node tools/react-brain-harvest.mjs watchlist
 ```
 The manifest convention + spot-check discipline live in `upkeep-routine.md` (step 2).
+And (4) **bench** — the JUDGMENT benchmark: adjudicated manifests double as gold
+data; replay a frozen issue inventory (with the corpus context PINNED at its
+pre-harvest commit — the live corpus would contaminate the test) against a
+candidate model and score disposition agreement deterministically. False skips
+(gold kept → candidate skipped) weigh 3× — over-keeping is reviewable noise,
+a silent skip is the failure the pipeline exists to prevent. Use before changing
+the cloud routine's model or triage prompt (`triage-bench.yml` runs it in CI on
+demand); gold n grows with every reviewed manifest.
 
 ## `react-brain-learn.mjs` — knowledge → human
 The **Tutorial pillar, made adaptive.** A learning path isn't authored — it's *computed*
