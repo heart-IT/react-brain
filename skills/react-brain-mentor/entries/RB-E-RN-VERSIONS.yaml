@@ -37,7 +37,7 @@ note: >
   images already run Xcode 26, SDK ≤53 needs an explicit image opt-in; practically, stay ≥SDK 54.
 defer_to_skill: react-native-jsi
 doc: "RB-E-RN-VERSIONS.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-10
+updated: 2026-07-16
 reading:
   - title: "React Native Architecture: From Bridge to Fabric"
     url: "https://blog.codeminer42.com/react-native-architecture-from-bridge-to-fabric/"

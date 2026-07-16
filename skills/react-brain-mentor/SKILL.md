@@ -101,7 +101,7 @@ eval) after any corpus edit. The mentor's breadth recommendations grow
 automatically. Recommendations are **context-keyed**, not absolute — an entry
 says *"for server state at MVP+, X wins on invalidation,"* never *"X is best."*
 
-**Current state (2026-07-16):** 44 entries across 6 groups, all `drafted`+ (0 stubs), 33
+**Current state (2026-07-16):** 44 entries across 6 groups, all `drafted`+ (0 stubs), 36
 `reviewed` with long-form `encyclopedia/<id>.md`, every entry with curated reading (plus an
 optional A/V `watching` list), synthesized from 6 cross-checked newsletters. Entries
 are reached two ways so none are orphaned (mechanized by `react-brain lint`): **cross-cutting**

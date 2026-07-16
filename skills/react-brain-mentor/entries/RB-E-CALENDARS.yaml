@@ -2,7 +2,7 @@ id: RB-E-CALENDARS
 topic: "Calendars, date pickers & event grids"
 category: calendars
 group: ui
-status: drafted
+status: reviewed   # long-form entry written + source-checked
 confidence: low
 platforms: [react, react-native]
 options:
@@ -30,8 +30,8 @@ note: >
   Reanimated-4/Gesture-Handler/Legend-List requirements verified vs its docs. Lightly vetted
   (confidence: low) — prototype gesture perf on low-end devices before committing.
 defer_to_skill: react-native-best-practices
-doc: null
-updated: 2026-07-07
+doc: "RB-E-CALENDARS.md"   # long-form Explanation entry in content_dir
+updated: 2026-07-16
 reading:
   - title: "Super Calendar — docs (views, gestures & architecture)"
     url: "https://super-calendar.afonsojramos.me/"

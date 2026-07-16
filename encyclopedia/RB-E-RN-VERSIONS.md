@@ -1,108 +1,173 @@
 ---
 id: RB-E-RN-VERSIONS
-title: "About the React Native release timeline — an architecture migration in disguise"
+title: "About the React Native release timeline — the version ladder"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: high
-updated: 2026-07-10
+updated: 2026-07-16
 platforms: [react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-RN-VERSIONS
-defer_to_skill: react-native-jsi
-related: [RB-E-NATIVE, RB-E-BUILD, RB-E-REACT-CORE, RB-E-OTA]
+defer_to_skill: react-native-jsi                              # New-Arch internals: JSI, Fabric, TurboModules, Codegen
+related: [RB-E-NATIVE, RB-E-BUILD, RB-E-REACT-CORE, RB-E-TESTING]
 sources:
   - "https://reactnative.dev/blog/2026/02/11/react-native-0.84"
   - "https://reactnative.dev/blog/2026/04/07/react-native-0.85"
   - "https://reactnative.dev/blog/2026/06/11/react-native-0.86"
+  - "https://expo.dev/changelog/sdk-57"
+  - "https://expo.dev/blog/app-store-connect-minimum-sdk-26"
 ---
 
-# About the React Native release timeline — an architecture migration in disguise
+# About the React Native release timeline — the version ladder
 
-> **Diataxis: Explanation.** This page builds *understanding* of what the version numbers mean —
-> the arcs behind the changelog rows. It is not an upgrade how-to. New-Architecture internals are
-> owned by `RB-E-NATIVE` and the `react-native-jsi` skill; engine/build detail by `RB-E-BUILD`.
+> **Diataxis: Explanation.** This page builds *understanding* of what an RN version number
+> means — why the release timeline reads as an architecture timeline, not a changelog. It is
+> not an upgrade how-to; the sequenced upgrade knowledge lives in the index entry's `migrate:`
+> block (assembled by `react-brain migrate`), and the per-version rows themselves live in the
+> index entry `RB-E-RN-VERSIONS`. New-Architecture internals — JSI, Fabric, TurboModules,
+> Codegen — are owned by the `react-native-jsi` skill. Read this for the *why*.
 
-## The one insight that organises everything: the timeline is three arcs, not eleven changelogs
+## The one idea that organises everything: the version number is a rung, not a date
 
-Read 0.76 → 0.87 as release notes and it's noise. Read it as **three overlapping migrations**
-and every row snaps into place:
+A React Native version tells you more than when a project last ran `npm install` — it tells
+you **what code that project is allowed to write**. The entry's own migrate guidance says it
+plainly: "the ladder crosses hard lines." Climb the rows and three kinds of permission change
+under your feet:
 
-1. **The architecture arc** — the async bridge dies. New Architecture default for new apps
-   (0.76) → the *only* runtime (0.82) → Legacy frozen (0.80) and progressively stripped from
-   core (0.84+) → bridge interop fully removed (0.85) → deprecated-API cleanup (0.87 RC:
-   InteractionManager, core SafeAreaView, deep imports). One direction, no way back.
-2. **The engine arc** — Hermes becomes *the* runtime, then gets fast. JavaScriptCore removed
-   (0.81, Hermes-only) → Hermes V1 experimental (0.82) → **Hermes V1 default** (0.84), plus
-   precompiled iOS binaries by default (0.84) — the build-time half of the same bet
-   (`RB-E-BUILD`).
-3. **The platform-floor arc** — the ground moves under you regardless of RN: React 19/19.2
-   (0.78/0.83), Node 22.11+ (0.84), Android 16 + mandatory edge-to-edge (0.81 → in core 0.86),
-   and Apple's hard rule that **App Store uploads must use Xcode 26 SDKs since 2026-04-28**.
-   Floors don't negotiate; they schedule your upgrades for you.
+1. **Architecture permission.** New Architecture ON by default (0.76) → Legacy Architecture
+   **FROZEN** (0.80, dated 2025-06-02) → New Architecture **MANDATORY** — opt-out ignored
+   (0.82) → Legacy-Arch **stripped** (0.84). Below 0.82 legacy code still runs, but on an
+   architecture receiving no fixes; at 0.82 the opt-out stops working; at 0.84 the code you
+   would fall back to is no longer shipped.
+2. **Engine permission.** JavaScriptCore removed — Hermes-only (0.81) → Hermes V1
+   experimental (0.82) → **Hermes V1 DEFAULT** plus precompiled iOS binaries by default
+   (0.84). The engine stopped being a choice at 0.81; from 0.84 its next generation is simply
+   what you get.
+3. **API permission.** `react-native init` deprecated → Expo recommended (0.76); `forwardRef`
+   deprecated → ref-as-prop (0.78, with React 19); core `SafeAreaView` deprecated →
+   `safe-area-context` (0.81); and the 0.87 RC is a cleanup release that removes
+   long-deprecated APIs (`InteractionManager`, `SafeAreaView`), restricts deep imports, and
+   deprecates `ImageBackground`. Deprecations on one rung become removals a few rungs up.
+
+The floors move too, on other people's schedules: iOS 15.1 / Android API 24 minimums (0.76),
+Android 15's 16KB pages (0.77), Android 16 / API 36 with mandatory edge-to-edge (0.81), Node
+22.11+ (0.84) — and, outside RN's ladder entirely, Apple's rule that since **2026-04-28** App
+Store Connect uploads must be built with Xcode 26 / iOS-26-family SDKs.
 
 ## The default, and why
 
-> Target the **latest stable RN (0.86)**; the New Architecture is non-optional from 0.82, so
-> plan any migration around that line.
+> Target the latest stable RN (0.86); the New Architecture is non-optional from 0.82, so plan
+> any migration around that line.
 
-Staying current stopped being optional the moment arc 1 completed: below 0.82 you're on an
-architecture that is frozen (no fixes since 0.80) and being deleted; libraries have followed
-(Fabric-only releases like ReactVision are normal now). Meanwhile the *cost* of staying current
-dropped — RN runs a bi-monthly cadence, and 0.86 was the second consecutive zero-breaking-change
-release; Expo SDK 57 shipped same-cycle with it. The honest framing: upgrades used to be
-projects, now they're maintenance — *unless* you fall behind the architecture line, where they
-become projects again.
+The recommendation names one line, because one line dominates: **0.82 is where the New
+Architecture became the only runtime.** Everything below it sits on an architecture frozen at
+0.80 (no fixes) and stripped at 0.84 — the entry's when-clause is blunt: on RN < 0.82, budget
+a New-Arch migration. And per the migrate block, every New-Arch-gated upgrade elsewhere in a
+stack "unblocks at 0.82+" — the line is a dependency of other decisions, not just this one.
 
-## Reading the landscape (how to use the version rows)
+Meanwhile the top of the ladder got cheaper to stand on: RN runs a bi-monthly cadence (0.84),
+0.86 was the second zero-breaking-change release, and Expo shipped SDK 57 against it having
+skipped the beta phase precisely because 0.86 was breaking-change-free — with Expo testing
+near-immediate optional upgrades as RN moves to six releases a year. Staying current is
+routine; falling behind the architecture line is the expensive state.
 
-The index entry's per-version rows answer "what does moving from X to Y buy me": each row is the
-version's *durable* change, not its full changelog. Two usage notes carry the trust model:
+## The landscape: reading the rungs
 
-- Rows marked ✓ (0.84–0.86) are verified against the official RN release blogs; earlier rows
-  come from release history and newsletters — **verify a pre-0.84 row against the RN blog before
-  quoting it as authoritative**. The 0.87 row is RC-verified via npm and gets the same treatment
-  when stable lands.
-- The **Expo SDK mapping** in the entry note (SDK 55 = RN 0.83 · SDK 56 = RN 0.85 · SDK 57 =
-  RN 0.86) is how most teams actually consume this timeline — you upgrade an SDK, and the RN
-  version comes with it.
+The entry's twelve rows (0.76 → 0.87 RC) are one row per version, each carrying that
+version's durable change. Beyond the three permission lines above, the rows carry a steady
+capability drip: CSS-ish styling — `display:contents`, `box-sizing`, `mixBlendMode`,
+`outline` (0.77) after `boxShadow` + `filter` (0.76); React 19 with Actions,
+`useActionState`, `useOptimistic`, `use`, and the React Compiler (0.78), the Compiler
+reaching the default template as RC (0.81), React 19.2 with `<Activity>` and
+`useEffectEvent` (0.83); DOM Node APIs (0.82) and Intersection Observer (0.83); Metro ~3x
+faster cold start via deferred hashing, with remote-JS Chrome debugging removed (0.79); React
+Native DevTools (0.76), its network inspector (0.83), light/dark (0.86); opt-in Strict
+TypeScript API with types from source (0.80); `debugOptimized` Android variant (0.82);
+prebuilt artefacts (0.83), precompiled iOS opt-in (0.81) then default (0.84); a shared C++
+animation backend and the Jest preset moving to `@react-native/jest-preset` (0.85), the
+layout-prop native driver landing in 0.85.1; Android-15+ edge-to-edge in core (0.86).
+
+Two usage notes carry the entry's trust model:
+
+- **Verification is per-row.** Rows marked ✓ (0.84–0.86) are verified against the official RN
+  release blogs; 0.76–0.83 come from release history + RN Rewind — verify a specific row
+  against the RN blog before quoting it as authoritative. The 0.87 row is RC-verified against
+  npm's `next` tag (per TWiR #289) and should be re-verified against the release blog when
+  stable lands.
+- **Most teams ride the ladder via Expo.** The entry's mapping: SDK 55 = RN 0.83 + React
+  19.2; SDK 56 = RN 0.85 + Expo UI stable; SDK 57 = RN 0.86 + React 19.2 (2026-06, verified
+  against the SDK 57 changelog). The Apple floor lands here too: SDK 54/55 EAS images already
+  run Xcode 26, SDK ≤ 53 needs an explicit image opt-in — practically, stay ≥ SDK 54.
+
+For the *why it changed* behind the 0.76→0.82 arc — the old async JSON bridge giving way to
+JSI, Fabric's immutable C++ shadow tree, Turbo Modules, Codegen — the entry's reading is
+Felipe Ramalho's "React Native Architecture: From Bridge to Fabric" (Codeminer42): a
+narrative, not a release note.
 
 ## Tradeoffs and failure modes to name out loud
 
-- **Camping below 0.82.** Frozen Legacy Arch + a library ecosystem that has moved on = every
-  month makes the eventual migration bigger. This is the one version cliff that compounds.
-- **Treating floors as optional.** Xcode 26 (uploads), Node 22 (0.84), Android 16 targeting —
-  these arrive on Apple/Google/OpenJS schedules, not yours. Budget for them out-of-cycle.
-- **Upgrading RN but not the assumptions.** 0.85 moved the Jest preset (`RB-E-TESTING`); 0.86
-  obsoleted `react-native-edge-to-edge`; 0.87 deletes deprecated imports. The gain of each
-  version is paired with a small removal — read the row, not just the number.
-- **Quoting old rows as gospel.** The corpus's own discipline applies to its readers: pre-0.84
-  facts are history-sourced; verify before load-bearing use.
-- **Skipping many versions at once.** Bi-monthly releases are small; five at once is a project.
-  The cadence rewards continuous small upgrades — the same logic as dependency hygiene
-  (`RB-E-DX`).
+- **Camping below 0.82.** Legacy has been frozen since 0.80 and stripped since 0.84; the
+  when-clause is to budget a New-Arch migration, and the migrate block prices it at effort L
+  with urgency *upgrade*. This is the rung where waiting compounds.
+- **Carrying polyfills past the rung that absorbed them.** `react-native-edge-to-edge` is
+  redundant on ≥ 0.86 — Android-15+ edge-to-edge is in core; the entry's second migrate row
+  exists to delete the package.
+- **Importing on borrowed time.** Still importing `InteractionManager`, core `SafeAreaView`,
+  or deep paths → the when-clause says migrate now; the 0.87 RC removes and restricts them.
+- **Quoting pre-0.84 rows as gospel.** The corpus's own discipline: history-sourced rows get
+  verified against the RN blog before load-bearing use.
+- **Missing floors that aren't RN's.** Node 22.11+ arrived with 0.84; the Xcode 26 upload
+  rule binds since 2026-04-28 regardless of your RN version. Floors don't negotiate.
+- **Assuming an upgrade only touches app code.** 0.85 moved the Jest preset to
+  `@react-native/jest-preset` — some rungs break config, not components.
 
 ## How it interacts with the rest of the stack
 
-- **Native (`RB-E-NATIVE`).** Arc 1 is *why* all new native work targets JSI/Fabric (Turbo/Nitro)
-  — the timeline is the schedule of that entry's architecture.
-- **Build (`RB-E-BUILD`).** Arc 2's precompiled-binaries trend (0.84 core, RNRepo, Expo SDK 56
-  XCFrameworks) is the build-time story of the same releases.
-- **React core (`RB-E-REACT-CORE`).** RN versions pin React versions (0.78→19, 0.83→19.2) — the
-  Compiler/Activity era arrives *via* this timeline.
-- **OTA (`RB-E-OTA`).** OTA ships JS only; every native-side row here is a store release. The
-  boundary between the two entries *is* arc 1's JS/native line.
+- **New Architecture depth (`react-native-jsi`, `RB-E-NATIVE`).** The ladder is the
+  *schedule* of the New Architecture; what JSI, Fabric, TurboModules, and Codegen actually
+  are belongs to the skill and the native entry.
+- **Build & engine (`RB-E-BUILD`).** Hermes V1, precompiled iOS binaries, prebuilt artefacts,
+  and Metro's cold-start work are the build-time face of the same rungs.
+- **React itself (`RB-E-REACT-CORE`).** RN versions pin React versions — 0.78 → React 19,
+  0.83 → React 19.2. The Actions/Compiler era arrives *via* this ladder.
+- **Testing (`RB-E-TESTING`).** The 0.85 Jest-preset move is where the ladder reaches into
+  test config.
+- **The migrate tool.** The entry's `migrate:` block is this page made executable: installed
+  `react-native` below 0.86 → a sequenced, receipted upgrade case assembled by
+  `react-brain migrate`.
 
 ## In one paragraph
 
-The RN version timeline is **three migrations wearing release numbers**: the bridge's removal
-(New Arch default 0.76 → only runtime 0.82 → Legacy stripped and cleaned through 0.87), the
-engine bet (Hermes-only 0.81 → Hermes V1 + precompiled builds by default 0.84), and the platform
-floors that move underneath (React 19.x, Node 22, Android 16, Apple's Xcode-26 upload rule).
-Target the latest stable (0.86, with Expo SDK 57 tracking it same-cycle), treat bi-monthly
-upgrades as maintenance rather than projects, and know the one cliff that compounds: anything
-below 0.82 is on borrowed, frozen, actively-deleted time.
+The React Native version number is **an architecture timeline wearing a release number**:
+where you stand on the ladder decides what code you're allowed to write. The New Architecture
+went default (0.76) → Legacy frozen (0.80) → mandatory, opt-out ignored (0.82) → Legacy
+stripped (0.84); the engine went Hermes-only (0.81) → Hermes V1 default with precompiled iOS
+binaries (0.84); deprecated APIs (`InteractionManager`, core `SafeAreaView`, deep imports)
+fall off at the 0.87 cleanup release. Target the latest stable (0.86 — second consecutive
+zero-breaking-change release, bi-monthly cadence, Expo SDK 57 tracking it same-cycle), plan
+any migration around the 0.82 line, verify pre-0.84 rows against the RN blog before quoting
+them, and respect the floors that move on Apple's and Node's schedules, not yours.
 
 ---
 
-*See also: `RB-E-NATIVE` (what the New Architecture is), `RB-E-BUILD` (engine + precompiled
-builds), `RB-E-REACT-CORE` (the React versions each RN pins), `RB-E-OTA` (what can ship without
-a store release). JSI/threading depth: the `react-native-jsi` skill.*
+*See also: `RB-E-NATIVE` (what the New Architecture is), `RB-E-BUILD` (Hermes, precompiled
+binaries, Metro), `RB-E-REACT-CORE` (the React versions each RN pins), `RB-E-TESTING` (the
+0.85 Jest-preset move). New-Arch internals — JSI, Fabric, TurboModules, Codegen: the
+`react-native-jsi` skill. Background reading: Felipe Ramalho, "React Native Architecture:
+From Bridge to Fabric" (Codeminer42).*
+
+<!-- CANNOT GROUND (flagged, not invented):
+  1. The "rung = permission / what code you're allowed to write" framing is the assigned
+     organizing idea; the entry's migrate.why grounds the word "ladder" ("the ladder crosses
+     hard lines") and the rows ground each hard line, but the permission metaphor itself is
+     editorial.
+  2. related-entry id mapping (RB-E-NATIVE, RB-E-BUILD, RB-E-REACT-CORE, RB-E-TESTING) is
+     inferred from row facts (New Arch, Hermes/precompiled/Metro, React 19/19.2, Jest
+     preset); the entry names no related ids.
+  3. "Staying current is routine; falling behind ... is the expensive state" — inference from
+     bi-monthly cadence + two zero-breaking-change releases + Expo's near-immediate-upgrade
+     experiment + the frozen/stripped Legacy line; the entry makes no explicit cost claim.
+  4. Grouping the twelve rows into permission lines + a capability drip is an editorial
+     arrangement; every row fact is entry text, the grouping is not.
+  5. "The line is a dependency of other decisions" — restatement of migrate.why's "every
+     New-Arch-gated upgrade below unblocks at 0.82+"; the generalisation is editorial.
+-->
