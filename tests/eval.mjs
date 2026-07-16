@@ -303,6 +303,11 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
   const falseSkip = scoreTriage(g, [{ key: 'a', disposition: 'skipped' }, { key: 'b', disposition: 'skipped', reason: 'how-to' }], ['a', 'b']).score;
   const overKeep = scoreTriage(g, [{ key: 'a', disposition: 'kept', entry: 'RB-E-X' }, { key: 'b', disposition: 'kept' }], ['a', 'b']).score;
   check(falseSkip === 25 && overKeep === 75 && falseSkip < overKeep, 'bench: a false skip costs 3× an over-keep (25 vs 75)');
+  const { applyAdvocate } = await import(join(ROOT, 'tools/harvest-lib.mjs'));
+  const rows = [{ url: 'https://x.dev/a', disposition: 'skipped' }, { url: 'https://x.dev/b', disposition: 'already-held' }];
+  const merged = applyAdvocate(rows, [{ url: 'https://x.dev/a', entry: 'RB-E-X' }, { url: 'https://x.dev/b', entry: 'RB-E-Y' }]);
+  check(merged[0].disposition === 'kept' && merged[0].entry === 'RB-E-X' && merged[0].advocate === true, 'advocate: flips a skip to kept with the proposed entry');
+  check(merged[1].disposition === 'already-held' && !merged[1].advocate, 'advocate: may ONLY flip skips — already-held rows are untouchable');
 }
 
 // ── report ──────────────────────────────────────────────────────────────────────

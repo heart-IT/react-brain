@@ -87,6 +87,12 @@ The agent should, in order:
      PRs (`.github/workflows/harvest-verify.yml`) — "verified" is computed, not claimed.
    - `react-brain harvest watchlist` — re-triage anything skipped in ≥2 issues and review
      the standing reopen signals.
+   - **Advocate pass (each manifest, before the gates):** re-read the skip rows as a hostile
+     reviewer arguing items back in — flip only for durable status changes, genuine gaps, or
+     canonical uncovered-facet deep-dives. Evidence: the triage bench's measured failure is
+     keep-aversion (56/100 baseline), and a fresh-context advocate arm scored +7 by
+     recovering the two most consequential misses at one cheap over-keep (`harvest bench
+     --advocate` reproduces the experiment; wrong flips are reviewable noise by design).
    - **Spot-check (each pass):** re-adjudicate ALL `cap` skips + 2 random skips from the
      PREVIOUS issue's manifest; corrections are committed amendments. (First run corrected
      2 of 2 examined reasons and reopened the react-compiler-explained + thoughtbot keeps.)

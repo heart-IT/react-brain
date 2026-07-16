@@ -55,7 +55,13 @@ skill. One knowledge base, every session (local, resumed, or cloud-cloned).
    supersession/version-line fact ⇒ also add the entry's `migrate:` rule — but
    supersession-IN-PROGRESS (no formal deprecation) gets a watch note, NOT a rule
    (Rive and next-auth precedents).
-5. **Gates**: `node tools/cli.mjs harvest coverage <issue-url> <manifest>` must exit 0;
+5. **Advocate pass (mandatory)**: re-read each drafted manifest's SKIP rows as a
+   hostile reviewer arguing items back in — the pipeline's measured failure is
+   false skips (bench: baseline keep-averse at 56/100; the advocate arm recovered
+   the two most consequential misses for one cheap over-keep). Flip a skip only
+   for: durable status change · genuine domain gap · canonical deep-dive on an
+   uncovered facet. Note reinstated rows as such.
+6. **Gates**: `node tools/cli.mjs harvest coverage <issue-url> <manifest>` must exit 0;
    `node tools/cli.mjs harvest verify-diff --base=main` must exit 0 (the receipts gate —
    every added URL machine-re-verified; CI runs it on the PR too);
    `node tools/cli.mjs harvest watchlist` (re-triage recurring skips); spot-check ALL

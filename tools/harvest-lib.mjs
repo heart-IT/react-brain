@@ -181,6 +181,19 @@ export function scoreTriage(goldRows, candRows, keys, knownIds) {
   return s;
 }
 
+// advocate merge: the adversarial second pass may ONLY flip skip → kept (the
+// measured failure is keep-aversion; one-directional by construction so its
+// worst case is reviewable over-keeps, never a silent drop)
+export function applyAdvocate(candRows, flips) {
+  const flipByKey = new Map((flips || []).map((f) => [f.key ?? normalize(f.url), f]));
+  return candRows.map((r) => {
+    const key = r.key ?? normalize(r.url);
+    const f = flipByKey.get(key);
+    const skipped = !/kept|already/i.test(String(r.disposition));
+    return f && skipped ? { ...r, disposition: 'kept', entry: f.entry || r.entry, advocate: true } : r;
+  });
+}
+
 // wayback: does an archived snapshot exist? (the third tier of the verify chain)
 export async function waybackSnapshot(url) {
   try {

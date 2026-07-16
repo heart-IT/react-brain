@@ -24,7 +24,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadEntries } from './detect.mjs';
-import { normalize, parseGoldManifest, scoreTriage } from './harvest-lib.mjs';
+import { normalize, parseGoldManifest, scoreTriage, applyAdvocate } from './harvest-lib.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const argv = process.argv.slice(2);
@@ -34,27 +34,31 @@ const FIXTURE = flag('fixture', 'twir-290');
 const CANDIDATE = flag('candidate');
 const OUT = flag('out');
 const PROVIDER = flag('provider', 'anthropic');
+const ADVOCATE = argv.includes('--advocate');
 
 const fix = JSON.parse(readFileSync(join(ROOT, 'tests/fixtures/harvest', `${FIXTURE}-inventory.json`), 'utf8'));
 const gold = parseGoldManifest(readFileSync(join(ROOT, fix.gold), 'utf8'));
 const keys = fix.links.map((l) => normalize(l.url));
 
-function buildPrompt() {
-  // CONTAMINATION GUARD: judge against the corpus AS IT STOOD when the issue
-  // arrived (frozen in the fixture) — the live corpus already contains what the
-  // gold pass kept, which turns every gold-keep into a fake "already-held".
-  // The bench's own first run caught exactly this.
-  let index, held;
-  if (fix.corpus) { index = fix.corpus.index.join('\n'); held = fix.corpus.held.join('\n'); }
-  else {
-    const entries = Object.values(loadEntries());
-    index = entries.map((e) =>
-      `${e.id} — ${e.topic} [${e.category}] (${(e.reading || []).length + (e.watching || []).length} readings held)`).join('\n');
-    held = [...new Set(entries.flatMap((e) => [
+// CONTAMINATION GUARD: judge against the corpus AS IT STOOD when the issue
+// arrived (frozen in the fixture) — the live corpus already contains what the
+// gold pass kept, which turns every gold-keep into a fake "already-held".
+// The bench's own first run caught exactly this.
+function corpusContext() {
+  if (fix.corpus) return { index: fix.corpus.index.join('\n'), held: fix.corpus.held.join('\n') };
+  const entries = Object.values(loadEntries());
+  return {
+    index: entries.map((e) =>
+      `${e.id} — ${e.topic} [${e.category}] (${(e.reading || []).length + (e.watching || []).length} readings held)`).join('\n'),
+    held: [...new Set(entries.flatMap((e) => [
       ...(e.sources || []), ...(e.reading || []).map((r) => r.url), ...(e.watching || []).map((w) => w.url),
       ...(e.migrate || []).flatMap((m) => m.receipts || []),
-    ]).filter(Boolean))].join('\n');
-  }
+    ]).filter(Boolean))].join('\n'),
+  };
+}
+
+function buildPrompt() {
+  const { index, held } = corpusContext();
   const links = fix.links.map((l, i) => `${i + 1}. ${l.url}\n   text: ${l.text || '(none)'}`).join('\n');
   return `You are the triage layer of react-brain, a verified React/React-Native ecosystem knowledge corpus. Below is the complete external-link inventory of a newsletter issue. Give EVERY link exactly one disposition:
 
@@ -77,6 +81,31 @@ Reply with ONLY a JSON array, one object per link, in order, url copied EXACTLY:
 [{"url": "...", "disposition": "kept|already-held|skipped", "entry": "RB-E-... (kept only)", "reason": "class (skipped only)"}]`;
 }
 
+// the adversarial second pass — fresh context, opposite mandate, skips only
+function buildAdvocatePrompt(rows) {
+  const skips = rows.filter((r) => !/kept|already/i.test(String(r.disposition)));
+  const { index, held } = corpusContext();
+  const list = skips.map((r, i) => {
+    const l = fix.links.find((x) => normalize(x.url) === (r.key ?? normalize(r.url)));
+    return `${i + 1}. ${r.url}\n   text: ${l?.text || '(none)'}\n   first-pass skip reason: ${r.reason || '(none given)'}`;
+  }).join('\n');
+  return `You are the ADVOCATE FOR THE DROPPED in react-brain, a verified React/React-Native selection corpus. A first-pass triage skipped every item below. This pipeline's MEASURED failure mode is FALSE SKIPS — durable facts silently dropped — while over-keeping is cheap (a human reviews all keeps). Your only job: attack each skip reason and argue back in anything the corpus would regret losing.
+
+Flip an item to kept ONLY if it is: a durable status change (release line, deprecation, stewardship/acquisition, governance), a genuine domain GAP no entry covers, or a canonical deep-dive covering a facet the entry's readings lack. Leave skipped: corroboration of held facts, implementation how-tos, routine point releases, pre-ship RFCs/betas, sponsors/testimonials.
+
+THE CORPUS INDEX:
+${index}
+
+URLS THE CORPUS ALREADY HOLDS (do not flip these — they are held):
+${held}
+
+THE SKIPS (${skips.length}):
+${list}
+
+Reply with ONLY a JSON array containing ONLY the items you flip to kept, url copied EXACTLY — [] if every skip survives your attack:
+[{"url": "...", "entry": "RB-E-... or NEW", "why": "one line"}]`;
+}
+
 async function askAnthropic(prompt) {
   if (!process.env.ANTHROPIC_API_KEY) { console.error('no ANTHROPIC_API_KEY in env — use --provider=claude-cli (Claude Code subscription) or --candidate=<file> (offline scoring)'); process.exit(1); }
   const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -96,19 +125,34 @@ function askClaudeCli(prompt) {
   ], { encoding: 'utf8', cwd: scratch, timeout: 600000, maxBuffer: 16 * 1024 * 1024 }).trim();
 }
 
+const ask = (prompt) => PROVIDER === 'claude-cli' ? askClaudeCli(prompt) : askAnthropic(prompt);
+const parseArray = (raw, label) => {
+  const m = String(raw).match(/\[[\s\S]*\]/);
+  if (!m) { console.error(`no JSON array in ${label} response; first 400 chars:\n${String(raw).slice(0, 400)}`); process.exit(1); }
+  return JSON.parse(m[0]);
+};
+
 let candRows;
 if (CANDIDATE) {
   candRows = JSON.parse(readFileSync(CANDIDATE, 'utf8'));
 } else {
   console.log(`harvest bench — ${FIXTURE} (${fix.links.length} links) vs gold ${fix.gold}\n   model: ${MODEL} (${PROVIDER})…`);
-  const raw = PROVIDER === 'claude-cli' ? askClaudeCli(buildPrompt()) : await askAnthropic(buildPrompt());
-  const m = raw.match(/\[[\s\S]*\]/);
-  if (!m) { console.error(`no JSON array in response; first 400 chars:\n${raw.slice(0, 400)}`); process.exit(1); }
-  candRows = JSON.parse(m[0]);
+  candRows = parseArray(await ask(buildPrompt()), 'triage');
 }
 
 const knownIds = fix.corpus ? new Set(fix.corpus.index.map((l) => l.split(' ')[0])) : null;
 const s = scoreTriage(gold, candRows, keys, knownIds);
+
+let adv = null;
+if (ADVOCATE) {
+  console.log('   advocate pass (fresh context, skips only)…');
+  const flips = parseArray(await ask(buildAdvocatePrompt(candRows)), 'advocate');
+  const merged = applyAdvocate(candRows, flips);
+  const s2 = scoreTriage(gold, merged, keys, knownIds);
+  const goldKeys = new Map(gold.map((r) => [r.key, r]));
+  const recovered = flips.filter((f) => goldKeys.get(normalize(f.url))?.disposition === 'kept');
+  adv = { flips: flips.length, recovered: recovered.length, wrongFlips: flips.length - recovered.length, score: s2.score, s2, flipsDetail: flips };
+}
 console.log(`\nJUDGMENT SCORE: ${s.score}/100   (weighted agreement over ${s.n} links; gold-kept ×3)`);
 console.log(`   false skips (gold KEPT → skipped): ${s.falseSkips.length}   ← the feared failure`);
 s.falseSkips.forEach((k) => console.log(`      ✗ ${k}`));
@@ -119,4 +163,11 @@ if (s.unanswered.length) console.log(`   unanswered: ${s.unanswered.length} (${s
 console.log(`   routing (both kept): ${s.routing.ok}/${s.routing.n} correct entry`);
 s.routing.misses.forEach((x) => console.log(`      · ${x}`));
 console.log(`   skip-reason agreement (coarse): ${s.reason.ok}/${s.reason.n}`);
-if (OUT) { writeFileSync(OUT, JSON.stringify({ model: CANDIDATE ? `candidate:${CANDIDATE}` : MODEL, fixture: FIXTURE, ran: new Date().toISOString().slice(0, 10), ...s }, null, 1) + '\n'); console.log(`\nwrote ${OUT}`); }
+if (adv) {
+  console.log(`\nADVOCATE ARM: ${s.score} → ${adv.score}   (Δ ${adv.score - s.score >= 0 ? '+' : ''}${adv.score - s.score})`);
+  console.log(`   flips proposed: ${adv.flips} — recovered gold keeps: ${adv.recovered} · wrong flips (over-keeps introduced): ${adv.wrongFlips}`);
+  adv.flipsDetail.forEach((f) => console.log(`      ${gold.find((g) => g.key === normalize(f.url))?.disposition === 'kept' ? '✓' : '·'} ${f.url} → ${f.entry}   (${f.why})`));
+  console.log(`   remaining false skips after advocate: ${adv.s2.falseSkips.length}`);
+  adv.s2.falseSkips.forEach((k) => console.log(`      ✗ ${k}`));
+}
+if (OUT) { writeFileSync(OUT, JSON.stringify({ model: CANDIDATE ? `candidate:${CANDIDATE}` : MODEL, fixture: FIXTURE, ran: new Date().toISOString().slice(0, 10), ...s, advocate: adv ? { flips: adv.flips, recovered: adv.recovered, wrongFlips: adv.wrongFlips, score: adv.score } : undefined, rows: candRows }, null, 1) + '\n'); console.log(`\nwrote ${OUT}`); }
