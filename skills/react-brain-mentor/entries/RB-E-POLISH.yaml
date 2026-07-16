@@ -2,7 +2,7 @@ id: RB-E-POLISH
 topic: "UX polish primitives — toasts, haptics, splash screens, image viewers (React Native)"
 category: polish
 group: ui
-status: drafted
+status: reviewed   # long-form entry written + source-checked
 confidence: low
 platforms: [react-native]
 options:
@@ -30,8 +30,8 @@ note: >
   the 'app feels finished' checklist. Skipped as too-early: react-native-tickle (Nitro haptics
   w/ AHAP patterns — not yet on npm). expo-haptics/expo-splash-screen versions track the SDK.
 defer_to_skill: react-native-best-practices
-doc: null
-updated: 2026-07-09
+doc: "RB-E-POLISH.md"   # long-form Explanation entry in content_dir
+updated: 2026-07-16
 reading:
   - title: "Building a toast component"
     url: "https://emilkowal.ski/ui/building-a-toast-component"

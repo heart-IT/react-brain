@@ -2,7 +2,7 @@ id: RB-E-P2P
 topic: "Peer-to-peer / local-first backend (Holepunch · Pear)"
 category: p2p
 group: app-architecture
-status: drafted
+status: reviewed   # long-form entry written + source-checked
 confidence: medium
 platforms: [react, react-native]
 options:
@@ -32,8 +32,10 @@ note: >
   it to. DEPTH (correctness, replication, identity, sessions, Pear/Bare workflow) is owned by the
   holepunch-p2p-systems skill.
 defer_to_skill: holepunch-p2p-systems
-doc: null
-updated: 2026-06-25
+doc: "RB-E-P2P.md"   # long-form Explanation entry in content_dir
+updated: 2026-07-16
+sources:
+  - "https://docs.pears.com/"
 reading:
   - title: "Pear by Holepunch — building blocks & architecture (docs)"
     url: "https://docs.pears.com/"

@@ -2,7 +2,7 @@ id: RB-E-SVG
 topic: "SVG, vector graphics & icons (React Native)"
 category: svg
 group: ui
-status: drafted
+status: reviewed   # long-form entry written + source-checked
 confidence: medium
 platforms: [react, react-native]
 options:
@@ -34,8 +34,8 @@ note: >
   (verified vs the SDK 56 changelog). The icon-lib consolidation onto the scoped packages is
   now complete on both bare RN and Expo.
 defer_to_skill: react-native-best-practices
-doc: null
-updated: 2026-07-09
+doc: "RB-E-SVG.md"   # long-form Explanation entry in content_dir
+updated: 2026-07-16
 reading:
   - title: "Hello, Project Redraw"
     url: "https://wcandillon.dev/article/hello-project-redraw"
