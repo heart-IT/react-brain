@@ -610,3 +610,97 @@ export const CENSUS_PATH = resolve(__dir, '.census-baseline.json');
 export function loadCensus() {
   try { return JSON.parse(readFileSync(CENSUS_PATH, 'utf8')); } catch { return null; }
 }
+
+// ── TRAJECTORY — the time axis (git history) under every suggestion ─────────────
+// Every other scan reads the repo as a snapshot; suggestions get dramatically
+// smarter with the story: which habits are LIVE vs frozen debt (churn), when each
+// dep arrived (adoption), and whether a two-libraries-one-slot situation is a
+// migration in progress, stalled, or regressing (file counts now vs ~6 months
+// ago). Generalizes review.mjs's introduced-vs-preexisting insight from one diff
+// to the whole timeline. Deterministic, git-only; returns {git:false} gracefully
+// for non-git targets.
+const RETIRED_LABEL = /retired|deprecated|legacy|dormant|superseded/i;
+const SRC_SPEC = ['*.js', '*.jsx', '*.ts', '*.tsx'];
+const DAY = 86400;
+
+export function trajectoryScan(repoPath, deps, entriesById, { now = Math.floor(Date.now() / 1000) } = {}) {
+  const git = (args, opts = {}) => execFileSync('git', ['-C', repoPath, ...args],
+    { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, ...opts }).trim();
+  try { git(['rev-parse', '--git-dir']); } catch { return { git: false }; }
+
+  // churn: one pass over ~13 months → per-file {commits, lastTouched}
+  const churn = {};
+  try {
+    let ts = 0;
+    for (const line of git(['log', '--since=400.days', '--numstat', '--format=%x01%ct']).split('\n')) {
+      if (line.startsWith('\x01')) { ts = +line.slice(1) || 0; continue; }
+      const m = line.match(/^\d+\t\d+\t(.+)$/);
+      if (!m) continue;
+      const f = m[1];
+      (churn[f] ||= { commits: 0, lastTouched: 0 }).commits++;
+      if (ts > churn[f].lastTouched) churn[f].lastTouched = ts;
+    }
+  } catch { /* young/odd repo — churn stays empty */ }
+  const liveness = (file) => {
+    const c = churn[file];
+    if (!c) return 'dormant';                       // untouched in ~13 months
+    return now - c.lastTouched <= 90 * DAY ? 'live' : 'aging';
+  };
+
+  // adoption: when each detect-matched dep first entered package.json
+  const adoption = {};
+  const matched = Object.keys(deps || {}).filter((p) => matchDetector(p)).slice(0, 60);
+  for (const pkg of matched) {
+    try {
+      const first = git(['log', '--reverse', '--format=%ct', `-S"${pkg}"`, '--', 'package.json']).split('\n')[0];
+      if (first) adoption[pkg] = +first;
+    } catch { /* shallow clone etc. */ }
+  }
+
+  // migrations: entries where ≥2 competing detect pkgs are installed
+  let oldRef = null, oldRefDate = null;
+  try {
+    oldRef = git(['rev-list', '-1', '--before=6 months ago', 'HEAD']) || null;
+    if (oldRef) oldRefDate = +git(['log', '-1', '--format=%ct', oldRef]);
+  } catch { /* no history that far back */ }
+  const grepFiles = (pkg, ref) => {
+    const pat = `['"]${pkg.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(/|['"])`;
+    try {
+      const args = ['grep', '-lE', pat, ...(ref ? [ref] : []), '--', ...SRC_SPEC];
+      return git(args).split('\n').filter(Boolean).map((l) => (ref ? l.replace(`${ref}:`, '') : l));
+    } catch { return []; }
+  };
+  // a detect row matches installed deps exactly, by '@scope/*', or by 'name*' prefix —
+  // glob rows resolve to the CONCRETE installed package names (that's what we grep for)
+  const rowDeps = (pat) => Object.keys(deps || {}).filter((dep) =>
+    pat.endsWith('/*') ? dep.startsWith(pat.slice(0, -1)) :
+    pat.endsWith('*') ? dep.startsWith(pat.slice(0, -1)) : dep === pat);
+  const migrations = [];
+  for (const [id, e] of Object.entries(entriesById || {})) {
+    const installed = (e.detect || [])
+      .map((d) => ({ ...d, matched: rowDeps(d.pkg) })).filter((d) => d.matched.length);
+    if (installed.length < 2) continue;
+    const isLegacy = (d) => RETIRED_LABEL.test(d.label || '') || (e.migrate || []).some((m) => m.from?.pkg === d.pkg);
+    const legacy = installed.filter(isLegacy), modern = installed.filter((d) => !isLegacy(d));
+    // only legacy-vs-modern pairs are mechanically trustworthy as "same slot" — multiple
+    // non-legacy rows are usually a complementary STACK (hypercore+autobase, camera+picker),
+    // and calling that a conflict is exactly the false-positive class the ourpot dogfood
+    // taught us to avoid. No legacy side ⇒ no migration claim.
+    if (!legacy.length || !modern.length) continue;
+    for (const d of legacy.flatMap((row) => row.matched.map((pkg) => ({ pkg, row })))) {
+      const nowFiles = grepFiles(d.pkg);
+      const thenFiles = oldRef ? grepFiles(d.pkg, oldRef) : null;
+      const status = nowFiles.length === 0 ? 'done'
+        : thenFiles === null ? 'unknown-age'
+        : nowFiles.length < thenFiles.length ? 'in-progress'
+        : nowFiles.length > thenFiles.length ? 'regressing' : 'stalled';
+      const lastMove = Math.max(0, ...nowFiles.map((f) => churn[f]?.lastTouched || 0));
+      migrations.push({ entry: id, kind: 'migration', legacyPkg: d.pkg,
+        modernPkgs: modern.flatMap((x) => x.matched), status,
+        nowCount: nowFiles.length, thenCount: thenFiles ? thenFiles.length : null,
+        remaining: nowFiles.slice(0, 12),
+        lastMovedAt: lastMove || null });
+    }
+  }
+  return { git: true, oldRef, oldRefDate, churn, liveness, adoption, migrations, now };
+}

@@ -64,6 +64,16 @@ node tools/react-brain-doctor.mjs ../../ledgerhr ../../ourpot/ourpot ../../bitba
 node tools/react-brain-doctor.mjs . --json     # machine-readable — agents / mentor Phase 0
 ```
 
+**Trajectory (2026-07-16):** doctor also reads the repo's git HISTORY — the time axis under
+every suggestion. One `git log --numstat` pass classifies each file live/aging/dormant
+(smell and modernization priorities are churn-weighted: a habit written this week outranks
+debt frozen since last year — review's introduced-vs-preexisting insight generalized to the
+whole timeline); `-S` blame on package.json dates every detected dep's adoption; and any
+entry with a legacy-marked package installed NEXT TO its modern replacement becomes a
+migration with a measured trend (files importing the legacy pkg now vs ~6 months ago →
+in-progress / STALLED-since / regressing / done-remove-the-dep, with the remaining file
+list). `--no-history` skips it; non-git targets degrade gracefully.
+
 ## `react-brain-map.mjs` — the repo pinboard (code location for agents)
 One compact line per source file — corpus-domain tags (detector imports + per-file smell
 hits), external imports, exports, LOC — plus an inverted DOMAINS→files index. An agent

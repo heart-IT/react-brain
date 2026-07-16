@@ -10,7 +10,7 @@
 // Shared detection lives in ./detect.mjs (one source of truth, also used by evidence).
 // ───────────────────────────────────────────────────────────────────────────────
 
-import { loadEntries, analyzeRepo, fit, trunc, GROUP_ORDER, trackRecord, TRACK_GLYPH, scanModernDefaults, scanSourceSignals, checkAdrs, adviseReadings, loadCensus, resolveRecommendation } from './detect.mjs';
+import { loadEntries, analyzeRepo, fit, trunc, GROUP_ORDER, trackRecord, TRACK_GLYPH, scanModernDefaults, scanSourceSignals, checkAdrs, adviseReadings, loadCensus, resolveRecommendation, trajectoryScan } from './detect.mjs';
 
 // Situational context tokens for resolveRecommendation — matched against the
 // corpus's "context → choice" when-clauses, mirroring learn's contextFor logic.
@@ -34,23 +34,43 @@ const EXPECTED = {
 // ── TOP PRIORITIES — one deterministic impact×effort ranking across every section ──
 // impact by finding class (census-weighted for gaps) × entry confidence ÷ effort.
 // A pre-ranking heuristic, not judgment: the mentor re-ranks; sections carry the detail.
-function computePriorities({ entries, detected, gaps, advice, modern, sigs, stage = 'mvp' }) {
+function computePriorities({ entries, detected, gaps, advice, modern, sigs, traj, stage = 'mvp' }) {
   const CONF = { high: 1, medium: 0.85, low: 0.6 };
   const EFF = { S: 1, M: 1.5, L: 2.5 };
   // MP-STAGE-CALIBRATED: missing-domain pressure scales with maturity — a prototype's
   // concrete code smells outrank "adopt CI/testing"; at production the gaps dominate.
   const GAP_STAGE = { prototype: 0.55, mvp: 0.8, production: 1, scale: 1 };
+  // TRAJECTORY: a habit being written NOW outranks debt frozen for a year — the
+  // review-gate's introduced-vs-preexisting insight, applied to the whole timeline.
+  const churnFactor = (files) => {
+    if (!traj?.git || !files?.length) return { mult: 1, tag: '' };
+    const lv = files.map(traj.liveness);
+    if (lv.includes('live')) return { mult: 1.25, tag: ' — LIVE (touched <90d)' };
+    if (lv.every((x) => x === 'dormant')) return { mult: 0.7, tag: ' — dormant (>1y untouched)' };
+    return { mult: 1, tag: '' };
+  };
   const items = [];
   for (const f of modern?.findings || []) {
     const imp = f.strength === 'deprecated' ? 90 : f.strength === 'superseded' ? 60 : 30;
-    items.push({ kind: 'modernize', entry: f.entry, score: imp / (EFF[f.effort] || 1.5),
+    const cf = churnFactor(f.files);
+    items.push({ kind: 'modernize', entry: f.entry, score: imp * cf.mult / (EFF[f.effort] || 1.5),
       text: `replace ${f.legacy.replace(' (core)', '')} → ${trunc(f.modern, 46)}${f.count ? ` (${f.count} file${f.count === 1 ? '' : 's'})` : ''}`,
-      why: `${f.strength} legacy API` });
+      why: `${f.strength} legacy API${cf.tag}` });
   }
   for (const s of sigs?.findings || []) {
     const e = entries[s.entry];
-    items.push({ kind: 'smell', entry: s.entry, score: (50 + Math.min(s.count || 0, 20)) * (CONF[e?.confidence] || 0.85) / 1.5,
-      text: s.signal, why: s.hint ? trunc(s.hint, 100) : 'source signal' });
+    const cf = churnFactor(s.files);
+    items.push({ kind: 'smell', entry: s.entry, score: (50 + Math.min(s.count || 0, 20)) * cf.mult * (CONF[e?.confidence] || 0.85) / 1.5,
+      text: s.signal, why: (s.hint ? trunc(s.hint, 100) : 'source signal') + cf.tag });
+  }
+  for (const m of (traj?.migrations || []).filter((x) => x.kind === 'migration')) {
+    const IMP = { regressing: 95, stalled: 78, done: 62, 'in-progress': 55, 'unknown-age': 50 };
+    const since = m.status === 'stalled' && m.lastMovedAt ? ` since ${new Date(m.lastMovedAt * 1000).toISOString().slice(0, 10)}` : '';
+    const text = m.status === 'done'
+      ? `migration finished — remove the now-unused ${m.legacyPkg} dependency`
+      : `${m.status === 'in-progress' ? 'finish' : m.status === 'regressing' ? 'STOP writing' : 'unstick'} the ${m.legacyPkg} → ${m.modernPkgs.join('/')} migration (${m.nowCount} file${m.nowCount === 1 ? '' : 's'} left${m.thenCount != null ? `, was ${m.thenCount}` : ''})`;
+    items.push({ kind: 'finish', entry: m.entry, score: (IMP[m.status] || 50) / 1.5,
+      text, why: `trajectory: ${m.status}${since}` });
   }
   for (const g of gaps) {
     const e = entries[g.entry];
@@ -91,6 +111,7 @@ function printReport(a, entries) {
   const advice = adviseReadings(a, entries);
   const modern = (!NO_SCAN && a.platform !== 'react') ? scanModernDefaults(a.path, a.deps) : null;
   const sigs = !NO_SCAN ? scanSourceSignals(a.path, entries, { stage: a.stage, platform: a.platform, deps: a.deps }) : null;
+  const traj = (!NO_SCAN && !NO_HISTORY) ? trajectoryScan(a.path, a.deps, entries) : null;
   const expected = [...EXPECTED.always, ...(EXPECTED[a.platform] || [])];
   const gapIds = expected.filter((id) => !a.byEntry[id]);
   const resolvedPick = (e, toks) => { const r = resolveRecommendation(e, toks); return r.via !== 'default' ? { pick: r.why } : null; };
@@ -98,7 +119,7 @@ function printReport(a, entries) {
     detected: detected.map(({ id, e, info }) => ({ entry: id, labels: [...info.labels], fitStr: fit(e, info.tokens), resolved: resolvedPick(e, [...ctxTokens(a), ...info.tokens]) })),
     gaps: gapIds.map((id) => { const c = census?.agg?.[id]; return { entry: id, recommend: entries[id]?.recommend?.default || '',
       resolved: entries[id] ? resolvedPick(entries[id], ctxTokens(a)) : null, field: c ? { appCount: c.appCount, denom: c.denom } : null }; }),
-    advice, modern, sigs, stage: a.stage });
+    advice, modern, sigs, traj, stage: a.stage });
   if (priorities.length) {
     console.log(`\n  ⚡ TOP PRIORITIES  (impact × effort heuristic — detail in the sections below)`);
     console.log(`  ${'-'.repeat(74)}`);
@@ -136,6 +157,24 @@ function printReport(a, entries) {
         console.log(`      the field (census): you ship ${mine}${rival}`);
       }
     }
+  }
+
+  // TRAJECTORY — the time axis: migrations in flight, live vs frozen habits.
+  if (traj?.git && (traj.migrations.length || Object.keys(traj.adoption).length)) {
+    console.log(`\n  TRAJECTORY  (git history — the story, not the snapshot)`);
+    console.log(`  ${'-'.repeat(74)}`);
+    for (const m of traj.migrations) {
+      const glyph = { 'in-progress': '⏩', stalled: '⏸', regressing: '⚠', done: '✅', 'unknown-age': '·' }[m.status];
+      const since = m.status === 'stalled' && m.lastMovedAt ? ` (no movement since ${new Date(m.lastMovedAt * 1000).toISOString().slice(0, 10)})` : '';
+      const trend = m.thenCount != null ? ` — ${m.thenCount} → ${m.nowCount} files over ~6mo` : ` — ${m.nowCount} file${m.nowCount === 1 ? '' : 's'} on the legacy pkg`;
+      console.log(`  ${glyph} ${m.entry.replace('RB-E-', '')}: ${m.legacyPkg} → ${m.modernPkgs.join('/')}  ${m.status.toUpperCase()}${trend}${since}`);
+      if (m.status !== 'done' && m.remaining.length && SHOW_FILES) m.remaining.forEach((f) => console.log(`        ${f}`));
+      else if (m.status !== 'done' && m.remaining.length) console.log(`        remaining: ${m.remaining.slice(0, 4).join(', ')}${m.nowCount > 4 ? ` (+${m.nowCount - 4} — --files lists all)` : ''}`);
+      if (m.status === 'done') console.log(`        no source imports left — remove ${m.legacyPkg} from package.json`);
+    }
+    const recent = Object.entries(traj.adoption).filter(([, t]) => traj.now - t <= 90 * 86400)
+      .map(([p, t]) => `${p} (${new Date(t * 1000).toISOString().slice(0, 10)})`);
+    if (recent.length) console.log(`  • recently adopted (<90d): ${trunc(recent.join(' · '), 130)}`);
   }
 
   if (gapIds.length) {
@@ -246,14 +285,17 @@ function jsonReport(a, entries) {
   const modernization = (!NO_SCAN && a.platform !== 'react') ? scanModernDefaults(a.path, a.deps) : null;
   const sourceSignals = !NO_SCAN ? scanSourceSignals(a.path, entries, { stage: a.stage, platform: a.platform, deps: a.deps }) : null;
   const advice = adviseReadings(a, entries);
+  const traj = (!NO_SCAN && !NO_HISTORY) ? trajectoryScan(a.path, a.deps, entries) : null;
   const priorities = computePriorities({ entries,
-    detected: detected.map((d) => ({ ...d, fitStr: d.fit })), gaps, advice, modern: modernization, sigs: sourceSignals, stage: a.stage });
+    detected: detected.map((d) => ({ ...d, fitStr: d.fit })), gaps, advice, modern: modernization, sigs: sourceSignals, traj, stage: a.stage });
+  const trajectory = traj?.git ? { oldRefDate: traj.oldRefDate, migrations: traj.migrations,
+    recentlyAdopted: Object.fromEntries(Object.entries(traj.adoption).filter(([, t]) => traj.now - t <= 90 * 86400)) } : null;
   return {
     adrs: checkAdrs(a.path, entries),
     name: a.name, path: a.path, version: a.version || null, platform: a.platform,
     desktopShell: a.desktopShell || null, stage: a.stage, depCount: a.depCount,
     ts: a.ts, ci: a.ci, tests: a.tests, lintfmt: a.lintfmt, hooks: a.hooks,
-    priorities, detected, gaps, advice, modernization, sourceSignals, unmapped: a.unmapped,
+    priorities, detected, gaps, advice, modernization, sourceSignals, trajectory, unmapped: a.unmapped,
   };
 }
 
@@ -282,6 +324,7 @@ const census = loadCensus();   // one snapshot read, shared by both report paths
 
 const argv = process.argv.slice(2);
 const NO_SCAN = argv.includes('--no-scan');       // skip the source-level scans (modernization + signals)
+const NO_HISTORY = argv.includes('--no-history'); // skip the git trajectory scan (churn, adoption, migrations)
 const SHOW_FILES = argv.includes('--files');      // list the offending files per finding
 const AS_JSON = argv.includes('--json');          // machine-readable (agents / mentor Phase 0)
 const CI = argv.includes('--ci');                 // gate: exit 1 on expired/moved decision records or deprecated APIs

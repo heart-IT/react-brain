@@ -310,6 +310,37 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
   check(merged[1].disposition === 'already-held' && !merged[1].advocate, 'advocate: may ONLY flip skips — already-held rows are untouchable');
 }
 
+// ── trajectory: git-history-aware suggestions (stalled migration + churn) ───────
+{
+  const { mkdtempSync, writeFileSync: wf, mkdirSync, rmSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const T = mkdtempSync(join(tmpdir(), 'rb-traj-'));
+  try {
+    const g = (args, daysAgo) => execFileSync('git', ['-C', T, '-c', 'user.email=e@e', '-c', 'user.name=e', ...args], {
+      encoding: 'utf8', env: { ...process.env, ...(daysAgo != null ? {
+        GIT_AUTHOR_DATE: new Date(Date.now() - daysAgo * 864e5).toISOString(),
+        GIT_COMMITTER_DATE: new Date(Date.now() - daysAgo * 864e5).toISOString() } : {}) } });
+    g(['init', '-q']);
+    mkdirSync(join(T, 'src'));
+    wf(join(T, 'package.json'), JSON.stringify({ name: 'traj-fix', version: '1.0.0', dependencies: {
+      react: '19.2.0', 'react-native': '0.86.0', 'react-native-vector-icons': '10.0.0', '@react-native-vector-icons/material-icons': '11.0.0' } }));
+    const legacy = (f) => wf(join(T, 'src', f), `import Icon from 'react-native-vector-icons/MaterialIcons';\nexport default () => <Icon/>;\n`);
+    legacy('a.tsx'); legacy('b.tsx'); legacy('d.tsx');
+    g(['add', '-A'], 300); g(['commit', '-qm', 'init'], 300);
+    wf(join(T, 'src', 'd.tsx'), `import Icon from '@react-native-vector-icons/material-icons';\nexport default () => <Icon/>;\n`);
+    g(['add', '-A'], 200); g(['commit', '-qm', 'migrate d'], 200);
+    const d = doctorPath(T);
+    const mig = (d.trajectory?.migrations || []).find((m) => m.kind === 'migration' && m.entry === 'RB-E-SVG');
+    check(Boolean(d.trajectory), 'trajectory: present for a git repo');
+    check(mig?.status === 'stalled' && mig.nowCount === 2 && mig.thenCount === 2, `trajectory: vector-icons migration reads STALLED at 2 files (got ${mig?.status}/${mig?.nowCount}/${mig?.thenCount})`);
+    check(mig?.remaining?.length === 2, 'trajectory: remaining legacy files listed');
+    check(d.priorities.some((p) => p.kind === 'finish' && /unstick|finish|STOP/i.test(p.text)), 'trajectory: stalled migration surfaces as a finish-priority');
+    const noH = JSON.parse(execFileSync(process.execPath, [join(ROOT, 'tools/react-brain-doctor.mjs'), T, '--json', '--no-history'], { encoding: 'utf8' }));
+    check(noH.trajectory === null, 'trajectory: --no-history skips the scan');
+  } finally { rmSync(T, { recursive: true, force: true }); }
+}
+function doctorPath(p) { return JSON.parse(execFileSync(process.execPath, [join(ROOT, 'tools/react-brain-doctor.mjs'), p, '--json'], { encoding: 'utf8' })); }
+
 // ── report ──────────────────────────────────────────────────────────────────────
 console.log(`react-brain eval — ${pass + fails.length} assertions`);
 if (fails.length) { for (const f of fails) console.log(`  ✗ ${f}`); console.log(`\n✗ ${fails.length} failed / ${pass} passed`); process.exit(1); }

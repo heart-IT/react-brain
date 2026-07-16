@@ -34,6 +34,8 @@ usage: react-brain <command> [args]
   stack    [intent]    compose a greenfield stack from intent flags (no repo needed)
                        (flags: --rn|--web|--both, --expo, --p2p, --stage=…, --help)
   doctor   <repo...>   advise a repo: detected stack vs the encyclopedia's context recommendations
+                       + TRAJECTORY (git history): stalled/regressing migrations, live-vs-
+                       dormant churn weighting on priorities, recent adoptions (--no-history)
                        + source scan for legacy core RN APIs → modern swaps + living-ADR premise
                        checks (--no-scan, --files, --json, --ci = exit 1 on expired records)
   map      <repo>      the repo pinboard: one compact line per source file (domains, imports,
