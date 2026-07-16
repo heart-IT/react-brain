@@ -542,7 +542,8 @@ const NO_SCAN = argv.includes('--no-scan');       // skip the source-level scans
 const NO_HISTORY = argv.includes('--no-history'); // skip the git trajectory scan (churn, adoption, migrations)
 const SHOW_FILES = argv.includes('--files');      // list the offending files per finding
 const AS_JSON = argv.includes('--json');          // machine-readable (agents / mentor Phase 0)
-const CI = argv.includes('--ci');                 // gate: exit 1 on expired/moved decision records or deprecated APIs
+const CI = argv.includes('--ci');
+const BRIEF = argv.includes('--brief');  // --json consumers (mentor Phase-0/MCP): decisions-only payload                 // gate: exit 1 on expired/moved decision records or deprecated APIs
 // registry preflight (network, opt-in; 7d cache): --preflight = whole-tree dep health;
 // --target=pkg@x.y adds upgrade feasibility (peer-range blockers). Keeps default runs offline.
 const TARGET_STR = (argv.find((x) => x.startsWith('--target=')) || '').split('=')[1] || null;
@@ -599,7 +600,9 @@ function registryReport(a) {
   return { health, preflight: pf, failed: reg.failed };
 }
 if (AS_JSON) {
-  const out = analyses.map((a) => jsonReport(a, entries));
+  const out = analyses.map((a) => { const r = jsonReport(a, entries);
+    return BRIEF && !r.skipped ? { name: r.name, platform: r.platform, stage: r.stage, priorities: r.priorities,
+      swaps: r.swaps, upside: r.upside, trajectory: r.trajectory, acknowledged: r.acknowledged, outcomes: r.outcomes } : r; });
   console.log(JSON.stringify(out.length === 1 ? out[0] : out, null, 2));
 } else {
   for (const a of analyses) printReport(a, entries);

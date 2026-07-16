@@ -150,7 +150,13 @@ The agent should, in order:
    blind spots / contradictions. Also run `react-brain census` — cohort adoption CHANGES since
    the last snapshot are evidence-grade signals (an app dropping/adopting a tracked lib
    outranks a download trend; feed notable deltas into challenge targets and entry notes).
-4. **Correctness** — follow `tools/challenge-routine.md` on 2–3 rotating reviewed entries
+4. **Depth cadence (the quality ceiling):** each weekly pass graduates ~2 drafted entries
+   toward `reviewed` (long-form doc + sources; grounding gate: regex-extract numerics from
+   the doc, assert each exists in the entry yaml) and challenges ~2 aging `reviewed` entries
+   (oldest `updated:` first, per challenge-routine.md). Every analyzer surface is only as
+   good as the entry behind it — this is the highest-yield token in the system.
+
+5. **Correctness** — follow `tools/challenge-routine.md` on 2–3 rotating reviewed entries
    (oldest `updated:` first); record SURVIVES / WEAKENED / OVERTURNED.
 5. **Emit ONE reviewable delta** — dead links, undated/aging entries, drift, proposed new
    entries/reading/status-flips (with verified sources), new gaps, challenge verdicts. Order by
