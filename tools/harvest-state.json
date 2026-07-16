@@ -3,7 +3,7 @@
     "Resume state for the newsletter harvest (tools/upkeep-routine.md step 2).",
     "Read this BEFORE a harvest pass; update `last_processed`/`count`/`updated` and COMMIT it after.",
     "This file lives in the repo (not session memory) precisely so a CLOUD agent can clone, resume, and open a PR.",
-    "`react-brain lint` cross-checks each `count` against encyclopedia.yaml sources_digested — they must match.",
+    "`react-brain lint` cross-checks each `count` against encyclopedia.yaml sources_digested \u2014 they must match.",
     "Narrative harvest history (what each pass changed, process learnings) stays in the maintainer's memory ledger."
   ],
   "updated": "2026-07-16",
@@ -14,7 +14,8 @@
       "last_processed": "#290",
       "count": 24,
       "cadence": "weekly",
-      "notes": "issue pages fetch directly at /newsletter/<n>"
+      "notes": "issue pages fetch directly at /newsletter/<n>",
+      "url_pattern": "https://thisweekinreact.com/newsletter/{n}"
     },
     "react-status": {
       "name": "React Status",
@@ -22,7 +23,8 @@
       "last_processed": "#482",
       "count": 23,
       "cadence": "weekly",
-      "notes": "corroboration-heavy; headliners usually already held"
+      "notes": "corroboration-heavy; headliners usually already held",
+      "url_pattern": "https://react.statuscode.com/issues/{n}"
     },
     "react-digest": {
       "name": "React Digest",
@@ -30,7 +32,7 @@
       "last_processed": "#2320",
       "count": 17,
       "cadence": "weekly",
-      "notes": "issues slug-titled by featured article; article/depth-driven — durable yield is usually one decision-guide reading. Archive moved: /digests 404s, use /newsletters. Slug numbers are NOT sequential (2316 → 2320 with nothing between)"
+      "notes": "issues slug-titled by featured article; article/depth-driven \u2014 durable yield is usually one decision-guide reading. Archive moved: /digests 404s, use /newsletters. Slug numbers are NOT sequential (2316 \u2192 2320 with nothing between)"
     },
     "react-native-rewind": {
       "name": "React Native Rewind",
@@ -38,7 +40,7 @@
       "last_processed": "#48",
       "count": 48,
       "cadence": "weekly",
-      "notes": "slug-titled; each issue page has an authoritative 'Issue #NN' label (near the title) — use THAT, not sequential guesswork, to resume (confirmed 2026-07-16: RSS + newsletter-rss.xml list newest-first; #48 = 'Zoomable Calendar Grids...', dated 2026-07-06, was the newest available and already fully corroborated in-corpus — RB-E-CALENDARS/RB-E-COMPONENT-LIBS/RB-E-ONDEVICE-AI/RB-E-BUILD/RB-E-DESKTOP/RB-E-ANIMATION between them cover every substantive item across issues #46-48)"
+      "notes": "slug-titled; each issue page has an authoritative 'Issue #NN' label (near the title) \u2014 use THAT, not sequential guesswork, to resume (confirmed 2026-07-16: RSS + newsletter-rss.xml list newest-first; #48 = 'Zoomable Calendar Grids...', dated 2026-07-06, was the newest available and already fully corroborated in-corpus \u2014 RB-E-CALENDARS/RB-E-COMPONENT-LIBS/RB-E-ONDEVICE-AI/RB-E-BUILD/RB-E-DESKTOP/RB-E-ANIMATION between them cover every substantive item across issues #46-48)"
     },
     "native-weekly": {
       "name": "Native Weekly",
@@ -46,7 +48,7 @@
       "last_processed": "#16",
       "count": 6,
       "cadence": "~6-weekly (irregular)",
-      "notes": "nativeweekly.com is a shell — use the beehiiv archive; author also authors rnsec (watch self-promotion); strongest beat = agentic dev tooling"
+      "notes": "nativeweekly.com is a shell \u2014 use the beehiiv archive; author also authors rnsec (watch self-promotion); strongest beat = agentic dev tooling"
     },
     "react-weekly": {
       "name": "React Weekly",
@@ -54,7 +56,7 @@
       "last_processed": "#28",
       "count": 21,
       "cadence": "weekly (Sundays)",
-      "notes": "site + api.react-weekly.dev are JS-shell/auth-gated — harvest via rss.xml content:encoded (FULL bodies). RSS window = latest 20: a backlog >20 issues loses them permanently (issues 1-7 already unreachable). TanStack-heavy."
+      "notes": "site + api.react-weekly.dev are JS-shell/auth-gated \u2014 harvest via rss.xml content:encoded (FULL bodies). RSS window = latest 20: a backlog >20 issues loses them permanently (issues 1-7 already unreachable). TanStack-heavy."
     }
   }
 }

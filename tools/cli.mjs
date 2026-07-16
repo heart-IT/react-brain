@@ -55,7 +55,7 @@ usage: react-brain <command> [args]
   pulse    [repo...]   corpus health: dead links, stale entries, stack drift
                        (flags: --today=YYYY-MM-DD, --no-links)
   harvest  <mode>      deterministic acquisition scaffolding:
-                       firsthand (corpus-derived watch graph — npm dist-tags, GitHub
+                       prep <source> (pre-triaged manifest: next-issue probe + corpus/manifest cross-ref — judge only TODO rows) · firsthand (corpus-derived watch graph — npm dist-tags, GitHub
                        releases, author feeds — diffed vs .firsthand-state.json;
                        --graph | --json | --manifest) · inventory <url> (every link,
                        mechanically) · coverage <url> <manifest.md> (exit 1 on

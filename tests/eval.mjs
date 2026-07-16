@@ -376,6 +376,18 @@ function doctorPath(p) { return JSON.parse(execFileSync(process.execPath, [join(
   } finally { rmSync(T, { recursive: true, force: true }); }
 }
 
+// ── harvest prep: pre-triage classifier (pure) ───────────────────────────────────
+{
+  const { prepClassify } = await import(join(ROOT, 'tools/harvest-lib.mjs'));
+  const links = [{ key: 'a.dev/x', url: 'https://a.dev/x' }, { key: 'b.dev/y', url: 'https://b.dev/y' }, { key: 'c.dev/z', url: 'https://c.dev/z' }];
+  const held = new Map([['a.dev/x', new Set(['RB-E-STATE'])]]);
+  const gold = [{ key: 'b.dev/y', disposition: 'skipped', reason: 'pre-ship', entries: [] }];
+  const r = prepClassify(links, held, gold);
+  check(r[0].pre === 'already-held' && /RB-E-STATE/.test(r[0].note), 'prep: corpus-held link pre-dispositioned with entry id');
+  check(r[1].pre === 'carried' && /pre-ship/.test(r[1].note), 'prep: previously-dispositioned link carried with its reason');
+  check(r[2].pre === 'todo', 'prep: novel link stays TODO');
+}
+
 // ── registry preflight: range parsing + feasibility + health (offline, pure) ────
 {
   const { satisfiesRange, preflightVerdict, classifyDepHealth } = await import(join(ROOT, 'tools/harvest-lib.mjs'));

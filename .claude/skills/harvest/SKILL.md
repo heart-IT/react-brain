@@ -36,9 +36,12 @@ skill. One knowledge base, every session (local, resumed, or cloud-cloned).
    update the prose caveat, and REMOVE the fired row. When a harvest lands a new
    "watch/revisit when X ships" caveat, wire it as a tripwire row at keep-time.
    Newsletters' job is unknown unknowns + corroboration.
-1. **Inventory first** (per newsletter issue): `node tools/cli.mjs harvest inventory
-   <issue-url>` — build triage from the mechanical link list, never from an LLM
-   summary of the page.
+1. **Prep first** (per newsletter source): `node tools/cli.mjs harvest prep <source>` —
+   detects the next issue deterministically (url_pattern sources; slug/RSS sources say
+   so — fall back to inventory) and writes a PRE-TRIAGED manifest where corpus-held and
+   previously-dispositioned links arrive already filled in. **Judge only the TODO
+   rows.** For sources without a pattern: `harvest inventory <issue-url>` and build the
+   manifest from that mechanical list — never from an LLM summary of the page.
 2. Triage each link; **fetch-verify every keep**; dedupe vs the corpus
    (`grep -rn "<url>" skills/react-brain-mentor/entries/`).
 3. Write `tools/harvest-log/<source>-<issue>.md` — line 2 is `issue: <issue-url>`

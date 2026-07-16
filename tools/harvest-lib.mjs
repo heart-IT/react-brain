@@ -308,3 +308,20 @@ export function preflightVerdict(pkg, doc, targetPkg, targetVersion, installedMi
   if (instPeer !== undefined && satisfiesRange(targetVersion, instPeer)) return { pkg, verdict: 'ok' };
   return { pkg, verdict: 'bump', to: doc.latest, peer: latestPeer };
 }
+
+// ── harvest prep — pre-triage classifier (pure; IO in react-brain-harvest.mjs) ──
+// Six newsletters corroborate heavily: most links in a new issue are already in
+// the corpus or already dispositioned in a prior manifest. Classify each inventory
+// link so the agent judges ONLY the genuinely novel ones (the bench's biggest
+// confusion class — mislabeled already-helds — disappears by construction).
+export function prepClassify(links, heldByKey, goldRows) {
+  const gold = new Map();
+  for (const r of goldRows || []) if (!gold.has(r.key)) gold.set(r.key, r);
+  return links.map((l) => {
+    const held = heldByKey.get(l.key);
+    if (held) return { ...l, pre: 'already-held', note: `in corpus: ${[...held].slice(0, 3).join(', ')}` };
+    const g = gold.get(l.key);
+    if (g) return { ...l, pre: 'carried', note: `previously ${g.disposition}${g.reason ? ` (${g.reason})` : ''}${g.entries.length ? ` → ${g.entries.slice(0, 2).join(', ')}` : ''} — carry over unless a reopen signal applies` };
+    return { ...l, pre: 'todo' };
+  });
+}

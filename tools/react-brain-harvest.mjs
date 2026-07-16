@@ -26,12 +26,13 @@
 //   node tools/react-brain-harvest.mjs watchlist
 // ───────────────────────────────────────────────────────────────────────────────
 
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { get, UA_BROWSER, extractLinks, manifestKeys, normalize, coverageCheck } from './harvest-lib.mjs';
+import { get, UA_BROWSER, extractLinks, manifestKeys, normalize, coverageCheck, prepClassify, parseGoldManifest } from './harvest-lib.mjs';
 
-const LOG_DIR = join(dirname(fileURLToPath(import.meta.url)), 'harvest-log');
+const TOOLS = dirname(fileURLToPath(import.meta.url));
+const LOG_DIR = join(TOOLS, 'harvest-log');
 
 async function fetchPage(url) {
   try { return await get(url, { ua: UA_BROWSER }); } catch (err) {
@@ -51,6 +52,43 @@ if (mode === 'firsthand') {
 } else if (mode === 'bench') {
   process.argv = [process.argv[0], process.argv[1], ...args];
   await import('./react-brain-triage-bench.mjs');
+} else if (mode === 'prep') {
+  // pre-triaged manifest skeleton: detect the next issue deterministically, then
+  // cross-reference every link against the corpus + ALL prior manifests, so the
+  // agent judges ONLY the novel (TODO) rows. Six newsletters corroborate heavily —
+  // most rows arrive pre-dispositioned.
+  const key = args[0];
+  const state = JSON.parse(readFileSync(join(TOOLS, 'harvest-state.json'), 'utf8'));
+  const src = state.sources[key];
+  if (!src) { console.error(`usage: harvest prep <source> [--issue=N] [--stdout] — sources: ${Object.keys(state.sources).join(', ')}`); process.exit(1); }
+  if (!src.url_pattern) { console.log(`${key}: slug/RSS source (no url_pattern) — check ${src.archive} manually, then use inventory + hand-write the manifest`); process.exit(0); }
+  const last = parseInt(String(src.last_processed).replace(/\D/g, ''), 10);
+  const forced = parseInt((args.find((a) => a.startsWith('--issue=')) || '').split('=')[1], 10);
+  let issue = null, url = null;
+  for (const c of forced ? [forced] : [last + 1, last + 2]) {
+    const u = src.url_pattern.replace('{n}', c);
+    try { await get(u, { ua: UA_BROWSER }); issue = c; url = u; break; } catch { /* not published yet */ }
+  }
+  if (!issue) { console.log(`${key}: no new issue after #${last} (probed ${last + 1}, ${last + 2})`); process.exit(0); }
+  const links = extractLinks(await fetchPage(url), url).filter((l) => !l.sameSite);
+  const { loadEntries } = await import('./detect.mjs');
+  const held = new Map();
+  for (const e of Object.values(loadEntries()))
+    for (const u of [...(e.sources || []), ...(e.reading || []).map((r) => r.url), ...(e.watching || []).map((w) => w.url), ...(e.migrate || []).flatMap((m) => m.receipts || [])].filter(Boolean)) {
+      const k = normalize(u); if (k) (held.get(k) || held.set(k, new Set()).get(k)).add(e.id);
+    }
+  const goldRows = readdirSync(LOG_DIR).filter((f) => f.endsWith('.md'))
+    .flatMap((f) => parseGoldManifest(readFileSync(join(LOG_DIR, f), 'utf8')).map((r) => ({ ...r, file: f })));
+  const rows = prepClassify(links, held, goldRows);
+  const todo = rows.filter((r) => r.pre === 'todo');
+  const PREFIX = { 'this-week-in-react': 'twir', 'react-native-rewind': 'rn-rewind' };
+  const out = join(LOG_DIR, `${PREFIX[key] || key}-${issue}.md`);
+  const esc = (s) => String(s || '').replace(/\|/g, '·');
+  const line = (r) => `| [${esc(r.text) || r.url}](${r.url}) | ${r.pre === 'todo' ? 'TODO' : r.pre === 'already-held' ? `already-held: ${esc(r.note).replace('in corpus: ', '')}` : esc(r.note)} |`;
+  const md = `# Harvest manifest — ${src.name} #${issue} (prepped ${new Date().toISOString().slice(0, 10)})\nissue: ${url}\n\nPre-triaged by \`harvest prep\`: ${rows.length} external links · ${rows.length - todo.length} pre-dispositioned (corpus + prior-manifest cross-ref) · **${todo.length} TODO**.\nJudge ONLY the TODO rows; carried rows re-open only on their reopen signals. Advocate pass, verify-diff and coverage gates apply as usual.\n\n| item | disposition |\n|---|---|\n${[...todo, ...rows.filter((r) => r.pre !== 'todo')].map(line).join('\n')}\n`;
+  if (args.includes('--stdout')) console.log(md);
+  else if (existsSync(out)) { console.error(`refusing to overwrite ${out} — use --stdout to preview`); process.exit(1); }
+  else { writeFileSync(out, md); console.log(`wrote ${out} — ${todo.length} TODO of ${rows.length} links (${rows.length - todo.length} pre-dispositioned)`); }
 } else if (mode === 'inventory') {
   if (!args[0]) { console.error('usage: harvest inventory <issue-url>'); process.exit(1); }
   const links = extractLinks(await fetchPage(args[0]), args[0]);
@@ -96,6 +134,6 @@ if (mode === 'firsthand') {
   console.log(`\n${signals.length} standing reopen signal(s):`);
   signals.forEach((s) => console.log(`   [${s.file}] ${s.line}`));
 } else {
-  console.error('usage: react-brain harvest <firsthand [--graph|--json|--manifest] | inventory <url> | coverage <url> <manifest.md> | verify-diff [--base=main] | bench [--model=id|--candidate=file] | watchlist>');
+  console.error('usage: react-brain harvest <prep <source> | firsthand [--graph|--json|--manifest] | inventory <url> | coverage <url> <manifest.md> | verify-diff [--base=main] | bench [--model=id|--candidate=file] | watchlist>');
   process.exit(1);
 }
