@@ -8,7 +8,7 @@ platforms: [react, react-native]
 options:
   - { name: "Reanimated 4", tradeoff: "UI-thread + CSS-style animations/transitions; worklets split into react-native-worklets; requires New Arch" }
   - { name: "Gesture Handler 3.0", tradeoff: "native gestures; v3 adds a hook-based API built for the React Compiler + Reanimated 4" }
-  - { name: "react-native-worklets 8.0", tradeoff: "the worklets runtime under Reanimated 4 (now its own package); Shareable values across isolated runtimes" }
+  - { name: "react-native-worklets (0.11.x)", tradeoff: "the worklets runtime under Reanimated 4 (now its own package; npm latest 0.11.0, verified 2026-07-17 — an earlier '8.0' claim here was WRONG, caught by the firsthand watch); 0.11 adds experimental Hermes-bytecode worklets + Shareable values across isolated runtimes" }
   - { name: "react-native-skia (2.x)", tradeoff: "GPU 2D drawing; v2.1 plays Lottie via Skottie; pairs with Reanimated" }
   - { name: "lottie-react-native", tradeoff: "designer Lottie/JSON animations; v7 adds visionOS" }
   - { name: "Rive — @rive-app/react-native (Nitro) / rive-react-native (legacy)", tradeoff: "designer-driven INTERACTIVE vector animation (state machines) — the Lottie alternative; the SDK was rewritten on Nitro under Rive's official scope (@rive-app/react-native, 0.4.x EARLY line): files/view-models become shared typed HybridObjects — Margelo-measured up to 94× multi-view loads + ~4.7× lower memory vs legacy (rewrite authors' own benchmark); legacy unscoped pkg at 9.8.3, quiet since 2026-04" }
@@ -43,7 +43,7 @@ note: >
   (caught from ledgerhr's framer-motion usage). Verified vs the official RN 0.85 blog.
 defer_to_skill: react-native-best-practices
 doc: "RB-E-ANIMATION.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-13
+updated: 2026-07-17   # worklets version corrected 8.0→0.11.x (firsthand catch)
 reading:
   - title: "CSS vs. JavaScript Animations"
     url: "https://www.joshwcomeau.com/animation/css-vs-javascript/"
