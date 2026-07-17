@@ -6,7 +6,7 @@
     "`react-brain lint` cross-checks each `count` against encyclopedia.yaml sources_digested \u2014 they must match.",
     "Narrative harvest history (what each pass changed, process learnings) stays in the maintainer's memory ledger."
   ],
-  "updated": "2026-07-16",
+  "updated": "2026-07-17",
   "sources": {
     "this-week-in-react": {
       "name": "This Week in React",
@@ -37,8 +37,8 @@
     "react-native-rewind": {
       "name": "React Native Rewind",
       "archive": "https://reactnativerewind.com/",
-      "last_processed": "#48",
-      "count": 48,
+      "last_processed": "#49",
+      "count": 49,
       "cadence": "weekly",
       "notes": "slug-titled; each issue page has an authoritative 'Issue #NN' label (near the title) \u2014 use THAT, not sequential guesswork, to resume (confirmed 2026-07-16: RSS + newsletter-rss.xml list newest-first; #48 = 'Zoomable Calendar Grids...', dated 2026-07-06, was the newest available and already fully corroborated in-corpus \u2014 RB-E-CALENDARS/RB-E-COMPONENT-LIBS/RB-E-ONDEVICE-AI/RB-E-BUILD/RB-E-DESKTOP/RB-E-ANIMATION between them cover every substantive item across issues #46-48)"
     },

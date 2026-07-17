@@ -10,12 +10,14 @@ options:
   - { name: "expo-updates + custom server", tradeoff: "the Expo Updates protocol is open — self-host the server, keep the battle-tested client; more ops work than EAS" }
   - { name: "hot-updater", tradeoff: "self-hosted open-source OTA (gronxb) explicitly positioned as the CodePush successor; actively maintained (v0.35.x, 2026-07); younger than expo-updates" }
   - { name: "code-push-server (standalone)", tradeoff: "Microsoft's open-sourced server, compatible with the legacy react-native-code-push client — a self-host stopgap for existing CodePush apps, not a bet for new ones" }
+  - { name: "Delta (Zepto, OSS)", tradeoff: "self-hosted BINARY DELTA patching at quick-commerce scale — delta-cli computes bsdiff patches between releases to your S3; delta-server (Lambdas behind CloudFront) picks the patch per device (appId/jsVersion/bundleVersion manifest); device applies bspatch, swaps on next launch. Production receipts (Zepto's own): 80% adoption in 24h, 15M update requests/day, P90 patch download 305ms. GitHub-install (not yet on npm) — WATCH for a published package" }
   - { name: "react-native-code-push (RETIRED service)", tradeoff: "App Center + the hosted CodePush service shut down 2025-03-31; the client npm has been dormant since 2024-12 — migrate" }
 recommend:
   default: "On Expo/EAS → EAS Update via the expo-updates client (channels + phased rollouts + rollback, and diffing makes updates dramatically smaller since SDK 55/56). Hard self-host requirement → hot-updater, or the open expo-updates protocol with your own server. Anything still pointed at the retired CodePush service is silently broken — migrate."
   when:
     - "Expo app → EAS Update (first-party; channels/rollouts/rollback built in)"
     - "self-hosted / no-vendor requirement → hot-updater, or expo-updates protocol + your own server"
+    - "huge fleet where full-bundle pushes cost real money (a 20MB Hermes bundle × 1M installs ≈ $1,700/push at CloudFront list) → delta patching: EAS bsdiff diffing on Expo, or Zepto's Delta self-hosted"
     - "legacy CodePush app → standalone code-push-server keeps it alive while you migrate; the hosted service is gone"
     - "the change touches native code → OTA cannot ship it; that's a store release (see RB-E-RN-VERSIONS)"
     - "RN embedded in a native app (brownfield) → Expo Updates works in isolated brownfield since SDK 55 (see RB-E-BROWNFIELD)"
@@ -30,9 +32,19 @@ note: >
   SDK 55 changelog). Store policy allows updating interpreted JS/assets within guidelines;
   native changes always require a store release. OTA is also the rollback story: republishing
   a known-good update is the fastest production mitigation RN has.
+  DELTA LANE (2026-07-17, RN Rewind #49; repo verified): Zepto open-sourced Delta —
+  the self-hosted binary-delta answer to full-bundle economics (their motivation math:
+  one-character fix × 1M installs = ~20TB ≈ $1,700 CloudFront). Numbers are Zepto's own
+  production telemetry; repo-install only for now — add a detect row + consider a
+  tripwire when it lands on npm.
 defer_to_skill: null
 doc: "RB-E-OTA.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-13
+updated: 2026-07-17
+watching:
+  - title: "The OTA Illusion: What No One Tells You About Instant Updates At Scale (RUC 2025)"
+    url: "https://www.youtube.com/watch?v=hBoAD6sYDYo"
+    by: "Adam Mruk (Callstack) — React Universe Conf 2025"
+    what: "The scale half of this entry's delta-patching lane: why 'instant' OTA is an illusion at fleet size — full-bundle economics, adoption curves, and delivery latency — the problem statement Zepto's Delta and EAS bsdiff diffing both answer. (Verified via YouTube oEmbed: title + author.)"
 reading:
   - title: "The production playbook for OTA updates"
     url: "https://expo.dev/blog/the-production-playbook-for-ota-updates"
@@ -45,6 +57,7 @@ reading:
     by: "Expo"
     what: "The reference for the hosted-default choice: how updates map to channels, phased rollouts to a percentage of users, and rollback-by-republish ('much like a new commit'). Read before designing a release-channel scheme."
 sources:
+  - "https://github.com/zepto-labs/react-native-delta"
   - "https://expo.dev/changelog/sdk-55"
   - "https://github.com/microsoft/react-native-code-push"
   - "https://registry.npmjs.org/hot-updater/latest"

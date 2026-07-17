@@ -20,6 +20,11 @@ recommend:
     - "server-state caching, retries, invalidation → that's TanStack Query territory (RB-E-DATA), regardless of client"
     - "P2P / Holepunch app → there may be no HTTP layer at all; transport is Hyperswarm streams (RB-E-P2P)"
 note: >
+  ABORT MODERNIZATION (2026-07-17, RN Rewind #49; commit verified): RN forked the 7-years-dormant
+  abort-controller polyfill IN-TREE (dropping it and event-target-shim), wired it to RN's own
+  EventTarget, and added the missing modern API — AbortSignal.timeout(), AbortSignal.any(),
+  AbortSignal.abort(reason), signal.throwIfAborted(). Landed on main against 0.87 (next release):
+  web cancellation patterns (per-request deadlines, merged signals) work unmodified.
   NEW entry (2026-07-09): the fetch-layer choice had no home — flagged as a gap candidate in the
   Native Weekly first-harvest (nitro-fetch featured twice; SDK 56 made expo/fetch the global
   default, verified vs the SDK 56 changelog) and promoted on the user's call. The durable axis:
@@ -29,7 +34,7 @@ note: >
   nitro-fetch facts verified vs its repo (benchmarks are vendor-run; ~23% on their harness).
 defer_to_skill: null
 doc: "RB-E-NETWORKING.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-16
+updated: 2026-07-17
 reading:
   - title: "react-native-nitro-fetch — architecture & benchmarks"
     url: "https://github.com/margelo/react-native-nitro-fetch"
@@ -38,6 +43,7 @@ reading:
     claim: "You ship react-native-nitro-fetch — it swaps the fetch engine (Cronet/URLSession: HTTP/3+QUIC, Brotli, disk cache, prefetch, worklet parsing) behind the same API; benchmarks are vendor-run (~23% on their harness), so measure your own hot path."
     applies_when: { deps: ["react-native-nitro-fetch"], platforms: [react-native] }
 sources:
+  - "https://github.com/react/react-native/commit/6f3375a140b10cffe9bed3dd72a017ece97bbbba"
   - "https://github.com/margelo/react-native-nitro-fetch"
   - "https://expo.dev/changelog/sdk-56"
   - "https://registry.npmjs.org/axios/latest"

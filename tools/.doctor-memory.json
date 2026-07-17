@@ -33,125 +33,125 @@
  "rn-smells": {
   "items": {
    "revisit:RB-E-RN-VERSIONS": {
-    "seen": 56,
+    "seen": 60,
     "text": "revisit RN 0.86.0 (RN-VERSIONS)",
-    "last": "2026-07-16"
+    "last": "2026-07-17"
    },
    "gap:RB-E-TESTING": {
-    "seen": 56,
+    "seen": 60,
     "text": "close the TESTING gap — Unit/component: Vitest (web) or Jest (RN) + React Testing Library. E2…",
-    "last": "2026-07-16"
+    "last": "2026-07-17"
    },
    "read:RB-E-STATE": {
-    "seen": 56,
+    "seen": 60,
     "text": "You ship a client store but no server cache — server state (stale-while-revalidate, inval…",
-    "last": "2026-07-16"
+    "last": "2026-07-17"
    },
    "read:RB-E-DATA": {
-    "seen": 56,
+    "seen": 60,
     "text": "You ship an HTTP client but no server cache — hand-rolled fetching hides race conditions,…",
-    "last": "2026-07-16"
+    "last": "2026-07-17"
    },
    "read:RB-E-OTA": {
-    "seen": 56,
+    "seen": 60,
     "text": "You ship OTA updates — run them like releases: staged percentage rollouts, a monitored ba…",
-    "last": "2026-07-16"
+    "last": "2026-07-17"
    }
   },
-  "visits": 56,
+  "visits": 60,
   "resolvedTotal": 0
  },
  "web-clean": {
   "items": {
    "read:RB-E-DATA": {
-    "seen": 56,
+    "seen": 60,
     "text": "You ship TanStack Query — the maintainer's guidance is to structure around queryOptions o…",
-    "last": "2026-07-16"
+    "last": "2026-07-17"
    },
    "read:RB-E-BUILD": {
-    "seen": 56,
+    "seen": 60,
     "text": "You ship Vite — v8 unifies dev and prod on Rolldown (one Rust bundler, 10-30x faster) ins…",
-    "last": "2026-07-16"
+    "last": "2026-07-17"
    },
    "read:RB-E-TESTING": {
-    "seen": 56,
+    "seen": 60,
     "text": "You have a test runner — spend it on integration tests over mock-heavy unit suites: confi…",
-    "last": "2026-07-16"
+    "last": "2026-07-17"
    },
    "read:RB-E-TYPESCRIPT": {
-    "seen": 56,
+    "seen": 60,
     "text": "You ship TypeScript — TS 7 (Go-native tsc, ~10x) is stable; migrate incrementally through…",
-    "last": "2026-07-16"
+    "last": "2026-07-17"
    },
    "read:RB-E-NAV": {
-    "seen": 56,
+    "seen": 60,
     "text": "You ship React Router — it runs ChatGPT's web app at billion-user scale (framework mode +…",
-    "last": "2026-07-16"
+    "last": "2026-07-17"
    }
   },
-  "visits": 56,
+  "visits": 60,
   "resolvedTotal": 0
  },
  "p2p-pear": {
   "items": {
    "read:RB-E-P2P": {
-    "seen": 14,
+    "seen": 15,
     "text": "You ship the Hypercore stack — data is a local append-only log merged by Autobase, indexe…",
-    "last": "2026-07-16"
+    "last": "2026-07-17"
    },
    "gap:RB-E-DX": {
-    "seen": 14,
+    "seen": 15,
     "text": "close the DX gap — Gate tests + typecheck + lint on every PR in CI, and enforce the same…",
-    "last": "2026-07-16"
+    "last": "2026-07-17"
    },
    "gap:RB-E-STATE": {
-    "seen": 14,
+    "seen": 15,
     "text": "close the STATE gap — Split the problem: TanStack Query for server state + Zustand for clie…",
-    "last": "2026-07-16"
+    "last": "2026-07-17"
    },
    "gap:RB-E-TYPESCRIPT": {
-    "seen": 14,
+    "seen": 15,
     "text": "close the TYPESCRIPT gap — Run strict TypeScript (strict:true, the TS 6 default) and export a sm…",
-    "last": "2026-07-16"
+    "last": "2026-07-17"
    },
    "gap:RB-E-NAV": {
-    "seen": 14,
+    "seen": 15,
     "text": "close the NAV gap — React Native → Expo Router if you're on Expo, else React Navigation. …",
-    "last": "2026-07-16"
+    "last": "2026-07-17"
    }
   },
-  "visits": 14,
+  "visits": 15,
   "resolvedTotal": 0
  },
  "prod-no-boundary": {
   "items": {
    "gap:RB-E-NATIVE": {
-    "seen": 14,
+    "seen": 15,
     "text": "close the NATIVE gap — Target the New Architecture (mandatory ≥ RN 0.82). Reach for Expo Mod…",
-    "last": "2026-07-16"
+    "last": "2026-07-17"
    },
    "gap:RB-E-STATE": {
-    "seen": 14,
+    "seen": 15,
     "text": "close the STATE gap — Split the problem: TanStack Query for server state + Zustand for clie…",
-    "last": "2026-07-16"
+    "last": "2026-07-17"
    },
    "gap:RB-E-NAV": {
-    "seen": 14,
+    "seen": 15,
     "text": "close the NAV gap — React Navigation",
-    "last": "2026-07-16"
+    "last": "2026-07-17"
    },
    "gap:RB-E-STYLING": {
-    "seen": 14,
+    "seen": 15,
     "text": "close the STYLING gap — Web: Tailwind (pair with shadcn/ui — RB-E-COMPONENT-LIBS). React Nati…",
-    "last": "2026-07-16"
+    "last": "2026-07-17"
    },
    "revisit:RB-E-RN-VERSIONS": {
-    "seen": 14,
+    "seen": 15,
     "text": "revisit RN 0.86.0 (RN-VERSIONS)",
-    "last": "2026-07-16"
+    "last": "2026-07-17"
    }
   },
-  "visits": 14,
+  "visits": 15,
   "resolvedTotal": 0
  },
  "traj-fix": {
@@ -159,61 +159,61 @@
    "finish:RB-E-SVG": {
     "seen": 1,
     "text": "unstick the react-native-vector-icons → @react-native-vector-icons/material-icons migration (2 files left, was 2)",
-    "last": "2026-07-16"
+    "last": "2026-07-17"
    },
    "revisit:RB-E-RN-VERSIONS": {
-    "seen": 56,
+    "seen": 60,
     "text": "revisit RN 0.86.0 (RN-VERSIONS)",
-    "last": "2026-07-16"
+    "last": "2026-07-17"
    },
    "gap:RB-E-TESTING": {
-    "seen": 56,
+    "seen": 60,
     "text": "close the TESTING gap — Unit/component: Vitest (web) or Jest (RN) + React Testing Library. E2…",
-    "last": "2026-07-16"
+    "last": "2026-07-17"
    },
    "gap:RB-E-NATIVE": {
-    "seen": 56,
+    "seen": 60,
     "text": "close the NATIVE gap — Target the New Architecture (mandatory ≥ RN 0.82). Reach for Expo Mod…",
-    "last": "2026-07-16"
+    "last": "2026-07-17"
    },
    "gap:RB-E-DX": {
-    "seen": 56,
+    "seen": 60,
     "text": "close the DX gap — Gate tests + typecheck + lint on every PR in CI, and enforce the same…",
-    "last": "2026-07-16"
+    "last": "2026-07-17"
    }
   },
-  "visits": 56,
-  "resolvedTotal": 28
+  "visits": 60,
+  "resolvedTotal": 30
  },
  "swap-fix": {
   "items": {
    "revisit:RB-E-RN-VERSIONS": {
-    "seen": 14,
+    "seen": 15,
     "text": "revisit RN 0.86.0 (RN-VERSIONS)",
-    "last": "2026-07-16"
+    "last": "2026-07-17"
    },
    "gap:RB-E-TESTING": {
-    "seen": 14,
+    "seen": 15,
     "text": "close the TESTING gap — Unit/component: Vitest (web) or Jest (RN) + React Testing Library. E2…",
-    "last": "2026-07-16"
+    "last": "2026-07-17"
    },
    "read:RB-E-DATA": {
-    "seen": 14,
+    "seen": 15,
     "text": "You ship an HTTP client but no server cache — hand-rolled fetching hides race conditions,…",
-    "last": "2026-07-16"
+    "last": "2026-07-17"
    },
    "gap:RB-E-DX": {
-    "seen": 14,
+    "seen": 15,
     "text": "close the DX gap — Gate tests + typecheck + lint on every PR in CI, and enforce the same…",
-    "last": "2026-07-16"
+    "last": "2026-07-17"
    },
    "gap:RB-E-STATE": {
-    "seen": 14,
+    "seen": 15,
     "text": "close the STATE gap — Split the problem: TanStack Query for server state + Zustand for clie…",
-    "last": "2026-07-16"
+    "last": "2026-07-17"
    }
   },
-  "visits": 14,
+  "visits": 15,
   "resolvedTotal": 0
  }
 }

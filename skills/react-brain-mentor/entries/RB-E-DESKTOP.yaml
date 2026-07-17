@@ -12,6 +12,7 @@ options:
   - { name: "Pear (Holepunch)", tradeoff: "P2P/serverless desktop+mobile runtime (Bare); no central server, content-addressed distribution; depth → holepunch-p2p-systems" }
   - { name: "Capacitor (Ionic)", tradeoff: "wraps a web app into iOS/Android (and desktop via Electron) native shells; web-first teams shipping to mobile" }
   - { name: "PWA (no shell)", tradeoff: "installable from the browser; least native integration but zero packaging — try this before reaching for a shell" }
+  - { name: "Native SDK (Vercel Labs) — EXPERIMENTAL", tradeoff: "a THIRD renderer answer: neither bundled (Electron) nor borrowed (Tauri) — an OWNED engine drawing every pixel; declarative markup + TypeScript/Zig compiled to native at BUILD time (no browser, no WebView, no JS engine in the binary); TEA-style single update function, NOT React; 45+ built-in components, embedded automation server for coding agents; 3.6MB/~100ms calculator (vendor numbers); iOS/Android experimental; ironically ships a 16KiB-capped async-JSON WebView Bridge" }
   - { name: "react-native-windows / react-native-macos (Microsoft)", tradeoff: "the RN-NATIVE desktop path — real native UI from RN code, no webview at all; rn-windows tracks core closely (0.84, 2026-06), rn-macos lags a few versions (0.81.x); for RN teams extending to desktop, not for packaging a web app" }
 recommend:
   default: "Lightweight desktop → Tauri 2 (native webview, tiny builds). Need maximum ecosystem / deep Node + native integration, or already on it → Electron. Just wrapping an existing web URL → Pake."
@@ -36,9 +37,14 @@ note: >
   share-your-RN-code answer; a different axis than the bundled-vs-borrowed-renderer choice.
   LEAD (2026-07-16 back-audit, TWiR #284): shirakaba/expo-desktop targets Expo → macOS/Windows
   directly — early and unproven, but a third RN-desktop lane (vs Microsoft's forks) to watch.
+  NATIVE SDK PROMOTED lead→option 2026-07-17 (RN Rewind #49 = 2nd independent signal in a week,
+  resolving twir-290's too-early reopen condition; native-sdk.dev/bridge + /platform-support
+  verified): the owned-renderer lane is real but experimental — and RN Rewind's own critique
+  stands quoted: async serialized JSON bridge + declarative views + native renderer ≈ "inventing
+  React Native 0.59". Watch, don't bet.
 defer_to_skill: engineering-principles   # shell↔web boundary; Pear depth → holepunch-p2p-systems; shell security → RB-E-SECURITY
 doc: "RB-E-DESKTOP.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-16
+updated: 2026-07-17
 reading:
   - title: "The Conductor Rewrite: what they changed to make it fast"
     url: "https://performance.dev/the-conductor-rewrite"
@@ -51,6 +57,7 @@ reading:
     by: "Petr Nikolaev & Thomas Paul Mann (Raycast)"
     what: "How Raycast ships one React + TypeScript codebase to both macOS and Windows via native shells (Swift/C#) plus WebKit — IPC design, memory breakdown, and concrete WebKit workarounds. A durable model for cross-platform desktop on React without Electron."
 sources:
+  - "https://native-sdk.dev/platform-support"
   - "https://github.com/shirakaba/expo-desktop"
   - "https://tauri.app/"
   - "https://github.com/tw93/Pake"
