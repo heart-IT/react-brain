@@ -6,7 +6,7 @@
     "`react-brain lint` cross-checks each `count` against encyclopedia.yaml sources_digested \u2014 they must match.",
     "Narrative harvest history (what each pass changed, process learnings) stays in the maintainer's memory ledger."
   ],
-  "updated": "2026-07-17",
+  "updated": "2026-07-20",
   "sources": {
     "this-week-in-react": {
       "name": "This Week in React",
@@ -29,8 +29,8 @@
     "react-digest": {
       "name": "React Digest",
       "archive": "https://reactdigest.net/digests",
-      "last_processed": "#2320",
-      "count": 17,
+      "last_processed": "#2325",
+      "count": 18,
       "cadence": "weekly",
       "notes": "issues slug-titled by featured article; article/depth-driven \u2014 durable yield is usually one decision-guide reading. Archive moved: /digests 404s, use /newsletters. Slug numbers are NOT sequential (2316 \u2192 2320 with nothing between)"
     },

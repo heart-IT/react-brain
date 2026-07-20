@@ -9,7 +9,7 @@ options:
   - { name: "Better Auth", tradeoff: "TS-first, framework-agnostic, self-hosted (your DB owns the users); 2FA/passkeys/organizations via plugins; acquired Auth.js and JOINED VERCEL 2026-07 with a stated open-source + framework-agnostic commitment; 1.6.x, very active" }
   - { name: "Auth.js / NextAuth (maintenance)", tradeoff: "the long-time Next.js default — now under Better Auth's stewardship: security + bug fixes continue but the stated path is transitioning users to Better Auth; registry shows the cadence (@auth/core last publish 2025-10)" }
   - { name: "Clerk", tradeoff: "managed auth SaaS with prebuilt React components (sign-in, orgs, MFA) + a first-class Expo SDK (@clerk/clerk-expo); fastest to ship; per-MAU pricing + vendor dependency" }
-  - { name: "Auth0 (react-native-auth0)", tradeoff: "the enterprise IdP — SSO/SAML/federation; RN SDK active (v5.9, 2026-07, adds passwordless OTP for database connections)" }
+  - { name: "Auth0 (react-native-auth0)", tradeoff: "the enterprise IdP — SSO/SAML/federation; RN SDK active (v5.10, 2026-07, adds MFA support; v5.9 added passwordless OTP for database connections)" }
   - { name: "backend-bundled — Supabase Auth / Firebase Auth", tradeoff: "already included with the backend (@react-native-firebase/auth on RN); use it rather than bolting on a second identity system" }
   - { name: "expo-auth-session (DIY)", tradeoff: "Expo's browser-based OAuth/OIDC primitive — the hand-rolled lane on RN; you own token/session handling (Keychain via RB-E-STORAGE) and the correctness burden (see reading)" }
 recommend:
@@ -36,13 +36,14 @@ note: >
   when-clause, not churn. Auth was a domain GAP — no entry covered it among the prior 42.
 defer_to_skill: null
 doc: null
-updated: 2026-07-16
+updated: 2026-07-20   # react-native-auth0 v5.10 (MFA) — firsthand watch
 reading:
   - title: "The Copenhagen Book"
     url: "https://thecopenhagenbook.com/"
     by: "Pilcrow (Lucia Auth author)"
     what: "The free, open, community-maintained guideline for implementing auth from first principles — server-side tokens, sessions, password auth + reset, email verification, OAuth, MFA, WebAuthn, CSRF, open redirects — meant to be read alongside the OWASP cheat sheets. THE canonical reference when you hand-roll any part of auth instead of adopting a library above; its author sunset the Lucia auth library INTO this book, the lesson being that auth is a design problem more than a dependency."
 sources:
+  - "https://github.com/auth0/react-native-auth0/releases/tag/v5.10.0"
   - "https://better-auth.com/blog/better-auth-joins-vercel"
   - "https://registry.npmjs.org/better-auth/latest"
   - "https://registry.npmjs.org/@auth%2Fcore/latest"

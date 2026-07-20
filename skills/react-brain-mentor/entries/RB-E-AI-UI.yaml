@@ -9,7 +9,7 @@ options:
   - { name: "Vercel AI SDK / json-render", tradeoff: "streaming chat + tool-calling; json-render renders model output as components (now RN too)" }
   - { name: "assistant-ui / Tambo", tradeoff: "prebuilt chat/generative-UI components; Tambo 1.0 adds state persistence + streaming, self-host or cloud" }
   - { name: "Cedar / Streamdown", tradeoff: "Cedar = agent-UI toolkit; Streamdown = streaming-markdown renderer for LLM output" }
-  - { name: "TanStack AI (@tanstack/ai + ai-react)", tradeoff: "type-safe TS AI SDK — streaming chat, tool calling, agents, host-side MCP client, generation hooks (useGenerateImage/Speech/Video, useTranscription) beyond chat; 7-provider adapters; pre-1.0 (0.40, active 2026-07) — the first real Vercel-AI-SDK alternative" }
+  - { name: "TanStack AI (@tanstack/ai + ai-react)", tradeoff: "type-safe TS AI SDK — streaming chat, tool calling, agents, host-side MCP client, generation hooks (useGenerateImage/Speech/Video, useTranscription) beyond chat; 7-provider adapters; pre-1.0 (0.41, active 2026-07) — the first real Vercel-AI-SDK alternative" }
 recommend:
   default: "Vercel AI SDK for streaming chat + tool-calling (TanStack AI is the emerging type-safe alternative — pre-1.0, watch it); assistant-ui/Tambo for prebuilt chat UI; Streamdown to render streaming markdown. Very fast-moving (confidence: low) — treat picks as current-best, not settled."
   when:
@@ -24,7 +24,7 @@ note: >
   not a React UI library itself.
 defer_to_skill: null
 doc: null
-updated: 2026-07-10   # TanStack AI added — three independent React Weekly signals (issues 11/16/23), verified vs npm
+updated: 2026-07-20   # Margelo RN chat-stack reading + TanStack AI 0.41 — firsthand watch
 sources:
   - "https://json-render.dev/docs/ai-sdk"
   - "https://github.com/tambo-ai/tambo"
@@ -43,6 +43,12 @@ reading:
     what: "The architecture behind streaming-markdown rendering (the Streamdown problem): repairing incomplete markdown before parsing, block-level memoization to avoid re-parsing every token, processor caching, and startTransition for smooth streaming."
     claim: "You ship streaming LLM output — render markdown the Streamdown way: repair incomplete markdown before parsing, memoize at block level so every token doesn't re-parse, cache the processor, and wrap updates in startTransition."
     applies_when: { deps: ["ai", "@ai-sdk/*", "@tanstack/ai"] }
+  - title: "Building a ChatGPT-Style AI Chat App in React Native with RAG & Streaming"
+    url: "https://blog.margelo.com/building-native-llm-chat-app-with-rag"
+    by: "Dave Mkpa-Eke (Margelo)"
+    what: "A production RN chat-app architecture (MargeloChat): stream OpenAI over WebSocket with UTF-8 decoding off the JS thread (react-native-nitro-websockets), native markdown parsing (Software Mansion's react-native-enriched-markdown), Legend List v3 for the transcript, keyboard-controller for composer tracking, true-sheet + liquid-glass for chrome, Pinecone RAG over nitro-fetch — 57-60fps by keeping every expensive step native or UI-thread. Margelo self-promotes its Nitro ecosystem throughout; the architectural principle stands independent of the vendor picks."
+    claim: "You're building an AI chat UI in React Native — keep the JS thread free: decode streaming sockets, parse markdown, and fetch RAG natively; render the transcript with a chat-optimized list. Per-token JS-thread work is what makes streaming chat jank."
+    applies_when: { deps: ["ai", "@ai-sdk/*", "@tanstack/ai"], platforms: [react-native] }
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "@ai-sdk/*", label: "Vercel AI SDK", token: "ai sdk" }
   - { pkg: "ai", label: "Vercel AI SDK", token: "ai sdk" }

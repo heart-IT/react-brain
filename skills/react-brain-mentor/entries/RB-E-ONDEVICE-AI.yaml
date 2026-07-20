@@ -20,7 +20,7 @@ recommend:
 note: "Fast-moving area surfaced across multiple RN Rewind issues; recommend tentatively (confidence: low) and validate on-device before committing."
 defer_to_skill: null
 doc: null
-updated: 2026-07-09
+updated: 2026-07-20   # Edge AI production survey reading — firsthand watch (swmansion feed)
 sources:
   - "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.8.0"
   - "https://registry.npmjs.org/@react-native-ai/adk/latest"
@@ -33,6 +33,12 @@ reading:
     what: "A reasoned cost/latency/privacy case for on-device TTS (Kokoro via react-native-executorch), with the economics and the tradeoffs (voice/language coverage, a custom C++ phonemizer). A durable framing for the on-device-vs-cloud decision."
     claim: "You ship react-native-executorch — the on-device-vs-cloud TTS case (Kokoro): cost, latency and privacy favor on-device, with the tradeoffs being voice/language coverage and a custom C++ phonemizer."
     applies_when: { deps: ["react-native-executorch"], platforms: [react-native] }
+  - title: "Edge AI in Production: What Apple, Meta, and Google Already Ship On-Device"
+    url: "https://swmansion.com/blog/edge-ai-in-production-what-apple-meta-and-google-already-ship-on-device/"
+    by: "Martyna Szabat (Software Mansion)"
+    what: "Survey evidence that on-device AI is production-proven, not experimental: Apple ships multimodal-embedding photo search + hybrid Siri; Meta runs ExecuTorch in WhatsApp (network prediction), Instagram (SqueezeSAM cutouts) and Messenger (transcription); Google ships scam detection + Gemini Nano; Snapchat runs 10MB AR models. Ends in RN ExecuTorch pointers (Gemma/Qwen, ~30MB quantized Whisper Tiny STT) — vendor self-promotion, they author the lib. The durable framing: 'fine-tuning is what makes a small model good enough.'"
+    claim: "You're weighing on-device AI in React Native — it's production-proven at big-tech scale (Meta runs ExecuTorch inside WhatsApp/Instagram/Messenger), and small models get good enough through task-specific fine-tuning, not size."
+    applies_when: { platforms: [react-native], stages: [production, scale] }
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "react-native-executorch", label: "ExecuTorch", token: "executorch" }
   - { pkg: "@react-native-ai/apple", label: "Apple on-device LLM", token: "apple" }

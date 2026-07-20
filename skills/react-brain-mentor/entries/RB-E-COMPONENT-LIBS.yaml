@@ -9,7 +9,7 @@ options:
   - { name: "Base UI (1.x)", tradeoff: "unstyled accessible primitives (Radix/MUI lineage); render-prop customization" }
   - { name: "React Aria Components (1.x, Adobe)", tradeoff: "accessibility-first headless primitives; `render` prop pattern (not asChild)" }
   - { name: "Radix UI", tradeoff: "unstyled primitives; `asChild` composition; widely used under shadcn" }
-  - { name: "shadcn/ui", tradeoff: "copy-paste components (own the code) + Tailwind; CLI + registries; Base UI is the DEFAULT headless layer since July 2026 (4.13) — Radix stays supported, every component ships for both; 2026-06 added chat components + the first headless @shadcn/react package" }
+  - { name: "shadcn/ui", tradeoff: "copy-paste components (own the code) + Tailwind; CLI + registries; Base UI is the DEFAULT headless layer since July 2026 (4.13) — Radix stays supported, and React Aria joined as a THIRD first-class base later that month (`init --base aria`; per-base scoped registries, all 8 style variants); 2026-06 added chat components + the first headless @shadcn/react package" }
   - { name: "MUI (9) / Chakra (3) / Mantine (9) / Ant Design (6)", tradeoff: "batteries-included styled systems; MUI v9 is incrementally adopting Base UI primitives for new components (NumberField, MenuBar), not a full migration" }
   - { name: "HeroUI (3)", tradeoff: "React Aria + Tailwind; separate web + RN libraries sharing design tokens (not one cross-platform abstraction)" }
   - { name: "Astryx (Meta)", tradeoff: "Meta's open-source design system on React + StyleX: 150+ accessible, themeable components, compile-time atomic styling, agent-ready scaffolding (CLI + MCP); grown 8 yrs internally, 13,000+ Meta apps; batteries-included; beta (2026)" }
@@ -21,11 +21,12 @@ recommend:
     - "internal admin/enterprise → Ant Design or MUI"
     - "Meta/StyleX-native, agent-ready design system → Astryx (beta — vet component coverage before betting on it)"
     - "React Native UI → this entry is web-only; see RB-E-STYLING / RB-E-CROSSPLATFORM"
-note: "Split three ways: headless/unstyled (Base UI, React Aria, Radix) vs batteries-included (MUI/Chakra/Mantine/Ant, plus Meta's StyleX-based Astryx) vs own-the-code (shadcn). Web only. HEADLESS-LAYER SHIFT (verified vs the shadcn changelog, 2026-07-10): 'Base UI is the default component library in shadcn/ui' — Radix explicitly NOT deprecated (both supported), but the center of gravity for new shadcn work is now Base UI; MUI v9 is incrementally adopting the same primitives. Astryx (beta, 2026) pairs compile-time StyleX styling with agent-ready scaffolding (CLI + MCP) — Meta open-sourced its 8-yr internal system (13,000+ apps); see RB-E-STYLING for StyleX."
+note: "Split three ways: headless/unstyled (Base UI, React Aria, Radix) vs batteries-included (MUI/Chakra/Mantine/Ant, plus Meta's StyleX-based Astryx) vs own-the-code (shadcn). Web only. HEADLESS-LAYER SHIFT (verified vs the shadcn changelog, 2026-07-10): 'Base UI is the default component library in shadcn/ui' — Radix explicitly NOT deprecated (both supported), but the center of gravity for new shadcn work is now Base UI; MUI v9 is incrementally adopting the same primitives. UPDATE (verified vs the shadcn changelog, 2026-07-20): React Aria is now the THIRD first-class shadcn base (`shadcn init --base aria`) — all three headless layers install through the same tooling with per-base scoped registries, so a project standardizes on one without cross-contamination; Base UI remains the default. Astryx (beta, 2026) pairs compile-time StyleX styling with agent-ready scaffolding (CLI + MCP) — Meta open-sourced its 8-yr internal system (13,000+ apps); see RB-E-STYLING for StyleX."
 defer_to_skill: design-systems-governance
 doc: "RB-E-COMPONENT-LIBS.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-10
+updated: 2026-07-20   # React Aria promoted to first-class shadcn base — firsthand watch (shadcn changelog)
 sources:
+  - "https://ui.shadcn.com/docs/changelog/2026-07-react-aria"
   - "https://registry.npmjs.org/@mui/material/latest"
   - "https://github.com/mui/base-ui"
   - "https://astryx.atmeta.com/blog/how-astryx-works"

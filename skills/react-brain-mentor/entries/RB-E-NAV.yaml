@@ -8,7 +8,7 @@ platforms: [react, react-native]
 options:
   - { name: "React Navigation", tradeoff: "RN default; mature; imperative + declarative" }
   - { name: "Expo Router", tradeoff: "file-based; great if on Expo; convention over config; v56 (SDK 56) DECOUPLED from React Navigation — its own native-first core; direct @react-navigation/* imports no longer work alongside it" }
-  - { name: "React Router (8.x)", tradeoff: "web routing; absorbed Remix; v8 (8.2.0, 2026-07) RELEASED — ESM-only (drops CJS + react-router-dom), future flags on by default; v7→v8 generally non-breaking if you're caught up on v7 future flags" }
+  - { name: "React Router (8.x)", tradeoff: "web routing; absorbed Remix; v8 (8.2.0, 2026-07) RELEASED — ESM-only (drops CJS + react-router-dom), future flags on by default incl. middleware (v8_middleware flag removed — auth/logging/headers now first-class via RouterContextProvider); v7→v8 generally non-breaking if you're caught up on v7 future flags" }
   - { name: "TanStack Router / Start", tradeoff: "type-safe web routing; signal-based core; Start is its RSC/SSR meta-framework (see RB-E-META-FRAMEWORKS)" }
   - { name: "Next.js App Router", tradeoff: "web, full-framework routing + RSC (see RB-E-META-FRAMEWORKS)" }
 recommend:
@@ -46,7 +46,7 @@ note: >
   the native layer under RN8's native bottom tabs firms up while RN8 itself remains pre-stable.
 defer_to_skill: null
 doc: "RB-E-NAV.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-16
+updated: 2026-07-20   # middleware-default named explicitly (React Digest #2325; verified vs the official v8 post already in sources)
 reading:
   - title: "Reverse Engineering ChatGPT Web: How OpenAI Built for a Billion Users"
     url: "https://performance.dev/chatgpt"
