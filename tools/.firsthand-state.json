@@ -775,6 +775,10 @@
   "@lodev09/react-native-true-sheet": {
    "latest": "3.11.9",
    "deprecated": false
+  },
+  "linaria": {
+   "latest": "8.1.0",
+   "deprecated": false
   }
  },
  "github": {
@@ -1103,6 +1107,10 @@
   "emilkowal.ski": {
    "feed": null,
    "lastId": null
+  },
+  "dx-styles.dev": {
+   "feed": "https://dx-styles.dev/rss.xml",
+   "lastId": "https://dx-styles.dev/blog/why-dx-styles/"
   }
  },
  "updated": "2026-07-20",
