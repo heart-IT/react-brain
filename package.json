@@ -1,6 +1,6 @@
 {
   "name": "@heart-it/react-brain",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "Engineering decisions for React & React Native, with receipts — a continuously verified corpus with doctor (repo analysis), migrate (upgrade plans), review (CI gate), and an MCP server for agents.",
   "author": "heartit (https://heartit.tech/)",
   "homepage": "https://heart-it.github.io/react-brain/",
