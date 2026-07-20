@@ -30,7 +30,11 @@ note: >
   Jan 2026) is inflated by Lovable's platform CI — raw downloads ≠ team adoption; Next held flat
   (~160-175M/mo). And Next security releases DON'T BACKPORT: the May-2026 release (13 advisories,
   7 High, incl. upstream RSC CVE-2026-23870) patched only 15.5.18/16.2.6 — choosing Next commits
-  you to tracking latest minors. Stress-tested 2026-07-10 (WEAKENED → caveats applied; the
+  you to tracking latest minors. UPDATE (2026-07-20, verified vs the first-party program post):
+  security releases are now SCHEDULED — monthly advance notice on the Next.js blog (expected
+  date + highest anticipated severity), first scheduled release 2026-07-20 patching 16.2 + 15.5
+  (4 high + 5 medium); ad-hoc patches remain for in-the-wild exploits. Predictable upgrade
+  windows soften (not remove) the track-latest-minors commitment. Stress-tested 2026-07-10 (WEAKENED → caveats applied; the
   Next-default and the how-much-RSC context-key both SURVIVED the migration-wave attack).
   LANDSCAPE (2026-07-16 back-audit, verified vs the Vercel post): Vercel and Shopify are
   REBUILDING HYDROGEN together — Shopify's React meta-framework consolidating toward the
@@ -38,7 +42,7 @@ note: >
   slices fact verified vs Daishi Kato's first-party post.
 defer_to_skill: engineering-principles
 doc: "RB-E-META-FRAMEWORKS.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-16
+updated: 2026-07-20   # monthly scheduled security releases — React Status #483, first-party post verified
 reading:
   - title: "Who Owns the Tree? RSC as a Protocol, Not an Architecture"
     url: "https://tanstack.com/blog/who-owns-the-tree"
@@ -71,6 +75,7 @@ reading:
     by: "Neci Dan (neciudan.dev)"
     what: "A systematic map of the whole rendering spectrum — CSR, SSG, ISR, SSR, streaming SSR + Suspense, RSC, islands, signal-based fine-grained reactivity, Qwik resumability, and Next 16.3 instant navigations — organized around ONE durable question: the gap between when a page LOOKS ready (HTML painted) and when it WORKS (JS hydrated/executing). Each strategy is a different trade on that window — ship less JS (islands/RSC), execute it faster (signals), or skip execution (resumability). The mental model that turns 'which meta-framework / rendering mode' into a reasoned choice instead of a checklist; the framing behind this entry's context-keys."
 sources:
+  - "https://nextjs.org/blog/next-security-release-program"
   - "https://newsletter.daishikato.com/p/waku-s-unique-feature-slices"
   - "https://vercel.com/blog/vercel-and-shopify-are-rebuilding-hydrogen"
   - "https://tanstack.com/blog/who-owns-the-tree"

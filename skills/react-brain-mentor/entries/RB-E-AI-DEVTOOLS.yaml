@@ -15,6 +15,7 @@ options:
   - { name: "Expo AI tooling", tradeoff: "SDK 55+ ships agent-focused tooling (Expo skills, MCP integration) for Claude/Cursor/Codex as part of the framework; Expo Agent (waitlist beta, 2026-03) is their first-party app-building agent — track, don't bet" }
   - { name: "TanStack Intent (ALPHA)", tradeoff: "a DISTRIBUTION mechanism, not a pack: agent skills ship INSIDE npm packages and are discovered via the node_modules dependency graph, version-pinned with staleness detection; rolling out in TanStack DB first" }
   - { name: "React Native Evals (Callstack)", tradeoff: "open-source benchmark suite for WHICH MODEL writes good RN code — task dataset by category/library, TS+Bun runner, judge + methodology whitepaper; the model-selection layer under all the tools above" }
+  - { name: "ReactBench (Million)", tradeoff: "WHICH MODEL writes good REACT-WEB code — Write React / Fix React tasks from real merged PRs, graded by behavioral tests + react-doctor's 400+ deterministic rules (see RB-E-DX) in clean-room containers; public leaderboard (2026-07: GPT 5.6 Terramax/Solmax 53%, Fable 5xhigh 46% Pass@1); the web counterpart to RN Evals" }
 recommend:
   default: "Give a coding agent two things: RN KNOWLEDGE — a curated skills pack (Callstack agent-skills is the broadest; add Margelo react-native-skills for camera/native depth) — and EYES+HANDS on the running app — Maestro MCP if you already test with Maestro (see RB-E-TESTING), else agent-device (cross-platform) or Argent (iOS debug/profile depth). Add Reactotron MCP when the agent needs runtime state. Fast-moving (confidence: low) — most of these tools are months old; trial on one workflow before standardizing."
   when:
@@ -34,7 +35,7 @@ note: >
   (GitHub repos, npm, SWM blog). Everything here is pre-1.0-culture — pin versions, expect churn.
 defer_to_skill: agentic-engineering-patterns
 doc: null
-updated: 2026-07-16
+updated: 2026-07-20   # ReactBench row — React Status #483; launch post verified
 reading:
   - title: "Bun is being rewritten in Rust"
     url: "https://bun.com/blog/bun-in-rust"
@@ -49,6 +50,7 @@ reading:
     by: "Kacper Kapuściak (Software Mansion)"
     what: "The clearest articulation of the closed loop this entry is about: the agent that writes the code also boots the simulator, drives the UI, attaches a debugger, and profiles React+iOS in the same session — with production numbers (~50% re-render reduction in a banking app) rather than demos."
 sources:
+  - "https://www.reactbench.com/blog"
   - "https://github.com/callstackincubator/agent-skills"
   - "https://github.com/margelo/react-native-skills"
   - "https://github.com/infinitered/reactotron/releases/tag/reactotron-core-server%403.3.0"

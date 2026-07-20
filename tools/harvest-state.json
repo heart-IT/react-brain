@@ -20,8 +20,8 @@
     "react-status": {
       "name": "React Status",
       "archive": "https://react.statuscode.com/issues",
-      "last_processed": "#482",
-      "count": 23,
+      "last_processed": "#483",
+      "count": 24,
       "cadence": "weekly",
       "notes": "corroboration-heavy; headliners usually already held",
       "url_pattern": "https://react.statuscode.com/issues/{n}"

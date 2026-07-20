@@ -31,7 +31,7 @@ note: >
   selection axis is runtime cost — zero-runtime/compiler approaches avoid JS-side style work.
 defer_to_skill: design-systems-governance  # tokens, theme parity, a11y intrinsics
 doc: "RB-E-STYLING.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-10   # challenge-pass: s-c v7-prerelease-but-still-runtime, NativeWind TW4 skew, dead-pkg row fixed
+updated: 2026-07-20   # Linaria wind-down reading + detect rows — React Status #483; first-party essay verified
 reading:
   - title: "Why We're Breaking Up with CSS-in-JS"
     url: "https://www.spotvirtual.com/blog/why-were-breaking-up-with-css-in-js"
@@ -51,7 +51,14 @@ reading:
     what: "First-hand account of a large production CSS-in-JS to StyleX migration: build-time vs runtime styling, ~30% nav improvement, and agent-driven codemods at 100k-line scale. The migration companion to the runtime-cost argument above."
     claim: "You ship styled-components — Linear's production migration to StyleX is the playbook: build-time vs runtime styling, ~30% nav improvement, agent-driven codemods at 100k-line scale."
     applies_when: { deps: ["styled-components"] }
+  - title: "I've Maintained Linaria for Six Years: Here's Why I Built Something New"
+    url: "https://dx-styles.dev/blog/why-dx-styles/"
+    by: "Anton Evzhakov (Linaria maintainer)"
+    what: "The Linaria maintainer's own verdict on the category: runtime CSS-in-JS is winding down, and two foundational Linaria issues can't be fixed without breaking its core design — so Linaria stays maintained but frozen (NOT deprecated), and his successor dx-styles (zero-runtime on wyw-in-js, RSC-compatible, typed recipe variants, token contracts) ships with a Linaria migration guide. Supersession-in-progress: watch dx-styles, no migrate rule yet."
+    claim: "You ship Linaria — its maintainer says its foundational issues are unfixable by design; the library stays maintained but frozen, and his zero-runtime successor dx-styles (RSC-compatible) publishes a Linaria migration guide."
+    applies_when: { deps: ["linaria", "@linaria/*"] }
 sources:
+  - "https://dx-styles.dev/blog/why-dx-styles/"
   - "https://www.spotvirtual.com/blog/why-were-breaking-up-with-css-in-js"
   - "https://engineering.fb.com/2025/11/11/web/stylex-a-styling-library-for-css-at-scale/"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
@@ -66,6 +73,8 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "@stylexjs/stylex", label: "StyleX", token: "stylex" }
   - { pkg: "styled-components", label: "styled-components", token: "styled-components" }
   - { pkg: "@emotion/*", label: "Emotion", token: "css-in-js" }
+  - { pkg: "linaria", label: "Linaria (frozen by design)", token: "css-in-js" }
+  - { pkg: "@linaria/*", label: "Linaria (frozen by design)", token: "css-in-js" }
 migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-brain migrate`)
   - from: { pkg: "react-native-tailwind" }
     to: "@mgcrea/react-native-tailwind (zero-runtime Babel plugin) — or NativeWind/Uniwind per this entry"
