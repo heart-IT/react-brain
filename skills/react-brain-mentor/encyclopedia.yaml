@@ -74,7 +74,7 @@ encyclopedia:
   content_dir: "../../encyclopedia"   # long-form entries land here as markdown, named <id>.md
   authoring_guide: "diataxis-documentation"
   updated: 2026-07-20
-  sources_digested: ["React Native Rewind ×49", "This Week in React ×24", "React Status ×24", "React Digest ×18", "Native Weekly ×6", "React Weekly ×21"]
+  sources_digested: ["React Native Rewind ×49", "This Week in React ×24", "React Status ×24", "React Digest ×18", "Native Weekly ×7", "React Weekly ×21"]
 
 # ------------------------------------------------------------------------------
 # GROUPS — table of contents. The mentor navigates by group, not by scanning all.

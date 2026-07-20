@@ -57,13 +57,19 @@ note: >
   the Rspack 2.1 blog) — Rolldown's pullback is a Rolldown-integration choice, not a dead Rust port.
 defer_to_skill: null
 doc: "RB-E-BUILD.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-16   # Hermes release-line + Bacon reading added by the #284-289 back-audit
+updated: 2026-07-20   # Teamworks Re.Pack case-study reading — Native Weekly #17; verified via browser-UA curl
 watching:
   - title: "How React Native Builds Actually Work (APK, AAB, IPA, APP)"
     url: "https://www.youtube.com/watch?v=1o0pEjYGUWM"
     by: "Code with Beto"
     what: "Walkthrough of what actually happens between `npx expo run` and an installable artifact — the Gradle/Xcode stages behind APK/AAB/IPA and where Metro's bundle lands in them. The A/V companion to this entry's build-pipeline facts. (Verified via YouTube oEmbed: title + author.)"
 reading:
+  - title: "How Teamworks Cut Mobile Release Time to 10 Minutes"
+    url: "https://www.callstack.com/case-studies/accelerating-teamworks-mobile-delivery-with-re-pack-and-module-federation"
+    by: "Callstack (case study)"
+    what: "The production receipt for the Re.Pack/Module-Federation lane: Teamworks' seven mini-apps moved off Metro onto Re.Pack + Module Federation with a shell app and two CI/CD lanes (host vs mini-app), cutting change lead time from 1-2 days to ~10 minutes with multiple staging deploys per day. Vendor case study (Callstack builds Re.Pack) — but the numbers are client receipts, and it grounds this entry's own when-clause: module federation is worth the complexity when independent teams need independent release cadences in one app."
+    claim: "You ship Re.Pack — the Teamworks case is the reference architecture: mini-apps on Module Federation behind a shell app with separate host/mini-app CI lanes took change lead time from days to ~10 minutes."
+    applies_when: { deps: ["@callstack/repack"], platforms: [react-native] }
   - title: "Things I Learned While Building Expo"
     url: "https://evanbacon.dev/blog/expo"
     by: "Evan Bacon (Expo core, 9 years; Expo Router creator — farewell essay, 2026-05)"

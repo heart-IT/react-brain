@@ -45,8 +45,8 @@
     "native-weekly": {
       "name": "Native Weekly",
       "archive": "https://nativeweekly.beehiiv.com/",
-      "last_processed": "#16",
-      "count": 6,
+      "last_processed": "#17",
+      "count": 7,
       "cadence": "~6-weekly (irregular)",
       "notes": "nativeweekly.com is a shell \u2014 use the beehiiv archive; author also authors rnsec (watch self-promotion); strongest beat = agentic dev tooling"
     },

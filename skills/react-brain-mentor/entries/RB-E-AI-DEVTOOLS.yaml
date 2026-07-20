@@ -35,7 +35,7 @@ note: >
   (GitHub repos, npm, SWM blog). Everything here is pre-1.0-culture — pin versions, expect churn.
 defer_to_skill: agentic-engineering-patterns
 doc: null
-updated: 2026-07-20   # ReactBench row — React Status #483; launch post verified
+updated: 2026-07-20   # ReactBench row (React Status #483) + Argent autonomous-repro receipt (Native Weekly #17)
 reading:
   - title: "Bun is being rewritten in Rust"
     url: "https://bun.com/blog/bun-in-rust"
@@ -51,6 +51,7 @@ reading:
     what: "The clearest articulation of the closed loop this entry is about: the agent that writes the code also boots the simulator, drives the UI, attaches a debugger, and profiles React+iOS in the same session — with production numbers (~50% re-render reduction in a banking app) rather than demos."
 sources:
   - "https://www.reactbench.com/blog"
+  - "https://swmansion.com/blog/closing-the-agent-loop-autonomous-react-native-bug-reproduction-with-argent/"
   - "https://github.com/callstackincubator/agent-skills"
   - "https://github.com/margelo/react-native-skills"
   - "https://github.com/infinitered/reactotron/releases/tag/reactotron-core-server%403.3.0"
