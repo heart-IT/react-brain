@@ -17,7 +17,7 @@ options:
   - { name: "RN 0.84 (2026-02-11) ✓", tradeoff: "Hermes V1 DEFAULT; precompiled iOS binaries default; Node 22.11+ min; Legacy-Arch stripped; bi-monthly cadence" }
   - { name: "RN 0.85 (2026-04-07) ✓", tradeoff: "shared C++ animation backend; Jest preset → @react-native/jest-preset; layout-prop native driver (0.85.1)" }
   - { name: "RN 0.86 (2026-06-11) ✓", tradeoff: "Android-15+ edge-to-edge in core (drop react-native-edge-to-edge); DevTools light/dark; 2nd zero-breaking-change release" }
-  - { name: "RN 0.87 (RC.0, 2026-07-08)", tradeoff: "cleanup release (per TWiR #289; RC verified vs npm `next` tag): removes long-deprecated APIs (InteractionManager, SafeAreaView), restricts deep imports, deprecates ImageBackground — verify the row vs the release blog when stable lands" }
+  - { name: "RN 0.87 (RC.3, 2026-07-27)", tradeoff: "cleanup release (per TWiR #289; RC.3 verified vs the GitHub releases): removes long-deprecated APIs (InteractionManager, SafeAreaView), restricts deep imports, deprecates ImageBackground. Two additions worth planning around — the SwiftPM support chain was cherry-picked in (PRs #57442/#57332/#57564 via #57578, merged 2026-07-16), making Swift Package Manager a first-class iOS dependency path; and it carries the upstream Hermes fix for the worklet debug-metadata memory regression (see RB-E-ANIMATION). Verify the row vs the release blog when stable lands" }
 recommend:
   default: "Target the latest stable RN (0.86); the New Architecture is non-optional from 0.82, so plan any migration around that line."
   when:
@@ -37,7 +37,7 @@ note: >
   images already run Xcode 26, SDK ≤53 needs an explicit image opt-in; practically, stay ≥SDK 54.
 defer_to_skill: react-native-jsi
 doc: "RB-E-RN-VERSIONS.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-16
+updated: 2026-07-28   # 0.87 RC.3: SwiftPM chain backported + Hermes worklet-metadata fix (TWiR #291)
 reading:
   - title: "React Native Architecture: From Bridge to Fabric"
     url: "https://blog.codeminer42.com/react-native-architecture-from-bridge-to-fabric/"
@@ -49,6 +49,7 @@ sources:
   - "https://reactnative.dev/blog/2026/06/11/react-native-0.86"
   - "https://expo.dev/changelog/sdk-57"
   - "https://expo.dev/blog/app-store-connect-minimum-sdk-26"
+  - "https://github.com/react/react-native/pull/57332"
 migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-brain migrate`)
   - from: { pkg: "react-native", below: "0.86.0" }
     to: "React Native 0.86 (current stable)"

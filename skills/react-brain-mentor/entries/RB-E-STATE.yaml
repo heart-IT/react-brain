@@ -24,7 +24,7 @@ recommend:
 note: "Separate server state (caching/sync) from client/UI state — different problems, different tools. State of React 2025 (3,760 devs): TanStack Query the #1 React library; Zustand crossed 50% usage + tops satisfaction; ~34% use no state library. Adversarially stress-tested 2026-06-25 (SURVIVES, high): nothing has overtaken Zustand, and local-first (TanStack DB) builds on TanStack Query rather than replacing it."
 defer_to_skill: react-native-best-practices  # re-render/perf rules (e.g. RN-RULE-ATOMIC-STATE)
 doc: "RB-E-STATE.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-10
+updated: 2026-07-28   # useSyncExternalStore build-vs-buy reading + the time/conflict framing axis
 reading:
   - title: "Structural sharing, selectAtom, and why your Jotai atoms re-render too much"
     url: "https://www.peterp.me/articles/jotai-structural-sharing-vs-selectatom/"
@@ -56,6 +56,16 @@ reading:
     url: "https://neciudan.dev/component-communication-patterns-in-react"
     by: "Neciu Dan"
     what: "A decision framework for WHERE state should live, keyed by component proximity × data type: props/callbacks for adjacent components, lifted state or composition for siblings, context for slow-changing globals, Zustand for frequently-updated client state, TanStack Query for server data, URL params for view state, events for fire-and-forget. 'Reach for the closest tool that can actually reach the problem, and only move outward when it stops working.' The how-to-choose guide that operationalizes this entry's server-vs-client-vs-view split."
+  - title: "Do we need state management libraries anymore?"
+    url: "https://neciudan.dev/do-we-need-state-management-libraries"
+    by: "Neci Dan (neciudan.dev)"
+    what: "The build-vs-buy answer behind this entry's '~34% use no state library' and 'don't add a lib' clauses. Reads Redux, Zustand, Jotai, MobX and Valtio under the hood and shows they all converge on the SAME React primitive — useSyncExternalStore — then builds a working store from scratch with selectors, showing which three problems the primitive solves for free and where the naive version loops infinitely. The point is not that libraries are useless but that you should know what ~50 lines of understood code buys you before adding a dependency: what you pay for is ergonomics, devtools and middleware, not the subscription mechanism."
+    claim: "You ship a client store — every popular one converges on useSyncExternalStore; know what the primitive gives you for free (and where a hand-rolled selector store loops) so the dependency is bought for ergonomics/devtools, not for the mechanism."
+    applies_when: { deps: ["zustand", "jotai", "@reduxjs/toolkit", "react-redux", "redux", "mobx", "valtio"] }
+  - title: "The Absolute State of Management"
+    url: "https://infrequently.org/2026/07/state-management/"
+    by: "Alex Russell"
+    what: "The vocabulary attack on this entry's own subject: Russell argues that Redux, MobX, Zustand — and React itself — don't MANAGE state, they PROPAGATE it, and that real state management is about time and conflicts (the problem CRDTs and sync engines actually solve). Deliberately provocative, and Redux maintainer Mark Erikson pushed back publicly, so read it as a framing argument rather than a verdict. Its durable value here is a third axis next to the client-vs-server split: when your problem is concurrent edits and reconciliation, no propagation library is the answer — that's the local-first/sync-engine row (TanStack DB, Zero — see RB-E-DATA)."
 sources:
   - "https://2025.stateofreact.com/en-US/libraries/state-management/"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)

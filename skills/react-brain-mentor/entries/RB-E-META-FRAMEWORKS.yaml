@@ -32,8 +32,10 @@ note: >
   7 High, incl. upstream RSC CVE-2026-23870) patched only 15.5.18/16.2.6 — choosing Next commits
   you to tracking latest minors. UPDATE (2026-07-20, verified vs the first-party program post):
   security releases are now SCHEDULED — monthly advance notice on the Next.js blog (expected
-  date + highest anticipated severity), first scheduled release 2026-07-20 patching 16.2 + 15.5
-  (4 high + 5 medium); ad-hoc patches remain for in-the-wild exploits. Predictable upgrade
+  date + highest anticipated severity); the first one landed 2026-07-20 (verified vs the release
+  post): 4 High + 5 Medium CVEs, patched in v16.2.11 (Active LTS) and v15.5.21 (Maintenance LTS)
+  only — the no-backport rule above still holds, the DATE is what became predictable. Ad-hoc
+  patches remain for in-the-wild exploits. Predictable upgrade
   windows soften (not remove) the track-latest-minors commitment. Stress-tested 2026-07-10 (WEAKENED → caveats applied; the
   Next-default and the how-much-RSC context-key both SURVIVED the migration-wave attack).
   LANDSCAPE (2026-07-16 back-audit, verified vs the Vercel post): Vercel and Shopify are
@@ -42,7 +44,7 @@ note: >
   slices fact verified vs Daishi Kato's first-party post.
 defer_to_skill: engineering-principles
 doc: "RB-E-META-FRAMEWORKS.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-20   # monthly scheduled security releases — React Status #483, first-party post verified
+updated: 2026-07-28   # first scheduled security release verified (16.2.11/15.5.21) + TanStack's RSC reversal reading
 reading:
   - title: "Who Owns the Tree? RSC as a Protocol, Not an Architecture"
     url: "https://tanstack.com/blog/who-owns-the-tree"
@@ -70,12 +72,19 @@ reading:
     url: "https://nextjs.org/blog/next-16-3-instant-navigations"
     by: "Andrew Clark & Josh Story (Next.js team)"
     what: "How Next.js closes RSC's biggest UX gap — slow navigations — with Cache Components + a per-route Stream/Cache/Block choice and Partial Prefetching (one reusable per-route shell instead of a prefetch per link). The durable mental model for server-driven-but-instant navigation; covers a facet the other RSC readings don't. Gated behind cacheComponents/partialPrefetching flags (16.3 Preview, not yet stable — verify before quoting as GA)."
+  - title: "We Stopped Using RSC on TanStack.com"
+    url: "https://tanstack.com/blog/we-stopped-using-rsc-on-tanstack-com"
+    by: "Tanner Linsley (TanStack)"
+    what: "The reversal of the adoption post this entry already cites in sources — read them as a pair. RSC did work: moving markdown + Shiki highlighting to the server cut client JS by ~153KB gzipped on blog/docs pages, took /blog/react-server-components from Lighthouse 52→74 and TBT 1,200ms→260ms. The reversal argument is that the win came from KEEPING A HUGE DEPENDENCY OUT OF THE BROWSER, not from the architecture: once they replaced the 358KiB markdown/highlighting stack with small purpose-built packages (~27KiB transferred, only ~18–19KiB more than the RSC version), plain SSR + server functions held the performance and the RSC machinery — bundler config, serialization boundaries, special files, runtime-boundary rules — was left with nothing to pay for. The honest context-key for 'how much RSC do you actually need': measure whether your case is a dependency problem before you make it an architecture problem."
+    claim: "You ship RSC — its clearest concrete benefit is keeping heavy server-only dependencies out of the browser; TanStack's reversal shows that when the dependency itself gets small, plain SSR keeps the performance win without the architecture cost."
+    applies_when: { deps: ["next", "@tanstack/react-start", "waku"], platforms: [react] }
   - title: "Different Hydration and Rendering Strategies"
     url: "https://neciudan.dev/hydration-and-rendering-strategies"
     by: "Neci Dan (neciudan.dev)"
     what: "A systematic map of the whole rendering spectrum — CSR, SSG, ISR, SSR, streaming SSR + Suspense, RSC, islands, signal-based fine-grained reactivity, Qwik resumability, and Next 16.3 instant navigations — organized around ONE durable question: the gap between when a page LOOKS ready (HTML painted) and when it WORKS (JS hydrated/executing). Each strategy is a different trade on that window — ship less JS (islands/RSC), execute it faster (signals), or skip execution (resumability). The mental model that turns 'which meta-framework / rendering mode' into a reasoned choice instead of a checklist; the framing behind this entry's context-keys."
 sources:
   - "https://nextjs.org/blog/next-security-release-program"
+  - "https://nextjs.org/blog/july-2026-security-release"
   - "https://newsletter.daishikato.com/p/waku-s-unique-feature-slices"
   - "https://vercel.com/blog/vercel-and-shopify-are-rebuilding-hydrogen"
   - "https://tanstack.com/blog/who-owns-the-tree"

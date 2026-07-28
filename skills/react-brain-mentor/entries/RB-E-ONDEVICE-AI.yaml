@@ -11,21 +11,22 @@ options:
   - { name: "@react-native-ai/adk", tradeoff: "Google Gemini on ANDROID via the Agent Development Kit — on-device Gemini Nano + cloud models behind one Vercel-AI-SDK provider; tool calling + streaming; same react-native-ai family as the Apple provider (v0.12)" }
   - { name: "react-native-nitro-mlx", tradeoff: "Apple MLX on-device LLM + TTS/STT via Nitro Modules, with tool calling (ChatSession API); iOS 26+ ONLY; v0.5, ~100★ — niche/early" }
   - { name: "react-native-rag", tradeoff: "on-device retrieval-augmented generation over ExecuTorchLLM; local vector store" }
-  - { name: "offline speech (expo-speech-recognition / whisper)", tradeoff: "speech-to-text without network" }
+  - { name: "offline speech (expo-speech-recognition / whisper.rn)", tradeoff: "speech-to-text without network; whisper.rn (0.7.2, ~800★, verified vs npm + repo 2026-07-28) is the concrete binding — whisper.cpp under the hood, and it now also carries NVIDIA Parakeet ASR alongside Whisper" }
 recommend:
   default: "Cross-platform on-device models → react-native-executorch; Apple-only → @react-native-ai/apple; local RAG → react-native-rag. Fast-moving (confidence: low) — validate on-device perf before committing."
   when:
-    - "offline speech-to-text → expo-speech-recognition / whisper"
+    - "offline speech-to-text → expo-speech-recognition, or whisper.rn for whisper.cpp/Parakeet models"
     - "private/offline LLM over local docs → react-native-rag"
 note: "Fast-moving area surfaced across multiple RN Rewind issues; recommend tentatively (confidence: low) and validate on-device before committing."
 defer_to_skill: null
 doc: null
-updated: 2026-07-20   # Edge AI production survey reading — firsthand watch (swmansion feed)
+updated: 2026-07-28   # named whisper.rn as the offline-ASR binding (+ Parakeet) — TWiR #291
 sources:
   - "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.8.0"
   - "https://registry.npmjs.org/@react-native-ai/adk/latest"
   - "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.3.0"
   - "https://github.com/corasan/react-native-nitro-mlx"
+  - "https://github.com/mybigday/whisper.rn"
 reading:
   - title: "On-Device AI Beats Cloud for TTS — Here's Why"
     url: "https://swmansion.com/blog/on-device-ai-beats-cloud-for-tts-heres-why/"

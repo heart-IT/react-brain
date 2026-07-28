@@ -8,11 +8,11 @@ platforms: [react, react-native]
 options:
   - { name: "agent-skills (Callstack)", tradeoff: "curated skill packs for coding agents — RN best practices, upgrade playbook, brownfield migration, library scaffolding; installs into Claude Code / Cursor / Codex / Gemini CLI; the broadest pack (~1.5k★)" }
   - { name: "react-native-skills (Margelo)", tradeoff: "RN-focused skills (VisionCamera and native-module depth) via `npx skills add margelo/react-native-skills`; younger/smaller than Callstack's" }
-  - { name: "agent-device (Callstack)", tradeoff: "agent-native CLI: AI agents drive real iOS/Android/tvOS/macOS/web devices & simulators — a11y snapshots, actions, replayable scripts; v0.19.x, iterating fast" }
-  - { name: "Argent (Software Mansion)", tradeoff: "MCP server + skills: simulator control, debugger attach (React tree + JS), console/HTTP monitoring, correlated React+iOS profiling; 0.15 (2026-07, verified vs npm) extends beyond iOS — tvOS/Android TV/Vega OS, cloud agents for autonomous bug repro, Argent Lens design review; also listed in RB-E-TESTING" }
+  - { name: "agent-device (Callstack)", tradeoff: "agent-native CLI: AI agents drive real iOS/Android/tvOS/macOS/web devices & simulators — a11y snapshots, actions, replayable scripts; v0.20.x (0.20.1, verified vs npm 2026-07-28), iterating fast — 0.20 redesigned gesture execution and added Maestro compatibility through a typed engine" }
+  - { name: "Argent (Software Mansion)", tradeoff: "MCP server + skills: simulator control, debugger attach (React tree + JS), console/HTTP monitoring, correlated React+iOS profiling; 0.17.0 (verified vs npm 2026-07-28) extends beyond iOS — tvOS/Android TV/Vega OS, cloud agents for autonomous bug repro, Argent Lens design review; also listed in RB-E-TESTING" }
   - { name: "Maestro MCP / Maestro Viewer", tradeoff: "agents drive devices and GENERATE E2E flows on the tool the ecosystem already tests with — see RB-E-TESTING (which owns the testing depth)" }
   - { name: "Reactotron MCP", tradeoff: "the classic RN debugger exposes runtime state/network to coding agents via MCP (reactotron-core-server 3.3.0, 2026-05)" }
-  - { name: "Expo AI tooling", tradeoff: "SDK 55+ ships agent-focused tooling (Expo skills, MCP integration) for Claude/Cursor/Codex as part of the framework; Expo Agent (waitlist beta, 2026-03) is their first-party app-building agent — track, don't bet" }
+  - { name: "Expo AI tooling", tradeoff: "SDK 55+ ships agent-focused tooling (Expo skills at docs.expo.dev/skills, MCP integration) for Claude/Cursor/Codex as part of the framework — THIS is the durable part. Expo Agent, their hosted web app-building agent, is DEAD: closed beta ended, agent.expo.dev goes away after 2026-07-31 (export your projects), with Expo saying it would rather integrate with the harnesses developers already use than build its own IDE" }
   - { name: "TanStack Intent (ALPHA)", tradeoff: "a DISTRIBUTION mechanism, not a pack: agent skills ship INSIDE npm packages and are discovered via the node_modules dependency graph, version-pinned with staleness detection; rolling out in TanStack DB first" }
   - { name: "React Native Evals (Callstack)", tradeoff: "open-source benchmark suite for WHICH MODEL writes good RN code — task dataset by category/library, TS+Bun runner, judge + methodology whitepaper; the model-selection layer under all the tools above" }
   - { name: "ReactBench (Million)", tradeoff: "WHICH MODEL writes good REACT-WEB code — Write React / Fix React tasks from real merged PRs, graded by behavioral tests + react-doctor's 400+ deterministic rules (see RB-E-DX) in clean-room containers; public leaderboard (2026-07: GPT 5.6 Terramax/Solmax 53%, Fable 5xhigh 46% Pass@1); the web counterpart to RN Evals" }
@@ -33,9 +33,16 @@ note: >
   is AI at DEV time. Device-driving TESTING tools (Maestro MCP, Argent, Radon IDE) stay owned
   by RB-E-TESTING; this entry is the cross-tool map. All options fetch-verified 2026-07-09
   (GitHub repos, npm, SWM blog). Everything here is pre-1.0-culture — pin versions, expect churn.
+  FIRST CASUALTY (2026-07-28, verified vs the Expo changelog): Expo Agent — carried here since
+  2026-07-09 as "waitlist beta … track, don't bet" — was wound down on 2026-07-20, five weeks
+  after this entry first listed it; the hosted agent at agent.expo.dev stops working after
+  2026-07-31. Expo's stated reasoning is the useful signal, not the shutdown: rather than build a
+  web-based harness and IDE, integrate with the harnesses developers already customize deeply.
+  That is the shape of this whole category — the SKILLS/MCP layer (portable, rides whatever
+  harness you use) outlives the hosted-product layer. Weight option rows accordingly.
 defer_to_skill: agentic-engineering-patterns
 doc: null
-updated: 2026-07-20   # ReactBench row (React Status #483) + Argent autonomous-repro receipt (Native Weekly #17)
+updated: 2026-07-28   # Expo Agent wound down (first option-row casualty) + Metrognome measured-loop reading
 reading:
   - title: "Bun is being rewritten in Rust"
     url: "https://bun.com/blog/bun-in-rust"
@@ -45,12 +52,19 @@ reading:
     url: "https://www.callstack.com/blog/how-expensify-uses-agent-device-for-mobile-bug-evidence-and-profiling"
     by: "Callstack (with Expensify)"
     what: "The first named production-adopter case study for agent-device: agents run Sentry-span measurement loops across branches and drive the React profiler mid-session via react-devtools integration, returning named components and render counts as bug evidence. What agent-in-the-debug-loop looks like at a real company, beyond vendor demos."
+  - title: "Metrognome — An AI Agent for Measured React Native Performance Fixes"
+    url: "https://www.callstack.com/blog/an-ai-agent-for-measured-react-native-performance-fixes"
+    by: "Callstack"
+    what: "The layer ABOVE the device-drivers in this entry: not another profiler or benchmark, but a loop that decides what to keep. For a given performance goal it proposes one hypothesis, runs the experiment, measures it N times on a live app, keeps the change only if it beats the noise, commits it with the evidence, then picks the next hypothesis — one variable at a time. It ships no profiler and no device driver of its own; it orchestrates the tools already listed here (Agent Device for eyes and hands, Agent React DevTools, and the rest of Callstack's stack) and contributes the research loop plus memory. VENDOR POST — nearly every organ carries a Callstack logo, and the numbers are theirs. The durable, transferable part is the discipline: an optimization agent that can REJECT its own work against a noise floor is a different thing from one that reports a diff."
+    claim: "You point an agent at performance work — require it to measure N times against a noise floor and reject its own changes that don't beat it; an agent that only reports a diff has no way to tell an optimization from a coincidence."
+    applies_when: { platforms: [react-native], stages: [production, scale] }
   - title: "Meet Argent: Agentic Toolkit to Control, Debug and Profile iOS applications"
     url: "https://swmansion.com/blog/argent-agentic-toolkit-to-control-debug-and-profile-ios-applications/"
     by: "Kacper Kapuściak (Software Mansion)"
     what: "The clearest articulation of the closed loop this entry is about: the agent that writes the code also boots the simulator, drives the UI, attaches a debugger, and profiles React+iOS in the same session — with production numbers (~50% re-render reduction in a banking app) rather than demos."
 sources:
   - "https://www.reactbench.com/blog"
+  - "https://expo.dev/changelog/expo-agent-ending-the-closed-beta-and-winding-the-project-down"
   - "https://swmansion.com/blog/closing-the-agent-loop-autonomous-react-native-bug-reproduction-with-argent/"
   - "https://github.com/callstackincubator/agent-skills"
   - "https://github.com/margelo/react-native-skills"

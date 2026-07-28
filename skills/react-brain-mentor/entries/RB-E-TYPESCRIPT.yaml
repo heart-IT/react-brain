@@ -15,11 +15,22 @@ recommend:
   when:
     - "library/package author → minimize + version the exported types; avoid leaking internals"
     - "large repo with slow tsc → TS 7 (Go) is STABLE (~10x); migrate via the TS 6 bridge, following the VS Code pattern in reading"
+    - "Next.js repo moving to TS 7 → `next build` loads TypeScript's JS compiler API, which TS 7 does not yet expose; set experimental.useTypeScriptCli so the build shells out to the project-local tsc instead (experimental, 16.3 Preview)"
     - "not at Meta → use TypeScript, not Flow"
-note: "TypeScript 7.0 (the Go/native rewrite of tsc) is STABLE — npm latest = 7.0.2, published 2026-07-08 (verified vs the npm registry; RC was 2026-06-18, stable landed on schedule). ~10x vs TS 6.0, up to 16x type-checking with parallelization. Migrate incrementally through TS 6 (the bridge release) per the VS Code case study in reading."
+note: >
+  TypeScript 7.0 (the Go/native rewrite of tsc) is STABLE — npm latest = 7.0.2, published
+  2026-07-08 (verified vs the npm registry; RC was 2026-06-18, stable landed on schedule).
+  ~10x vs TS 6.0, up to 16x type-checking with parallelization. Migrate incrementally through
+  TS 6 (the bridge release) per the VS Code case study in reading.
+  TOOLING GAP (2026-07-28, verified vs the Next.js docs): TS 7 ships the compiler, not yet its
+  JavaScript API — so tools that EMBED tsc lag the release. Next.js is the load-bearing example:
+  `next build` loads the TS compiler API, so TS 7 needs `experimental.useTypeScriptCli`, which
+  makes the build run the project-local `tsc` CLI instead ("enables TypeScript 7 support while
+  its JavaScript API is unavailable"; experimental, not recommended for production, 16.3 Preview).
+  Expect the same shape from other API-embedding tools — check yours before pinning typescript@7.
 defer_to_skill: engineering-principles
 doc: "RB-E-TYPESCRIPT.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-13
+updated: 2026-07-28   # TS7-lacks-JS-API tooling gap (Next.js experimental.useTypeScriptCli)
 reading:
   - title: "Why does tsgo use so much memory?"
     url: "https://zackoverflow.dev/writing/why-does-tsgo-use-so-much-memory"
@@ -38,6 +49,7 @@ reading:
 sources:
   - "https://devblogs.microsoft.com/typescript/announcing-typescript-7-0-rc/"
   - "https://registry.npmjs.org/typescript/latest"
+  - "https://nextjs.org/docs/app/api-reference/config/next-config-js/useTypeScriptCli"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "typescript", label: "TypeScript", token: "typescript" }
 detect_source:   # source-level signals owned by this entry (regex over repo source)
@@ -50,5 +62,5 @@ migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-
     to: "TypeScript 7 (Go-native tsc) via the TS 6 bridge"
     urgency: upgrade
     effort: M
-    why: "TS 7.0 is STABLE (~10x, up to 16x type-checking with parallelization); migrate incrementally — TS 6 as the low-churn bridge, TS 6 and 7 side-by-side in CI, then TS 7 as default (the VS Code ~50-extension migration pattern; their blocker was formatter diffs, not type errors)"
-    receipts: ["https://registry.npmjs.org/typescript/latest", "https://code.visualstudio.com/blogs/2026/06/26/iterating-faster-with-ts-7"]
+    why: "TS 7.0 is STABLE (~10x, up to 16x type-checking with parallelization); migrate incrementally — TS 6 as the low-churn bridge, TS 6 and 7 side-by-side in CI, then TS 7 as default (the VS Code ~50-extension migration pattern; their blocker was formatter diffs, not type errors). Check tools that EMBED the TS compiler API first — TS 7 doesn't expose it yet, e.g. `next build` needs experimental.useTypeScriptCli to shell out to the tsc CLI instead"
+    receipts: ["https://registry.npmjs.org/typescript/latest", "https://code.visualstudio.com/blogs/2026/06/26/iterating-faster-with-ts-7", "https://nextjs.org/docs/app/api-reference/config/next-config-js/useTypeScriptCli"]

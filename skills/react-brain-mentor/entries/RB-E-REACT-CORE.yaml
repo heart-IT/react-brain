@@ -36,7 +36,7 @@ note: >
   enabling the Compiler — useMemo/useCallback remain valid escape hatches.
 defer_to_skill: engineering-principles
 doc: "RB-E-REACT-CORE.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-16
+updated: 2026-07-28   # composition-ladder reading (TWiR #291 · React Status #484 · React Digest #2330)
 reading:
   - title: "The hidden cost of React.Activity"
     url: "https://www.peterp.me/articles/hidden-cost-of-react-activity"
@@ -80,6 +80,12 @@ reading:
     what: "The what-does-it-actually-emit explainer the other compiler readings skip: a TodoList compiled into cache-slot code (_c() slots + reference-equality checks — a custom caching system, NOT inserted useMemo/useCallback), dependencies inferred from code FLOW rather than manual arrays, memoization applied where hooks are prohibited (behind early returns), and why identical cached JSX objects stop child re-renders without memo wrappers. Plus a staged adoption path (gradual gating, canary) grounded in Meta/Sanity/Wakelet production numbers. Pairs with the saschb2b retrospective (adoption/bail-outs) — this one is the transformation mechanics."
     claim: "You hand-memoize without the React Compiler — this shows the emitted cache-slot output that replaces useMemo/useCallback (and memoizes where hooks can't, e.g. behind early returns); the concrete before/after for adopting it."
     applies_when: { absent_deps: ["babel-plugin-react-compiler", "react-compiler-runtime"] }
+  - title: "Props, Composers, and Providers: the composition pattern we're converging on"
+    url: "https://backstage.orus.eu/react-composition-patterns-at-orus"
+    by: "Maxime Grébauval (Orus)"
+    what: "The composition facet these readings otherwise skip — they explain how React RENDERS, this explains how to SHAPE a component API as an app grows. A production team's four-rung ladder with the named pain that justifies each climb: plain props (where most components should stay) → compound components with slots (when a row sprouts a prop for every shape) → a Composer plus Providers (when the same UI must render data from swappable or deferred sources) → lifted state behind a contract (when state must cross a boundary and the layout should stay pure). The first two rungs use no context at all. Its governing rule is the useful one: an abstraction earns its place by making a CURRENT requirement simpler, never by betting on a future you can't see."
+    claim: "You create Context in many files — climb the composition ladder instead of reaching for providers by default: plain props, then compound components with slots, and only then a Composer + Providers, each rung justified by a named pain."
+    applies_when: { platforms: [react, react-native] }
   - title: "React Compiler at Eighteen Months"
     url: "https://saschb2b.com/blog/react-compiler-year-in-review"
     by: "Sascha Becker"

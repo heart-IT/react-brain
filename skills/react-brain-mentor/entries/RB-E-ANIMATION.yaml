@@ -8,7 +8,7 @@ platforms: [react, react-native]
 options:
   - { name: "Reanimated 4", tradeoff: "UI-thread + CSS-style animations/transitions; worklets split into react-native-worklets; requires New Arch" }
   - { name: "Gesture Handler 3.0", tradeoff: "native gestures; v3 adds a hook-based API built for the React Compiler + Reanimated 4" }
-  - { name: "react-native-worklets (0.11.x)", tradeoff: "the worklets runtime under Reanimated 4 (now its own package; npm latest 0.11.0, verified 2026-07-17 — an earlier '8.0' claim here was WRONG, caught by the firsthand watch); 0.11 adds experimental Hermes-bytecode worklets + Shareable values across isolated runtimes" }
+  - { name: "react-native-worklets (0.11.x)", tradeoff: "the worklets runtime under Reanimated 4 (now its own package; npm latest 0.11.0, verified 2026-07-17 — an earlier '8.0' claim here was WRONG, caught by the firsthand watch); 0.11 adds experimental Hermes-bytecode worklets + Shareable values across isolated runtimes. TURN ON BUNDLE MODE (stable since 0.10) — it is the fix for the Hermes V1 memory regression, see note" }
   - { name: "react-native-skia (2.x)", tradeoff: "GPU 2D drawing; v2.1 plays Lottie via Skottie; pairs with Reanimated" }
   - { name: "lottie-react-native", tradeoff: "designer Lottie/JSON animations; v7 adds visionOS" }
   - { name: "Rive — @rive-app/react-native (Nitro) / rive-react-native (legacy)", tradeoff: "designer-driven INTERACTIVE vector animation (state machines) — the Lottie alternative; the SDK was rewritten on Nitro under Rive's official scope (@rive-app/react-native, 0.4.x EARLY line): files/view-models become shared typed HybridObjects — Margelo-measured up to 94× multi-view loads + ~4.7× lower memory vs legacy (rewrite authors' own benchmark); legacy unscoped pkg at 9.8.3, quiet since 2026-04" }
@@ -41,9 +41,19 @@ note: >
   animation default — added 2026-06-25 after the evidence-loop corpus self-audit flagged
   that this [react]-platform entry had options/recommend for React Native only, no web pick
   (caught from ledgerhr's framer-motion usage). Verified vs the official RN 0.85 blog.
+  HERMES V1 WORKLET MEMORY REGRESSION (2026-07-28, verified vs the Software Mansion writeup and
+  reproduced independently in the Calazans benchmark below): Hermes V1 attaches ~512KB of debug
+  metadata to EVERY eval'd worklet, and Worklets' Legacy Eval Mode ships animation code to the UI
+  runtime as strings — so memory scales with unique worklets triggered. Software Mansion measured
+  Expensify's bundle at 1,000+ unique worklets, with 100+ evaluated just to initialize (≥50MB at
+  startup). Four fixes, in preference order: turn on WORKLETS BUNDLE MODE (exposes the mmap'd
+  bytecode bundle instead of eval'ing strings — measured −~100MB PSS, ~45%, native heap
+  ~142MB→~32MB, with frame rate and CPU unchanged), the experimental bytecode option for Legacy
+  Eval Mode, pinning Hermes, or waiting for RN 0.87 which carries the upstream Hermes fix.
+  Bundle Mode is worth enabling regardless.
 defer_to_skill: react-native-best-practices
 doc: "RB-E-ANIMATION.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-17   # worklets version corrected 8.0→0.11.x (firsthand catch)
+updated: 2026-07-28   # Hermes V1 worklet-memory regression + Bundle Mode fix; independent 3-way benchmark
 reading:
   - title: "CSS vs. JavaScript Animations"
     url: "https://www.joshwcomeau.com/animation/css-vs-javascript/"
@@ -67,6 +77,12 @@ reading:
     what: "The only cross-library per-frame benchmark: UI-thread cost of core Animated vs Reanimated (shared values AND the CSS API) vs Ease on real devices — at ~500 animating views only the fully native-driven approach stays under frame budget (Reanimated SVs measured ~36ms/frame). CAVEAT: the author created Ease, the approach that wins — treat the numbers as vendor-run and re-measure on your own screens; the methodology and the per-frame cost model are the durable part."
     claim: "You ship Reanimated — the only cross-library per-frame benchmark measured its shared values at ~36ms/frame at ~500 animating views; only the fully native-driven approach stayed under budget (vendor-run by the Ease author — re-measure)."
     applies_when: { deps: ["react-native-reanimated"], platforms: [react-native] }
+  - title: "Which React Native Animation Library Should You Use for Performance?"
+    url: "https://andrei-calazans.com/posts/2026-07-15-which-react-native-animation-library/"
+    by: "Andrei Calazans"
+    what: "The INDEPENDENT replication the Expo/Ease benchmark above asks for — same three-way question (Animated with useNativeDriver, Reanimated 4.5, Ease 0.7), different author, reproducible harness (AndreiCalazans/react-native-animation-performance), Android release build on New Arch, 90Hz physical device, Maestro-driven, median of 3, 60 boxes animating. It splits the answer BY ANIMATION TYPE instead of picking a winner: for touch/state/loop all three keep JS at the idle floor and Ease drops the fewest frames with Animated close behind; SCRUB is the fork — Animated drives the value via PanResponder→setValue on the JS thread (29% JS CPU, ~26% of JS frames dropped, and useNativeDriver cannot save a value you set from JS each frame) while Reanimated keeps it entirely on the UI thread (2.9% JS CPU). Blunt version: Reanimated when a finger is dragging, Ease or the native driver otherwise. Two caveats the author states himself: 60 independent nodes deliberately punishes per-node cost (Reanimated's useAnimatedStyle mapper), so the UI-thread loop ranking is partly an artifact — at one hero element Reanimated is likely best overall; and the ~50MB memory premium it measured DISAPPEARS with Worklets Bundle Mode on (−~100MB PSS in the follow-up re-run)."
+    claim: "You ship Reanimated — independently measured, it is the only library keeping continuous gesture input off the JS thread (2.9% vs Animated's 29% JS CPU while scrubbing), but its per-node UI-thread cost dominates when many nodes animate at once."
+    applies_when: { deps: ["react-native-reanimated", "react-native-ease"], platforms: [react-native] }
   - title: "A React trick to improve exit animations"
     url: "https://barvian.me/react-exit-animations"
     by: "Max Barvian"
@@ -78,6 +94,7 @@ reading:
     claim: "You ship Rive — the Nitro line (@rive-app/react-native, 0.4.x early) makes files/view-models shared typed objects: parse once, render many views (94× multi-view loads, ~4.7× lower memory in the authors' benchmark); the legacy unscoped package is quiet."
     applies_when: { deps: ["rive-react-native", "@rive-app/react-native"], platforms: [react-native] }
 sources:
+  - "https://swmansion.com/blog/how-worklets-bundle-mode-accidentally-fixed-Hermes-v1-memory-regression/"
   - "https://reactnative.dev/blog/2026/04/07/react-native-0.85"
   - "https://registry.npmjs.org/@rive-app%2freact-native"
   - "https://reactnavigation.org/blog/2026/04/27/building-custom-screen-transitions"
@@ -106,3 +123,6 @@ tripwires:   # standing caveats as executable conditions — evaluated by `harve
   - when: { pkg: "rive-react-native", deprecated: true }
     then: "legacy Rive SDK formally deprecated on npm — add the migrate rule (urgency: deprecated) per the note's WATCH; receipts: this flag + the Margelo rewrite post"
     added: 2026-07-16
+  - when: { pkg: "react-native", atleast: "0.87.0" }
+    then: "RN 0.87 stable carries the upstream Hermes fix for the worklet debug-metadata regression — rewrite the note's four-fix ladder as history ('fixed in 0.87; Bundle Mode still recommended') and drop 'waiting for RN 0.87' as an option"
+    added: 2026-07-28

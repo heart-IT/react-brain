@@ -20,7 +20,7 @@ recommend:
     - "existing Formik that works → keep it unless re-render cost bites"
 defer_to_skill: null
 doc: "RB-E-FORMS.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-13
+updated: 2026-07-28   # RHF-vs-TanStack-Form state-model reading (TWiR #291 · React Weekly #30)
 sources:
   - "https://standardschema.dev/"
   - "https://tanstack.com/form/latest/docs/framework/react/guides/form-groups"
@@ -31,6 +31,12 @@ reading:
     what: "The decision arc of this entry in interactive form: a four-jobs mental model (capture, verify, recover, commit), then three archetypes — a React 19 useActionState + server-action + Zod form with no client form lib, a TanStack Form multi-step wizard (schema composition, AbortController async checks), and a field-array editable table with row-level re-render isolation — closing with when native React 19 suffices vs when a client library earns its keep. Covers the native-actions end of the spectrum the other reading here doesn't."
     claim: "You ship no form library — often right: React 19 native actions + Zod handle simple forms; a library earns its keep at multi-step wizards, async validation, and field-level re-render isolation. This walks the decision."
     applies_when: { absent_deps: ["react-hook-form", "formik", "@tanstack/react-form"] }
+  - title: "React Hook Form Avoids State. TanStack Form Scopes It."
+    url: "https://www.adarsha.dev/blog/react-hook-form-and-tanstack-form-state-models"
+    by: "Adarsha Acharya"
+    what: "The mechanism behind this entry's RHF-vs-TanStack-Form choice, which the option rows only assert. RHF starts from REGISTERED inputs — the browser holds the value, so ordinary keystrokes never enter React's render loop — and adds React subscriptions only where other UI needs form state. TanStack Form starts from fields backed by a store: inputs are controlled, but only the field and its subscribers update. Both stay fast; they differ in where the default lands, and the post walks the specific code paths where that shows (field binding, watch/subscribe, arrays, async validation). Its own conclusion is the conservative one — a working RHF form is rarely worth rewriting. Examples checked against react-hook-form 7.82.0 and @tanstack/react-form 1.33.1."
+    claim: "You ship React Hook Form or TanStack Form — the split is where keystrokes land: RHF keeps them out of React's render loop, TanStack Form stores them with narrow subscriptions. Both stay fast; a working RHF form is rarely worth rewriting."
+    applies_when: { deps: ["react-hook-form", "@tanstack/react-form"] }
   - title: "One core, six frameworks, zero runtime abstraction"
     url: "https://formisch.dev/blog/one-core-six-frameworks/"
     by: "Fabian Hiller (Formisch / Valibot)"

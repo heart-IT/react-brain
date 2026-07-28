@@ -8,6 +8,7 @@ platforms: [react, react-native]
 options:
   - { name: "CI (GitHub Actions / similar)", tradeoff: "gate tests + typecheck + lint + build on every PR; the single highest-leverage DX baseline" }
   - { name: "lint/format — Biome or ESLint (flat) + Prettier", tradeoff: "Biome = one fast Rust tool (lint+format); ESLint flat + Prettier = bigger plugin ecosystem (react-hooks, react-compiler rules)" }
+  - { name: "Oxlint + oxlint-tsgolint (type-aware)", tradeoff: "the third lint lane, and the reason to re-evaluate: TYPE-AWARE linting went STABLE 2026-07-22 with tsgolint v7 — tracks TypeScript 7.0.2 and covers 59 of typescript-eslint's 61 type-aware rules (`oxlint --type-aware`). The rules that needed the type checker are no longer ESLint's exclusive; what still isn't ported is the React plugin surface (react-hooks, react-compiler)" }
   - { name: "git hooks — husky + lint-staged / lefthook", tradeoff: "run lint/format/tests pre-commit/pre-push; catch issues before CI" }
   - { name: "monorepo task runner — Turborepo / Nx + pnpm workspaces", tradeoff: "cached, parallel task graph across packages (see RB-E-BUILD)" }
   - { name: "dependency hygiene — renovate/dependabot + audit", tradeoff: "automated updates + npm/pnpm audit + install-script blocking (see RB-E-SECURITY)" }
@@ -16,14 +17,34 @@ recommend:
   default: "Gate tests + typecheck + lint on every PR in CI, and enforce the same locally with a pre-commit hook. For lint/format, default to Biome (one fast tool) unless you need ESLint's plugin ecosystem (react-hooks, react-compiler)."
   when:
     - "has tests but no CI → add CI FIRST; invariants that aren't gated silently rot (a real finding in audited production apps)"
-    - "needs ESLint react-hooks / react-compiler rules → ESLint flat config + Prettier over Biome"
-    - "multi-package repo → pnpm workspaces + Turborepo for a cached task graph"
+    - "needs ESLint react-hooks / react-compiler rules → ESLint flat config + Prettier over Biome (still the only lane carrying them)"
+    - "kept typescript-eslint ONLY for type-aware rules → re-evaluate: oxlint --type-aware is stable and covers 59/61 of them"
+    - "multi-package repo → pnpm workspaces + Turborepo for a cached task graph; pnpm 11.11+ also versions and releases the workspace itself (see note) — no separate changesets tool needed"
     - "normative styleguide but no linter config → wire the rules into lint so they're enforced mechanically, not by review"
     - "lots of agent-written React landing in the repo → add a react-doctor pass (CI or agent skill) on top of lint"
-note: "DX is cross-cutting — architecture/boundaries depth → engineering-principles; bundler choice → RB-E-BUILD; supply-chain → RB-E-SECURITY. This entry is the feedback loop (CI/lint/hooks/onboarding) that keeps the others honest."
+note: >
+  DX is cross-cutting — architecture/boundaries depth → engineering-principles; bundler choice →
+  RB-E-BUILD; supply-chain → RB-E-SECURITY. This entry is the feedback loop (CI/lint/hooks/
+  onboarding) that keeps the others honest.
+  LINT LANDSCAPE SHIFT (2026-07-28, verified vs the Oxc release post): type-aware linting is no
+  longer a reason to stay on typescript-eslint — tsgolint v7 shipped stable, tracking TypeScript
+  7.0.2 with 59 of typescript-eslint's 61 type-aware rules behind `oxlint --type-aware`. The
+  remaining ESLint-only surface for React work is the PLUGIN ecosystem (react-hooks,
+  react-compiler), which is what the recommend clause above still keys on.
+  MONOREPO RELEASE MANAGEMENT MOVED INTO pnpm (2026-07-28, verified vs the pnpm 11.11-11.14 post
+  — this fires the twir-290 reopen signal on the merged pnpm RFC, which said "DX/BUILD candidate
+  when it lands in a pnpm release"): `pnpm change` records changesets-compatible `.changeset/*.md`
+  intents, a bare `pnpm version -r` consumes them across the workspace with dependent propagation
+  through `workspace:` ranges and a committed `.changeset/ledger.yaml` that keeps cherry-picks and
+  merge-backs safe, and `pnpm lane` runs per-package prerelease lanes. Config lives under a
+  `versioning` key in pnpm-workspace.yaml; changelogs default to REGISTRY storage (composed at
+  publish time, no committed CHANGELOG.md) unless you set `versioning.changelog.storage:
+  repository`. Same releases add `pnpm doctor` (installation/environment diagnosis with non-zero
+  exit, --json, --offline) and fix a path-traversal vulnerability. For a pnpm monorepo this
+  removes a dependency (changesets) rather than adding one.
 defer_to_skill: engineering-principles
 doc: "RB-E-DX.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-10
+updated: 2026-07-28   # oxlint type-aware STABLE; pnpm native workspace release management (twir-290 reopen fired)
 reading:
   - title: "Best CI/CD for mobile apps in 2026: a practical comparison"
     url: "https://expo.dev/blog/best-ci-cd-for-mobile-apps"
@@ -38,6 +59,8 @@ reading:
 sources:
   - "https://medium.com/doctolib/expo-without-eas-scaling-the-react-native-developer-experience-of-an-app-with-90m-users-2694ea841805"
   - "https://github.com/millionco/react-doctor"
+  - "https://oxc.rs/blog/2026-07-22-type-aware-linting-stable"
+  - "https://pnpm.io/blog/releases/11.11-11.14"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "husky", label: "husky (git hooks)", token: "husky" }
   - { pkg: "lefthook", label: "lefthook", token: "lefthook" }
@@ -49,3 +72,5 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "nx", label: "Nx", token: "nx" }
   - { pkg: "lunte", label: "lunte (lint)", token: "lint" }
   - { pkg: "react-doctor", label: "react-doctor", token: "react-doctor" }
+  - { pkg: "oxlint", label: "Oxlint", token: "oxlint" }
+  - { pkg: "typescript-eslint", label: "typescript-eslint", token: "type-aware" }

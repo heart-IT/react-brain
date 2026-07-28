@@ -6,7 +6,7 @@ status: reviewed   # long-form entry written + source-checked
 confidence: low
 platforms: [react, react-native]
 options:
-  - { name: "Lynx (ByteDance)", tradeoff: "web-tech (HTML/CSS) + native render; dual-thread UI/logic; young ecosystem (open-sourced 2025); scaffold via create-rspeedy" }
+  - { name: "Lynx (ByteDance)", tradeoff: "web-tech (HTML/CSS) + native render; dual-thread UI/logic; young ecosystem (open-sourced 2025) but moving fast — 4.0.0 released 2026-07-20 (verified vs the GitHub release); scaffold via create-rspeedy" }
   - { name: "Valdi (Snap)", tradeoff: "declarative TypeScript compiling to native views on iOS/Android/macOS; beta (beta-0.1.0), open-sourced by Snap Nov 2025 after ~8 yrs internal use" }
   - { name: "Flutter", tradeoff: "Dart; own render engine; large ecosystem; not React/JS" }
   - { name: "Kotlin Multiplatform", tradeoff: "share business logic across platforms; native UI per platform; SWM's same-app benchmark: KMP ~8x smaller + 2-4x faster startup on ANDROID, but iOS converges (RN uses 3-4x LESS memory there — UIKit rendering vs KMP's resident Skia)" }
@@ -18,7 +18,7 @@ recommend:
 note: "Context for teams weighing leaving the React/RN ecosystem. Newer entrants (Lynx, Valdi) are early — not endorsements. The KMP-vs-RN numbers come from Software Mansion's controlled same-app benchmark (see reading) — notable because an RN shop published results that favor KMP on Android."
 defer_to_skill: null
 doc: "RB-E-ALT-FRAMEWORKS.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-16
+updated: 2026-07-28   # Shopify React→Preact under a 64KB budget; Lynx 4.0.0
 sources:
   - "https://github.com/lynx-family/lynx"
   - "https://github.com/Snapchat/Valdi"
@@ -35,6 +35,12 @@ reading:
     url: "https://evilmartians.com/chronicles/from-react-to-native-web-with-nanotags-a-migration-that-saved-100kb"
     by: "Evil Martians"
     what: "When a marketing/content site doesn't need React — migrating to Web Components (Custom Elements + Astro + nanostores, ~3KB vs ~63KB), with the boilerplate/accessibility trade-offs nanotags addresses. Durable do-you-even-need-React reasoning."
+  - title: "Upgrading Checkout Blocks app to Polaris web components"
+    url: "https://shopify.engineering/upgrading-checkout-blocks-app-to-polaris-web-components"
+    by: "Engineering at Shopify"
+    what: "The PREACT data point the other do-you-need-React readings lack, and the rare case where a hard number forces the decision: Shopify's Checkout Blocks extensions (rendered on a third of all customized checkouts) had to fit a 64KB gzip per-bundle limit enforced by the 2026-01 remote-dom CLI, and were at 300–356KB raw / ~100–112KB gzipped. Dropping react-reconciler by moving React→Preact was the single biggest win at ~89KB and got them most of the way to budget; replacing liquidjs (~73KB) with an in-house parser and dayjs with a scoped date utility closed the rest, while markdown-to-jsx was kept by aliasing onto @preact/compat. Transferred bundle sizes fell 40–85% across the five extensions. Also a credible AI-assisted-migration pattern: an in-house agent skill did the mechanical React→Preact and component swaps against a parity test suite built from thousands of real merchant configurations, with engineers on the judgment calls."
+    claim: "You ship React inside a byte-budgeted embed (checkout widget, third-party extension) — react-reconciler alone is ~89KB, so swapping to Preact via @preact/compat is usually the largest single cut available."
+    applies_when: { platforms: [react] }
   - title: "How We Rewrote 130K Lines from React to Svelte in Two Weeks"
     url: "https://strawberrybrowser.com/blog/react-to-svelte"
     by: "Strawberry Browser (Dendrite Systems)"

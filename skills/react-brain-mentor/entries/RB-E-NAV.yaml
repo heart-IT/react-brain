@@ -8,7 +8,7 @@ platforms: [react, react-native]
 options:
   - { name: "React Navigation", tradeoff: "RN default; mature; imperative + declarative" }
   - { name: "Expo Router", tradeoff: "file-based; great if on Expo; convention over config; v56 (SDK 56) DECOUPLED from React Navigation — its own native-first core; direct @react-navigation/* imports no longer work alongside it" }
-  - { name: "React Router (8.x)", tradeoff: "web routing; absorbed Remix; v8 (8.2.0, 2026-07) RELEASED — ESM-only (drops CJS + react-router-dom), future flags on by default incl. middleware (v8_middleware flag removed — auth/logging/headers now first-class via RouterContextProvider); v7→v8 generally non-breaking if you're caught up on v7 future flags" }
+  - { name: "React Router (8.x)", tradeoff: "web routing; absorbed Remix; v8 (8.3.0, 2026-07, verified vs npm) RELEASED — ESM-only (drops CJS + react-router-dom), future flags on by default incl. middleware (v8_middleware flag removed — auth/logging/headers now first-class via RouterContextProvider); v7→v8 generally non-breaking if you're caught up on v7 future flags. SECURITY FLOOR: 8.3.0 / 7.18.0 — see note" }
   - { name: "TanStack Router / Start", tradeoff: "type-safe web routing; signal-based core; Start is its RSC/SSR meta-framework (see RB-E-META-FRAMEWORKS)" }
   - { name: "Next.js App Router", tradeoff: "web, full-framework routing + RSC (see RB-E-META-FRAMEWORKS)" }
 recommend:
@@ -44,9 +44,17 @@ note: >
   UPDATE 2026-07-16 (TWiR #290, verified vs the release): react-native-screens 4.26 marks the
   Tabs API STABLE (requires RN 0.84+; FormSheet + Stack-v5 toolbar menus stay experimental) —
   the native layer under RN8's native bottom tabs firms up while RN8 itself remains pre-stable.
+  REACT ROUTER SECURITY FLOOR (2026-07-28, verified vs the GitHub advisories): six advisories
+  published 2026-07-22 against react-router — including an unauthenticated DoS on the __manifest
+  endpoint (High, CVSS 7.6, affecting >=7.0.0 <7.18.0), an RSC-mode CSRF bypass that executes the
+  action before the 400 response, an RSCErrorHandler protocol-validation XSS, arbitrary
+  client-side constructor injection via SSR hydration, and two open-redirect variants (one a
+  CVE-2025-68470 bypass). Fixed in 8.3.0 and backported to 7.18.0 — the team advises upgrading to
+  one of those. Note the pattern: half of these live in the RSC/SSR surface, so the exposure
+  scales with how much of React Router's server side you actually use.
 defer_to_skill: null
 doc: "RB-E-NAV.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-20   # middleware-default named explicitly (React Digest #2325; verified vs the official v8 post already in sources)
+updated: 2026-07-28   # React Router 2026-07-22 advisory batch → security floor 8.3.0 / 7.18.0 (React Status #484)
 reading:
   - title: "Reverse Engineering ChatGPT Web: How OpenAI Built for a Billion Users"
     url: "https://performance.dev/chatgpt"
@@ -95,6 +103,7 @@ sources:
   - "https://reactnavigation.org/blog/2026/07/08/react-navigation-8.0-july-progress/"
   - "https://github.com/software-mansion/react-native-screens/releases/tag/4.26.0"
   - "https://remix.run/blog/react-router-v8"
+  - "https://github.com/remix-run/react-router/security/advisories"
 detect_source:   # source-level signals owned by this entry (regex over repo source)
   - pattern: "window\\.location\\.(?:href\\s*=|assign\\()"
     min_files: 2
@@ -113,9 +122,9 @@ migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-
     effort: M
     why: "v8 (8.x, released 2026) is ESM-only and drops both CJS and the react-router-dom package; v7→v8 is generally non-breaking if you're caught up on v7 future flags"
     receipts: ["https://reactrouter.com/"]
-  - from: { pkg: "react-router", below: "8.0.0" }
-    to: "react-router v8"
+  - from: { pkg: "react-router", below: "8.3.0" }
+    to: "react-router 8.3.0 (or 7.18.0 if you must stay on v7)"
     urgency: upgrade
     effort: S
-    why: "ESM-only, future flags on by default; generally non-breaking from a flags-current v7"
-    receipts: ["https://reactrouter.com/"]
+    why: "SECURITY: six advisories published 2026-07-22 — unauthenticated __manifest DoS (High, CVSS 7.6), RSC-mode CSRF bypass, RSCErrorHandler XSS, SSR-hydration constructor injection, two open redirects — fixed in 8.3.0 and backported to 7.18.0. Moving all the way to v8 also gets ESM-only + future flags on by default, generally non-breaking from a flags-current v7"
+    receipts: ["https://github.com/remix-run/react-router/security/advisories", "https://github.com/remix-run/react-router/security/advisories/GHSA-chx6-hx7r-mcp5", "https://registry.npmjs.org/react-router/latest"]

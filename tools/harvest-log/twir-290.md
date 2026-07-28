@@ -62,7 +62,7 @@ corroboration · how-to (defer_to_skill) · pre-ship (RFC/beta) · too-early (0.
 | item | disposition |
 |---|---|
 | [TC39 115th meeting agenda](https://github.com/tc39/agendas/blob/main/2026/07.md) | skipped: pre-ship (proposals not yet advanced) |
-| [pnpm RFC: native monorepo versioning](https://github.com/pnpm/rfcs/pull/18) (merged) | skipped: pre-ship (RFC merged ≠ shipped; DX/BUILD candidate when it lands in a pnpm release) |
+| [pnpm RFC: native monorepo versioning](https://github.com/pnpm/rfcs/pull/18) (merged) | skipped: pre-ship (RFC merged ≠ shipped; DX/BUILD candidate when it lands in a pnpm release) — **REOPEN SIGNAL FIRED 2026-07-28**: shipped in pnpm 11.11–11.14, kept into RB-E-DX (see twir-291 manifest) |
 | [npm 12.0](https://socket.dev/blog/npm-12) (install scripts opt-in) | already-held: RB-E-SECURITY option/note + the NodeSource nuance reading |
 | [Nub package manager](https://nubjs.com/blog/unblocking-the-global-virtual-store) | skipped: too-early; phantom-dep story noted for future corroboration |
 | [Bun rewritten in Rust (v1.4)](https://bun.com/blog/bun-in-rust) | **kept twice** → RB-E-BUILD note (Rust-wave fact) + RB-E-AI-DEVTOOLS reading (agent-fleet methodology case study; primary post verified) |
@@ -79,3 +79,16 @@ corroboration · how-to (defer_to_skill) · pre-ship (RFC/beta) · too-early (0.
 | [SVAR React Gantt](https://svar.dev/react/gantt/) · [Meticulous](https://www.meticulous.ai/) · [PostHog](https://go.posthog.com/twir-jul15) · [Formity](https://formity.app/) · [Drizz](https://www.drizz.dev/) · [Agent Conf](https://www.agent.sh/) | sponsor (not evaluated) |
 | [reader testimonial clip](https://www.youtube.com/clip/UgkxDdNASo6xNS710ODcjMx0WW4HtTxIYbrA) · [jherr testimonial tweet](https://twitter.com/jherr/status/1666578571912171520) | off-scope (newsletter testimonials) |
 | [Software Mansion](https://swmansion.com/) · [sebastienlorber.com](https://sebastienlorber.com/) | off-scope (co-author/author affiliation links) |
+
+## Spot-check re-adjudication (2026-07-28, from the twir-291 pass)
+
+Routine requires re-examining ALL `cap` skips plus 2 random skips from the previous issue.
+Verdicts below; no reversals this time (contrast the first spot-check, which overturned 2 of 2).
+
+| row | re-verdict |
+|---|---|
+| [HTMX and Web Components Instead of React](https://kore-nordmann.de/blog/htmx-and-web-components-instead-of-react.html) — cap | HOLD, and the case got stronger: RB-E-ALT-FRAMEWORKS' "do you even need React" thread went from 3 readings to 5 this pass (Shopify's Preact migration landed). An opinion essay would now be the weakest item on a fuller list |
+| [Async hydration in Preact](https://jovidecroock.com/blog/resumed-hydration-preact/) — cap + narrow | HOLD, but the context changed and was re-argued: Preact is now load-bearing in the corpus (the Shopify 64KB reading turns on dropping react-reconciler for Preact). Still held out because this post is hydration INTERNALS, not a selection input — knowing how Preact resumes hydration doesn't change whether you pick it. Reopen: a Preact-vs-React decision piece, or Preact 11 stable (npm 2026-07-20: latest 10.29.7, beta 11.0.0-beta.2) |
+| [Do we still need build tools?](https://olliewilliams.xyz/blog/no-build/) — cap | HOLD — RB-E-BUILD's reading list is unchanged and still full; the no-build argument remains web-platform essay territory |
+| [Nub package manager](https://nubjs.com/blog/unblocking-the-global-virtual-store) — too-early (random pick) | HOLD — no corroborating signal in six newsletters or 105 firsthand events this pass. The phantom-dependency story is still a single vendor post |
+| [Exporting Next.js Server Traces with OpenTelemetry](https://blog.sentry.io/nextjs-export-traces-opentelemetry/) — how-to (random pick) | HOLD — RB-E-OBSERVABILITY owns tracing selection; this is a vendor setup walkthrough for one integration, which is exactly what `how-to` is for |

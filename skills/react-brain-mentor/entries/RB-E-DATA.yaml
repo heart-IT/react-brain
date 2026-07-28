@@ -24,7 +24,7 @@ recommend:
 note: "Server state ≠ client state (see RB-E-STATE). TanStack Query is the #1 React library in State of React 2025; it's transport- and platform-agnostic, so the data layer is shared code across web + RN. Adversarially stress-tested 2026-06-25 (SURVIVES, high): RSC complements (doesn't displace) the cache; TanStack DB builds ON TanStack Query; Zero reached 1.0 (2026-06) with React Native support."
 defer_to_skill: null
 doc: "RB-E-DATA.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-10   # TanStack DB 0.6 persistence verified vs npm + tanstack blog; TkDodo readings added
+updated: 2026-07-28   # measured per-request CPU cost of six data layers on low-end Android (TWiR #291)
 reading:
   - title: "Creating Query Abstractions"
     url: "https://tkdodo.eu/blog/creating-query-abstractions"
@@ -60,6 +60,12 @@ reading:
     url: "https://armand-salle.fr/post/real-time-cache-invalidation-sse-trpc-redis-bullmq/"
     by: "Armand Sallé"
     what: "A full architecture for pushing invalidation EVENTS (not data) over SSE to drive TanStack Query cache updates, with reference-counted subscriptions and horizontal-scaling guidance. The real-time dimension the other DATA readings don't cover."
+  - title: "What Does a GraphQL / Server-State Client Cost You Per Request?"
+    url: "https://andrei-calazans.com/posts/2026-07-18-cost-of-graphql-client-server-state/"
+    by: "Andrei Calazans"
+    what: "The only PRICE TAG on this entry's options: one Expo app (SDK 57 / RN 0.86 / React 19, New Arch) built six times behind an identical DataLayer contract against Coinbase's public GraphQL API, Maestro-driven, on a low-end Samsung A16, measured with Flashlight plus a Hermes sampling profiler started at bundle load. Library self-time summed across three flows — Vanilla 0ms, Jotai 122ms, Zustand 277ms, Relay 804ms, TanStack Query 904ms, RTK Query 3218ms. The durable finding is the SHAPE, not the ranking: cost is per CACHE WRITE, so a network response, a live tick and an optimistic update each pay it — RTK Query's number explodes only in the flow with WebSocket price ticks. Pick for the features you need, then keep firehose data out of the expensive path. (Reproducible: AndreiCalazans/GraphqlClientComparison.)"
+    claim: "You route high-frequency data (WebSocket ticks, polling) through a server-state client — the cost is per cache write and measurable: on low-end Android, RTK Query billed ~3.2s of JS-thread self-time vs ~0.9s for TanStack Query/Relay."
+    applies_when: { deps: ["@tanstack/react-query", "@reduxjs/toolkit", "react-relay", "@apollo/client"], platforms: [react-native] }
 sources:
   - "https://2025.stateofreact.com/en-US/libraries/"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)

@@ -23,11 +23,16 @@ note: >
   in an ISOLATED brownfield architecture with SDK 55 — OTA for embedded RN screens was
   previously a known limitation ("that limitation is a thing of the past"); see RB-E-OTA. The
   same prebuilt-XCFramework flow also cuts hybrid iOS compile times ~39% (Callstack, 2026-07).
+  VERSION FLOOR (2026-07-28, verified vs the GitHub release): @callstack/react-native-brownfield
+  5.0.0 (2026-07-23) has exactly one breaking change — it DROPS Expo SDK 55 support (brownfield-cli
+  bumps to 5.0.0 with it). SDK-55 apps stay on the 4.x line; the SDK-55 capability flip above is
+  therefore a 4.x fact. Pair the brownfield major with the Expo SDK upgrade, not before it.
 defer_to_skill: engineering-principles
 doc: "RB-E-BROWNFIELD.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-16
+updated: 2026-07-28   # brownfield 5.0.0 drops Expo SDK 55 (firsthand GitHub release watch)
 sources:
   - "https://github.com/callstack/react-native-brownfield"
+  - "https://github.com/callstack/react-native-brownfield/releases/tag/%40callstack%2Freact-native-brownfield%405.0.0"
   - "https://registry.npmjs.org/@callstack/brownie"
   - "https://docs.expo.dev/brownfield/overview/"
   - "https://www.callstack.com/blog/how-we-made-hybrid-ios-apps-compile-39-faster-with-react-native-brownfield"
