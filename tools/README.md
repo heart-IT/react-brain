@@ -214,7 +214,8 @@ and changed manifests with an `issue:` header get coverage re-run.
 guardrail under the weekly cloud routine. Shared primitives live in
 `harvest-lib.mjs`.
 ```sh
-node tools/react-brain-harvest.mjs firsthand            # poll + diff (~45s; --graph = no network)
+node tools/react-brain-harvest.mjs firsthand --manifest # poll + diff + write the triage manifest (~45s)
+node tools/react-brain-harvest.mjs firsthand            # same poll, DRY — state advances only when --manifest captures the events
 node tools/react-brain-harvest.mjs inventory https://thisweekinreact.com/newsletter/290
 node tools/react-brain-harvest.mjs coverage <issue-url> tools/harvest-log/twir-290.md
 node tools/react-brain-harvest.mjs verify-diff --base=main

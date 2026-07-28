@@ -62,12 +62,17 @@ The agent should, in order:
    > (a 404 is a 404) are safe to auto-fix; judgments are not.
 
 2. **Growth** — start with the FIRST-PARTY layer (added 2026-07-16): `react-brain harvest
-   firsthand` polls the corpus-derived watch graph (npm dist-tags/deprecation flags for
+   firsthand --manifest` polls the corpus-derived watch graph (npm dist-tags/deprecation
+   flags for
    every detect-row package, GitHub releases for every cited repo, RSS for every author
    host cited ≥2×) and diffs vs the committed `.firsthand-state.json` — known-entity
    events (version lines, deprecations, author posts) come from here with zero editorial
-   filter and zero latency; triage them with the same manifest discipline
-   (`tools/harvest-log/firsthand-<date>.md`, `--manifest` writes the skeleton). ⚡ TRIPWIRE
+   filter and zero latency; triage them with the same manifest discipline in the
+   `tools/harvest-log/firsthand-<date>.md` the flag writes. ALWAYS pass `--manifest`:
+   advancing the state file marks every reported event as consumed, so a bare poll is
+   deliberately DRY (prints and re-reports next run) rather than silently burning them
+   (a run on 2026-07-28 lost 105 events this way before the behaviour was fixed).
+   ⚡ TRIPWIRE
    events (entry `tripwires:` — standing caveats as release conditions, e.g. "Rive line
    hits 1.0 → add the migrate rule") are MANDATORY work items: do the `then:`, update the
    prose, remove the fired row; new watch/revisit caveats get wired as tripwires at

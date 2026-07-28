@@ -56,8 +56,9 @@ usage: react-brain <command> [args]
                        (flags: --today=YYYY-MM-DD, --no-links)
   harvest  <mode>      deterministic acquisition scaffolding:
                        prep <source> (pre-triaged manifest: next-issue probe + corpus/manifest cross-ref — judge only TODO rows) · firsthand (corpus-derived watch graph — npm dist-tags, GitHub
-                       releases, author feeds — diffed vs .firsthand-state.json;
-                       --graph | --json | --manifest) · inventory <url> (every link,
+                       releases, author feeds — diffed vs .firsthand-state.json; pass
+                       --manifest to capture events AND advance state, else the poll is
+                       dry; --graph | --json) · inventory <url> (every link,
                        mechanically) · coverage <url> <manifest.md> (exit 1 on
                        unaccounted links) · verify-diff [--base=main] (the receipts
                        gate: re-verify every URL the branch adds — CI-enforced on

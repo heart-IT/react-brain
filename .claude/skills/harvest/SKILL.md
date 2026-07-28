@@ -26,11 +26,13 @@ skill. One knowledge base, every session (local, resumed, or cloud-cloned).
 
 ## The sequence (details in the routine — do not improvise a different one)
 
-0. **Firsthand first**: `node tools/cli.mjs harvest firsthand` — the corpus-derived
+0. **Firsthand first**: `node tools/cli.mjs harvest firsthand --manifest` — the corpus-derived
    watch graph (npm dist-tags + deprecation flags, GitHub releases, vetted-author RSS)
    diffed against the committed `.firsthand-state.json`. Known-entity events come from
-   here, not from newsletters; triage them into `tools/harvest-log/firsthand-<date>.md`
-   (`--manifest` writes the skeleton) and commit the updated state WITH the delta.
+   here, not from newsletters; triage them in the `tools/harvest-log/firsthand-<date>.md`
+   the flag writes, and commit the updated state WITH the delta. Without `--manifest` the
+   run is DRY (events stay pending and re-report next run) — that is the safe default, but
+   it means the bare command never captures anything, so always pass the flag.
    **⚡ TRIPWIRE events are mandatory work items** — an entry's standing caveat whose
    release condition just came true (its `tripwires:` block): do the `then:` action,
    update the prose caveat, and REMOVE the fired row. When a harvest lands a new

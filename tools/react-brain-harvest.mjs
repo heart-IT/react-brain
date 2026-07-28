@@ -150,6 +150,6 @@ if (mode === 'firsthand') {
   console.log(`\n${signals.length} standing reopen signal(s):`);
   signals.forEach((s) => console.log(`   [${s.file}] ${s.line}`));
 } else {
-  console.error('usage: react-brain harvest <prep <source> | firsthand [--graph|--json|--manifest] | inventory <url> | coverage <url> <manifest.md> | verify-diff [--base=main] | bench [--model=id|--candidate=file] | watchlist>');
+  console.error('usage: react-brain harvest <prep <source> | firsthand --manifest (bare poll is dry) [--graph|--json] | inventory <url> | coverage <url> <manifest.md> | verify-diff [--base=main] | bench [--model=id|--candidate=file] | watchlist>');
   process.exit(1);
 }

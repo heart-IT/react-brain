@@ -297,6 +297,11 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
   check(screens?.disposition === 'kept' && screens.entries.includes('RB-E-NAV'), 'bench: screens 4.26 row parses as kept → RB-E-NAV');
   const solid = gold.find((r) => r.key === normalize('https://morello.dev/blog/solidjs-2-react-developers-first-look'));
   check(solid?.disposition === 'skipped' && solid.reason === 'pre-ship', 'bench: solidjs row parses as skipped/pre-ship');
+  // an un-judged row is NOT a skip — `prep` and `firsthand --manifest` write `| TODO |`
+  // for rows awaiting a human, and reading those as skips fed fake `previously skipped`
+  // carry-overs into the next issue's prep (found 2026-07-28)
+  const withTodo = parseGoldManifest('| item | disposition |\n|---|---|\n| [a](https://ex.dev/a) | TODO |\n| [b](https://ex.dev/b) | skipped: how-to |\n| [c](https://ex.dev/c) → RB-E-X | TODO |\n');
+  check(withTodo.length === 1 && withTodo[0].key === normalize('https://ex.dev/b'), 'bench: TODO rows are un-adjudicated — parsed out, not counted as skips');
   const g = [{ key: 'a', disposition: 'kept', entries: ['RB-E-X'], reason: null }, { key: 'b', disposition: 'skipped', entries: [], reason: 'how-to' }];
   const perfect = scoreTriage(g, [{ key: 'a', disposition: 'kept', entry: 'RB-E-X' }, { key: 'b', disposition: 'skipped', reason: 'how-to' }], ['a', 'b']);
   check(perfect.score === 100 && perfect.routing.ok === 1 && perfect.reason.ok === 1, 'bench: perfect candidate scores 100 w/ routing + reason credit');
@@ -386,6 +391,11 @@ function doctorPath(p) { return JSON.parse(execFileSync(process.execPath, [join(
   check(r[0].pre === 'already-held' && /RB-E-STATE/.test(r[0].note), 'prep: corpus-held link pre-dispositioned with entry id');
   check(r[1].pre === 'carried' && /pre-ship/.test(r[1].note), 'prep: previously-dispositioned link carried with its reason');
   check(r[2].pre === 'todo', 'prep: novel link stays TODO');
+  // end-to-end on the trap: a manifest whose rows are still TODO must contribute
+  // NO carry-overs, so an un-triaged firsthand manifest can't poison the next prep
+  const { parseGoldManifest: parseGold } = await import(join(ROOT, 'tools/harvest-lib.mjs'));
+  const untriaged = parseGold('| event | disposition |\n|---|---|\n| [c](https://c.dev/z) → RB-E-DX | TODO |\n');
+  check(prepClassify(links, held, untriaged)[2].pre === 'todo', 'prep: an untriaged manifest contributes no carry-overs');
 }
 
 // ── registry preflight: range parsing + feasibility + health (offline, pure) ────

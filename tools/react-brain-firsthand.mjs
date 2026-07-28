@@ -11,11 +11,13 @@
 // latency, routed by entry. Newsletters demote to what they're actually good
 // at: discovering unknown unknowns.
 //
-//   node tools/react-brain-firsthand.mjs            poll + diff + update state
+//   node tools/react-brain-firsthand.mjs            poll + diff (DRY: state advances only if there are no events)
 //   node tools/react-brain-firsthand.mjs --graph    print the derived graph, no network
-//   node tools/react-brain-firsthand.mjs --json     events as JSON
-//   node tools/react-brain-firsthand.mjs --manifest write tools/harvest-log/firsthand-<date>.md skeleton
+//   node tools/react-brain-firsthand.mjs --json     events as JSON (also dry)
+//   node tools/react-brain-firsthand.mjs --manifest write tools/harvest-log/firsthand-<date>.md skeleton AND advance state
 //
+// Advancing state CONSUMES the events it reports, so only --manifest (which puts
+// them on disk for triage) does it — a bare poll is repeatable and lossless.
 // First run (no state file) establishes the baseline and reports no events.
 // Every event is a TRIAGE CANDIDATE — same manifest/verify discipline as a
 // newsletter item (tools/upkeep-routine.md step 2).
@@ -221,8 +223,14 @@ blogKeys.forEach((host, i) => {
   state.blogs[host] = { feed: r.feed ?? null, lastId: r.items[0]?.id || prev?.lastId || null };
 });
 
-state.updated = TODAY;
-writeFileSync(STATE_FILE, JSON.stringify(state, null, 1) + '\n');
+// The state file is the record of "already reported", so advancing it CONSUMES
+// every event in this run — they never surface again. Printing them to a
+// terminal is not a handoff: a plain `harvest firsthand` used to poll, list 100+
+// events, and burn them in the same breath. So persist only when nothing is at
+// risk (first-run baseline / quiet run) or when --manifest has written the
+// events to disk for triage. Everything else is a dry poll; re-run to re-see.
+const persistState = () => { state.updated = TODAY; writeFileSync(STATE_FILE, JSON.stringify(state, null, 1) + '\n'); };
+if (!events.length) persistState();
 
 if (JSON_OUT) { console.log(JSON.stringify({ baseline: first, stats, events, failures }, null, 1)); process.exit(0); }
 
@@ -250,5 +258,8 @@ if (MANIFEST && events.length) {
   if (existsSync(path)) { console.error(`\nrefusing to overwrite ${path}`); process.exit(1); }
   const rows = [...new Set(events)].map((ev) => `| [${ev.what.replace(/\|/g, '·')}](${ev.url}) → ${ev.entries.join(', ')} | TODO |`).join('\n');
   writeFileSync(path, `# Harvest manifest — firsthand watch (${TODAY})\nissue: firsthand\n\nEvents from the corpus-derived watch graph (npm dist-tags · GitHub releases · author feeds).\nSame disposition discipline as newsletter manifests; verify before keeping.\n\n| event | disposition |\n|---|---|\n${rows}\n`);
-  console.log(`\nwrote ${path}`);
+  persistState();   // captured to disk — safe to mark these events reported
+  console.log(`\nwrote ${path} — state advanced (these events are now recorded as reported)`);
+} else if (events.length) {
+  console.log(`\nstate NOT advanced — ${events.length} event(s) stay pending, so nothing is lost; re-run with --manifest to capture them.`);
 }

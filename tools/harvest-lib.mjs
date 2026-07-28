@@ -128,6 +128,11 @@ export function coarseReason(cell) {
   return 'other';
 }
 
+// Reads the ADJUDICATED rows out of a manifest. A row still marked TODO is
+// un-judged, not a skip: `harvest prep` and `harvest firsthand --manifest` both
+// write `| TODO |` for rows awaiting a human, so treating that as a disposition
+// let an untriaged manifest feed fake `previously skipped` carry-overs into the
+// next issue's prep (and the same phantom skips into bench gold + watchlist).
 export function parseGoldManifest(md) {
   const rows = [];
   for (const line of md.split('\n')) {
@@ -136,6 +141,7 @@ export function parseGoldManifest(md) {
     const urls = [...t.matchAll(/https?:\/\/[^\s)|\]"'`]+/g)].map((m) => m[0].replace(/[.,;:]+$/, ''));
     if (!urls.length) continue;
     const cell = (t.split('|')[2] || '');
+    if (/^TODO\b/i.test(cell.trim())) continue;
     const disposition = /\*\*kept/i.test(cell) ? 'kept' : /already-held/i.test(cell) ? 'already-held' : 'skipped';
     const entries = [...new Set([...t.matchAll(/RB-E-[A-Z0-9-]+/g)].map((m) => m[0]))];
     const reason = disposition === 'skipped' ? coarseReason(cell) : null;
