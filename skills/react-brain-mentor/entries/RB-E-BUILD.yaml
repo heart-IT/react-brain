@@ -7,7 +7,7 @@ confidence: high
 platforms: [react, react-native]
 options:
   - { name: "Metro", tradeoff: "RN bundler" }
-  - { name: "Vite 8 / Rspack 2 / webpack", tradeoff: "web bundlers; Vite 8 defaults to the Rust Rolldown bundler; Rspack 2 adds RSC + 2.1 ships the Rust React Compiler via its built-in SWC loader (7–13x the Babel plugin); Vite default for new web" }
+  - { name: "Vite 8 / Rspack 2 / webpack 5.109", tradeoff: "web bundlers; Vite 8 defaults to the Rust Rolldown bundler; Rspack 2 adds RSC + 2.1 ships the Rust React Compiler via its built-in SWC loader (7–13x the Babel plugin); webpack 5.109 closes much of the config gap (zero-loader CSS/HTML/TS/Wasm + Vite-compatible import.meta APIs); Vite still the default for new web" }
   - { name: "Turborepo / Nx + pnpm/yarn workspaces", tradeoff: "monorepo task graph + caching" }
   - { name: "Expo vs bare RN", tradeoff: "managed velocity vs native control" }
   - { name: "react-native-swc", tradeoff: "Rust/SWC Metro transform — faster than Babel; custom Babel plugins need SWC equivalents (e.g. worklets plugin for Reanimated)" }
@@ -55,9 +55,19 @@ note: >
   JS path, not Rolldown-as-bundler; Metro stays the RN default. UPDATE 2026-07-06: the Rust React
   Compiler has since merged into SWC and ships in Rspack 2.1 (7–13x the Babel version, verified vs
   the Rspack 2.1 blog) — Rolldown's pullback is a Rolldown-integration choice, not a dead Rust port.
+  WEBPACK CONVERGES ON THE VITE DX (5.109, 2026-07-28, verified vs the webpack blog): the
+  `experiments.css` / `.html` / `.typescript` / `.asyncWebAssembly` flags flip from opt-in to an
+  `"auto"` default — each feature turns itself on UNLESS a loader is already registered for those
+  files (built-in TS type-stripping additionally needs Node >= 22.6). Existing configs behave
+  exactly as before; a fresh project imports CSS, HTML, TypeScript and Wasm with zero loaders and
+  zero config. It also adopts Vite's module APIs outright — `import.meta.glob` (with eager/import/
+  query/base/exhaustive/caseSensitive), `import.meta.env` (MODE/DEV/PROD/SSR/BASE_URL) and
+  `import.meta.resolve` — plus `?raw` / `?inline` / `?url` asset query suffixes under
+  `experiments.futureDefaults`. This narrows the practical reason to reach for Vite on
+  CONFIGURATION grounds; the Rust-speed argument is untouched, so the default above stands.
 defer_to_skill: null
 doc: "RB-E-BUILD.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-20   # Teamworks Re.Pack case-study reading — Native Weekly #17; verified via browser-UA curl
+updated: 2026-08-04   # webpack 5.109 "auto" experiments + Vite-compatible import.meta APIs
 watching:
   - title: "How React Native Builds Actually Work (APK, AAB, IPA, APP)"
     url: "https://www.youtube.com/watch?v=1o0pEjYGUWM"
@@ -101,6 +111,7 @@ sources:
   - "https://github.com/ecrindigital/facetpack"
   - "https://expo.dev/changelog/sdk-56"
   - "https://www.callstack.com/blog/mobile-module-federation-with-re-pack-when-runtime-delivery-is-worth-the-complexity"
+  - "https://webpack.js.org/blog/2026-07-24-webpack-5-109/"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "vite", label: "Vite", token: "vite" }
   - { pkg: "@rspack/*", label: "Rspack", token: "rspack" }

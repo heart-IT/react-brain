@@ -20,7 +20,7 @@ recommend:
 note: "AsyncStorage v3.x moved to instance-based storage (createAsyncStorage) and requires React Native 0.76+ (NOT New-Arch-only — that earlier claim was wrong; verified vs the v3 migration docs). react-native-mmkv v4 is a full Nitro rewrite (Oct 2025) that restored Old-Arch compat. Latest: async-storage 3.1.x, mmkv 4.3.x, op-sqlite 17.x (2026-06)."
 defer_to_skill: null
 doc: "RB-E-STORAGE.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-13
+updated: 2026-08-04   # MMKV-writes-in-a-worklet serialization-cost reading (measured negative result)
 sources:
   - "https://react-native-async-storage.github.io/3.1/migration-to-3/"
   - "https://github.com/mrousavy/react-native-mmkv/releases"
@@ -33,6 +33,12 @@ reading:
     url: "https://frontendatscale.com/blog/tanstack-db/"
     by: "Maxi Ferreira (Frontend at Scale)"
     what: "Builds the local-first reactive-persistence mental model from first principles — Collections, live queries via differential dataflow, optimistic transactional mutations — contrasting it with request/response fetching. The shift to sync-engine thinking."
+  - title: "Why We Did Not Move MMKV Writes to a Worklet: The Serialization Cost"
+    url: "https://andrei-calazans.com/posts/2026-07-28-mmkv-writes-worklet-serialization-cost/"
+    by: "Andrei Calazans"
+    what: "A measured NEGATIVE result, which is why it is worth holding: MMKV writes are synchronous and block the JS thread, so moving them into a worklet looks like free relief. It isn't. Moving just the write left the ~29.56ms cost intact — it simply moved from the write into createSerializableString, because copying the string into the worklet costs what the write did. Sending the raw store object instead was worse (~132ms, cloning every property one at a time via cloneObjectProperties/clonePlainJSObject), and Bundle Mode changed nothing (~136ms), confirming the cost tracks data-structure size rather than compilation. The durable rule: a worklet is not a free way to move work off the JS thread — you pay serialization at the boundary, so measure that cost first and send the smallest payload you can."
+    claim: "You ship MMKV with worklets — moving writes into a worklet does not offload them: serialization at the boundary cost the same ~29.56ms as the write, and passing a whole store object cost ~132ms. Measure the boundary cost before moving work off the JS thread."
+    applies_when: { deps: ["react-native-mmkv", "react-native-worklets", "react-native-reanimated"], platforms: [react-native] }
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "react-native-mmkv", label: "MMKV", token: "mmkv" }
   - { pkg: "@react-native-async-storage/async-storage", label: "AsyncStorage", token: "asyncstorage" }

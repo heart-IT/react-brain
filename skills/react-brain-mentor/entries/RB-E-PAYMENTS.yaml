@@ -6,8 +6,8 @@ status: drafted
 confidence: medium
 platforms: [react-native]
 options:
-  - { name: "expo-iap", tradeoff: "OpenIAP-compliant IAP; Google Play Billing v8 / Apple StoreKit; avoids ejecting" }
-  - { name: "react-native-iap", tradeoff: "long-standing community IAP wrapper; now deprecated/archived → folded into the OpenIAP monorepo, prefer expo-iap" }
+  - { name: "expo-iap (5.x)", tradeoff: "OpenIAP-compliant IAP; Google Play Billing v8 / Apple StoreKit; avoids ejecting" }
+  - { name: "react-native-iap (16.x)", tradeoff: "long-standing community IAP wrapper; its STANDALONE repo is archived but the package is NOT deprecated — it moved into the hyodotdev/openiap monorepo and still ships majors in lockstep with expo-iap" }
   - { name: "RevenueCat", tradeoff: "hosted subscription infra + entitlements across stores; fees vs less server work" }
   - { name: "react-native-wallet", tradeoff: "Apple PassKit / Google Wallet passes (tickets, loyalty, coupons) — NOT tap-to-pay; iOS needs a Pass Type ID + entitlements" }
 recommend:
@@ -16,12 +16,23 @@ recommend:
     - "small team, subscriptions, don't want a billing backend → RevenueCat"
     - "one-time purchases / avoid vendor fees → expo-iap / react-native-iap (you own validation)"
     - "wallet passes (tickets/loyalty/coupons) → react-native-wallet (set up an Apple Pass Type ID + entitlements; not tap-to-pay)"
-note: "Store rules + receipt validation make IAP testing-heavy; hosted options (RevenueCat) trade fees for less backend."
+note: >
+  Store rules + receipt validation make IAP testing-heavy; hosted options (RevenueCat) trade
+  fees for less backend.
+  STALE FACT CORRECTED (2026-08-04, firsthand watch): this entry previously called
+  react-native-iap "deprecated/archived → prefer expo-iap". That read an archived REPO as a dead
+  PACKAGE. Both libraries moved into the hyodotdev/openiap monorepo (the OpenIAP protocol project;
+  the old hyochan/react-native-iap and hyochan/expo-iap repos were archived 2026-04-26 on the way
+  out) and both are actively released from it: react-native-iap 16.0.2 and expo-iap 5.0.1 shipped
+  the SAME day (2026-08-03), neither carries an npm deprecation flag. Pick between them on runtime
+  (Expo module vs bare RN wrapper), not on liveness.
 defer_to_skill: null
 doc: null
-updated: 2026-06-25
+updated: 2026-08-04   # react-native-iap "deprecated" fact corrected + both lines at fresh majors (16.0.2 / 5.0.1)
 sources:
-  - "https://github.com/hyochan/expo-iap"
+  - "https://github.com/hyodotdev/openiap"
+  - "https://registry.npmjs.org/react-native-iap/latest"
+  - "https://registry.npmjs.org/expo-iap/latest"
   - "https://github.com/premieroctet/react-native-wallet"
 reading:
   - title: "Cross-platform subscription state: sharing entitlements between Android and iOS"

@@ -8,6 +8,7 @@ platforms: [react-native]
 options:
   - { name: "EAS Update (expo-updates client)", tradeoff: "the hosted default — channels, phased rollouts, republish-to-rollback; SDK 55 added bsdiff bytecode/bundle diffing (est. ~75% smaller update downloads; default in SDK 56)" }
   - { name: "expo-updates + custom server", tradeoff: "the Expo Updates protocol is open — self-host the server, keep the battle-tested client; more ops work than EAS" }
+  - { name: "XPREM (ex expo-open-ota)", tradeoff: "the concrete server for the row above: a Go implementation of the Expo Updates protocol — multi-app, progressive rollouts + instant rollback, A/B branch splitting, S3/GCS/Azure/R2 backends, no Expo account or token. Stateless (bucket-only) or PostgreSQL control-plane mode. Core is open source; RBAC/SSO/protected branches are commercial. RENAMED from expo-open-ota at v3 — old name still all over the ecosystem" }
   - { name: "hot-updater", tradeoff: "self-hosted open-source OTA (gronxb) explicitly positioned as the CodePush successor; actively maintained (v0.35.x, 2026-07); younger than expo-updates" }
   - { name: "code-push-server (standalone)", tradeoff: "Microsoft's open-sourced server, compatible with the legacy react-native-code-push client — a self-host stopgap for existing CodePush apps, not a bet for new ones" }
   - { name: "Delta (Zepto, OSS)", tradeoff: "self-hosted BINARY DELTA patching at quick-commerce scale — delta-cli computes bsdiff patches between releases to your S3; delta-server (Lambdas behind CloudFront) picks the patch per device (appId/jsVersion/bundleVersion manifest); device applies bspatch, swaps on next launch. Production receipts (Zepto's own): 80% adoption in 24h, 15M update requests/day, P90 patch download 305ms. GitHub-install (not yet on npm) — WATCH for a published package" }
@@ -16,7 +17,7 @@ recommend:
   default: "On Expo/EAS → EAS Update via the expo-updates client (channels + phased rollouts + rollback, and diffing makes updates dramatically smaller since SDK 55/56). Hard self-host requirement → hot-updater, or the open expo-updates protocol with your own server. Anything still pointed at the retired CodePush service is silently broken — migrate."
   when:
     - "Expo app → EAS Update (first-party; channels/rollouts/rollback built in)"
-    - "self-hosted / no-vendor requirement → hot-updater, or expo-updates protocol + your own server"
+    - "self-hosted / no-vendor requirement → hot-updater, or the expo-updates protocol behind your own server — XPREM is the ready-made one (keeps the Expo client, adds rollouts/rollback/A-B on your bucket)"
     - "huge fleet where full-bundle pushes cost real money (a 20MB Hermes bundle × 1M installs ≈ $1,700/push at CloudFront list) → delta patching: EAS bsdiff diffing on Expo, or Zepto's Delta self-hosted"
     - "legacy CodePush app → standalone code-push-server keeps it alive while you migrate; the hosted service is gone"
     - "the change touches native code → OTA cannot ship it; that's a store release (see RB-E-RN-VERSIONS)"
@@ -39,7 +40,7 @@ note: >
   tripwire when it lands on npm.
 defer_to_skill: null
 doc: "RB-E-OTA.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-17
+updated: 2026-08-04   # XPREM (ex expo-open-ota) v3 named as the concrete self-hosted Expo-protocol server
 watching:
   - title: "The OTA Illusion: What No One Tells You About Instant Updates At Scale (RUC 2025)"
     url: "https://www.youtube.com/watch?v=hBoAD6sYDYo"
@@ -61,6 +62,8 @@ sources:
   - "https://expo.dev/changelog/sdk-55"
   - "https://github.com/microsoft/react-native-code-push"
   - "https://registry.npmjs.org/hot-updater/latest"
+  - "https://github.com/mercuretechnologies/xprem"
+  - "https://www.mercuretechnologies.com/blog/expo-open-ota-v3"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "expo-updates", label: "EAS Update", token: "eas update" }
   - { pkg: "react-native-code-push", label: "CodePush (retired service)", token: "codepush" }

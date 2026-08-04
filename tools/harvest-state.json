@@ -6,13 +6,13 @@
     "`react-brain lint` cross-checks each `count` against encyclopedia.yaml sources_digested — they must match.",
     "Narrative harvest history (what each pass changed, process learnings) stays in the maintainer's memory ledger."
   ],
-  "updated": "2026-07-28",
+  "updated": "2026-08-04",
   "sources": {
     "this-week-in-react": {
       "name": "This Week in React",
       "archive": "https://thisweekinreact.com/newsletter",
-      "last_processed": "#291",
-      "count": 25,
+      "last_processed": "#292",
+      "count": 26,
       "cadence": "weekly",
       "notes": "issue pages fetch directly at /newsletter/<n>",
       "url_pattern": "https://thisweekinreact.com/newsletter/{n}"
@@ -20,8 +20,8 @@
     "react-status": {
       "name": "React Status",
       "archive": "https://react.statuscode.com/issues",
-      "last_processed": "#484",
-      "count": 25,
+      "last_processed": "#485",
+      "count": 26,
       "cadence": "weekly",
       "notes": "corroboration-heavy; headliners usually already held",
       "url_pattern": "https://react.statuscode.com/issues/{n}"
@@ -29,18 +29,18 @@
     "react-digest": {
       "name": "React Digest",
       "archive": "https://reactdigest.net/digests",
-      "last_processed": "#2330",
-      "count": 19,
+      "last_processed": "#2335",
+      "count": 20,
       "cadence": "weekly",
-      "notes": "issues slug-titled by featured article; article/depth-driven — durable yield is usually one decision-guide reading. Archive moved: /digests 404s, use /newsletters or /newsletters.rss (newest-first, resolves the slug). Slug numbers are NOT sequential (2316 → 2320 → 2325 → 2330)"
+      "notes": "issues slug-titled by featured article; article/depth-driven — durable yield is usually one decision-guide reading. Archive moved: /digests 404s, use /newsletters or /newsletters.rss (newest-first, resolves the slug). Slug numbers are NOT sequential (2316 → 2320 → 2325 → 2330 → 2335)"
     },
     "react-native-rewind": {
       "name": "React Native Rewind",
       "archive": "https://reactnativerewind.com/",
-      "last_processed": "#50",
-      "count": 50,
+      "last_processed": "#51",
+      "count": 51,
       "cadence": "weekly",
-      "notes": "slug-titled; each issue page has an authoritative 'Issue #NN' label (near the title) — use THAT, not sequential guesswork, to resume. RSS at /newsletter-rss.xml lists newest-first (confirmed 2026-07-28: canonical host is www.thereactnativerewind.com; #50 = 'Blue Checkmark Coding Agents...', 2026-07-21, an agentic-tooling essay issue with a sponsored Maestro section and no library releases — 0 keeps)"
+      "notes": "slug-titled; each issue page carries an authoritative 'Issue #NN' label near the title — use THAT, not sequential guesswork, to resume. RSS at /newsletter-rss.xml lists newest-first; canonical host is www.thereactnativerewind.com. #51 = 'GPU-Powered Crayons…' (2026-08-03), a supply-chain/agentic essay issue, 0 keeps — and #50 was also 0 keeps, so this source has shifted away from library releases toward essays"
     },
     "native-weekly": {
       "name": "Native Weekly",
@@ -48,13 +48,13 @@
       "last_processed": "#17",
       "count": 7,
       "cadence": "~6-weekly (irregular)",
-      "notes": "nativeweekly.com is a shell — use the beehiiv archive (slugs like /p/jul-17-2026-issue-17); author also authors rnsec (watch self-promotion); strongest beat = agentic dev tooling. Irregular: no new issue between 2026-07-17 (#17) and 2026-07-28"
+      "notes": "nativeweekly.com is a shell — use the beehiiv archive (slugs like /p/jul-17-2026-issue-17); author also authors rnsec (watch self-promotion); strongest beat = agentic dev tooling. Irregular: STILL no issue after #17 (2026-07-17) as of 2026-08-04 — two consecutive passes with nothing new"
     },
     "react-weekly": {
       "name": "React Weekly",
       "archive": "https://react-weekly.dev/rss.xml",
-      "last_processed": "#30",
-      "count": 23,
+      "last_processed": "#31",
+      "count": 24,
       "cadence": "weekly (Sundays)",
       "notes": "site + api.react-weekly.dev are JS-shell/auth-gated — harvest via rss.xml content:encoded (FULL bodies). Links inside are api.react-weekly.dev/track/click/<id> redirects: resolve each with `curl -L` before dispositioning. `harvest inventory`/`coverage` return 0 links on the issue URL, so the coverage gate cannot cover this source — the RSS-derived manifest is the record. RSS window = latest 20: a backlog >20 issues loses them permanently (issues 1-7 already unreachable). TanStack-heavy."
     }

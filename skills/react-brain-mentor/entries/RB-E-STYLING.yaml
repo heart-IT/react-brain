@@ -31,7 +31,7 @@ note: >
   selection axis is runtime cost — zero-runtime/compiler approaches avoid JS-side style work.
 defer_to_skill: design-systems-governance  # tokens, theme parity, a11y intrinsics
 doc: "RB-E-STYLING.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-20   # Linaria wind-down reading + detect rows — React Status #483; first-party essay verified
+updated: 2026-08-04   # zero-runtime field-map reading (advocate flip after 3 cap-skips) + detect rows
 reading:
   - title: "Why We're Breaking Up with CSS-in-JS"
     url: "https://www.spotvirtual.com/blog/why-were-breaking-up-with-css-in-js"
@@ -57,6 +57,12 @@ reading:
     what: "The Linaria maintainer's own verdict on the category: runtime CSS-in-JS is winding down, and two foundational Linaria issues can't be fixed without breaking its core design — so Linaria stays maintained but frozen (NOT deprecated), and his successor dx-styles (zero-runtime on wyw-in-js, RSC-compatible, typed recipe variants, token contracts) ships with a Linaria migration guide. Supersession-in-progress: watch dx-styles, no migrate rule yet."
     claim: "You ship Linaria — its maintainer says its foundational issues are unfixable by design; the library stays maintained but frozen, and his zero-runtime successor dx-styles (RSC-compatible) publishes a Linaria migration guide."
     applies_when: { deps: ["linaria", "@linaria/*"] }
+  - title: "The State of Zero-Runtime CSS-in-JS, Mid-2026"
+    url: "https://dx-styles.dev/blog/state-of-zero-runtime-css-in-js/"
+    by: "Anton Evzhakov (maintains Linaria + wyw-in-js; built dx-styles — conflicts disclosed in the post)"
+    what: "The comparative map this entry's options list lacks: where every live zero-runtime option actually sits — Linaria (maintained, frozen), next-yak (Rust compiler over styled-syntax, RSC-compatible), vanilla-extract (the TypeScript answer to CSS Modules, typed themes), Panda CSS (config-first, atomic output), StyleX (Meta's, strict constraints + deterministic merging), Griffel (Microsoft/Fluent UI, limited ecosystem interop), and dx-styles itself. Routes by situation rather than ranking: big styled-components codebase → next-yak or Linaria; typed styles with little setup → vanilla-extract or Panda; design system → dx-styles or vanilla-extract; hundreds of teams → StyleX; pragmatic → Tailwind or CSS Modules. The category has CONVERGED on plain class-name output, so the live differences are atomicity, authoring style and design-system features — not runtime cost, which the readings above already settle. KEPT ON THE 2026-08-04 ADVOCATE PASS after three cap-skips: recurring in three sources at once, and it is the only piece here covering the field rather than one library."
+    claim: "You ship zero-runtime CSS-in-JS — the field converged on plain class-name output, so pick on atomicity and design-system features: next-yak/Linaria for a styled-components codebase, vanilla-extract or Panda for typed styles, StyleX at hundreds-of-teams scale."
+    applies_when: { deps: ["linaria", "@linaria/*", "@vanilla-extract/*", "@pandacss/*", "next-yak", "@griffel/*", "@stylexjs/stylex"], platforms: [react] }
 sources:
   - "https://dx-styles.dev/blog/why-dx-styles/"
   - "https://www.spotvirtual.com/blog/why-were-breaking-up-with-css-in-js"
@@ -75,6 +81,10 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "@emotion/*", label: "Emotion", token: "css-in-js" }
   - { pkg: "linaria", label: "Linaria (frozen by design)", token: "css-in-js" }
   - { pkg: "@linaria/*", label: "Linaria (frozen by design)", token: "css-in-js" }
+  - { pkg: "@vanilla-extract/*", label: "vanilla-extract", token: "zero-runtime" }
+  - { pkg: "@pandacss/*", label: "Panda CSS", token: "zero-runtime" }
+  - { pkg: "next-yak", label: "next-yak", token: "zero-runtime" }
+  - { pkg: "@griffel/*", label: "Griffel (Fluent UI)", token: "zero-runtime" }
 migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-brain migrate`)
   - from: { pkg: "react-native-tailwind" }
     to: "@mgcrea/react-native-tailwind (zero-runtime Babel plugin) — or NativeWind/Uniwind per this entry"

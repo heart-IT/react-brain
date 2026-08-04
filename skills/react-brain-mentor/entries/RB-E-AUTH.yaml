@@ -36,12 +36,18 @@ note: >
   when-clause, not churn. Auth was a domain GAP — no entry covered it among the prior 42.
 defer_to_skill: null
 doc: null
-updated: 2026-07-20   # react-native-auth0 v5.10 (MFA) — firsthand watch
+updated: 2026-08-04   # Android GoogleSignInClient→Credential Manager deprecation reading (3-source corroboration)
 reading:
   - title: "The Copenhagen Book"
     url: "https://thecopenhagenbook.com/"
     by: "Pilcrow (Lucia Auth author)"
     what: "The free, open, community-maintained guideline for implementing auth from first principles — server-side tokens, sessions, password auth + reset, email verification, OAuth, MFA, WebAuthn, CSRF, open redirects — meant to be read alongside the OWASP cheat sheets. THE canonical reference when you hand-roll any part of auth instead of adopting a library above; its author sunset the Lucia auth library INTO this book, the lesson being that auth is a design problem more than a dependency."
+  - title: "Sign in with Google for React Native"
+    url: "https://thoughtbot.com/blog/sign-in-with-google-for-react-native"
+    by: "thoughtbot"
+    what: "Carries a PLATFORM deprecation this entry had no home for: Android's legacy GoogleSignInClient (Google Play services) is deprecated and slated for removal, with Credential Manager as the replacement — and much of the existing RN Google-sign-in field still targets the old API, so it misses Credential Manager's bottom-sheet flow, automatic sign-in and structured error handling. The post introduces the authors' own @thoughtbot/react-native-social-auth (Credential Manager on Android, Google Sign-In SDK 8+ on iOS with Firebase App Check and custom nonces, TypeScript-first, Expo config plugin), so treat the library pick as vendor advocacy; the deprecation and the capability checklist are the durable part. It stops at obtaining the credential — session/token handling is still yours (Keychain via RB-E-STORAGE, never AsyncStorage)."
+    claim: "You ship Google sign-in on Android — the legacy GoogleSignInClient API is deprecated and will be removed; audit whether your RN library targets Credential Manager, and remember the library only gets you the credential, not session handling."
+    applies_when: { platforms: [react-native] }
 sources:
   - "https://github.com/auth0/react-native-auth0/releases/tag/v5.10.0"
   - "https://better-auth.com/blog/better-auth-joins-vercel"

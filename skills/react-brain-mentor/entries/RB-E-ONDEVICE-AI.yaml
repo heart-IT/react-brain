@@ -20,7 +20,7 @@ recommend:
 note: "Fast-moving area surfaced across multiple RN Rewind issues; recommend tentatively (confidence: low) and validate on-device before committing."
 defer_to_skill: null
 doc: null
-updated: 2026-07-28   # named whisper.rn as the offline-ASR binding (+ Parakeet) — TWiR #291
+updated: 2026-08-04   # Margelo on-device face-recognition pipeline reading (VisionCamera frame processors, measured)
 sources:
   - "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.8.0"
   - "https://registry.npmjs.org/@react-native-ai/adk/latest"
@@ -40,6 +40,12 @@ reading:
     what: "Survey evidence that on-device AI is production-proven, not experimental: Apple ships multimodal-embedding photo search + hybrid Siri; Meta runs ExecuTorch in WhatsApp (network prediction), Instagram (SqueezeSAM cutouts) and Messenger (transcription); Google ships scam detection + Gemini Nano; Snapchat runs 10MB AR models. Ends in RN ExecuTorch pointers (Gemma/Qwen, ~30MB quantized Whisper Tiny STT) — vendor self-promotion, they author the lib. The durable framing: 'fine-tuning is what makes a small model good enough.'"
     claim: "You're weighing on-device AI in React Native — it's production-proven at big-tech scale (Meta runs ExecuTorch inside WhatsApp/Instagram/Messenger), and small models get good enough through task-specific fine-tuning, not size."
     applies_when: { platforms: [react-native], stages: [production, scale] }
+  - title: "Building a Real-Time Face Recognition App in React Native with VisionCamera"
+    url: "https://blog.margelo.com/on-device-face-recognition-react-native"
+    by: "Margelo"
+    what: "The end-to-end build this entry's option rows only imply: a fully on-device recognition pipeline — detection → tracking → alignment → embedding → matching → liveness — on VisionCamera 5 frame processors, with ONNX Runtime (CPU/XNNPACK) for inference and Reanimated shared values bridging worklet and JS. Two things make it durable knowledge rather than a tutorial. First, the architectural reason it can work at all: the frame processor gets each YUV frame synchronously on a dedicated native thread as a worklet, with no bridge serialization and no pixel copy into JS. Second, real numbers on a Galaxy S21 Ultra — YuNet detection (~230KB model) 3–6ms/frame at 128×128, SFace embedding (37MB, 19MB int8) ~29ms, ~39ms end-to-end per detection cycle, gallery matching in microseconds for 512 entries — plus the budget trick of running detection every 10th frame and letting tracking bridge the gaps. Uses ONNX Runtime rather than this entry's ExecuTorch default, which is itself a useful data point."
+    claim: "You ship VisionCamera and want on-device inference — frame processors hand you each frame synchronously on a native thread, with no serialization or pixel copy; that is what makes a real-time pipeline viable (~39ms per cycle on a Galaxy S21 Ultra)."
+    applies_when: { deps: ["react-native-vision-camera"], platforms: [react-native] }
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "react-native-executorch", label: "ExecuTorch", token: "executorch" }
   - { pkg: "@react-native-ai/apple", label: "Apple on-device LLM", token: "apple" }

@@ -24,7 +24,7 @@ recommend:
 note: "Separate server state (caching/sync) from client/UI state — different problems, different tools. State of React 2025 (3,760 devs): TanStack Query the #1 React library; Zustand crossed 50% usage + tops satisfaction; ~34% use no state library. Adversarially stress-tested 2026-06-25 (SURVIVES, high): nothing has overtaken Zustand, and local-first (TanStack DB) builds on TanStack Query rather than replacing it."
 defer_to_skill: react-native-best-practices  # re-render/perf rules (e.g. RN-RULE-ATOMIC-STATE)
 doc: "RB-E-STATE.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-28   # useSyncExternalStore build-vs-buy reading + the time/conflict framing axis
+updated: 2026-08-04   # MobX 7 migrate rule (Proxy-only, legacy decorators dropped, React 18+)
 reading:
   - title: "Structural sharing, selectAtom, and why your Jotai atoms re-render too much"
     url: "https://www.peterp.me/articles/jotai-structural-sharing-vs-selectatom/"
@@ -77,7 +77,14 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "@xstate/*", label: "XState", token: "xstate" }
   - { pkg: "xstate", label: "XState", token: "xstate" }
   - { pkg: "valtio", label: "Valtio", token: "valtio" }
-  - { pkg: "mobx", label: "MobX", token: "mobx" }
+  - { pkg: "mobx", label: "MobX (7.x line)", token: "mobx" }
+migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-brain migrate`)
+  - from: { pkg: "mobx", below: "7.0.0" }
+    to: "MobX 7"
+    urgency: upgrade
+    effort: M
+    why: "MobX 7 (2026-07-30) drops the ES5/non-proxy fallback entirely — Proxy-backed observables are now the only mode, so `configure({ useProxies })` and `{ proxy: false }` are gone; legacy decorators are no longer supported (Stage-3 `@observer` stays in mobx-react); namespaced properties became named exports (observable.ref → observableRef, comparer.structural → compareStructural); the public `trace` API and mobx-react's Provider/inject were removed, and the React bindings now require React 18+. Pays for itself in bundle: the ESM production build drops 17.02 → 13.96 KiB gzip"
+    receipts: ["https://github.com/mobxjs/mobx/releases/tag/mobx%407.0.0", "https://registry.npmjs.org/mobx/latest"]
 detect_source:   # source-level signals owned by this entry (regex over repo source)
   - pattern: "\\bcreateContext\\s*\\("
     min_files: 5

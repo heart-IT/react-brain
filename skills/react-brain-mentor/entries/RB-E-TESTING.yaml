@@ -9,7 +9,7 @@ options:
   - { name: "Jest / Vitest", tradeoff: "unit; Vitest faster on web, Jest default on RN" }
   - { name: "React Testing Library (14)", tradeoff: "behavior-first component tests (web + RN variants); v14 adds React 19 support + async APIs" }
   - { name: "MSW (Mock Service Worker)", tradeoff: "network-level API mocking; same mocks reused across unit/e2e and dev" }
-  - { name: "Playwright / Maestro / Detox / Meticulous", tradeoff: "e2e: Playwright web; Maestro 2.0 (AI test-healing) is Expo's recommended native e2e (Expo archived Detox; Detox has a 'Copilot' beta); Maestro now bundles an MCP server so coding agents can drive simulators/emulators/devices, inspect UI, and generate E2E flows (claude mcp add maestro -- maestro mcp); Meticulous = record-based AI e2e" }
+  - { name: "Playwright (1.62) / Maestro / Detox / Meticulous", tradeoff: "e2e: Playwright web — 1.62 rebuilds component testing on stories + galleries and adds `retryStrategy: 'isolated'`; Maestro 2.0 (AI test-healing) is Expo's recommended native e2e (Expo archived Detox; Detox has a 'Copilot' beta); Maestro now bundles an MCP server so coding agents can drive simulators/emulators/devices, inspect UI, and generate E2E flows (claude mcp add maestro -- maestro mcp); Meticulous = record-based AI e2e" }
   - { name: "Storybook 10", tradeoff: "component workshop; web + RN run side-by-side; Vite 8 + Playwright/Vitest test integration + MCP" }
   - { name: "Radon IDE (Software Mansion)", tradeoff: "VS Code / Cursor RN debugging — device panel, click-to-inspect, React Profiler" }
   - { name: "Argent (Software Mansion) — NEW/experimental", tradeoff: "agentic toolkit giving an AI assistant control of the iOS Simulator (drive + inspect the running app) to shorten the debug loop; new, niche" }
@@ -34,9 +34,18 @@ note: >
   test-renderer that renders HOST elements only — which is WHY its query model moved to
   host-element/role queries. The old react-test-renderer package from React core is
   deprecated — don't reach for it in new test code.
+  PLAYWRIGHT 1.62 (2026-07-30, verified vs the release notes + registry): component testing is
+  rebuilt around STORIES + GALLERIES — a story wraps a component in a scenario, a gallery renders
+  stories on demand, and `mount('components/Expandable/Stateful')` navigates to the gallery and
+  returns a scoped Locator. That closes most of the distance to Storybook's model, so "Storybook
+  for the workshop, Playwright for e2e" is no longer the only sensible split on web. Also lands:
+  an `AbortSignal` `signal` option on most operations (cancel long waits/navigations/assertions),
+  WebP screenshots for visual comparison (quality 100 = lossless), and
+  `testConfig.retryStrategy: 'isolated'`, which defers all retries to the end and runs them one by
+  one in a single worker — the fix for flaky retries that interfere with the rest of the suite.
 defer_to_skill: agentic-engineering-patterns  # TDD/verify discipline
 doc: "RB-E-TESTING.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-10
+updated: 2026-08-04   # Playwright 1.62 — stories/galleries component testing, isolated retries
 reading:
   - title: "Test IDs are an a11y smell"
     url: "https://tkdodo.eu/blog/test-ids-are-an-a11y-smell"
@@ -59,6 +68,7 @@ sources:
   - "https://docs.maestro.dev/get-started/maestro-mcp"
   - "https://github.com/callstackincubator/react-native-harness"
   - "https://github.com/mdjastrzebski/test-renderer"
+  - "https://github.com/microsoft/playwright/releases/tag/v1.62.0"
 migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-brain migrate`)
   - from: { pkg: "react-test-renderer" }
     to: "React Native Testing Library v14 (host-element role/label queries)"

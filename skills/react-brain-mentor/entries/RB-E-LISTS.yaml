@@ -18,9 +18,18 @@ recommend:
     - "one list engine across RN + web → Legend List"
     - "old-architecture RN app → FlashList v2 is New-Arch-only; pin FlashList v1.x or stay on FlatList"
     - "exact thresholds / perf → react-native-best-practices owns the rules"
+note: >
+  TANSTACK TABLE v9 IS STABLE (9.0.0 on npm 2026-08-04, verified vs the registry — the beta line
+  had been carried as a skip since #291). v9 moves REACTIVITY underneath the Table APIs: instead of
+  one table-state object that adapters wrap from the outside, feature state is split into separate
+  atoms (pagination, row selection, column sizing, …) behind a shared `TableReactivityBindings`
+  contract, so each of its 9 framework adapters plugs in native signals (Angular/Solid/Vue) or
+  TanStack Store. The point is grain — selecting a row updates that checkbox and the selected-row
+  counter without making every cell depend on whole-table state. Callers still pass ordinary values
+  and call the same Table methods, so this is an upgrade, not a rewrite.
 defer_to_skill: react-native-best-practices  # RN-RULE-USE-FLASHLIST owns the thresholds
 doc: "RB-E-LISTS.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-10   # challenge-pass caveat: FlashList v2 = New-Arch-only (verified vs the Shopify README)
+updated: 2026-08-04   # TanStack Table v9.0.0 stable — reactivity-under-the-API architecture + migrate rule
 reading:
   - title: "How to Build the Fastest Apps: Break the Rules (App.js Conf 2026)"
     url: "https://www.youtube.com/watch?v=K3flMIHS-cI"
@@ -50,9 +59,16 @@ reading:
     what: "The five techniques behind HighTable — lazy slicing, the ~17M-px canvas-height ceiling with downscaled scrollbars, dual local/global scroll modes, decoupled axes. The web huge-table counterpart to the RN list pieces above (HighTable is a listed option here)."
     claim: "You ship TanStack Table — for huge web tables (100k+ rows) HighTable's techniques apply: lazy slicing, the ~17M-px canvas-height ceiling with downscaled scrollbars, dual local/global scroll modes, decoupled axes."
     applies_when: { deps: ["@tanstack/react-table"], platforms: [react] }
+  - title: "Reactivity in TanStack Table V9"
+    url: "https://tanstack.com/blog/tanstack-table-v9-reactivity"
+    by: "TanStack"
+    what: "The architecture rationale behind the v9 line this entry's note records: v8 kept one stable table instance and let each adapter connect it to a framework's update model from the outside, which makes any state change look like whole-table churn. V9 puts a reactive graph underneath instead — per-feature atoms plus a `TableReactivityBindings` contract each adapter fills with its framework's own primitives — so a row selection updates that row and the counter, not every cell. The generalizable lesson matches this entry's Legend List readings: the cost of a big grid is what you make re-render, so put the subscription grain at the leaf."
+    claim: "You ship TanStack Table — v9 (stable 2026-08-04) splits feature state into per-feature atoms behind a reactivity contract so cell re-renders no longer depend on whole-table state; the same subscription-grain lesson as the list readings here."
+    applies_when: { deps: ["@tanstack/react-table"], platforms: [react] }
 sources:
   - "https://shopify.engineering/flashlist-v2"
   - "https://rednegra.net/blog/20260212-virtual-scroll/"
+  - "https://registry.npmjs.org/@tanstack/react-table/latest"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "@shopify/flash-list", label: "FlashList", token: "flashlist" }
   - { pkg: "@legendapp/list", label: "Legend List", token: "legend list" }
@@ -74,3 +90,9 @@ migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-
     requires: { pkg: "react-native", atleast: "0.82.0" }
     why: "v2 is a ground-up New-Architecture rewrite (recycling, progressive rendering, pre-paint correction) and is New-Arch-ONLY — on the old architecture stay pinned to v1.x until the RN ladder is done"
     receipts: ["https://shopify.engineering/flashlist-v2"]
+  - from: { pkg: "@tanstack/react-table", below: "9.0.0" }
+    to: "TanStack Table v9"
+    urgency: upgrade
+    effort: M
+    why: "v9 went stable 2026-08-04 and moves reactivity underneath the Table APIs — per-feature atoms behind a TableReactivityBindings contract, so grid re-renders track the state a cell actually uses instead of whole-table state; callers keep passing ordinary values and calling the same Table methods, so this is a version-line move rather than a rewrite"
+    receipts: ["https://tanstack.com/blog/tanstack-table-v9-reactivity", "https://registry.npmjs.org/@tanstack/react-table/latest"]

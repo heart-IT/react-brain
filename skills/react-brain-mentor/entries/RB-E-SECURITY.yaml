@@ -9,7 +9,7 @@ options:
   - { name: "jail-monkey (v3)", tradeoff: "client-side jailbreak/root + mock-location + debug detection; v3 adds New-Arch support; NOT a substitute for server-side Play Integrity / DeviceCheck" }
   - { name: "react-native-keychain / expo-secure-store", tradeoff: "store tokens/secrets in Keychain/Keystore, not AsyncStorage (see RB-E-STORAGE)" }
   - { name: "dependency CVE scanning", tradeoff: "npm/pnpm audit; route depth to the review skill's security phase" }
-  - { name: "supply-chain hardening", tradeoff: "install-script blocking (npm v12 default), install-age gating (min-release-age / npmMinimalAgeGate), provenance — provenance alone is not enough" }
+  - { name: "supply-chain hardening", tradeoff: "install-script blocking (npm v12 default), install-age gating (min-release-age / npmMinimalAgeGate), provenance, and since 2026-07 npm's own publish-time malware scan — provenance alone is not enough" }
   - { name: "Trusted Types (web)", tradeoff: "React integrates the browser Trusted Types API for XSS prevention; dangerouslySetInnerHTML needs an explicit policy" }
   - { name: "rnsec (RN/Expo security scanner)", tradeoff: "zero-config static scanner — 63 rules across storage/network/auth/secrets/crypto, CI-ready (exit codes, PR comments, JSON/HTML reports); young + single-author (~500★, v1.3) — a cheap CI layer, not a substitute for per-diff review" }
   - { name: "DeepSec (Vercel Labs)", tradeoff: "open-source AI security-scan harness — agents trace data flows on YOUR infra with YOUR Claude/Codex subscription; produces severity-rated findings (NOT auto-fix PRs), ~10–20% false-positive rate per Vercel; framework-agnostic, new" }
@@ -48,9 +48,20 @@ note: >
   PLATFORM-SIDE FIX (2026-07-16 back-audit, verified vs the GitHub changelog): actions/checkout
   v7 ships safer pull_request_target defaults — closing the exact 'Pwn Request' door the
   TanStack postmortem reading documents; pin checkout ≥7 in CI.
+  REGISTRY-SIDE LAYER (2026-07-28, verified vs the GitHub changelog): npm now scans every newly
+  published package for malware BEFORE it becomes installable — default and non-negotiable, with
+  three outcomes (publish, hold for manual review, block, with an appeal path) and a typical 5–15
+  minute publish delay. Packages with legitimate security-relevant capability must now declare it
+  as DUAL-USE: a `contentPolicy` field in package.json plus a text-only DISCLOSURE file describing
+  the functionality and its intended use; the declaration must persist across versions and
+  publishing requires 2FA. This is the first defense in the chain that runs on the REGISTRY rather
+  than in your install or CI — it raises the floor against the Shai-Hulud/axios-RAT family but
+  catches only "the malware we can detect", so it stacks with, and does not replace, install-script
+  blocking, install-age gating and egress control. Maintainers: budget the delay into release
+  pipelines (this repo publishes via OIDC trusted publishing).
 defer_to_skill: review
 doc: "RB-E-SECURITY.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-28   # GHSA-wx67-qw84-cm4g floor (19.2.8/19.1.9/19.0.8) + Flight-protocol defense reading
+updated: 2026-08-04   # npm publish-time malware scanning + dual-use contentPolicy/DISCLOSURE metadata
 reading:
   - title: "The React2Shell Story"
     url: "https://lachlan.nz/blog/the-react2shell-story"
@@ -95,6 +106,7 @@ sources:
   - "https://vercel.com/blog/introducing-deepsec-find-and-fix-vulnerabilities-in-your-code-base"
   - "https://nuqs.dev/blog/staged-publishing-for-supply-chain-security"
   - "https://github.blog/changelog/2026-06-18-safer-pull_request_target-defaults-for-github-actions-checkout/"
+  - "https://github.blog/changelog/2026-07-28-npm-publish-time-malware-scanning-and-dual-use-metadata/"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "rnsec", label: "rnsec (security scanner)", token: "rnsec" }
   - { pkg: "jail-monkey", label: "jail-monkey", token: "jail-monkey" }
