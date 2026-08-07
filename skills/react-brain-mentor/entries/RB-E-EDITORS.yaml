@@ -13,6 +13,7 @@ options:
   - { name: "BlockNote", tradeoff: "Notion-style block editor on ProseMirror/TipTap; fast to adopt for block-based UX" }
   - { name: "react-native-enriched (Software Mansion)", tradeoff: "RN rich-text EDITOR on native UITextView/EditText (not a WebView); v0.8 adds EnrichedText for HTML rendering + experimental web; pre-1.0, moving fast" }
   - { name: "react-native-enriched-markdown (Software Mansion)", tradeoff: "native RN Markdown renderer/editor with STREAMING support (GFM tables/math, mentions) — built for AI-chat output; v0.7, pre-1.0" }
+  - { name: "react-native-enriched-html (Software Mansion)", tradeoff: "native HTML renderer in the same family — its only ≥1.0 member (1.1.0, 2026-07-30); web support maturing this release (sanitization, press handlers, text selection) on RN 0.86" }
 recommend:
   default: "Most React apps → TipTap (ProseMirror power with React ergonomics); large-scale / custom-node-heavy → Lexical; maximum control → ProseMirror directly; deeply custom React schemas → Slate/Plate; Notion-style blocks → BlockNote. React Native → react-native-enriched for rich-text input, react-native-enriched-markdown for (streaming) Markdown display. Lightly vetted (confidence: low) — prototype against your real document model before committing."
   when:
@@ -30,12 +31,18 @@ note: >
   (v0.3→v0.8 across Feb–Jun 2026) — finally gives RN a native (non-WebView) rich-text editor
   and a streaming Markdown renderer (both verified vs npm + the SWM repos; both pre-1.0).
   Lightly vetted (confidence: low) — prototype before committing.
+  ENRICHED-HTML 1.1 (2026-08-07, verified vs the GitHub release + npm): the family's HTML
+  renderer is a standalone package (react-native-enriched-html) and its only ≥1.0 member —
+  1.1.0 (2026-07-30) hardens web (HTML sanitization, link/mention press handlers, text
+  selectability, ellipsizeMode/numberOfLines) on RN 0.86. TWiR #293's "full web feature
+  parity" framing is NOT in the release notes — treat web as maturing, not parity-complete.
 defer_to_skill: null
 doc: "RB-E-EDITORS.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-16
+updated: 2026-08-07   # react-native-enriched-html 1.1 — family's first ≥1.0 member, web hardening (TWiR #293 + firsthand)
 sources:
   - "https://github.com/software-mansion/react-native-enriched"
   - "https://github.com/software-mansion/react-native-enriched-markdown"
+  - "https://github.com/software-mansion/react-native-enriched-html/releases/tag/v1.1.0"
 reading:
   - title: "The Unreasonable Effectiveness of the ProseMirror Model in Rich Text Transformation"
     url: "https://smoores.dev/post/unreasonable_effectiveness_of_prosemirror/"
@@ -51,6 +58,7 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "slate", label: "Slate", token: "slate" }
   - { pkg: "react-native-enriched", label: "react-native-enriched", token: "enriched" }
   - { pkg: "react-native-enriched-markdown", label: "enriched-markdown", token: "enriched-markdown" }
+  - { pkg: "react-native-enriched-html", label: "enriched-html", token: "enriched-html" }
 detect_source:   # source-level signals owned by this entry (regex over repo source)
   - pattern: "contentEditable|contenteditable"
     signal: "hand-rolled contentEditable editing surface"

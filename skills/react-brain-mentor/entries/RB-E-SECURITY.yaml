@@ -59,9 +59,16 @@ note: >
   catches only "the malware we can detect", so it stacks with, and does not replace, install-script
   blocking, install-age gating and egress control. Maintainers: budget the delay into release
   pipelines (this repo publishes via OIDC trusted publishing).
+  FIRST-PARTY UMBRELLA (2026-08-07, verified vs the GitHub post): "Disrupting supply chain
+  attacks on npm and GitHub Actions" (github.blog, 2026-07-28) is the one link that bundles the
+  whole 2026 program — staged publishing (May), npm v12 install-script defaults (June),
+  72-hour read-only lock on high-impact accounts after email changes or 2FA-recovery use (June),
+  Actions hardening (checkout defaults, workflow-execution policies, read-only cache for
+  untrusted workflows), and a 3-day default Dependabot cooldown (July) — install-age gating is
+  now a PLATFORM default, not just a local countermeasure. See reading.
 defer_to_skill: review
 doc: "RB-E-SECURITY.md"   # long-form Explanation entry in content_dir
-updated: 2026-08-04   # npm publish-time malware scanning + dual-use contentPolicy/DISCLOSURE metadata
+updated: 2026-08-07   # GitHub first-party supply-chain umbrella post (TWiR #293 + firsthand corroborated)
 reading:
   - title: "The React2Shell Story"
     url: "https://lachlan.nz/blog/the-react2shell-story"
@@ -93,6 +100,12 @@ reading:
     what: "The DEFENSE half of this entry's Flight-protocol readings, which are otherwise all attack postmortems. Walks the protocol as an attack surface — a line-delimited format with its own type system, its own reference resolution, and its own rules for reconstructing executable behavior on the client — then works through the CVSS 10.0 React2Shell mechanics (CVE-2025-55182) to a RANKED set of defenses, from strict schema validation of everything crossing the boundary to CSRF hardening. Read when you ship RSC and need practice, not just incident history."
     claim: "You ship RSC — the Flight payload is a deserialization sink, not inert data: validate everything crossing the boundary with a strict schema and harden CSRF on server functions."
     applies_when: { deps: ["next", "@tanstack/react-start", "waku"], platforms: [react] }
+  - title: "Disrupting supply chain attacks on npm and GitHub Actions"
+    url: "https://github.blog/security/supply-chain-security/disrupting-supply-chain-attacks-on-npm-and-github-actions/"
+    by: "Greg Ose & Zachary Steindler (GitHub)"
+    what: "The first-party umbrella over this entry's whole supply-chain thread: GitHub's 2026 program in one post — npm staged publishing, install-script restrictions (npm v12), 72-hour read-only account lock after email/2FA-recovery changes, Actions hardening (checkout defaults, workflow-execution policies, read-only cache), an outbound-network-firewall technical preview, and a 3-day default Dependabot cooldown. The platform-side complement to the Shai-Hulud and TanStack postmortems' local mitigations."
+    claim: "You run a production pipeline — GitHub's 2026 platform defaults (staged publishing, install-script blocking, Dependabot cooldown, account lockdown) now cover several supply-chain layers; know which mitigations remain yours (egress control, non-npm registries)."
+    applies_when: { stages: [production, scale] }
   - title: "Blocking Install Scripts Is Not a Silver Bullet"
     url: "https://nodesource.com/blog/npm-v12-install-scripts-not-a-silver-bullet"
     by: "NodeSource"

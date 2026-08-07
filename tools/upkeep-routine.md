@@ -136,8 +136,10 @@ The agent should, in order:
    claim⇔applies_when pairing and the schema.
 
    **Fetch-verification playbook (learned 2026-07-09):**
-   - `expo.dev/blog/*` is a JS shell (unfetchable) but **`expo.dev/changelog/sdk-NN` fetches
-     fine** and usually carries the same load-bearing facts — source changelogs, not blog posts.
+   - `expo.dev/blog/*` was a JS shell for WebFetch, but **browser-UA curl retrieves the full
+     post since at least 2026-08-07** (verified: fable-5-vs-gpt-5-6-sol-expo-apps, 189KB) — try
+     curl-UA before excluding. `expo.dev/changelog/sdk-NN` still fetches fine and stays the
+     preferred source for version/deprecation facts — source changelogs, not blog posts.
    - A 403 from WebFetch (callstack.com, developerway.com, …) is often bot-gating, not a
      paywall: retry with a **browser user-agent via curl** —
      `curl -sL -A "Mozilla/5.0 (Macintosh...) Chrome/126.0 Safari/537.36" <url>` — then verify

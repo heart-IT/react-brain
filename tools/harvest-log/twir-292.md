@@ -109,3 +109,15 @@ the two random picks below are the whole check.
 | [TSRX / Octane.js](https://octanejs.dev/) — too-early, reopen signal was "TSRX or Octane reaching a stable npm release" (random pick) | HOLD — signal has NOT fired, **and the spot-check found a trap worth recording**: the npm names `tsrx` and `octanejs` are both already taken by UNRELATED packages (`tsrx` 1.2.1 "Typescript + React", last published 2022-01-12; `octanejs` 0.0.3, 2023-02-16). A future pass checking "is it on npm yet?" would get a 200 and a version number for neither project. Whatever these ship under, it will not be those names — re-verify identity, not just existence |
 | [Jotai 3.0 alpha](https://github.com/pmndrs/jotai/releases/tag/v3.0.0-alpha.0) — pre-ship, reopen at 3.0 stable (random pick) | HOLD — registry 2026-08-04: latest still 2.20.2, next still 3.0.0-alpha.0. Unchanged in a week |
 | [GTKX 1.0 RC](https://gtkx.dev/blog/gtkx-1-0-rc-1) — pre-ship, reopen at 1.0 stable (checked because #291 flagged it as a 2nd-signal promotion candidate for a DESKTOP gap) | HOLD — still prerelease, but MOVING: rc.2 (07-30) → rc.3 (07-31) → rc.4 (08-02), repo pushed 2026-08-03. RB-E-DESKTOP still has no Linux-native React row. Expect this to fire soon; it is the most likely new option row of the next pass |
+
+## Spot-check re-adjudication (2026-08-07, from the twir-293 pass)
+
+Routine: re-examine ALL `cap` skips + 2 random skips from the previous issue. No reversals.
+
+| row | re-verdict |
+|---|---|
+| [Shruti Kapoor - React Debugging with Performance Tracks](https://www.youtube.com/watch?v=B_w1xFbRvCg) — cap | HOLD — REACT-CORE's profiling coverage is unchanged since; the react.dev Performance Tracks reference remains the better artifact |
+| [Your SPA Is Leaking Memory. Soak Test It](https://denodell.com/blog/your-spa-is-leaking-memory-soak-test-it) — cap | HOLD — the reopen signal (OBSERVABILITY opening a memory lane) has not fired. Adjacency noted: this pass added a MEMORY reading to RB-E-NATIVE (SWM stale shadow nodes), but that is RN/Fabric-specific, not the web-SPA soak-testing lane this row waits on |
+| [Experimenting with RSCs for Performance and UX in Next.js](https://aurorascharff.no/posts/experimenting-with-rsc-for-performance-and-ux-in-nextjs/) — carried cap | HOLD — REACT-CORE/META-FRAMEWORKS RSC coverage unchanged this pass |
+| [Sentry logging best practices](https://blog.sentry.io/logging-best-practices/) — how-to (random pick) | HOLD — vendor guidance on structuring logs; OBSERVABILITY owns the selection layer |
+| [Screen Transitions 3.9](https://screen-transitions.esjr.org/changelog/updating-to-3-9) — minor (random pick) | HOLD — ANIMATION cites react-native-screen-transitions without point-version claims; 3.9 changes nothing selection-facing |

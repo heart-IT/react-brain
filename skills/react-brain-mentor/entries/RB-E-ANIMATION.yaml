@@ -58,9 +58,15 @@ note: >
   is react-native >= 0.78 and react >= 19.0, with react-native-reanimated >= 4.0.0 and
   react-native-worklets >= 0.7.0 as OPTIONAL peers — i.e. Skia does not force Reanimated on you,
   but if you pair them the v4 line is the floor.
+  MOTION 13 (web; 2026-08-06, verified vs npm + the motion.dev upgrade guide): one breaking
+  change — drops @emotion/is-prop-valid as an auto-detected optional dependency, so
+  styled-components/Emotion codebases must inject the prop-validation function via MotionConfig
+  (or invert composition so the styling library controls prop forwarding) or previously-filtered
+  props leak onto the DOM. framer-motion (the legacy package name) moved to 13.0.0 in lockstep;
+  neither package is deprecated.
 defer_to_skill: react-native-best-practices
 doc: "RB-E-ANIMATION.md"   # long-form Explanation entry in content_dir
-updated: 2026-08-04   # Skia 2.10 HostObject→JSI NativeState + verified optional Reanimated v4 peer floor
+updated: 2026-08-07   # Motion 13: @emotion/is-prop-valid dropped — CSS-in-JS interop now explicit (firsthand)
 reading:
   - title: "CSS vs. JavaScript Animations"
     url: "https://www.joshwcomeau.com/animation/css-vs-javascript/"

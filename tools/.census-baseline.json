@@ -1,5 +1,5 @@
 {
- "date": "2026-07-13",
+ "date": "2026-08-06",
  "cohort": {
   "fetched": 34,
   "total": 34,
@@ -17,6 +17,8 @@
     "Gesture Handler",
     "Jest",
     "Lingui",
+    "MMKV",
+    "Oxlint",
     "Prettier",
     "RN Testing Library",
     "React Navigation",
@@ -25,6 +27,7 @@
     "TanStack Query",
     "TipTap",
     "TypeScript",
+    "Worklets",
     "Zod",
     "expo-camera",
     "expo-haptics",
@@ -68,8 +71,10 @@
     "haptic-feedback",
     "keyboard-controller",
     "lefthook",
+    "nitro-fetch",
     "react-map-gl",
-    "react-native-svg"
+    "react-native-svg",
+    "typescript-eslint"
    ]
   },
   "mattermost": {
@@ -93,6 +98,7 @@
     "WatermelonDB",
     "Worklets",
     "expo-splash-screen",
+    "gorhom bottom-sheet",
     "haptic-feedback",
     "husky (git hooks)",
     "keyboard-controller",
@@ -133,9 +139,11 @@
     "expo-av (DEPRECATED → expo-video/expo-audio)",
     "expo-camera",
     "expo-haptics",
+    "gorhom bottom-sheet",
     "keyboard-controller",
     "react-native-svg",
-    "react-native-webrtc"
+    "react-native-webrtc",
+    "true-sheet (native)"
    ]
   },
   "rainbow": {
@@ -168,6 +176,7 @@
     "Zustand",
     "bootsplash",
     "expo-image-picker",
+    "gorhom bottom-sheet",
     "husky (git hooks)",
     "keyboard-controller",
     "lint-staged",
@@ -203,6 +212,7 @@
     "Victory Native",
     "Worklets",
     "bootsplash",
+    "gorhom bottom-sheet",
     "haptic-feedback",
     "husky (git hooks)",
     "keyboard-controller",
@@ -228,6 +238,8 @@
     "Lottie",
     "MMKV",
     "MSW",
+    "Nitro Modules",
+    "Oxlint",
     "QR generation (qrcode-svg)",
     "RN Testing Library",
     "React Navigation",
@@ -239,7 +251,9 @@
     "TanStack Query",
     "VisionCamera",
     "Worklets",
+    "axios",
     "expo-haptics",
+    "gorhom bottom-sheet",
     "haptic-feedback",
     "i18next",
     "react-i18next",
@@ -273,9 +287,9 @@
     "Apollo Client",
     "AsyncStorage",
     "Expo (managed native)",
+    "Firebase Auth",
     "FlashList",
     "Gesture Handler",
-    "Jest",
     "Legend List",
     "MMKV",
     "Metro",
@@ -290,15 +304,20 @@
     "Redux Toolkit",
     "Skia",
     "Storybook",
+    "Tailwind",
     "Tamagui",
     "TanStack Query",
-    "TypeScript",
+    "Uniwind",
+    "Vitest",
+    "Worklets",
     "Zod",
     "Zustand",
+    "agent-device",
     "bootsplash",
     "esbuild",
     "expo-camera",
     "expo-secure-store (secrets)",
+    "gorhom bottom-sheet",
     "i18next",
     "keyboard-controller",
     "react-i18next",
@@ -311,7 +330,8 @@
    "platform": "react",
    "labels": [
     "MSW",
-    "MobX",
+    "MobX (7.x line)",
+    "Oxlint",
     "ProseMirror",
     "Radix UI",
     "React Hook Form",
@@ -339,6 +359,7 @@
     "Biome",
     "Jotai",
     "Next.js",
+    "NextAuth / Auth.js (maintenance)",
     "Playwright",
     "Radix UI",
     "React Hook Form",
@@ -395,9 +416,11 @@
     "BlockNote",
     "Jest",
     "Jotai",
+    "Linaria (frozen by design)",
     "Lingui",
     "MSW",
     "Mantine",
+    "Oxlint",
     "Playwright",
     "Prettier",
     "React Hook Form",
@@ -416,7 +439,7 @@
    "name": "Plane",
    "platform": "react",
    "labels": [
-    "MobX",
+    "MobX (7.x line)",
     "Next.js",
     "Prettier",
     "React Hook Form",
@@ -464,6 +487,7 @@
     "Jest",
     "MSW",
     "Mantine",
+    "Oxlint",
     "Prettier",
     "ProseMirror",
     "React Router",
@@ -476,9 +500,11 @@
     "TanStack Virtual",
     "TipTap",
     "TypeScript",
+    "Vite",
     "esbuild",
     "husky (git hooks)",
     "lint-staged",
+    "typescript-eslint",
     "visx",
     "webpack"
    ]
@@ -501,9 +527,11 @@
     "Redux (classic)",
     "Redux (react-redux)",
     "Redux Toolkit",
+    "Rspack",
     "Slate",
     "TanStack Virtual",
     "TypeScript",
+    "Vitest",
     "Zod",
     "d3-force",
     "esbuild",
@@ -521,6 +549,7 @@
     "ESLint",
     "Electron",
     "Motion",
+    "Oxlint",
     "Prettier",
     "React Aria",
     "Redux (classic)",
@@ -551,7 +580,8 @@
     "axios",
     "husky (git hooks)",
     "lint-staged",
-    "react-intl"
+    "react-intl",
+    "typescript-eslint"
    ]
   },
   "metamask": {
@@ -582,6 +612,7 @@
     "Redux (classic)",
     "Redux (react-redux)",
     "Redux Toolkit",
+    "Rive (legacy pkg)",
     "Sentry",
     "Storybook",
     "Tailwind",
@@ -592,6 +623,7 @@
     "agent-device",
     "axios",
     "esbuild",
+    "expo-auth-session (DIY OAuth)",
     "expo-haptics",
     "expo-splash-screen",
     "husky (git hooks)",
@@ -639,7 +671,7 @@
     "Keychain",
     "Lottie",
     "Metro",
-    "MobX",
+    "MobX (7.x line)",
     "Prettier",
     "QR generation (qrcode-svg)",
     "React Navigation",
@@ -701,6 +733,7 @@
     "expo-haptics",
     "expo-image-picker",
     "expo-splash-screen",
+    "gorhom bottom-sheet",
     "keyboard-controller",
     "react-native-svg"
    ]
@@ -729,7 +762,7 @@
     "ESLint",
     "Emotion",
     "Jest",
-    "MobX",
+    "MobX (7.x line)",
     "React Router",
     "React Testing Library",
     "Rspack",
@@ -740,23 +773,30 @@
     "TypeScript",
     "Zod",
     "esbuild",
-    "framer-motion / Motion"
+    "framer-motion / Motion",
+    "typescript-eslint"
    ]
   },
   "formbricks": {
    "name": "Formbricks",
    "platform": "react",
    "labels": [
+    "Better Auth",
+    "Jotai",
     "Lexical",
     "Next.js",
+    "Playwright",
     "Radix UI",
     "React Hook Form",
     "React Testing Library",
     "Recharts",
     "Sentry",
+    "Storybook",
     "Tailwind",
     "TanStack Query",
     "TanStack Table",
+    "TypeScript",
+    "Vercel AI SDK",
     "Vite",
     "Vitest",
     "Zod",
@@ -787,6 +827,7 @@
    "labels": [
     "Motion",
     "Next.js",
+    "NextAuth / Auth.js (maintenance)",
     "Playwright",
     "Radix UI",
     "React Hook Form",
@@ -827,7 +868,8 @@
     "axios",
     "framer-motion / Motion",
     "i18next",
-    "react-i18next"
+    "react-i18next",
+    "typescript-eslint"
    ]
   },
   "ffprofiler": {
@@ -842,13 +884,15 @@
     "TypeScript",
     "Valibot",
     "esbuild",
-    "husky (git hooks)"
+    "husky (git hooks)",
+    "typescript-eslint"
    ]
   },
   "tldraw": {
    "name": "tldraw.com",
    "platform": "react",
    "labels": [
+    "Clerk",
     "Playwright",
     "React Router",
     "Sentry",
@@ -897,12 +941,12 @@
    "appCount": 12,
    "labels": {
     "AsyncStorage": 11,
+    "MMKV": 6,
     "WatermelonDB": 2,
     "Keychain": 8,
-    "MMKV": 5,
     "expo-secure-store (secrets)": 1
    },
-   "denom": 34
+   "denom": 14
   },
   "RB-E-NAV": {
    "appCount": 24,
@@ -948,7 +992,7 @@
    "labels": {
     "Expo (managed native)": 12,
     "Expo Modules": 2,
-    "Nitro Modules": 7
+    "Nitro Modules": 8
    },
    "denom": 14
   },
@@ -988,12 +1032,13 @@
    "labels": {
     "Gesture Handler": 12,
     "Reanimated": 12,
+    "Worklets": 10,
     "Skia": 3,
     "Lottie": 7,
-    "Worklets": 8,
     "Moti": 2,
     "framer-motion / Motion": 7,
-    "Motion": 3
+    "Motion": 3,
+    "Rive (legacy pkg)": 1
    },
    "denom": 34
   },
@@ -1030,13 +1075,13 @@
    "appCount": 31,
    "labels": {
     "RN Testing Library": 11,
-    "Jest": 22,
-    "Storybook": 11,
+    "Jest": 21,
+    "Storybook": 12,
     "Detox": 3,
     "MSW": 9,
     "React Testing Library": 14,
-    "Vitest": 6,
-    "Playwright": 8
+    "Vitest": 8,
+    "Playwright": 9
    },
    "denom": 34
   },
@@ -1045,9 +1090,11 @@
    "labels": {
     "husky (git hooks)": 11,
     "lint-staged": 9,
+    "Oxlint": 6,
     "Prettier": 14,
     "ESLint": 18,
     "lefthook": 1,
+    "typescript-eslint": 6,
     "Biome": 1,
     "Turborepo": 2,
     "Nx": 1
@@ -1084,10 +1131,18 @@
    "appCount": 28,
    "labels": {
     "Metro": 10,
-    "Rspack": 4,
+    "Rspack": 5,
     "webpack": 7,
     "esbuild": 10,
-    "Vite": 9
+    "Vite": 10
+   },
+   "denom": 34
+  },
+  "RB-E-NETWORKING": {
+   "appCount": 9,
+   "labels": {
+    "nitro-fetch": 2,
+    "axios": 8
    },
    "denom": 34
   },
@@ -1103,33 +1158,35 @@
    },
    "denom": 34
   },
-  "RB-E-NETWORKING": {
+  "RB-E-SHEETS": {
    "appCount": 7,
    "labels": {
-    "axios": 7,
-    "nitro-fetch": 1
+    "gorhom bottom-sheet": 7,
+    "true-sheet (native)": 1
    },
-   "denom": 34
+   "denom": 14
   },
   "RB-E-STATE": {
-   "appCount": 24,
+   "appCount": 25,
    "labels": {
     "Redux (react-redux)": 15,
     "Redux (classic)": 13,
     "Zustand": 4,
     "Redux Toolkit": 8,
-    "Jotai": 4,
-    "MobX": 4,
+    "Jotai": 5,
+    "MobX (7.x line)": 4,
     "Valtio": 1
    },
    "denom": 34
   },
   "RB-E-STYLING": {
-   "appCount": 19,
+   "appCount": 20,
    "labels": {
     "styled-components": 6,
+    "Tailwind": 11,
+    "Uniwind": 1,
     "Tamagui": 1,
-    "Tailwind": 10,
+    "Linaria (frozen by design)": 1,
     "Emotion": 3
    },
    "denom": 34
@@ -1138,7 +1195,18 @@
    "appCount": 4,
    "labels": {
     "Reactotron": 4,
-    "agent-device": 1
+    "agent-device": 2
+   },
+   "denom": 34
+  },
+  "RB-E-AUTH": {
+   "appCount": 6,
+   "labels": {
+    "Firebase Auth": 1,
+    "NextAuth / Auth.js (maintenance)": 2,
+    "expo-auth-session (DIY OAuth)": 1,
+    "Better Auth": 1,
+    "Clerk": 1
    },
    "denom": 34
   },
@@ -1160,9 +1228,9 @@
    "denom": 34
   },
   "RB-E-AI-UI": {
-   "appCount": 3,
+   "appCount": 4,
    "labels": {
-    "Vercel AI SDK": 3
+    "Vercel AI SDK": 4
    },
    "denom": 34
   },

@@ -40,7 +40,7 @@ note: >
   citing as an option.
 defer_to_skill: react-native-jsi  # owns JSI memory/threading rules
 doc: "RB-E-NATIVE.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-16   # + react-native-runtimes lead (back-audit); arch facts unchanged since 2026-06-25 stress-test
+updated: 2026-08-07   # + SWM stale-shadow-nodes reading — Fabric memory invisible to Hermes snapshots (firsthand)
 reading:
   - title: "How to Make Pure JSI Code Faster in React Native (Part 1)"
     url: "https://blog.margelo.com/make-jsi-run-faster"
@@ -64,6 +64,12 @@ reading:
     url: "https://blog.margelo.com/four-years-of-react-native-quick-crypto"
     by: "Brad Anderson (Margelo)"
     what: "A four-year native-library architecture case study: wrapping OpenSSL for Node behavior-parity, a sync-first threading model with async escape hatches, the hand-written-JSI to Nitro codegen migration, and security audit as architecture validation. Generalizable lessons for native-module authors."
+  - title: "The Memory Hermes Can't See: Stale Shadow Nodes in React Native"
+    url: "https://swmansion.com/blog/the-memory-hermes-cant-see-stale-shadow-nodes-in-react-native/"
+    by: "Tomasz J. Żelawski (Software Mansion)"
+    what: "The memory-leak sibling of the Discord jank postmortem above: Fabric ShadowNodes are C++ objects retained via JS wrapper objects, so unmounted views' wrappers can pin whole shadow-tree revisions (amplified by Reanimated's per-frame revision cloning) — and none of it appears in Hermes heap snapshots, because the retained memory sits outside the JS heap. The author's two candidate mitigations (periodic forced GC; per-wrapper setExternalMemoryPressure) are both judged not production-ready — this is debugging awareness, not a shipped fix. (2026-08-05)"
+    claim: "You debug memory on the New Architecture — Hermes heap snapshots cannot see retained Fabric ShadowNodes (C++ memory pinned by JS wrappers), so a flat JS heap with growing process memory means profile the native side too."
+    applies_when: { platforms: [react-native] }
 watching:
   - title: "RNR 351 — Transforming Packages to Nitro with Marc Rousavy"
     url: "https://infinite.red/react-native-radio/rnr-351-transforming-packages-to-nitro-with-marc-rousavy"

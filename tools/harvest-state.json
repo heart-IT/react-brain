@@ -6,13 +6,13 @@
     "`react-brain lint` cross-checks each `count` against encyclopedia.yaml sources_digested — they must match.",
     "Narrative harvest history (what each pass changed, process learnings) stays in the maintainer's memory ledger."
   ],
-  "updated": "2026-08-04",
+  "updated": "2026-08-07",
   "sources": {
     "this-week-in-react": {
       "name": "This Week in React",
       "archive": "https://thisweekinreact.com/newsletter",
-      "last_processed": "#292",
-      "count": 26,
+      "last_processed": "#293",
+      "count": 27,
       "cadence": "weekly",
       "notes": "issue pages fetch directly at /newsletter/<n>",
       "url_pattern": "https://thisweekinreact.com/newsletter/{n}"
@@ -48,7 +48,7 @@
       "last_processed": "#17",
       "count": 7,
       "cadence": "~6-weekly (irregular)",
-      "notes": "nativeweekly.com is a shell — use the beehiiv archive (slugs like /p/jul-17-2026-issue-17); author also authors rnsec (watch self-promotion); strongest beat = agentic dev tooling. Irregular: STILL no issue after #17 (2026-07-17) as of 2026-08-04 — two consecutive passes with nothing new"
+      "notes": "nativeweekly.com is a shell — use the beehiiv archive (slugs like /p/jul-17-2026-issue-17); author also authors rnsec (watch self-promotion); strongest beat = agentic dev tooling. Irregular: STILL no issue after #17 (2026-07-17) as of 2026-08-07 — three consecutive passes with nothing new"
     },
     "react-weekly": {
       "name": "React Weekly",

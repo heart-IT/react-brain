@@ -40,9 +40,15 @@ note: >
   web-based harness and IDE, integrate with the harnesses developers already customize deeply.
   That is the shape of this whole category — the SKILLS/MCP layer (portable, rides whatever
   harness you use) outlives the hosted-product layer. Weight option rows accordingly.
+  BENCHMARK LAYER (2026-08-07, verified vs appcontrolbench.swmansion.com): SWM Labs'
+  AppControlBench compares agent-tool × model configurations (Argent and agent-device — the two
+  device-driving options this entry tracks — against Claude/GPT lines) on real iOS app-control
+  tasks: ~120 configs with completion/time/cost leaderboards (best on record 2026-08-03: 98%
+  completion at $0.22/run, Claude Haiku + Argent 0.15). The selection question this entry owns
+  now has a live first-party leaderboard — check it before pinning a tool+model pair.
 defer_to_skill: agentic-engineering-patterns
 doc: null
-updated: 2026-07-28   # Expo Agent wound down (first option-row casualty) + Metrognome measured-loop reading
+updated: 2026-08-07   # AppControlBench leaderboard + Expo model-shootout reading (TWiR #293 + firsthand)
 reading:
   - title: "Bun is being rewritten in Rust"
     url: "https://bun.com/blog/bun-in-rust"
@@ -62,7 +68,14 @@ reading:
     url: "https://swmansion.com/blog/argent-agentic-toolkit-to-control-debug-and-profile-ios-applications/"
     by: "Kacper Kapuściak (Software Mansion)"
     what: "The clearest articulation of the closed loop this entry is about: the agent that writes the code also boots the simulator, drives the UI, attaches a debugger, and profiles React+iOS in the same session — with production numbers (~50% re-render reduction in a banking app) rather than demos."
+  - title: "Fable 5 vs GPT-5.6 Sol: I spent $2,000 and 2 billion tokens to find out who wins"
+    url: "https://expo.dev/blog/fable-5-vs-gpt-5-6-sol-expo-apps"
+    by: "Rami Maalouf (Expo)"
+    what: "First-party measured model comparison on real Expo apps: three models (Fable 5/Claude Code, GPT-5.6 Sol/Codex, GPT-5.5 control) each one-shot three apps end-to-end — ideation, per-feature on-simulator validation, debugging — under the same spec-driven prompt and template. Fable 5 won code + UI quality (code-health 88 vs 79/79) at ~3× the hourly cost ($74/h vs ~$30/h) and ~30% less wall-clock; the dominant token cost across all models was the simulator-validation loop, not generation. The model numbers are point-in-time (2026-08-05); the durable part is the harness — standing quality bars plus per-feature simulator validation is what made one-shot apps work at all. (Fetched via browser-UA curl; expo.dev/blog no longer blocks it.)"
+    claim: "You drive coding agents against an RN/Expo app — budget for the validation loop, not generation: per-feature on-simulator verification dominates token spend and is what makes one-shot quality possible; pick the model on measured cost-vs-speed, not vibes."
+    applies_when: { deps: ["expo"], platforms: [react-native] }
 sources:
+  - "https://appcontrolbench.swmansion.com/"
   - "https://www.reactbench.com/blog"
   - "https://expo.dev/changelog/expo-agent-ending-the-closed-beta-and-winding-the-project-down"
   - "https://swmansion.com/blog/closing-the-agent-loop-autonomous-react-native-bug-reproduction-with-argent/"

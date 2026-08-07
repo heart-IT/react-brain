@@ -20,8 +20,9 @@ skill. One knowledge base, every session (local, resumed, or cloud-cloned).
 2. `tools/upkeep-routine.md` **step 2 (Growth)** — THE method: triage rules, the
    mandatory inventory→manifest→coverage sequence, claim-tagging at keep-time, and the
    fetch-verification playbook (WebFetch → browser-UA curl → Wayback snapshot; exclude
-   a URL only when ALL THREE fail; `expo.dev/blog/*` is a JS shell — use
-   `expo.dev/changelog/sdk-NN`; version/deprecation facts → `registry.npmjs.org/<pkg>`).
+   a URL only when ALL THREE fail; `expo.dev/blog/*` blocks WebFetch but curl-UA works
+   since 2026-08 — `expo.dev/changelog/sdk-NN` stays preferred for version facts;
+   version/deprecation facts → `registry.npmjs.org/<pkg>`).
 3. `tools/harvest-log/twir-290.md` — the manifest template (2026-07-16).
 
 ## The sequence (details in the routine — do not improvise a different one)
