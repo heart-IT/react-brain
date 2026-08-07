@@ -4,7 +4,7 @@ description: >
   Newsletter/blog harvest pass for react-brain — run whenever asked to "update self
   with <url>", "harvest <newsletter/issue>", or scan a source for the encyclopedia.
   Routes to the repo's canonical routine: deterministic link inventory → disposition
-  manifest → fetch-verify → apply delta → coverage + npm-test gates → ledgers.
+  manifest → fetch-verify → apply delta → coverage + npm-test gates → ledger.
 ---
 
 # react-brain newsletter harvest
@@ -15,73 +15,43 @@ skill. One knowledge base, every session (local, resumed, or cloud-cloned).
 
 ## Read before touching anything
 
-1. `tools/harvest-state.json` — resume numbers per source (which issue is next),
-   per-source access notes. Update + commit it WITH the delta afterwards.
+1. `tools/harvest-state.json` — resume numbers per source, per-source access notes.
+   Update + commit it WITH the delta afterwards.
 2. `tools/upkeep-routine.md` **step 2 (Growth)** — THE method: triage rules, the
-   mandatory inventory→manifest→coverage sequence, claim-tagging at keep-time, and the
-   fetch-verification playbook (WebFetch → browser-UA curl → Wayback snapshot; exclude
-   a URL only when ALL THREE fail; `expo.dev/blog/*` blocks WebFetch but curl-UA works
-   since 2026-08 — `expo.dev/changelog/sdk-NN` stays preferred for version facts;
-   version/deprecation facts → `registry.npmjs.org/<pkg>`).
-3. `tools/harvest-log/twir-290.md` — the manifest template (2026-07-16).
+   mandatory inventory→manifest→coverage sequence, claim-tagging at keep-time, and
+   the full fetch-verification playbook (WebFetch → browser-UA curl → Wayback;
+   exclude only when all three fail).
+3. `tools/harvest-log/LEDGER.md` — narrative history; read the last pass's section,
+   append a dated section after yours.
+4. `tools/harvest-log/twir-290.md` — the manifest template.
 
-## The sequence (details in the routine — do not improvise a different one)
+## Non-negotiables (the method is in the routine — these are the tripping hazards)
 
-0. **Firsthand first**: `node tools/cli.mjs harvest firsthand --manifest` — the corpus-derived
-   watch graph (npm dist-tags + deprecation flags, GitHub releases, vetted-author RSS)
-   diffed against the committed `.firsthand-state.json`. Known-entity events come from
-   here, not from newsletters; triage them in the `tools/harvest-log/firsthand-<date>.md`
-   the flag writes, and commit the updated state WITH the delta. Without `--manifest` the
-   run is DRY (events stay pending and re-report next run) — that is the safe default, but
-   it means the bare command never captures anything, so always pass the flag.
-   **⚡ TRIPWIRE events are mandatory work items** — an entry's standing caveat whose
-   release condition just came true (its `tripwires:` block): do the `then:` action,
-   update the prose caveat, and REMOVE the fired row. When a harvest lands a new
-   "watch/revisit when X ships" caveat, wire it as a tripwire row at keep-time.
-   Newsletters' job is unknown unknowns + corroboration.
-1. **Prep first** (per newsletter source): `node tools/cli.mjs harvest prep <source>` —
-   detects the next issue deterministically (url_pattern sources; slug/RSS sources say
-   so — fall back to inventory) and writes a PRE-TRIAGED manifest where corpus-held and
-   previously-dispositioned links arrive already filled in. **Judge only the TODO
-   rows.** For sources without a pattern: `harvest inventory <issue-url>` and build the
-   manifest from that mechanical list — never from an LLM summary of the page.
-2. Triage each link; **fetch-verify every keep**; dedupe vs the corpus
-   (`grep -rn "<url>" skills/react-brain-mentor/entries/`).
-3. Write `tools/harvest-log/<source>-<issue>.md` — line 2 is `issue: <issue-url>`
-   (CI re-runs coverage from it; firsthand manifests use `issue: firsthand`), then
-   EVERY external link gets a row carrying its URL: `kept` (→ entry/field) /
-   `already-held` (→ where) / `skipped` (reason class + reopen signal for
-   cap/pre-ship/too-early).
-4. Apply the delta to `skills/react-brain-mentor/entries/<ID>.yaml` (one file per
-   entry; bump `updated:`). A NEW entry needs the full wiring: entry file (+ `detect:`
-   rows) · TOC slot in `encyclopedia.yaml` · `capability_map` row in
-   `react-brain-mentor.yaml` · `FEATURE_DOMAINS` in `tools/react-brain-stack.mjs` ·
-   `node tools/react-brain-calibrate.mjs --seed`. Bump `sources_digested` counts and
-   any "N entries" claims (count-drift lint catches stragglers). A deprecation/
-   supersession/version-line fact ⇒ also add the entry's `migrate:` rule — but
-   supersession-IN-PROGRESS (no formal deprecation) gets a watch note, NOT a rule
-   (Rive and next-auth precedents).
-5. **Advocate pass (mandatory)**: re-read each drafted manifest's SKIP rows as a
-   hostile reviewer arguing items back in — the pipeline's measured failure is
-   false skips (bench: baseline keep-averse at 56/100; the advocate arm recovered
-   the two most consequential misses for one cheap over-keep). Flip a skip only
-   for: durable status change · genuine domain gap · canonical deep-dive on an
-   uncovered facet. Note reinstated rows as such.
-6. **Gates**: `node tools/cli.mjs harvest coverage <issue-url> <manifest>` must exit 0;
-   `node tools/cli.mjs harvest verify-diff --base=main` must exit 0 (the receipts gate —
-   every added URL machine-re-verified; CI runs it on the PR too);
-   `node tools/cli.mjs harvest watchlist` (re-triage recurring skips); spot-check ALL
-   `cap` skips + 2 random skips from the PREVIOUS issue's manifest; then `npm test`.
-6. Commit delta + manifest + `harvest-state.json` together.
+- **Firsthand first, ALWAYS with `--manifest`** (`harvest firsthand --manifest`): a bare
+  poll is deliberately dry; a `--manifest` run consumes events, so FINISH its triage in
+  the same session or say loudly that you didn't (an untriaged manifest was once left
+  stranded for a day).
+- **⚡ Fired tripwires are mandatory work items** — do the `then:`, update the prose,
+  remove the row; wire new watch/revisit caveats as tripwires at keep-time.
+- **Per newsletter: `harvest prep <source>`**, judge ONLY the TODO rows; no url_pattern →
+  `harvest inventory <issue-url>`, never an LLM summary of the page.
+- **Fetch-verify every keep**; dedupe vs `skills/react-brain-mentor/entries/`.
+- **Every external link gets a manifest row** carrying its URL: `kept` / `already-held` /
+  `skipped` (reason class + reopen signal for cap/pre-ship/too-early).
+- **Keeps land in `entries/<ID>.yaml`** (bump `updated:`); a NEW entry needs the full
+  wiring listed in the routine; bump `sources_digested`.
+- **Advocate pass over your own skips is mandatory**, then the spot-check of the
+  previous issue's manifest (all `cap` skips + 2 random).
+- **Gates before commit**: `harvest coverage` = 0 · `harvest verify-diff --base=main` = 0
+  · `harvest watchlist` reviewed · `npm test` green. On a Thursday, re-probe React
+  Status before declaring the pass complete (it publishes Thursdays; #486 precedent).
+- **One commit**: delta + manifests + `harvest-state.json` + LEDGER note together.
 
-## Ledgers (after the commit)
+## Ledger (in-repo since 2026-08-07)
 
-- **Local maintainer session**: append the dated narrative note to
-  `/Users/f1sh/.claude/projects/-Users-f1sh-odd-jobs-heartit-react-brain/memory/react-brain-mentor-skill.md`
-  (the OLD-path project memory — kept there on purpose) and refresh the
-  "Last processed" line in this project's memory `newsletter-harvest-ledger.md`.
-- **Cloud/headless agent**: no memory access — the PR description carries the
-  narrative instead; everything else above is in-repo and identical.
+Append the dated narrative section to `tools/harvest-log/LEDGER.md` — local and
+cloud runs alike (it travels with the branch/PR). Cloud runs summarize in the PR
+description too. No session-memory ledger steps remain; the memory files are pointers.
 
 ## Calibration
 

@@ -30,9 +30,11 @@ mcp-server   ── distribution       (the corpus as MCP tools for any coding a
 | `.census-baseline.json` | `census` | ✓ | delete → next run rebaselines |
 | `.signals-baseline.json` | `signals` | ✓ | delete → next run rebaselines |
 | `predictions.jsonl` | `calibrate` (append-only ledger) | ✓ never rewrite | `--seed` adds; `--record` resolves |
+| `.doctor-memory.json` | `doctor` (outcome memory: resolved/persisting per repo) | ✓ | delete → doctor forgets visit history |
 | `.registry-cache.json` | `doctor --preflight` (7d TTL) | ✗ gitignored | delete freely |
 | `.briefing-state.json` | `briefing` | ✗ gitignored | rewind after test runs |
 | `harvest-log/*.md` | disposition manifests (+ bench gold) | ✓ | never — they're the audit trail |
+| `harvest-log/LEDGER.md` | narrative pass history (in-repo since 2026-08-07) | ✓ append-only | append a dated section per pass |
 
 > YAML loads via the `yaml` npm dep (python3+pyyaml shim as zero-install fallback). The
 > detection table is fully data-driven: each entry declares its own `detect:` (package
@@ -213,9 +215,14 @@ and changed manifests with an `issue:` header get coverage re-run.
 `.github/workflows/harvest-verify.yml` enforces it on every harvest PR — the
 guardrail under the weekly cloud routine. Shared primitives live in
 `harvest-lib.mjs`.
+**prep** rolls inventory + corpus cross-ref into one step for url_pattern sources: it
+detects the next issue from `harvest-state.json`, writes a PRE-TRIAGED manifest
+(corpus-held and previously-dispositioned links arrive filled in; judge only the TODO
+rows) and freezes the issue's bench fixture at pre-harvest state.
 ```sh
 node tools/react-brain-harvest.mjs firsthand --manifest # poll + diff + write the triage manifest (~45s)
 node tools/react-brain-harvest.mjs firsthand            # same poll, DRY — state advances only when --manifest captures the events
+node tools/react-brain-harvest.mjs prep this-week-in-react   # next issue → pre-triaged manifest + frozen bench fixture
 node tools/react-brain-harvest.mjs inventory https://thisweekinreact.com/newsletter/290
 node tools/react-brain-harvest.mjs coverage <issue-url> tools/harvest-log/twir-290.md
 node tools/react-brain-harvest.mjs verify-diff --base=main

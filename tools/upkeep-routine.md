@@ -174,8 +174,8 @@ The agent should, in order:
    delta broke a corpus invariant or a known-good behavior; fix before recording.
 7. **Record** — update `tools/harvest-state.json` (last_processed + count + updated; lint
    cross-checks the counts against sources_digested) and commit it WITH the delta (repo is under
-   git). Local sessions additionally append the narrative note to the maintainer's memory ledger;
-   cloud runs put the narrative in the PR description instead.
+   git). Append the dated narrative section to `tools/harvest-log/LEDGER.md` (in-repo since
+   2026-08-07 — local and cloud runs alike; cloud runs also summarize in the PR description).
 
 ## Cadence
 
