@@ -1845,3 +1845,27 @@ links pre-dispositioned, incl. this morning's Expo shootout keep already cited b
 No advocate flips (closest: WebMCP's official Chrome docs — half the reopen bar; held).
 Counts: Status ×27. All-sources state: TWiR #293 · Status #486 · Digest #2335 · RNR #51 ·
 RW #31 · NW #17.
+
+## 2026-08-07 — triage rules: the pipeline learns its own reflexes (tooling, same session as the reorg)
+
+Of the 195 manifest rows hand-written this morning, 75+ were mechanical (patch bumps,
+nightlies, sponsor tracking links, platform chrome). New `tools/triage-rules.yaml` +
+`react-brain-triage-rules.mjs`: `prep` and `firsthand --manifest` now write matching rows
+pre-dispositioned `[rule:<id>]` instead of TODO. Design: SKIP-ONLY (mirror of the advocate
+pass's keep-only flips — each side's worst case is reviewable noise for the other to catch);
+hard guards for ⚡TRIP / DEPRECATED / majors / prerelease→stable graduations / entry
+version-pins (grain-aware: a patch defers only to exact x.y.z pins); ADMISSION BY GOLD —
+`harvest rules` replays every rule against all 889 adjudicated rows in 28 manifests, zero
+unwaived kept-collisions or inactive, re-checked by npm test as gold grows.
+
+The gate earned its keep before shipping: the "obvious" npm-patch rule had 3 gold-kept
+collisions (all 2026-08-04, all duplicate-anchors — TWiR #292 carried the same facts, so
+they're waived with citations); npm-minor had 2 REAL would-be losses (auth0 5.9→5.10 was a
+pure-firsthand pin-refresh no newsletter covered) and stays INADMISSIBLE — minors remain
+judgment. gh prereleases admitted only for nightly/canary/experimental/insiders (an rc was
+gold-kept once: RN 0.87.0-rc.3). Admitted actives: npm-patch (74 agree), npm-prerelease,
+gh-nightly, sponsor-tracking-domain, vercel-changelog-chrome (the standing "drop vercel?"
+flag resolved as policy), vscode-updates — 105 gold rows would have been auto-dispositioned.
+Spot-check now samples 2 random [rule:*] rows; a wrong rule row indicts the RULE.
+Engine guards pinned by tests/triage-rules.test.mjs (24 assertions). Cloud agents cannot
+edit triage-rules.yaml (out of PR scope) — rule activation stays a maintainer judgment.

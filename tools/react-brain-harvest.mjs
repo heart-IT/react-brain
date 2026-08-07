@@ -52,6 +52,9 @@ if (mode === 'firsthand') {
 } else if (mode === 'bench') {
   process.argv = [process.argv[0], process.argv[1], ...args];
   await import('./react-brain-triage-bench.mjs');
+} else if (mode === 'rules') {
+  process.argv = [process.argv[0], process.argv[1], ...args];
+  await import('./react-brain-triage-rules.mjs');
 } else if (mode === 'prep') {
   // pre-triaged manifest skeleton: detect the next issue deterministically, then
   // cross-reference every link against the corpus + ALL prior manifests, so the
@@ -79,13 +82,23 @@ if (mode === 'firsthand') {
     }
   const goldRows = readdirSync(LOG_DIR).filter((f) => f.endsWith('.md'))
     .flatMap((f) => parseGoldManifest(readFileSync(join(LOG_DIR, f), 'utf8')).map((r) => ({ ...r, file: f })));
-  const rows = prepClassify(links, held, goldRows);
+  const classified = prepClassify(links, held, goldRows);
+  // triage rules: chrome/tracking-host rows the gold has always skipped arrive
+  // pre-dispositioned [rule:<id>] (skip-only, gold-admitted — triage-rules.yaml)
+  const { loadRules, ruleForUrl } = await import('./react-brain-triage-rules.mjs');
+  const rules = loadRules();
+  const rows = classified.map((r) => {
+    if (r.pre !== 'todo') return r;
+    const d = ruleForUrl(r.url, rules);
+    return d ? { ...r, pre: 'ruled', note: d } : r;
+  });
   const todo = rows.filter((r) => r.pre === 'todo');
+  const ruled = rows.filter((r) => r.pre === 'ruled').length;
   const PREFIX = { 'this-week-in-react': 'twir', 'react-native-rewind': 'rn-rewind' };
   const out = join(LOG_DIR, `${PREFIX[key] || key}-${issue}.md`);
   const esc = (s) => String(s || '').replace(/\|/g, '·');
   const line = (r) => `| [${esc(r.text) || r.url}](${r.url}) | ${r.pre === 'todo' ? 'TODO' : r.pre === 'already-held' ? `already-held: ${esc(r.note).replace('in corpus: ', '')}` : esc(r.note)} |`;
-  const md = `# Harvest manifest — ${src.name} #${issue} (prepped ${new Date().toISOString().slice(0, 10)})\nissue: ${url}\n\nPre-triaged by \`harvest prep\`: ${rows.length} external links · ${rows.length - todo.length} pre-dispositioned (corpus + prior-manifest cross-ref) · **${todo.length} TODO**.\nJudge ONLY the TODO rows; carried rows re-open only on their reopen signals. Advocate pass, verify-diff and coverage gates apply as usual.\n\n| item | disposition |\n|---|---|\n${[...todo, ...rows.filter((r) => r.pre !== 'todo')].map(line).join('\n')}\n`;
+  const md = `# Harvest manifest — ${src.name} #${issue} (prepped ${new Date().toISOString().slice(0, 10)})\nissue: ${url}\n\nPre-triaged by \`harvest prep\`: ${rows.length} external links · ${rows.length - todo.length} pre-dispositioned (corpus + prior-manifest cross-ref${ruled ? ` + ${ruled} by triage rules` : ''}) · **${todo.length} TODO**.\nJudge ONLY the TODO rows; carried rows re-open only on their reopen signals. Advocate pass, verify-diff and coverage gates apply as usual.\n\n| item | disposition |\n|---|---|\n${[...todo, ...rows.filter((r) => r.pre !== 'todo')].map(line).join('\n')}\n`;
   if (args.includes('--stdout')) console.log(md);
   else if (existsSync(out)) { console.error(`refusing to overwrite ${out} — use --stdout to preview`); process.exit(1); }
   else {

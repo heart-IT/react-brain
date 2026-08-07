@@ -35,6 +35,9 @@ skill. One knowledge base, every session (local, resumed, or cloud-cloned).
   remove the row; wire new watch/revisit caveats as tripwires at keep-time.
 - **Per newsletter: `harvest prep <source>`**, judge ONLY the TODO rows; no url_pattern →
   `harvest inventory <issue-url>`, never an LLM summary of the page.
+- **`[rule:*]` rows are auto-dispositioned** (triage-rules.yaml, skip-only, gold-admitted) —
+  leave them unless the spot-check indicts a rule; a wrong rule row means fix/deactivate
+  the RULE, and `harvest rules --check` (in npm test) re-verifies admission as gold grows.
 - **Fetch-verify every keep**; dedupe vs `skills/react-brain-mentor/entries/`.
 - **Every external link gets a manifest row** carrying its URL: `kept` / `already-held` /
   `skipped` (reason class + reopen signal for cap/pre-ship/too-early).

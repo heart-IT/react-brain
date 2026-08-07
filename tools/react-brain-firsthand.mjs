@@ -162,9 +162,9 @@ npmKeys.forEach((pkg, i) => {
   const prev = state.npm[pkg];
   if (graph.npm.has(pkg)) {   // tripwire-only pkgs emit no version-change noise — only their condition matters
     if (prev && r.latest && prev.latest !== r.latest)
-      events.push({ kind: 'npm', entries: graph.npm.get(pkg), what: `${pkg}  ${prev.latest} → ${r.latest}${r.deprecated ? '  (latest is DEPRECATED)' : ''}`, url: `https://registry.npmjs.org/${pkg}/latest` });
+      events.push({ kind: 'npm', entries: graph.npm.get(pkg), pkg, from: prev.latest, to: r.latest, deprecated: r.deprecated, what: `${pkg}  ${prev.latest} → ${r.latest}${r.deprecated ? '  (latest is DEPRECATED)' : ''}`, url: `https://registry.npmjs.org/${pkg}/latest` });
     else if (prev && !prev.deprecated && r.deprecated)
-      events.push({ kind: 'npm', entries: graph.npm.get(pkg), what: `${pkg}  DEPRECATED flag flipped on npm (still ${r.latest})`, url: `https://registry.npmjs.org/${pkg}/latest` });
+      events.push({ kind: 'npm', entries: graph.npm.get(pkg), pkg, deprecated: true, what: `${pkg}  DEPRECATED flag flipped on npm (still ${r.latest})`, url: `https://registry.npmjs.org/${pkg}/latest` });
   }
   state.npm[pkg] = r;
 });
@@ -197,7 +197,7 @@ ghKeys.forEach((repo, i) => {
   if (r.err) return failures.push(`github ${repo}: ${r.err}`);
   const prev = state.github[repo];
   if (prev && r.id && prev.id !== r.id)
-    events.push({ kind: 'release', entries: graph.github.get(repo), what: `${repo}: ${r.title}`, url: r.link || `https://github.com/${repo}/releases` });
+    events.push({ kind: 'release', entries: graph.github.get(repo), repo, title: r.title, what: `${repo}: ${r.title}`, url: r.link || `https://github.com/${repo}/releases` });
   state.github[repo] = { id: r.id, title: r.title };
 });
 
@@ -256,10 +256,22 @@ if (failures.length) console.log(`\n${failures.length} endpoint failure(s) (stat
 if (MANIFEST && events.length) {
   const path = join(TOOLS, 'harvest-log', `firsthand-${TODAY}.md`);
   if (existsSync(path)) { console.error(`\nrefusing to overwrite ${path}`); process.exit(1); }
-  const rows = [...new Set(events)].map((ev) => `| [${ev.what.replace(/\|/g, '·')}](${ev.url}) → ${ev.entries.join(', ')} | TODO |`).join('\n');
-  writeFileSync(path, `# Harvest manifest — firsthand watch (${TODAY})\nissue: firsthand\n\nEvents from the corpus-derived watch graph (npm dist-tags · GitHub releases · author feeds).\nSame disposition discipline as newsletter manifests; verify before keeping.\n\n| event | disposition |\n|---|---|\n${rows}\n`);
+  // triage rules: mechanical rows (patch bumps, nightlies, chrome hosts) arrive
+  // pre-dispositioned with a [rule:<id>] receipt — only judgment calls stay TODO.
+  // Skip-only + gold-admitted (see tools/triage-rules.yaml); pin-guard live.
+  const { loadRules, ruleForEvent, ruleForUrl } = await import('./react-brain-triage-rules.mjs');
+  const rules = loadRules();
+  const entryTextById = new Map(Object.values(loadEntries()).map((e) => [e.id, JSON.stringify(e)]));
+  let ruled = 0;
+  const rows = [...new Set(events)].map((ev) => {
+    const d = ruleForEvent(ev, rules, { entryTextById }) || (ev.kind === 'post' ? ruleForUrl(ev.url, rules) : null);
+    if (d) ruled++;
+    return `| [${ev.what.replace(/\|/g, '·')}](${ev.url}) → ${ev.entries.join(', ')} | ${d || 'TODO'} |`;
+  }).join('\n');
+  writeFileSync(path, `# Harvest manifest — firsthand watch (${TODAY})\nissue: firsthand\n\nEvents from the corpus-derived watch graph (npm dist-tags · GitHub releases · author feeds).\nSame disposition discipline as newsletter manifests; verify before keeping.\n[rule:*] rows were auto-dispositioned by tools/triage-rules.yaml (gold-admitted, skip-only) — spot-check samples them.\n\n| event | disposition |\n|---|---|\n${rows}\n`);
   persistState();   // captured to disk — safe to mark these events reported
   console.log(`\nwrote ${path} — state advanced (these events are now recorded as reported)`);
+  console.log(`   ${ruled} row(s) auto-dispositioned by triage rules · ${[...new Set(events)].length - ruled} TODO for judgment`);
 } else if (events.length) {
   console.log(`\nstate NOT advanced — ${events.length} event(s) stay pending, so nothing is lost; re-run with --manifest to capture them.`);
 }

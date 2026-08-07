@@ -1,0 +1,63 @@
+# ── triage-rules — auto-disposition policy for harvest manifests ────────────────
+# Applied at manifest-WRITING time (`harvest firsthand --manifest`, `harvest prep`):
+# a matching row arrives pre-dispositioned as `<disposition> [rule:<id>]` instead
+# of TODO. Rules are SKIP-ONLY (the mirror of the advocate pass's keep-only flips);
+# hard guards in the engine — ⚡TRIP events, DEPRECATED flags, major bumps,
+# prerelease→stable graduations, and the live pin-guard (a routed entry pinning
+# the from-line forces TODO) — can never be overridden from this file.
+#
+# ADMISSION DISCIPLINE: a rule may be `active: true` only after `harvest rules`
+# replays it over every adjudicated manifest with ZERO unwaived kept-collisions.
+# A `waive:` entry is a maintainer-committed judgment that a specific historical
+# keep was a DUPLICATE ANCHOR — the fact landed the same pass via another row
+# (newsletter receipt), so rule-skipping this row would not have lost it. Waivers
+# are per-row, cited, and visible in every report. npm test runs
+# `harvest rules --check`, so admission re-verifies as gold grows: a rule that
+# develops a new collision turns the build red until fixed or deactivated.
+# Spot-check discipline (upkeep-routine step 2) samples [rule:*] rows each pass.
+
+updated: 2026-08-07
+
+version_rules:   # structured firsthand events (npm dist-tag diffs, GitHub releases)
+  - id: npm-patch
+    active: true   # admitted 2026-08-07: 79 fires · 74 agree · 2 already-held · 3 waived · 0 unwaived collisions
+    when: { kind: npm, bump: patch }
+    disposition: "skipped: patch release"
+    waive:
+      # all three: 2026-08-04 pass, fact independently kept via TWiR #292 rows the
+      # same day (ledger receipt) — the patch event was a duplicate anchor
+      - "@shopify/react-native-skia  2.10.0 → 2.10.1"
+      - "webpack  5.109.1 → 5.109.2"
+      - "@playwright/test  1.62.0 → 1.62.1"
+  - id: npm-prerelease
+    active: true   # admitted 2026-08-07: 1 fire · 1 agree · 0 collisions
+    when: { kind: npm, bump: prerelease }
+    disposition: "skipped: prerelease"
+  - id: gh-nightly
+    active: true   # admitted 2026-08-07 with the rc/alpha/beta/next tags EXCLUDED:
+                   # RN 0.87.0-rc.3 was gold-KEPT (SwiftPM backport + Hermes fix),
+                   # so rc-grade prereleases stay judgment calls
+    when: { kind: release, title_pre: [nightly, canary, experimental, insiders] }
+    disposition: "skipped: prerelease/nightly"
+  - id: npm-minor
+    active: false  # INADMISSIBLE 2026-08-07: 2 kept-collisions, and the auth0 5.9→5.10
+                   # one was a PURE-firsthand pin-refresh keep (no newsletter would have
+                   # caught it) — a real would-be loss, not a duplicate anchor. Minors
+                   # stay judgment. Re-argue only with a mechanically-safe predicate.
+    when: { kind: npm, bump: minor }
+    disposition: "skipped: minor release"
+
+url_rules:       # bare-URL rules (newsletter prep rows; hosts must be pure chrome/tracking)
+  - id: sponsor-tracking-domain
+    active: true   # admitted 2026-08-07: 6 fires · 6 agree · 0 collisions
+    hosts: [go.posthog.com, coderabbit.link, zuplo.link]
+    disposition: "sponsor (tracking link, not evaluated)"
+  - id: vercel-changelog-chrome
+    active: true   # admitted 2026-08-07: 10 fires · 10 agree · 0 collisions — resolves
+                   # the standing "drop vercel.com?" maintainer flag as reviewable policy
+    prefixes: ["https://vercel.com/changelog/"]
+    disposition: "skipped: off-scope platform chrome"
+  - id: vscode-updates
+    active: true   # admitted 2026-08-07: 4 fires · 4 agree · 0 collisions
+    prefixes: ["https://code.visualstudio.com/updates/"]
+    disposition: "skipped: off-scope routine editor release"

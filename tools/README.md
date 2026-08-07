@@ -35,6 +35,7 @@ mcp-server   ── distribution       (the corpus as MCP tools for any coding a
 | `.briefing-state.json` | `briefing` | ✗ gitignored | rewind after test runs |
 | `harvest-log/*.md` | disposition manifests (+ bench gold) | ✓ | never — they're the audit trail |
 | `harvest-log/LEDGER.md` | narrative pass history (in-repo since 2026-08-07) | ✓ append-only | append a dated section per pass |
+| `triage-rules.yaml` | auto-disposition policy (`prep` / `firsthand --manifest`) | ✓ | activate a rule only after `harvest rules` replays clean |
 
 > YAML loads via the `yaml` npm dep (python3+pyyaml shim as zero-install fallback). The
 > detection table is fully data-driven: each entry declares its own `detect:` (package
@@ -229,7 +230,21 @@ node tools/react-brain-harvest.mjs verify-diff --base=main
 node tools/react-brain-harvest.mjs watchlist
 ```
 The manifest convention + spot-check discipline live in `upkeep-routine.md` (step 2).
-And (4) **bench** — the JUDGMENT benchmark: adjudicated manifests double as gold
+And (4) **rules** — the pipeline's REFLEXES: ~60% of firsthand rows were version
+mechanics whose disposition is derivable from data already in hand, so
+`triage-rules.yaml` encodes them and `prep`/`firsthand --manifest` write matching
+rows pre-dispositioned `[rule:<id>]` instead of TODO. Skip-only by construction
+(the mirror of the advocate pass's keep-only flips), hard guards for ⚡TRIP /
+DEPRECATED / majors / graduations / entry version-pins, and ADMISSION BY GOLD:
+`harvest rules` replays every rule against every adjudicated manifest — zero
+unwaived kept-collisions or it stays inactive (`waive:` entries are cited
+duplicate-anchor judgments). `--check` runs in npm test, so admission
+re-verifies as gold grows; engine guards are pinned by `tests/triage-rules.test.mjs`.
+```sh
+node tools/react-brain-harvest.mjs rules          # per-rule replay report vs all gold manifests
+node tools/react-brain-harvest.mjs rules --check  # CI gate: exit 1 on active-rule kept-collision
+```
+And (5) **bench** — the JUDGMENT benchmark: adjudicated manifests double as gold
 data; replay a frozen issue inventory (with the corpus context PINNED at its
 pre-harvest commit — the live corpus would contaminate the test) against a
 candidate model and score disposition agreement deterministically. False skips

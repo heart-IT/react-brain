@@ -29,7 +29,7 @@
     "learn": "node tools/cli.mjs learn",
     "query": "node tools/cli.mjs query",
     "lint": "node tools/cli.mjs lint",
-    "test": "node tools/cli.mjs lint && node tests/eval.mjs",
+    "test": "node tools/cli.mjs lint && node tools/react-brain-triage-rules.mjs --check && node tests/triage-rules.test.mjs && node tests/eval.mjs",
     "census": "node tools/cli.mjs census",
     "briefing": "node tools/cli.mjs briefing",
     "version": "node alias/sync.mjs && git add alias/package.json"

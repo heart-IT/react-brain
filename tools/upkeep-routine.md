@@ -72,6 +72,14 @@ The agent should, in order:
    advancing the state file marks every reported event as consumed, so a bare poll is
    deliberately DRY (prints and re-reports next run) rather than silently burning them
    (a run on 2026-07-28 lost 105 events this way before the behaviour was fixed).
+   TRIAGE RULES (2026-08-07): mechanical rows — patch bumps, nightlies, chrome/tracking
+   hosts — arrive pre-dispositioned `[rule:<id>]` from `tools/triage-rules.yaml`, applied
+   by both `--manifest` and `prep`. Rules are SKIP-ONLY (the mirror of the advocate
+   pass's keep-only flips) with hard engine guards (⚡TRIP, DEPRECATED, majors,
+   prerelease→stable graduations, the pin-guard) and are ADMITTED BY GOLD: `harvest
+   rules` replays each against every adjudicated manifest; zero unwaived kept-collisions
+   or it stays inactive, and npm test re-checks admission as gold grows. Judge only the
+   TODO rows; the spot-check samples rule rows.
    ⚡ TRIPWIRE
    events (entry `tripwires:` — standing caveats as release conditions, e.g. "Rive line
    hits 1.0 → add the migrate rule") are MANDATORY work items: do the `then:`, update the
@@ -112,9 +120,11 @@ The agent should, in order:
      keep-aversion (56/100 baseline), and a fresh-context advocate arm scored +7 by
      recovering the two most consequential misses at one cheap over-keep (`harvest bench
      --advocate` reproduces the experiment; wrong flips are reviewable noise by design).
-   - **Spot-check (each pass):** re-adjudicate ALL `cap` skips + 2 random skips from the
-     PREVIOUS issue's manifest; corrections are committed amendments. (First run corrected
-     2 of 2 examined reasons and reopened the react-compiler-explained + thoughtbot keeps.)
+   - **Spot-check (each pass):** re-adjudicate ALL `cap` skips + 2 random skips + 2 random
+     `[rule:*]` auto-dispositions from the PREVIOUS issue's manifest; corrections are
+     committed amendments (a wrong rule row indicts the RULE — fix or deactivate it in
+     triage-rules.yaml, not just the row). (First run corrected 2 of 2 examined reasons
+     and reopened the react-compiler-explained + thoughtbot keeps.)
    - **Bench gold compounds automatically:** `harvest prep` freezes each issue's fixture at prep time (pre-harvest corpus by construction). Re-run `harvest bench` monthly across fixtures as n grows — that is when advocate-pass value and cheaper-model swaps become answerable.
    - **Model/prompt changes to the harvester get benched first:** `react-brain harvest
      bench --model=<id>` replays a frozen issue against its adjudicated manifest (judgment
