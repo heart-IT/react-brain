@@ -66,9 +66,18 @@ note: >
   Actions hardening (checkout defaults, workflow-execution policies, read-only cache for
   untrusted workflows), and a 3-day default Dependabot cooldown (July) — install-age gating is
   now a PLATFORM default, not just a local countermeasure. See reading.
+  LIVE COUNTEREXAMPLE (2026-08-07, verified vs the Aikido incident report): the keyv compromise
+  (2026-08-04) — maintainer GitHub account takeover → poisoned versions published WITH VALID
+  GitHub-Actions provenance → preinstall-hook dropper (downloads Bun, harvests npm/GitHub/AWS/
+  Vault/Stripe/Slack credentials) → self-replicating worm: 444 packages / 1,381 versions /
+  ~2B combined monthly installs within a day. Receipts for two standing claims at once:
+  provenance alone is not enough (the signatures were valid), and registry-side scanning catches
+  only what it can detect (the worm shipped a week after publish-time scanning went default,
+  2026-07-28). Install-script blocking + install-age gating remain the layers that bite.
+  Incident is ongoing — promote to a reading when a definitive postmortem lands.
 defer_to_skill: review
 doc: "RB-E-SECURITY.md"   # long-form Explanation entry in content_dir
-updated: 2026-08-07   # GitHub first-party supply-chain umbrella post (TWiR #293 + firsthand corroborated)
+updated: 2026-08-07   # GitHub supply-chain umbrella reading + keyv worm counterexample (TWiR #293 + Status #486)
 reading:
   - title: "The React2Shell Story"
     url: "https://lachlan.nz/blog/the-react2shell-story"
@@ -111,6 +120,7 @@ reading:
     by: "NodeSource"
     what: "The nuance behind this entry's supply-chain note: npm v12's default block on preinstall/install/postinstall closes the INSTALL-TIME door but leaves the EXECUTION-TIME door open. Attackers already moved the payload into the module body as a top-level side effect (runs on first require), or ship a binding.gyp so npm's implicit node-gyp rebuild fires anyway (the June-2026 Miasma campaign). Removing a trigger isn't removing the capability — so layer defenses: Node's --permission model (--allow-net / --allow-child-process / --allow-fs-write to cap what running code may DO), CI egress allow-listing (Harden-Runner), and container/seccomp isolation. Install-script blocking raises the floor; it is not the ceiling."
 sources:
+  - "https://www.aikido.dev/blog/keyv-and-friends-compromised-in-npm-supply-chain-attack"
   - "https://react.dev/blog/2025/12/11/denial-of-service-and-source-code-exposure-in-react-server-components"
   - "https://github.com/react/react/security/advisories/GHSA-wx67-qw84-cm4g"
   - "https://github.com/advisories/GHSA-83fc-fqcc-2hmg"
