@@ -1,5 +1,5 @@
 {
- "date": "2026-08-06",
+ "date": "2026-08-18",
  "cohort": {
   "fetched": 34,
   "total": 34,
@@ -589,7 +589,6 @@
    "platform": "react-native",
    "labels": [
     "AsyncStorage",
-    "Detox",
     "EAS Update",
     "ESLint",
     "Expo (managed native)",
@@ -1077,7 +1076,7 @@
     "RN Testing Library": 11,
     "Jest": 21,
     "Storybook": 12,
-    "Detox": 3,
+    "Detox": 2,
     "MSW": 9,
     "React Testing Library": 14,
     "Vitest": 8,

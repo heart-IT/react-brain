@@ -196,7 +196,7 @@
       "id": "sentry",
       "name": "Sentry (frontend)",
       "repo": "getsentry/sentry",
-      "branch": "main",
+      "branch": "master",
       "path": "package.json"
     },
     {

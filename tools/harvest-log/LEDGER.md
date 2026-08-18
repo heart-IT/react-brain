@@ -1985,3 +1985,54 @@ does not fire on a repo that already has one. Counts: RNR ×53 · Status ×28 ·
 RW ×26 · TWiR ×27 (unchanged). FEED HYGIENE: vercel.com produced an overflow marker and zero keeps
 for the SIXTH consecutive pass; github.blog and thoughtbot likewise. The prune is still a
 maintainer call.
+
+### Addendum, same day — upkeep steps 3–4 (completeness + depth cadence)
+
+STEP 3 (completeness). `evidence` first: the routine's documented invocation
+(`react-brain evidence ../ledgerhr ../ourpot ../bitbarter`) is stale in two ways — the repo now
+lives at heartit/skills/react-brain so `../` resolves inside skills/, and `bitbarter` is
+`peerBarter` on disk. Ran against absolute paths (ledgerhr · ourpot/ourpot · peerBarter). Nothing
+alarming: §2 flags ourpot (RN 0.86.2) and peerbarter (RN 0.86.0) as `review` against the entry's
+new 0.87 default — correct and newly true as of this morning's pass, and the migrate rule now
+fires for both with the Strict-API work named. Every other contradiction is a `~ contextual`
+already explained by a when-clause (Pear/Holepunch lane, brittle as the TAP runner, esbuild).
+Candidate blind spots are Holepunch/infra plus one lead worth remembering: ledger-hr carries five
+`@electron-forge/*` packages and DESKTOP has no Electron PACKAGING facet at all. One repo, so it
+stays a lead, not an entry change.
+
+`census`: the cohort was reporting 33/34 with `sentry(HTTP 404)` — a stale branch pin
+(getsentry/sentry moved to `master`, verified against the GitHub API). Fixed in census-cohort.json;
+now 34/34. No adoption deltas this snapshot.
+
+STEP 4 (depth cadence) — TWO GRADUATIONS, and both found errors rather than confirming the entry.
+That is the argument for the cadence in one line.
+
+**RB-E-SHEETS drafted → reviewed.** Re-verifying a month-old entry INVERTED its default.
+react-native-true-sheet is no longer "the simpler alternative": 3.11.11 (2026-08-12), releasing
+every few days, with a React Navigation sheet navigator, side sheets for tablets, built-in keyboard
+handling, native accessibility strings and iOS 26 Liquid Glass — while @gorhom/bottom-sheet has not
+published or pushed since 2026-05-09 and sits on 74 open issues. So the entry now says PRESENT the
+OS sheet by default and DRAW one (gorhom) only for custom gesture choreography. Held at medium
+confidence deliberately: the 34-app census still finds gorhom in 7 of 14 RN apps and true-sheet in
+1 — the argument moved before the ecosystem did. Added a true-sheet ≥4.0.0 tripwire (a 4.0.0-beta.3
+line is open) so the new default gets re-read rather than aging quietly.
+
+**RB-E-PAYMENTS drafted → reviewed.** The graduation caught a WRONG PACKAGE NAME that had been
+sitting in the option rows since the entry was written: `react-native-wallet` on npm is an unrelated
+2020 module (1.0.8, Apple-Wallet-only, erikpoort). The library the row describes — PassKit AND
+Google Wallet, premieroctet, already linked in the entry's own sources — is
+`@premieroctet/react-native-wallet` (1.0.2, 2025-06-26). Exactly the tsrx/octanejs failure the
+twir-291 spot-check found: a name that RESOLVES is not a name that resolves to YOUR library. Also
+recorded a live install trap: on both IAP packages the `next` dist-tag is BEHIND `latest`
+(react-native-iap next = 15.4.0-rc.3 vs latest 16.3.1; expo-iap next = 4.4.0-rc.7 vs latest 5.3.1),
+so `@next` silently downgrades a major. Added the missing wallet detect row.
+
+THE GROUNDING GATE EARNED ITS KEEP TOO. Both long-form docs were checked by extracting every
+numeric from the prose and asserting it exists in the entry YAML. SHEETS failed the first pass on
+"a 12-inch display" — a number I had reached for rhetorically with no source behind it. Rewritten
+as "a tablet display"; both docs now ground at 0 ungrounded numerics. Count claims in README /
+SKILL.md / react-brain-mentor.yaml / encyclopedia.yaml moved 38 → 40 reviewed (lint checks these).
+Gates: lint clean · rules ✓ · eval 139/139 · verify-diff ✓.
+
+STILL OPEN after this session: step 5 (challenge 2–3 aging reviewed entries — CROSSPLATFORM
+2026-06-17 is oldest, then KEYBOARD 07-13 and the 07-16 cluster) and the standing feed-prune call.

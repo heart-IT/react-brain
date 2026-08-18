@@ -2,19 +2,21 @@ id: RB-E-SHEETS
 topic: "Bottom sheets & modal sheets (React Native)"
 category: sheets
 group: ui
-status: drafted
-confidence: low
+status: reviewed   # long-form entry written + source-checked → encyclopedia/RB-E-SHEETS.md
+confidence: medium
 platforms: [react-native]
 options:
-  - { name: "@gorhom/bottom-sheet", tradeoff: "the JS incumbent (v5.2.x) — built on Reanimated + Gesture Handler, dynamic sizing, scrollable content handoff, huge deployed base; JS-driven look (not the OS sheet), most flexible for custom gesture-heavy sheets" }
-  - { name: "@swmansion/react-native-bottom-sheet", tradeoff: "Software Mansion's NEW true-native sheet components (inline AND modal, snap points; software-mansion-labs) — platform-authentic behavior; 0.16.x and moving fast (0.x — pin, expect churn)" }
-  - { name: "react-native-true-sheet (@lodev09)", tradeoff: "native sheets on both platforms (v3.11.x, active) — the lightweight platform-authentic option that pre-dates SWM's entrant; simpler API surface than gorhom" }
-  - { name: "react-native-screens FormSheet", tradeoff: "the sheet as a NAVIGATION DESTINATION — native-stack presents a route as a form sheet (detents); experimental in the screens v5 line (see RB-E-NAV); right shape when the sheet is conceptually a screen" }
+  - { name: "@gorhom/bottom-sheet", tradeoff: "the JS incumbent (5.2.14, published 2026-05-09) — built on Reanimated + Gesture Handler, dynamic sizing, scrollable content handoff, ~9.1k stars and by far the largest deployed base; JS-driven look (it DRAWS a sheet, it does not present the OS one), most flexible for custom gesture-heavy sheets. Maintenance is the thing to watch: no release and no repo push since 2026-05-09 with 74 open issues, while both native entrants ship weekly" }
+  - { name: "@swmansion/react-native-bottom-sheet", tradeoff: "Software Mansion's native sheet components (inline AND modal, snap points; software-mansion-labs) — platform-authentic behavior; 0.16.2 latest with 0.17.0-next.1 on the `next` tag (verified 2026-08-18), still 0.x — pin, expect churn" }
+  - { name: "react-native-true-sheet (@lodev09)", tradeoff: "native sheets on iOS, Android and web (3.11.11, 2026-08-12; a 4.0.0-beta.3 line is open) — the platform-authentic option that pre-dates SWM's entrant, and the most complete one today: Fabric-only, native accessibility, built-in keyboard handling, side sheets on iPad/Android tablets, iOS 26+ Liquid Glass, first-class Reanimated, and a built-in SHEET NAVIGATOR for React Navigation. Releasing every few days" }
+  - { name: "react-native-screens FormSheet", tradeoff: "the sheet as a NAVIGATION DESTINATION — native-stack presents a route as a form sheet (detents); still experimental on the 4.x line (4.27.0, 2026-08-07; 5.0.0-alpha.2 on `next`) — see RB-E-NAV. Right shape when the sheet is conceptually a screen, but true-sheet's sheet navigator now covers that case too without waiting on the screens rewrite" }
 recommend:
-  default: "@gorhom/bottom-sheet is the safe default — mature, gesture-rich, works everywhere Reanimated does. Reach for a NATIVE sheet (react-native-true-sheet today; @swmansion/react-native-bottom-sheet once it stabilizes) when platform-authentic behavior — real detents, OS styling (iOS 26 Liquid Glass era) — matters more than custom gesture control. Lightly vetted (confidence: low) — the native-vs-JS split is fresh."
+  default: "Default to a NATIVE sheet — react-native-true-sheet today — unless you need custom gesture choreography, where @gorhom/bottom-sheet remains the flexible JS incumbent. The axis is simple: gorhom DRAWS a sheet in JS, the native libraries PRESENT the OS one, so detents, dismissal physics, screen-reader semantics and iOS 26 Liquid Glass come from the platform instead of being re-implemented. Every native option is pre-1.0 or fast-moving — pin versions."
   when:
     - "custom gesture-heavy sheet UIs (drag handoff to inner scroll, dynamic snap logic) → @gorhom/bottom-sheet"
-    - "platform-authentic native sheet, stable today → react-native-true-sheet (v3)"
+    - "platform-authentic native sheet, stable today → react-native-true-sheet (3.11.x; New Architecture required — it is Fabric-only)"
+    - "the sheet must hold a form or a text input → prefer a native sheet: keyboard avoidance inside a JS-drawn sheet is your problem to solve, while true-sheet ships keyboard handling and native a11y strings"
+    - "iPad / Android tablet layouts → true-sheet side sheets; a phone-shaped bottom sheet stretched across a tablet is the giveaway of a JS-drawn one"
     - "betting on the Software Mansion native line → @swmansion/react-native-bottom-sheet — 0.x, pin versions and expect breaking changes"
     - "the sheet is really a SCREEN (deep-linkable, own route) → react-native-screens FormSheet via native-stack (experimental — pin; see RB-E-NAV)"
 note: >
@@ -27,9 +29,19 @@ note: >
   npm 2026-07-16: gorhom 5.2.14 (2026-05), @swmansion 0.16.2 (2026-07-14), true-sheet 3.11.9
   (2026-07-15). The selection axis mirrors RB-E-POLISH's toasts: JS-flexible incumbent vs
   platform-authentic native entrants; the SWM line is the one to WATCH for 1.0 (tripwire below).
+  GRADUATED drafted → reviewed 2026-08-18 (upkeep-routine step 4). What changed in the month since
+  the entry was drafted, all re-verified against npm + the repos: true-sheet went from "the simpler
+  alternative" to the most COMPLETE native option (3.11.11, releasing every few days, with a
+  React Navigation sheet navigator, side sheets, built-in keyboard handling, native accessibility
+  strings and iOS 26 Liquid Glass support), while gorhom has not published or pushed since
+  2026-05-09 and carries 74 open issues. That inverts the default: the JS incumbent is now the
+  specialist choice for custom gesture work, not the safe first pick. Adoption still lags the
+  argument — the 34-app census (2026-08-18) finds sheets in 7 of 14 RN apps, gorhom in 7 and
+  true-sheet in 1 — which is exactly what a recent inversion looks like, and why this is medium
+  confidence rather than high.
 defer_to_skill: react-native-best-practices
-doc: null
-updated: 2026-07-16
+doc: "RB-E-SHEETS.md"   # long-form Explanation entry in content_dir
+updated: 2026-08-18   # graduated drafted → reviewed: long-form doc + versions/maintenance re-verified
 reading:
   - title: "Building a drawer component"
     url: "https://emilkowal.ski/ui/building-a-drawer-component"
@@ -49,3 +61,6 @@ tripwires:   # standing caveats as executable conditions — evaluated by `harve
   - when: { pkg: "@swmansion/react-native-bottom-sheet", atleast: "1.0.0" }
     then: "SWM's native bottom-sheet hit 1.0 — soften the '0.x, pin, expect churn' caveats in the option row + when-clause and reconsider the default split (native entrant now stable)"
     added: 2026-07-16
+  - when: { pkg: "@lodev09/react-native-true-sheet", atleast: "4.0.0" }
+    then: "true-sheet 4.0 went stable (this entry's default was set on the 3.11.x line, with 4.0.0-beta.3 open) — re-read the 4.0 release notes for breaking changes, refresh the option row, and re-check that the default still holds"
+    added: 2026-08-18
