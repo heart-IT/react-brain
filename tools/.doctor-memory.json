@@ -33,120 +33,120 @@
  "rn-smells": {
   "items": {
    "revisit:RB-E-RN-VERSIONS": {
-    "seen": 136,
+    "seen": 140,
     "text": "revisit RN 0.87.0 (RN-VERSIONS)",
     "last": "2026-08-18"
    },
    "gap:RB-E-TESTING": {
-    "seen": 136,
+    "seen": 140,
     "text": "close the TESTING gap — Unit/component: Vitest (web) or Jest (RN) + React Testing Library. E2…",
     "last": "2026-08-18"
    },
    "read:RB-E-STATE": {
-    "seen": 136,
+    "seen": 140,
     "text": "You ship a client store — every popular one converges on useSyncExternalStore; know what …",
     "last": "2026-08-18"
    },
    "read:RB-E-DATA": {
-    "seen": 136,
+    "seen": 140,
     "text": "You ship an HTTP client but no server cache — hand-rolled fetching hides race conditions,…",
     "last": "2026-08-18"
    }
   },
-  "visits": 136,
+  "visits": 140,
   "resolvedTotal": 1
  },
  "web-clean": {
   "items": {
    "read:RB-E-STATE": {
-    "seen": 60,
+    "seen": 64,
     "text": "You ship a client store — every popular one converges on useSyncExternalStore; know what …",
     "last": "2026-08-18"
    },
    "read:RB-E-DATA": {
-    "seen": 136,
+    "seen": 140,
     "text": "You ship TanStack Query — the maintainer's guidance is to structure around queryOptions o…",
     "last": "2026-08-18"
    },
    "read:RB-E-BUILD": {
-    "seen": 136,
+    "seen": 140,
     "text": "You ship Vite — v8 unifies dev and prod on Rolldown (one Rust bundler, 10-30x faster) ins…",
     "last": "2026-08-18"
    },
    "read:RB-E-TESTING": {
-    "seen": 136,
+    "seen": 140,
     "text": "You have a test runner — spend it on integration tests over mock-heavy unit suites: confi…",
     "last": "2026-08-18"
    },
    "read:RB-E-TYPESCRIPT": {
-    "seen": 16,
+    "seen": 20,
     "text": "You ship TypeScript — TS 7 (Go-native tsc, ~10x) is stable; migrate incrementally through…",
     "last": "2026-08-18"
    }
   },
-  "visits": 136,
+  "visits": 140,
   "resolvedTotal": 2
  },
  "p2p-pear": {
   "items": {
    "read:RB-E-P2P": {
-    "seen": 34,
+    "seen": 35,
     "text": "You ship the Hypercore stack — data is a local append-only log merged by Autobase, indexe…",
     "last": "2026-08-18"
    },
    "gap:RB-E-STATE": {
-    "seen": 34,
+    "seen": 35,
     "text": "close the STATE gap — Split the problem: TanStack Query for server state + Zustand for clie…",
     "last": "2026-08-18"
    },
    "gap:RB-E-DX": {
-    "seen": 34,
+    "seen": 35,
     "text": "close the DX gap — Gate tests + typecheck + lint on every PR in CI, and enforce the same…",
     "last": "2026-08-18"
    },
    "gap:RB-E-TYPESCRIPT": {
-    "seen": 34,
+    "seen": 35,
     "text": "close the TYPESCRIPT gap — Run strict TypeScript (strict:true, the TS 6 default) and export a sm…",
     "last": "2026-08-18"
    },
    "gap:RB-E-NAV": {
-    "seen": 34,
+    "seen": 35,
     "text": "close the NAV gap — React Native → Expo Router if you're on Expo, else React Navigation. …",
     "last": "2026-08-18"
    }
   },
-  "visits": 34,
+  "visits": 35,
   "resolvedTotal": 0
  },
  "prod-no-boundary": {
   "items": {
    "gap:RB-E-NATIVE": {
-    "seen": 34,
+    "seen": 35,
     "text": "close the NATIVE gap — Target the New Architecture (mandatory ≥ RN 0.82). Reach for Expo Mod…",
     "last": "2026-08-18"
    },
    "gap:RB-E-STATE": {
-    "seen": 34,
+    "seen": 35,
     "text": "close the STATE gap — Split the problem: TanStack Query for server state + Zustand for clie…",
     "last": "2026-08-18"
    },
    "gap:RB-E-NAV": {
-    "seen": 34,
+    "seen": 35,
     "text": "close the NAV gap — React Navigation",
     "last": "2026-08-18"
    },
    "gap:RB-E-STYLING": {
-    "seen": 34,
+    "seen": 35,
     "text": "close the STYLING gap — Web: Tailwind (pair with shadcn/ui — RB-E-COMPONENT-LIBS). React Nati…",
     "last": "2026-08-18"
    },
    "revisit:RB-E-RN-VERSIONS": {
-    "seen": 34,
+    "seen": 35,
     "text": "revisit RN 0.86.0 (RN-VERSIONS)",
     "last": "2026-08-18"
    }
   },
-  "visits": 34,
+  "visits": 35,
   "resolvedTotal": 0
  },
  "traj-fix": {
@@ -157,58 +157,58 @@
     "last": "2026-08-18"
    },
    "revisit:RB-E-RN-VERSIONS": {
-    "seen": 136,
+    "seen": 140,
     "text": "revisit RN 0.86.0 (RN-VERSIONS)",
     "last": "2026-08-18"
    },
    "gap:RB-E-TESTING": {
-    "seen": 136,
+    "seen": 140,
     "text": "close the TESTING gap — Unit/component: Vitest (web) or Jest (RN) + React Testing Library. E2…",
     "last": "2026-08-18"
    },
    "gap:RB-E-NATIVE": {
-    "seen": 136,
+    "seen": 140,
     "text": "close the NATIVE gap — Target the New Architecture (mandatory ≥ RN 0.82). Reach for Expo Mod…",
     "last": "2026-08-18"
    },
    "gap:RB-E-STATE": {
-    "seen": 40,
+    "seen": 44,
     "text": "close the STATE gap — Split the problem: TanStack Query for server state + Zustand for clie…",
     "last": "2026-08-18"
    }
   },
-  "visits": 136,
-  "resolvedTotal": 69
+  "visits": 140,
+  "resolvedTotal": 71
  },
  "swap-fix": {
   "items": {
    "revisit:RB-E-RN-VERSIONS": {
-    "seen": 34,
+    "seen": 35,
     "text": "revisit RN 0.86.0 (RN-VERSIONS)",
     "last": "2026-08-18"
    },
    "gap:RB-E-TESTING": {
-    "seen": 34,
+    "seen": 35,
     "text": "close the TESTING gap — Unit/component: Vitest (web) or Jest (RN) + React Testing Library. E2…",
     "last": "2026-08-18"
    },
    "read:RB-E-DATA": {
-    "seen": 34,
+    "seen": 35,
     "text": "You ship an HTTP client but no server cache — hand-rolled fetching hides race conditions,…",
     "last": "2026-08-18"
    },
    "read:RB-E-AI-DEVTOOLS": {
-    "seen": 10,
+    "seen": 11,
     "text": "You drive coding agents against an RN/Expo app — budget for the validation loop, not gene…",
     "last": "2026-08-18"
    },
    "gap:RB-E-STATE": {
-    "seen": 34,
+    "seen": 35,
     "text": "close the STATE gap — Split the problem: TanStack Query for server state + Zustand for clie…",
     "last": "2026-08-18"
    }
   },
-  "visits": 34,
+  "visits": 35,
   "resolvedTotal": 1
  }
 }

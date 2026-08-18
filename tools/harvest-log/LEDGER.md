@@ -2140,3 +2140,24 @@ Verdicts recorded this session: 6 (charts weakened · storage weakened · networ
 animation weakened · lists held). Gates: lint clean · rules ✓ · eval 139/139 · verify-diff ✓.
 One firsthand event stays PENDING and unconsumed by design — agent-device v0.20.9, the real release
 behind this morning's phantom v0.20.10; the next --manifest run will capture it.
+
+### Addendum, same day — the pending event, and the dead end it exposed
+
+One event stayed pending after the pass: agent-device v0.20.9, the REAL release behind this
+morning's phantom v0.20.10. Capturing it hit a wall — `--manifest` refuses to overwrite an existing
+dated manifest and exits before advancing state. That refusal is right about the invariant it
+protects (rows must hit disk before state marks them reported, and today's hand-triaged manifest
+must not be clobbered) but wrong as a terminus: any event landing AFTER the day's triage — a release
+published mid-pass, a phantom tag resolving — was uncapturable until the date rolled over. The same
+shape as last pass's React Status #486 addendum, where the fix was to re-probe; here there was
+nothing to re-probe, just no way in.
+
+Fixed at the root: a second same-day `--manifest` now APPENDS a "Later the same day" table to the
+day's manifest instead of refusing. The invariant is preserved (append, then persistState), the
+earlier triage is untouched, and parseGoldManifest is line-based so a second table in one file reads
+correctly — verified by `harvest rules --check`, which now replays 1146 gold rows (was 1145) with
+zero collisions. The event itself is kept: the v0.20.9 tag resolves, and it is now the GitHub-side
+receipt under the option row's "0.20.9 on npm and GitHub" claim, which until now rested on the
+registry alone. Watch queue: empty ("no new events since last run").
+
+Gates: lint clean · rules ✓ 1146 gold rows · eval 139/139 · verify-diff ✓.

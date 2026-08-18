@@ -795,6 +795,10 @@
   "react-native-enriched-html": {
    "latest": "1.1.1",
    "deprecated": false
+  },
+  "@premieroctet/react-native-wallet": {
+   "latest": "1.0.2",
+   "deprecated": false
   }
  },
  "github": {
@@ -943,8 +947,8 @@
    "title": "reactotron-react-native@5.3.1"
   },
   "callstack/agent-device": {
-   "id": "tag:github.com,2008:Repository/1146193768/v0.20.10",
-   "title": "v0.20.10"
+   "id": "tag:github.com,2008:Repository/1146193768/v0.20.9",
+   "title": "v0.20.9"
   },
   "react/react-native": {
    "id": "tag:github.com,2008:Repository/29028775/v0.87.0",
@@ -1005,6 +1009,30 @@
   "software-mansion/react-native-enriched-html": {
    "id": "tag:github.com,2008:Repository/967922414/v1.1.1",
    "title": "Release 1.1.1"
+  },
+  "better-auth/better-auth": {
+   "id": "tag:github.com,2008:Repository/803014189/v1.7.0",
+   "title": "v1.7.0"
+  },
+  "software-mansion/react-native-reanimated": {
+   "id": "tag:github.com,2008:Repository/130961487/worklets-0.11.4",
+   "title": "Worklets - 0.11.4"
+  },
+  "mdjastrzebski/react-native-plain-text": {
+   "id": "tag:github.com,2008:Repository/1308149594/v0.7.1",
+   "title": "v0.7.1"
+  },
+  "software-mansion/enriched-markdown": {
+   "id": "tag:github.com,2008:Repository/1077535932/v1.0.1",
+   "title": "v1.0.1"
+  },
+  "op-engineering/op-sqlite": {
+   "id": "tag:github.com,2008:Repository/715061816/18.1.1",
+   "title": "Release 18.1.1"
+  },
+  "codemagic-ci-cd/codemagic-patch": {
+   "id": null,
+   "title": null
   }
  },
  "blogs": {
@@ -1167,13 +1195,24 @@
   "thoughtbot.com": {
    "feed": "https://feed.thoughtbot.com/",
    "lastId": "https://thoughtbot.com/blog/how-healthcare-tech-teams-innovate-while-balancing-speed-and-security"
+  },
+  "engineeringblog.yelp.com": {
+   "feed": "https://engineeringblog.yelp.com/feed.xml",
+   "lastId": "https://engineeringblog.yelp.com/2026/08/migrating-a-large-flow-monorepo-to-typescript.html"
+  },
+  "invertase.io": {
+   "feed": "https://invertase.io/blog/rss.xml",
+   "lastId": "https://invertase.io/blog/react-native-firebase-v26-release"
+  },
+  "gtkx.dev": {
+   "feed": null,
+   "lastId": null
+  },
+  "margelo.com": {
+   "feed": "https://margelo.com/blog/feed.xml",
+   "lastId": "https://margelo.com/blog/react-native-barcode-scanner"
   }
  },
  "updated": "2026-08-18",
- "tripwires": {
-  "RB-E-ANIMATION:react-native:atleast:0.87.0": {
-   "fired": "2026-08-18",
-   "latest": "0.87.0"
-  }
- }
+ "tripwires": {}
 }

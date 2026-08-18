@@ -14,7 +14,7 @@
 //   node tools/react-brain-firsthand.mjs            poll + diff (DRY: state advances only if there are no events)
 //   node tools/react-brain-firsthand.mjs --graph    print the derived graph, no network
 //   node tools/react-brain-firsthand.mjs --json     events as JSON (also dry)
-//   node tools/react-brain-firsthand.mjs --manifest write tools/harvest-log/firsthand-<date>.md skeleton AND advance state
+//   node tools/react-brain-firsthand.mjs --manifest write (or APPEND to) tools/harvest-log/firsthand-<date>.md AND advance state
 //
 // Advancing state CONSUMES the events it reports, so only --manifest (which puts
 // them on disk for triage) does it — a bare poll is repeatable and lossless.
@@ -23,7 +23,7 @@
 // newsletter item (tools/upkeep-routine.md step 2).
 // ───────────────────────────────────────────────────────────────────────────────
 
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, appendFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadEntries } from './detect.mjs';
@@ -268,7 +268,13 @@ if (failures.length) console.log(`\n${failures.length} endpoint failure(s) (stat
 
 if (MANIFEST && events.length) {
   const path = join(TOOLS, 'harvest-log', `firsthand-${TODAY}.md`);
-  if (existsSync(path)) { console.error(`\nrefusing to overwrite ${path}`); process.exit(1); }
+  // A second capture on the same day used to be refused outright, which was safe (state stayed
+  // un-advanced, nothing burned) but a dead end: events that land AFTER the day's triage — a
+  // release published mid-pass, a phantom tag that resolves — could not be captured until the
+  // date rolled over. Now the day's manifest is APPENDED to instead, which keeps the invariant
+  // that matters (rows hit disk BEFORE state marks them reported) and leaves the earlier triage
+  // untouched. parseGoldManifest is line-based, so a second table in the same file reads fine.
+  const appending = existsSync(path);
   // triage rules: mechanical rows (patch bumps, nightlies, chrome hosts) arrive
   // pre-dispositioned with a [rule:<id>] receipt — only judgment calls stay TODO.
   // Skip-only + gold-admitted (see tools/triage-rules.yaml); pin-guard live.
@@ -281,9 +287,10 @@ if (MANIFEST && events.length) {
     if (d) ruled++;
     return `| [${ev.what.replace(/\|/g, '·')}](${ev.url}) → ${ev.entries.join(', ')} | ${d || 'TODO'} |`;
   }).join('\n');
-  writeFileSync(path, `# Harvest manifest — firsthand watch (${TODAY})\nissue: firsthand\n\nEvents from the corpus-derived watch graph (npm dist-tags · GitHub releases · author feeds).\nSame disposition discipline as newsletter manifests; verify before keeping.\n[rule:*] rows were auto-dispositioned by tools/triage-rules.yaml (gold-admitted, skip-only) — spot-check samples them.\n\n| event | disposition |\n|---|---|\n${rows}\n`);
+  if (appending) appendFileSync(path, `\n## Later the same day — ${[...new Set(events)].length} further event(s)\n\n| event | disposition |\n|---|---|\n${rows}\n`);
+  else writeFileSync(path, `# Harvest manifest — firsthand watch (${TODAY})\nissue: firsthand\n\nEvents from the corpus-derived watch graph (npm dist-tags · GitHub releases · author feeds).\nSame disposition discipline as newsletter manifests; verify before keeping.\n[rule:*] rows were auto-dispositioned by tools/triage-rules.yaml (gold-admitted, skip-only) — spot-check samples them.\n\n| event | disposition |\n|---|---|\n${rows}\n`);
   persistState();   // captured to disk — safe to mark these events reported
-  console.log(`\nwrote ${path} — state advanced (these events are now recorded as reported)`);
+  console.log(`\n${appending ? 'appended to' : 'wrote'} ${path} — state advanced (these events are now recorded as reported)`);
   console.log(`   ${ruled} row(s) auto-dispositioned by triage rules · ${[...new Set(events)].length - ruled} TODO for judgment`);
 } else if (events.length) {
   console.log(`\nstate NOT advanced — ${events.length} event(s) stay pending, so nothing is lost; re-run with --manifest to capture them.`);

@@ -99,6 +99,7 @@ reading:
 sources:
   - "https://registry.npmjs.org/modern-web-guidance/latest"
   - "https://registry.npmjs.org/agent-device/latest"
+  - "https://github.com/callstack/agent-device/releases/tag/v0.20.9"
   - "https://registry.npmjs.org/metrognome/latest"
   - "https://www.callstack.com/blog/an-ai-agent-for-measured-react-native-performance-fixes"
   - "https://appcontrolbench.swmansion.com/"
