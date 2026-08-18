@@ -19,6 +19,7 @@ recommend:
     - "type-safe web SPA without a meta-framework → TanStack Router"
     - "web SPA already on React Router, or ecosystem/familiarity over route type-safety → React Router 8 (released, ESM-only; its typegen is framework-mode-only — which is why TanStack keeps the type-safe-SPA slot)"
     - "adopting React Navigation 8 native tabs → still ALPHA in 2026; pin + verify against the RN8 release notes first"
+    - "links must survive a store install (invites, referrals, shared products) → deferred deep linking, i.e. an attribution SDK or Detour; plain Universal/App Links lose the intent at the store boundary (see reading)"
 note: >
   React Navigation 8.0 (ALPHA, announced 2025-12) makes NATIVE bottom tabs the default
   (via react-native-screens — native look incl. iOS 26 liquid glass), adds native icon
@@ -54,8 +55,14 @@ note: >
   scales with how much of React Router's server side you actually use.
 defer_to_skill: null
 doc: "RB-E-NAV.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-28   # React Router 2026-07-22 advisory batch → security floor 8.3.0 / 7.18.0 (React Status #484)
+updated: 2026-08-18   # deferred deep linking / the Installation Gap (+native-intent as pre-routing middleware)
 reading:
+  - title: "Detour: deferred deep linking done right in Expo Router"
+    url: "https://expo.dev/blog/deferred-deep-linking-the-right-way"
+    by: "Bartek Krasoń (Software Mansion), guest post on the Expo blog"
+    what: "Names a hole every referral/invite flow eventually falls into: standard deep links (Universal Links / App Links) only work when the app is ALREADY installed — iOS and Android preserve nothing across the store boundary, so a new user who taps an invite link launches the app blind to what they clicked. That is the Installation Gap, and closing it needs a server that remembers the click, which is why this has historically meant adopting an attribution SDK (deep linking as its side feature) and hand-writing glue between its callback and your router. The router-side argument is the durable part: because Expo Router exposes `+native-intent.tsx` as pre-routing middleware (redirectSystemPath), the deferred link can be resolved BEFORE the first screen mounts, which removes the post-mount useEffect race, duplicate navigation events and the ordering problem with auth gates; the remaining case — link resolves, user isn't signed in yet, guard redirects to /login and swallows it — is handled by holding the intent in a provider until the app says the user is ready. Vendor content (SWM's own SDK, @swmansion/react-native-detour 2.3.1, and it needs a Detour account for app credentials), but the failure mode and the +native-intent hook are general."
+    claim: "You ship invite or referral links into Expo Router — a plain deep link does NOT survive the store install, so first-launch intent needs deferred deep linking with a server behind it; resolve it in +native-intent.tsx and hold it across your auth gate."
+    applies_when: { deps: ["expo-router"], platforms: [react-native] }
   - title: "Reverse Engineering ChatGPT Web: How OpenAI Built for a Billion Users"
     url: "https://performance.dev/chatgpt"
     by: "Dennis Brotzky (performance.dev)"
@@ -97,6 +104,8 @@ reading:
     claim: "You ship React Router — model modal dialogs as nested routes instead of local useState/useEffect; revalidation, view transitions, flash sessions, and exit animations then ride the router."
     applies_when: { deps: ["react-router", "react-router-dom"], platforms: [react] }
 sources:
+  - "https://expo.dev/blog/deferred-deep-linking-the-right-way"
+  - "https://registry.npmjs.org/@swmansion/react-native-detour/latest"
   - "https://reactnavigation.org/blog/2025/12/19/react-navigation-8.0-alpha/"
   - "https://reactrouter.com/"
   - "https://expo.dev/changelog/sdk-56"

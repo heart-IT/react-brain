@@ -19,13 +19,19 @@ recommend:
     - "client + server both TypeScript, private API → tRPC (type-safety with no codegen)"
     - "offline / local-first / collaborative → TanStack DB or Zero"
     - "P2P / serverless / Holepunch backend → data lives in the Hypercore/Autobase stack queried locally via hrpc; a client cache (TanStack Query) is N/A by design — see RB-E-P2P"
-    - "server-rendered web → fetch in RSC and skip a client cache where you can"
+    - "server-rendered web → fetch in RSC and skip a client cache where you can; the sharper test is whether data changes ON ITS OWN (polling/pushes) — if it only changes when the user acts, useActionState + useOptimistic cover it (see reading)"
     - "already on Redux Toolkit → RTK Query"
 note: "Server state ≠ client state (see RB-E-STATE). TanStack Query is the #1 React library in State of React 2025; it's transport- and platform-agnostic, so the data layer is shared code across web + RN. Adversarially stress-tested 2026-06-25 (SURVIVES, high): RSC complements (doesn't displace) the cache; TanStack DB builds ON TanStack Query; Zero reached 1.0 (2026-06) with React Native support."
 defer_to_skill: null
 doc: "RB-E-DATA.md"   # long-form Explanation entry in content_dir
-updated: 2026-08-07   # + Calazans Relay-scoping reading — where normalization doesn't earn its cost (Status #486)
+updated: 2026-08-18   # when an RSC app actually needs a client cache (data changes on its own vs on user action)
 reading:
+  - title: "Coordinating Optimistic Updates in Next.js"
+    url: "https://aurorascharff.no/posts/coordinating-optimistic-updates-in-nextjs/"
+    by: "Aurora Scharff"
+    what: "Answers the question this entry's 'skip a client cache where you can' clause leaves open — when DO you need one — from the other side: two real apps built without one. The pattern is useActionState as an async reducer holding the confirmed-plus-queued state (React queues Actions, so overlapping writes apply in order instead of racing) with useOptimistic layering the in-flight change on top; rollback needs no reverse-change calculation because when the Transition ends the optimistic layer simply disappears and the server data shows through. Scaling it past one component means lifting the queue and the optimistic state into a context provider so sibling subtrees see the same pending change. The criterion at the end is the durable part: reach for TanStack Query or SWR when the data changes ON ITS OWN (messages arriving while you read), not when it only changes because the user acted (a dragged channel layout) — and be honest that adopting one in an RSC app leaves you coordinating TWO caches, invalidating the server cache inside the Server Function and the client keys in the browser. The author's own closing caveat: reducer + Action queue + optimistic state is a fair amount of wiring."
+    claim: "You are deciding whether an RSC/Server-Function app needs TanStack Query or SWR — the test is whether data changes on its OWN (polling, pushes). User-driven writes are served by useActionState + useOptimistic; a client cache means keeping two caches in sync."
+    applies_when: { deps: ["next"], absent_deps: ["@tanstack/react-query", "swr"], platforms: [react] }
   - title: "Creating Query Abstractions"
     url: "https://tkdodo.eu/blog/creating-query-abstractions"
     by: "Dominik Dorfmeister (TkDodo), TanStack Query maintainer"
@@ -73,6 +79,7 @@ reading:
     claim: "You ship Relay — scope it to cross-referenced entity data: config, experiments, volatile time-series, server-driven UI trees and inlined assets don't benefit from normalization, and a plain store beside Relay is strictly cheaper for them."
     applies_when: { deps: ["react-relay"] }
 sources:
+  - "https://aurorascharff.no/posts/coordinating-optimistic-updates-in-nextjs/"
   - "https://2025.stateofreact.com/en-US/libraries/"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "@tanstack/react-query", label: "TanStack Query", token: "tanstack query" }

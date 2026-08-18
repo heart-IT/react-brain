@@ -19,7 +19,8 @@ recommend:
   when:
     - "custom real-time effects (blur / segmentation / virtual bg) → VisionCamera frame processors + Skia/Metal + MediaPipe/Vision"
     - "self-hosted / open-source calling → LiveKit; fastest managed setup → Daily / Agora / Stream"
-    - "just capture photos / scan codes → expo-camera (or VisionCamera for advanced)"
+    - "just capture photos → expo-camera (or VisionCamera for advanced)"
+    - "scan a code → choose by the native engine, not the wrapper (see the engine map in reading); no custom camera UI needed → a one-call platform scanner, overlays/validation → VisionCamera + barcode plugin, Expo Go → expo-camera"
     - "shipping camera to prod NOW → VisionCamera v5 (GA 2026-04) is still stabilizing: open iOS-26 teardown/race crashes + an AE regression vs v4, and ~85% of installs remain on v4 (2026-07) — adopt v5 pinned-patch with a device-matrix pass; don't linger on v4 (frozen since 2025-11)"
     - "displaying images (caching, blurhash placeholders, transitions) → expo-image, not core <Image>"
     - "video/audio playback → expo-video / expo-audio; migrate off expo-av (deprecated, unpatched, out of Expo Go since SDK 55)"
@@ -36,7 +37,7 @@ note: >
   (pricing, features) are not yet verified here.
 defer_to_skill: react-native-jsi   # frame processors / native modules; real-time perf → rt-audio-pipeline-audit
 doc: "RB-E-MEDIA.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-13
+updated: 2026-08-18   # barcode engine map (ML Kit / AVFoundation / VisionKit / ZXing) — quirks belong to the engine
 reading:
   - title: "Building a video call app with filters"
     url: "https://blog.margelo.com/building-videocall-app-with-filters"
@@ -59,6 +60,12 @@ reading:
     what: "The canonical v5 reference for this entry's default camera pick: the full Nitro rewrite (−3k LOC of hand-written JSI, ~15x lower call latency vs Turbo Modules), the Constraints API replacing Formats, in-memory photo capture, depth/RAW/multi-cam, and modular frame-processor plugins. Read before betting real-time work on v5."
     claim: "You ship VisionCamera — v5 is a full Nitro rewrite (Constraints API replaces Formats, ~15x lower call latency) but still stabilizing: adopt pinned-patch with a device-matrix pass; don't linger on frozen v4."
     applies_when: { deps: ["react-native-vision-camera"], platforms: [react-native] }
+  - title: "Scanning Barcodes in React Native Apps: The Complete Guide (2026)"
+    url: "https://margelo.com/blog/react-native-barcode-scanner"
+    by: "Marc Rousavy (creator of VisionCamera and react-native-data-scanner)"
+    what: "The cross-library selection guide the VisionCamera-scoped piece below doesn't cover, and its durable core is the ENGINE MAP: every RN scanning library wraps one of four native engines — Google ML Kit (VisionCamera's Barcode Scanner on both platforms, expo-camera on Android, data-scanner on Android), AVFoundation's AVCaptureMetadataOutput (VisionCamera's Object Output, expo-camera on iOS for most formats), VisionKit's DataScannerViewController (react-native-data-scanner on iOS 16+, expo-camera's launchScanner), and ZXing (which expo-camera bundles on iOS to decode PDF417/Code 39/Codabar). The consequence is the useful part: decoder quirks belong to the ENGINE, not the wrapper, so if ML Kit mis-reads an inverted barcode every ML-Kit-based library does, and iOS reporting UPC-A as EAN-13 shows up in everything built on Apple's APIs. The routing: one code and no custom UI → react-native-data-scanner (one call, no camera view to build); in-app camera with overlays or validation → VisionCamera + the barcode plugin; smallest iOS-only footprint → VisionCamera's Object Output; Expo Go → expo-camera; damaged/dense codes at industrial scale → a commercial SDK. Author bias is explicit (he wrote VisionCamera and data-scanner), and the post corrects a vendor claim that VisionCamera uses VisionKit — it never has. Note react-native-data-scanner is 0.1.2 on npm (verified 2026-08-18): the routing advice is sound, the package is early."
+    claim: "You scan barcodes in React Native — pick by the native engine underneath (ML Kit / AVFoundation / VisionKit / ZXing): decoder quirks belong to the engine, not the wrapper. Need one code and no custom UI? A platform scanner call beats mounting a camera view."
+    applies_when: { deps: ["react-native-vision-camera", "expo-camera"], platforms: [react-native] }
   - title: "QR and Barcode Scanning in React Native with VisionCamera V5"
     url: "https://blog.margelo.com/react-native-qr-barcode-scanner-visioncamera-v5"
     by: "Marc Rousavy (Margelo; VisionCamera creator)"
@@ -66,6 +73,7 @@ reading:
     claim: "You ship VisionCamera and scan codes — three APIs (CodeScanner / useBarcodeScannerOutput / frame processors); narrow barcodeFormats and outputResolution for latency, and mind the frame-vs-preview coordinate gotcha."
     applies_when: { deps: ["react-native-vision-camera"], platforms: [react-native] }
 sources:
+  - "https://margelo.com/blog/react-native-barcode-scanner"
   - "https://blog.margelo.com/building-videocall-app-with-filters"
   - "https://expo.dev/changelog/sdk-55"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)

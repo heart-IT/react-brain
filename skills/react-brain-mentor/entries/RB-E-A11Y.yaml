@@ -16,11 +16,18 @@ recommend:
     - "depth audit (contrast, intrinsics, dynamic type) → design-systems-governance"
 defer_to_skill: design-systems-governance
 doc: "RB-E-A11Y.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-16
+updated: 2026-08-18   # the blocked-aria-hidden ordering rule: focus leaves before the region hides
 sources:
+  - "https://css-tricks.com/blocked-aria-hidden-fix/"
   - "https://css-tricks.com/the-siren-song-of-arianotify/"
   - "https://certificates.dev/blog/accessibility-in-react-common-mistakes-and-how-to-fix-them"
 reading:
+  - title: "Blocked aria-hidden: The Warning is Right, and Every Fix You've Found is Wrong"
+    url: "https://css-tricks.com/blocked-aria-hidden-fix/"
+    by: "Durgesh Rajubhai Pawar (CSS-Tricks)"
+    what: "One rule, and the reason the popular fixes are worse than the bug: FOCUS HAS TO LEAVE A REGION BEFORE THAT REGION BECOMES HIDDEN OR INERT. The browser's 'Blocked aria-hidden on an element because its descendant retained focus' warning is telling the truth — a screen-reader user's focus is about to land in a hole — and the three fixes that dominate search results (blur() the active element, wrap the close in setTimeout, or strip the aria-hidden attribute) all silence the console while leaving that user stranded. The fix is an ordering change in code most apps already have: move focus out first, then hide/inert the region, and inert the closing overlay itself (the step nearly everyone skips). The shortcut worth taking when you can: native <dialog> with .showModal() runs the whole focus dance for you — with the one case no browser can guess, restoring focus to an element that has since been removed from the DOM."
+    claim: "You hide regions when a modal or drawer closes — move focus OUT before the region becomes hidden or inert (not blur(), not setTimeout, not deleting aria-hidden), and prefer native <dialog>.showModal(), which handles the focus sequence for you."
+    applies_when: { platforms: [react] }
   - title: "The Siren Song of ariaNotify()"
     url: "https://css-tricks.com/the-siren-song-of-arianotify/"
     by: "Mat Marquis (CSS-Tricks)"

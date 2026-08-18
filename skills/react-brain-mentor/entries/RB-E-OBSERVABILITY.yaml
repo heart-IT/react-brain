@@ -7,18 +7,18 @@ confidence: medium
 platforms: [react, react-native]
 options:
   - { name: "Sentry (v8)", tradeoff: "crash + perf; v8 captures crashes before RN bootstraps via sentry.options.json (fixes 'TestFlight instant death')" }
-  - { name: "EAS Observe (Expo)", tradeoff: "startup-metric sampling (open beta); traces regressions to a specific build / OTA update" }
+  - { name: "EAS Observe (Expo)", tradeoff: "production performance monitoring, still OPEN BETA (first 10k monthly active users free; verified vs the docs 2026-08-18): install expo-observe, wrap the root in <ObserveRoot> and call markInteractive() — it then reports startup (cold/warm), time-to-interactive/time-to-render, bundle load and EAS Update download/apply times from real sessions, with P50/P90/P99 across devices. Two things Sentry-style tools don't give you: every build AND OTA update lands as a marker so a regression traces to the release that caused it, and the Expo Router integration breaks time-to-interactive down PER ROUTE. Metrics are queryable from the EAS CLI (JSON, for handing to an agent; there is an eas-observe Expo Skill). Expo-only" }
   - { name: "Firebase Crashlytics / Bugsnag", tradeoff: "established crash reporting" }
   - { name: "@callstack/inspector", tradeoff: "React-level component profiling in RELEASE builds via React DevTools, zero native changes — fills the release-profiling hole; VERY young (v0.1.x, 2026-06)" }
 recommend:
   default: "Sentry for crash + performance monitoring (v8 catches pre-bootstrap crashes); add error boundaries and wire it up at the production stage."
   when:
-    - "on Expo and want build/OTA regression tracing → add Expo Observe"
+    - "on Expo and want build/OTA regression tracing, or per-route time-to-interactive → add EAS Observe (open beta; expo-observe + markInteractive())"
     - "already on Firebase → Crashlytics is fine for crashes"
 note: "Production-stage concern (the mentor emphasizes observability + error boundaries at production). @callstack/inspector added 2026-07-10 (verified vs npm) — profile React components in release builds; v0.1.x, treat as experimental."
 defer_to_skill: null
 doc: "RB-E-OBSERVABILITY.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-10
+updated: 2026-08-18   # EAS Observe scope verified vs docs — per-route TTI, build/OTA markers, CLI/agent export
 sources:
   - "https://blog.sentry.io/react-native-sdk-8-is-here/"
   - "https://docs.expo.dev/eas/observe/introduction/"

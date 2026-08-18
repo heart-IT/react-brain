@@ -16,7 +16,8 @@ recommend:
     - "library/package author → minimize + version the exported types; avoid leaking internals"
     - "large repo with slow tsc → TS 7 (Go) is STABLE (~10x); migrate via the TS 6 bridge, following the VS Code pattern in reading"
     - "Next.js repo moving to TS 7 → `next build` loads TypeScript's JS compiler API, which TS 7 does not yet expose; set experimental.useTypeScriptCli so the build shells out to the project-local tsc instead (experimental, 16.3 Preview)"
-    - "not at Meta → use TypeScript, not Flow"
+    - "not at Meta → use TypeScript, not Flow; budget a Flow exit as a package-by-package program with type integrity preserved throughout (see the Yelp case in reading)"
+    - "React Native app on 0.87+ → the Strict TypeScript API is the default and deep imports into react-native/Libraries/* are type errors; see RB-E-RN-VERSIONS"
 note: >
   TypeScript 7.0 (the Go/native rewrite of tsc) is STABLE — npm latest = 7.0.2, published
   2026-07-08 (verified vs the npm registry; RC was 2026-06-18, stable landed on schedule).
@@ -30,8 +31,14 @@ note: >
   Expect the same shape from other API-embedding tools — check yours before pinning typescript@7.
 defer_to_skill: engineering-principles
 doc: "RB-E-TYPESCRIPT.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-28   # TS7-lacks-JS-API tooling gap (Next.js experimental.useTypeScriptCli)
+updated: 2026-08-18   # Yelp Flow→TS case (1.4M SLoC, 3y7m) + RN 0.87 Strict-API default cross-ref
 reading:
+  - title: "Migrating a Large Flow Monorepo to TypeScript"
+    url: "https://engineeringblog.yelp.com/2026/08/migrating-a-large-flow-monorepo-to-typescript.html"
+    by: "Shawn Walton (Yelp Engineering)"
+    what: "The receipt under this entry's 'not at Meta → use TypeScript, not Flow' line, and the shape of a type-checker migration you cannot do in one cut: 1.4M SLoC across 570 packages, three years and seven months, ending February 2026. The load-bearing decision was refusing to suspend type-checking anywhere — 'code that loses coverage from its type checker, tests, or linter almost never regains it' — which ruled out a big-bang rewrite and forced Flow and TypeScript to coexist in production. The mechanism: convert one package at a time (flowts first, later Stripe's flow-to-typescript-codemod, which cut the manual tail), then run flowgen to turn the emitted .d.ts back into Flow headers so still-Flow consumers keep type-checking. Because no tool generates .d.ts FROM Flow, the order is forced — deepest internal dependencies first, up the tree. What actually moved the needle was not tooling: a year of dogfooding on ~90 foundational packages before launch, documentation and outreach, a dependency-graph score that ranked which package unblocks the most others, auto-filed Jira tickets when a package became convertible, and finally hard quarterly deadlines — voluntary migration plateaued once the enthusiasts were done. LLM-driven conversion was tried in 2023 and abandoned as unreliable. Outcome: type coverage 83.15% (Flow) → 96.44% (TS), ~6,000 @ts-expect-error (2,000 of them mass-added when the team auto-suppressed the last few dozen orphaned packages to finish), 82% of surveyed engineers reporting a productivity gain."
+    claim: "You still run Flow — exiting it is a package-by-package program, not a codemod: keep type integrity throughout (flowgen turns emitted .d.ts back into Flow headers), convert deepest dependencies first, and expect uptake to stall until deadlines land."
+    applies_when: { deps: ["flow-bin"] }
   - title: "Why does tsgo use so much memory?"
     url: "https://zackoverflow.dev/writing/why-does-tsgo-use-so-much-memory"
     by: "Zackary Radisic"
@@ -50,6 +57,7 @@ sources:
   - "https://devblogs.microsoft.com/typescript/announcing-typescript-7-0-rc/"
   - "https://registry.npmjs.org/typescript/latest"
   - "https://nextjs.org/docs/app/api-reference/config/next-config-js/useTypeScriptCli"
+  - "https://engineeringblog.yelp.com/2026/08/migrating-a-large-flow-monorepo-to-typescript.html"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "typescript", label: "TypeScript", token: "typescript" }
 detect_source:   # source-level signals owned by this entry (regex over repo source)

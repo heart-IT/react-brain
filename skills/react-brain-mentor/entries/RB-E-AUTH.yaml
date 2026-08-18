@@ -6,11 +6,11 @@ status: drafted
 confidence: low
 platforms: [react, react-native]
 options:
-  - { name: "Better Auth", tradeoff: "TS-first, framework-agnostic, self-hosted (your DB owns the users); 2FA/passkeys/organizations via plugins; acquired Auth.js and JOINED VERCEL 2026-07 with a stated open-source + framework-agnostic commitment; 1.6.x, very active" }
+  - { name: "Better Auth", tradeoff: "TS-first, framework-agnostic, self-hosted (your DB owns the users); 2FA/passkeys/organizations via plugins; acquired Auth.js and JOINED VERCEL 2026-07 with a stated open-source + framework-agnostic commitment; 1.7.0 (2026-08-18) moves the joins flag out of experimental to advanced.database.joins — a config rename if you opted in; very active" }
   - { name: "Auth.js / NextAuth (maintenance)", tradeoff: "the long-time Next.js default — now under Better Auth's stewardship: security + bug fixes continue but the stated path is transitioning users to Better Auth; registry shows the cadence (@auth/core last publish 2025-10)" }
   - { name: "Clerk", tradeoff: "managed auth SaaS with prebuilt React components (sign-in, orgs, MFA) + a first-class Expo SDK (@clerk/clerk-expo); fastest to ship; per-MAU pricing + vendor dependency" }
   - { name: "Auth0 (react-native-auth0)", tradeoff: "the enterprise IdP — SSO/SAML/federation; RN SDK active (v5.10, 2026-07, adds MFA support; v5.9 added passwordless OTP for database connections)" }
-  - { name: "backend-bundled — Supabase Auth / Firebase Auth", tradeoff: "already included with the backend (@react-native-firebase/auth on RN); use it rather than bolting on a second identity system" }
+  - { name: "backend-bundled — Supabase Auth / Firebase Auth", tradeoff: "already included with the backend (@react-native-firebase/auth on RN, v26.x); use it rather than bolting on a second identity system. v26 (2026-08-07) is a hard line — see note" }
   - { name: "expo-auth-session (DIY)", tradeoff: "Expo's browser-based OAuth/OIDC primitive — the hand-rolled lane on RN; you own token/session handling (Keychain via RB-E-STORAGE) and the correctness burden (see reading)" }
 recommend:
   default: "Self-hosted TypeScript auth → Better Auth; managed auth with prebuilt UI and orgs/MFA out of the box → Clerk (web + Expo SDKs). If the backend already bundles auth (Supabase / Firebase), use that instead of adding a second identity system. Lightly vetted as an entry (confidence: low) — though the options themselves are mature."
@@ -20,6 +20,7 @@ recommend:
     - "managed service / fastest ship / prebuilt sign-in UI → Clerk (per-MAU pricing; @clerk/clerk-expo on RN)"
     - "enterprise SSO / SAML / an existing IdP → Auth0 (react-native-auth0 on RN)"
     - "backend is Supabase or Firebase → its bundled auth"
+    - "on react-native-firebase < 26 → v26 requires the New Architecture and drops the namespaced API (firebase.auth() → getAuth(app)); if you can't enable New Arch yet, stay on v25 deliberately"
     - "hand-rolling OAuth/sessions (expo-auth-session or custom) → read the Copenhagen Book first; session tokens live in Keychain/Keystore (RB-E-STORAGE), never AsyncStorage (RB-E-SECURITY)"
     - "P2P / Holepunch app → no auth server: identity is keypair-based → RB-E-P2P"
     - "agent-facing product (AI agents authenticating to your app) → watch Agent Auth Protocol (Better Auth × Vercel) — early, not a bet yet"
@@ -34,9 +35,19 @@ note: >
   as ANIMATION's Rive case): Auth.js is NOT formally deprecated — add the next-auth →
   better-auth migrate rule if/when a formal deprecation or EOL lands; until then it is a
   when-clause, not churn. Auth was a domain GAP — no entry covered it among the prior 42.
+  REACT NATIVE FIREBASE v26 (2026-08-07, verified vs the Invertase release post): the biggest
+  architectural cut in the library's nine years, and it is gated — every package with a native
+  bridge now REQUIRES the New Architecture (Codegen TurboModules), so v26 is only reachable once
+  the app is on New Arch; the maintainers' explicit advice otherwise is to stay on v25. Three
+  changes travel with it: all 19 packages migrated JS→TypeScript (the prerequisite for TurboModule
+  specs), the deprecated NAMESPACED API is removed so modular calls (getAuth(app)) are the only
+  surface — matching the firebase-js-sdk docs people already copy from — and CI now diffs the
+  TypeScript shapes against firebase-js-sdk so API drift fails on Invertase's side instead of in
+  your build months later. One migration trap worth knowing: TurboModules let APIs be synchronous
+  where firebase-js-sdk is synchronous, so code calling .then() on what is now void breaks.
 defer_to_skill: null
 doc: null
-updated: 2026-08-04   # Android GoogleSignInClient→Credential Manager deprecation reading (3-source corroboration)
+updated: 2026-08-18   # RN Firebase v26 — New Arch required, namespaced API removed (migrate rule added)
 reading:
   - title: "The Copenhagen Book"
     url: "https://thecopenhagenbook.com/"
@@ -49,6 +60,8 @@ reading:
     claim: "You ship Google sign-in on Android — the legacy GoogleSignInClient API is deprecated and will be removed; audit whether your RN library targets Credential Manager, and remember the library only gets you the credential, not session handling."
     applies_when: { platforms: [react-native] }
 sources:
+  - "https://github.com/better-auth/better-auth/releases/tag/v1.7.0"
+  - "https://invertase.io/blog/react-native-firebase-v26-release"
   - "https://github.com/auth0/react-native-auth0/releases/tag/v5.10.0"
   - "https://better-auth.com/blog/better-auth-joins-vercel"
   - "https://registry.npmjs.org/better-auth/latest"
@@ -65,3 +78,11 @@ tripwires:   # standing caveats as executable conditions — evaluated by `harve
   - when: { pkg: "next-auth", deprecated: true }
     then: "Auth.js/NextAuth formally deprecated on npm — the note's DELIBERATE NO-MIGRATE-RULE condition is met: add the next-auth → better-auth migrate rule (urgency: deprecated) with this flag as receipt"
     added: 2026-07-16
+migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-brain migrate`)
+  - from: { pkg: "@react-native-firebase/*", below: "26.0.0" }
+    to: "React Native Firebase v26 (TurboModules + modular API)"
+    urgency: upgrade
+    effort: M
+    requires: { pkg: "react-native", atleast: "0.82.0" }
+    why: "v26 makes every natively-bridged package New-Architecture-only and removes the namespaced API — bump the packages together, switch firebase.auth()-style calls to modular getAuth(app), and drop .then() where the TurboModule API is now synchronous. Below New Arch the supported position is to stay on v25."
+    receipts: ["https://invertase.io/blog/react-native-firebase-v26-release"]

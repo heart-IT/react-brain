@@ -1869,3 +1869,119 @@ flag resolved as policy), vscode-updates — 105 gold rows would have been auto-
 Spot-check now samples 2 random [rule:*] rows; a wrong rule row indicts the RULE.
 Engine guards pinned by tests/triage-rules.test.mjs (24 assertions). Cloud agents cannot
 edit triage-rules.yaml (out of PR scope) — rule activation stays a maintainer judgment.
+
+## 2026-08-18 — RN 0.87 pass: 6 sources, 11 days of drift, 20 keeps across 18 entries
+
+ELEVEN DAYS since the last pass and every source except TWiR had moved: Status #487, Digest #2340
++ #2344, RN Rewind #52 + #53, React Weekly #32 + #33, and Native Weekly #18 — the first NW issue
+after four consecutive dry passes, which settles its cadence note as genuinely ~monthly. 113
+firsthand events (40 auto-dispositioned by rules, 73 judged). The spine of the whole pass is React
+Native 0.87 stable (2026-08-11), which five of the six sources carried.
+
+TWiR DID NOT PUBLISH — AND `prep` DISAGREED. `harvest prep this-week-in-react` probed
+/newsletter/294, got a 175KB 200, wrote a manifest and froze a bench fixture. The page is a STUB
+for an unpublished issue: title "This Week In React #294: ...", description "Hi everyone!", and
+the only real links are next week's sponsor slots (posthog's tracking URL literally says
+`twir-aug19`). The archive listing stops at #293. Deleted both artifacts and wrote the trap into
+harvest-state.json: a 200 is not proof of publication on this source; cross-check the archive or
+reject a title ending in ": ...". Left unnoticed, the next pass's prep would have refused to
+overwrite a manifest built from a stub, and the bench gold would have inherited a fixture with
+eleven links in it.
+
+THE TRIPWIRE FIRED AND THE PREMISE WAS CHECKED BEFORE IT WAS OBEYED. ANIMATION's
+`react-native ≥ 0.87.0` tripwire says 0.87 carries the upstream Hermes fix for the worklet
+debug-metadata regression. The 0.87 release blog never mentions Hermes, so the `then:` was not
+self-evidently true. Verified through a chain instead: SWM's post names the backport as Hermes
+250829098.0.15, and the v0.87.0 tag's package.json pins hermes-compiler 250829098.0.16. Only then
+was the four-fix ladder rewritten as history ("fixed from 0.87 up"), "wait for RN 0.87" dropped as
+an option, and the row removed. Worklets 0.12 (2026-08-11) landed alongside — and the newsletter
+framing needed correcting there too: 0.12.0 is on npm's `next` tag while `latest` is 0.11.4,
+published a day LATER. Its Bundle Mode work (local bundles mmapped instead of living in an
+in-memory std::string, Android dev-server bundles streamed to a cache file) strengthens the
+"enable Bundle Mode regardless" line rather than replacing it.
+
+RN 0.87 ITSELF, verified against the blog AND the v0.87.0 CHANGELOG: Strict TypeScript API is now
+the DEFAULT (deep imports into Libraries/* are type errors; the react-native-legacy-deep-imports
+customCondition is a bridge that expires after 0.88), Metro 0.84→0.87 (2x faster source maps, half
+the source-map memory, stable TS/ESM config files, YAML + .es6 configs dropped), experimental
+SwiftPM, AGP 9, Node ≥22.13 / Kotlin 2.0 / compileSdk 37, InteractionManager and friends removed,
+backgroundImage de-experimentalized (which fired a twir-292 reopen), 0.84.x unsupported. It landed
+in RN-VERSIONS (row + note + recommend + the migrate rule, now `below: 0.87.0`), BUILD (Metro) and
+TYPESCRIPT (a when-clause).
+
+THE BEST LINK OF THE PASS WAS THE LEAST PROMINENT ONE. RN Rewind #53 mentioned in passing that
+CocoaPods "will shut down permanently on December 2, 2026". Checked at the source: CocoaPods has
+been in declared maintenance mode since 2024-08-13, and on 2026-12-02 trunk goes READ-ONLY —
+permanently refusing NEW Podspecs, with the Specs repo archived and a test run 2026-11-01→07. The
+CDN and Specs repo keep serving, so existing builds and existing pod versions keep resolving and
+private specs repos are untouched. "Read-only" versus "shutdown" is the difference between an
+audit and a panic — and it is what puts a date on 0.87's experimental SwiftPM path. Recorded with
+the correction visible in both the entry and the manifest.
+
+TWO FIRED REOPEN SIGNALS PAID OFF, ONE DIDN'T. GTKX 1.0 (2026-08-04) fired the exact signal wired
+at TWiR #291 — "1.0 stable → DESKTOP option row" — and closed a hole the entry had carried since
+it was written: every other row reaches Linux through a webview or not at all, so there was no
+Linux-native React row. react-native-plain-text fired its "recurrence or adoption signal" reopen
+on its 2nd independent mention (TWiR #293 → RNR #52) and became a LISTS when-clause, scoped
+honestly (single string, single style, Fabric-only, 0.7.x beta; cell-content tuning AFTER
+virtualization is right). Gesture Handler's "faster touchables" reopen fired too — and after
+reading v3.2.0 it stayed a skip: Touchable reimplemented without GestureDetector on all three
+platforms is an implementation change behind an unchanged API. A fired tripwire is mandatory WORK;
+a fired reopen is mandatory RE-TRIAGE, and re-triage is allowed to conclude "still no".
+
+THE SPOT-CHECK OVERTURNED A CAP SKIP, AGAIN ON THE ENTRY-GAP TEST. React Status #486 had skipped
+TanStack Table v9's memory post as cap ("more depth on a release we already documented"). Re-read:
+V8 gave every row/cell/header object its own copy of every method, each carrying a closure scope;
+V9 hangs them on shared prototypes cached per table, worth up to ~90% less memory on large tables
+and moving the practical ceiling from ~1–1.5M rows before ~4GB to ~10–16M. That is a THRESHOLD the
+entry recommends on ("huge web tables → HighTable"), so it is now a LISTS note and the 486 manifest
+carries the retro-added keep. Same lesson as the dx-styles flip: the question is what the ENTRY
+lacks, not how novel the item is.
+
+ADVOCATE PASS FLIPPED ONE, AGAINST ITS OWN REOPEN SIGNAL. Callstack's "Migration to React Native in
+2026 Starts With a Delivery Question" had been skipped twice with the reopen recorded as "a
+brownfield migration piece with production numbers". It still has no production numbers — the flip
+is on the gap instead: BROWNFIELD's three readings are all about HOW to embed (Doctolib, Expo
+Updates in brownfield, Zalando), and none frames brownfield vs greenfield vs a checkpointed hybrid,
+which is the decision that comes first. "The entry owns the decision" was true of its scope and
+false of its content. Recorded as a visible disagreement in react-weekly-32.md.
+
+THE RECEIPTS GATE CAUGHT A FIRSTHAND FALSE POSITIVE. The poller reported
+`callstack/agent-device: v0.20.10`; verify-diff found it 404s with no Wayback snapshot. GitHub's
+releases API and npm both top out at 0.20.9 (2026-08-17), so v0.20.10 was never published — a
+draft or deleted tag caught mid-flight. The row is now a documented phantom, and the option row
+cites the registry. A firsthand GitHub-release event is a claim to verify, not a fact.
+
+TWELVE OTHER KEEPS, all fetch-verified: TESTING — Shopify's E2E rebuild (Appium/WebdriverIO suite
+pulled from blocking CI at ~50% stability, back at 98% via an API where every step carries a
+validated assertion, elements are found visually with PaddleOCR + OpenCV against Polaris SVGs, and
+escape hatches are named UNSAFE_). TYPESCRIPT — Yelp's Flow→TS program (1.4M SLoC, 570 packages,
+3y7m, coverage 83.15%→96.44%; flowgen backwards so still-Flow consumers keep type-checking;
+voluntary uptake plateaued until deadlines). ONDEVICE-AI — Margelo's local RAG build, kept for its
+constraint list (generator + embedder must co-fit in ~900MB; a 1.07GB model dies on an untrappable
+native OOM; context is capped by KV-cache RAM so oversized prompts are REJECTED, not truncated) +
+a @react-native-ai/llama option row. MEDIA — the barcode engine map (ML Kit / AVFoundation /
+VisionKit / ZXing; decoder quirks belong to the engine, not the wrapper). NAV — deferred deep
+linking and the Installation Gap, with Expo Router's +native-intent.tsx as pre-routing middleware.
+DATA — when an RSC app actually needs a client cache (data that changes on its OWN vs on user
+action). A11Y — focus must leave a region BEFORE it is hidden or inert, and the three popular
+"fixes" all strand the screen-reader user. AI-DEVTOOLS — the agent-device replay study (3m18s live
+vs 8.8s replayed with zero model calls; 14.1% of agent tool calls never reach the device), plus
+modern-web-guidance as the first WEB-side skills row and Metrognome (npm 0.2.6 — from Uphold, not
+Callstack, though it orchestrates Callstack tooling). AUTH — RN Firebase v26 is New-Arch-gated with
+the namespaced API removed (migrate rule added; stay on v25 otherwise) and better-auth 1.7's joins
+config move. OBSERVABILITY — EAS Observe's real scope from the docs, not the marketing page
+(per-route TTI, build/OTA markers, 10k MAU free). OTA — Codemagic Patch, the CodePush-lineage
+self-host option, kept off the repo + registry rather than the ad copy that carried it (it is a
+sponsored slot in RNR #52/#53 — disclosed in the manifest). Plus STORAGE (op-sqlite 18 removes
+crsqlite), EDITORS (enriched-markdown 1.0), DX (Biome's nursery useReactCompiler rule).
+
+GATES: coverage ✓ on all seven gate-able manifests (React Weekly's two remain RSS-derived by
+design) · verify-diff ✓ 45 receipts after the phantom was corrected · watchlist reviewed · npm test
+green (lint clean, rules ✓ across 1145 gold rows, eval 139/139). Two eval fixtures moved WITH the
+corpus: rn-smells' react-native bumped 0.86→0.87 because that fixture means "current stack, nothing
+to migrate", and the new DATA claim was re-scoped to `deps: [next] + absent_deps: [cache]` so it
+does not fire on a repo that already has one. Counts: RNR ×53 · Status ×28 · Digest ×22 · NW ×8 ·
+RW ×26 · TWiR ×27 (unchanged). FEED HYGIENE: vercel.com produced an overflow marker and zero keeps
+for the SIXTH consecutive pass; github.blog and thoughtbot likewise. The prune is still a
+maintainer call.

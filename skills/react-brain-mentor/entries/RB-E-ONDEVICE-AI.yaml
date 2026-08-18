@@ -11,23 +11,31 @@ options:
   - { name: "@react-native-ai/adk", tradeoff: "Google Gemini on ANDROID via the Agent Development Kit — on-device Gemini Nano + cloud models behind one Vercel-AI-SDK provider; tool calling + streaming; same react-native-ai family as the Apple provider (v0.12)" }
   - { name: "react-native-nitro-mlx", tradeoff: "Apple MLX on-device LLM + TTS/STT via Nitro Modules, with tool calling (ChatSession API); iOS 26+ ONLY; v0.5, ~100★ — niche/early" }
   - { name: "react-native-rag", tradeoff: "on-device retrieval-augmented generation over ExecuTorchLLM; local vector store" }
+  - { name: "@react-native-ai/llama", tradeoff: "llama.cpp behind the Vercel AI SDK provider interface (v0.12.0, verified vs npm 2026-08-18) — runs GGUF chat AND embedding models on one engine/one dependency, which is what makes a hand-rolled local RAG pipeline (embed + generate) practical; pair with react-native-nitro-sqlite + sqlite-vec for the vector store (see reading)" }
   - { name: "offline speech (expo-speech-recognition / whisper.rn)", tradeoff: "speech-to-text without network; whisper.rn (0.7.2, ~800★, verified vs npm + repo 2026-07-28) is the concrete binding — whisper.cpp under the hood, and it now also carries NVIDIA Parakeet ASR alongside Whisper" }
 recommend:
   default: "Cross-platform on-device models → react-native-executorch; Apple-only → @react-native-ai/apple; local RAG → react-native-rag. Fast-moving (confidence: low) — validate on-device perf before committing."
   when:
     - "offline speech-to-text → expo-speech-recognition, or whisper.rn for whisper.cpp/Parakeet models"
-    - "private/offline LLM over local docs → react-native-rag"
+    - "private/offline LLM over local docs → react-native-rag, or roll it yourself with @react-native-ai/llama + nitro-sqlite/sqlite-vec; budget RAM for generator + embedder TOGETHER (see reading)"
 note: "Fast-moving area surfaced across multiple RN Rewind issues; recommend tentatively (confidence: low) and validate on-device before committing."
 defer_to_skill: null
 doc: null
-updated: 2026-08-04   # Margelo on-device face-recognition pipeline reading (VisionCamera frame processors, measured)
+updated: 2026-08-18   # local-RAG build reading (llama.cpp + sqlite-vec) + @react-native-ai/llama option row
 sources:
   - "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.8.0"
   - "https://registry.npmjs.org/@react-native-ai/adk/latest"
   - "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.3.0"
   - "https://github.com/corasan/react-native-nitro-mlx"
   - "https://github.com/mybigday/whisper.rn"
+  - "https://registry.npmjs.org/@react-native-ai/llama/latest"
 reading:
+  - title: "Fitting RAG in Your Pocket: Local Retrieval in React Native"
+    url: "https://margelo.com/blog/fitting-RAG-in-your-pocket"
+    by: "Ritesh Shukla (Margelo)"
+    what: "The build behind this entry's react-native-rag / local-RAG option rows, done by hand so every constraint is visible: a WhatsApp export chunked, embedded and searched entirely on a $100 Android phone in airplane mode. The stack is one engine and one store — @react-native-ai/llama (llama.cpp) runs BOTH the embedder and the generator, and react-native-nitro-sqlite statically links sqlite-vec so KNN is a vec0 virtual table queried with `WHERE embedding MATCH ? AND k = ?`, no second ML runtime and nothing fetched at runtime. What makes it durable is the failure list. MEMORY IS THE CEILING, not accuracy: ~900MB usable RAM holds Qwen2.5-0.5B-Instruct Q4 (469MB) beside the 119MB embedder, and Qwen2.5-1.5B (1.07GB) hard-crashed the process with an uncatchable native OOM that JS cannot trap. The context window is paid for in KV-cache RAM, so it is capped at 4,096 tokens and a 21,000-token export is REJECTED outright ('Context is full'), not truncated — which is the whole reason retrieval exists here. Query and documents must be embedded by the same model with the same normalization, or search returns noise (the author calls this the number-one RAG pitfall). The multilingual embedder (paraphrase-multilingual-MiniLM-L12-v2, 384 dims, ~119MB at Q4) is worth its size the moment chats aren't pure English — all-MiniLM-L6 collapsed non-English messages to nearly identical vectors. Chunk boundaries are part of the data model: strip the speaker or timestamp and the model hallucinates them back. And a small model needs an explicit 'say you don't know' escape plus replayed recent turns, or follow-up questions retrieve the wrong thing entirely."
+    claim: "You are building on-device RAG in React Native — memory binds before quality: generator + embedder must fit together (~900MB on a budget phone; a 1.07GB model dies on an untrappable native OOM) and query and documents need one embedding model."
+    applies_when: { deps: ["@react-native-ai/llama", "react-native-rag", "react-native-executorch"], platforms: [react-native] }
   - title: "On-Device AI Beats Cloud for TTS — Here's Why"
     url: "https://swmansion.com/blog/on-device-ai-beats-cloud-for-tts-heres-why/"
     by: "Mateusz Kopciński (Software Mansion)"

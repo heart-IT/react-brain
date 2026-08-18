@@ -16,6 +16,7 @@ recommend:
   when:
     - "add RN screens to an existing native app → react-native-brownfield"
     - "many teams shipping independent bundles → Granite (Toss) / Rock"
+    - "deciding brownfield vs a greenfield rewrite → choose by where the risk sits (continuity vs owning a runtime boundary); a checkpointed greenfield with a real brownfield fallback tests it — see reading"
 note: >
   For embedding RN into native apps or splitting a super-app — a scale-stage concern; mostly
   Callstack/Toss tooling (several alpha) plus, since SDK 55, a first-party Expo path.
@@ -29,14 +30,21 @@ note: >
   therefore a 4.x fact. Pair the brownfield major with the Expo SDK upgrade, not before it.
 defer_to_skill: engineering-principles
 doc: "RB-E-BROWNFIELD.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-28   # brownfield 5.0.0 drops Expo SDK 55 (firsthand GitHub release watch)
+updated: 2026-08-18   # brownfield-vs-greenfield decision reading (the choice before the tooling)
 sources:
   - "https://github.com/callstack/react-native-brownfield"
   - "https://github.com/callstack/react-native-brownfield/releases/tag/%40callstack%2Freact-native-brownfield%405.0.0"
   - "https://registry.npmjs.org/@callstack/brownie"
   - "https://docs.expo.dev/brownfield/overview/"
   - "https://www.callstack.com/blog/how-we-made-hybrid-ios-apps-compile-39-faster-with-react-native-brownfield"
+  - "https://www.callstack.com/blog/migration-to-react-native-in-2026-starts-with-a-delivery-question"
 reading:
+  - title: "Migration to React Native in 2026 Starts With a Delivery Question"
+    url: "https://www.callstack.com/blog/migration-to-react-native-in-2026-starts-with-a-delivery-question"
+    by: "Michał Pierzchala (Callstack)"
+    what: "The decision that comes BEFORE this entry's tooling: brownfield or greenfield. The framing is that the trigger for migrating is usually delivery cost (two implementation tracks, two review paths, two QA cycles, two release trains), and that the choice between paths is really a choice of where the risk sits during the transition. Brownfield keeps the native apps as the production host and moves one flow at a time — it preserves installed-app continuity (session state, secure storage, push identity, subscriptions, app extensions) and leaves a native fallback, at the cost of owning a runtime boundary (packaging, host integration, native↔RN navigation, shared state) while maintaining two surfaces at once. Greenfield builds a replacement and ships it under the same bundle ID — less architectural drag and a codebase agents work better in, but continuity becomes the risk: auth, deep links, push tokens, app groups, persisted data and analytics all have to survive the cutover, and mature products fail on accumulated behavior rather than on screens. The third option is the useful one: start greenfield with a fixed checkpoint and a REAL brownfield fallback, where the checkpoint tests product continuity (authenticated flows, analytics, accessibility, performance, at least one meaningful native boundary) and not just how fast screens get rebuilt."
+    claim: "You are weighing a native→React Native migration — pick by where the risk can sit: brownfield preserves installed-app continuity but you own a runtime boundary; greenfield is cleaner but must reproduce auth, deep links and push identity before cutover."
+    applies_when: { platforms: [react-native], stages: [production, scale] }
   - title: "Rebuilding the Doctolib Homepage from Webview to Native"
     url: "https://medium.com/doctolib/rebuilding-the-doctolib-homepage-from-webview-to-native-27937ea71801"
     by: "Doctolib"

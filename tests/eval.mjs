@@ -27,7 +27,7 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
   check(d.platform === 'react-native', 'rn-smells: platform should be react-native');
   check(byEntry(d, 'RB-E-MAPS')?.fit === '✓ aligned', 'rn-smells: maps deps should detect as MAPS ✓ aligned');
   check(byEntry(d, 'RB-E-STATE')?.fit === '✓ aligned', 'rn-smells: zustand should detect as STATE ✓ aligned');
-  check(byEntry(d, 'RB-E-RN-VERSIONS')?.labels.join() === 'RN 0.86.0', 'rn-smells: RN version row');
+  check(byEntry(d, 'RB-E-RN-VERSIONS')?.labels.join() === 'RN 0.87.0', 'rn-smells: RN version row');
   // 2026-07-10 entries: pin the new detect rows so harvest-era additions stay wired
   check(byEntry(d, 'RB-E-OTA')?.fit === '✓ aligned', 'rn-smells: expo-updates should detect as OTA ✓ aligned');
   check(byEntry(d, 'RB-E-POLISH')?.fit === '✓ aligned', 'rn-smells: sonner-native+bootsplash should detect as POLISH ✓ aligned');

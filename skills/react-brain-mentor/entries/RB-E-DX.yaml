@@ -17,7 +17,7 @@ recommend:
   default: "Gate tests + typecheck + lint on every PR in CI, and enforce the same locally with a pre-commit hook. For lint/format, default to Biome (one fast tool) unless you need ESLint's plugin ecosystem (react-hooks, react-compiler)."
   when:
     - "has tests but no CI → add CI FIRST; invariants that aren't gated silently rot (a real finding in audited production apps)"
-    - "needs ESLint react-hooks / react-compiler rules → ESLint flat config + Prettier over Biome (still the only lane carrying them)"
+    - "needs ESLint react-hooks / react-compiler rules → ESLint flat config + Prettier over Biome (still the only lane carrying them) — though Biome 2.5.8 began closing that gap, see note"
     - "kept typescript-eslint ONLY for type-aware rules → re-evaluate: oxlint --type-aware is stable and covers 59/61 of them"
     - "multi-package repo → pnpm workspaces + Turborepo for a cached task graph; pnpm 11.11+ also versions and releases the workspace itself (see note) — no separate changesets tool needed"
     - "normative styleguide but no linter config → wire the rules into lint so they're enforced mechanically, not by review"
@@ -26,6 +26,13 @@ note: >
   DX is cross-cutting — architecture/boundaries depth → engineering-principles; bundler choice →
   RB-E-BUILD; supply-chain → RB-E-SECURITY. This entry is the feedback loop (CI/lint/hooks/
   onboarding) that keeps the others honest.
+  BIOME STARTS ON THE REACT-COMPILER GAP (2026-08-13, verified vs the Biome rule docs): 2.5.8 adds
+  `useReactCompiler`, which RUNS React Compiler in lint mode and surfaces its actionable
+  diagnostics (e.g. a hook called inside a conditional). It self-scopes — it only runs when the
+  nearest package.json declares React ≥19 — but it is in the NURSERY group at `information`
+  severity, i.e. experimental and off by default; you opt in per-rule. That narrows, without
+  closing, the "ESLint is the only lane with react-hooks/react-compiler rules" reason above:
+  treat it as a signal about where Biome is heading, not yet as parity.
   LINT LANDSCAPE SHIFT (2026-07-28, verified vs the Oxc release post): type-aware linting is no
   longer a reason to stay on typescript-eslint — tsgolint v7 shipped stable, tracking TypeScript
   7.0.2 with 59 of typescript-eslint's 61 type-aware rules behind `oxlint --type-aware`. The
@@ -44,7 +51,7 @@ note: >
   removes a dependency (changesets) rather than adding one.
 defer_to_skill: engineering-principles
 doc: "RB-E-DX.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-28   # oxlint type-aware STABLE; pnpm native workspace release management (twir-290 reopen fired)
+updated: 2026-08-18   # Biome 2.5.8 useReactCompiler (nursery) — the ESLint-only-lane reason narrows
 reading:
   - title: "Best CI/CD for mobile apps in 2026: a practical comparison"
     url: "https://expo.dev/blog/best-ci-cd-for-mobile-apps"
@@ -57,6 +64,7 @@ reading:
     claim: "You ship Expo at scale — Doctolib's blueprint runs the bare workflow without EAS: fingerprint caching + JS patching halved CI builds while contributors grew 9→105."
     applies_when: { deps: ["expo"], stages: [scale] }
 sources:
+  - "https://biomejs.dev/linter/rules/use-react-compiler/"
   - "https://medium.com/doctolib/expo-without-eas-scaling-the-react-native-developer-experience-of-an-app-with-90m-users-2694ea841805"
   - "https://github.com/millionco/react-doctor"
   - "https://oxc.rs/blog/2026-07-22-type-aware-linting-stable"

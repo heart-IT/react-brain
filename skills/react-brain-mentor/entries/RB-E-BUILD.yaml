@@ -6,7 +6,7 @@ status: reviewed   # long-form entry written + source-checked → encyclopedia/R
 confidence: high
 platforms: [react, react-native]
 options:
-  - { name: "Metro", tradeoff: "RN bundler" }
+  - { name: "Metro", tradeoff: "RN bundler; 0.87 ships with RN 0.87 (2026-08-11) — source-map generation 2x faster and source maps take half the memory (both feed React Native DevTools load time), TypeScript/ESM config files (metro.config.mts) are STABLE, package self-resolve lands, and support for YAML configs + .es6 extensions is REMOVED" }
   - { name: "Vite 8 / Rspack 2 / webpack 5.109", tradeoff: "web bundlers; Vite 8 defaults to the Rust Rolldown bundler; Rspack 2 adds RSC + 2.1 ships the Rust React Compiler via its built-in SWC loader (7–13x the Babel plugin); webpack 5.109 closes much of the config gap (zero-loader CSS/HTML/TS/Wasm + Vite-compatible import.meta APIs); Vite still the default for new web" }
   - { name: "Turborepo / Nx + pnpm/yarn workspaces", tradeoff: "monorepo task graph + caching" }
   - { name: "Expo vs bare RN", tradeoff: "managed velocity vs native control" }
@@ -67,7 +67,7 @@ note: >
   CONFIGURATION grounds; the Rust-speed argument is untouched, so the default above stands.
 defer_to_skill: null
 doc: "RB-E-BUILD.md"   # long-form Explanation entry in content_dir
-updated: 2026-08-04   # webpack 5.109 "auto" experiments + Vite-compatible import.meta APIs
+updated: 2026-08-18   # Metro 0.87 with RN 0.87 — faster/leaner source maps, TS/ESM config stable, YAML+.es6 dropped
 watching:
   - title: "How React Native Builds Actually Work (APK, AAB, IPA, APP)"
     url: "https://www.youtube.com/watch?v=1o0pEjYGUWM"
@@ -105,6 +105,7 @@ reading:
     by: "The Mythical Engineer"
     what: "Why RN Android builds are slow (conservative Gradle/Metro/C++ defaults) and how parallel Gradle, dynamic Metro workers, ccache, and single-architecture builds cut times from 20+ min to 2-5 min, with benchmarks. The RN-CI build-perf dimension the other readings here don't cover."
 sources:
+  - "https://reactnative.dev/blog/2026/08/11/react-native-0.87"
   - "https://reactnative.dev/blog/2026/02/11/react-native-0.84"
   - "https://github.com/facebook/hermes/blob/static_h/doc/blog/2026-06-05-new-hermes-stable-release.md"
   - "https://voidzero.dev/posts/announcing-vite-plus-beta"

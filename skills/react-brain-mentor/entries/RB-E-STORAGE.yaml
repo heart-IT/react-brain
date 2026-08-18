@@ -17,11 +17,12 @@ recommend:
     - "frequent synchronous reads → MMKV"
     - "structured/queryable data → SQLite (op-sqlite for perf)"
     - "P2P / local-first app → primary persistence is the Hypercore/Autobase/Hyperbee log, not KV/SQLite (KV like AsyncStorage is just for local prefs) — see RB-E-P2P"
-note: "AsyncStorage v3.x moved to instance-based storage (createAsyncStorage) and requires React Native 0.76+ (NOT New-Arch-only — that earlier claim was wrong; verified vs the v3 migration docs). react-native-mmkv v4 is a full Nitro rewrite (Oct 2025) that restored Old-Arch compat. Latest: async-storage 3.1.x, mmkv 4.3.x, op-sqlite 17.x (2026-06)."
+note: "AsyncStorage v3.x moved to instance-based storage (createAsyncStorage) and requires React Native 0.76+ (NOT New-Arch-only — that earlier claim was wrong; verified vs the v3 migration docs). react-native-mmkv v4 is a full Nitro rewrite (Oct 2025) that restored Old-Arch compat. Latest: async-storage 3.1.x, mmkv 4.3.x, op-sqlite 18.1.1 (2026-08-17). OP-SQLITE 18 IS BREAKING (2026-08-14, verified vs the GitHub releases): 18.0.0 REMOVES crsqlite — if you were using op-sqlite as the local half of a CRDT-synced store, that extension is gone and the migration is yours; it also rebinds hooks/reactive flush to their runtime generation and drops an internal mutex in favour of self-cleaning databases. 18.1 adds initial Swift Package Manager support and RN 0.87 compatibility, so on 0.87 this is the line to be on."
 defer_to_skill: null
 doc: "RB-E-STORAGE.md"   # long-form Explanation entry in content_dir
-updated: 2026-08-04   # MMKV-writes-in-a-worklet serialization-cost reading (measured negative result)
+updated: 2026-08-18   # op-sqlite 18 — crsqlite removed (breaking), SPM + RN 0.87 compat in 18.1
 sources:
+  - "https://github.com/OP-Engineering/op-sqlite/releases"
   - "https://react-native-async-storage.github.io/3.1/migration-to-3/"
   - "https://github.com/mrousavy/react-native-mmkv/releases"
 reading:

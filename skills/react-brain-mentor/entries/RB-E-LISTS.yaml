@@ -17,8 +17,27 @@ recommend:
     - "huge web tables (100k+ rows) → HighTable"
     - "one list engine across RN + web → Legend List"
     - "old-architecture RN app → FlashList v2 is New-Arch-only; pin FlashList v1.x or stay on FlatList"
+    - "text-heavy RN feeds where hundreds of flat labels mount at once → try react-native-plain-text for those labels (renders straight to UILabel/TextView, skipping RN's text layout pipeline; one string, one style, Fabric-only, 0.7.x beta) and keep <Text> wherever you need nesting, mixed styles, press handling or selection — the two mix in one screen"
     - "exact thresholds / perf → react-native-best-practices owns the rules"
 note: >
+  PLAIN TEXT PROMOTED skip→when-clause 2026-08-18 (2nd independent signal — TWiR #293 then RN
+  Rewind #52 — which was the reopen condition recorded at the first skip; facts verified vs the
+  repo README + npm 0.7.1): react-native-plain-text is a narrow micro-optimization, not a list
+  engine — it bypasses RN's text layout pipeline by rendering to the platform's native label
+  widget, and buys that with a hard constraint (single string, single style; no nested <Text>,
+  no press handling or selection). It requires the New Architecture and does not run in Expo Go.
+  Treat it as cell-content tuning AFTER virtualization is right, and measure before adopting.
+  V9 ALSO MOVED THE SCALE CEILING (added 2026-08-18 on spot-check — this post had been carried as a
+  `cap` skip since React Status #486, and re-reading it overturned that: it is not a duplicate of the
+  reactivity story, it changes a threshold this entry recommends on). V8 built every row/cell/header
+  object with its own copy of every method, each carrying its own closure scope, so memory scaled
+  with objects created; V9 hangs those methods on shared prototypes cached per table. Measured on the
+  authors' Playwright/CDP benchmark: up to ~90% less memory on large tables, moving the practical
+  browser ceiling from ~1–1.5M rows before hitting ~4GB to roughly 10–16M. Two honest edges they
+  state themselves — small tables (10 rows × 8 cols, all features) use slightly MORE memory in v9
+  because of added memoization, and one breaking change came with the refactor. The consequence
+  here: "huge web tables → HighTable" is now a call about DOM/UX at that size, not about Table
+  running out of memory first.
   TANSTACK TABLE v9 IS STABLE (9.0.0 on npm 2026-08-04, verified vs the registry — the beta line
   had been carried as a skip since #291). v9 moves REACTIVITY underneath the Table APIs: instead of
   one table-state object that adapters wrap from the outside, feature state is split into separate
@@ -29,7 +48,7 @@ note: >
   and call the same Table methods, so this is an upgrade, not a rewrite.
 defer_to_skill: react-native-best-practices  # RN-RULE-USE-FLASHLIST owns the thresholds
 doc: "RB-E-LISTS.md"   # long-form Explanation entry in content_dir
-updated: 2026-08-04   # TanStack Table v9.0.0 stable — reactivity-under-the-API architecture + migrate rule
+updated: 2026-08-18   # plain-text when-clause (2nd signal) + Table v9 memory ceiling (spot-check overturned a cap skip)
 reading:
   - title: "How to Build the Fastest Apps: Break the Rules (App.js Conf 2026)"
     url: "https://www.youtube.com/watch?v=K3flMIHS-cI"
@@ -66,6 +85,8 @@ reading:
     claim: "You ship TanStack Table — v9 (stable 2026-08-04) splits feature state into per-feature atoms behind a reactivity contract so cell re-renders no longer depend on whole-table state; the same subscription-grain lesson as the list readings here."
     applies_when: { deps: ["@tanstack/react-table"], platforms: [react] }
 sources:
+  - "https://tanstack.com/blog/tanstack-table-v9-memory-performance"
+  - "https://github.com/mdjastrzebski/react-native-plain-text"
   - "https://shopify.engineering/flashlist-v2"
   - "https://rednegra.net/blog/20260212-virtual-scroll/"
   - "https://registry.npmjs.org/@tanstack/react-table/latest"

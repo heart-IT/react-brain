@@ -17,16 +17,18 @@ options:
   - { name: "RN 0.84 (2026-02-11) ✓", tradeoff: "Hermes V1 DEFAULT; precompiled iOS binaries default; Node 22.11+ min; Legacy-Arch stripped; bi-monthly cadence" }
   - { name: "RN 0.85 (2026-04-07) ✓", tradeoff: "shared C++ animation backend; Jest preset → @react-native/jest-preset; layout-prop native driver (0.85.1)" }
   - { name: "RN 0.86 (2026-06-11) ✓", tradeoff: "Android-15+ edge-to-edge in core (drop react-native-edge-to-edge); DevTools light/dark; 2nd zero-breaking-change release" }
-  - { name: "RN 0.87 (RC.3, 2026-07-27)", tradeoff: "cleanup release (per TWiR #289; RC.3 verified vs the GitHub releases): removes long-deprecated APIs (InteractionManager, SafeAreaView), restricts deep imports, deprecates ImageBackground. Two additions worth planning around — the SwiftPM support chain was cherry-picked in (PRs #57442/#57332/#57564 via #57578, merged 2026-07-16), making Swift Package Manager a first-class iOS dependency path; and it carries the upstream Hermes fix for the worklet debug-metadata memory regression (see RB-E-ANIMATION). Verify the row vs the release blog when stable lands" }
+  - { name: "RN 0.87 (2026-08-11) ✓", tradeoff: "Strict TypeScript API becomes the DEFAULT (types generated from source; deep imports into react-native/Libraries/* are now a type error; opt out through 0.88 with the \"react-native-legacy-deep-imports\" tsconfig customCondition, then the legacy types go); Metro 0.84→0.87 (source maps 2x faster, half the source-map memory, stable TS/ESM config files, .es6 + YAML configs dropped); EXPERIMENTAL Swift Package Manager for iOS (`npx react-native spm`, CocoaPods still the default and the supported path — the docs say not for production yet); AGP 9 support (opt out of built-in Kotlin + new DSL via android.builtInKotlin=false / android.newDsl=false); toolchain floor rises to Node ≥22.13, Kotlin 2.0+, minCompileSdk 34, compileSdk/buildTools 37. Removals: InteractionManager (→ requestIdleCallback), Modal `animated`, StatusBar backgroundColor/translucent, boolean keyboardShouldPersistTaps, the useTurboModules flag, *Properties type aliases. backgroundImage loses its experimental_ prefix. 0.84.x moves to UNSUPPORTED"}
 recommend:
-  default: "Target the latest stable RN (0.86); the New Architecture is non-optional from 0.82, so plan any migration around that line."
+  default: "Target the latest stable RN (0.87); the New Architecture is non-optional from 0.82, so plan any migration around that line."
   when:
     - "on RN < 0.82 → budget a New-Arch migration; Legacy was frozen at 0.80 (no fixes)"
     - "on RN ≥ 0.86 → drop react-native-edge-to-edge (now in core)"
-    - "still importing InteractionManager / core SafeAreaView / deep paths → migrate now; RN 0.87 (RC) removes them"
+    - "moving to 0.87 → the Strict TypeScript API is the default: fix deep imports into react-native/Libraries/* (the /migrate-to-strict-api skill + the ESLint fixers do most of it), or set the react-native-legacy-deep-imports customCondition as a bridge — that escape hatch exists only through 0.88"
+    - "still importing InteractionManager / core SafeAreaView / deep paths → 0.87 removed them; migrate now"
+    - "on iOS and tempted by SwiftPM → it is experimental and additive in 0.87; CocoaPods stays the default and the supported path — but trunk goes read-only 2026-12-02 (no NEW podspec versions after that; existing ones keep resolving), so audit which iOS deps still depend on it"
     - "quoting a pre-0.84 row as authoritative → verify against that version's RN blog first"
 note: >
-  Use this to tell a project what it gains/loses by moving RN versions. Rows marked ✓ (0.84–0.86)
+  Use this to tell a project what it gains/loses by moving RN versions. Rows marked ✓ (0.84–0.87)
   are verified vs official RN blogs; 0.76–0.83 are from release history + RN Rewind — verify a
   specific row against the RN blog before quoting it as authoritative. Expo SDK mapping: SDK 55 =
   RN 0.83 + React 19.2; SDK 56 = RN 0.85 + Expo UI stable; SDK 57 = RN 0.86 + React 19.2 (2026-06,
@@ -35,9 +37,26 @@ note: >
   APPLE PLATFORM FLOOR (2026-07-10, verified vs the Expo post's body): since 2026-04-28, App
   Store Connect uploads MUST be built with Xcode 26 / iOS-26-family SDKs — Expo SDK 54/55 EAS
   images already run Xcode 26, SDK ≤53 needs an explicit image opt-in; practically, stay ≥SDK 54.
+  0.87 IS THE STRICT-API LINE (2026-08-11, verified vs the release blog + the v0.87.0 CHANGELOG):
+  the 0.80 opt-in preview became the default, so a 0.87 bump is a TYPE migration first and a
+  runtime migration second — plan it as codemod work (the /migrate-to-strict-api skill and the
+  ESLint fixers), and treat the react-native-legacy-deep-imports customCondition as a bridge that
+  expires after 0.88. It also raises the toolchain floor (Node ≥22.13, Kotlin 2.0+, compileSdk 37),
+  so CI images move with it. Expo: 0.87 ships in expo@canary first, not in SDK 57 (= RN 0.86).
+  Hermes: 0.87 pins hermes-compiler 250829098.0.16 (verified vs the tag's package.json), past the
+  .15 backport that fixes the worklet debug-metadata memory regression — see RB-E-ANIMATION.
+  WHY SWIFTPM NOW, AND WHAT IS ACTUALLY HAPPENING TO COCOAPODS (verified vs the CocoaPods blog,
+  because the newsletter framing of this is overstated): CocoaPods has been in declared MAINTENANCE
+  MODE since 2024-08-13, and on 2026-12-02 trunk goes READ-ONLY — the server will permanently
+  refuse NEW Podspecs and the Specs repo gets archived (a test run runs 2026-11-01→07). That is
+  not a shutdown: the Specs repo and CDN keep serving, so existing builds and existing pod versions
+  keep working, and private specs repos are unaffected. The real consequence is that from December
+  no library can publish a NEW version through trunk. So 0.87's experimental SwiftPM path is the
+  ecosystem's answer to a dated deadline, not a preference — but it is still experimental, so the
+  planning move today is to know which of your iOS dependencies still resolve only through trunk.
 defer_to_skill: react-native-jsi
 doc: "RB-E-RN-VERSIONS.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-28   # 0.87 RC.3: SwiftPM chain backported + Hermes worklet-metadata fix (TWiR #291)
+updated: 2026-08-18   # RN 0.87 STABLE — Strict TS API default, Metro 0.87, experimental SwiftPM, AGP 9
 reading:
   - title: "React Native Architecture: From Bridge to Fabric"
     url: "https://blog.codeminer42.com/react-native-architecture-from-bridge-to-fabric/"
@@ -50,13 +69,16 @@ sources:
   - "https://expo.dev/changelog/sdk-57"
   - "https://expo.dev/blog/app-store-connect-minimum-sdk-26"
   - "https://github.com/react/react-native/pull/57332"
+  - "https://reactnative.dev/blog/2026/08/11/react-native-0.87"
+  - "https://reactnative.dev/docs/strict-typescript-api"
+  - "https://blog.cocoapods.org/CocoaPods-Specs-Repo/"
 migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-brain migrate`)
-  - from: { pkg: "react-native", below: "0.86.0" }
-    to: "React Native 0.86 (current stable)"
+  - from: { pkg: "react-native", below: "0.87.0" }
+    to: "React Native 0.87 (current stable)"
     urgency: upgrade
     effort: L
-    why: "the ladder crosses hard lines: New Architecture is the ONLY runtime ≥0.82 (Legacy frozen at 0.80, stripped at 0.84), Hermes V1 + precompiled iOS binaries default at 0.84 (Node 22.11+ min), the Jest preset moves to @react-native/jest-preset at 0.85, Android edge-to-edge lands in core at 0.86. Every New-Arch-gated upgrade below unblocks at 0.82+."
-    receipts: ["https://reactnative.dev/blog/2026/02/11/react-native-0.84", "https://reactnative.dev/blog/2026/06/11/react-native-0.86"]
+    why: "the ladder crosses hard lines: New Architecture is the ONLY runtime ≥0.82 (Legacy frozen at 0.80, stripped at 0.84), Hermes V1 + precompiled iOS binaries default at 0.84 (Node 22.11+ min), the Jest preset moves to @react-native/jest-preset at 0.85, Android edge-to-edge lands in core at 0.86, and 0.87 makes the Strict TypeScript API the default (deep imports into react-native/Libraries/* become type errors) while raising the floor to Node 22.13 / Kotlin 2.0 / compileSdk 37 and dropping InteractionManager. Every New-Arch-gated upgrade below unblocks at 0.82+; budget the 0.87 step as type-codemod work."
+    receipts: ["https://reactnative.dev/blog/2026/02/11/react-native-0.84", "https://reactnative.dev/blog/2026/06/11/react-native-0.86", "https://reactnative.dev/blog/2026/08/11/react-native-0.87"]
   - from: { pkg: "react-native-edge-to-edge" }
     to: "remove the package — Android-15+ edge-to-edge is in RN core since 0.86"
     urgency: conditional

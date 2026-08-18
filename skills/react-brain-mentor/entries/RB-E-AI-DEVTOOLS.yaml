@@ -8,12 +8,14 @@ platforms: [react, react-native]
 options:
   - { name: "agent-skills (Callstack)", tradeoff: "curated skill packs for coding agents — RN best practices, upgrade playbook, brownfield migration, library scaffolding; installs into Claude Code / Cursor / Codex / Gemini CLI; the broadest pack (~1.5k★)" }
   - { name: "react-native-skills (Margelo)", tradeoff: "RN-focused skills (VisionCamera and native-module depth) via `npx skills add margelo/react-native-skills`; younger/smaller than Callstack's" }
-  - { name: "agent-device (Callstack)", tradeoff: "agent-native CLI: AI agents drive real iOS/Android/tvOS/macOS/web devices & simulators — a11y snapshots, actions, replayable scripts; v0.20.x (0.20.1, verified vs npm 2026-07-28), iterating fast — 0.20 redesigned gesture execution and added Maestro compatibility through a typed engine" }
-  - { name: "Argent (Software Mansion)", tradeoff: "MCP server + skills: simulator control, debugger attach (React tree + JS), console/HTTP monitoring, correlated React+iOS profiling; 0.17.0 (verified vs npm 2026-07-28) extends beyond iOS — tvOS/Android TV/Vega OS, cloud agents for autonomous bug repro, Argent Lens design review; also listed in RB-E-TESTING" }
+  - { name: "agent-device (Callstack)", tradeoff: "agent-native CLI: AI agents drive real iOS/Android/tvOS/macOS/web devices & simulators — a11y snapshots, actions, replayable scripts; v0.20.x (0.20.9 on npm and GitHub, verified 2026-08-18), iterating fast — 0.20 redesigned gesture execution, added Maestro compatibility through a typed engine, and shipped REPLAY: save a completed agent-driven flow as a script and re-run it with zero model calls (see reading)" }
+  - { name: "Argent (Software Mansion)", tradeoff: "MCP server + skills: simulator control, debugger attach (React tree + JS), console/HTTP monitoring, correlated React+iOS profiling; 0.21.0 (verified vs npm 2026-08-18; 0.17 first) extends beyond iOS — tvOS/Android TV/Vega OS, cloud agents for autonomous bug repro, Argent Lens design review; also listed in RB-E-TESTING" }
   - { name: "Maestro MCP / Maestro Viewer", tradeoff: "agents drive devices and GENERATE E2E flows on the tool the ecosystem already tests with — see RB-E-TESTING (which owns the testing depth)" }
   - { name: "Reactotron MCP", tradeoff: "the classic RN debugger exposes runtime state/network to coding agents via MCP (reactotron-core-server 3.3.0, 2026-05)" }
   - { name: "Expo AI tooling", tradeoff: "SDK 55+ ships agent-focused tooling (Expo skills at docs.expo.dev/skills, MCP integration) for Claude/Cursor/Codex as part of the framework — THIS is the durable part. Expo Agent, their hosted web app-building agent, is DEAD: closed beta ended, agent.expo.dev goes away after 2026-07-31 (export your projects), with Expo saying it would rather integrate with the harnesses developers already use than build its own IDE" }
   - { name: "TanStack Intent (ALPHA)", tradeoff: "a DISTRIBUTION mechanism, not a pack: agent skills ship INSIDE npm packages and are discovered via the node_modules dependency graph, version-pinned with staleness detection; rolling out in TanStack DB first" }
+  - { name: "modern-web-guidance (Google Chrome)", tradeoff: "the WEB counterpart to the RN skill packs above, and a different shape: not a linter or a codegen tool but a SEARCH INDEX over curated best-practice guides, consulted BEFORE writing HTML/CSS/DOM code — `npx modern-web-guidance search \"<action phrase>\"` returns ranked hits with ids, the web features used, a tokenCount and a similarity score; `retrieve <id>` returns the guide as markdown. Guides carry Baseline-keyed fallbacks, so \"is this safe yet?\" becomes a date comparison with the fallback attached. Semantic search runs locally through a small on-device model (no API key, works offline; telemetry to Google is on by default — DISABLE_TELEMETRY=1). Framework-agnostic. 0.0.x, published continuously" }
+  - { name: "Metrognome (Uphold)", tradeoff: "an AUTONOMOUS performance loop rather than a hands-on-the-device tool: propose a hypothesis → drive the app (it orchestrates agent-device and Callstack's profiling tooling rather than shipping its own) → measure N times → keep the change only if it beats the noise, else revert; accepted fixes land as separate commits carrying their before/after numbers, and every experiment (kept OR rejected) appends to a performance-memory file committed in the repo so the next run doesn't re-test a dead end. npm `metrognome` 0.2.6 (2026-08-08, github.com/uphold/metrognome) — early, and the strongest idea in it is the gate, not the automation" }
   - { name: "React Native Evals (Callstack)", tradeoff: "open-source benchmark suite for WHICH MODEL writes good RN code — task dataset by category/library, TS+Bun runner, judge + methodology whitepaper; the model-selection layer under all the tools above" }
   - { name: "ReactBench (Million)", tradeoff: "WHICH MODEL writes good REACT-WEB code — Write React / Fix React tasks from real merged PRs, graded by behavioral tests + react-doctor's 400+ deterministic rules (see RB-E-DX) in clean-room containers; public leaderboard (2026-07: GPT 5.6 Terramax/Solmax 53%, Fable 5xhigh 46% Pass@1); the web counterpart to RN Evals" }
 recommend:
@@ -23,6 +25,8 @@ recommend:
     - "agent must run and SEE the app (closed verify loop) → agent-device (cross-platform) or Argent (iOS debugger/profiler depth)"
     - "agent-generated E2E tests → Maestro MCP (owned by RB-E-TESTING)"
     - "agent needs runtime state / network inspection → Reactotron MCP"
+    - "agent writes WEB frontend code (HTML/CSS/DOM) → modern-web-guidance as a pre-write consult; the RN skill packs above don't cover the web platform"
+    - "agent-driven device work you repeat (QA sweeps, regression flows) → discover the flow once with the model, then agent-device replay it with zero model calls"
     - "how to WORK with agents (TDD, review discipline, cognitive debt) → agentic-engineering-patterns"
 note: >
   NEW entry (2026-07-09): the dominant recurring theme of Native Weekly issues 11–16 (Jan–Jun
@@ -40,6 +44,12 @@ note: >
   web-based harness and IDE, integrate with the harnesses developers already customize deeply.
   That is the shape of this whole category — the SKILLS/MCP layer (portable, rides whatever
   harness you use) outlives the hosted-product layer. Weight option rows accordingly.
+  THE WEB SIDE WAS MISSING UNTIL 2026-08-18: every skills-pack row here was React Native (Callstack,
+  Margelo, Expo), which quietly implied the corpus had no answer for "my agent writes stale web
+  frontend code". Google Chrome's modern-web-guidance fills it, and its shape is worth copying:
+  a searchable index of current guidance with Baseline-keyed fallbacks, consulted before writing —
+  not a linter run afterwards. It also draws the boundary this category keeps blurring: a skill
+  supplies the STANDARD, something else (you or the agent) still has to read the code.
   BENCHMARK LAYER (2026-08-07, verified vs appcontrolbench.swmansion.com): SWM Labs'
   AppControlBench compares agent-tool × model configurations (Argent and agent-device — the two
   device-driving options this entry tracks — against Claude/GPT lines) on real iOS app-control
@@ -48,8 +58,20 @@ note: >
   now has a live first-party leaderboard — check it before pinning a tool+model pair.
 defer_to_skill: agentic-engineering-patterns
 doc: null
-updated: 2026-08-07   # AppControlBench leaderboard + Expo model-shootout reading (TWiR #293 + firsthand)
+updated: 2026-08-18   # replay economics (agent-device) + modern-web-guidance (web skills) + Metrognome
 reading:
+  - title: "3 Minutes With an Agent, 9 Seconds on Replay"
+    url: "https://www.callstack.com/blog/3-minutes-with-an-agent-9-seconds-on-replay"
+    by: "Michał Pierzchala (Callstack)"
+    what: "Measures where the time actually goes when an agent drives a device, and the answer is: not on the device. A nine-action QA task on an Android emulator took the agent 3m18s; saved as a replayable script and re-run with `agent-device replay` it finished in 8.8 seconds INCLUDING app launch, with zero model calls. Taps and snapshots were thin slices of the original run — the ~190-second gap is model inference, API round trips, screen reading and deciding what to do next. Two numbers make it actionable: in the opening run 2 of 29 tool calls were help lookups or rejected commands, and across an audit of 108 spontaneous runs 375 of 2,668 calls (14.1%) never reached the device at all. So the design rule for agent-driven device work is to spend model turns on DISCOVERING a flow once, then replay it deterministically for every repeat — the same split that makes recorded E2E cheap. Stated caveats: simulators/emulators on a workstation (no physical devices), load-gated timings for one experiment only, small + mid-tier models of one provider."
+    claim: "You have an agent driving simulators or devices — the model, not the device, is the cost: a nine-action flow took 3m18s live and 8.8s on replay with zero model calls. Discover a flow once with the model, then replay it deterministically."
+    applies_when: { platforms: [react-native], stages: [production, scale] }
+  - title: "Testing Google's modern-web-guidance skill against a real React app"
+    url: "https://alfy.blog/2026/07/25/modern-web-guidance.html"
+    by: "Alfy"
+    what: "An independent field test of the option row above, and the honest scoping this category usually lacks. Pointed at a real Vite + React questionnaire app (42 files) it correctly flagged a hardcoded light theme with no color-scheme/prefers-color-scheme, data-entry surfaces with zero <form> elements, validation predating :user-invalid, and min-height:100vh where 100dvh is the modern answer — each with Baseline-checked, copy-pasteable guidance, and it also explicitly endorsed what the app already had right (fieldset/legend, role=alert, :focus-visible). The limits are the useful part: THE SKILL DOES NOT READ YOUR CODE — a human or an agent must inventory the codebase, turn each suspicion into a search phrase and compare the answer back to the actual lines; semantic search has a recall ceiling (dark-mode hit 0.75, but the dvh answer never surfaced as its own result, only inside broad omnibus guides); guides are large (forms ~4,500 tokens, accessibility ~7,100, both reported up front so you can weigh the fetch); and it returns general rules that may not apply — most of the input-attribute advice was irrelevant to a radio-driven form, and noticing that is the human's job. The author's reframe is the durable one: it is less a tool you run than a standard you consult, best used the moment BEFORE writing a component, when the model in the loop (human or AI) is about to reach for the pattern it already knows."
+    claim: "Your agent writes frontend code that was best practice three years ago — consult a curated guidance index (modern-web-guidance) before writing rather than reviewing after. It never reads your code: you still inventory, query, and judge whether a rule applies."
+    applies_when: { platforms: [react], stages: [prototype, mvp, production, scale] }
   - title: "Bun is being rewritten in Rust"
     url: "https://bun.com/blog/bun-in-rust"
     by: "Jarred Sumner (Bun)"
@@ -75,6 +97,10 @@ reading:
     claim: "You drive coding agents against an RN/Expo app — budget for the validation loop, not generation: per-feature on-simulator verification dominates token spend and is what makes one-shot quality possible; pick the model on measured cost-vs-speed, not vibes."
     applies_when: { deps: ["expo"], platforms: [react-native] }
 sources:
+  - "https://registry.npmjs.org/modern-web-guidance/latest"
+  - "https://registry.npmjs.org/agent-device/latest"
+  - "https://registry.npmjs.org/metrognome/latest"
+  - "https://www.callstack.com/blog/an-ai-agent-for-measured-react-native-performance-fixes"
   - "https://appcontrolbench.swmansion.com/"
   - "https://www.reactbench.com/blog"
   - "https://expo.dev/changelog/expo-agent-ending-the-closed-beta-and-winding-the-project-down"

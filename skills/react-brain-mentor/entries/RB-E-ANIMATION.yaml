@@ -8,7 +8,7 @@ platforms: [react, react-native]
 options:
   - { name: "Reanimated 4", tradeoff: "UI-thread + CSS-style animations/transitions; worklets split into react-native-worklets; requires New Arch" }
   - { name: "Gesture Handler 3.0", tradeoff: "native gestures; v3 adds a hook-based API built for the React Compiler + Reanimated 4" }
-  - { name: "react-native-worklets (0.11.x)", tradeoff: "the worklets runtime under Reanimated 4 (now its own package; npm latest 0.11.0, verified 2026-07-17 — an earlier '8.0' claim here was WRONG, caught by the firsthand watch); 0.11 adds experimental Hermes-bytecode worklets + Shareable values across isolated runtimes. TURN ON BUNDLE MODE (stable since 0.10) — it is the fix for the Hermes V1 memory regression, see note" }
+  - { name: "react-native-worklets (0.11.x)", tradeoff: "the worklets runtime under Reanimated 4 (now its own package; npm latest 0.11.4, verified 2026-08-18 — an earlier '8.0' claim here was WRONG, caught by the firsthand watch); 0.11 adds experimental Hermes-bytecode worklets + Shareable values across isolated runtimes. 0.12.0 shipped 2026-08-11 but sits on the `next` dist-tag, NOT latest (WeakRef on worklet runtimes; Bundle Mode script loading on par with RN's own loaders) — read it as the next line, not the one to install. TURN ON BUNDLE MODE (stable since 0.10) — below RN 0.87 it is the fix for the Hermes V1 memory regression, and worth it regardless; see note" }
   - { name: "react-native-skia (2.x)", tradeoff: "GPU 2D drawing; v2.1 plays Lottie via Skottie; pairs with Reanimated" }
   - { name: "lottie-react-native", tradeoff: "designer Lottie/JSON animations; v7 adds visionOS" }
   - { name: "Rive — @rive-app/react-native (Nitro) / rive-react-native (legacy)", tradeoff: "designer-driven INTERACTIVE vector animation (state machines) — the Lottie alternative; the SDK was rewritten on Nitro under Rive's official scope (@rive-app/react-native, 0.4.x EARLY line): files/view-models become shared typed HybridObjects — Margelo-measured up to 94× multi-view loads + ~4.7× lower memory vs legacy (rewrite authors' own benchmark); legacy unscoped pkg at 9.8.3, quiet since 2026-04" }
@@ -41,16 +41,22 @@ note: >
   animation default — added 2026-06-25 after the evidence-loop corpus self-audit flagged
   that this [react]-platform entry had options/recommend for React Native only, no web pick
   (caught from ledgerhr's framer-motion usage). Verified vs the official RN 0.85 blog.
-  HERMES V1 WORKLET MEMORY REGRESSION (2026-07-28, verified vs the Software Mansion writeup and
-  reproduced independently in the Calazans benchmark below): Hermes V1 attaches ~512KB of debug
+  HERMES V1 WORKLET MEMORY REGRESSION — FIXED IN RN 0.87 (history, kept because it still bites
+  every app below 0.87; original finding 2026-07-28, verified vs the Software Mansion writeup and
+  reproduced independently in the Calazans benchmark below): Hermes V1 attached ~512KB of debug
   metadata to EVERY eval'd worklet, and Worklets' Legacy Eval Mode ships animation code to the UI
-  runtime as strings — so memory scales with unique worklets triggered. Software Mansion measured
+  runtime as strings — so memory scaled with unique worklets triggered. Software Mansion measured
   Expensify's bundle at 1,000+ unique worklets, with 100+ evaluated just to initialize (≥50MB at
-  startup). Four fixes, in preference order: turn on WORKLETS BUNDLE MODE (exposes the mmap'd
-  bytecode bundle instead of eval'ing strings — measured −~100MB PSS, ~45%, native heap
-  ~142MB→~32MB, with frame rate and CPU unchanged), the experimental bytecode option for Legacy
-  Eval Mode, pinning Hermes, or waiting for RN 0.87 which carries the upstream Hermes fix.
-  Bundle Mode is worth enabling regardless.
+  startup). The Hermes fix was backported to 250829098.0.15, and RN 0.87 (2026-08-11) pins
+  hermes-compiler 250829098.0.16 — verified vs the v0.87.0 tag's package.json — so the regression
+  is closed from 0.87 up. BELOW 0.87 the ladder still applies, in preference order: turn on
+  WORKLETS BUNDLE MODE (exposes the mmap'd bytecode bundle instead of eval'ing strings — measured
+  −~100MB PSS, ~45%, native heap ~142MB→~32MB, with frame rate and CPU unchanged), the
+  experimental bytecode option for Legacy Eval Mode, or pin Hermes 250829098.0.15. TURN ON BUNDLE
+  MODE REGARDLESS: SWM still recommends it for its own performance gains, and Worklets 0.12
+  (2026-08-11) brought its script loading to parity with React Native's own loaders — local
+  bundles are mmapped instead of held in an in-memory std::string for the app's lifetime, and
+  Android dev-server bundles stream to a cache file (verified vs the worklets-0.12.0 release).
   SKIA 2.10 MOVED OFF HostObject (2026-07-23, verified vs the release + the published manifest):
   the release's one feature is "migrate from host objects to native states" (#3964) — Skia's JSI
   objects now use NativeState rather than HostObject, the direction the Hermes team favors because
@@ -66,7 +72,7 @@ note: >
   neither package is deprecated.
 defer_to_skill: react-native-best-practices
 doc: "RB-E-ANIMATION.md"   # long-form Explanation entry in content_dir
-updated: 2026-08-07   # Motion 13: @emotion/is-prop-valid dropped — CSS-in-JS interop now explicit (firsthand)
+updated: 2026-08-18   # ⚡tripwire fired: Hermes worklet-metadata regression closed in RN 0.87 (hermes-compiler .0.16)
 reading:
   - title: "CSS vs. JavaScript Animations"
     url: "https://www.joshwcomeau.com/animation/css-vs-javascript/"
@@ -108,6 +114,7 @@ reading:
     applies_when: { deps: ["rive-react-native", "@rive-app/react-native"], platforms: [react-native] }
 sources:
   - "https://swmansion.com/blog/how-worklets-bundle-mode-accidentally-fixed-Hermes-v1-memory-regression/"
+  - "https://github.com/software-mansion/react-native-reanimated/releases/tag/worklets-0.12.0"
   - "https://reactnative.dev/blog/2026/04/07/react-native-0.85"
   - "https://registry.npmjs.org/@rive-app%2freact-native"
   - "https://reactnavigation.org/blog/2026/04/27/building-custom-screen-transitions"
@@ -137,6 +144,3 @@ tripwires:   # standing caveats as executable conditions — evaluated by `harve
   - when: { pkg: "rive-react-native", deprecated: true }
     then: "legacy Rive SDK formally deprecated on npm — add the migrate rule (urgency: deprecated) per the note's WATCH; receipts: this flag + the Margelo rewrite post"
     added: 2026-07-16
-  - when: { pkg: "react-native", atleast: "0.87.0" }
-    then: "RN 0.87 stable carries the upstream Hermes fix for the worklet debug-metadata regression — rewrite the note's four-fix ladder as history ('fixed in 0.87; Bundle Mode still recommended') and drop 'waiting for RN 0.87' as an option"
-    added: 2026-07-28
