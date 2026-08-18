@@ -11,17 +11,36 @@ options:
   - { name: "react-native-skia (build-your-own)", tradeoff: "RN; max control + perf, more code" }
   - { name: "react-native-livechart", tradeoff: "RN; Skia + Reanimated + Gesture Handler; realtime/finance focus, crosshair scrubbing — newer/niche" }
   - { name: "react-native-graph (Margelo)", tradeoff: "RN; Skia-based LINE graphs with gesture scrubbing; REBOOTED v1.2 (2026-04) onto current Skia APIs after ~2y dormancy — line-focused, check it covers your chart types" }
-  - { name: "Recharts / visx / Chart.js", tradeoff: "web; visx = low-level D3 primitives, Recharts = batteries-included" }
+  - { name: "Recharts / visx / Chart.js", tradeoff: "web; visx = low-level D3 primitives (4.0.0), Recharts = batteries-included (3.10.1); both current as of 2026-08-18. The legacy web `victory` package is NOT one of these — it is dormant, see note" }
 recommend:
   default: "RN: Victory Native (XL) for standard charts; react-native-skia when you need custom/realtime rendering. Web: Recharts (batteries-included) or visx (low-level D3)."
   when:
     - "realtime/finance RN charts → Skia-based (Victory Native XL, react-native-graph for scrubbing line charts, or react-native-livechart — the latter two newer/niche)"
     - "fully custom web viz → visx; quick standard charts → Recharts"
     - "heavy Skia/Reanimated perf → react-native-best-practices"
-note: "Library picks are reasonable defaults but lightly vetted. Ignore react-native-livechart's satirical 'degen mode' framing — not a selection axis. FRESHNESS (signals, 2026-07-10): the ACTIVE Victory line is victory-native XL (41.26, 2026-06, verified vs npm) — the web `victory` package moves slowly; d3's 2-year publish gap is maturity, not abandonment (it's the stable substrate under visx)."
+note: >
+  Library picks are reasonable defaults but lightly vetted. Ignore react-native-livechart's
+  satirical "degen mode" framing — not a selection axis. FRESHNESS (signals, 2026-07-10): the
+  ACTIVE Victory line is victory-native XL (41.26, 2026-06, verified vs npm); d3's 2-year publish
+  gap is maturity, not abandonment (it's the stable substrate under visx).
+  CHALLENGED 2026-08-18 → WEAKENED (the RN default SURVIVED, one caveat was missing). The attack:
+  react-native-gifted-charts ships weekly (1.4.78, 2026-08-10) and has more stars (1,362 vs 1,210),
+  so should it take the RN default from Victory Native XL? No, on both axes this entry claims.
+  DOWNLOADS: victory-native 381,672/wk vs gifted-charts 147,977/wk (2.6× the other way, verified vs
+  the npm API) — the popularity argument runs backwards. SUBSTRATE: victory-native peers on
+  @shopify/react-native-skia + Reanimated + Gesture Handler, gifted-charts on react-native-svg — so
+  the entry's "Skia-backed for standard charts, raw Skia when you need custom/realtime" axis is a
+  real rendering difference, not branding. Victory Native XL is slower-moving than it was (npm
+  41.26.0 2026-06-09, repo pushed 2026-07-06, 89 open issues) — watch it, but it is not stalled.
+  WHAT THE CHALLENGE DID CHANGE: the web `victory` package is not "slow", it is DORMANT — npm
+  37.3.6 published 2025-01-14, repo last pushed 2025-12-19. Nothing here recommends it (web goes to
+  Recharts 3.10.1 / visx 4.0.0, both current), but the option row read as though it were live, and
+  its detect label shared the "victory" token with victory-native, which made `react-brain signals`
+  report a dormant web package as a stale recommended DEFAULT. The label now says so explicitly,
+  which is also the documented way to keep a row out of the default set.
 defer_to_skill: react-native-best-practices  # Skia/Reanimated render-perf depth
 doc: "RB-E-CHARTS.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-16
+updated: 2026-08-18   # challenged → WEAKENED: RN default held on downloads + substrate; web Victory is dormant
 reading:
   - title: "Introducing visx from Airbnb"
     url: "https://medium.com/airbnb-engineering/introducing-visx-from-airbnb-fd6155ac4658"
@@ -36,12 +55,14 @@ reading:
     claim: "You ship Skia-backed RN charts (Victory Native XL or raw react-native-skia) — the rendering model underneath: JSI, immutable display lists, a unified WebGPU backend, and the canonical high-density line-chart-as-GPU-texture pattern."
     applies_when: { deps: ["victory-native", "@shopify/react-native-skia"], platforms: [react-native] }
 sources:
+  - "https://registry.npmjs.org/victory-native/latest"
+  - "https://registry.npmjs.org/react-native-gifted-charts/latest"
   - "https://reactnativerewind.com/issues/react-native-0-86-charting-your-financial-ruin-and-the-junk-drawer-in-your-package-json"
   - "https://github.com/FormidableLabs/victory-native-xl"
   - "https://github.com/margelo/react-native-graph/releases"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "victory-native", label: "Victory Native", token: "victory" }
-  - { pkg: "victory", label: "Victory", token: "victory" }
+  - { pkg: "victory", label: "Victory (web, dormant)", token: "victory" }
   - { pkg: "recharts", label: "Recharts", token: "recharts" }
   - { pkg: "@visx/*", label: "visx", token: "visx" }
   - { pkg: "chart.js", label: "Chart.js", token: "chart.js" }

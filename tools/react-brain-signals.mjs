@@ -39,7 +39,18 @@ const BASELINE = resolve(__dir, '.signals-baseline.json');
 const CENSUS_PATH = resolve(__dir, '.census-baseline.json');
 let CENSUS = null;   // a corrupt census baseline must not take signals down with it
 try { CENSUS = existsSync(CENSUS_PATH) ? JSON.parse(readFileSync(CENSUS_PATH, 'utf8')) : null; } catch { /* ships-in column simply absent */ }
-const MAINT_RE = /maintenance|deprecated|frozen|sunset|superseded|abandoned|unmaintained|no longer/i;
+const MAINT_RE = /maintenance|deprecated|frozen|sunset|superseded|abandoned|unmaintained/i;
+// A maintenance KEYWORD near a package name is not a maintenance CLAIM about it. Three ways
+// that goes wrong, all observed in this corpus on 2026-08-18 (5 of 5 CLAIM flags were false):
+//   NEGATED      "neither package is deprecated"           (RB-E-ANIMATION)
+//   RETROSPECTIVE"this entry PREVIOUSLY called X deprecated" (RB-E-PAYMENTS ×2 — a corrected fact)
+//   BORROWED     "react-test-renderer is deprecated. … Playwright 1.62" (RB-E-TESTING — the word
+//                belongs to a different package one sentence away)
+// ("no longer" was also dropped from MAINT_RE: "no longer a REASON to stay on X" says nothing
+// about X's maintenance — RB-E-DX.) Precision matters here because a CLAIM flag proposes a
+// `calibrate --record … weakened` entry, and the calibration ledger is append-only.
+const NEGATED_RE = /\b(?:not|never|neither|nor|isn't|aren't|no)\b[^.]{0,40}(?:maintenance|deprecat\w*|frozen|sunset|abandoned|unmaintained)/i;
+const RETROSPECT_RE = /previously|used to|formerly|corrected|stale fact|that read|wrongly|no longer true|turned out/i;
 const STALE_MONTHS = 12;       // a recommended default silent this long → early warning
 const FRESH_MONTHS = 6;        // "maintenance" claim contradicted if published within this
 
@@ -218,7 +229,11 @@ for (const id of ordered) {
       const li = txt.toLowerCase().indexOf(r.label.toLowerCase());
       if (li < 0) continue;
       const win = txt.slice(Math.max(0, li - 70), li + r.label.length + 70);
-      if (MAINT_RE.test(win) && age[r.pkg] != null && age[r.pkg] <= FRESH_MONTHS) {
+      // the keyword has to be in the SAME sentence as the label (otherwise it is describing
+      // some neighbouring package), un-negated, and not narrating a past belief
+      const sentence = win.split(/(?<=[.!?])\s+/).find((seg) => seg.toLowerCase().includes(r.label.toLowerCase())) || '';
+      if (MAINT_RE.test(sentence) && !NEGATED_RE.test(sentence) && !RETROSPECT_RE.test(sentence)
+          && age[r.pkg] != null && age[r.pkg] <= FRESH_MONTHS) {
         FLAGS.push(['CLAIM', id, `entry calls ${r.label} maintenance/deprecated, but ${r.pkg} published ${ageStr(age[r.pkg])} ago — re-check the claim`]);
         claims.push({ id, pkg: r.pkg, age: age[r.pkg] });
       }

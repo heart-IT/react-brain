@@ -9,18 +9,20 @@ options:
   - { name: "@react-native-async-storage/async-storage", tradeoff: "simple async key-value; v3.x is instance-based (createAsyncStorage), getMany/setMany/removeMany, requires RN 0.76+; v2 default export kept for back-compat" }
   - { name: "react-native-mmkv (v4)", tradeoff: "fast synchronous key-value; v4 is a full Nitro Modules rewrite (restores Old-Arch compat); common AsyncStorage replacement" }
   - { name: "op-sqlite / expo-sqlite", tradeoff: "relational SQLite; op-sqlite is high-perf JSI" }
-  - { name: "react-native-keychain / expo-secure-store", tradeoff: "secure storage for tokens/secrets (Keychain/Keystore)" }
+  - { name: "expo-secure-store (57.0.1)", tradeoff: "secure storage for tokens/secrets on the Keychain/Keystore; first-party, ships with the Expo SDK and releases with it (2026-07-15) — the default secrets store on any Expo app" }
+  - { name: "react-native-keychain (10.0.0)", tradeoff: "the bare-RN secrets store, and the one to choose when you need finer access-control/biometry configuration than secure-store exposes. QUIET: no npm release since 2025-03-23 (17 months), 180 open issues, though the repo still gets commits (pushed 2026-04-29) — pin it and re-check before starting new work on it" }
 recommend:
-  default: "Small key-value → react-native-mmkv (fast, synchronous). Relational/large → op-sqlite or expo-sqlite. Secrets/tokens → Keychain / secure-store, never AsyncStorage."
+  default: "Small key-value → react-native-mmkv (fast, synchronous). Relational/large → op-sqlite or expo-sqlite. Secrets/tokens → the OS Keychain/Keystore, never AsyncStorage — on Expo that is expo-secure-store, on bare RN react-native-keychain."
   when:
     - "simple persisted prefs, no perf concern → AsyncStorage is fine"
     - "frequent synchronous reads → MMKV"
     - "structured/queryable data → SQLite (op-sqlite for perf)"
+    - "secrets on an Expo app → expo-secure-store (first-party, released with the SDK); reach for react-native-keychain when you need access-control options it doesn't expose — and note keychain has not published since 2025-03-23"
     - "P2P / local-first app → primary persistence is the Hypercore/Autobase/Hyperbee log, not KV/SQLite (KV like AsyncStorage is just for local prefs) — see RB-E-P2P"
 note: "AsyncStorage v3.x moved to instance-based storage (createAsyncStorage) and requires React Native 0.76+ (NOT New-Arch-only — that earlier claim was wrong; verified vs the v3 migration docs). react-native-mmkv v4 is a full Nitro rewrite (Oct 2025) that restored Old-Arch compat. Latest: async-storage 3.1.x, mmkv 4.3.x, op-sqlite 18.1.1 (2026-08-17). OP-SQLITE 18 IS BREAKING (2026-08-14, verified vs the GitHub releases): 18.0.0 REMOVES crsqlite — if you were using op-sqlite as the local half of a CRDT-synced store, that extension is gone and the migration is yours; it also rebinds hooks/reactive flush to their runtime generation and drops an internal mutex in favour of self-cleaning databases. 18.1 adds initial Swift Package Manager support and RN 0.87 compatibility, so on 0.87 this is the line to be on."
 defer_to_skill: null
 doc: "RB-E-STORAGE.md"   # long-form Explanation entry in content_dir
-updated: 2026-08-18   # op-sqlite 18 — crsqlite removed (breaking), SPM + RN 0.87 compat in 18.1
+updated: 2026-08-18   # challenged → WEAKENED: secrets split by runtime (secure-store vs keychain); op-sqlite 18 — crsqlite removed (breaking), SPM + RN 0.87 compat in 18.1
 sources:
   - "https://github.com/OP-Engineering/op-sqlite/releases"
   - "https://react-native-async-storage.github.io/3.1/migration-to-3/"
@@ -46,6 +48,6 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "@op-engineering/op-sqlite", label: "op-sqlite", token: "op-sqlite" }
   - { pkg: "op-sqlite", label: "op-sqlite", token: "op-sqlite" }
   - { pkg: "expo-sqlite", label: "expo-sqlite", token: "sqlite" }
-  - { pkg: "react-native-keychain", label: "Keychain", token: "keychain" }
+  - { pkg: "react-native-keychain", label: "Keychain (quiet since 2025-03)", token: "keychain" }
   - { pkg: "expo-secure-store", label: "expo-secure-store (secrets)", token: "secure-store" }
   - { pkg: "@nozbe/watermelondb", label: "WatermelonDB", token: "watermelondb" }

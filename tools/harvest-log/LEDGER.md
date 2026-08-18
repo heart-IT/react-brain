@@ -2036,3 +2036,58 @@ Gates: lint clean · rules ✓ · eval 139/139 · verify-diff ✓.
 
 STILL OPEN after this session: step 5 (challenge 2–3 aging reviewed entries — CROSSPLATFORM
 2026-06-17 is oldest, then KEYBOARD 07-13 and the 07-16 cluster) and the standing feed-prune call.
+
+### Addendum, same day — upkeep step 5 (challenge): 3 verdicts, and the queue itself was lying
+
+Targets came from `react-brain signals` + `calibrate --check-due` rather than from `updated:` age
+(the routine's own instruction). `calibrate` had nothing past its horizon — soonest due 2026-08-25 —
+so `signals` picked the targets: 14 flags, of which the sharpest looked like five CLAIM flags
+("entry calls X maintenance/deprecated, but X shipped days ago").
+
+FIRST FINDING: ALL FIVE CLAIM FLAGS WERE FALSE, AND EACH FAILED DIFFERENTLY. The check was a
+±70-character keyword-proximity test, which cannot read a sentence:
+- NEGATED — ANIMATION literally says "neither package is deprecated".
+- RETROSPECTIVE ×2 — PAYMENTS narrates a belief it already CORRECTED ("this entry previously called
+  react-native-iap 'deprecated/archived'… That read an archived REPO as a dead PACKAGE").
+- OVER-BROAD KEYWORD — DX says type-aware linting is "no longer a REASON to stay on
+  typescript-eslint", which says nothing about the package's maintenance; "no longer" was simply
+  too generic to sit in the keyword list.
+- BORROWED — TESTING's "react-test-renderer … is deprecated." landed one sentence away from
+  "Playwright 1.62", so the word was attributed to the wrong package.
+This matters more than a noisy report: signals PROPOSES `calibrate --record … weakened` from these,
+and the calibration ledger is append-only, so acting on them would have permanently scored three
+correct entries as weakened. Fixed at the root — "no longer" dropped from the keyword set, and the
+keyword must now sit in the SAME SENTENCE as the label, un-negated and not narrating a past belief.
+Verified against all four real windows plus two synthetic true positives (a genuine "in maintenance
+mode" line and a genuine "deprecated in SDK 56" line) — the true positives still fire. Flags 14 → 8,
+zero bogus calibrate proposals. NOT pinned by npm test (the predicate is inline in the script); if
+signals grows further, export it and add a case table.
+
+RB-E-NETWORKING → HELD. The attack was the corpus's most extreme divergence: axios 101.7M/wk vs
+react-native-nitro-fetch 91k/wk, 1117×. It fails on inspection, because the entry does not
+recommend nitro-fetch — the default is "use fetch (expo/fetch is already global on SDK 56+); the
+bigger win is the cache layer above it", with nitro-fetch scoped to a MEASURED hot path and an
+explicit "already on axios → keep it" clause. The flag is an artifact of default-extraction reading
+a conditional mention as a pick. Left as-is (the fix belongs in the tool's pick parser, not in the
+entry); recorded as a lead. Refreshed nitro-fetch 1.5 → 1.6.1 while there.
+
+RB-E-CHARTS → WEAKENED. Steelmanned react-native-gifted-charts (ships weekly, 1,362 stars vs 1,210)
+against Victory Native XL as the RN default. It loses on both axes the entry claims: downloads run
+2.6× the OTHER way (victory-native 381,672/wk vs 147,977/wk) and the substrate differs — victory-native
+peers on Skia + Reanimated + Gesture Handler, gifted-charts on react-native-svg — so "Skia-backed for
+standard charts" is a rendering fact, not branding. What the attack DID expose: the web `victory`
+package is not "slow", it is dormant (npm 2025-01-14, repo pushed 2025-12-19), and because its detect
+label shared the "victory" token with victory-native, signals kept reporting a dormant web package as
+a stale recommended DEFAULT. Relabelled "Victory (web, dormant)" — which is the corpus's documented
+way to keep a row out of the default set, and it retired that flag too.
+
+RB-E-STORAGE → WEAKENED. The secrets recommendation read "react-native-keychain / expo-secure-store"
+as an undifferentiated pair, and that pair is no longer symmetric: expo-secure-store ships with the
+Expo SDK (57.0.1, 2026-07-15) while react-native-keychain has not published since 2025-03-23 —
+17 months, 180 open issues, though the repo still takes commits (pushed 2026-04-29). The principle
+survives untouched (secrets belong in the OS Keychain/Keystore, never AsyncStorage); the routing is
+now explicit — Expo → secure-store, bare RN or finer access-control needs → keychain, pinned, with
+the gap stated. The STALE flag on keychain is the one flag in this batch that was RIGHT.
+
+Verdicts recorded: `calibrate --record` ×3 (charts weakened · storage weakened · networking held).
+Gates: lint clean · rules ✓ · eval 139/139 · verify-diff ✓.
