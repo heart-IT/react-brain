@@ -41,7 +41,12 @@ note: >
   The Expo-vs-bare split above now separates two DISTINCT navigation stacks, not one wrapper
   over the other — which raises the cost of switching lanes later; weigh it at project setup.
   Stress-tested 2026-07-10 (WEAKENED → React Router when-clause added; the TanStack type-safe-SPA
-  slot SURVIVED the 2.3x-downloads attack — RR's typegen is framework-mode-only).
+  slot SURVIVED the 2.3x-downloads attack — RR's typegen is framework-mode-only). RE-CHALLENGED
+  2026-08-18 → HELD: same attack, bigger gap (react-router 44.2M/wk vs @tanstack/react-router
+  19.7M/wk, 2.2×), and the axis is unchanged at the source — React Router 8.3.0's type generation
+  "executes your route config (app/routes.ts by default)" and emits per-route-module +types, i.e.
+  it is tied to FRAMEWORK-mode conventions, so a declarative/data-mode SPA still does not get it
+  (verified vs reactrouter.com/explanation/type-safety). Popularity moved; the reason did not.
   UPDATE 2026-07-16 (TWiR #290, verified vs the release): react-native-screens 4.26 marks the
   Tabs API STABLE (requires RN 0.84+; FormSheet + Stack-v5 toolbar menus stay experimental) —
   the native layer under RN8's native bottom tabs firms up while RN8 itself remains pre-stable.
@@ -55,7 +60,7 @@ note: >
   scales with how much of React Router's server side you actually use.
 defer_to_skill: null
 doc: "RB-E-NAV.md"   # long-form Explanation entry in content_dir
-updated: 2026-08-18   # deferred deep linking / the Installation Gap (+native-intent as pre-routing middleware)
+updated: 2026-08-18   # re-challenged → HELD (RR typegen still framework-mode-only); deferred deep linking
 reading:
   - title: "Detour: deferred deep linking done right in Expo Router"
     url: "https://expo.dev/blog/deferred-deep-linking-the-right-way"
@@ -104,6 +109,7 @@ reading:
     claim: "You ship React Router — model modal dialogs as nested routes instead of local useState/useEffect; revalidation, view transitions, flash sessions, and exit animations then ride the router."
     applies_when: { deps: ["react-router", "react-router-dom"], platforms: [react] }
 sources:
+  - "https://reactrouter.com/explanation/type-safety"
   - "https://expo.dev/blog/deferred-deep-linking-the-right-way"
   - "https://registry.npmjs.org/@swmansion/react-native-detour/latest"
   - "https://reactnavigation.org/blog/2025/12/19/react-navigation-8.0-alpha/"

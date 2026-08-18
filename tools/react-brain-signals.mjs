@@ -11,7 +11,15 @@
 //
 // For each entry it resolves the options to npm packages (reusing DETECTORS), fetches
 // weekly downloads + (where it matters) last-publish, and raises three flags:
-//   TRAILING  — the recommended default is badly out-downloaded by an alternative
+//   TRAILING  — the recommended default is badly out-downloaded by an alternative.
+//               KNOWN LIMITATION (measured 2026-08-18): this assumes an entry's options are
+//               SUBSTITUTES. Several are not — MEDIA lists expo-camera beside expo-image-picker
+//               (a camera is not a picker), P2P lists autobase beside corestore (Autobase runs ON
+//               Corestore). Those two fire every run and mean nothing. A third mode is
+//               default-extraction: NETWORKING's default is "use fetch", and nitro-fetch is named
+//               only in a "reach for it when measured" clause, but pkgsForPick reads the whole
+//               string and calls it the default. Read TRAILING as "look at this entry", never as
+//               "this entry is wrong" — which is why it is printed and never auto-recorded.
 //   STALE     — a recommended default hasn't published in >12mo (early warning)
 //   CLAIM     — an entry calls a lib "maintenance/deprecated" but it just shipped
 // Writes tools/.signals-baseline.json so later runs show ↑/↓ download deltas (pulse pattern).

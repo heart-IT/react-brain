@@ -2091,3 +2091,52 @@ the gap stated. The STALE flag on keychain is the one flag in this batch that wa
 
 Verdicts recorded: `calibrate --record` ×3 (charts weakened · storage weakened · networking held).
 Gates: lint clean · rules ✓ · eval 139/139 · verify-diff ✓.
+
+### Addendum, same day — clearing the still-open list (feed prune + the remaining flags)
+
+THE FEED-PRUNE RECOMMENDATION WAS WRONG, AND MEASURING IT SAID SO. This ledger had been carrying
+"vercel.com, github.blog and thoughtbot produce overflow markers and zero keeps" for six passes, and
+I repeated it twice today before counting. Counted across every manifest in tools/harvest-log
+(rows mentioning the host → rows kept): vercel.com 25 → 1 · github.blog 17 → 3 · css-tricks.com
+11 → 2 · thoughtbot.com 8 → 4. For scale, the hosts nobody would question: swmansion 13 → 7,
+margelo 23 → 9, callstack 20 → 6, expo.dev 30 → 4. So github.blog (18%) and css-tricks (18%)
+convert like expo.dev, and thoughtbot at 50% is one of the BEST feeds in the graph. github.blog's
+three keeps are all RB-E-SECURITY platform facts (npm publish-time malware scanning, the
+supply-chain umbrella post, actions/checkout hardening) — pruning it would have cut the corpus's
+main line into platform-level supply-chain news. Only vercel.com earned the prune: one keep in ten
+manifests (a Vercel+Shopify/Hydrogen landscape note) against a "+17 more posts" overflow marker
+every single pass, and the Next.js releases anyone acts on arrive via nextjs.org, which is watched
+separately. Pruned exactly that one, in code, with the measurement in the comment. LESSON: a
+recommendation that survives six passes by repetition is not evidence; it is a habit.
+
+REMAINING SIGNALS FLAGS, WORKED THROUGH. 14 → 6 across the session.
+- RB-E-NAV → HELD (re-challenge; the same attack ran on 2026-07-09). react-router now out-downloads
+  @tanstack/react-router 2.2× (44.2M vs 19.7M/wk) — and the axis is unchanged at the source: React
+  Router 8.3.0's typegen "executes your route config (app/routes.ts by default)" and emits per-route
+  +types, i.e. framework-mode conventions, so a declarative/data-mode SPA still doesn't get it.
+  Popularity moved; the reason didn't.
+- RB-E-ANIMATION → WEAKENED. The default is untouched, but the entry contradicted itself: the option
+  row said "prefer plain Reanimated/LayoutAnimation for new work" while a when-clause still routed
+  "simple fade/slide, want declarative" to Moti. Moti is dormant, not slow — npm 0.30.0 published
+  2025-01-29, no repo commits since 2025-03-11, and its own dependency list still pins
+  framer-motion ^6.5.1 with a wildcard reanimated peer, so nothing warns you on Reanimated 4. The
+  clause now points at LayoutAnimation / Reanimated presets, and the detect label reads
+  "Moti (dormant)" — which is the corpus's documented way to say so, and it retired the flag.
+- RB-E-LISTS → HELD. Both web co-defaults are current (react-window 2.3.0, TanStack Virtual 3.14.9).
+  The flag was a label/default-text mismatch: the default said "react-virtual" while the detect
+  label reads "TanStack Virtual", so the tool never saw it as a default and compared it against
+  react-window. The default now names it as its label reads.
+- NETWORKING / P2P / MEDIA TRAILING flags are ARTIFACTS and are now documented as such in the tool
+  header rather than silently re-triaged every week: TRAILING assumes an entry's options are
+  SUBSTITUTES, but MEDIA lists a camera beside an image picker, P2P lists Autobase beside the
+  Corestore it runs on, and NETWORKING's "default" is extracted from a conditional clause ("reach
+  for nitro-fetch when measured"), not from the actual pick ("use fetch"). Not recorded as verdicts —
+  the entries were never attacked on their merits, and pretending otherwise would pad the ledger.
+- CHARTS (d3, 2y) and STORAGE (keychain, 17mo) STALE flags stay ON PURPOSE: d3's gap is maturity
+  (the note says so and it is the substrate under visx), and keychain's gap is real and now
+  documented in the entry. A flag whose answer lives in the entry is a working flag.
+
+Verdicts recorded this session: 6 (charts weakened · storage weakened · networking held · nav held ·
+animation weakened · lists held). Gates: lint clean · rules ✓ · eval 139/139 · verify-diff ✓.
+One firsthand event stays PENDING and unconsumed by design — agent-device v0.20.9, the real release
+behind this morning's phantom v0.20.10; the next --manifest run will capture it.

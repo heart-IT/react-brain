@@ -38,6 +38,19 @@ const TODAY = ((argv.find((a) => a.startsWith('--today=')) || '').split('=')[1])
 // hosts that are never author blogs (platforms, registries, media)
 const NOT_BLOG = /(^|\.)(github\.com|npmjs\.com|registry\.npmjs\.org|youtube\.com|youtu\.be|twitter\.com|x\.com|bsky\.app|dev\.to|medium\.com|archive\.org|web\.archive\.org)$/;
 
+// PRUNED FEEDS — real blogs, dropped on MEASURED yield rather than vibes. Counted over every
+// manifest in tools/harvest-log on 2026-08-18 (rows carrying the host → rows kept):
+//   vercel.com 25 → 1   ← the only one that earned a prune
+//   github.blog 17 → 3 · css-tricks.com 11 → 2 · thoughtbot.com 8 → 4   ← all kept, see below
+// vercel.com's single keep in ten manifests was a landscape note (Vercel+Shopify/Hydrogen), while
+// its feed reliably produces the "+17 more posts" overflow marker every pass; the Next.js releases
+// anyone actually acts on arrive on nextjs.org, which is watched separately. The three hosts that
+// LOOKED like prune candidates in the ledger were measured and kept instead: github.blog's keeps
+// are all RB-E-SECURITY platform facts (npm publish-time malware scanning, the supply-chain
+// umbrella post, actions/checkout hardening), css-tricks is the corpus's only a11y feed, and
+// thoughtbot converts at 50%. Re-measure before adding a host here.
+const PRUNED_FEEDS = new Set(['vercel.com']);
+
 // ── derive the watch graph from the corpus ─────────────────────────────────────
 function deriveGraph() {
   const entries = loadEntries();
@@ -72,7 +85,7 @@ function deriveGraph() {
       }
       try {
         const host = new URL(u).host.replace(/^www\./, '');
-        if (NOT_BLOG.test(host)) continue;
+        if (NOT_BLOG.test(host) || PRUNED_FEEDS.has(host)) continue;
         const h = hostHits.get(host) || hostHits.set(host, { n: 0, entries: new Set() }).get(host);
         h.n++; h.entries.add(e.id);
       } catch { /* non-URL source string */ }
