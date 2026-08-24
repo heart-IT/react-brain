@@ -2161,3 +2161,50 @@ receipt under the option row's "0.20.9 on npm and GitHub" claim, which until now
 registry alone. Watch queue: empty ("no new events since last run").
 
 Gates: lint clean · rules ✓ 1146 gold rows · eval 139/139 · verify-diff ✓.
+
+## 2026-08-24 — firsthand + TWiR #294 + React Weekly #34
+
+FIRSTHAND: 107 events (34 rule-dispositioned, 73 judged). The week's real story is TanStack AI
+entering RC (2026-08-21): 24 tree-shakable provider adapters and AG-UI adopted as the official
+protocol — RB-E-AI-UI's option row/default/when-clause updated off "pre-1.0 0.41", with a 1.0
+tripwire wired for the re-evaluation against the Vercel AI SDK default. Yesterday's phantom
+agent-device v0.20.10 is now real on npm AND GitHub — pin + receipt refreshed (the pin-guard
+correctly surfaced the patch as TODO this time). Pin refreshes: nitro-mlx v0.5→v0.7. tkdodo's
+series #4 (route-context queryOptions kill loader/component prefetch divergence) went into
+RB-E-DATA next to part 3. shadcn registries now install from PRIVATE GitHub repos — option row
+updated. Next.js pre-announced a CRITICAL security release for Aug 26 (16.3.3/15.5.24): kept as
+a tripwire on `next >= 16.3.3`, explicitly because the npm-patch rule would otherwise silently
+swallow the patch bump — the tripwire IS the reopen mechanism for a pre-ship security keep.
+
+TWIR #294 (the real one — last week's stub precedent held: the archive listing now carries it):
+87 links, 37 pre-dispositioned, 50 judged, 2 keeps. Oxlint 1.79 ported the React Compiler rule
+surface (22 compiler-powered rules, recommended presets → correctness) and oxc-transform-react
+does compiler auto-memoization ~10× faster than Babel via @vitejs/plugin-react 6.1.0 — this
+directly rewrote RB-E-DX's "what still isn't ported is react-hooks + react-compiler" clause;
+the ESLint-only surface is now react-hooks alone. Lovable's Next→Start migration writeup
+(42M uniques, 400 routes, 910K LOC) became the META-FRAMEWORKS reading behind the held
+"Lovable defaults to Start" fact — kept for cutting both ways (10s/1.5GB vs 70s/8GB dev loops
+and fewer agent mistakes, against hand-tuned production bundling). Also in #294: RNGH 3's
+unified Touchable (swmansion post, Aug 20) — kept into RB-E-ANIMATION as reading + option-row
+update (one button deprecates the 9 legacy exports). That keep CONSUMES twir-293's standing
+pre-ship skip "faster touchables coming soon (tweet)" — the reopen signal fired and worked as
+designed. RC wave skipped on pre-ship discipline: Preact 11, Solid 2.0, Vitest 5, pnpm 12,
+Effect 4.0 — NOTE: preact/solid/pnpm are NOT firsthand-watched, so those reopens rest on
+newsletter recurrence, not the graduation guard (the Preact row says so explicitly). Expo Tuft
+(agent-on-an-always-on-machine, Slack/iMessage) skipped as waitlist-gated technical preview.
+
+REACT WEEKLY #34: 8 links, 6 already dispositioned this same pass (heavy overlap with TWiR +
+firsthand — corroboration doing its job); 1 new skip (sergiodxa SSR-timezone tutorial).
+React Status: NO Thursday issue — /issues/488 404s, archive ends at #487; noted in state,
+probe first next pass. React Digest (#2344), RN Rewind (#53), Native Weekly (#18) all current.
+
+Spot-check (previous manifests): no fresh cap skips in twir-293; its two re-adjudicated skips
+both validated — the touchables teaser resolved via today's keep, react-native-plain-text
+(now skipped in 2 passes) re-triaged and still too-early at 0.8 with no adoption signal. Two
+rule rows from firsthand-08-18 examined: agent-device 0.20.6→0.20.9 npm-patch skip was correct
+pre-pin (today's pinned 0.20.10 arrived TODO — the pin-guard works); vercel-changelog-chrome
+rows correctly chrome. No rule indicted.
+
+Delta: 9 entries touched (AI-UI · DATA · META-FRAMEWORKS ×2 keeps · ANIMATION · DX · AI-DEVTOOLS ·
+ONDEVICE-AI · COMPONENT-LIBS), 2 new tripwires, 3 manifests. Gates: lint clean · rules ✓ 1348
+gold rows · eval 139/139 · verify-diff 8/8 receipts · coverage 87/87 (twir-294).

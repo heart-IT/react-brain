@@ -8,7 +8,7 @@ platforms: [react, react-native]
 options:
   - { name: "agent-skills (Callstack)", tradeoff: "curated skill packs for coding agents — RN best practices, upgrade playbook, brownfield migration, library scaffolding; installs into Claude Code / Cursor / Codex / Gemini CLI; the broadest pack (~1.5k★)" }
   - { name: "react-native-skills (Margelo)", tradeoff: "RN-focused skills (VisionCamera and native-module depth) via `npx skills add margelo/react-native-skills`; younger/smaller than Callstack's" }
-  - { name: "agent-device (Callstack)", tradeoff: "agent-native CLI: AI agents drive real iOS/Android/tvOS/macOS/web devices & simulators — a11y snapshots, actions, replayable scripts; v0.20.x (0.20.9 on npm and GitHub, verified 2026-08-18), iterating fast — 0.20 redesigned gesture execution, added Maestro compatibility through a typed engine, and shipped REPLAY: save a completed agent-driven flow as a script and re-run it with zero model calls (see reading)" }
+  - { name: "agent-device (Callstack)", tradeoff: "agent-native CLI: AI agents drive real iOS/Android/tvOS/macOS/web devices & simulators — a11y snapshots, actions, replayable scripts; v0.20.x (0.20.10 on npm and GitHub, verified 2026-08-24), iterating fast — 0.20 redesigned gesture execution, added Maestro compatibility through a typed engine, and shipped REPLAY: save a completed agent-driven flow as a script and re-run it with zero model calls (see reading)" }
   - { name: "Argent (Software Mansion)", tradeoff: "MCP server + skills: simulator control, debugger attach (React tree + JS), console/HTTP monitoring, correlated React+iOS profiling; 0.21.0 (verified vs npm 2026-08-18; 0.17 first) extends beyond iOS — tvOS/Android TV/Vega OS, cloud agents for autonomous bug repro, Argent Lens design review; also listed in RB-E-TESTING" }
   - { name: "Maestro MCP / Maestro Viewer", tradeoff: "agents drive devices and GENERATE E2E flows on the tool the ecosystem already tests with — see RB-E-TESTING (which owns the testing depth)" }
   - { name: "Reactotron MCP", tradeoff: "the classic RN debugger exposes runtime state/network to coding agents via MCP (reactotron-core-server 3.3.0, 2026-05)" }
@@ -58,7 +58,7 @@ note: >
   now has a live first-party leaderboard — check it before pinning a tool+model pair.
 defer_to_skill: agentic-engineering-patterns
 doc: null
-updated: 2026-08-18   # replay economics (agent-device) + modern-web-guidance (web skills) + Metrognome
+updated: 2026-08-24   # agent-device pin 0.20.9 → 0.20.10 (yesterday's phantom tag now real on npm + GitHub)
 reading:
   - title: "3 Minutes With an Agent, 9 Seconds on Replay"
     url: "https://www.callstack.com/blog/3-minutes-with-an-agent-9-seconds-on-replay"
@@ -99,7 +99,7 @@ reading:
 sources:
   - "https://registry.npmjs.org/modern-web-guidance/latest"
   - "https://registry.npmjs.org/agent-device/latest"
-  - "https://github.com/callstack/agent-device/releases/tag/v0.20.9"
+  - "https://github.com/callstack/agent-device/releases/tag/v0.20.10"
   - "https://registry.npmjs.org/metrognome/latest"
   - "https://www.callstack.com/blog/an-ai-agent-for-measured-react-native-performance-fixes"
   - "https://appcontrolbench.swmansion.com/"

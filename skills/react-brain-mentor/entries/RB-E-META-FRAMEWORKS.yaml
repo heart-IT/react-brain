@@ -44,8 +44,14 @@ note: >
   slices fact verified vs Daishi Kato's first-party post.
 defer_to_skill: engineering-principles
 doc: "RB-E-META-FRAMEWORKS.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-28   # first scheduled security release verified (16.2.11/15.5.21) + TanStack's RSC reversal reading
+updated: 2026-08-24   # security-release tripwire (16.3.3/15.5.24, Aug 26) + Lovable's Next→Start migration reading (twir-294)
 reading:
+  - title: "How we migrated lovable.dev away from Next.js and turned it into another Lovable app"
+    url: "https://lovable.dev/blog/how-we-migrated-lovable-dev-away-from-nextjs"
+    by: "Lovable (2026-08-18)"
+    what: "The detailed writeup behind this entry's held Lovable fact, and the largest public Next→Start migration on record: lovable.dev (42M+ monthly uniques, ~400 routes, 910K+ lines of non-generated code) moved off Next.js/Vercel onto TanStack Start, with the mechanical code-move AI-assisted. The comparison section is the durable part, and it cuts both ways: Vite dev server at 10s start / 1.5GB RAM vs 70s / 8GB for Next 16.2+Turbopack on the same codebase (they note 16.3 claims up to 90% dev-server memory reduction); fewer server/client abstractions to hold in your head; agents make fewer framework mistakes on Start (their read: a small consistent training corpus beats a large self-contradictory one, because Next 12/14/16 answers pollute each other); BUT production bundling needed 'quite a bit of low-level configuration' where Next.js is efficient out of the box."
+    claim: "You're weighing Next.js vs TanStack Start — Lovable's 910K-LOC migration reports lighter dev loops, fewer abstractions, fewer agent mistakes on Start; the cost is hand-tuned production bundling Next gives you out of the box."
+    applies_when: { deps: ["next", "@tanstack/react-start"], platforms: [react] }
   - title: "Who Owns the Tree? RSC as a Protocol, Not an Architecture"
     url: "https://tanstack.com/blog/who-owns-the-tree"
     by: "TanStack"
@@ -85,6 +91,7 @@ reading:
 sources:
   - "https://nextjs.org/blog/next-security-release-program"
   - "https://nextjs.org/blog/july-2026-security-release"
+  - "https://nextjs.org/blog/upcoming-nextjs-security-release-august-2026"
   - "https://newsletter.daishikato.com/p/waku-s-unique-feature-slices"
   - "https://vercel.com/blog/vercel-and-shopify-are-rebuilding-hydrogen"
   - "https://tanstack.com/blog/who-owns-the-tree"
@@ -100,3 +107,6 @@ tripwires:   # standing caveats as executable conditions — evaluated by `harve
   - when: { pkg: "waku", atleast: "1.0.0" }
     then: "Waku hit 1.0 stable (option row says '1.0-beta = minimal RSC') — update the option row + the 'still beta' when-clause"
     added: 2026-07-16
+  - when: { pkg: "next", atleast: "16.3.3" }
+    then: "The scheduled 2026-08-26 security release landed (pre-announced 2026-08-20: ONE CRITICAL severity vulnerability, patched in 16.3.3 + 15.5.24) — capture the advisory (CVE, affected versions) into the security-release prose; the npm-patch rule would otherwise silently skip this patch bump"
+    added: 2026-08-24

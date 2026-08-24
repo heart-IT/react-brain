@@ -9,7 +9,7 @@ options:
   - { name: "react-native-executorch", tradeoff: "on-device models (Meta ExecuTorch); v0.8 adds VLM + runOnFrame worklet w/ Vision Camera; tool-calling/embeddings since 0.4, OCR since 0.3" }
   - { name: "@react-native-ai/apple", tradeoff: "Apple on-device LLM + SpeechAnalyzer (iOS 26); zero cloud; RN 0.80+ (preview)" }
   - { name: "@react-native-ai/adk", tradeoff: "Google Gemini on ANDROID via the Agent Development Kit — on-device Gemini Nano + cloud models behind one Vercel-AI-SDK provider; tool calling + streaming; same react-native-ai family as the Apple provider (v0.12)" }
-  - { name: "react-native-nitro-mlx", tradeoff: "Apple MLX on-device LLM + TTS/STT via Nitro Modules, with tool calling (ChatSession API); iOS 26+ ONLY; v0.5, ~100★ — niche/early" }
+  - { name: "react-native-nitro-mlx", tradeoff: "Apple MLX on-device LLM + TTS/STT via Nitro Modules, with tool calling (ChatSession API); iOS 26+ ONLY; v0.7 (2026-08-22), ~100★ — niche/early" }
   - { name: "react-native-rag", tradeoff: "on-device retrieval-augmented generation over ExecuTorchLLM; local vector store" }
   - { name: "@react-native-ai/llama", tradeoff: "llama.cpp behind the Vercel AI SDK provider interface (v0.12.0, verified vs npm 2026-08-18) — runs GGUF chat AND embedding models on one engine/one dependency, which is what makes a hand-rolled local RAG pipeline (embed + generate) practical; pair with react-native-nitro-sqlite + sqlite-vec for the vector store (see reading)" }
   - { name: "offline speech (expo-speech-recognition / whisper.rn)", tradeoff: "speech-to-text without network; whisper.rn (0.7.2, ~800★, verified vs npm + repo 2026-07-28) is the concrete binding — whisper.cpp under the hood, and it now also carries NVIDIA Parakeet ASR alongside Whisper" }
@@ -21,7 +21,7 @@ recommend:
 note: "Fast-moving area surfaced across multiple RN Rewind issues; recommend tentatively (confidence: low) and validate on-device before committing."
 defer_to_skill: null
 doc: null
-updated: 2026-08-18   # local-RAG build reading (llama.cpp + sqlite-vec) + @react-native-ai/llama option row
+updated: 2026-08-24   # nitro-mlx pin v0.5 → v0.7 — firsthand
 sources:
   - "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.8.0"
   - "https://registry.npmjs.org/@react-native-ai/adk/latest"

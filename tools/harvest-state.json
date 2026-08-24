@@ -6,13 +6,13 @@
     "`react-brain lint` cross-checks each `count` against encyclopedia.yaml sources_digested — they must match.",
     "Narrative harvest history (what each pass changed, process learnings) lives in tools/harvest-log/LEDGER.md — in-repo since 2026-08-07."
   ],
-  "updated": "2026-08-18",
+  "updated": "2026-08-24",
   "sources": {
     "this-week-in-react": {
       "name": "This Week in React",
       "archive": "https://thisweekinreact.com/newsletter",
-      "last_processed": "#293",
-      "count": 27,
+      "last_processed": "#294",
+      "count": 28,
       "cadence": "weekly",
       "notes": "issue pages fetch directly at /newsletter/{n} — BUT a 200 IS NOT PROOF OF PUBLICATION: on 2026-08-18 /newsletter/294 returned a 175KB PAGE with the title 'This Week In React #294: ...' , description 'Hi everyone!' and only the upcoming issue's sponsor slots (posthog 'twir-aug19'). `harvest prep` probed it, wrote a manifest and froze a bench fixture off that stub — both were deleted. Cross-check the ARCHIVE listing at /newsletter (it stopped at #293) or reject titles ending in ': ...' before treating an issue as live. #293 (Aug 5) → #294 slated Aug 19, i.e. the author skipped a week",
       "url_pattern": "https://thisweekinreact.com/newsletter/{n}"
@@ -23,7 +23,7 @@
       "last_processed": "#487",
       "count": 28,
       "cadence": "weekly",
-      "notes": "corroboration-heavy; headliners usually already held",
+      "notes": "corroboration-heavy; headliners usually already held. No Thursday issue the week of 2026-08-20: /issues/488 404s and the archive ends at #487 as of 2026-08-24 — probe #488 first next pass",
       "url_pattern": "https://react.statuscode.com/issues/{n}"
     },
     "react-digest": {
@@ -53,8 +53,8 @@
     "react-weekly": {
       "name": "React Weekly",
       "archive": "https://react-weekly.dev/rss.xml",
-      "last_processed": "#33",
-      "count": 26,
+      "last_processed": "#34",
+      "count": 27,
       "cadence": "weekly (Sundays)",
       "notes": "site + api.react-weekly.dev are JS-shell/auth-gated — harvest via rss.xml content:encoded (FULL bodies). Links inside are api.react-weekly.dev/track/click/<id> redirects: resolve each with `curl -L` before dispositioning. `harvest inventory`/`coverage` return 0 links on the issue URL, so the coverage gate cannot cover this source — the RSS-derived manifest is the record. RSS window = latest 20: a backlog >20 issues loses them permanently (issues 1-7 already unreachable). TanStack-heavy."
     }

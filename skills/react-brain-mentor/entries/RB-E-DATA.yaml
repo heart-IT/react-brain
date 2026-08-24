@@ -24,8 +24,14 @@ recommend:
 note: "Server state ≠ client state (see RB-E-STATE). TanStack Query is the #1 React library in State of React 2025; it's transport- and platform-agnostic, so the data layer is shared code across web + RN. Adversarially stress-tested 2026-06-25 (SURVIVES, high): RSC complements (doesn't displace) the cache; TanStack DB builds ON TanStack Query; Zero reached 1.0 (2026-06) with React Native support."
 defer_to_skill: null
 doc: "RB-E-DATA.md"   # long-form Explanation entry in content_dir
-updated: 2026-08-18   # when an RSC app actually needs a client cache (data changes on its own vs on user action)
+updated: 2026-08-24   # tkdodo series #4: route-context queryOptions kill loader/component prefetch divergence — firsthand
 reading:
+  - title: "Reliable Query Prefetching with TanStack Router"
+    url: "https://tkdodo.eu/blog/reliable-query-prefetching-with-tanstack-router"
+    by: "Dominik Dorfmeister (TkDodo)"
+    what: "Part 4 of the series ('TanStack Router and Query' below is part 3), and it names that pattern's failure mode at scale: the route loader and the component fetch from two places that must stay 100% in sync, there is no error when they diverge, and drift means prefetching data you no longer use or waterfalling data you forgot to prefetch. The fix is to create queryOptions in the route's `context` function — the loader calls ensureQueryData(context.xQueryOptions) and components consume the SAME object via Route.useRouteContext(), so one definition feeds both sides; child routes see every parent's queryOptions through context inheritance. Addresses the re-render worry directly: the context function re-runs only when params or loaderDeps change, so unrelated search-param churn doesn't re-render context subscribers."
+    claim: "You ship TanStack Router + Query — define queryOptions in the route's context function so the loader (ensureQueryData) and components (useRouteContext) consume one object; separate definitions silently diverge into over-prefetching or waterfalls."
+    applies_when: { deps: ["@tanstack/react-router"] }
   - title: "Coordinating Optimistic Updates in Next.js"
     url: "https://aurorascharff.no/posts/coordinating-optimistic-updates-in-nextjs/"
     by: "Aurora Scharff"

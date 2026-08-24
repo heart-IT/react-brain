@@ -7,7 +7,7 @@ confidence: medium
 platforms: [react, react-native]
 options:
   - { name: "Reanimated 4", tradeoff: "UI-thread + CSS-style animations/transitions; worklets split into react-native-worklets; requires New Arch" }
-  - { name: "Gesture Handler 3.0", tradeoff: "native gestures; v3 adds a hook-based API built for the React Compiler + Reanimated 4" }
+  - { name: "Gesture Handler 3.0", tradeoff: "native gestures; v3 adds a hook-based API built for the React Compiler + Reanimated 4, and a single unified Touchable button component that replaces (and deprecates) the library's 9 legacy button/touchable exports" }
   - { name: "react-native-worklets (0.11.x)", tradeoff: "the worklets runtime under Reanimated 4 (now its own package; npm latest 0.11.4, verified 2026-08-18 — an earlier '8.0' claim here was WRONG, caught by the firsthand watch); 0.11 adds experimental Hermes-bytecode worklets + Shareable values across isolated runtimes. 0.12.0 shipped 2026-08-11 but sits on the `next` dist-tag, NOT latest (WeakRef on worklet runtimes; Bundle Mode script loading on par with RN's own loaders) — read it as the next line, not the one to install. TURN ON BUNDLE MODE (stable since 0.10) — below RN 0.87 it is the fix for the Hermes V1 memory regression, and worth it regardless; see note" }
   - { name: "react-native-skia (2.x)", tradeoff: "GPU 2D drawing; v2.1 plays Lottie via Skottie; pairs with Reanimated" }
   - { name: "lottie-react-native", tradeoff: "designer Lottie/JSON animations; v7 adds visionOS" }
@@ -72,8 +72,14 @@ note: >
   neither package is deprecated.
 defer_to_skill: react-native-best-practices
 doc: "RB-E-ANIMATION.md"   # long-form Explanation entry in content_dir
-updated: 2026-08-18   # challenged → WEAKENED (Moti when-clause contradicted its own caveat); Hermes tripwire closed in RN 0.87
+updated: 2026-08-24   # RNGH 3 Touchable: one button replaces the 9 deprecated touchables — firsthand (swmansion blog)
 reading:
+  - title: "React Native Gesture Handler's Touchable: The Button We Wish We Had Sooner"
+    url: "https://swmansion.com/blog/react-native-gesture-handler-s-touchable-the-button-we-wish-we-had-sooner/"
+    by: "Jakub Piasecki (Software Mansion), 2026-08-20"
+    what: "The maintainer's account of why Gesture Handler had accumulated NINE separate button components (drop-ins for RN's Touchables, then for Pressable, each with different feedback) and why RNGH 3's answer is one configurable Touchable that deprecates the rest. The durable selection fact for anyone on RNGH 3: new pressables go through Touchable, not the legacy exports; the post includes measured press-feedback latency comparisons against RN's Pressable."
+    claim: "You ship react-native-gesture-handler 3 — build buttons on its unified Touchable; the library's 9 legacy button/touchable exports are deprecated."
+    applies_when: { deps: ["react-native-gesture-handler"], platforms: [react-native] }
   - title: "CSS vs. JavaScript Animations"
     url: "https://www.joshwcomeau.com/animation/css-vs-javascript/"
     by: "Josh W. Comeau"
