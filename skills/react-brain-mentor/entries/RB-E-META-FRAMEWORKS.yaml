@@ -10,14 +10,14 @@ options:
   - { name: "TanStack Start", tradeoff: "Vite-based (Rsbuild 2 also supported since 2026-06); RSC support EXPERIMENTAL (into early v1), SSR, Server Functions; deliberately omits Server Actions for security; less opinionated than Next" }
   - { name: "React Router 7 (framework mode) / Remix", tradeoff: "Remix merged into React Router 7; full-stack loaders/actions; Remix 3 is a separate JSX-component pivot away from RR" }
   - { name: "Expo Router", tradeoff: "the RN/universal meta-framework; SDK 56 decoupled from React Navigation; web SSR (alpha)" }
-  - { name: "Astro / Waku / RedwoodSDK", tradeoff: "Astro = content/islands; Waku 1.0-beta = minimal RSC — its SLICES (reusable components w/ independent render config; lazy slices ≈ Astro server islands, mixable across static/dynamic pages) are its distinctive feature; RedwoodSDK 1.0 = Vite+RSC+Cloudflare" }
+  - { name: "Astro / Waku / RedwoodSDK", tradeoff: "Astro = content/islands; Waku 1.0-rc (rc.0 2026-08-25, verified vs npm) = minimal RSC — its SLICES (reusable components w/ independent render config; lazy slices ≈ Astro server islands, mixable across static/dynamic pages) are its distinctive feature; RedwoodSDK 1.0 = Vite+RSC+Cloudflare" }
   - { name: "Vinext (Cloudflare)", tradeoff: "Vite-based Next.js rebuild; 1.0.0-beta (2026-07-04, verified vs npm) drops the experimental label — maturing, but AI-generated origins + the security issues Vercel flagged warrant re-verification before any production bet" }
 recommend:
   default: "Web: Next.js is the safe default; choose TanStack Start when you want a less-opinionated, Vite-native full-stack alternative (Server Functions stable; RSC opt-in and still experimental; Start itself is v1 RC). RN/universal: Expo Router."
   when:
     - "content/marketing site → Astro (ship less JS)"
     - "Cloudflare-first stack → RedwoodSDK"
-    - "want minimal RSC, no lock-in → Waku (still beta)"
+    - "want minimal RSC, no lock-in → Waku (RC as of 2026-08-25; 1.0-stable tripwire wired)"
     - "evaluating Vinext → not production-ready; don't bet on it yet"
 note: >
   Distinct from routing (RB-E-NAV): these own SSR/RSC/data/build. Context-key by hosting target +
@@ -36,7 +36,14 @@ note: >
   post): 4 High + 5 Medium CVEs, patched in v16.2.11 (Active LTS) and v15.5.21 (Maintenance LTS)
   only — the no-backport rule above still holds, the DATE is what became predictable. Ad-hoc
   patches remain for in-the-wild exploits. Predictable upgrade
-  windows soften (not remove) the track-latest-minors commitment. Stress-tested 2026-07-10 (WEAKENED → caveats applied; the
+  windows soften (not remove) the track-latest-minors commitment. The August 2026 release
+  (verified vs the release post) showed the program's limits both ways: pre-announced 2026-08-20
+  as ONE critical, it shipped 2026-08-25 — a day EARLY, after a second critical was found — with
+  TWO unauthenticated RCEs patched in 16.3.3/15.5.24: CVE-2026-75604 (GHSA-p293-qw3h-jr36,
+  Windows-hosted servers only, Pages Router + App Router without Cache Components, no workaround)
+  and GHSA-2xp9-vwfh-vxw4 (RCE via attacker-controlled AVIF in the Image Optimization API —
+  upstream libheif via sharp; the patch DISABLES AVIF optimization until upstream propagates,
+  i.e. a fix that removes a feature). Stress-tested 2026-07-10 (WEAKENED → caveats applied; the
   Next-default and the how-much-RSC context-key both SURVIVED the migration-wave attack).
   LANDSCAPE (2026-07-16 back-audit, verified vs the Vercel post): Vercel and Shopify are
   REBUILDING HYDROGEN together — Shopify's React meta-framework consolidating toward the
@@ -44,7 +51,7 @@ note: >
   slices fact verified vs Daishi Kato's first-party post.
 defer_to_skill: engineering-principles
 doc: "RB-E-META-FRAMEWORKS.md"   # long-form Explanation entry in content_dir
-updated: 2026-08-24   # security-release tripwire (16.3.3/15.5.24, Aug 26) + Lovable's Next→Start migration reading (twir-294)
+updated: 2026-09-01   # Aug security release captured (2 critical RCEs, CVE-2026-75604 + AVIF/libheif; tripwire fired+cleared) · Waku 1.0-beta → 1.0-rc
 reading:
   - title: "How we migrated lovable.dev away from Next.js and turned it into another Lovable app"
     url: "https://lovable.dev/blog/how-we-migrated-lovable-dev-away-from-nextjs"
@@ -92,7 +99,9 @@ sources:
   - "https://nextjs.org/blog/next-security-release-program"
   - "https://nextjs.org/blog/july-2026-security-release"
   - "https://nextjs.org/blog/upcoming-nextjs-security-release-august-2026"
+  - "https://nextjs.org/blog/august-2026-security-release"
   - "https://newsletter.daishikato.com/p/waku-s-unique-feature-slices"
+  - "https://waku.gg/blog/waku-v1-rc"
   - "https://vercel.com/blog/vercel-and-shopify-are-rebuilding-hydrogen"
   - "https://tanstack.com/blog/who-owns-the-tree"
   - "https://frontendmasters.com/blog/react-server-components-in-tanstack/"
@@ -107,6 +116,3 @@ tripwires:   # standing caveats as executable conditions — evaluated by `harve
   - when: { pkg: "waku", atleast: "1.0.0" }
     then: "Waku hit 1.0 stable (option row says '1.0-beta = minimal RSC') — update the option row + the 'still beta' when-clause"
     added: 2026-07-16
-  - when: { pkg: "next", atleast: "16.3.3" }
-    then: "The scheduled 2026-08-26 security release landed (pre-announced 2026-08-20: ONE CRITICAL severity vulnerability, patched in 16.3.3 + 15.5.24) — capture the advisory (CVE, affected versions) into the security-release prose; the npm-patch rule would otherwise silently skip this patch bump"
-    added: 2026-08-24

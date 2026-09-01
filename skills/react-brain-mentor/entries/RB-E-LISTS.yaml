@@ -17,12 +17,12 @@ recommend:
     - "huge web tables (100k+ rows) → HighTable"
     - "one list engine across RN + web → Legend List"
     - "old-architecture RN app → FlashList v2 is New-Arch-only; pin FlashList v1.x or stay on FlatList"
-    - "text-heavy RN feeds where hundreds of flat labels mount at once → try react-native-plain-text for those labels (renders straight to UILabel/TextView, skipping RN's text layout pipeline; one string, one style, Fabric-only, 0.7.x beta) and keep <Text> wherever you need nesting, mixed styles, press handling or selection — the two mix in one screen"
+    - "text-heavy RN feeds where hundreds of flat labels mount at once → try react-native-plain-text for those labels (renders straight to UILabel/TextView, skipping RN's text layout pipeline; one string, one style, Fabric-only, 0.8.x beta as of 2026-08) and keep <Text> wherever you need nesting, mixed styles, press handling or selection — the two mix in one screen"
     - "exact thresholds / perf → react-native-best-practices owns the rules"
 note: >
   PLAIN TEXT PROMOTED skip→when-clause 2026-08-18 (2nd independent signal — TWiR #293 then RN
   Rewind #52 — which was the reopen condition recorded at the first skip; facts verified vs the
-  repo README + npm 0.7.1): react-native-plain-text is a narrow micro-optimization, not a list
+  repo README + npm 0.7.1; still pre-1.0 at 0.8.1, 2026-09-01): react-native-plain-text is a narrow micro-optimization, not a list
   engine — it bypasses RN's text layout pipeline by rendering to the platform's native label
   widget, and buys that with a hard constraint (single string, single style; no nested <Text>,
   no press handling or selection). It requires the New Architecture and does not run in Expo Go.
@@ -48,7 +48,7 @@ note: >
   and call the same Table methods, so this is an upgrade, not a rewrite.
 defer_to_skill: react-native-best-practices  # RN-RULE-USE-FLASHLIST owns the thresholds
 doc: "RB-E-LISTS.md"   # long-form Explanation entry in content_dir
-updated: 2026-08-18   # challenged → HELD (web co-defaults both current); plain-text when-clause; Table v9 memory ceiling
+updated: 2026-09-01   # plain-text version true-up 0.7.x → 0.8.x (still beta, clause unchanged) — firsthand
 reading:
   - title: "How to Build the Fastest Apps: Break the Rules (App.js Conf 2026)"
     url: "https://www.youtube.com/watch?v=K3flMIHS-cI"

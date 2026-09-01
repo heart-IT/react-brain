@@ -11,6 +11,7 @@ options:
   - { name: "WebGPU (react-native-webgpu, formerly react-native-wgpu)", tradeoff: "3D render pipelines on Google's Dawn (by William Candillon, not Software Mansion); UI-thread via Reanimated/worklets; advanced" }
   - { name: "react-native-game-engine", tradeoff: "entity-component loop for simple 2D games; effectively unmaintained (last release v1.2.0, 2020)" }
   - { name: "@react-three/fiber (three.js)", tradeoff: "declarative 3D scenes as React components; v9 runs in RN via expo-gl — the 3D-in-an-app path without a game engine" }
+  - { name: "react-native-filament (Margelo)", tradeoff: "Google's Filament physically-based renderer as declarative React components — GPU-native (Metal on iOS, OpenGL/Vulkan on Android), mobile-first, ~4MB native dep (verified vs the docs); the mid ground between r3f-over-GL and embedding a game engine; 1.11.0, 1.4k★, but QUIET since 2026-05 (no npm publish or repo push in ~3 months, verified 2026-09-01) — check pulse before betting" }
   - { name: "ReactVision (@reactvision/react-viro)", tradeoff: "AR/VR from one RN codebase (iPhone/Android AR + Meta Quest) — the maintained fork of react-viro; New Architecture (Fabric) REQUIRED; active (2.57.x, 2026-07)" }
   - { name: "react-native-visionos (Callstack)", tradeoff: "full RN fork targeting Apple Vision Pro / visionOS SDK (~1.1k★); CAUTION: pinned to RN 0.78 (2025-03), lags core by ~a year — verify parity before betting" }
 recommend:
@@ -32,7 +33,7 @@ note: >
   the Horizon Store — a first-party 2D-panel path beside ReactVision's immersive AR/VR.
 defer_to_skill: react-native-best-practices
 doc: "RB-E-GAMES.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-16
+updated: 2026-09-01   # react-native-filament row added (gap: PBR renderer between r3f and Godot; quiet-since-May caveat) — React Status #488
 sources:
   - "https://github.com/wcandillon/react-native-webgpu"
   - "https://registry.npmjs.org/@borndotcom/react-native-godot"

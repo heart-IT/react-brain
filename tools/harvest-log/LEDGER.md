@@ -2208,3 +2208,87 @@ rows correctly chrome. No rule indicted.
 Delta: 9 entries touched (AI-UI · DATA · META-FRAMEWORKS ×2 keeps · ANIMATION · DX · AI-DEVTOOLS ·
 ONDEVICE-AI · COMPONENT-LIBS), 2 new tripwires, 3 manifests. Gates: lint clean · rules ✓ 1348
 gold rows · eval 139/139 · verify-diff 8/8 receipts · coverage 87/87 (twir-294).
+
+## 2026-09-01 — firsthand + React Status #488 + React Digest #2350/#2355 + RN Rewind #54/#55 + Native Weekly #19 + React Weekly #35
+
+Six newsletter issues plus firsthand in one pass — the Aug-24 week's backlog all landed at once
+(RN Rewind published twice, Digest twice). Heavy corroboration did its usual work: React
+Weekly #35 was SIX-for-six already-dispositioned, the first pure-corroboration issue on record.
+
+FIRSTHAND: 114 events (35 rule-dispositioned, 79 judged). The ⚡ next>=16.3.3 tripwire FIRED and
+worked exactly as designed: the npm-patch rule would have silently swallowed 16.3.4, but the
+tripwire surfaced it and the advisory is now in RB-E-META-FRAMEWORKS prose — TWO critical
+unauthenticated RCEs, not the pre-announced one: CVE-2026-75604 (Windows-hosted, Pages+App
+Router without Cache Components, no workaround) + GHSA-2xp9-vwfh-vxw4 (AVIF via libheif/sharp;
+the patch DISABLES AVIF optimization — a fix that removes a feature), shipped 2026-08-25 a day
+EARLY. Tripwire row removed. Majors triaged: victory-native 42 (floor-raise: Skia 2.6 +
+PathBuilder, Reanimated 3.19.1 — also retires CHARTS' "slower-moving, watch it" caveat),
+screen-transitions 4.0 (floor-raise: React 19.2/Reanimated 4/Worklets 0.8; v3 line remains),
+fbtee 4.0 (Babel compiler REMOVED — Rust/Oxc CLI; v3.3.0 is the Babel terminus), electron 44 +
+pear-runtime-react-native 3.0.0 both skipped (no corpus facts affected; pear's 3.0.0 is a
+3-commit release with an empty body — reopen on actual notes). Waku 1.0-beta → 1.0-RC flip
+(rc.0 2026-08-25; the 1.0-stable tripwire stays wired). EAS Observe hit GA — per-EVENT pricing
+replaces the 10k-MAU beta tier (100K events free / $19 / $199, 90d retention), SDK 55/56/57
+feature floors, needs a new binary, still not a crash reporter. Expensify×NitroFetch became
+NETWORKING's production receipt (15-30% faster requests; startup P50 −267ms iOS / −650ms
+Android via prefetch-before-JS with account-scoped keys; Cronet cert-pinning caveat) + pin
+1.6.3. MEDIA grew a native-call-UI clause: callkeep is dormant (npm 2024-11, cross-verified)
+on the pre-Jetpack telecom API → expo-callkit-telecom / SDK-bundled call UI (Fishjam
+self-promotion disclosed). saschb2b's tools-ship-their-own-instructions survey went into
+AI-DEVTOOLS (MCP/AGENTS.md convergence; @storybook/addon-mcp spot-verified). Pin refreshes:
+Argent 0.21→0.23, expo/react-native-iap lockstep 5.5.0/16.5.0, secure-store 57.0.2,
+plain-text 0.7→0.8 true-up (still too-early, 3rd skip). ADVOCATE FLIP of the pass: aurorascharff's
+cache()/preload post — initially skipped as how-to, flipped because NEITHER REACT-CORE nor DATA
+held ANY cache() coverage; kept with the pedagogical framing disclosed. That's the measured
+keep-aversion failure mode being caught by the pass that exists to catch it.
+
+REACT STATUS #488 (42 links, 12 pre-dispositioned, 30 judged): the browser() canary API
+(use(browser()) → SSR suspends to the Suspense fallback; replaces typeof-window hacks) went
+into REACT-CORE as a CANARY WATCH note — and it CONSUMED twir-293's standing pre-ship skip on
+the core PR ("reopen: merge + release-line announcement" — react.dev now documents it). RTL's
+43%-faster story kept into TESTING with the durable reframe: the whole win landed UPSTREAM in
+jsdom (label index, selector fast path, event dispatch) — slow RTL is a jsdom-version problem.
+TanStack Query 5.102's query()/infiniteQuery() (deprecating fetchQuery/prefetchQuery/
+ensureQueryData, additive) into DATA. GTKX 1.5 forms/i18n + pin 1.6.0 into DESKTOP.
+react-native-filament filled a real GAMES gap (PBR renderer between r3f and Godot) with its
+quiet-since-May caveat stated. Ionic 9 judged off-scope (corpus tracks Capacitor, not Ionic UI).
+
+DIGESTS #2350/#2355: the Next-memory-leak deep dive kept into OBSERVABILITY (heap-signature
+correlation + retainer chains; three framework leaks in 15.5–16.2, fixed 16.3.0). The pass's
+honest MISS: the PDFium-vs-PDF.js selection guide — genuinely good, bias-disclosed, covering a
+facet nothing owns (PDF rendering), but the medium.com URL fails WebFetch + curl-UA + Wayback
+(no snapshot; SPN 520), and a third-party extractor can't stand as a receipt. Skipped
+unverifiable with reopen signals; if PDF recurs, that's also the cue to consider the GAP.
+jovidecroock's Stable<T> phantom-brand experiment: credible author, explicitly an experiment —
+skipped too-early, reopen on a shipped package/lint rule.
+
+RN REWIND #54/#55 + NATIVE WEEKLY #19: #54's whole enriched/markdown story was ALREADY HELD
+(EDITORS, 2026-08-18) — dedupe working. #55 yielded the Expo FIRST-PARTY agent layer keep
+(docs.expo.dev/agents: official expo plugin for Claude Code/Codex, MCP server with EAS/
+TestFlight access, generated AGENTS.md — and Expo's own guide hands device control to this
+entry's agent-device/Argent picks). NW #19's release table produced the Reanimated 4.6 keep
+(RN 0.83–0.87, native CSS callbacks) and the Worklets 0.12→latest DIST-TAG FLIP (retiring the
+entry's "sits on next" status). Its stale-ShadowNodes article exposed the session's one dedupe
+MISS: I kept it into OBSERVABILITY before finding RB-E-NATIVE already held it — lint's
+shared-reading-URL warning caught it, the duplicate was removed, the manifest row says so.
+React Navigation 8.0-alpha noted; its stable graduation is covered by the engine's
+prerelease→stable guard, no manual tripwire.
+
+Spot-check (previous manifests): the twir-294 cap skip (TanStack Router navigation lanes)
+re-fetched and VALIDATED — internals explainer, not selection-relevant. Random skips (TSRX
+too-early; Argent 0.20 superseded) both validated. Rule rows: jotai npm-patch (2.20.3 still
+latest — terminal patch, correct) and next 16.3.1→16.3.2 npm-patch (correct, AND the
+16.3.3 tripwire covering the rule's blind spot fired this very pass — the two mechanisms
+interlocking as designed). No rule indicted.
+
+Delta: 19 entries touched (META-FRAMEWORKS · OBSERVABILITY · NETWORKING · CHARTS · ANIMATION ×3
+edits · I18N · MEDIA · AI-DEVTOOLS ×3 · BUILD · PAYMENTS · STORAGE · LISTS · REACT-CORE ×2 ·
+DATA · TESTING · GAMES · DESKTOP), 1 fired tripwire cleared, 8 manifests (firsthand + 7 issues;
+react-weekly's is RSS-derived per its standing note). High-volume-host note: the firsthand feed
+watcher flagged github.blog / css-tricks / revenuecat / swmansion as high-volume; all four
+checked to the bottom this pass (aggregates dispositioned with their remainders named) — if
+github.blog/css-tricks/revenuecat keep yielding zero, dropping them from the author-host watch
+is the next config trim. Gates: lint clean (1 pre-existing shared-URL warning) · rules ✓ 1628
+gold rows · engine 24 ✓ · eval 139/139 · verify-diff 14/14 receipts · coverage ✓ on all six
+coverable issues (react-status-488 42/42, digest-2350 12/12, digest-2355 12/12, rn-rewind-54
+27/27, rn-rewind-55 11/11, native-weekly-19 56/56).

@@ -10,7 +10,7 @@ options:
   - { name: "FormatJS / react-intl", tradeoff: "ICU message format; mature, framework-agnostic" }
   - { name: "Lingui (6.x)", tradeoff: "compile-time message extraction; low-boilerplate; i18n directives" }
   - { name: "i18next / react-i18next", tradeoff: "very popular, big plugin ecosystem; works web + RN" }
-  - { name: "fbtee", tradeoff: "modern continuation of Meta's deprecated fbt" }
+  - { name: "fbtee", tradeoff: "modern continuation of Meta's deprecated fbt; v4.0 (2026-08, verified vs the GitHub release) REMOVED the Babel compiler entirely — the CLI is now a native Rust/Oxc executable, and @nkzw/babel-plugin-fbtee / babel-preset-fbtee are gone (use @nkzw/vite-plugin-fbtee or @nkzw/next-plugin-fbtee; a Babel-dependent workflow must stay on v3.3.0)" }
 recommend:
   default: "Next.js app → next-intl. Otherwise i18next (web + RN, huge ecosystem) or Lingui (compile-time, low boilerplate)."
   when:
@@ -18,7 +18,7 @@ recommend:
     - "need maximum plugin ecosystem / RN + web parity → i18next"
 defer_to_skill: null
 doc: "RB-E-I18N.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-16
+updated: 2026-09-01   # fbtee 4.0: Babel pipeline removed, native Rust/Oxc CLI (breaking; v3.3.0 is the Babel terminus) — firsthand
 sources:
   - "https://github.com/amannn/next-intl/releases/tag/v4.8.0"
   - "https://github.com/nkzw-tech/fbtee"

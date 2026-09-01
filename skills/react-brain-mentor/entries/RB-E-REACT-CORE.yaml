@@ -34,10 +34,21 @@ note: >
   Adversarially stress-tested 2026-06-25 (SURVIVES, caveats applied): 19.2 is still the stable line
   (19.3 in active canary — re-verify before quoting "19.2"); don't strip existing memoization when
   enabling the Compiler — useMemo/useCallback remain valid escape hatches.
+  CANARY WATCH (2026-09-01, verified vs the react.dev reference): a browser() API landed in
+  canary/experimental — use(browser(reason)) marks a Client Component browser-only, so server
+  rendering suspends to the nearest Suspense fallback instead of needing typeof-window checks or
+  mounted-state useEffect gymnastics; the optional reason feeds onBrowserBailout. Canary-only —
+  don't quote as stable; newsletters will carry its graduation.
 defer_to_skill: engineering-principles
 doc: "RB-E-REACT-CORE.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-28   # composition-ladder reading (TWiR #291 · React Status #484 · React Digest #2330)
+updated: 2026-09-01   # cache()/preload reading (advocate-pass flip) — firsthand · browser() canary note — React Status #488
 reading:
+  - title: "Avoiding Server Component Waterfall Fetching with React 19 cache()"
+    url: "https://aurorascharff.no/posts/avoiding-server-component-waterfall-fetching-with-react-19-cache/"
+    by: "Aurora Scharff"
+    what: "The corpus's cache() coverage (nothing else here or in RB-E-DATA held it): React 19's cache() gives per-render memoization for server-side fetches, and the PRELOAD pattern it enables — fire the cached fetch un-awaited high in the tree so deep Server Components that await the same call hit the memo instead of serializing a waterfall. Pedagogical (mock-data demo, mechanics-focused), and the author's own caveat is the durable half: preloading couples the parent to a child's data needs, so don't scatter it prematurely — use it where a measured waterfall exists. Kept on the advocate pass as the gap-filler, not as a deep architectural reference."
+    claim: "You fetch in Server Components — a child awaiting the same data as a parent serializes into a waterfall unless the fetch is wrapped in React 19 cache(); preload by calling the cached fetch un-awaited up-tree, but only where a waterfall is measured."
+    applies_when: { deps: ["next", "waku", "@tanstack/react-start"], platforms: [react] }
   - title: "The hidden cost of React.Activity"
     url: "https://www.peterp.me/articles/hidden-cost-of-react-activity"
     by: "Peter Piekarczyk"
@@ -100,6 +111,7 @@ detect_source:   # source-level signals owned by this entry (regex over repo sou
     unless_dep: ["babel-plugin-react-compiler", "react-compiler-runtime"]
 sources:
   - "https://react.dev/community/team"
+  - "https://react.dev/reference/react-dom/browser"
   - "https://react.dev/blog/2025/10/07/react-compiler-1"
   - "https://react.dev/blog/2025/12/11/denial-of-service-and-source-code-exposure-in-react-server-components"
   - "https://rspack.rs/blog/announcing-2-1"

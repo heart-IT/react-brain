@@ -21,10 +21,10 @@ recommend:
     - "P2P / serverless / Holepunch backend → data lives in the Hypercore/Autobase stack queried locally via hrpc; a client cache (TanStack Query) is N/A by design — see RB-E-P2P"
     - "server-rendered web → fetch in RSC and skip a client cache where you can; the sharper test is whether data changes ON ITS OWN (polling/pushes) — if it only changes when the user acts, useActionState + useOptimistic cover it (see reading)"
     - "already on Redux Toolkit → RTK Query"
-note: "Server state ≠ client state (see RB-E-STATE). TanStack Query is the #1 React library in State of React 2025; it's transport- and platform-agnostic, so the data layer is shared code across web + RN. Adversarially stress-tested 2026-06-25 (SURVIVES, high): RSC complements (doesn't displace) the cache; TanStack DB builds ON TanStack Query; Zero reached 1.0 (2026-06) with React Native support."
+note: "Server state ≠ client state (see RB-E-STATE). TanStack Query is the #1 React library in State of React 2025; it's transport- and platform-agnostic, so the data layer is shared code across web + RN. Adversarially stress-tested 2026-06-25 (SURVIVES, high): RSC complements (doesn't displace) the cache; TanStack DB builds ON TanStack Query; Zero reached 1.0 (2026-06) with React Native support. IMPERATIVE-API MODERNIZATION (5.102, 2026-08, verified vs the PR): new queryClient query()/infiniteQuery() replace fetchQuery/fetchInfiniteQuery and DEPRECATE prefetchQuery/ensureQueryData (additive, old methods warn but work) — they respect select and skipToken, which the old ones ignored; prefer them in new imperative/prefetch code, incl. the route-context prefetch patterns in the tkdodo readings."
 defer_to_skill: null
 doc: "RB-E-DATA.md"   # long-form Explanation entry in content_dir
-updated: 2026-08-24   # tkdodo series #4: route-context queryOptions kill loader/component prefetch divergence — firsthand
+updated: 2026-09-01   # TanStack Query 5.102: query()/infiniteQuery() supersede fetchQuery/prefetchQuery/ensureQueryData (additive) — React Status #488
 reading:
   - title: "Reliable Query Prefetching with TanStack Router"
     url: "https://tkdodo.eu/blog/reliable-query-prefetching-with-tanstack-router"
@@ -86,6 +86,7 @@ reading:
     applies_when: { deps: ["react-relay"] }
 sources:
   - "https://aurorascharff.no/posts/coordinating-optimistic-updates-in-nextjs/"
+  - "https://github.com/TanStack/query/pull/10658"
   - "https://2025.stateofreact.com/en-US/libraries/"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "@tanstack/react-query", label: "TanStack Query", token: "tanstack query" }

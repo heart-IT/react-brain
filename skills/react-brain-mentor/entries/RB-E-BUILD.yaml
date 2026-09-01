@@ -67,7 +67,7 @@ note: >
   CONFIGURATION grounds; the Rust-speed argument is untouched, so the default above stands.
 defer_to_skill: null
 doc: "RB-E-BUILD.md"   # long-form Explanation entry in content_dir
-updated: 2026-08-18   # Metro 0.87 with RN 0.87 — faster/leaner source maps, TS/ESM config stable, YAML+.es6 dropped
+updated: 2026-09-01   # Super App Showcase architecture reading (host-shell/mini-app/shared-SDK invariants) — firsthand (callstack blog)
 watching:
   - title: "How React Native Builds Actually Work (APK, AAB, IPA, APP)"
     url: "https://www.youtube.com/watch?v=1o0pEjYGUWM"
@@ -79,6 +79,12 @@ reading:
     by: "Callstack (case study)"
     what: "The production receipt for the Re.Pack/Module-Federation lane: Teamworks' seven mini-apps moved off Metro onto Re.Pack + Module Federation with a shell app and two CI/CD lanes (host vs mini-app), cutting change lead time from 1-2 days to ~10 minutes with multiple staging deploys per day. Vendor case study (Callstack builds Re.Pack) — but the numbers are client receipts, and it grounds this entry's own when-clause: module federation is worth the complexity when independent teams need independent release cadences in one app."
     claim: "You ship Re.Pack — the Teamworks case is the reference architecture: mini-apps on Module Federation behind a shell app with separate host/mini-app CI lanes took change lead time from days to ~10 minutes."
+    applies_when: { deps: ["@callstack/repack"], platforms: [react-native] }
+  - title: "Working With the React Native Super App Showcase Repository"
+    url: "https://www.callstack.com/blog/working-with-the-react-native-super-app-showcase-repository"
+    by: "Callstack"
+    what: "The HOW behind the Teamworks receipt above: Callstack's open-source Super App Showcase (Re.Pack + Module Federation V2, monorepo) explained role by role — a Host Shell that is the ONLY package with native binaries (owns root nav, boot, auth gates, remote origins), federated mini-apps each exposing one navigator/context as a remote bundle, and a singleton Shared SDK for anything that must exist exactly once (streaming connections, shared state, design tokens). Two non-negotiable rules carry the architecture: native code lives only in the host shell (a doubly-registered native module crashes outright, no soft warning), and every shared dep reads version AND requiredVersion from one dependency catalog because Module Federation does not enforce strict equality itself. (Fetched via browser-UA curl; callstack.com 403s WebFetch.)"
+    claim: "You build a Re.Pack/Module-Federation super app — hold the showcase's two invariants: native modules only in the host shell (double registration hard-crashes), and singleton shared deps pinned via one catalog for version AND requiredVersion."
     applies_when: { deps: ["@callstack/repack"], platforms: [react-native] }
   - title: "Things I Learned While Building Expo"
     url: "https://evanbacon.dev/blog/expo"

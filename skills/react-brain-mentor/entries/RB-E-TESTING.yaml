@@ -46,8 +46,14 @@ note: >
   one in a single worker — the fix for flaky retries that interfere with the rest of the suite.
 defer_to_skill: agentic-engineering-patterns  # TDD/verify discipline
 doc: "RB-E-TESTING.md"   # long-form Explanation entry in content_dir
-updated: 2026-08-18   # Shopify: native-E2E flakiness is an API problem (builder API + CV element finding, 50%→98%)
+updated: 2026-09-01   # RTL-speed-is-a-jsdom-version-problem reading (43% via upstream jsdom fixes) — React Status #488
 reading:
+  - title: "Making React Testing Library Tests 43% Faster"
+    url: "https://sigh.dev/posts/making-react-testing-library-faster/"
+    by: "Scott Cooper (Sentry)"
+    what: "A 43% suite-time win with ZERO test-code changes — the whole gain landed upstream in jsdom, which reframes slow-RTL complaints as a dependency-version problem: a label-to-control index so getByRole stops rescanning the DOM per input (60.5ms → 0.67ms label reads), an un-tripped selector fast path fixed (getByRole queries ~42% faster), and event dispatch recording its target during path construction (12-36% by tree depth). Method note worth copying: AI-found bottlenecks, but every change had to survive Sentry's real codebase, not microbenchmarks, and had to land upstream where it stays maintained."
+    claim: "Your RTL suite is slow — before rewriting tests or switching runners, upgrade jsdom: the 43% win (label-index, selector fast path, event dispatch) shipped upstream and applies to unchanged test code."
+    applies_when: { deps: ["@testing-library/react", "jsdom"], platforms: [react] }
   - title: "How we raised mobile end-to-end test stability to 98%"
     url: "https://shopify.engineering/mobile-e2e-testing"
     by: "Michael Garfinkle (Shopify Engineering)"

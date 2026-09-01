@@ -9,7 +9,7 @@ options:
   - { name: "agent-skills (Callstack)", tradeoff: "curated skill packs for coding agents — RN best practices, upgrade playbook, brownfield migration, library scaffolding; installs into Claude Code / Cursor / Codex / Gemini CLI; the broadest pack (~1.5k★)" }
   - { name: "react-native-skills (Margelo)", tradeoff: "RN-focused skills (VisionCamera and native-module depth) via `npx skills add margelo/react-native-skills`; younger/smaller than Callstack's" }
   - { name: "agent-device (Callstack)", tradeoff: "agent-native CLI: AI agents drive real iOS/Android/tvOS/macOS/web devices & simulators — a11y snapshots, actions, replayable scripts; v0.20.x (0.20.10 on npm and GitHub, verified 2026-08-24), iterating fast — 0.20 redesigned gesture execution, added Maestro compatibility through a typed engine, and shipped REPLAY: save a completed agent-driven flow as a script and re-run it with zero model calls (see reading)" }
-  - { name: "Argent (Software Mansion)", tradeoff: "MCP server + skills: simulator control, debugger attach (React tree + JS), console/HTTP monitoring, correlated React+iOS profiling; 0.21.0 (verified vs npm 2026-08-18; 0.17 first) extends beyond iOS — tvOS/Android TV/Vega OS, cloud agents for autonomous bug repro, Argent Lens design review; also listed in RB-E-TESTING" }
+  - { name: "Argent (Software Mansion)", tradeoff: "MCP server + skills: simulator control, debugger attach (React tree + JS), console/HTTP monitoring, correlated React+iOS profiling; 0.23.0 (verified vs npm 2026-09-01; 0.17 first) extends beyond iOS — tvOS/Android TV/Vega OS, cloud agents for autonomous bug repro, Argent Lens design review; also listed in RB-E-TESTING" }
   - { name: "Maestro MCP / Maestro Viewer", tradeoff: "agents drive devices and GENERATE E2E flows on the tool the ecosystem already tests with — see RB-E-TESTING (which owns the testing depth)" }
   - { name: "Reactotron MCP", tradeoff: "the classic RN debugger exposes runtime state/network to coding agents via MCP (reactotron-core-server 3.3.0, 2026-05)" }
   - { name: "Expo AI tooling", tradeoff: "SDK 55+ ships agent-focused tooling (Expo skills at docs.expo.dev/skills, MCP integration) for Claude/Cursor/Codex as part of the framework — THIS is the durable part. Expo Agent, their hosted web app-building agent, is DEAD: closed beta ended, agent.expo.dev goes away after 2026-07-31 (export your projects), with Expo saying it would rather integrate with the harnesses developers already use than build its own IDE" }
@@ -22,6 +22,7 @@ recommend:
   default: "Give a coding agent two things: RN KNOWLEDGE — a curated skills pack (Callstack agent-skills is the broadest; add Margelo react-native-skills for camera/native depth) — and EYES+HANDS on the running app — Maestro MCP if you already test with Maestro (see RB-E-TESTING), else agent-device (cross-platform) or Argent (iOS debug/profile depth). Add Reactotron MCP when the agent needs runtime state. Fast-moving (confidence: low) — most of these tools are months old; trial on one workflow before standardizing."
   when:
     - "agent writes RN code → install a skills pack (agent-skills / react-native-skills) so it stops generating stale patterns"
+    - "on Expo → start from Expo's FIRST-PARTY agent layer (docs.expo.dev/agents, verified 2026-09-01): the official `expo` plugin for Claude Code (claude plugin install expo@claude-plugins-official) / Codex, an Expo MCP server with live docs + EAS Build history + Update channels + TestFlight metadata, and an AGENTS.md that create-expo-app now generates pointing at your SDK's docs — Expo's own guide then hands device control to the same agent-device/Argent picks this entry makes"
     - "agent must run and SEE the app (closed verify loop) → agent-device (cross-platform) or Argent (iOS debugger/profiler depth)"
     - "agent-generated E2E tests → Maestro MCP (owned by RB-E-TESTING)"
     - "agent needs runtime state / network inspection → Reactotron MCP"
@@ -58,7 +59,7 @@ note: >
   now has a live first-party leaderboard — check it before pinning a tool+model pair.
 defer_to_skill: agentic-engineering-patterns
 doc: null
-updated: 2026-08-24   # agent-device pin 0.20.9 → 0.20.10 (yesterday's phantom tag now real on npm + GitHub)
+updated: 2026-09-01   # saschb2b survey + Argent pin 0.21 → 0.23 (firsthand) · Expo first-party agent layer (docs.expo.dev/agents) — RN Rewind #55
 reading:
   - title: "3 Minutes With an Agent, 9 Seconds on Replay"
     url: "https://www.callstack.com/blog/3-minutes-with-an-agent-9-seconds-on-replay"
@@ -96,8 +97,15 @@ reading:
     what: "First-party measured model comparison on real Expo apps: three models (Fable 5/Claude Code, GPT-5.6 Sol/Codex, GPT-5.5 control) each one-shot three apps end-to-end — ideation, per-feature on-simulator validation, debugging — under the same spec-driven prompt and template. Fable 5 won code + UI quality (code-health 88 vs 79/79) at ~3× the hourly cost ($74/h vs ~$30/h) and ~30% less wall-clock; the dominant token cost across all models was the simulator-validation loop, not generation. The model numbers are point-in-time (2026-08-05); the durable part is the harness — standing quality bars plus per-feature simulator validation is what made one-shot apps work at all. (Fetched via browser-UA curl; expo.dev/blog no longer blocks it.)"
     claim: "You drive coding agents against an RN/Expo app — budget for the validation loop, not generation: per-feature on-simulator verification dominates token spend and is what makes one-shot quality possible; pick the model on measured cost-vs-speed, not vibes."
     applies_when: { deps: ["expo"], platforms: [react-native] }
+  - title: "React Agentic Engineering 2026: The Tools Started Shipping Their Own Instructions"
+    url: "https://saschb2b.com/blog/react-agentic-engineering-2026"
+    by: "Sascha Brandt (saschb2b.com)"
+    what: "A factual survey (with advocacy framing) of the convergence the tools themselves shipped in 2026: Next.js bundles its docs in the package (node_modules/next/dist/docs/) plus AGENTS.md and an MCP server at /_next/mcp; Material UI ships @mui/mcp and per-skill AGENTS.md; Storybook ships @storybook/addon-mcp (verified vs npm — localhost:6006/mcp, three toolsets); Playwright generates planner/generator/healer agents via `npx playwright init-agents`; Vercel publishes a react-best-practices skill installable via `npx skills add`. The durable observation: four independent teams converged on machine-readable instructions shipped WITH the tool inside twelve months — check what a library already ships before writing your own agent context for it."
+    claim: "You write agent context for React tooling — check what the tool already ships first: Next.js, MUI, Storybook and Playwright bundle their own MCP servers/docs/agents, which version with the package where hand-written summaries go stale."
+    applies_when: { deps: ["next", "@mui/*", "storybook", "@playwright/*"], platforms: [react] }
 sources:
   - "https://registry.npmjs.org/modern-web-guidance/latest"
+  - "https://docs.expo.dev/agents/"
   - "https://registry.npmjs.org/agent-device/latest"
   - "https://github.com/callstack/agent-device/releases/tag/v0.20.10"
   - "https://registry.npmjs.org/metrognome/latest"

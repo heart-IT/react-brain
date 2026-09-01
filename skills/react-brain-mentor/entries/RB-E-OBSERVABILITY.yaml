@@ -7,22 +7,29 @@ confidence: medium
 platforms: [react, react-native]
 options:
   - { name: "Sentry (v8)", tradeoff: "crash + perf; v8 captures crashes before RN bootstraps via sentry.options.json (fixes 'TestFlight instant death')" }
-  - { name: "EAS Observe (Expo)", tradeoff: "production performance monitoring, still OPEN BETA (first 10k monthly active users free; verified vs the docs 2026-08-18): install expo-observe, wrap the root in <ObserveRoot> and call markInteractive() — it then reports startup (cold/warm), time-to-interactive/time-to-render, bundle load and EAS Update download/apply times from real sessions, with P50/P90/P99 across devices. Two things Sentry-style tools don't give you: every build AND OTA update lands as a marker so a regression traces to the release that caused it, and the Expo Router integration breaks time-to-interactive down PER ROUTE. Metrics are queryable from the EAS CLI (JSON, for handing to an agent; there is an eas-observe Expo Skill). Expo-only" }
+  - { name: "EAS Observe (Expo)", tradeoff: "production performance monitoring, GA since 2026-08 (open beta May→Aug; verified vs the GA post): install expo-observe, wrap the root in <ObserveRoot> and call markInteractive() — it then reports startup (cold/warm), time-to-interactive/time-to-render, bundle load and EAS Update download/apply times from real sessions, with P50/P90/P99 across devices, plus JS errors and device context. Two things Sentry-style tools don't give you: every build AND OTA update lands as a marker so a regression traces to the release that caused it, and the Expo Router integration breaks time-to-interactive down PER ROUTE. Metrics are queryable from the EAS CLI (JSON, for handing to an agent; there is an eas-observe Expo Skill). GA pricing is per-EVENT, not per-MAU: 100K events/mo free, $19/mo (500K, Starter) / $199/mo (Production), $5/M beyond, 90-day retention. Floors: SDK 55+ (per-route metrics 56+, error reporting 57+), and enabling it needs a NEW BINARY, not just config. Expo-only, and NOT a crash reporter — it doesn't capture native crashes; Expo's own guidance is to keep Sentry alongside" }
   - { name: "Firebase Crashlytics / Bugsnag", tradeoff: "established crash reporting" }
   - { name: "@callstack/inspector", tradeoff: "React-level component profiling in RELEASE builds via React DevTools, zero native changes — fills the release-profiling hole; VERY young (v0.1.x, 2026-06)" }
 recommend:
   default: "Sentry for crash + performance monitoring (v8 catches pre-bootstrap crashes); add error boundaries and wire it up at the production stage."
   when:
-    - "on Expo and want build/OTA regression tracing, or per-route time-to-interactive → add EAS Observe (open beta; expo-observe + markInteractive())"
+    - "on Expo (SDK 55+) and want build/OTA regression tracing, or per-route time-to-interactive → add EAS Observe (GA; expo-observe + markInteractive(); needs a new binary — keep your crash reporter, it doesn't capture native crashes)"
     - "already on Firebase → Crashlytics is fine for crashes"
 note: "Production-stage concern (the mentor emphasizes observability + error boundaries at production). @callstack/inspector added 2026-07-10 (verified vs npm) — profile React components in release builds; v0.1.x, treat as experimental."
 defer_to_skill: null
 doc: "RB-E-OBSERVABILITY.md"   # long-form Explanation entry in content_dir
-updated: 2026-08-18   # EAS Observe scope verified vs docs — per-route TTI, build/OTA markers, CLI/agent export
+updated: 2026-09-01   # Observe GA (firsthand) · Next heap-signature diagnosis reading (Digest #2350)
 sources:
   - "https://blog.sentry.io/react-native-sdk-8-is-here/"
   - "https://docs.expo.dev/eas/observe/introduction/"
+  - "https://expo.dev/blog/introducing-observe"
 reading:
+  - title: "How to find a Next.js memory leak in production"
+    url: "https://xabierlameiro.com/blog/nextjs/nextjs-memory-leak-in-production"
+    by: "Xabier Lameiro"
+    what: "Production heap-diagnosis methodology on a real case: three Next.js framework leaks between 15.5 and 16.2 (router LRU cache ignoring URL-key size — hundreds of MB proportional to unique routes; RSC streams retained on client disconnect, worst on Node 22/24; middleware timeout IDs never released), all fixed by 16.3.0. The durable half is the method — chart process.memoryUsage() against candidate variables (unique URLs, traffic, middleware) to match the growth SIGNATURE before assigning blame, then diff heap snapshots and read retainer chains (LRUNode / reactServerStream / TimeoutsManager name the culprits). Also: raising heap limits is a band-aid against a monotonic slope, and on serverless memory problems surface as latency, so profile that instead."
+    claim: "Your Node/Next server's memory climbs — match the growth signature to a variable, then read heap-snapshot retainer chains; on Next 15.5–16.2, upgrade to 16.3.0 first (three framework leaks live there)."
+    applies_when: { deps: ["next"], platforms: [react], stages: [production, scale] }
   - title: "Bringing Lighthouse to the App: Core Web Vitals for React Native"
     url: "https://engineering.indeedblog.com/blog/2026/03/bringing-lighthouse-to-the-app-building-performance-metrics-for-react-native/"
     by: "Ben Cripps (Indeed Engineering)"
