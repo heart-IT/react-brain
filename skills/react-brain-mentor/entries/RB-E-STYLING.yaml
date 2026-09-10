@@ -12,7 +12,7 @@ options:
   - { name: "Uniwind", tradeoff: "Tailwind w/ C++ styling engine + animated themes; Pro is paid (~$99/seat/yr)" }
   - { name: "@mgcrea/react-native-tailwind", tradeoff: "Babel-plugin / zero-runtime Tailwind — no JS-side styling overhead; micro-adoption (<1k dl/wk). (The unscoped npm name react-native-tailwind is a dead 2020 package — don't cite it)" }
   - { name: "Tamagui", tradeoff: "cross-platform design-system + optimizing compiler" }
-  - { name: "StyleX (0.18, Meta)", tradeoff: "atomic compile-time CSS; sx={} prop; strong web story, RN support emerging" }
+  - { name: "StyleX (0.18, Meta)", tradeoff: "atomic compile-time CSS; sx={} prop; strong web story, RN support emerging; first marquee non-Meta production adopter on record — Linear migrated off styled-components across 1,000+ PRs (see reading)" }
   - { name: "styled-components", tradeoff: "runtime CSS-in-JS — avoid for new web work on the per-render-cost axis, not abandonment: v7 is in active prerelease (2026-06, RN-parity features) but stays runtime; prefer zero-runtime/StyleX" }
   - { name: "CSS-in-JS (web)", tradeoff: "runtime cost; prefer zero-runtime variants" }
   - { name: "React Strict DOM", tradeoff: "strict HTML/CSS compiled to static CSS on web + RN styles on native; see RB-E-CROSSPLATFORM" }
@@ -31,8 +31,14 @@ note: >
   selection axis is runtime cost — zero-runtime/compiler approaches avoid JS-side style work.
 defer_to_skill: design-systems-governance  # tokens, theme parity, a11y intrinsics
 doc: "RB-E-STYLING.md"   # long-form Explanation entry in content_dir
-updated: 2026-08-04   # zero-runtime field-map reading (advocate flip after 3 cap-skips) + detect rows
+updated: 2026-09-10   # Linear's styled-components → StyleX production migration reading (criteria, measured payoff, enforcement) — TWiR #295
 reading:
+  - title: "Styling Linear for the future with StyleX"
+    url: "https://linear.app/now/styling-linear-for-the-future-stylex"
+    by: "Kenneth Skovhus (Linear)"
+    what: "The first detailed non-Meta production migration TO StyleX, and the most useful part is the selection criteria, not the endorsement. Linear's non-negotiables: generate styles at BUILD time, make styling-at-a-distance deliberately hard (not just discouraged by convention) while still letting components expose explicit styling contracts, predictable cross-file merge without specificity games, and — stated as a first-class criterion — agent ergonomics. vanilla-extract was the runner-up (static extraction, strong types) and lost on API fragmentation and the component/style file split; StyleX won on colocation, a small API, and deterministic resolution. The honest tradeoff is stated too: parent-dependent selectors, global selectors and restyling-through-wrappers all get harder, which is the point but is also the migration cost. What pushed them off styled-components was a performance regression after the React 18 concurrent-rendering upgrade plus styled-components entering maintenance mode. Measured payoff, isolated as best they could: removing runtime style injection cut main-thread CPU for style work ~20–35% on view-heavy pages (~30% faster on a mid-tier machine), and a navigation went from injecting hundreds of CSS rules to zero. Two process lessons that generalize past StyleX: a deterministic CODEMOD carried the bulk (styled-components is Turing-complete, so agents produced plausible-but-wrong output early on — model capability only made agents the better tool partway through the project), and the end state is held in place by tooling — Oxlint rules for the fast local checks plus a custom TYPE-AWARE repository checker that traces sx through wrappers and polymorphic components to catch conditional styles silently dropped across boundaries. They kept CSS Modules as an explicit escape hatch for genuinely CSS-shaped problems (global selectors, third-party DOM) and extended StyleX for runtime-generated theming rather than fighting it."
+    claim: "Weighing a move off runtime CSS-in-JS: Linear's StyleX migration gives the criteria (build-time generation, hard-to-style-at-a-distance, predictable merge) and the payoff — ~20–35% less main-thread style CPU on view-heavy pages."
+    applies_when: { deps: ["styled-components", "@emotion/react", "@emotion/styled", "@stylexjs/stylex"], platforms: [react] }
   - title: "Why We're Breaking Up with CSS-in-JS"
     url: "https://www.spotvirtual.com/blog/why-were-breaking-up-with-css-in-js"
     by: "Sam Magura (Emotion maintainer)"
@@ -64,6 +70,7 @@ reading:
     claim: "You ship zero-runtime CSS-in-JS — the field converged on plain class-name output, so pick on atomicity and design-system features: next-yak/Linaria for a styled-components codebase, vanilla-extract or Panda for typed styles, StyleX at hundreds-of-teams scale."
     applies_when: { deps: ["linaria", "@linaria/*", "@vanilla-extract/*", "@pandacss/*", "next-yak", "@griffel/*", "@stylexjs/stylex"], platforms: [react] }
 sources:
+  - "https://linear.app/now/styling-linear-for-the-future-stylex"
   - "https://dx-styles.dev/blog/why-dx-styles/"
   - "https://www.spotvirtual.com/blog/why-were-breaking-up-with-css-in-js"
   - "https://engineering.fb.com/2025/11/11/web/stylex-a-styling-library-for-css-at-scale/"

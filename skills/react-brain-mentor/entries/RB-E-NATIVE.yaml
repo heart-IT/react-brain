@@ -8,12 +8,12 @@ platforms: [react-native]
 options:
   - { name: "Expo modules", tradeoff: "managed, fast path for many needs" }
   - { name: "Turbo Modules / Fabric (JSI)", tradeoff: "custom native; New Architecture" }
-  - { name: "Nitro Modules", tradeoff: "codegen-driven JSI; positioned as Turbo Modules' successor; vendor claims ~10x vs Turbo, ~100x vs Expo Modules" }
+  - { name: "Nitro Modules", tradeoff: "codegen-driven JSI; positioned as Turbo Modules' successor; vendor claims ~10x vs Turbo, ~100x vs Expo Modules — the Expo half of that claim is now STALE: Expo's own SDK-56/57 numbers put Expo Module calls on par with Turbo Modules (see note); Margelo joined Callstack 2026-09-01 (€20M+; Nitro/VisionCamera/mmkv stay open source, Rousavy keeps leading them), so the 'small independent vendor' half of the risk is smaller than it was — pre-1.0 churn is not" }
 recommend:
   default: "Target the New Architecture (mandatory ≥ RN 0.82). Reach for Expo Modules for most native needs; use Nitro Modules for performance-critical custom native."
   when:
     - "most native integrations → Expo Modules (managed, fast path)"
-    - "perf-critical custom native (camera, audio, BLE) → Nitro Modules — but it's pre-1.0 (v0.36.x, 2026-07), third-party (not in RN core), and still ships breaking changes, so pin versions; for non-extreme needs, plain Turbo Modules are zero-dep, in-core, and stable"
+    - "perf-critical custom native (camera, audio, BLE) → Nitro Modules — but it's pre-1.0 (v0.37.0, 2026-08-20 — which moved Props and react::ComponentDescriptor into Nitro core via C++ templates and renamed CachedProp to ReactProp, keeping the old name as a deprecated alias: the churn is real and visible), third-party (not in RN core), and still ships breaking changes, so pin versions; for non-extreme needs, plain Turbo Modules are zero-dep, in-core, and stable"
     - "standard custom native → Turbo Modules / Fabric"
     - "still on Legacy Arch → migrate; it's frozen and being stripped from core"
 note: >
@@ -35,13 +35,46 @@ note: >
   you write inline Expo Modules (Swift/Kotlin in-app with generated TypeScript). Expo Modules also
   ships SHARED OBJECTS/REFS (verified vs docs.expo.dev/modules/shared-objects) — JS handles to live
   native objects instead of serialized copies; the next-gen MediaLibrary/Contacts APIs are built on it.
+  EXPO MODULES 2.0 (2026-09-08, verified vs the Expo blog post): the authoring API is being replaced
+  by annotated plain Swift/Kotlin — @ExpoModule on a class, @JS on methods and properties, @Record on
+  a struct, a typed callable property for events — retiring the 1.0 result-builder DSL (Name/Function/
+  AsyncFunction/Property/Class/Events). Sync-vs-async is decided by Swift's own `async` keyword. The
+  numbers matter for the OPTION CHOICE above: SDK 56 made Expo Module calls 1.5–2× faster than SDK 55
+  and, per Expo, "on par with React Native's Turbo Modules"; on the same SDK the @JS path is a further
+  2.5–5.6× faster than 1.0 for SYNCHRONOUS calls (async is roughly unchanged — both share the promise
+  machinery; iPhone 16 Pro / iOS 27 / Release build, 100k calls) — because the macro reads the
+  signature at build time, so the 1.0 reflection path (allocate a boxed container, run each argument
+  through a dynamic converter into [Any], build a tuple) disappears. STATUS DISCIPLINE: iOS-only in
+  SDK 57 and UNDOCUMENTED/experimental — the API can still change; Android is in progress, views are
+  not covered yet, and the official beta is SDK 58. Migration is incremental (both APIs merge in one
+  module; `expo-migrate-module` is an agent skill that converts the Swift side and reports what it
+  left behind). Stated design rationale worth carrying: the API is being shaped for coding agents —
+  models know Swift/Kotlin, not a bespoke DSL, and build-time type errors keep the fix loop short.
   LEAD (2026-07-16 back-audit; recurrence-grade — TWiR #284 AND #285): margelo/react-native-runtimes
   runs RN components/business logic in ISOLATED Hermes runtimes — young, watch for adoption before
   citing as an option.
 defer_to_skill: react-native-jsi  # owns JSI memory/threading rules
 doc: "RB-E-NATIVE.md"   # long-form Explanation entry in content_dir
-updated: 2026-08-07   # + SWM stale-shadow-nodes reading — Fabric memory invisible to Hermes snapshots (firsthand)
+updated: 2026-09-10   # Expo Modules 2.0 + Discord New-Arch reading (firsthand) · Bridgeless concurrent-runtime race reading + Nitro pin 0.36 → 0.37 (TWiR #295)
 reading:
+  - title: "React Native Bridgeless: race conditions with concurrent JS runtimes"
+    url: "https://ospfranco.com/concurrent-engines-crash/"
+    by: "Oscar Franco (op-sqlite author)"
+    what: "A native-module authoring rule extracted from a real op-sqlite crash, and it invalidates an assumption most C++ modules were written under. Under the old bridge a reload was strictly sequential — the outgoing runtime's invalidate() completed before the next generation's install() ran — so process-global module state (a static shared_ptr, a bool flag, a cached CallInvoker) was safe by construction, because only one generation could ever touch it. Bridgeless starts the new RCTInstance BEFORE the old one has finished invalidating and gives the old one only a few seconds to drain, so two runtime generations are genuinely alive at once. The crash: an in-flight SQLite query on a background thread is interrupted by a reload or OTA update and tries to schedule its error back onto the JS thread, by which time the new generation has already overwritten the global invoker — so the callback either runs on the wrong invoker or destroys JS objects off the JS thread. The fix generalizes past SQLite: give each generation its own liveness flag (a shared_ptr<atomic<bool>> that install() allocates and invalidate() flips for THAT generation only), and have every host object COPY the invoker and the liveness pointer into members at construction rather than reading the globals inside the callback — bind generation identity at creation, check it at run time. Fixed every update hook at once with no call-site changes."
+    claim: "Your C++/JSI module keeps process-global state (a cached CallInvoker, a static registry) — Bridgeless overlaps two runtime generations on reload/OTA, so capture the invoker and a per-generation liveness flag at construction, never inside a callback."
+    applies_when: { platforms: [react-native] }
+  - title: "What It Actually Takes to Migrate Discord to React Native's New Architecture"
+    url: "https://swmansion.com/blog/what-it-actually-takes-to-migrate-discord-to-react-native-s-new-architecture/"
+    by: "Software Mansion (embedded ~1 year with Discord's iOS team)"
+    what: "The post-flip half of a New-Architecture migration, which the official docs don't cover, told through one app at Discord's scale (Android first, then iOS). The headline is the ticket breakdown on the way back to parity: rendering/layout/visual 47%, crashes & stability 16%, build/infra/the migration ITSELF 14%, performance 13%, input (keyboard/gesture) 11% — i.e. flipping the switch is about one seventh of the work, and the rest is the app behaving differently under the new renderer. Three broken implicit contracts, each worth knowing before you hit it: (1) MEASUREMENT ORIGIN — old arch measured a view against the window, Fabric measures against its Yoga root, and a modal is its own root, so the same measure() returns different numbers inside a modal; the tell is a constant offset that looks like the height of something else. (2) VIEW IDENTITY — Fabric's view flattening is re-evaluated on every commit, and accessibility props are among those that force a real host view, so toggling accessibilityElementsHidden mid-gesture can swap the gesture's backing view and cancel it silently (onFinalize never runs); collapsable={false} pins it. (3) NATIVE LOOKUP — the legacy-interop layer finds a view manager by appending 'Manager' to the component name; a class named without that suffix misses the fast path, falls back to a main-thread-synchronous module creation while holding a registry write lock, and deadlocks against an in-flight animation's read lock. The advice that generalizes: budget for INVESTIGATION, not fixes (every story above ended in one prop, one helper, or a rename — the cost was finding it); the problems cluster where your app touches native (measurements, refs, gestures, imperative calls, interop-layer components) while pure React code comes through untouched; instrument before optimizing; and fix upstream rather than patch locally, because a local patch is tech debt every future upgrade must re-check."
+    claim: "Migrating to the New Architecture: the flip is ~14% of the work and rendering/layout ~47%, so budget for the long tail and check three changed contracts — measure() origin in modals, view flattening cancelling gestures, interop 'Manager' lookups."
+    applies_when: { platforms: [react-native] }
+  - title: "An early look at Expo Modules 2.0"
+    url: "https://expo.dev/blog/an-early-look-at-expo-modules-2-0"
+    by: "Tomasz Sapeta (Expo)"
+    what: "The first-party walkthrough of the API change behind this entry's Expo Modules 2.0 note: each 1.0 DSL component folded into ordinary Swift (Function/AsyncFunction → a method marked @JS, Property → a var, a record → a struct, an event → one typed callable property), with the migration path (both APIs coexist in one module; the expo-migrate-module agent skill does the Swift side and lists what it couldn't). Also states the mechanism behind the speedup — build-time signatures replace 1.0's per-call reflection — and what is NOT done yet: views, Android, generated TypeScript declarations, and documentation."
+    claim: "You author Expo Modules — 2.0 replaces the result-builder DSL with annotated plain Swift/Kotlin (@ExpoModule/@JS/@Record); it is iOS-only and undocumented in SDK 57 (official beta lands in SDK 58), and both APIs coexist so you can migrate a function at a time."
+    applies_when: { deps: ["expo-modules-core"], platforms: [react-native] }
   - title: "How to Make Pure JSI Code Faster in React Native (Part 1)"
     url: "https://blog.margelo.com/make-jsi-run-faster"
     by: "Alex Shumihin (Margelo)"
@@ -76,6 +109,10 @@ watching:
     by: "React Native Radio (guest: Marc Rousavy, Nitro/VisionCamera author)"
     what: "37-min episode (2026-01) from Nitro's author on why Nitro exists (JSI boilerplate), how it compares to Turbo Modules and Expo Modules, and the ecosystem's package-migration wave — the audio companion to this entry's Nitro-consolidation note."
 sources:
+  - "https://github.com/margelo/nitro/releases/tag/v0.37.0"
+  - "https://ospfranco.com/concurrent-engines-crash/"
+  - "https://expo.dev/blog/an-early-look-at-expo-modules-2-0"
+  - "https://margelo.com/blog/margelo-joins-callstack"
   - "https://github.com/margelo/react-native-runtimes"
   - "https://reactnative.dev/blog/2026/02/11/react-native-0.84"
   - "https://reactnative.dev/blog/2026/06/11/react-native-0.86"

@@ -7,8 +7,8 @@ confidence: high
 platforms: [react, react-native]
 options:
   - { name: "Metro", tradeoff: "RN bundler; 0.87 ships with RN 0.87 (2026-08-11) — source-map generation 2x faster and source maps take half the memory (both feed React Native DevTools load time), TypeScript/ESM config files (metro.config.mts) are STABLE, package self-resolve lands, and support for YAML configs + .es6 extensions is REMOVED" }
-  - { name: "Vite 8 / Rspack 2 / webpack 5.109", tradeoff: "web bundlers; Vite 8 defaults to the Rust Rolldown bundler; Rspack 2 adds RSC + 2.1 ships the Rust React Compiler via its built-in SWC loader (7–13x the Babel plugin); webpack 5.109 closes much of the config gap (zero-loader CSS/HTML/TS/Wasm + Vite-compatible import.meta APIs); Vite still the default for new web" }
-  - { name: "Turborepo / Nx + pnpm/yarn workspaces", tradeoff: "monorepo task graph + caching" }
+  - { name: "Vite 8 / Rspack 2.2 / webpack 5.110", tradeoff: "web bundlers; Vite 8 defaults to the Rust Rolldown bundler; Rspack 2 adds RSC + 2.1 ships the Rust React Compiler via its built-in SWC loader (7–13x the Babel plugin), and 2.2 (2026-08-26) is a performance release — ~3x faster built-in CSS parsing, ~5% off production builds, and HMR that no longer refetches CSS on a JS-only change (a 4.1 MB stylesheet went ~385 ms → ~6 ms per hot update), plus Browserslist Baseline targets; webpack 5.110 closes much of the config gap (zero-loader CSS/HTML/TS/Wasm + Vite-compatible import.meta APIs, and now built-in CSS/HTML minification + performance hints); Vite still the default for new web" }
+  - { name: "Turborepo / Nx + pnpm/yarn workspaces", tradeoff: "monorepo task graph + caching; pnpm 12 (2026-08-26) is the Rust rewrite and is STABLE — see note" }
   - { name: "Expo vs bare RN", tradeoff: "managed velocity vs native control" }
   - { name: "react-native-swc", tradeoff: "Rust/SWC Metro transform — faster than Babel; custom Babel plugins need SWC equivalents (e.g. worklets plugin for Reanimated)" }
   - { name: "facetpack (early)", tradeoff: "@ecrindigital/facetpack — Rust/OXC Metro transformer (claims ~36x Babel transforms), one-line metro.config, Babel fallback for Flow packages, Doctor CLI; v0.2 (2026-01), early-stage" }
@@ -65,15 +65,37 @@ note: >
   `import.meta.resolve` — plus `?raw` / `?inline` / `?url` asset query suffixes under
   `experiments.futureDefaults`. This narrows the practical reason to reach for Vite on
   CONFIGURATION grounds; the Rust-speed argument is untouched, so the default above stands.
+  PNPM 12 (2026-08-26, verified vs the release post; CONSUMES the pre-ship skip on the pnpm 12 RC):
+  the Rust rewrite is stable and deliberately not a migration — commands, flags, settings and the
+  LOCKFILE FORMAT all carry over from pnpm 11. Two gotchas before you upgrade: npm's `latest` tag
+  still points at the pnpm 11 line (install via `pnpm self-update latest-12`; Homebrew/winget/Scoop/
+  Chocolatey did not carry it at release), and git dependencies became IDENTITIES — for GitHub/GitLab/
+  Bitbucket a specifier now only names the repo and always resolves through HTTPS, so the lockfile
+  never records an SSH URL; a machine that needs SSH for private repos configures
+  `git config --global url."git@github.com:".insteadOf https://github.com/` rather than encoding it
+  in the manifest (unknown hosts and credential-bearing URLs are kept verbatim). Two wins worth
+  the bump: an unrecognized key in pnpm-workspace.yaml is now REPORTED instead of silently ignored
+  — an error when the project pins a matching pnpm version, a warning otherwise — which closes a real
+  supply-chain hole, since a misspelled `minimumReleaseAge` used to disable the install-age policy
+  silently (see RB-E-SECURITY); and peer resolution now cuts dependency cycles at a deterministic
+  edge, so the lockfile depends only on the dependency graph — byte-identical across reinstalls and
+  project reordering, where pnpm 11 could churn it — with large cyclic workspaces resolving peers
+  2–3x faster on ~25% less memory.
 defer_to_skill: null
 doc: "RB-E-BUILD.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-01   # Super App Showcase architecture reading (host-shell/mini-app/shared-SDK invariants) — firsthand (callstack blog)
+updated: 2026-09-10   # pnpm 12 stable (Rust rewrite; pre-ship skip reopened) + Rspack 2.2 + webpack 5.110 — TWiR #295 · Turbopack chunking reading — firsthand
 watching:
   - title: "How React Native Builds Actually Work (APK, AAB, IPA, APP)"
     url: "https://www.youtube.com/watch?v=1o0pEjYGUWM"
     by: "Code with Beto"
     what: "Walkthrough of what actually happens between `npx expo run` and an installable artifact — the Gradle/Xcode stages behind APK/AAB/IPA and where Metro's bundle lands in them. The A/V companion to this entry's build-pipeline facts. (Verified via YouTube oEmbed: title + author.)"
 reading:
+  - title: "How Turbopack chunks your JavaScript"
+    url: "https://nextjs.org/blog/turbopack-chunking"
+    by: "Sam Poder (Turbopack team, Vercel)"
+    what: "The chunking-strategy explainer plus the Next.js 16.3 knobs that come out of it — the first thing to read when a Next app's problem is 'too many requests' or 'too much JS per page'. The framing is a three-way tradeoff with no free answer: one chunk for everything caches perfectly but over-ships; one chunk per page never over-ships but duplicates shared code into every page; one chunk per module never duplicates but explodes the request count. Turbopack's default sits in between by MERGING chunks at build time, weighting a single-page visit at 2/3. Measured on nextjs.org itself, that default cut requests by more than half versus no merging while shipping slightly less code, whereas maximum merging cut requests further but shipped ~10% more overall — better for a visitor who lands once, worse for one who navigates. The 16.3 features address the two structural limits (merging happens before anyone visits, and the algorithm has to guess how people browse): experimental.turbopackChunking.generateComponentChunks emits un-merged chunks alongside merged ones so the RUNTIME picks whichever is cheaper given what the browser already has; firstPageLoadPriority (default 0.67, bounce rate is a sensible starting value), priorityRoutes and clusters let you replace the guesses with your own analytics; and three ship-less-code flags — experimental.turbopackCjsTreeShaking (CJS tree-shaking was previously ESM-only), experimental.turbopackSharedRuntime (one runtime chunk instead of per-page: one fewer blocking request and ~10 KB per navigation), and a default runtime that no longer ships WebAssembly/Web Worker code unless detected. All experimental in 16.3; the CJS and shared-runtime flags are stated as future defaults."
+    claim: "Your Next.js bundle ships too many requests or too much per-page JS — 16.3 turns Turbopack's chunking guesses into config (firstPageLoadPriority, priorityRoutes, clusters) plus generateComponentChunks, CJS tree-shaking and a shared runtime."
+    applies_when: { deps: ["next"], platforms: [react] }
   - title: "How Teamworks Cut Mobile Release Time to 10 Minutes"
     url: "https://www.callstack.com/case-studies/accelerating-teamworks-mobile-delivery-with-re-pack-and-module-federation"
     by: "Callstack (case study)"
@@ -111,6 +133,9 @@ reading:
     by: "The Mythical Engineer"
     what: "Why RN Android builds are slow (conservative Gradle/Metro/C++ defaults) and how parallel Gradle, dynamic Metro workers, ccache, and single-architecture builds cut times from 20+ min to 2-5 min, with benchmarks. The RN-CI build-perf dimension the other readings here don't cover."
 sources:
+  - "https://webpack.js.org/blog/2026-08-29-webpack-5-110/"
+  - "https://rspack.rs/blog/announcing-2-2"
+  - "https://pnpm.io/blog/releases/12.0"
   - "https://reactnative.dev/blog/2026/08/11/react-native-0.87"
   - "https://reactnative.dev/blog/2026/02/11/react-native-0.84"
   - "https://github.com/facebook/hermes/blob/static_h/doc/blog/2026-06-05-new-hermes-stable-release.md"

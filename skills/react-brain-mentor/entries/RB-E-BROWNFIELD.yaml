@@ -6,7 +6,7 @@ status: reviewed   # long-form entry written + source-checked
 confidence: low
 platforms: [react-native]
 options:
-  - { name: "react-native-brownfield (Callstack)", tradeoff: "embed RN in an existing native app; self-contained iOS init via ReactNativeBrownfield.shared.startReactNative() (wraps RN core's RCTReactNativeFactory)" }
+  - { name: "react-native-brownfield (Callstack)", tradeoff: "embed RN in an existing native app; self-contained iOS init via ReactNativeBrownfield.shared.startReactNative() (wraps RN core's RCTReactNativeFactory); 5.1.0 (2026-09-03) adds `preloadBundle` — without it RN only builds the factory and defers bundle evaluation to the first RN view, so the first screen pays for it; with it the React Host starts and the JS bundle evaluates in parallel with the rest of app launch (Android's ReactNativeBrownfield.initialize already did this). Note the timing change that comes with it: onBundleLoaded now runs on the MAIN thread, not the JS thread" }
   - { name: "Brownie (@callstack/brownie)", tradeoff: "share native↔JS state for brownfield; generates Swift + Kotlin types from .brownie.ts; iOS + Android; stable (v3.13.x, 2026-06)" }
   - { name: "Granite (Toss)", tradeoff: "micro-frontend: each screen an independently deployable ~200KB bundle on CDN (ESBuild)" }
   - { name: "Rock (Callstack)", tradeoff: "super-apps via micro-frontends + native build caching" }
@@ -24,16 +24,20 @@ note: >
   in an ISOLATED brownfield architecture with SDK 55 — OTA for embedded RN screens was
   previously a known limitation ("that limitation is a thing of the past"); see RB-E-OTA. The
   same prebuilt-XCFramework flow also cuts hybrid iOS compile times ~39% (Callstack, 2026-07).
+  STARTUP (2026-09-10, verified vs the 5.1.0 GitHub release): a brownfield app's RN screens are
+  usually blamed for a slow first open — `preloadBundle` on iOS is the first thing to try, since it
+  moves bundle evaluation off the first-view critical path and onto app launch.
   VERSION FLOOR (2026-07-28, verified vs the GitHub release): @callstack/react-native-brownfield
   5.0.0 (2026-07-23) has exactly one breaking change — it DROPS Expo SDK 55 support (brownfield-cli
   bumps to 5.0.0 with it). SDK-55 apps stay on the 4.x line; the SDK-55 capability flip above is
   therefore a 4.x fact. Pair the brownfield major with the Expo SDK upgrade, not before it.
 defer_to_skill: engineering-principles
 doc: "RB-E-BROWNFIELD.md"   # long-form Explanation entry in content_dir
-updated: 2026-08-18   # brownfield-vs-greenfield decision reading (the choice before the tooling)
+updated: 2026-09-10   # brownfield 5.1.0 preloadBundle — bundle eval moves onto app launch, onBundleLoaded now main-thread (firsthand)
 sources:
   - "https://github.com/callstack/react-native-brownfield"
   - "https://github.com/callstack/react-native-brownfield/releases/tag/%40callstack%2Freact-native-brownfield%405.0.0"
+  - "https://github.com/callstack/react-native-brownfield/releases/tag/%40callstack%2Freact-native-brownfield%405.1.0"
   - "https://registry.npmjs.org/@callstack/brownie"
   - "https://docs.expo.dev/brownfield/overview/"
   - "https://www.callstack.com/blog/how-we-made-hybrid-ios-apps-compile-39-faster-with-react-native-brownfield"

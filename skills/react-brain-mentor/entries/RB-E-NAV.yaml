@@ -60,8 +60,14 @@ note: >
   scales with how much of React Router's server side you actually use.
 defer_to_skill: null
 doc: "RB-E-NAV.md"   # long-form Explanation entry in content_dir
-updated: 2026-08-18   # re-challenged → HELD (RR typegen still framework-mode-only); deferred deep linking
+updated: 2026-09-10   # four-library RN navigation benchmark reading (cold start / RAM / where the time goes) — TWiR #296
 reading:
+  - title: "React Native Navigation Benchmarks (State of RN Navigation)"
+    url: "https://andrei-calazans.com/posts/2026-06-05-state-of-rn-navigation/"
+    by: "Andrei Calazans"
+    what: "The measured evidence this entry's RN recommendation never had: the same app built four times over four navigation libraries and profiled on one Android device (Expo SDK 56, RN 0.85, Hermes, New Architecture, Samsung Galaxy A16, release/profileable builds; cold start = the OS Displayed metric, median of 3; FPS/CPU/RAM via Flashlight driving Maestro; breakdowns from Perfetto Systrace + source-mapped Hermes CPU profiles, all data and scripts published). Cold start: react-native-navigation 316 ms · React Navigation v7 358 ms · navigation (Graham Mendick) 398 ms · Expo Router 917 ms. Peak RAM: 195 / 214 / 241 / 308 MB. All four hold ~60 FPS, so the difference is startup and memory, not smoothness. The WHY matters more than the ranking: (1) Expo Router's ~3x cold start is NOT Reanimated — a controlled experiment put Reanimated at only ~62 ms — it is a 2x bigger bundle plus router-on-top-of-React-Navigation layering that evaluates 106 JS modules at boot against 36–43 for the others; (2) Reanimated IS the RAM story — adding it alone to the leanest app reproduced Expo Router's entire ~125 MB premium, almost all anonymous heap from the second Hermes runtime Worklets spins up; (3) react-native-navigation wins because its tabs and stack are Kotlin views, so its JS bundle evaluates in 55 ms against React Navigation's 168 ms of real component tree — but the author's own caveat is that the same design chokes on large screens and drops frames. Read the caveats before quoting the table: rn-navigation is a BARE RN app (some of its lead is 'no expo-modules-core', not the navigation library), it is one device and one trivial UI, and Expo Router buys deep linking, lazy screen loading, file-based routing and web support that this benchmark does not price."
+    claim: "Choosing an RN navigation library on startup or memory: one Android device gave cold starts of 316/358/398/917 ms and peak RAM 195/214/241/308 MB for react-native-navigation / React Navigation v7 / navigation / Expo Router."
+    applies_when: { platforms: [react-native] }
   - title: "Detour: deferred deep linking done right in Expo Router"
     url: "https://expo.dev/blog/deferred-deep-linking-the-right-way"
     by: "Bartek Krasoń (Software Mansion), guest post on the Expo blog"
@@ -109,6 +115,7 @@ reading:
     claim: "You ship React Router — model modal dialogs as nested routes instead of local useState/useEffect; revalidation, view transitions, flash sessions, and exit animations then ride the router."
     applies_when: { deps: ["react-router", "react-router-dom"], platforms: [react] }
 sources:
+  - "https://andrei-calazans.com/posts/2026-06-05-state-of-rn-navigation/"
   - "https://reactrouter.com/explanation/type-safety"
   - "https://expo.dev/blog/deferred-deep-linking-the-right-way"
   - "https://registry.npmjs.org/@swmansion/react-native-detour/latest"

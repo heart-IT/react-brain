@@ -2292,3 +2292,122 @@ is the next config trim. Gates: lint clean (1 pre-existing shared-URL warning) �
 gold rows · engine 24 ✓ · eval 139/139 · verify-diff 14/14 receipts · coverage ✓ on all six
 coverable issues (react-status-488 42/42, digest-2350 12/12, digest-2355 12/12, rn-rewind-54
 27/27, rn-rewind-55 11/11, native-weekly-19 56/56).
+
+## 2026-09-10 — firsthand + TWiR #295/#296 + React Status #489 + React Digest #2360 + RN Rewind #56 + React Weekly #36
+
+The React 19.3 pass. Seven manifests, 24 entries touched — the largest delta on record, driven by a
+genuinely dense fortnight rather than by loosened triage: React 19.3, Expo Modules 2.0, pnpm 12,
+Vitest 5, Zod 4.5, Rspack 2.2, executorch's rewrite and Jest 30.5 all landed inside two weeks.
+
+FIRSTHAND: 120 events (33 rule-dispositioned, 87 judged). The ⚡ react>=19.3.0 TRIPWIRE FIRED and did
+its job: 19.3 shipped 2026-09-09, so RB-E-REACT-CORE's current-line row, recommend and note were
+rewritten and the stale "19.3 in active canary" and "browser() is canary-only" caveats deleted.
+19.3 is additive — <ViewTransition> and Fragment Refs graduated from experimental (ViewTransition is
+DOM-ONLY; RN support is still in progress, which is why the fired row was replaced with a
+react-native>=0.89 tripwire guarding this entry's "RN runs React 19.2" claim), browser() became a
+first-class react-dom API that follows use() rules so it can sit behind a condition, and Server
+Components can now render a 'use client' Context directly without a pass-through Provider. The
+19.3 post also forced a CORRECTION in RB-E-SECURITY: its Trusted Types row read as though the
+integration already worked, when in fact React coerced every value with '' + value before DOM
+injection sinks until 19.3 — an app enforcing require-trusted-types-for 'script' needs React ≥19.3.
+That is the kind of quietly-wrong row a release post is uniquely good at exposing.
+
+The other firsthand keep that changes a RECOMMENDATION rather than a version: Expo Modules 2.0
+(annotated plain Swift/Kotlin replacing the result-builder DSL, @JS macros reading signatures at
+build time). Expo's own numbers — SDK 56 put Expo Module calls "on par with Turbo Modules", and the
+@JS path is a further 2.5–5.6x on synchronous calls — make Nitro's "~100x vs Expo Modules" vendor
+claim STALE, so RB-E-NATIVE's Nitro row now says so. Margelo joining Callstack (>€20M, 2026-09-01;
+Nitro/VisionCamera/mmkv stay open source under Rousavy) shrinks the same row's single-vendor risk
+without touching its pre-1.0 churn risk — and Nitro 0.37 renaming CachedProp to ReactProp two weeks
+later is that churn, on schedule. executorch v0.10 is a ground-up rewrite (opaque C++ task modules →
+inspectable TypeScript pipelines; Core ML/ANE, MLX and Vulkan delegates across 130+ model variants;
+worklet-by-default JSI; on-demand backend binaries) — take 0.10.1, which fixes iOS use_frameworks!
+build failures. Off-scope discipline held on the feed's long tail: github.blog (third zero-yield
+pass) and revenuecat (third) are now RECOMMENDED FOR REMOVAL from the author-host watch; thoughtbot
+is on its second.
+
+TWIR #295 (79 links, 27 pre-dispositioned, 52 judged) and #296 (63 links, 15 pre-dispositioned, 48
+judged) — both real, both carried by the archive listing, so the #294-stub check passed cleanly.
+#295's headliner is Linear's styled-components → StyleX migration: the first detailed non-Meta
+production adoption, kept for its SELECTION CRITERIA (build-time generation, styling-at-a-distance
+made deliberately hard, predictable merge, and — stated as first-class — agent ergonomics; vanilla-
+extract was the runner-up), its measured payoff (~20–35% less main-thread style CPU on view-heavy
+pages, hundreds of injected CSS rules per navigation → zero), and its honest cost (parent/global
+selectors and wrapper restyling get harder; the end state needs Oxlint plus a custom type-aware
+cross-file checker to hold). pnpm 12 stable CONSUMED twir-294's pre-ship skip, and its best fact is
+a supply-chain one: an unrecognized key in pnpm-workspace.yaml is now reported instead of ignored,
+which closes the hole where a misspelled `minimumReleaseAge` silently disabled install-age gating
+(cross-referenced into RB-E-SECURITY's territory from RB-E-BUILD). Zod 4.5's z.compile() (~3–9x
+parsing, 16x on the invalid path via z.validate, ~9x less memory) largely retires the runtime-speed
+half of the Zod-vs-Valibot tradeoff — the bundle-size half survives. ospfranco's Bridgeless post
+became a NATIVE reading with a rule worth more than its bug: Bridgeless starts the new RCTInstance
+before the old finishes invalidating, so two runtime generations are alive for seconds and any C++
+module's process-global CallInvoker is a real race; bind generation identity at construction, check
+it at run time. #296 gave RB-E-NAV the measured evidence it never had — four navigation libraries,
+same app, one Android device (cold start 316/358/398/917 ms; peak RAM 195/214/241/308 MB; all ~60
+FPS), with the causes isolated: Expo Router's ~3x cold start is bundle size and 106 boot modules,
+NOT Reanimated (~62 ms), while Reanimated is worth ~125 MB of RAM via the second Hermes runtime. That
+same benchmark produced this pass's most useful disagreement, recorded rather than resolved: its
+author measured Bundle Mode REGRESSING cold start, against SWM's turn-it-on-regardless guidance —
+noted in RB-E-ANIMATION as a one-device counter-datapoint with the recommendation left standing.
+Also #296: React DevTools 8.0 REMOVED the Timeline profiler tab (profile in the browser Performance
+panel now), which dates every runbook that says otherwise; and Expo Go on SDK 57 requires login on
+both CLI and app (iOS only, not simulators, not dev builds).
+
+REACT STATUS #489 (49 links, 7 pre-dispositioned, 42 judged) was the most corroboration-heavy issue
+on record for this source — nearly every item was already dispositioned elsewhere in this same pass.
+Its one keep is the best essay of the fortnight: Wieruch's "Bet on the Primitives", kept into
+RB-E-CHARTS because it argues against this corpus's own default. His D3-vs-Recharts spike (primitives
+matched the design; Recharts reached 80% fast, then needed the same custom SVG and froze its
+entrance animation) grounds the thesis that agentic coding moved the library-vs-primitives crossover.
+Kept WITH his counter-arguments intact — no agentic workflow means the old labor math still applies,
+commodity UI belongs on the happy path, owned lines are maintained lines, accessibility widgets stay
+libraries, and an agent collapses the cost of writing a layer, not of judging it.
+
+DIGEST #2360 yielded ZERO — an internals tutorial the corpus already covers four ways plus a
+TanStack Form v2 ALPHA. Recorded as-is; a dry issue is a fact, not a failure. RN REWIND #56 was
+single-theme (agent/CI device infrastructure) and yielded Simlock, a device-LEASE control plane for
+the case every other AI-DEVTOOLS row ignores: several agents on one machine fighting over simulators.
+Its headliner, EAS Simulator, was SKIPPED as waitlist-gated early access — the same discipline
+applied to Expo Tuft on 2026-09-01 — while noting that Expo is building it on top of agent-device
+and Argent, the two tools that entry already recommends. NATIVE WEEKLY had no new issue (#19 still
+the latest). REACT WEEKLY #36 was TWELVE-for-twelve already-held, the SECOND consecutive pure-
+corroboration issue; its count was deliberately NOT incremented, and if #37 also yields zero the
+rotation question is real.
+
+ADVOCATE PASS — one flip, and it caught exactly the failure mode the pass exists for. Rozenite was
+skipped twice (2.3 in #295, 2.4 in #296) as "too-early, untracked". Re-reading it as a hostile
+reviewer: "untracked" was the GAP — no entry covered React Native DevTools panels — not evidence of
+immaturity, and the project is ~656★, active since 2025-07, at 2.x with a documented compatibility
+matrix (Expo SDK 52+, RN 0.76+, Re.Pack 5.2+) and plugins auto-disabled in production. That is MORE
+adoption than several rows RB-E-OBSERVABILITY already carries. Kept; both manifest rows amended to
+show the flip. Skips that survived the advocate pass: EAS Simulator (gated), the SWM local-models
+listicle (model leaderboards churn faster than this corpus should track, though executorch's 130+
+pre-exported variants make which-model a facet worth watching), Drydock (marketing only), and the
+single-author RN security guide.
+
+SPOT-CHECK (previous manifests) — ONE OVERTURNED. react-status-488's rifm cap skip had the reopen
+signal "recurrence", and rifm recurred in TWiR #295. Re-adjudication showed the original reasoning
+was thin: this is not a fresh micro-lib but a ~1.4k★ library shipping since 2018 (1.1.0, npm
+2026-08-29), and "FORMS holds no masking facet" was the gap, not a reason to skip. RB-E-FORMS gained
+a masking when-clause naming rifm as a hook that composes with your form library; the 488 manifest
+row carries the committed amendment. rn-rewind-54's remend cap skip VALIDATED (still 1.3.1, no
+recurrence). Two random skips (a job listing, a Trigger.dev sponsor link) validated. Two rule rows
+(react-intl 10.1.23→10.1.25, corestore 7.12.0→7.12.2, both npm-patch) validated — both packages have
+since taken further patches only. No rule indicted.
+
+GAPS NOTED, not filled: no entry owns client-side FILE UPLOAD (chunking, resumability, progress) —
+Uppy 6.0 was the second upload-adjacent item to appear; and shared-element transitions for Expo
+Router have no pick (react-native-screen-choreography 0.4 is the candidate; RB-E-ANIMATION's
+screen-transitions is React-Navigation-shaped). julesblom's hoistable-SVG-defs post has now been
+skipped in three issues as how-to — holding, since it is a technique essay rather than a selection
+fact, but the count is on record.
+
+Delta: 24 entries touched (REACT-CORE · SECURITY · NATIVE ×4 · ONDEVICE-AI · AI-DEVTOOLS ×4 ·
+BROWNFIELD · TESTING ×3 · STATE · AI-UI · META-FRAMEWORKS · BUILD ×4 · ANIMATION ×2 · STORAGE ×2 ·
+PAYMENTS ×2 · COMPONENT-LIBS · LISTS · OTA · STYLING · FORMS ×3 · NATIVE-UI · NAV · OBSERVABILITY ×2 ·
+RN-VERSIONS · CHARTS), 1 fired tripwire cleared and replaced, 7 new manifests + 1 amended
+(react-status-488). Gates: lint clean (1 pre-existing shared-URL warning) · rules ✓ 1976 gold rows ·
+engine 24 ✓ · eval 139/139 · verify-diff ✓ every added receipt · coverage ✓ on all five coverable
+issues (twir-295 79/79, twir-296 63/63, react-status-489 49/49, digest-2360 12/12, rn-rewind-56
+13/13; firsthand and react-weekly are not coverable by URL, per their standing notes).

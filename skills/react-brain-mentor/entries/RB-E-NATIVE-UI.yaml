@@ -9,7 +9,7 @@ options:
   - { name: "expo-widgets (Expo)", tradeoff: "iOS home-screen widgets + Live Activities from Expo UI components — no SwiftUI/native code; STABLE in Expo SDK 56 (alpha in SDK 55); full env access, no pre-render" }
   - { name: "Voltra (Callstack)", tradeoff: "Live Activities + widgets; SwiftUI-style layout (VStack/HStack); v2.0 (2026-06-18) rewrote to Turbo Modules → now works in BARE RN (no Expo Modules); iOS 16.2+ (interactive 17+), iOS 18+ activity families; v2 migration required" }
   - { name: "Expo Targets", tradeoff: "native targets (widgets, App Clips, share extensions) in Swift/Kotlin or RN; multi-step setup" }
-  - { name: "react-native-teleport", tradeoff: "portals rendering in the native layer (re-parenting); web + native" }
+  - { name: "react-native-teleport", tradeoff: "portals rendering in the native layer (re-parenting); web + native. 1.2.0 fixes the visible flaw on Android: the old move used removeView()/addView(), which detached the view from the window and so disconnected the rendering surface behind a SurfaceView/TextureView — a black or white flash while the compositor waited for the next frame, worst on older devices and intermittent on new ones. 1.2 reparents an attached view with detachViewFromParent()/attachViewToParent() instead, keeping it in the window and its rendering resources alive, so teleporting video and maps no longer flickers. No API or config to adopt: the fast path is used only when both parents share an Android window with no active focus/layout transition, and it falls back to the old behavior otherwise" }
 recommend:
   default: "On Expo → expo-widgets for iOS widgets/Live Activities (stable in SDK 56, no native code). Bare RN → Voltra 2 (now bare-RN capable). Custom native targets / App Clips / share extensions → Expo Targets."
   when:
@@ -27,7 +27,7 @@ note: >
   thread, no JS round-trips; relevant when native-UI surfaces must track gestures/animation.
 defer_to_skill: null
 doc: "RB-E-NATIVE-UI.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-16
+updated: 2026-09-10   # Teleport 1.2 Android fast reparenting — no empty frames for surface-backed views (video/maps) — TWiR #295
 reading:
   - title: "Apple Home Screen Widgets with Expo (Continuous Native Generation)"
     url: "https://evanbacon.dev/blog/apple-home-screen-widgets"
@@ -47,6 +47,7 @@ watching:
     by: "Fernando Rojo, Szymon Rybczak & Oskar Kwaśniewski"
     what: "The v0 iOS team on what shipping a native-feel RN app took — including the upstream RN fixes it produced. Video companion to the v0 case study in `reading`."
 sources:
+  - "https://kirillzyusko.github.io/react-native-teleport/blog/1-2-0-android-fast-reparenting"
   - "https://expo.dev/blog/ios-widgets-and-live-activities-in-expo"
   - "https://github.com/callstackincubator/voltra/releases/tag/v2.0.0"
   - "https://expo.dev/blog/worklet-integration-in-expo-ui-synchronously-controlling-swiftui-and-compose-state"

@@ -44,8 +44,14 @@ note: >
   which is also the documented way to keep a row out of the default set.
 defer_to_skill: react-native-best-practices  # Skia/Reanimated render-perf depth
 doc: "RB-E-CHARTS.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-01   # victory-native 42.0 floor-raise major (min Skia 2.6 + PathBuilder, min Reanimated 3.19.1) — firsthand
+updated: 2026-09-10   # primitives-vs-charting-framework reading: agentic coding moved the crossover (D3 primitives vs Recharts spike, with its counter-arguments) — React Status #489
 reading:
+  - title: "Agentic Coding: Bet on the Primitives"
+    url: "https://www.robinwieruch.de/agentic-coding-bet-on-primitives/"
+    by: "Robin Wieruch"
+    what: "The argument that most directly challenges how this entry (and every library-selection entry) is framed, made concrete on charts. Wieruch spiked the same design-system chart set twice in an hour — once on D3's math primitives with React rendering the SVG, once on Recharts with an identical component API — and the primitive version matched the design exactly (entrance animations, crosshair tooltips, legend filtering) while the Recharts version reached 80% faster and then hit a wall: the last 20% needed custom SVG anyway, and its entrance animation froze in that React stack with no fix but disabling it. His frame is worth borrowing: a high-level library is PREPAID IMPLEMENTATION LABOR, bought with flexibility — a primitive maps a value to a pixel and has no opinion about what you draw, a framework owns rendering, animation lifecycle and tooltips and hands you config props to negotiate with, and the difference only shows up when your requirements leave the author's assumptions. The claim is not that libraries lost; it is that agentic coding moved the CROSSOVER POINT toward primitives, so requirements that used to sit safely on the library side (three charts matching a design system, a bespoke form flow, a custom data grid) now often sit on the other. He argues the other side himself, and those caveats are the load-bearing part: a team without an established agentic workflow cannot place this bet, because the old labor math still applies to them; commodity UI on a library's happy path should stay there; every line you own is a line you maintain, without a community surfacing edge cases; deep-accessibility widgets (combobox, date picker, focus-managed modal) encode years of screen-reader testing not worth regenerating; and genuinely hard stable problems — date arithmetic, color interpolation, schema validation, floating-element positioning — stay dependencies. His last caveat is the sharpest: the spike worked because he could JUDGE the output, and an agent collapses the cost of writing a layer, not the cost of understanding it."
+    claim: "Before installing a charting framework for design-system-specific charts, spike the D3-primitives version too — agentic coding moved the crossover; stay with the library for commodity UI, no agentic workflow, or deep accessibility needs."
+    applies_when: { platforms: [react, react-native] }
   - title: "Introducing visx from Airbnb"
     url: "https://medium.com/airbnb-engineering/introducing-visx-from-airbnb-fd6155ac4658"
     by: "Airbnb Tech Blog"
@@ -59,6 +65,7 @@ reading:
     claim: "You ship Skia-backed RN charts (Victory Native XL or raw react-native-skia) — the rendering model underneath: JSI, immutable display lists, a unified WebGPU backend, and the canonical high-density line-chart-as-GPU-texture pattern."
     applies_when: { deps: ["victory-native", "@shopify/react-native-skia"], platforms: [react-native] }
 sources:
+  - "https://www.robinwieruch.de/agentic-coding-bet-on-primitives/"
   - "https://registry.npmjs.org/victory-native/latest"
   - "https://registry.npmjs.org/react-native-gifted-charts/latest"
   - "https://reactnativerewind.com/issues/react-native-0-86-charting-your-financial-ruin-and-the-junk-drawer-in-your-package-json"

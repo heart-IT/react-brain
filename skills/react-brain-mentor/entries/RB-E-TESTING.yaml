@@ -6,10 +6,10 @@ status: reviewed   # long-form entry written + source-checked → encyclopedia/R
 confidence: high
 platforms: [react, react-native]
 options:
-  - { name: "Jest / Vitest", tradeoff: "unit; Vitest faster on web, Jest default on RN" }
+  - { name: "Jest (30.5) / Vitest (5)", tradeoff: "unit; Vitest faster on web, Jest default on RN; both shipped major releases in the same fortnight and converged on the same feature — per-argument mocking (Jest 30.5 `fn.whenCalledWith(...)`, Vitest 5 `vi.when(spy).calledWith(...)`), both accepting asymmetric matchers with toHaveBeenCalledWith equality semantics. Jest 30.5 (2026-08-28) also adds describe-LEVEL retries via jest.retryTimes() and a new file watcher, and its own notes flag it as a big jest-runtime/resolve/haste-map change with regression risk" }
   - { name: "React Testing Library (14)", tradeoff: "behavior-first component tests (web + RN variants); v14 adds React 19 support + async APIs" }
   - { name: "MSW (Mock Service Worker)", tradeoff: "network-level API mocking; same mocks reused across unit/e2e and dev" }
-  - { name: "Playwright (1.62) / Maestro / Detox / Meticulous", tradeoff: "e2e: Playwright web — 1.62 rebuilds component testing on stories + galleries and adds `retryStrategy: 'isolated'`; Maestro 2.0 (AI test-healing) is Expo's recommended native e2e (Expo archived Detox; Detox has a 'Copilot' beta); Maestro now bundles an MCP server so coding agents can drive simulators/emulators/devices, inspect UI, and generate E2E flows (claude mcp add maestro -- maestro mcp); Meticulous = record-based AI e2e" }
+  - { name: "Playwright (1.63) / Maestro / Detox / Meticulous", tradeoff: "e2e: Playwright web — 1.63.0 is current (npm, 2026-09-10); 1.62 rebuilt component testing on stories + galleries and adds `retryStrategy: 'isolated'`; Maestro 2.0 (AI test-healing) is Expo's recommended native e2e (Expo archived Detox; Detox has a 'Copilot' beta); Maestro now bundles an MCP server so coding agents can drive simulators/emulators/devices, inspect UI, and generate E2E flows (claude mcp add maestro -- maestro mcp); Meticulous = record-based AI e2e" }
   - { name: "Storybook 10", tradeoff: "component workshop; web + RN run side-by-side; Vite 8 + Playwright/Vitest test integration + MCP" }
   - { name: "Radon IDE (Software Mansion)", tradeoff: "VS Code / Cursor RN debugging — device panel, click-to-inspect, React Profiler" }
   - { name: "Argent (Software Mansion) — NEW/experimental", tradeoff: "agentic toolkit giving an AI assistant control of the iOS Simulator (drive + inspect the running app) to shorten the debug loop; new, niche" }
@@ -30,6 +30,27 @@ note: >
   MCP server (verified vs docs.maestro.dev, 2026-07-07) puts device-driving + E2E-generation in
   the hands of coding agents — the agent-driven-testing trend consolidating around the tool the
   ecosystem already recommends. Jest-preset fact verified against the official RN 0.85 release blog.
+  VITEST 5 (2026-09-03, verified vs the release + the announcement post): a performance release with
+  its numbers published as a reproducible benchmark suite (vitest-dev/benchmarks — generated apps
+  from a 5-file utility package to a 1,280-module monolith, run across every pool × environment).
+  Read the shape of the wins before planning an upgrade: −53% on a deps-heavy app and −15..−25% on
+  vm pools, Browser Mode and large isolated suites, but ±3% where environment setup already
+  dominates (forks + jsdom + isolation) — which CORROBORATES this entry's RTL reading: when the
+  reporter says `environment 79%`, your test speed is a jsdom-version problem, not a runner problem,
+  and Vitest 5 will not fix it. Mechanisms: inline projects share one Vite server, fsModuleCache
+  graduated from experimental (on-disk transform cache reused across runs and processes), fewer
+  main↔worker round trips, vm pools reuse compiled code, and Vitest bundles its own deps for a
+  smaller install. New surface worth knowing: `vitest doctor` re-runs your suite under alternative
+  configurations and recommends faster options (performance hints also print by default); a
+  provider-independent Trace View for Browser Mode records interactions/assertions as DOM snapshots
+  you replay step by step in the UI and the HTML reporter (unlike Playwright traces, no separate
+  viewer); `vi.when(spy).calledWith(...)` for per-argument mock behavior with a
+  `toHaveBeenExhausted` assertion; and inline projects now inherit the root config by DEFAULT
+  (`extends: true` is no longer needed), with config files in `test.projects` allowed to nest their
+  own projects. Breaking changes to budget for: pretty-format replaces loupe.inspect (snapshot/error
+  output shifts), `sequential` test/suite options removed in favor of `concurrent`, locators are
+  objects rather than strings, deprecated entry points removed, and the benchmarking API was rewritten
+  — `bench` is no longer a top-level import but a test-context fixture inside a normal `test()`.
   RENDERER FLIP (2026-07-10, verified vs the docs + the mdjastrzebski/test-renderer repo):
   RN Testing Library v14 (actively maintained) runs on its own react-reconciler-based
   test-renderer that renders HOST elements only — which is WHY its query model moved to
@@ -46,7 +67,7 @@ note: >
   one in a single worker — the fix for flaky retries that interfere with the rest of the suite.
 defer_to_skill: agentic-engineering-patterns  # TDD/verify discipline
 doc: "RB-E-TESTING.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-01   # RTL-speed-is-a-jsdom-version-problem reading (43% via upstream jsdom fixes) — React Status #488
+updated: 2026-09-10   # Vitest 5 note + Jest 30.5 (whenCalledWith, describe-level retries) + Playwright pin 1.63 — firsthand · TWiR #295
 reading:
   - title: "Making React Testing Library Tests 43% Faster"
     url: "https://sigh.dev/posts/making-react-testing-library-faster/"
@@ -77,6 +98,9 @@ reading:
     by: "Kent C. Dodds"
     what: "Why tests coupled to internals are brittle (false failures on refactor, false passes on breakage) and why to test behavior the way users use it. The mental model behind Testing Library."
 sources:
+  - "https://github.com/jestjs/jest/releases/tag/v30.5.0"
+  - "https://vitest.dev/blog/vitest-5"
+  - "https://github.com/vitest-dev/vitest/releases/tag/v5.0.0"
   - "https://reactnative.dev/blog/2026/04/07/react-native-0.85"
   - "https://docs.maestro.dev/get-started/maestro-mcp"
   - "https://github.com/callstackincubator/react-native-harness"

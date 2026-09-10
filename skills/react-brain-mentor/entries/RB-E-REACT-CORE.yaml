@@ -6,16 +6,17 @@ status: reviewed   # long-form entry written + source-checked → encyclopedia/R
 confidence: high
 platforms: [react, react-native]
 options:
-  - { name: "React 19.2 (current line)", tradeoff: "latest 19.2.x; ships <Activity>, <ViewTransition>, useEffectEvent; RN 0.83+ runs React 19.2" }
+  - { name: "React 19.3 (current line)", tradeoff: "stable 2026-09-09; graduates <ViewTransition> and Fragment Refs from experimental, adds react-dom browser() + Trusted Types passthrough; <Activity>/useEffectEvent shipped in 19.2; RN 0.83+ runs React 19.2 — check RB-E-RN-VERSIONS before assuming 19.3 on native" }
   - { name: "React Compiler 1.0 (STABLE)", tradeoff: "auto-memoizes — drops most useMemo/useCallback; stable since 2025-10 (Meta prod); Rust port MERGED into SWC — ships via Rspack 2.1's built-in loader (7–13x the Babel plugin); enable via Babel/SWC/Oxc/Vite-8 plugin" }
   - { name: "React Server Components (RSC)", tradeoff: "server-rendered components over the Flight protocol; web-only; Server Functions = the mutation path (security-sensitive — see RB-E-SECURITY)" }
   - { name: "<Activity>", tradeoff: "hide a subtree while preserving its state (defer/restore); 100% satisfaction in State-of-React 2025; pair with Effect cleanup" }
-  - { name: "<ViewTransition> / use()", tradeoff: "animated transitions (component or native startViewTransition); use() reads promises/context under Suspense" }
+  - { name: "<ViewTransition> / use()", tradeoff: "STABLE in 19.3: wraps a subtree, animates enter/exit/update/share on Transition-marked updates (startTransition, Suspense reveal, useDeferredValue) via the browser View Transition API; addTransitionType picks per-cause animations; DOM-ONLY — RN support still in progress. use() reads promises/context under Suspense" }
+  - { name: "Fragment Refs", tradeoff: "STABLE in 19.3: ref on a <Fragment> yields a FragmentInstance over the children as a GROUP — addEventListener/dispatchEvent (first-level), focus/focusLast/blur (depth-first), observeUsing with an Intersection/ResizeObserver, getClientRects/scrollIntoView; attaches behavior to third-party components that never exposed a ref, with no wrapper <div> distorting layout" }
   - { name: "alternative React runtimes", tradeoff: "Preact (small, drop-in-ish); experimental @tanstack/redact (~9KB, claims 2–3x, TanStack-Start-scoped); Million; TSRX = a JSX-successor compiling to React/Preact/Solid — mostly experimental" }
 recommend:
-  default: "Stay on React 19.2 and turn on React Compiler 1.0 for new code — let it handle memoization; keep existing useMemo/useCallback as escape hatches (don't strip them — removing can change the compiler's output), and pin the exact compiler version if test coverage is thin."
+  default: "Move to React 19.3 (stable 2026-09-09, additive over 19.2) and turn on React Compiler 1.0 for new code — let it handle memoization; keep existing useMemo/useCallback as escape hatches (don't strip them — removing can change the compiler's output), and pin the exact compiler version if test coverage is thin."
   when:
-    - "new project → React 19.2 + Compiler from day one"
+    - "new project → React 19.3 + Compiler from day one"
     - "web data-fetching/SSR → RSC via a meta-framework (RB-E-META-FRAMEWORKS); React Native → RSC does not apply"
     - "bundle-size-critical web → consider Preact; treat @tanstack/redact / Million / TSRX as experimental, not production bets"
 note: >
@@ -31,17 +32,24 @@ note: >
   each seated on a Leadership Council that coordinates direction. RSC/
   Server Functions are a WEB concern (not RN) with an active DoS CVE history (see RB-E-SECURITY).
   Compiler-1.0 + RSC-DoS verified this session; other rows from release history + newsletters.
-  Adversarially stress-tested 2026-06-25 (SURVIVES, caveats applied): 19.2 is still the stable line
-  (19.3 in active canary — re-verify before quoting "19.2"); don't strip existing memoization when
-  enabling the Compiler — useMemo/useCallback remain valid escape hatches.
-  CANARY WATCH (2026-09-01, verified vs the react.dev reference): a browser() API landed in
-  canary/experimental — use(browser(reason)) marks a Client Component browser-only, so server
-  rendering suspends to the nearest Suspense fallback instead of needing typeof-window checks or
-  mounted-state useEffect gymnastics; the optional reason feeds onBrowserBailout. Canary-only —
-  don't quote as stable; newsletters will carry its graduation.
+  Adversarially stress-tested 2026-06-25 (SURVIVES, caveats applied): don't strip existing
+  memoization when enabling the Compiler — useMemo/useCallback remain valid escape hatches.
+  REACT 19.3 SHIPPED 2026-09-09 (verified vs the react.dev release post; supersedes the 19.2-line
+  and browser()-canary notes this entry carried). It is an ADDITIVE release — two experimental APIs
+  graduated (<ViewTransition>, Fragment Refs) plus three smaller wins: (1) browser() is now a
+  first-class react-dom API — use(browser()) opts a component out of server rendering, suspending
+  to the nearest Suspense fallback on the server and rendering normally after hydration; because it
+  follows use() rules it may sit behind a condition or early return, so a hook can opt out only when
+  it lacks initial data (the post's useBrowserQuery example) — this retires typeof-window checks and
+  mounted-state useEffect. (2) Trusted Types: React no longer coerces values with '' + value before
+  DOM injection sinks, so TrustedHTML/TrustedScript objects survive to the browser and a
+  require-trusted-types-for 'script' CSP actually works (see RB-E-SECURITY). (3) RSC: a Context
+  imported from a 'use client' module can be rendered DIRECTLY by a Server Component — the
+  pass-through Provider wrapper component is no longer needed. Watch the RN side separately:
+  <ViewTransition> is DOM-only for now.
 defer_to_skill: engineering-principles
 doc: "RB-E-REACT-CORE.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-01   # cache()/preload reading (advocate-pass flip) — firsthand · browser() canary note — React Status #488
+updated: 2026-09-10   # React 19.3 stable — tripwire fired (firsthand): ViewTransition + Fragment Refs graduate, browser() ships, Trusted Types, Context-in-RSC
 reading:
   - title: "Avoiding Server Component Waterfall Fetching with React 19 cache()"
     url: "https://aurorascharff.no/posts/avoiding-server-component-waterfall-fetching-with-react-19-cache/"
@@ -110,12 +118,13 @@ detect_source:   # source-level signals owned by this entry (regex over repo sou
     hint: "React Compiler 1.0 (stable) memoizes automatically — adopt it for new code instead of growing the hand-memoization surface; KEEP existing useMemo/useCallback when enabling (removal can change output — see reading: 'React Compiler at Eighteen Months')"
     unless_dep: ["babel-plugin-react-compiler", "react-compiler-runtime"]
 sources:
+  - "https://react.dev/blog/2026/09/09/react-19-3"
   - "https://react.dev/community/team"
   - "https://react.dev/reference/react-dom/browser"
   - "https://react.dev/blog/2025/10/07/react-compiler-1"
   - "https://react.dev/blog/2025/12/11/denial-of-service-and-source-code-exposure-in-react-server-components"
   - "https://rspack.rs/blog/announcing-2-1"
 tripwires:   # standing caveats as executable conditions — evaluated by `harvest firsthand`; fired ⇒ do the then:, update prose, remove the row
-  - when: { pkg: "react", atleast: "19.3.0" }
-    then: "React 19.3 went stable (was 'active canary — re-verify before quoting 19.2') — update the current-line option row + note, and re-check <Activity>/<ViewTransition> status changes in the release post"
-    added: 2026-07-16
+  - when: { pkg: "react-native", atleast: "0.89.0" }
+    then: "Check whether the RN release line moved off React 19.2 — this entry's current-line row and RB-E-RN-VERSIONS both assert 'RN 0.83+ runs React 19.2', and <ViewTransition> is DOM-only pending RN support"
+    added: 2026-09-10

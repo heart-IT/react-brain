@@ -8,7 +8,7 @@ platforms: [react, react-native]
 options:
   - { name: "useState/useReducer + Context", tradeoff: "zero-dep; re-render scope hard to control at scale" }
   - { name: "Zustand", tradeoff: "tiny, selector-based; minimal boilerplate; a State-of-React-2025 favorite" }
-  - { name: "Jotai", tradeoff: "atomic, fine-grained subscriptions" }
+  - { name: "Jotai (3.x)", tradeoff: "atomic, fine-grained subscriptions; v3 (2026-09-08) keeps the public API (useAtom/useAtomValue/useSetAtom unchanged) but modernizes the package — ESM-only, React 18+, Node ≥22.12 — and splits atomFamily/babel plugins into separate packages (see migrate)" }
   - { name: "Redux Toolkit (2.x)", tradeoff: "structured, devtools, larger surface; React-Redux `connect` HOC deprecated → use hooks" }
   - { name: "XState (5.x) / XState Store", tradeoff: "state machines / statecharts for complex flows; Store 4.0 is a lighter signal-style store" }
   - { name: "TanStack Store / Signals", tradeoff: "fine-grained reactive store (alien-signals core); underpins TanStack Router/Table/Form" }
@@ -24,7 +24,7 @@ recommend:
 note: "Separate server state (caching/sync) from client/UI state — different problems, different tools. State of React 2025 (3,760 devs): TanStack Query the #1 React library; Zustand crossed 50% usage + tops satisfaction; ~34% use no state library. Adversarially stress-tested 2026-06-25 (SURVIVES, high): nothing has overtaken Zustand, and local-first (TanStack DB) builds on TanStack Query rather than replacing it."
 defer_to_skill: react-native-best-practices  # re-render/perf rules (e.g. RN-RULE-ATOMIC-STATE)
 doc: "RB-E-STATE.md"   # long-form Explanation entry in content_dir
-updated: 2026-08-04   # MobX 7 migrate rule (Proxy-only, legacy decorators dropped, React 18+)
+updated: 2026-09-10   # Jotai 3 migrate rule — ESM-only, React 18+/Node 22.12, atomFamily+babel split out, loadable/setSelf/delay removed (firsthand)
 reading:
   - title: "Structural sharing, selectAtom, and why your Jotai atoms re-render too much"
     url: "https://www.peterp.me/articles/jotai-structural-sharing-vs-selectatom/"
@@ -79,6 +79,12 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "valtio", label: "Valtio", token: "valtio" }
   - { pkg: "mobx", label: "MobX (7.x line)", token: "mobx" }
 migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-brain migrate`)
+  - from: { pkg: "jotai", below: "3.0.0" }
+    to: "Jotai 3"
+    urgency: upgrade
+    effort: S
+    why: "Jotai 3 (2026-09-08) is a MODERNIZATION, not a rewrite — the maintainer's own test is: if your app runs on v2 with no deprecation warnings, it should run on v3 as is. What actually moves: (1) requirements rise to React 18, TypeScript 5.5 and Node >=22.12; (2) the package is ESM-ONLY (no CJS/UMD/SystemJS builds) and `exports` is closed to the public entry points, so any deep import into the package breaks; (3) `atomFamily` moved to the `jotai-family` package and the `jotai/babel` plugins to `jotai-babel` — both are one-line import swaps plus an install; (4) `loadable` is gone (rebuild it over `unwrap`, the guide gives the ~15-line version), as are the read function's `setSelf` option (use onMount or jotai-effect) and the `delay` option on useAtom/useAtomValue (write a custom hook). Two smaller things to know: published files read process.env.NODE_ENV directly, so a bundler-less browser setup must define it, and the build targets ES2020. There is ONE behavior change, not just packaging — a subtle useAtomValue mount-timing shift documented in the guide; useAtomValue now uses React.use() where available (React 19) and falls back to the old path on React 18."
+    receipts: ["https://github.com/pmndrs/jotai/releases/tag/v3.0.0", "https://raw.githubusercontent.com/pmndrs/jotai/main/docs/guides/migrating-to-v3.mdx", "https://registry.npmjs.org/jotai/latest"]
   - from: { pkg: "mobx", below: "7.0.0" }
     to: "MobX 7"
     urgency: upgrade

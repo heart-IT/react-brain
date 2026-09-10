@@ -9,7 +9,7 @@ options:
   - { name: "@react-native-async-storage/async-storage", tradeoff: "simple async key-value; v3.x is instance-based (createAsyncStorage), getMany/setMany/removeMany, requires RN 0.76+; v2 default export kept for back-compat" }
   - { name: "react-native-mmkv (v4)", tradeoff: "fast synchronous key-value; v4 is a full Nitro Modules rewrite (restores Old-Arch compat); common AsyncStorage replacement" }
   - { name: "op-sqlite / expo-sqlite", tradeoff: "relational SQLite; op-sqlite is high-perf JSI" }
-  - { name: "expo-secure-store (57.0.2)", tradeoff: "secure storage for tokens/secrets on the Keychain/Keystore; first-party, ships with the Expo SDK and releases with it (57.0.2, 2026-09-01 verified vs npm) — the default secrets store on any Expo app" }
+  - { name: "expo-secure-store (57.0.3)", tradeoff: "secure storage for tokens/secrets on the Keychain/Keystore; first-party, ships with the Expo SDK and releases with it (57.0.3, 2026-09-10 verified vs npm) — the default secrets store on any Expo app" }
   - { name: "react-native-keychain (10.0.0)", tradeoff: "the bare-RN secrets store, and the one to choose when you need finer access-control/biometry configuration than secure-store exposes. QUIET: no npm release since 2025-03-23 (17 months), 180 open issues, though the repo still gets commits (pushed 2026-04-29) — pin it and re-check before starting new work on it" }
 recommend:
   default: "Small key-value → react-native-mmkv (fast, synchronous). Relational/large → op-sqlite or expo-sqlite. Secrets/tokens → the OS Keychain/Keystore, never AsyncStorage — on Expo that is expo-secure-store, on bare RN react-native-keychain."
@@ -19,11 +19,12 @@ recommend:
     - "structured/queryable data → SQLite (op-sqlite for perf)"
     - "secrets on an Expo app → expo-secure-store (first-party, released with the SDK); reach for react-native-keychain when you need access-control options it doesn't expose — and note keychain has not published since 2025-03-23"
     - "P2P / local-first app → primary persistence is the Hypercore/Autobase/Hyperbee log, not KV/SQLite (KV like AsyncStorage is just for local prefs) — see RB-E-P2P"
-note: "AsyncStorage v3.x moved to instance-based storage (createAsyncStorage) and requires React Native 0.76+ (NOT New-Arch-only — that earlier claim was wrong; verified vs the v3 migration docs). react-native-mmkv v4 is a full Nitro rewrite (Oct 2025) that restored Old-Arch compat. Latest: async-storage 3.1.x, mmkv 4.3.x, op-sqlite 18.1.1 (2026-08-17). OP-SQLITE 18 IS BREAKING (2026-08-14, verified vs the GitHub releases): 18.0.0 REMOVES crsqlite — if you were using op-sqlite as the local half of a CRDT-synced store, that extension is gone and the migration is yours; it also rebinds hooks/reactive flush to their runtime generation and drops an internal mutex in favour of self-cleaning databases. 18.1 adds initial Swift Package Manager support and RN 0.87 compatibility, so on 0.87 this is the line to be on."
+note: "AsyncStorage v3.x moved to instance-based storage (createAsyncStorage) and requires React Native 0.76+ (NOT New-Arch-only — that earlier claim was wrong; verified vs the v3 migration docs). react-native-mmkv v4 is a full Nitro rewrite (Oct 2025) that restored Old-Arch compat. Latest: async-storage 3.1.x, mmkv 4.3.x, op-sqlite 18.2.1 (2026-09-09). 18.2.0 adds `executeSync` on a PREPARED STATEMENT — the synchronous path for a statement you reuse in a tight loop — plus an Android fix that stops op-sqlite applying the Kotlin plugin when AGP already provides it; take 18.2.1, which reverts a per-runtime PropNameID cache from 18.2.0. OP-SQLITE 18 IS BREAKING (2026-08-14, verified vs the GitHub releases): 18.0.0 REMOVES crsqlite — if you were using op-sqlite as the local half of a CRDT-synced store, that extension is gone and the migration is yours; it also rebinds hooks/reactive flush to their runtime generation and drops an internal mutex in favour of self-cleaning databases. 18.1 adds initial Swift Package Manager support and RN 0.87 compatibility, so on 0.87 this is the line to be on."
 defer_to_skill: null
 doc: "RB-E-STORAGE.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-01   # secure-store pin 57.0.1 → 57.0.2 (SDK-lockstep patch) — firsthand; challenge history unchanged
+updated: 2026-09-10   # op-sqlite 18.1.1 → 18.2.1 (executeSync on prepared statements) + secure-store 57.0.2 → 57.0.3 (firsthand)
 sources:
+  - "https://github.com/OP-Engineering/op-sqlite/releases/tag/18.2.0"
   - "https://github.com/OP-Engineering/op-sqlite/releases"
   - "https://react-native-async-storage.github.io/3.1/migration-to-3/"
   - "https://github.com/mrousavy/react-native-mmkv/releases"

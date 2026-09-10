@@ -9,7 +9,7 @@ options:
   - { name: "Vercel AI SDK / json-render", tradeoff: "streaming chat + tool-calling; json-render renders model output as components (now RN too)" }
   - { name: "assistant-ui / Tambo", tradeoff: "prebuilt chat/generative-UI components; Tambo 1.0 adds state persistence + streaming, self-host or cloud" }
   - { name: "Cedar / Streamdown", tradeoff: "Cedar = agent-UI toolkit; Streamdown = streaming-markdown renderer for LLM output" }
-  - { name: "TanStack AI (@tanstack/ai + ai-react)", tradeoff: "type-safe TS AI SDK — streaming chat, tool calling, agents, host-side MCP client, generation hooks (useGenerateImage/Speech/Video, useTranscription) beyond chat; RC PHASE as of 2026-08-21 (0.48) — grown to 24 tree-shakable provider adapters and adopted AG-UI (20+ agent frameworks) as its official protocol; the first real Vercel-AI-SDK alternative, now stabilizing toward 1.0" }
+  - { name: "TanStack AI (@tanstack/ai + ai-react)", tradeoff: "type-safe TS AI SDK — streaming chat, tool calling, agents, host-side MCP client, generation hooks (useGenerateImage/Speech/Video, useTranscription) beyond chat; RC PHASE as of 2026-08-21 (0.48) — grown to 24 tree-shakable provider adapters and adopted AG-UI (20+ agent frameworks) as its official protocol; the first real Vercel-AI-SDK alternative, now stabilizing toward 1.0. 0.54 on npm (2026-09-10). Vercel became a GOLD TanStack partner 2026-09-08 and shipped two first-party adapters — @tanstack/ai-vercel-gateway (route chat/embeddings/image/summarization across providers behind one AI-Gateway key, with per-request provider preferences and fallbacks) and @tanstack/ai-sandbox-vercel (Vercel microVMs as the execution environment for TanStack AI's sandbox system, resumable by ID with files intact and a dev-server port for previews) — so the 'which agent' and 'where it runs' choices are now separable; note the competitive read: TanStack AI's main alternative is Vercel's own AI SDK" }
 recommend:
   default: "Vercel AI SDK for streaming chat + tool-calling (TanStack AI is the emerging type-safe alternative — RC as of 2026-08, re-evaluate at 1.0); assistant-ui/Tambo for prebuilt chat UI; Streamdown to render streaming markdown. Very fast-moving (confidence: low) — treat picks as current-best, not settled."
   when:
@@ -24,7 +24,7 @@ note: >
   not a React UI library itself.
 defer_to_skill: null
 doc: null
-updated: 2026-08-24   # TanStack AI enters RC (0.48, 24 providers, AG-UI official protocol) — firsthand
+updated: 2026-09-10   # TanStack AI 0.48 → 0.54 + Vercel Gold partnership: ai-vercel-gateway and ai-sandbox-vercel adapters (firsthand)
 tripwires:   # standing caveats as executable conditions — evaluated by `harvest firsthand`; fired ⇒ do the then:, update prose, remove the row
   - when: { pkg: "@tanstack/ai", atleast: "1.0.0" }
     then: "TanStack AI hit 1.0 stable (default says 'RC as of 2026-08, re-evaluate at 1.0') — re-weigh the default vs Vercel AI SDK and update the option row + when-clause pins"
@@ -33,6 +33,7 @@ sources:
   - "https://json-render.dev/docs/ai-sdk"
   - "https://github.com/tambo-ai/tambo"
   - "https://registry.npmjs.org/@tanstack/ai/latest"
+  - "https://tanstack.com/blog/vercel-partnership"
   - "https://tanstack.com/blog/generation-hooks"
   - "https://tanstack.com/blog/tanstack-ai-rc"
 reading:

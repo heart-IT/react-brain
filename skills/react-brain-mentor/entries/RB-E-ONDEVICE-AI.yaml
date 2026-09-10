@@ -6,7 +6,7 @@ status: drafted
 confidence: low
 platforms: [react-native]
 options:
-  - { name: "react-native-executorch", tradeoff: "on-device models (Meta ExecuTorch); v0.8 adds VLM + runOnFrame worklet w/ Vision Camera; tool-calling/embeddings since 0.4, OCR since 0.3" }
+  - { name: "react-native-executorch", tradeoff: "on-device models (Meta ExecuTorch); v0.10 (2026-09-08) is a GROUND-UP REWRITE — see note; tool-calling/embeddings since 0.4, OCR since 0.3" }
   - { name: "@react-native-ai/apple", tradeoff: "Apple on-device LLM + SpeechAnalyzer (iOS 26); zero cloud; RN 0.80+ (preview)" }
   - { name: "@react-native-ai/adk", tradeoff: "Google Gemini on ANDROID via the Agent Development Kit — on-device Gemini Nano + cloud models behind one Vercel-AI-SDK provider; tool calling + streaming; same react-native-ai family as the Apple provider (v0.12)" }
   - { name: "react-native-nitro-mlx", tradeoff: "Apple MLX on-device LLM + TTS/STT via Nitro Modules, with tool calling (ChatSession API); iOS 26+ ONLY; v0.7 (2026-08-22), ~100★ — niche/early" }
@@ -18,11 +18,33 @@ recommend:
   when:
     - "offline speech-to-text → expo-speech-recognition, or whisper.rn for whisper.cpp/Parakeet models"
     - "private/offline LLM over local docs → react-native-rag, or roll it yourself with @react-native-ai/llama + nitro-sqlite/sqlite-vec; budget RAM for generator + embedder TOGETHER (see reading)"
-note: "Fast-moving area surfaced across multiple RN Rewind issues; recommend tentatively (confidence: low) and validate on-device before committing."
+note: >
+  Fast-moving area surfaced across multiple RN Rewind issues; recommend tentatively
+  (confidence: low) and validate on-device before committing.
+  EXECUTORCH v0.10 REWRITE (2026-09-08, verified vs the GitHub release + 0.10.1 patch): the library
+  was rebuilt on a TWO-LAYER architecture — native now exposes only the ExecuTorch runtime, tensors
+  and fast ops, while task orchestration moved into transparent TypeScript pipelines you can read,
+  edit, chain, or replace with a custom model, where 0.9 shipped opaque C++ task modules with rigid
+  interfaces. Three consequences that change the selection calculus: (1) HARDWARE ACCELERATION —
+  0.9 was mostly CPU; 0.10 wires per-silicon delegates across 130+ pre-exported model variants
+  (Core ML / Apple Neural Engine, 70+ variants · MLX over Metal for LLM generation, ~40 exports ·
+  Vulkan on Android, 25+ exports), with the multi-threaded XNNPACK CPU path as the fallback —
+  the vendor frames the win as inference speed, thermal throttling and battery, not just latency.
+  (2) WORKLETS — every native JSI function carries "worklet"; by default, so model calls run off
+  the main JS thread or inside UI worklets, which is what makes live-camera inference with
+  VisionCamera straightforward. (3) BINARY SIZE — backend binaries are fetched on demand at install
+  (zero-config by default), and a `react-native-executorch` block in package.json narrows the
+  download to the backends/tasks you actually use. Migration: 100% functional parity is claimed and
+  a `react-native-executorch/legacy` entry point preserves the whole pre-0.10 API for screen-by-screen
+  migration — but it is marked DEPRECATED and slated for removal, so treat it as a stepping stone,
+  not a resting place. Take 0.10.1 (2026-09-09), not 0.10.0: it fixes iOS `use_frameworks!` duplicate-
+  header build failures and silent setup failures, and pins react-native-worklets >=0.10.0 <0.13.0.
 defer_to_skill: null
 doc: null
-updated: 2026-08-24   # nitro-mlx pin v0.5 → v0.7 — firsthand
+updated: 2026-09-10   # executorch v0.10 ground-up rewrite: TS pipelines, Core ML/MLX/Vulkan delegates, worklets, on-demand binaries (firsthand)
 sources:
+  - "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.10.0"
+  - "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.10.1"
   - "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.8.0"
   - "https://registry.npmjs.org/@react-native-ai/adk/latest"
   - "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.3.0"

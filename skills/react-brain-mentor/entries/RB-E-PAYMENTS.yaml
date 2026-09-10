@@ -6,8 +6,8 @@ status: reviewed   # long-form entry written + source-checked → encyclopedia/R
 confidence: medium
 platforms: [react-native]
 options:
-  - { name: "expo-iap (5.5.0)", tradeoff: "OpenIAP-compliant IAP; Google Play Billing v8 / Apple StoreKit; avoids ejecting. Verified 2026-09-01 — still shipping in lockstep with react-native-iap" }
-  - { name: "react-native-iap (16.5.0)", tradeoff: "long-standing community IAP wrapper; its STANDALONE repo is archived but the package is NOT deprecated — it moved into the hyodotdev/openiap monorepo and still ships in lockstep with expo-iap (16.5.0 / 5.5.0, verified 2026-09-01). DIST-TAG TRAP: on both packages the `next` tag is BEHIND `latest` (react-native-iap next = 15.4.0-rc.3, expo-iap next = 4.4.0-rc.7, verified 2026-08-18) — installing @next silently downgrades you a major" }
+  - { name: "expo-iap (5.5.1)", tradeoff: "OpenIAP-compliant IAP; Google Play Billing v8 / Apple StoreKit; avoids ejecting. Verified 2026-09-10 — still shipping in lockstep with react-native-iap" }
+  - { name: "react-native-iap (16.5.1)", tradeoff: "long-standing community IAP wrapper; its STANDALONE repo is archived but the package is NOT deprecated — it moved into the hyodotdev/openiap monorepo and still ships in lockstep with expo-iap (16.5.1 / 5.5.1, verified 2026-09-10). DIST-TAG TRAP: on both packages the `next` tag is BEHIND `latest` (react-native-iap next = 15.4.0-rc.3, expo-iap next = 4.4.0-rc.7, verified 2026-08-18) — installing @next silently downgrades you a major" }
   - { name: "RevenueCat (react-native-purchases 10.7.1)", tradeoff: "hosted subscription infra + entitlements across stores; fees vs less server work. Also brings remote-configurable paywalls and pricing experiments — features of the hosting decision, not separate choices" }
   - { name: "@premieroctet/react-native-wallet (1.0.2)", tradeoff: "Apple PassKit / Google Wallet passes (tickets, loyalty, coupons) — NOT tap-to-pay; iOS needs a Pass Type ID + entitlements. MIND THE PACKAGE NAME: bare `react-native-wallet` on npm is an UNRELATED 2020 module (1.0.8, erikpoort, Apple-Wallet-only); the library meant here is the scoped @premieroctet one — last published 2025-06-26, so treat it as stable-but-quiet and pin it" }
 recommend:
@@ -22,6 +22,10 @@ note: >
   fees for less backend.
   STALE FACT CORRECTED (2026-08-04, firsthand watch): this entry previously called
   react-native-iap "deprecated/archived → prefer expo-iap". That read an archived REPO as a dead
+  OPENIAP BACKING (2026-08-19, verified vs openiap.dev/docs/updates/announcements): the OpenIAP
+  project is now backed by AMAZON DEVELOPER, and its docs carry store setup for Amazon and Horizon
+  OS alongside Apple/Google — so the protocol these two libraries implement is no longer a
+  two-storefront concern, which matters if you ship to Fire OS or Vega OS.
   PACKAGE. Both libraries moved into the hyodotdev/openiap monorepo (the OpenIAP protocol project;
   the old hyochan/react-native-iap and hyochan/expo-iap repos were archived 2026-04-26 on the way
   out) and both are actively released from it: react-native-iap 16.0.2 and expo-iap 5.0.1 shipped
@@ -38,8 +42,10 @@ note: >
   lockstep intact), react-native-purchases 10.7.1 (2026-08-13), no deprecation flags anywhere.
 defer_to_skill: null
 doc: "RB-E-PAYMENTS.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-01   # lockstep pin refresh: expo-iap 5.3.1 → 5.5.0, react-native-iap 16.3.1 → 16.5.0 — firsthand
+updated: 2026-09-10   # OpenIAP now backed by Amazon Developer (Fire OS / Vega OS storefronts) — TWiR #295 · iap lockstep pin 16.5.1/5.5.1 — firsthand
 sources:
+  - "https://www.openiap.dev/docs/updates/announcements"
+  - "https://github.com/hyodotdev/openiap/releases/tag/react-native-iap-16.5.1"
   - "https://github.com/hyodotdev/openiap"
   - "https://registry.npmjs.org/react-native-iap/latest"
   - "https://registry.npmjs.org/expo-iap/latest"

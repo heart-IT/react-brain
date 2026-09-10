@@ -28,6 +28,12 @@ recommend:
     - "on iOS and tempted by SwiftPM → it is experimental and additive in 0.87; CocoaPods stays the default and the supported path — but trunk goes read-only 2026-12-02 (no NEW podspec versions after that; existing ones keep resolving), so audit which iOS deps still depend on it"
     - "quoting a pre-0.84 row as authoritative → verify against that version's RN blog first"
 note: >
+  EXPO GO NOW REQUIRES LOGIN (SDK 57, verified vs expo.dev/changelog/expo-go-57-login): to run a
+  project in Expo Go you must be signed in to the SAME account in BOTH the terminal (`npx expo login`)
+  and the Expo Go app — otherwise scanning the QR code fails with a message naming which side is
+  missing. Scope it correctly before assuming it blocks you: it applies to the latest iOS Expo Go
+  only (Android is stated as coming later), NOT to simulator builds, and NOT to development builds —
+  which is one more reason a team past prototyping should be on a dev build rather than Expo Go.
   Use this to tell a project what it gains/loses by moving RN versions. Rows marked ✓ (0.84–0.87)
   are verified vs official RN blogs; 0.76–0.83 are from release history + RN Rewind — verify a
   specific row against the RN blog before quoting it as authoritative. Expo SDK mapping: SDK 55 =
@@ -56,13 +62,14 @@ note: >
   planning move today is to know which of your iOS dependencies still resolve only through trunk.
 defer_to_skill: react-native-jsi
 doc: "RB-E-RN-VERSIONS.md"   # long-form Explanation entry in content_dir
-updated: 2026-08-18   # RN 0.87 STABLE — Strict TS API default, Metro 0.87, experimental SwiftPM, AGP 9
+updated: 2026-09-10   # Expo Go (SDK 57, iOS) now requires login on both CLI and app; dev builds and simulators unaffected — TWiR #296
 reading:
   - title: "React Native Architecture: From Bridge to Fabric"
     url: "https://blog.codeminer42.com/react-native-architecture-from-bridge-to-fabric/"
     by: "Felipe Ramalho (Codeminer42)"
     what: "Traces RN's architecture from the old async JSON bridge to the New Architecture (JSI, Fabric's immutable C++ shadow tree, Turbo Modules, Codegen), explaining why each piece exists. The 'why it changed' narrative behind the 0.76→0.82 version arc — not a release note."
 sources:
+  - "https://expo.dev/changelog/expo-go-57-login"
   - "https://reactnative.dev/blog/2026/02/11/react-native-0.84"
   - "https://reactnative.dev/blog/2026/04/07/react-native-0.85"
   - "https://reactnative.dev/blog/2026/06/11/react-native-0.86"

@@ -8,7 +8,7 @@ platforms: [react, react-native]
 options:
   - { name: "Reanimated 4", tradeoff: "UI-thread + CSS-style animations/transitions; worklets split into react-native-worklets; requires New Arch. 4.6.0 (2026-08, verified vs the release) supports RN 0.83–0.87, pairs with Worklets 0.12.x, and fires the CSS animation/transition callbacks (onCSSAnimationStart/End/Iteration/Cancel, onCSSTransition*) natively on iOS + Android" }
   - { name: "Gesture Handler 3.0", tradeoff: "native gestures; v3 adds a hook-based API built for the React Compiler + Reanimated 4, and a single unified Touchable button component that replaces (and deprecates) the library's 9 legacy button/touchable exports" }
-  - { name: "react-native-worklets (0.11.x)", tradeoff: "the worklets runtime under Reanimated 4 (now its own package; npm latest 0.11.4, verified 2026-08-18 — an earlier '8.0' claim here was WRONG, caught by the firsthand watch); 0.11 adds experimental Hermes-bytecode worklets + Shareable values across isolated runtimes. 0.12 GRADUATED to latest (0.12.1, dist-tag verified 2026-09-01 — the earlier 'sits on next' status is over; WeakRef on worklet runtimes, Bundle Mode script loading on par with RN's own loaders) and is what Reanimated 4.6 pairs with. TURN ON BUNDLE MODE (stable since 0.10) — below RN 0.87 it is the fix for the Hermes V1 memory regression, and worth it regardless; see note" }
+  - { name: "react-native-worklets (0.11.x)", tradeoff: "the worklets runtime under Reanimated 4 (now its own package; npm latest 0.11.4, verified 2026-08-18 — an earlier '8.0' claim here was WRONG, caught by the firsthand watch); 0.11 adds experimental Hermes-bytecode worklets + Shareable values across isolated runtimes. 0.12 GRADUATED to latest (0.12.2, dist-tag verified 2026-09-10 — the earlier 'sits on next' status is over; WeakRef on worklet runtimes, Bundle Mode script loading on par with RN's own loaders) and is what Reanimated 4.6 pairs with. TURN ON BUNDLE MODE (stable since 0.10) — below RN 0.87 it is the fix for the Hermes V1 memory regression, and worth it regardless; see note" }
   - { name: "react-native-skia (2.x)", tradeoff: "GPU 2D drawing; v2.1 plays Lottie via Skottie; pairs with Reanimated" }
   - { name: "lottie-react-native", tradeoff: "designer Lottie/JSON animations; v7 adds visionOS" }
   - { name: "Rive — @rive-app/react-native (Nitro) / rive-react-native (legacy)", tradeoff: "designer-driven INTERACTIVE vector animation (state machines) — the Lottie alternative; the SDK was rewritten on Nitro under Rive's official scope (@rive-app/react-native, 0.4.x EARLY line): files/view-models become shared typed HybridObjects — Margelo-measured up to 94× multi-view loads + ~4.7× lower memory vs legacy (rewrite authors' own benchmark); legacy unscoped pkg at 9.8.3, quiet since 2026-04" }
@@ -53,6 +53,12 @@ note: >
   WORKLETS BUNDLE MODE (exposes the mmap'd bytecode bundle instead of eval'ing strings — measured
   −~100MB PSS, ~45%, native heap ~142MB→~32MB, with frame rate and CPU unchanged), the
   experimental bytecode option for Legacy Eval Mode, or pin Hermes 250829098.0.15. TURN ON BUNDLE
+  COUNTER-DATAPOINT (2026-09-10, TWiR #296 — the RN navigation benchmark cited in RB-E-NAV): its
+  author reports Bundle Mode REGRESSING cold start, because it must parse the whole bundle, while
+  measuring Reanimated + Worklets at a ~125 MB RAM premium (a second Hermes runtime, almost all
+  anonymous heap). That is one device and one trivial app against SWM's own guidance, so the
+  recommendation below stands — but measure cold start when you turn Bundle Mode on, rather than
+  treating it as free.
   MODE REGARDLESS: SWM still recommends it for its own performance gains, and Worklets 0.12
   (2026-08-11) brought its script loading to parity with React Native's own loaders — local
   bundles are mmapped instead of held in an in-memory std::string for the app's lifetime, and
@@ -72,7 +78,7 @@ note: >
   neither package is deprecated.
 defer_to_skill: react-native-best-practices
 doc: "RB-E-ANIMATION.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-01   # screen-transitions v4.0 floor-raise (firsthand) · Reanimated 4.6 + Worklets 0.12→latest flip — Native Weekly #19
+updated: 2026-09-10   # worklets pin 0.12.2 (firsthand) · Bundle-Mode cold-start counter-datapoint from the RN navigation benchmark — TWiR #296
 reading:
   - title: "React Native Gesture Handler's Touchable: The Button We Wish We Had Sooner"
     url: "https://swmansion.com/blog/react-native-gesture-handler-s-touchable-the-button-we-wish-we-had-sooner/"

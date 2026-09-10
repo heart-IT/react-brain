@@ -10,7 +10,7 @@ options:
   - { name: "expo-updates + custom server", tradeoff: "the Expo Updates protocol is open — self-host the server, keep the battle-tested client; more ops work than EAS" }
   - { name: "XPREM (ex expo-open-ota)", tradeoff: "the concrete server for the row above: a Go implementation of the Expo Updates protocol — multi-app, progressive rollouts + instant rollback, A/B branch splitting, S3/GCS/Azure/R2 backends, no Expo account or token. Stateless (bucket-only) or PostgreSQL control-plane mode. Core is open source; RBAC/SSO/protected branches are commercial. RENAMED from expo-open-ota at v3 — old name still all over the ecosystem" }
   - { name: "hot-updater", tradeoff: "self-hosted open-source OTA (gronxb) explicitly positioned as the CodePush successor; actively maintained (v0.35.x, 2026-07); younger than expo-updates" }
-  - { name: "Codemagic Patch (@codemagic/react-native-patch)", tradeoff: "the CodePush-lineage rewrite: Codemagic ran a CodePush fork for ~18 months after Microsoft retired the service, then rebuilt it as a self-hosted OTA service — server + release worker, RN client SDK with an Expo config plugin, a `cmpatch` CLI, a web dashboard, and a one-command Docker Compose stack you can evaluate locally (Postgres + MinIO + dashboard) before provisioning anything. Positioned on CDN-first delivery, binary diffs and native fingerprinting. The differentiator vs the other self-host rows is operability (dashboard + CI vendor behind it), not protocol. VERY EARLY — npm 0.1.6, first published 2026-07-29 (verified vs the registry 2026-08-18); evaluate, do not standardize" }
+  - { name: "Codemagic Patch (@codemagic/react-native-patch)", tradeoff: "the CodePush-lineage rewrite: Codemagic ran a CodePush fork for ~18 months after Microsoft retired the service, then rebuilt it as a self-hosted OTA service — server + release worker, RN client SDK with an Expo config plugin, a `cmpatch` CLI, a web dashboard, and a one-command Docker Compose stack you can evaluate locally (Postgres + MinIO + dashboard) before provisioning anything. Positioned on CDN-first delivery, binary diffs and native fingerprinting. The differentiator vs the other self-host rows is operability (dashboard + CI vendor behind it), not protocol — and server v0.3.0 (2026-09-07) is that differentiator maturing: a CLI that installs, upgrades, BACKS UP and restores a self-hosted server with guided Cloudflare/CloudFront/no-CDN setup, CloudFront joining Cloudflare as a delivery option, and structured failure detail (HTTP status, origin message, Android process-exit context) on metric failures; note the breaking change — an existing Cloudflare install with the old two-hour edge TTL rule must drop it to get the new cache policy. VERY EARLY — npm 0.1.6, first published 2026-07-29 (verified vs the registry 2026-08-18); evaluate, do not standardize" }
   - { name: "code-push-server (standalone)", tradeoff: "Microsoft's open-sourced server, compatible with the legacy react-native-code-push client — a self-host stopgap for existing CodePush apps, not a bet for new ones" }
   - { name: "Delta (Zepto, OSS)", tradeoff: "self-hosted BINARY DELTA patching at quick-commerce scale — delta-cli computes bsdiff patches between releases to your S3; delta-server (Lambdas behind CloudFront) picks the patch per device (appId/jsVersion/bundleVersion manifest); device applies bspatch, swaps on next launch. Production receipts (Zepto's own): 80% adoption in 24h, 15M update requests/day, P90 patch download 305ms. GitHub-install (not yet on npm) — WATCH for a published package" }
   - { name: "react-native-code-push (RETIRED service)", tradeoff: "App Center + the hosted CodePush service shut down 2025-03-31; the client npm has been dormant since 2024-12 — migrate" }
@@ -42,7 +42,7 @@ note: >
   tripwire when it lands on npm.
 defer_to_skill: null
 doc: "RB-E-OTA.md"   # long-form Explanation entry in content_dir
-updated: 2026-08-18   # Codemagic Patch — the CodePush-lineage self-host option (0.1.x, evaluate only)
+updated: 2026-09-10   # Codemagic Patch server 0.3.0 — self-host CLI (install/upgrade/backup/restore) + CloudFront; Cloudflare TTL breaking change (firsthand)
 watching:
   - title: "The OTA Illusion: What No One Tells You About Instant Updates At Scale (RUC 2025)"
     url: "https://www.youtube.com/watch?v=hBoAD6sYDYo"
@@ -60,6 +60,7 @@ reading:
     by: "Expo"
     what: "The reference for the hosted-default choice: how updates map to channels, phased rollouts to a percentage of users, and rollback-by-republish ('much like a new commit'). Read before designing a release-channel scheme."
 sources:
+  - "https://github.com/codemagic-ci-cd/codemagic-patch/releases/tag/codemagic-patch-server-v0.3.0"
   - "https://github.com/codemagic-ci-cd/codemagic-patch"
   - "https://registry.npmjs.org/@codemagic/react-native-patch"
   - "https://github.com/zepto-labs/react-native-delta"
