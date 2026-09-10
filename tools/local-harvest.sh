@@ -17,7 +17,23 @@ command -v node   >/dev/null || { echo "node not on PATH — abort"; exit 1; }
 
 BRANCH="harvest/$(date +%F)"
 git rev-parse --verify -q "$BRANCH" >/dev/null && { echo "$BRANCH already exists — already ran; abort"; exit 0; }
-[ -z "$(git status --porcelain)" ] || { echo "working tree dirty — refusing to run unattended; abort"; exit 1; }
+
+# Dirtiness guard — TRACKED changes only (--untracked-files=no). Untracked files cannot be
+# clobbered by a branch checkout, so they are not a reason to skip a week. This used to test
+# bare `git status --porcelain`, which counts untracked files, and that killed the job SILENTLY
+# and INDEFINITELY: two stray scratch files appeared after 2026-09-03 and every subsequent
+# Thursday aborted with one line in a log nobody reads (found 2026-09-10). The thing the old
+# guard was really protecting against — an agent running `git add -A` and sweeping strays into
+# a commit — is now handled deterministically by the STRAY CHECK after the run instead.
+# HARVEST-ABORT: is the greppable marker; SKILL.md tells the next pass to look for it.
+if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
+  echo "HARVEST-ABORT: tracked changes in the working tree — refusing to run unattended"
+  git status --short --untracked-files=no
+  exit 1
+fi
+
+# Snapshot what is untracked BEFORE the agent starts, so a stray that becomes tracked is provable.
+STRAYS_BEFORE="$(git ls-files --others --exclude-standard | sort)"
 git checkout -q main && git checkout -q -b "$BRANCH"
 
 # Tier-1 deterministic health (consolidated 2026-07-16 — was a separate Monday cron):
@@ -29,13 +45,27 @@ node tools/cli.mjs pulse   --today="$TODAY" ../../ledgerhr ../../ourpot/ourpot .
 node tools/cli.mjs signals --today="$TODAY" >> tools/signals.log 2>&1 || echo "signals exited non-zero"
 node tools/cli.mjs census  --today="$TODAY" >> tools/census.log  2>&1 || echo "census exited non-zero"
 
-PROMPT="Run the weekly react-brain harvest pass. Follow .claude/skills/harvest/SKILL.md EXACTLY — read it first, then tools/harvest-state.json and tools/upkeep-routine.md step 2. Tier-1 (pulse/signals/census) already ran — read the tails of tools/pulse.log, tools/signals.log and tools/census.log and fold dead links / drift / adoption deltas into the pass. You are ALREADY on branch $BRANCH: commit everything here, NEVER switch to or commit on main, NEVER push, never force anything. All gates must pass before your final commit (coverage, verify-diff --base=main, npm test); the advocate pass over your own skips is mandatory. Append the dated narrative section (issues processed, keeps with receipts, notable skips, counts before/after) to tools/harvest-log/LEDGER.md as part of the final commit — the ledger is in-repo and travels with this branch. If there are no new issues AND no firsthand events, print a one-line summary and stop (an empty branch is fine)."
+PROMPT="Run the weekly react-brain harvest pass. Follow .claude/skills/harvest/SKILL.md EXACTLY — read it first, then tools/harvest-state.json and tools/upkeep-routine.md step 2. Tier-1 (pulse/signals/census) already ran — read the tails of tools/pulse.log, tools/signals.log and tools/census.log and fold dead links / drift / adoption deltas into the pass. You are ALREADY on branch $BRANCH: commit your work here, NEVER switch to or commit on main, NEVER push, never force anything. Stage EXPLICIT PATHS only — never \`git add -A\` or \`git add .\`; this repo carries untracked scratch files that must stay untracked, and a blanket add sweeps them into the corpus history. All gates must pass before your final commit (coverage, verify-diff --base=main, npm test); the advocate pass over your own skips is mandatory. Append the dated narrative section (issues processed, keeps with receipts, notable skips, counts before/after) to tools/harvest-log/LEDGER.md as part of the final commit — the ledger is in-repo and travels with this branch. If there are no new issues AND no firsthand events, print a one-line summary and stop (an empty branch is fine)."
 
 claude -p "$PROMPT" \
   --model claude-sonnet-5 \
   --permission-mode acceptEdits \
   --allowedTools "Bash,Read,Write,Edit,Glob,Grep,WebFetch,WebSearch" \
   --max-turns 250 || echo "claude exited non-zero — inspect above"
+
+# STRAY CHECK — did anything that was untracked before the run end up TRACKED on the branch?
+# Deterministic, so it does not depend on the agent having followed the staging instruction.
+# Reports loudly and leaves the branch alone: un-committing someone's file is not this script's
+# call to make, and the branch is propose-only anyway.
+STRAYS_AFTER="$(git ls-files | sort)"
+SWEPT="$(comm -12 <(printf '%s\n' "$STRAYS_BEFORE") <(printf '%s\n' "$STRAYS_AFTER"))"
+if [ -n "$SWEPT" ]; then
+  echo "HARVEST-ABORT: the run committed files that were untracked before it started —"
+  # quoted + read loop: zsh does not word-split an unquoted scalar, so `printf ... $SWEPT`
+  # would indent only the first path and run the rest together
+  printf '%s\n' "$SWEPT" | while IFS= read -r f; do [ -n "$f" ] && printf '   %s\n' "$f"; done
+  echo "   review $BRANCH before merging: git rm --cached <path> on this branch, or drop the branch."
+fi
 
 git checkout -q main
 echo "── done. review: git log main..$BRANCH · git diff main...$BRANCH · merge: git merge --ff-only $BRANCH"

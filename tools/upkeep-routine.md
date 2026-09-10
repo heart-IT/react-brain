@@ -90,7 +90,14 @@ The agent should, in order:
    events (entry `tripwires:` — standing caveats as release conditions, e.g. "Rive line
    hits 1.0 → add the migrate rule") are MANDATORY work items: do the `then:`, update the
    prose, remove the fired row; new watch/revisit caveats get wired as tripwires at
-   keep-time. THEN
+   keep-time.
+   PREFLIGHT (added 2026-09-10, after both failures below cost a pass): before ANY of this, run
+   `git branch --list 'harvest/*'` and `tail -3 tools/harvest.log`. An unmerged harvest branch
+   means a scheduled run already covered part of this week — reconcile it rather than
+   re-adjudicating the same issues (cheapest method: diff the URLs it added to entries against
+   the URLs main already holds; the remainder is its unique contribution). A `HARVEST-ABORT:`
+   line means the scheduled job never ran, so the backlog is deeper than harvest-state.json
+   implies. THEN
    the newsletters — their irreplaceable job is
    UNKNOWN UNKNOWNS (new libs/domains the corpus doesn't track yet) + corroboration:
    from **`tools/harvest-state.json`** (in-repo

@@ -13,6 +13,26 @@ This skill is a ROUTER, deliberately thin. The canonical method lives in the rep
 wins over anything written here — if they disagree, follow the repo file and fix this
 skill. One knowledge base, every session (local, resumed, or cloud-cloned).
 
+## PREFLIGHT — 10 seconds, before anything else
+
+Two failure modes have cost a full pass each. Both are one command away:
+
+```sh
+git branch --list 'harvest/*'        # unmerged unattended runs — reconcile BEFORE harvesting
+tail -3 tools/harvest.log            # did the last scheduled run abort?
+```
+
+- **An unmerged `harvest/<date>` branch means a scheduled run already harvested some of
+  what you are about to harvest.** Read it first and reconcile — do NOT re-adjudicate the
+  same issues from scratch. On 2026-09-10 three branches had sat unread for four weeks
+  while manual passes redid their work, and one of them had caught a keep (nuqs) the
+  manual pass missed. Cheapest reconciliation: diff the URLs the branch added to entries
+  against the URLs main already holds; what is left is the branch's unique contribution.
+- **An abort line in `tools/harvest.log` means the scheduled job did not run** (`HARVEST-ABORT:`
+  since 2026-09-10; older runs read `refusing to run unattended`), so
+  firsthand events and issues have been accumulating longer than `harvest-state.json`
+  suggests. Fix the cause before starting, or the backlog silently deepens.
+
 ## Read before touching anything
 
 1. `tools/harvest-state.json` — resume numbers per source, per-source access notes.
