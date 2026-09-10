@@ -19,6 +19,10 @@ recommend:
     - "fully custom web viz → visx; quick standard charts → Recharts"
     - "heavy Skia/Reanimated perf → react-native-best-practices"
 note: >
+  LEAD (2026-09-10, adopted from harvest/2026-09-03): @tanstack/charts reached 0.16, officially alpha
+  and "ready to be field-tested" — a new web-charting entrant from the org already behind Query,
+  Router, Table, Form and AI in this corpus, which is why it is worth tracking rather than ignoring.
+  NOT an option yet: alpha, no adoption signal. Watch for a 1.0 before weighing it against the rows above.
   Library picks are reasonable defaults but lightly vetted. Ignore react-native-livechart's
   satirical "degen mode" framing — not a selection axis. FRESHNESS (signals, 2026-07-10): the
   ACTIVE Victory line is victory-native XL (42.0.1, 2026-08, verified vs npm + GitHub); d3's 2-year
@@ -44,7 +48,7 @@ note: >
   which is also the documented way to keep a row out of the default set.
 defer_to_skill: react-native-best-practices  # Skia/Reanimated render-perf depth
 doc: "RB-E-CHARTS.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-10   # primitives-vs-charting-framework reading: agentic coding moved the crossover (D3 primitives vs Recharts spike, with its counter-arguments) — React Status #489
+updated: 2026-09-10   # primitives-vs-framework reading (React Status #489) · TanStack Charts 0.16 alpha LEAD — reconciled from harvest/2026-09-03
 reading:
   - title: "Agentic Coding: Bet on the Primitives"
     url: "https://www.robinwieruch.de/agentic-coding-bet-on-primitives/"
@@ -65,6 +69,7 @@ reading:
     claim: "You ship Skia-backed RN charts (Victory Native XL or raw react-native-skia) — the rendering model underneath: JSI, immutable display lists, a unified WebGPU backend, and the canonical high-density line-chart-as-GPU-texture pattern."
     applies_when: { deps: ["victory-native", "@shopify/react-native-skia"], platforms: [react-native] }
 sources:
+  - "https://github.com/TanStack/charts/releases/tag/v0.16.0"
   - "https://www.robinwieruch.de/agentic-coding-bet-on-primitives/"
   - "https://registry.npmjs.org/victory-native/latest"
   - "https://registry.npmjs.org/react-native-gifted-charts/latest"

@@ -15,11 +15,12 @@ recommend:
   when:
     - "share only business logic, keep native UI → Kotlin Multiplatform"
     - "team already invested in Dart / wants one render engine → Flutter (leaves React entirely)"
-note: "Context for teams weighing leaving the React/RN ecosystem. Newer entrants (Lynx, Valdi) are early — not endorsements. The KMP-vs-RN numbers come from Software Mansion's controlled same-app benchmark (see reading) — notable because an RN shop published results that favor KMP on Android."
+note: "Context for teams weighing leaving the React/RN ecosystem. Newer entrants (Lynx, Valdi) are early — not endorsements. The KMP-vs-RN numbers come from Software Mansion's controlled same-app benchmark (see reading) — notable because an RN shop published results that favor KMP on Android. DACTYL LEAD (2026-09-10, adopted from harvest/2026-08-27; dactyl.dev reachable, verified): a different axis from every row above — an AI app-builder (from Deno) that generates GENUINE native SwiftUI from a prompt and previews it live through a SwiftUI-in-WebAssembly renderer in the browser, with no Mac, Xcode or React Native anywhere in the loop. There is no versioned SDK and no npm package, so it is not something you adopt into an existing codebase and not an option row — it is landscape: a no-code competitor at the 'skip React Native entirely' layer, not yet a tool a React/RN team would evaluate. Watch for a developer-facing SDK before promoting it."
 defer_to_skill: null
 doc: "RB-E-ALT-FRAMEWORKS.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-28   # Shopify React→Preact under a 64KB budget; Lynx 4.0.0
+updated: 2026-09-10   # Dactyl lead — AI-generated native SwiftUI previewed via WASM, a no-code axis — reconciled from harvest/2026-08-27
 sources:
+  - "https://dactyl.dev/"
   - "https://github.com/lynx-family/lynx"
   - "https://github.com/Snapchat/Valdi"
 reading:

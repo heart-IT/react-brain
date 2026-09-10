@@ -17,6 +17,14 @@ recommend:
     - "agent-style UI → Cedar"
     - "already TanStack-stack (Query/Router/Start) or want image/speech/video generation hooks → TanStack AI (RC, still 0.x — pin)"
 note: >
+  RN STREAMING-MARKDOWN LEAD (2026-09-10, verified vs npm + repo; adopted from harvest/2026-08-27):
+  this entry's "Streamdown" option row is the WEB renderer. A distinct React Native sibling,
+  react-native-streamdown, lives under the software-mansion-LABS org (not the main software-mansion
+  org the rest of that family ships from) — ~399★, actively pushed, npm 0.3.0 (2026-09-10): early,
+  watch don't bet. The problem it targets is real and RN-specific: streaming incomplete Markdown from
+  an LLM token-by-token flickers (raw ** / * briefly visible) when you re-render JS-side per token,
+  and native parsing avoids that. Do not conflate the two packages when reading newsletter rows —
+  the 2026-09-10 twir-296 manifest initially did.
   Distinct from on-device inference (RB-E-ONDEVICE-AI) — this is cloud-LLM app UI. Very
   fast-moving; recommend tentatively (confidence: low). Adjacent: Vercel's Eve is a file-based agent framework (an agent =
   a folder of tools/connections/channels/schedules; MCP connections, human-approval gates,
@@ -24,12 +32,13 @@ note: >
   not a React UI library itself.
 defer_to_skill: null
 doc: null
-updated: 2026-09-10   # TanStack AI 0.48 → 0.54 + Vercel Gold partnership: ai-vercel-gateway and ai-sandbox-vercel adapters (firsthand)
+updated: 2026-09-10   # TanStack AI 0.54 + Vercel adapters (firsthand) · react-native-streamdown lead, distinct from the web Streamdown row — reconciled from harvest/2026-08-27
 tripwires:   # standing caveats as executable conditions — evaluated by `harvest firsthand`; fired ⇒ do the then:, update prose, remove the row
   - when: { pkg: "@tanstack/ai", atleast: "1.0.0" }
     then: "TanStack AI hit 1.0 stable (default says 'RC as of 2026-08, re-evaluate at 1.0') — re-weigh the default vs Vercel AI SDK and update the option row + when-clause pins"
     added: 2026-08-24
 sources:
+  - "https://github.com/software-mansion-labs/react-native-streamdown"
   - "https://json-render.dev/docs/ai-sdk"
   - "https://github.com/tambo-ai/tambo"
   - "https://registry.npmjs.org/@tanstack/ai/latest"

@@ -6,7 +6,7 @@ status: reviewed   # long-form entry written + source-checked
 confidence: low
 platforms: [react-native]
 options:
-  - { name: "react-native-brownfield (Callstack)", tradeoff: "embed RN in an existing native app; self-contained iOS init via ReactNativeBrownfield.shared.startReactNative() (wraps RN core's RCTReactNativeFactory); 5.1.0 (2026-09-03) adds `preloadBundle` — without it RN only builds the factory and defers bundle evaluation to the first RN view, so the first screen pays for it; with it the React Host starts and the JS bundle evaluates in parallel with the rest of app launch (Android's ReactNativeBrownfield.initialize already did this). Note the timing change that comes with it: onBundleLoaded now runs on the MAIN thread, not the JS thread" }
+  - { name: "react-native-brownfield (Callstack)", tradeoff: "embed RN in an existing native app; self-contained iOS init via ReactNativeBrownfield.shared.startReactNative() (wraps RN core's RCTReactNativeFactory); 5.1.0 (2026-09-03) adds `preloadBundle` — without it RN only builds the factory and defers bundle evaluation to the first RN view, so the first screen pays for it; with it the React Host starts and the JS bundle evaluates in parallel with the rest of app launch (Android's ReactNativeBrownfield.initialize already did this). Note the timing change that comes with it: onBundleLoaded now runs on the MAIN thread, not the JS thread. THIRD HOST PLATFORM: it also ships a .NET MAUI variant — a C# binding project (XCFramework on iOS, AAR on Android) over the same native binding as the Swift/Obj-C and Kotlin/Java paths — which matters where the existing native host is MAUI rather than pure iOS/Android (see reading)" }
   - { name: "Brownie (@callstack/brownie)", tradeoff: "share native↔JS state for brownfield; generates Swift + Kotlin types from .brownie.ts; iOS + Android; stable (v3.13.x, 2026-06)" }
   - { name: "Granite (Toss)", tradeoff: "micro-frontend: each screen an independently deployable ~200KB bundle on CDN (ESBuild)" }
   - { name: "Rock (Callstack)", tradeoff: "super-apps via micro-frontends + native build caching" }
@@ -33,8 +33,9 @@ note: >
   therefore a 4.x fact. Pair the brownfield major with the Expo SDK upgrade, not before it.
 defer_to_skill: engineering-principles
 doc: "RB-E-BROWNFIELD.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-10   # brownfield 5.1.0 preloadBundle — bundle eval moves onto app launch, onBundleLoaded now main-thread (firsthand)
+updated: 2026-09-10   # brownfield 5.1.0 preloadBundle (firsthand) · .NET MAUI host variant + reading — reconciled from harvest/2026-09-03
 sources:
+  - "https://www.callstack.com/blog/react-native-in-net-maui-a-practical-brownfield-integration-guide"
   - "https://github.com/callstack/react-native-brownfield"
   - "https://github.com/callstack/react-native-brownfield/releases/tag/%40callstack%2Freact-native-brownfield%405.0.0"
   - "https://github.com/callstack/react-native-brownfield/releases/tag/%40callstack%2Freact-native-brownfield%405.1.0"
@@ -43,6 +44,12 @@ sources:
   - "https://www.callstack.com/blog/how-we-made-hybrid-ios-apps-compile-39-faster-with-react-native-brownfield"
   - "https://www.callstack.com/blog/migration-to-react-native-in-2026-starts-with-a-delivery-question"
 reading:
+  - title: "React Native in .NET MAUI: A Practical Brownfield Integration Guide"
+    url: "https://www.callstack.com/blog/react-native-in-net-maui-a-practical-brownfield-integration-guide"
+    by: "Juozas Petkelis, Marcin Szalski, Artur Morys-Magiera, Hur Ali (Callstack)"
+    what: "The MAUI half of react-native-brownfield, which the entry's other rows do not cover: a .NET binding project wrapping the same native binding the iOS/Android paths use (XCFramework on iOS, AAR on Android), surfaced as idiomatic C#. Walks the part that actually costs time — making NuGet coexist with npm/CocoaPods/Gradle — then wiring MauiProgram.cs / AppDelegate / MainActivity lifecycle events, and handing navigation back and forth between MAUI's Shell and React Native. Relevant when the existing app is MAUI, which is common where the org already standardized on C#."
+    claim: "Your native host is a .NET MAUI app — react-native-brownfield covers it via a C# binding project over the same native binding; the cost is mostly NuGet coexisting with npm/CocoaPods/Gradle, plus Shell-to-RN navigation."
+    applies_when: { platforms: [react-native], stages: [production, scale] }
   - title: "Migration to React Native in 2026 Starts With a Delivery Question"
     url: "https://www.callstack.com/blog/migration-to-react-native-in-2026-starts-with-a-delivery-question"
     by: "Michał Pierzchala (Callstack)"

@@ -2411,3 +2411,81 @@ RN-VERSIONS · CHARTS), 1 fired tripwire cleared and replaced, 7 new manifests +
 engine 24 ✓ · eval 139/139 · verify-diff ✓ every added receipt · coverage ✓ on all five coverable
 issues (twir-295 79/79, twir-296 63/63, react-status-489 49/49, digest-2360 12/12, rn-rewind-56
 13/13; firsthand and react-weekly are not coverable by URL, per their standing notes).
+
+## 2026-09-10b — reconciling three stranded unattended-run branches
+
+The launchd job (`dev.react-brain.harvest.plist`, Thu 09:00) has been writing propose-only
+`harvest/<date>` branches that were never reviewed. Three were unmerged: 2026-08-13, 2026-08-27,
+2026-09-03. Reviewed all three against current main; deleted after reconciling.
+
+METHOD: for each branch, diff the URLs it added to entries against every URL main holds. A URL
+absent from main is a fact main never captured — precise, and cheap compared to reading diffs.
+08-13 added none that survived; 08-27 added 7; 09-03 added 8.
+
+harvest/2026-08-13 — FULLY SUPERSEDED, nothing adopted. Its corpus work (firsthand-08-13, digest
+#2340, RN Rewind #52, React Weekly #32) was redone by later manual passes; main carries equivalent
+manifests. Its one code change was a CLAIM-detector rewrite in tools/react-brain-signals.mjs
+(clause-splitting on ';'/em-dash, quoted-text stripping, subject-position requirement, a narrowed
+"no longer" pattern). Main independently fixed the same false-fire problem on 2026-08-18 by a
+different and better-evidenced route — sentence-level scoping plus NEGATED_RE/RETROSPECT_RE, with a
+comment recording that 5 of 5 CLAIM flags were false and naming the three failure modes. The branch
+version is not strictly dominated (main can still bleed across clauses inside one sentence, and
+joins `when:` bullets with a bare space), so this was tested rather than argued: a probe replaying
+main's exact guard logic over the real label source — `entryPackages()`, i.e. detect rows, NOT
+`options[].name` — found ZERO surviving label/keyword pairs even with the age gate removed. The
+three cross-clause candidates a first probe reported were an artifact of using option names, which
+are not what the detector matches on. So the extra hardening fixes nothing demonstrable here;
+porting it would be speculative defensive code. Left main's implementation alone.
+
+harvest/2026-09-03 — the costly one: it had independently adjudicated TWiR #295, which the manual
+pass re-adjudicated from scratch earlier today. Two independent readings of one issue is a useful
+agreement test, and the agreement was high (Formisch 1.0, OpenIAP/Amazon, ospfranco Bridgeless,
+Teleport 1.2, pnpm 12, Webpack 5.110 all kept by both). Where it beat today's pass:
+  · NUQS — the branch's advocate pass flipped it in; today's pass SKIPPED it, and the skip was
+    wrong for a specific reason worth recording: it was judged against RB-E-NAV ("no nuqs adapter
+    matrix") when nuqs is a STATE library, and RB-E-STATE's own reading already named "URL params
+    for view state" as a decision axis with no library attached. Judged against the wrong entry, so
+    the wrong question got asked. Adopted, with freshly measured stats (~10.8k★, ~3.2M weekly).
+  · REMIX 3 RC — today's skip was a bare "pre-ship"; the branch carried the ship date. Adopted as
+    "releases 2026-10-02 at Remix Jam", deliberately NOT as the branch's "firm stable-release date":
+    the post commits to releasing on that date and separately discusses what remains before they
+    would call it stable.
+  · .NET MAUI brownfield host, TanStack Charts 0.16 alpha lead, openiap-commerce-protocol 0.1.0
+    (a vendor-neutral SERVER-side contract + conformance runner — the receipt-validation half the
+    client SDKs deliberately do not own), and Rozenite's `rozenite agent tap` angle. All adopted.
+  · Both passes independently flipped ROZENITE in on the advocate pass, to different entries
+    (branch → AI-DEVTOOLS for the agent angle; today → OBSERVABILITY for the panel framework).
+    Kept today's home and folded in the branch's agent-tap fact, which is the stronger observation.
+A pnpm CONFLICT was resolved by going back to the source: the branch said `self-update next-12`,
+today's pass said `latest-12`; the blog says latest-12, so the branch was wrong. But checking the
+registry rather than the post showed today's note was ALSO stale — npm `latest` is now 12.3.4, so
+the "latest still points at pnpm 11" line committed hours earlier was already false. Corrected, and
+the branch's verified extras adopted (packageImportMethod: auto hardlinks before reflink on Linux,
+~halving warm-store materialization on btrfs; project-aware global bins; registry revisions). The
+lesson generalizes: a point-in-time statement in a release post needs a registry check before it
+goes into prose as present tense.
+
+harvest/2026-08-27 — its corpus overlap with the 2026-09-01 manual pass was near-total, but four
+facts were unique and adopted: the Android FCM ONE-SERVICE-PER-APP collision (main's MEDIA carried
+the callkeep-is-dormant diagnosis but not the trap that actually bites — the VoIP push competes for
+the same slot as your notification library, which is WHY the alternatives parse VoIP natively and
+relay the rest); the SWSH OTA reading (gate every EAS Update behind an E2E run against the updated
+bundle on the native build it lands on — Meridian is Appium + WebDriverIO driven by Vitest, verified
+against the full article after a truncated first fetch made the claim look unsupported); the Dactyl
+landscape lead in ALT-FRAMEWORKS; and react-native-streamdown. That last one exposed an error in
+today's own work: twir-296 dispositioned it as corroboration "against the Streamdown row", but that
+row is the WEB renderer and react-native-streamdown is a distinct software-mansion-LABS package
+(~399★, npm 0.3.0) solving the RN-specific token-by-token Markdown flicker. Manifest row corrected.
+Its remend keep was NOT adopted — the later manual pass capped it, and today's spot-check
+re-validated that cap.
+
+Delta: 11 entries touched (STATE · CHARTS · META-FRAMEWORKS · BROWNFIELD · PAYMENTS · BUILD ·
+OBSERVABILITY · MEDIA · ALT-FRAMEWORKS · AI-UI · OTA), 1 committed fact corrected (pnpm `latest`),
+1 manifest row corrected (twir-296 streamdown). Gates: lint clean (1 pre-existing warning) ·
+rules ✓ 1976 gold rows · engine 24 ✓ · eval 139/139 · verify-diff ✓ every added receipt.
+
+PROCESS NOTE: unattended runs are only propose-only if someone actually reviews the proposals.
+Three sat unread for four weeks while manual passes re-did their work — duplicated cost on both
+sides, and today's nuqs miss shows the branches were not merely redundant. Either review each
+`harvest/<date>` branch the week it lands, or turn the launchd job off; leaving it writing branches
+nobody reads is the worst of the three options.

@@ -42,13 +42,19 @@ note: >
   tripwire when it lands on npm.
 defer_to_skill: null
 doc: "RB-E-OTA.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-10   # Codemagic Patch server 0.3.0 — self-host CLI (install/upgrade/backup/restore) + CloudFront; Cloudflare TTL breaking change (firsthand)
+updated: 2026-09-10   # Codemagic Patch server 0.3.0 (firsthand) · SWSH E2E-gate-every-OTA-push reading — reconciled from harvest/2026-08-27
 watching:
   - title: "The OTA Illusion: What No One Tells You About Instant Updates At Scale (RUC 2025)"
     url: "https://www.youtube.com/watch?v=hBoAD6sYDYo"
     by: "Adam Mruk (Callstack) — React Universe Conf 2025"
     what: "The scale half of this entry's delta-patching lane: why 'instant' OTA is an illusion at fleet size — full-bundle economics, adoption curves, and delivery latency — the problem statement Zepto's Delta and EAS bsdiff diffing both answer. (Verified via YouTube oEmbed: title + author.)"
 reading:
+  - title: "Inside SWSH's automated mobile release pipeline with Expo"
+    url: "https://expo.dev/blog/inside-swsh-automated-mobile-release-pipeline-with-expo"
+    by: "Expo / SWSH"
+    what: "Fills the gap this entry's staged-rollout guidance leaves open — how to validate the update ITSELF before it ships. SWSH gates every EAS Update behind Meridian, an in-house end-to-end framework built on Appium and WebDriverIO and driven by Vitest, running critical flows against the updated bundle on iOS/App Clip/Android simulators in CI. The reasoning generalizes even though Meridian does not: an OTA update drops new JS onto a native binary already on users' devices, and ordinary pre-merge CI never exercises that pairing, so nothing confirms compatibility before real users do. Context for the scale claim: one React Native codebase covering iOS, an iOS App Clip, Android and web, ~300 builds a month on the team's own hardware, native releases about weekly."
+    claim: "You ship OTA updates — gate each push behind an E2E run against the UPDATED bundle on the native build it is landing on, not just pre-merge CI; new JS onto an already-shipped binary is a pairing nothing else tests."
+    applies_when: { deps: ["expo-updates", "hot-updater"], platforms: [react-native], stages: [production, scale] }
   - title: "The production playbook for OTA updates"
     url: "https://expo.dev/blog/the-production-playbook-for-ota-updates"
     by: "Expo"
@@ -60,6 +66,7 @@ reading:
     by: "Expo"
     what: "The reference for the hosted-default choice: how updates map to channels, phased rollouts to a percentage of users, and rollback-by-republish ('much like a new commit'). Read before designing a release-channel scheme."
 sources:
+  - "https://expo.dev/blog/inside-swsh-automated-mobile-release-pipeline-with-expo"
   - "https://github.com/codemagic-ci-cd/codemagic-patch/releases/tag/codemagic-patch-server-v0.3.0"
   - "https://github.com/codemagic-ci-cd/codemagic-patch"
   - "https://registry.npmjs.org/@codemagic/react-native-patch"

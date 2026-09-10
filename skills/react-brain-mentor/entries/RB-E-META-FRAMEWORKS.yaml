@@ -20,6 +20,13 @@ recommend:
     - "want minimal RSC, no lock-in → Waku (RC as of 2026-08-25; 1.0-stable tripwire wired)"
     - "evaluating Vinext → not production-ready; don't bet on it yet"
 note: >
+  REMIX 3 RC (2026-09-01, verified vs the Remix blog; adopted from harvest/2026-09-03): a release
+  candidate for the separate-from-React-Router Remix 3 — one `remix` package bundling database
+  management, schema validation, a type-safe router, an unbundled asset server and a new UI runtime.
+  The post commits to RELEASING Remix 3 on 2026-10-02 at Remix Jam, and separately discusses what
+  remains before they would call it stable (bug cleanup, security audits, early-adopter feedback,
+  docs) — so treat 2026-10-02 as the ship date, not a stability guarantee. Not an option row yet:
+  no production track record. Revisit after the release.
   Distinct from routing (RB-E-NAV): these own SSR/RSC/data/build. Context-key by hosting target +
   how much RSC you actually need. UPDATE 2026-07-10 (React Weekly, verified): Next.js Adapter API
   went STABLE in 16.2 with a shared public test suite + an Ecosystem Working Group — the durable
@@ -51,7 +58,7 @@ note: >
   slices fact verified vs Daishi Kato's first-party post.
 defer_to_skill: engineering-principles
 doc: "RB-E-META-FRAMEWORKS.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-10   # TanStack Start first-party on Vercel (Gold partnership, deployment guide) — firsthand
+updated: 2026-09-10   # TanStack Start first-party on Vercel (firsthand) · Remix 3 RC ships 2026-10-02 at Remix Jam — reconciled from harvest/2026-09-03
 reading:
   - title: "How we migrated lovable.dev away from Next.js and turned it into another Lovable app"
     url: "https://lovable.dev/blog/how-we-migrated-lovable-dev-away-from-nextjs"
@@ -96,6 +103,7 @@ reading:
     by: "Neci Dan (neciudan.dev)"
     what: "A systematic map of the whole rendering spectrum — CSR, SSG, ISR, SSR, streaming SSR + Suspense, RSC, islands, signal-based fine-grained reactivity, Qwik resumability, and Next 16.3 instant navigations — organized around ONE durable question: the gap between when a page LOOKS ready (HTML painted) and when it WORKS (JS hydrated/executing). Each strategy is a different trade on that window — ship less JS (islands/RSC), execute it faster (signals), or skip execution (resumability). The mental model that turns 'which meta-framework / rendering mode' into a reasoned choice instead of a checklist; the framing behind this entry's context-keys."
 sources:
+  - "https://remix.run/blog/remix-3-release-candidate"
   - "https://tanstack.com/blog/vercel-partnership"
   - "https://nextjs.org/blog/next-security-release-program"
   - "https://nextjs.org/blog/july-2026-security-release"

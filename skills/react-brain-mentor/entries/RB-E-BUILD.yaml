@@ -67,9 +67,11 @@ note: >
   CONFIGURATION grounds; the Rust-speed argument is untouched, so the default above stands.
   PNPM 12 (2026-08-26, verified vs the release post; CONSUMES the pre-ship skip on the pnpm 12 RC):
   the Rust rewrite is stable and deliberately not a migration — commands, flags, settings and the
-  LOCKFILE FORMAT all carry over from pnpm 11. Two gotchas before you upgrade: npm's `latest` tag
-  still points at the pnpm 11 line (install via `pnpm self-update latest-12`; Homebrew/winget/Scoop/
-  Chocolatey did not carry it at release), and git dependencies became IDENTITIES — for GitHub/GitLab/
+  LOCKFILE FORMAT all carry over from pnpm 11. On the install path, note the post has DATED: at
+  publication npm's `latest` still pointed at pnpm 11 and the post told you to use
+  `pnpm self-update latest-12`, but the registry has since moved — `latest` is 12.3.4 (verified vs
+  registry.npmjs.org 2026-09-10), so a plain install now gets pnpm 12. The real gotcha is that git
+  dependencies became IDENTITIES — for GitHub/GitLab/
   Bitbucket a specifier now only names the repo and always resolves through HTTPS, so the lockfile
   never records an SSH URL; a machine that needs SSH for private repos configures
   `git config --global url."git@github.com:".insteadOf https://github.com/` rather than encoding it
@@ -80,10 +82,13 @@ note: >
   silently (see RB-E-SECURITY); and peer resolution now cuts dependency cycles at a deterministic
   edge, so the lockfile depends only on the dependency graph — byte-identical across reinstalls and
   project reordering, where pnpm 11 could churn it — with large cyclic workspaces resolving peers
-  2–3x faster on ~25% less memory.
+  2–3x faster on ~25% less memory. Smaller wins in the same release: `packageImportMethod: auto`
+  now tries a HARDLINK before a reflink on Linux, which the post says roughly halves the time an
+  install spends materializing node_modules from a warm store on btrfs; plus project-aware global
+  bins and registry revisions.
 defer_to_skill: null
 doc: "RB-E-BUILD.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-10   # pnpm 12 stable (Rust rewrite; pre-ship skip reopened) + Rspack 2.2 + webpack 5.110 — TWiR #295 · Turbopack chunking reading — firsthand
+updated: 2026-09-10   # pnpm 12 install-path fact corrected (npm `latest` is now 12.3.4) + Linux hardlink-first — reconciled from harvest/2026-09-03 · Rspack 2.2 / webpack 5.110 / Turbopack reading
 watching:
   - title: "How React Native Builds Actually Work (APK, AAB, IPA, APP)"
     url: "https://www.youtube.com/watch?v=1o0pEjYGUWM"

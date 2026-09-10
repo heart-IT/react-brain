@@ -22,6 +22,11 @@ note: >
   fees for less backend.
   STALE FACT CORRECTED (2026-08-04, firsthand watch): this entry previously called
   react-native-iap "deprecated/archived → prefer expo-iap". That read an archived REPO as a dead
+  SERVER-SIDE LAYER (2026-09-02, verified vs the GitHub release; adopted from harvest/2026-09-03):
+  openiap-commerce-protocol 0.1.0 extends OpenIAP past the client SDKs these two rows wrap — a
+  vendor-neutral SERVER-side contract shipping generated validator artifacts and a portable
+  conformance runner. Relevant to the receipt-validation half of an IAP build, which the client
+  libraries above deliberately do not own; 0.1.0, so evaluate rather than adopt.
   OPENIAP BACKING (2026-08-19, verified vs openiap.dev/docs/updates/announcements): the OpenIAP
   project is now backed by AMAZON DEVELOPER, and its docs carry store setup for Amazon and Horizon
   OS alongside Apple/Google — so the protocol these two libraries implement is no longer a
@@ -42,8 +47,9 @@ note: >
   lockstep intact), react-native-purchases 10.7.1 (2026-08-13), no deprecation flags anywhere.
 defer_to_skill: null
 doc: "RB-E-PAYMENTS.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-10   # OpenIAP now backed by Amazon Developer (Fire OS / Vega OS storefronts) — TWiR #295 · iap lockstep pin 16.5.1/5.5.1 — firsthand
+updated: 2026-09-10   # OpenIAP backed by Amazon (TWiR #295) + iap lockstep pins (firsthand) · openiap-commerce-protocol 0.1.0 server contract — reconciled from harvest/2026-09-03
 sources:
+  - "https://github.com/hyodotdev/openiap/releases/tag/openiap-commerce-protocol-0.1.0"
   - "https://www.openiap.dev/docs/updates/announcements"
   - "https://github.com/hyodotdev/openiap/releases/tag/react-native-iap-16.5.1"
   - "https://github.com/hyodotdev/openiap"
