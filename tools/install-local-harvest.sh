@@ -8,6 +8,10 @@
 #              && rm ~/Library/LaunchAgents/dev.react-brain.harvest.plist
 set -euo pipefail
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
+# NOTE: the redirection below is XML-ESCAPED (2&gt;&amp;1, not 2>&1). A raw ampersand makes the
+# plist invalid XML — `plutil -lint` rejects it. launchd tolerated it in place, so the job ran
+# for months, but a reload could have refused it and killed the schedule silently (found
+# 2026-09-10, while fixing a different silent-death in this same job).
 PLIST="$HOME/Library/LaunchAgents/dev.react-brain.harvest.plist"
 NODE_DIR="$(dirname "$(command -v node)")"
 CLAUDE_DIR="$(dirname "$(command -v claude)")"
@@ -21,7 +25,7 @@ cat > "$PLIST" <<EOF
   <key>ProgramArguments</key>
   <array>
     <string>/bin/zsh</string><string>-lc</string>
-    <string>PATH="$NODE_DIR:$CLAUDE_DIR:/usr/bin:/bin:/usr/sbin:/sbin:\$PATH" exec "$REPO/tools/local-harvest.sh" >> "$REPO/tools/harvest.log" 2>&1</string>
+    <string>PATH="$NODE_DIR:$CLAUDE_DIR:/usr/bin:/bin:/usr/sbin:/sbin:\$PATH" exec "$REPO/tools/local-harvest.sh" >> "$REPO/tools/harvest.log" 2&gt;&amp;1</string>
   </array>
   <key>StartCalendarInterval</key>
   <dict><key>Weekday</key><integer>4</integer><key>Hour</key><integer>9</integer><key>Minute</key><integer>0</integer></dict>
