@@ -49,7 +49,17 @@ const NOT_BLOG = /(^|\.)(github\.com|npmjs\.com|registry\.npmjs\.org|youtube\.co
 // are all RB-E-SECURITY platform facts (npm publish-time malware scanning, the supply-chain
 // umbrella post, actions/checkout hardening), css-tricks is the corpus's only a11y feed, and
 // thoughtbot converts at 50%. Re-measure before adding a host here.
-const PRUNED_FEEDS = new Set(['vercel.com']);
+// RE-MEASURED 2026-09-10 over all 60 manifests (rows carrying the host → rows kept), which
+// confirmed the 2026-08-18 read and settled one open question:
+//   revenuecat.com 17 → 0   ← pruned: the only true zero, across 8 manifests and ~3 months
+//   github.blog 27 → 3 (11%) · css-tricks 18 → 2 (11%) · thoughtbot 18 → 4 (22%)   ← all kept
+// For scale: vercel.com, the original prune, converts at 4% (27 → 1), so github.blog and
+// css-tricks are nearly 3x the bar that earned a prune and thoughtbot is 5x it. A LEDGER note on
+// 2026-09-10 had recommended pruning github.blog on three recent zero-yield passes; the measurement
+// overruled it — a 3-pass window is not evidence, and its keeps are all RB-E-SECURITY platform
+// facts that nothing else in the watch graph would surface. RevenueCat's rows are consistently
+// growth/paywall-marketing posts; its one engineering-flavoured piece was still a product how-to.
+const PRUNED_FEEDS = new Set(['vercel.com', 'revenuecat.com']);
 
 // ── derive the watch graph from the corpus ─────────────────────────────────────
 function deriveGraph() {

@@ -799,6 +799,10 @@
   "@premieroctet/react-native-wallet": {
    "latest": "1.0.2",
    "deprecated": false
+  },
+  "nuqs": {
+   "latest": "2.10.1",
+   "deprecated": false
   }
  },
  "github": {
@@ -1037,6 +1041,50 @@
   "tanstack/query": {
    "id": "tag:github.com,2008:Repository/207645083/@tanstack/solid-query-persist-client@6.0.0-rc.3",
    "title": "@tanstack/solid-query-persist-client@6.0.0-rc.3"
+  },
+  "47ng/nuqs": {
+   "id": "tag:github.com,2008:Repository/262932920/v2.10.2-beta.1",
+   "title": "v2.10.2-beta.1"
+  },
+  "pmndrs/jotai": {
+   "id": "tag:github.com,2008:Repository/286867459/v3.0.0",
+   "title": "v3.0.0"
+  },
+  "trysound/rifm": {
+   "id": "tag:github.com,2008:Repository/139852653/v1.1.0",
+   "title": "v1.1.0"
+  },
+  "tanstack/charts": {
+   "id": "tag:github.com,2008:Repository/1314386748/v0.18.0",
+   "title": "TanStack Charts v0.18.0"
+  },
+  "margelo/nitro": {
+   "id": "tag:github.com,2008:Repository/814092544/v0.37.1",
+   "title": "Release 0.37.1"
+  },
+  "jestjs/jest": {
+   "id": "tag:github.com,2008:Repository/15062869/v30.5.1",
+   "title": "v30.5.1"
+  },
+  "vitest-dev/vitest": {
+   "id": "tag:github.com,2008:Repository/434708679/v5.0.0",
+   "title": "v5.0.0"
+  },
+  "callstackincubator/rozenite": {
+   "id": "tag:github.com,2008:Repository/1017830023/v2.4.0",
+   "title": "v2.4.0"
+  },
+  "software-mansion-labs/react-native-streamdown": {
+   "id": "tag:github.com,2008:Repository/1167685989/0.3.0",
+   "title": "v0.3.0"
+  },
+  "callstackincubator/simlock": {
+   "id": "tag:github.com,2008:Repository/1304331546/v0.2.0",
+   "title": "v0.2.0"
+  },
+  "software-mansion/argent": {
+   "id": "tag:github.com,2008:Repository/1164885639/v0.25.0",
+   "title": "v0.25.0"
   }
  },
  "blogs": {
@@ -1219,13 +1267,44 @@
   "oxc.rs": {
    "feed": "https://oxc.rs/feeds/blog-en.rss",
    "lastId": "https://oxc.rs/blog/2023-12-12-announcing-oxlint"
+  },
+  "rspack.rs": {
+   "feed": "https://rspack.rs/rss/blog-rss.xml",
+   "lastId": "/blog/announcing-2-2"
+  },
+  "nuqs.dev": {
+   "feed": "https://nuqs.dev/blog/rss.xml",
+   "lastId": "https://nuqs.dev/blog/staged-publishing-for-supply-chain-security"
+  },
+  "remix.run": {
+   "feed": "https://remix.run/blog/rss.xml",
+   "lastId": "https://remix.run/blog/remix-3-release-candidate"
+  },
+  "formisch.dev": {
+   "feed": "https://formisch.dev/feed.xml",
+   "lastId": "https://formisch.dev/blog/formisch-v1/"
+  },
+  "linear.app": {
+   "feed": null,
+   "lastId": null
+  },
+  "robinwieruch.de": {
+   "feed": null,
+   "lastId": null
+  },
+  "ospfranco.com": {
+   "feed": "https://ospfranco.com/feed.xml",
+   "lastId": "https://ospfranco.com/concurrent-engines-crash"
+  },
+  "webpack.js.org": {
+   "feed": "https://webpack.js.org/feed.xml",
+   "lastId": "https://webpack.js.org/blog/2026-08-29-webpack-5-110/"
+  },
+  "pnpm.io": {
+   "feed": "https://pnpm.io/blog/rss.xml",
+   "lastId": "https://pnpm.io/blog/releases/11.25"
   }
  },
  "updated": "2026-09-10",
- "tripwires": {
-  "RB-E-REACT-CORE:react:atleast:19.3.0": {
-   "fired": "2026-09-10",
-   "latest": "19.3.0"
-  }
- }
+ "tripwires": {}
 }

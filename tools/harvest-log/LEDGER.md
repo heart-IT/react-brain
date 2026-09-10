@@ -2324,7 +2324,12 @@ inspectable TypeScript pipelines; Core ML/ANE, MLX and Vulkan delegates across 1
 worklet-by-default JSI; on-demand backend binaries) — take 0.10.1, which fixes iOS use_frameworks!
 build failures. Off-scope discipline held on the feed's long tail: github.blog (third zero-yield
 pass) and revenuecat (third) are now RECOMMENDED FOR REMOVAL from the author-host watch; thoughtbot
-is on its second.
+is on its second. [AMENDED 2026-09-10b — HALF WRONG; see the reconciliation section below. The
+measurement the code comment demands (rows carrying the host → rows kept, across ALL 60 manifests)
+gives github.blog 27 → 3 (11%) and thoughtbot 18 → 4 (22%), against 4% for vercel.com, the only host
+that ever earned a prune. Only revenuecat.com measured a true zero (17 → 0 over 8 manifests) and was
+pruned. A three-pass window is not evidence — which is exactly what the comment above PRUNED_FEEDS
+warns against, and this note walked straight into it.]
 
 TWIR #295 (79 links, 27 pre-dispositioned, 52 judged) and #296 (63 links, 15 pre-dispositioned, 48
 judged) — both real, both carried by the archive listing, so the #294-stub check passed cleanly.
