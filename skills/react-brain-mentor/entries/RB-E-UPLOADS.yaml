@@ -1,0 +1,65 @@
+id: RB-E-UPLOADS
+topic: "File uploads — pickers, drop zones, chunking, resumability"
+category: uploads
+group: app-architecture
+status: drafted
+confidence: medium
+platforms: [react, react-native]
+options:
+  - { name: "react-dropzone", tradeoff: "the drop-zone INPUT, and only that: a hook that gives you drag-and-drop plus file selection with accept/size validation, and hands you File objects — you still write the transport. 20.1.1 (2026-08-20), ~11.6M weekly downloads (verified 2026-09-10), by far the largest deployed base here and the most common answer in the census cohort (5 of 34 apps). Right pick when the upload itself is a plain POST or a presigned PUT and what you were missing was the input" }
+  - { name: "Uppy (@uppy/*)", tradeoff: "the batteries-included end of the range: a Dashboard UI plus provider plugins (Google Drive, OneDrive, URL import, webcam, image editor) and a resumable transport, assembled from scoped packages. @uppy/core 6.0.1 (2026-09-07), ~1.1M weekly. Earns its size when users import from THIRD-PARTY sources or need a file manager rather than a file input — that provider surface is what nothing else here offers. Overkill for 'attach a photo'" }
+  - { name: "tus-js-client", tradeoff: "the RESUMABLE-PROTOCOL lane — an open protocol (tus) for uploads that survive a dropped connection and continue where they stopped, which is the property large-file uploads actually need. 4.3.1 (2026-01-13), ~1.5M weekly; quieter than the others because a finished protocol client does not churn. Requires a tus-capable server, so this is a decision about your BACKEND as much as your client — Supabase ships one, which is why it is the cohort's tus adopter" }
+  - { name: "@rpldy/uploady", tradeoff: "React-native-idiomatic upload state (queue, progress, retry) exposed through hooks/components rather than a UI kit — the middle ground between react-dropzone's input-only scope and Uppy's dashboard. 1.13.0 (2025-11-26, verified 2026-09-10) — ten months quiet and no cohort adoption on record, so treat it as viable-but-unvetted" }
+  - { name: "expo-file-system (RN, first-party)", tradeoff: "on React Native the honest answer for most apps: upload directly from a file URI with the platform's own networking, no extra dependency. 57.0.6 (2026-09-09), ships and versions with the Expo SDK. Pair it with the picker you already have (expo-image-picker / expo-document-picker — see RB-E-MEDIA); the gap it leaves is background continuation" }
+  - { name: "react-native-background-upload", tradeoff: "the RN answer for uploads that must continue while the app is backgrounded (native background transfer sessions). DORMANT: 6.6.0 last published 2022-10-07 with ~4.9k weekly downloads (verified 2026-09-10) — four years silent. Named because the CAPABILITY has no maintained alternative in the RN ecosystem, not because it is a safe dependency; if you need background upload, budget for reviewing or forking it, or move the requirement server-side" }
+recommend:
+  default: "Web: react-dropzone for the input plus your own transport (presigned PUT / plain POST) — that covers most products. Reach for tus-js-client when uploads are large enough that resumability matters AND your backend speaks tus; reach for Uppy when users import from third-party sources and you want a file manager, not a file input. React Native: upload straight from the file URI with expo-file-system and the picker you already use."
+  when:
+    - "web, ordinary attachments (avatars, documents, images) → react-dropzone + a presigned URL; no upload framework needed"
+    - "large files over unreliable networks → the resumable protocol is the requirement, not a library preference → tus-js-client, and confirm the server side speaks tus before committing"
+    - "users import from Google Drive / OneDrive / a URL, or you need a file-manager UI → Uppy, whose provider plugins are the thing nothing else here replaces"
+    - "React Native, ordinary uploads → expo-file-system from the picked URI; adding an upload library is usually adding a dependency for a POST"
+    - "React Native, must keep uploading while backgrounded → react-native-background-upload is the only route, and it is dormant (2022) — treat adopting it as taking on maintenance"
+    - "the bytes are images/video you captured in-app → the picker and capture side belongs to RB-E-MEDIA; this entry starts once you hold a file"
+    - "upload endpoints accept files from untrusted users → the validation that matters is server-side (type sniffing, size caps, virus scanning); client-side accept/maxSize is UX, not a control — see RB-E-SECURITY"
+note: >
+  NEW entry (2026-09-10). Opened on cohort evidence rather than newsletter volume: probing the
+  census cohort's package.json files found 7 of 34 apps carrying a dedicated upload library, and
+  the split maps cleanly onto three different problems rather than three competing products —
+  react-dropzone in outline, twenty, plane, metabase and documenso (the INPUT), @uppy/* in
+  appsmith (PROVIDERS + file-manager UI), tus-js-client in supabase (RESUMABILITY, backed by a
+  tus-capable server). That is the shape of a real selection axis, and no entry among the prior 44
+  owned it; Uppy 6.0 surfacing twice in one harvest pass was the prompt to look.
+  READ THE THREE LANES AS PROBLEMS, NOT TIERS: picking Uppy because it "does more" is the common
+  mistake — its weight buys third-party providers, and if your users upload from their own device
+  you are paying for a surface you never render. Equally, react-dropzone does NOT upload anything;
+  teams reach for it expecting transport and then hand-roll the part that actually breaks.
+  THE REACT NATIVE SIDE IS GENUINELY THIN, and the entry says so rather than inventing a pick: not
+  one of the cohort's React Native apps carries an upload library, the maintained first-party path
+  (expo-file-system) covers foreground uploads, and the one library covering background continuation
+  has been silent since 2022 at ~4.9k weekly downloads. If background upload is a hard requirement,
+  that is a real gap to plan around — not a library to casually install.
+  Every version and download figure above was verified against the npm registry on 2026-09-10.
+defer_to_skill: null
+doc: null
+updated: 2026-09-10   # NEW entry — opened on cohort evidence (7/34 apps, three distinct lanes)
+sources:
+  - "https://registry.npmjs.org/react-dropzone/latest"
+  - "https://registry.npmjs.org/@uppy%2Fcore/latest"
+  - "https://registry.npmjs.org/tus-js-client/latest"
+  - "https://registry.npmjs.org/react-native-background-upload/latest"
+  - "https://registry.npmjs.org/expo-file-system/latest"
+  - "https://uppy.io/blog/uppy-6.0/"
+reading:
+  - title: "Uppy 6.0"
+    url: "https://uppy.io/blog/uppy-6.0/"
+    by: "The Uppy team (Transloadit)"
+    what: "Worth reading even if you never install Uppy, because the @uppy/aws-s3 rewrite is a case study in the failure mode that makes direct-to-S3 uploads flaky. The old plugin exposed up to eight callbacks (getUploadParameters, signPart, createMultipartUpload, listParts, abortMultipartUpload, completeMultipartUpload and friends) where WHICH subset you needed depended on whether you were doing multipart, whether Companion was involved, and whether you signed on the client — with nothing telling you up front, so people wired plausible-looking combinations that quietly did not work. The team's own diagnosis is the transferable part: the problem was the SHAPE of the API, not any individual bug in it. The replacement is three mutually exclusive signing modes — sign on the client with SigV4, bring your own signer, or let a server sign — and you pick exactly one. Two consequences beyond Uppy: the plugin now speaks to any S3-compatible service (R2, MinIO, DigitalOcean Spaces) with no provider-specific code, and their proxy is no longer required in the data path. The reliability bugs it closed name the hard parts of resumable upload precisely — retries with backoff, credential expiry, offline detection, and pause/resume races during multipart — which is a good checklist against your own implementation if you hand-rolled one. They also moved from mocks to testing against a real MinIO instance in CI, which is how several of those were found."
+    claim: "You upload direct-to-S3/R2/MinIO — pick ONE signing mode (client SigV4, your own signer, or server-side) instead of assembling callbacks, and check yours against the hard parts: retry backoff, credential expiry, offline detection, multipart pause/resume races."
+    applies_when: { platforms: [react, react-native] }
+detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
+  - { pkg: "react-dropzone", label: "react-dropzone", token: "react-dropzone" }
+  - { pkg: "@uppy/core", label: "Uppy", token: "uppy" }
+  - { pkg: "tus-js-client", label: "tus (resumable)", token: "tus-js-client" }
+  - { pkg: "@rpldy/uploady", label: "Uploady", token: "uploady" }
+  - { pkg: "react-native-background-upload", label: "RN background upload (dormant)", token: "background-upload" }

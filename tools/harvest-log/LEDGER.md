@@ -2494,3 +2494,84 @@ Three sat unread for four weeks while manual passes re-did their work — duplic
 sides, and today's nuqs miss shows the branches were not merely redundant. Either review each
 `harvest/<date>` branch the week it lands, or turn the launchd job off; leaving it writing branches
 nobody reads is the worst of the three options.
+
+## 2026-09-10c — closing the follow-up queue: Tier 1, completeness, challenge, depth, gaps
+
+Everything the weekly routine specifies beyond step 2, plus the two open judgment calls.
+
+TIER 1 (step 1, first run since 2026-09-03) — clean: 407 links ok, 0 DEAD, 0 undated, 0 aging past
+window, no stack drift. Getting there required a root-cause fix, though: `bitbarter` was RETIRED
+(its V0 knowledge base archived ahead of retirement) and is GONE from disk, so every documented
+pulse/evidence/briefing command had been failing on that argument. Repointed at peerBarter, the
+live Expo/RN sibling in that slot, and flagged in upkeep-routine.md that PeerBarter is a FRESH
+project — explicitly not bitbarter's code lineage, per its own commit history — so its pulse
+history starts now rather than continuing bitbarter's.
+
+COMPLETENESS (step 3) — two signals, both verified by fetching the cohort package.json directly
+rather than trusting the census diff:
+  · nuqs is in production at Sentry 2.7.1, Cal.com 2.8.2, Supabase 2.7.1, Documenso ^2.8.9. This is
+    a standing adoption LEVEL, not a week's movement — they became visible only because nuqs gained
+    a detect row in the same pass, so the diff calling them "adopted" is an artifact of the new row.
+    Recorded that way in RB-E-STATE. Worth noting as a general trap: adding a detect row makes every
+    existing user look like a new adopter.
+  · Sentry now carries oxlint 1.81.0 and NO eslint or typescript-eslint. That IS a real delta
+    (Oxlint was already in the baseline) and the first cohort app on record to drop ESLint outright
+    rather than run both lanes. Into RB-E-DX.
+
+CHALLENGE (step 5) — the CHECK-DUE queue had SIX overdue predictions, all sitting since 2026-08-25,
+so the whole queue was cleared rather than the usual 2-3. Three HELD (NATIVE-UI: expo-widgets
+57.0.18 / voltra 2.2.0 / apple-targets 5.0.0 all current · ALT-FRAMEWORKS: ReactLynx active but
+still 0.x · AI-UI: all four picks current, and the @tanstack/ai>=1.0.0 tripwire is the right lever).
+Three WEAKENED, no default overturned:
+  · ONDEVICE-AI — "local RAG → react-native-rag" hid a VERSION PINCER: rag is still 0.9.0 and quiet
+    since 2026-05-30, built against the pre-0.10 executorch API that the rewrite marks deprecated
+    and slated for removal. Pin the legacy path and inherit a deprecation, or take 0.10 and the RAG
+    layer may not follow. The kind of risk only visible when you look at two packages TOGETHER.
+  · AI-DEVTOOLS — every pick healthy, but the DEFAULT ordering was stale: it led with a third-party
+    skills pack while the entry's own when-clause already routed Expo users first-party. Default now
+    says first-party-first, which is also where react-devtools-cdt-mcp (kept this pass) points.
+  · GAMES — skia/r3f/ReactVision all current, but the "real game engine" leg names
+    @borndotcom/react-native-godot: npm-silent since 2025-11-04 at 1.0.1, ~0-star repo. Caveated
+    rather than dropped, because nothing else embeds a game engine.
+Two package-name errors were caught mid-challenge before they reached prose: bare `react-native-godot`
+is a DIFFERENT package from the scoped @borndotcom one the entry cites, and npm `valdi` is unrelated
+to the Valdi framework. Verify the package the entry actually names, not the one the name suggests.
+Low tier moved 50% → 64%; CHECK-DUE is now empty.
+
+DEPTH CADENCE (step 4) — AUTH and ONDEVICE-AI graduated drafted → reviewed with long-form
+Explanation docs, taking the corpus to 42 reviewed of 45. Both keep confidence: low deliberately —
+AUTH's options are mature while this entry's judgment is young, and ONDEVICE-AI outruns any settled
+recommendation. RB-E-AUTH.md organises on "who owns the user row"; RB-E-ONDEVICE-AI.md on
+"a runtime is not a model", which is why the corpus selects runtimes and refuses to rank weights.
+Grounding gate (every prose numeric must exist in the entry yaml) run on both: passes.
+
+GAP CLOSED — RB-E-UPLOADS, the 45th entry, opened on COHORT EVIDENCE rather than newsletter volume.
+Probing all 34 census apps found 7 carrying a dedicated upload library, splitting cleanly into three
+different problems rather than three competing products: react-dropzone (the INPUT) in outline,
+twenty, plane, metabase and documenso; @uppy/* (PROVIDERS + file-manager UI) in appsmith;
+tus-js-client (RESUMABILITY, needing a tus-capable server) in supabase. The entry says plainly that
+the React Native side is thin — no cohort RN app carries one, expo-file-system covers foreground
+uploads, and the only background-continuation library has been silent since 2022 at ~4.9k weekly —
+because inventing a pick there would be worse than naming the hole. Uppy 6.0 became its reading:
+the @uppy/aws-s3 rewrite is a case study in API SHAPE causing silent misconfiguration (eight
+callbacks where you had to guess the applicable subset → three mutually exclusive signing modes).
+GAP FLAGGED, not filled — Expo Router has no vetted shared-element-transition pick; noted in
+RB-E-ANIMATION so its absence reads as a hole rather than as "don't".
+
+REACT WEEKLY — measured instead of judged by impression, and the measurement was more interesting
+than either answer: across issues 29-36 it carries 65 dispositioned rows and ORIGINATED 9 keeps
+(14%), comparable to expo.dev (18%) and well above callstack.com (4%). But origination is ZERO for
+34, 35 and 36 — three consecutive — which fits the structural read that its editorial overlaps
+TWiR + firsthand almost entirely, and that the overlap grew as firsthand grew. KEPT for one more
+issue, with the decision criterion written into harvest-state.json so the next pass does not
+re-derive it from a single quiet issue: if #37 also originates zero, that is four consecutive and
+it goes. Also worth recording: a first pass at this measurement read 22%, because rows worded
+"kept: … (dispositioned via firsthand this session)" credit a keep that another source originated.
+A source's value is what it ORIGINATES, not what it corroborates.
+
+Delta: 8 entries touched (STATE · DX · ONDEVICE-AI ×2 · AI-DEVTOOLS · GAMES · AUTH · ANIMATION),
+1 NEW entry (RB-E-UPLOADS) fully wired (TOC slot, capability_map row, detect rows, reading),
+2 long-form docs written, 6 predictions resolved, 1 manifest row amended. Status counts corrected
+across the five files lint cross-checks — twice, since both 40→41→42 reviewed and 44→45 entries
+moved. Gates: lint clean (1 pre-existing shared-URL warning) · rules ✓ 1976 gold rows · engine 24 ✓
+· eval 139/139.

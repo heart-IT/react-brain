@@ -53,6 +53,11 @@ note: >
   WORKLETS BUNDLE MODE (exposes the mmap'd bytecode bundle instead of eval'ing strings — measured
   −~100MB PSS, ~45%, native heap ~142MB→~32MB, with frame rate and CPU unchanged), the
   experimental bytecode option for Legacy Eval Mode, or pin Hermes 250829098.0.15. TURN ON BUNDLE
+  GAP (2026-09-10): the screen-transitions row above is REACT-NAVIGATION-shaped. Expo Router has no
+  vetted shared-element-transition pick in this corpus — react-native-screen-choreography is the
+  obvious candidate and was skipped twice as too-early (0.4, TWiR #296). If you are on Expo Router
+  and need shared-element transitions today, that is a real hole: evaluate the candidate yourself
+  rather than reading its absence here as "don't".
   COUNTER-DATAPOINT (2026-09-10, TWiR #296 — the RN navigation benchmark cited in RB-E-NAV): its
   author reports Bundle Mode REGRESSING cold start, because it must parse the whole bundle, while
   measuring Reanimated + Worklets at a ~125 MB RAM premium (a second Hermes runtime, almost all
