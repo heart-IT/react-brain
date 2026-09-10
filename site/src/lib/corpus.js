@@ -166,6 +166,35 @@ export function changelog(limit = 60) {
   } catch { return []; }   // shallow clone / no git → page degrades gracefully
 }
 
+// ── newsletter: issues under newsletter/issues/, rendered from markdown ──────────
+// Content, not corpus — but it lives in the repo for the same reason everything else
+// does: the site is a rendering of the repo, never a separate content source.
+export function newsletterIssues({ drafts = false } = {}) {
+  const dir = join(ROOT, 'newsletter/issues');
+  if (!existsSync(dir)) return [];
+  const out = [];
+  for (const f of readdirSync(dir).filter((x) => x.endsWith('.md'))) {
+    const raw = readFileSync(join(dir, f), 'utf8');
+    const m = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+    if (!m) continue;                                   // no frontmatter → not an issue
+    const fm = parse(m[1]) || {};
+    if (!drafts && fm.status !== 'published') continue;  // drafts stay off the site
+    out.push({ ...fm, slug: String(fm.date), body: m[2] });
+  }
+  out.sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  return out;
+}
+
+// Issue markdown → HTML. Same demotion rule as docHtml(): the page supplies the h1,
+// so every heading inside the body drops one level to keep a single-h1 outline.
+export function issueHtml(issue) {
+  let html = marked.parse(issue.body);
+  return html
+    .replace(/<(\/?)h3([ >])/g, '<$1h4$2')
+    .replace(/<(\/?)h2([ >])/g, '<$1h3$2')
+    .replace(/<(\/?)h1([ >])/g, '<$1h2$2');
+}
+
 // ── staleness benchmark: bank + committed results ────────────────────────────────
 export function benchData() {
   const bankPath = join(ROOT, 'bench/questions.yaml');

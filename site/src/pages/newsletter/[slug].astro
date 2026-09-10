@@ -1,0 +1,25 @@
+---
+import Base from '../../layouts/Base.astro';
+import { newsletterIssues, issueHtml, href } from '../../lib/corpus.js';
+
+export function getStaticPaths() {
+  const issues = newsletterIssues();
+  return issues.map((it, i) => ({
+    params: { slug: it.slug },
+    // newest-first order, so "newer" is the previous index
+    props: { issue: it, newer: issues[i - 1] || null, older: issues[i + 1] || null },
+  }));
+}
+const { issue, newer, older } = Astro.props;
+const html = issueHtml(issue);
+---
+<Base title={`react-brain weekly #${issue.number} — ${issue.title}`} description={issue.dek}>
+  <p class="meta"><a href={href('newsletter/')}>react-brain weekly</a> · #{issue.number} · {issue.slug}</p>
+  <h1 style="max-width:24ch">{issue.title}</h1>
+  <p class="muted" style="max-width:70ch; font-size:1.02rem">{issue.dek}</p>
+  <article class="prose" set:html={html} />
+  <nav class="muted" style="margin-top:2rem; display:flex; gap:1.2rem; flex-wrap:wrap">
+    {older && <a href={href(`newsletter/${older.slug}/`)}>← #{older.number} {older.title}</a>}
+    {newer && <a href={href(`newsletter/${newer.slug}/`)}>#{newer.number} {newer.title} →</a>}
+  </nav>
+</Base>

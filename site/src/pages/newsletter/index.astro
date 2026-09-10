@@ -1,0 +1,29 @@
+---
+import Base from '../../layouts/Base.astro';
+import { newsletterIssues, href } from '../../lib/corpus.js';
+const issues = newsletterIssues();
+---
+<Base title="react-brain weekly — newsletter" description="The weekly harvest, rendered for a reader: what changed in the React and React Native ecosystem, why it matters, and what we deliberately did not keep.">
+  <h1>react-brain weekly</h1>
+  <p class="muted" style="max-width:46rem">One issue per harvest pass. Every item was
+  fetch-verified before it entered the corpus, and every link is a receipt — the primary source
+  for the claim, plus the entry page carrying the full argument with its dates and caveats. A
+  quiet week ships a short issue; there are no filler issues.</p>
+
+  {issues.length === 0 && <p class="muted">No published issues yet.</p>}
+
+  <div class="rows">
+  {issues.map((it) => (
+    <div>
+      <strong class="meta">#{it.number} · {it.slug}</strong>
+      <h2 style="margin:.2rem 0 .35rem; font-size:1.12rem">
+        <a href={href(`newsletter/${it.slug}/`)}>{it.title}</a>
+      </h2>
+      <p class="muted" style="margin:0; max-width:78ch; font-size:.94rem">{it.dek}</p>
+    </div>
+  ))}
+  </div>
+
+  <p class="muted" style="margin-top:1.5rem">Issues are written from the harvest manifests in
+  <code>tools/harvest-log/</code> — the same receipts the corpus itself is gated on.</p>
+</Base>
