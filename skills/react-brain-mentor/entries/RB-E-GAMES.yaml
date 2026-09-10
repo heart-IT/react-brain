@@ -7,7 +7,7 @@ confidence: low
 platforms: [react-native]
 options:
   - { name: "react-native-skia", tradeoff: "GPU 2D drawing loop; common base for RN games/visuals" }
-  - { name: "react-native-godot (@borndotcom)", tradeoff: "embed the Godot engine (RTNGodotView; by Born & Migeran); runs off-thread (separate from RN's JS thread)" }
+  - { name: "react-native-godot (@borndotcom)", tradeoff: "embed the Godot engine (RTNGodotView; by Born & Migeran); runs off-thread (separate from RN's JS thread). CHALLENGED 2026-09-10 (WEAKENED): the package reached 1.0.1 and then stopped — npm last modified 2025-11-04, ten months quiet, and the migeran/react-native-godot repo shows ~0 stars (verified 2026-09-10). The off-thread embed is still the only real-game-engine route in RN, so this stays the row; treat it as a dormant dependency you are adopting deliberately, not a maintained default, and pin it" }
   - { name: "WebGPU (react-native-webgpu, formerly react-native-wgpu)", tradeoff: "3D render pipelines on Google's Dawn (by William Candillon, not Software Mansion); UI-thread via Reanimated/worklets; advanced" }
   - { name: "react-native-game-engine", tradeoff: "entity-component loop for simple 2D games; effectively unmaintained (last release v1.2.0, 2020)" }
   - { name: "@react-three/fiber (three.js)", tradeoff: "declarative 3D scenes as React components; v9 runs in RN via expo-gl — the 3D-in-an-app path without a game engine" }
@@ -15,7 +15,7 @@ options:
   - { name: "ReactVision (@reactvision/react-viro)", tradeoff: "AR/VR from one RN codebase (iPhone/Android AR + Meta Quest) — the maintained fork of react-viro; New Architecture (Fabric) REQUIRED; active (2.57.x, 2026-07)" }
   - { name: "react-native-visionos (Callstack)", tradeoff: "full RN fork targeting Apple Vision Pro / visionOS SDK (~1.1k★); CAUTION: pinned to RN 0.78 (2025-03), lags core by ~a year — verify parity before betting" }
 recommend:
-  default: "2D / interactive visuals → react-native-skia. Declarative 3D inside a normal app → react-three-fiber (+expo-gl). Real game engine → embed Godot (react-native-godot). AR/VR → ReactVision. RN suits supplemental/interactive experiences more than AAA games."
+  default: "2D / interactive visuals → react-native-skia. Declarative 3D inside a normal app → react-three-fiber (+expo-gl). Real game engine → embed Godot (react-native-godot) — but see its dormancy caveat before committing; this is the weakest link in this default. AR/VR → ReactVision. RN suits supplemental/interactive experiences more than AAA games."
   when:
     - "simple 2D game loop → react-native-game-engine"
     - "3D / compute shaders → WebGPU (react-native-wgpu), advanced"
@@ -33,7 +33,7 @@ note: >
   the Horizon Store — a first-party 2D-panel path beside ReactVision's immersive AR/VR.
 defer_to_skill: react-native-best-practices
 doc: "RB-E-GAMES.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-01   # react-native-filament row added (gap: PBR renderer between r3f and Godot; quiet-since-May caveat) — React Status #488
+updated: 2026-09-10   # CHALLENGED — WEAKENED: the Godot pick has been dormant since 2025-11 (1.0.1, ~0★) while skia/r3f/ReactVision all stayed current
 sources:
   - "https://github.com/wcandillon/react-native-webgpu"
   - "https://registry.npmjs.org/@borndotcom/react-native-godot"

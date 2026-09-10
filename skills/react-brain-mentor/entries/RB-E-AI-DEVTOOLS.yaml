@@ -21,7 +21,7 @@ options:
   - { name: "React Native Evals (Callstack)", tradeoff: "open-source benchmark suite for WHICH MODEL writes good RN code — task dataset by category/library, TS+Bun runner, judge + methodology whitepaper; the model-selection layer under all the tools above" }
   - { name: "ReactBench (Million)", tradeoff: "WHICH MODEL writes good REACT-WEB code — Write React / Fix React tasks from real merged PRs, graded by behavioral tests + react-doctor's 400+ deterministic rules (see RB-E-DX) in clean-room containers; public leaderboard (2026-07: GPT 5.6 Terramax/Solmax 53%, Fable 5xhigh 46% Pass@1); the web counterpart to RN Evals" }
 recommend:
-  default: "Give a coding agent two things: RN KNOWLEDGE — a curated skills pack (Callstack agent-skills is the broadest; add Margelo react-native-skills for camera/native depth) — and EYES+HANDS on the running app — Maestro MCP if you already test with Maestro (see RB-E-TESTING), else agent-device (cross-platform) or Argent (iOS debug/profile depth). Add Reactotron MCP when the agent needs runtime state. Fast-moving (confidence: low) — most of these tools are months old; trial on one workflow before standardizing."
+  default: "FIRST-PARTY FIRST where it exists (challenge 2026-09-10): on Expo, start from Expo's own agent layer and add to it, rather than reaching for a third-party pack by reflex — the same now applies to React on the web via react-devtools-cdt-mcp. Then give a coding agent two things: RN KNOWLEDGE — a curated skills pack (Callstack agent-skills is the broadest at ~1.6k★, verified 2026-09-10; add Margelo react-native-skills for camera/native depth) — and EYES+HANDS on the running app — Maestro MCP if you already test with Maestro (see RB-E-TESTING), else agent-device (cross-platform) or Argent (iOS debug/profile depth). Add Reactotron MCP when the agent needs runtime state. Fast-moving (confidence: low) — most of these tools are months old; trial on one workflow before standardizing."
   when:
     - "agent writes RN code → install a skills pack (agent-skills / react-native-skills) so it stops generating stale patterns"
     - "on Expo → start from Expo's FIRST-PARTY agent layer (docs.expo.dev/agents, verified 2026-09-01): the official `expo` plugin for Claude Code (claude plugin install expo@claude-plugins-official) / Codex, an Expo MCP server with live docs + EAS Build history + Update channels + TestFlight metadata, and an AGENTS.md that create-expo-app now generates pointing at your SDK's docs — Expo's own guide then hands device control to the same agent-device/Argent picks this entry makes"
@@ -61,7 +61,7 @@ note: >
   now has a live first-party leaderboard — check it before pinning a tool+model pair.
 defer_to_skill: agentic-engineering-patterns
 doc: null
-updated: 2026-09-10   # agent-device 0.21 + Argent 0.23 → 0.25 incl. physical iOS devices (firsthand) · react-devtools-cdt-mcp (TWiR #296) · Simlock device-lease control plane for parallel agents (RN Rewind #56)
+updated: 2026-09-10   # agent-device 0.21 + Argent 0.25 + cdt-mcp + Simlock · CHALLENGED — WEAKENED: default now leads first-party, matching this entry's own Expo when-clause
 reading:
   - title: "3 Minutes With an Agent, 9 Seconds on Replay"
     url: "https://www.callstack.com/blog/3-minutes-with-an-agent-9-seconds-on-replay"

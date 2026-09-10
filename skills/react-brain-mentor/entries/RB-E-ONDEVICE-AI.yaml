@@ -7,17 +7,17 @@ confidence: low
 platforms: [react-native]
 options:
   - { name: "react-native-executorch", tradeoff: "on-device models (Meta ExecuTorch); v0.10 (2026-09-08) is a GROUND-UP REWRITE — see note; tool-calling/embeddings since 0.4, OCR since 0.3" }
-  - { name: "@react-native-ai/apple", tradeoff: "Apple on-device LLM + SpeechAnalyzer (iOS 26); zero cloud; RN 0.80+ (preview)" }
+  - { name: "@react-native-ai/apple", tradeoff: "Apple on-device LLM + SpeechAnalyzer (iOS 26); zero cloud; RN 0.80+ (preview) — and the preview label is doing real work: 0.12.0, last published 2026-02-11 (verified vs npm 2026-09-10), so seven months quiet" }
   - { name: "@react-native-ai/adk", tradeoff: "Google Gemini on ANDROID via the Agent Development Kit — on-device Gemini Nano + cloud models behind one Vercel-AI-SDK provider; tool calling + streaming; same react-native-ai family as the Apple provider (v0.12)" }
   - { name: "react-native-nitro-mlx", tradeoff: "Apple MLX on-device LLM + TTS/STT via Nitro Modules, with tool calling (ChatSession API); iOS 26+ ONLY; v0.7 (2026-08-22), ~100★ — niche/early" }
-  - { name: "react-native-rag", tradeoff: "on-device retrieval-augmented generation over ExecuTorchLLM; local vector store" }
+  - { name: "react-native-rag", tradeoff: "on-device retrieval-augmented generation over ExecuTorchLLM; local vector store. CHALLENGED 2026-09-10 (WEAKENED): still 0.9.0 with the repo quiet since 2026-05-30 (341★, not archived) — meanwhile executorch shipped the v0.10 ground-up rewrite whose PRE-0.10 API this is built against, and executorch marks that legacy entry point deprecated and slated for removal. So the risk is not abandonment, it is a version pincer: pin executorch to the legacy path and you inherit a deprecation, or take 0.10 and this may not follow. Verify the pairing on a spike before committing a RAG feature to it" }
   - { name: "@react-native-ai/llama", tradeoff: "llama.cpp behind the Vercel AI SDK provider interface (v0.12.0, verified vs npm 2026-08-18) — runs GGUF chat AND embedding models on one engine/one dependency, which is what makes a hand-rolled local RAG pipeline (embed + generate) practical; pair with react-native-nitro-sqlite + sqlite-vec for the vector store (see reading)" }
   - { name: "offline speech (expo-speech-recognition / whisper.rn)", tradeoff: "speech-to-text without network; whisper.rn (0.7.2, ~800★, verified vs npm + repo 2026-07-28) is the concrete binding — whisper.cpp under the hood, and it now also carries NVIDIA Parakeet ASR alongside Whisper" }
 recommend:
   default: "Cross-platform on-device models → react-native-executorch; Apple-only → @react-native-ai/apple; local RAG → react-native-rag. Fast-moving (confidence: low) — validate on-device perf before committing."
   when:
     - "offline speech-to-text → expo-speech-recognition, or whisper.rn for whisper.cpp/Parakeet models"
-    - "private/offline LLM over local docs → react-native-rag, or roll it yourself with @react-native-ai/llama + nitro-sqlite/sqlite-vec; budget RAM for generator + embedder TOGETHER (see reading)"
+    - "private/offline LLM over local docs → react-native-rag, or roll it yourself with @react-native-ai/llama + nitro-sqlite/sqlite-vec; budget RAM for generator + embedder TOGETHER (see reading). Since the 2026-09-10 challenge, prefer the roll-your-own path if you are adopting executorch 0.10 — the packaged RAG library has not moved since May and predates the rewrite"
 note: >
   Fast-moving area surfaced across multiple RN Rewind issues; recommend tentatively
   (confidence: low) and validate on-device before committing.
@@ -41,7 +41,7 @@ note: >
   header build failures and silent setup failures, and pins react-native-worklets >=0.10.0 <0.13.0.
 defer_to_skill: null
 doc: null
-updated: 2026-09-10   # executorch v0.10 ground-up rewrite: TS pipelines, Core ML/MLX/Vulkan delegates, worklets, on-demand binaries (firsthand)
+updated: 2026-09-10   # executorch v0.10 rewrite (firsthand) · CHALLENGED — WEAKENED: react-native-rag predates the rewrite and @react-native-ai/apple is 7mo quiet
 sources:
   - "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.10.0"
   - "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.10.1"
