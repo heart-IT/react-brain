@@ -2,7 +2,7 @@ id: RB-E-AUTH
 topic: "Authentication & identity — sessions, OAuth, managed vs self-hosted"
 category: auth
 group: app-architecture
-status: drafted
+status: reviewed   # long-form entry written + source-checked → encyclopedia/RB-E-AUTH.md
 confidence: low
 platforms: [react, react-native]
 options:
@@ -46,8 +46,8 @@ note: >
   your build months later. One migration trap worth knowing: TurboModules let APIs be synchronous
   where firebase-js-sdk is synchronous, so code calling .then() on what is now void breaks.
 defer_to_skill: null
-doc: null
-updated: 2026-08-18   # RN Firebase v26 — New Arch required, namespaced API removed (migrate rule added)
+doc: "RB-E-AUTH.md"   # long-form Explanation entry in content_dir
+updated: 2026-09-10   # GRADUATED drafted → reviewed: long-form Explanation written (encyclopedia/RB-E-AUTH.md); confidence stays low — the options are mature, this entry's judgment is young
 reading:
   - title: "The Copenhagen Book"
     url: "https://thecopenhagenbook.com/"

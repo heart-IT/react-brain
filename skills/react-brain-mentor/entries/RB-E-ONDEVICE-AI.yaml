@@ -2,7 +2,7 @@ id: RB-E-ONDEVICE-AI
 topic: "On-device AI / ML"
 category: ai-ml
 group: ai
-status: drafted
+status: reviewed   # long-form entry written + source-checked → encyclopedia/RB-E-ONDEVICE-AI.md
 confidence: low
 platforms: [react-native]
 options:
@@ -40,8 +40,8 @@ note: >
   not a resting place. Take 0.10.1 (2026-09-09), not 0.10.0: it fixes iOS `use_frameworks!` duplicate-
   header build failures and silent setup failures, and pins react-native-worklets >=0.10.0 <0.13.0.
 defer_to_skill: null
-doc: null
-updated: 2026-09-10   # executorch v0.10 rewrite (firsthand) · CHALLENGED — WEAKENED: react-native-rag predates the rewrite and @react-native-ai/apple is 7mo quiet
+doc: "RB-E-ONDEVICE-AI.md"   # long-form Explanation entry in content_dir
+updated: 2026-09-10   # GRADUATED drafted → reviewed: long-form Explanation written; confidence stays low — the area outpaces any settled recommendation
 sources:
   - "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.10.0"
   - "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.10.1"
