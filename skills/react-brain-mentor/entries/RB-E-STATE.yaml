@@ -28,7 +28,12 @@ note: "Separate server state (caching/sync) from client/UI state — different p
   named 'URL params for view state' as a decision axis, but no option row named a LIBRARY for it —
   nuqs is that library. Adopted from the unattended harvest/2026-09-03 run, whose advocate pass caught
   it; the 2026-09-10 manual pass had skipped it after judging it against RB-E-NAV (an adapter matrix)
-  instead of against this entry's own open axis — the wrong entry, so the wrong question."
+  instead of against this entry's own open axis — the wrong entry, so the wrong question.
+  COHORT EVIDENCE (2026-09-10, verified by fetching each package.json directly): nuqs is in
+  production use in four census-cohort apps — Sentry 2.7.1, Cal.com 2.8.2, Supabase 2.7.1 and
+  Documenso ^2.8.9. Read that as a standing adoption level, NOT as a week's movement: these became
+  visible to `react-brain census` only when this entry gained a nuqs detect row in the same pass,
+  so the census diff reporting them as 'adopted' is an artifact of the new row."
 defer_to_skill: react-native-best-practices  # re-render/perf rules (e.g. RN-RULE-ATOMIC-STATE)
 doc: "RB-E-STATE.md"   # long-form Explanation entry in content_dir
 updated: 2026-09-10   # nuqs named for the entry's existing URL-view-state axis — reconciled from harvest/2026-09-03 · Jotai 3 migrate rule (firsthand)

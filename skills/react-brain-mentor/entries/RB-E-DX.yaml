@@ -23,6 +23,13 @@ recommend:
     - "normative styleguide but no linter config → wire the rules into lint so they're enforced mechanically, not by review"
     - "lots of agent-written React landing in the repo → add a react-doctor pass (CI or agent skill) on top of lint"
 note: >
+  COHORT SIGNAL (2026-09-10, `react-brain census` delta, verified by fetching the package.json):
+  SENTRY has moved its lint lane — getsentry/sentry now carries oxlint 1.81.0 and NO eslint or
+  typescript-eslint at all. This is a real week-over-week change, not a tracking artifact (Oxlint was
+  already in the census baseline), and it is the first cohort app on record to drop ESLint outright
+  rather than run the two side by side. It does not overturn the react-hooks caveat below — a repo
+  can simply accept not having those rules — but it is the strongest adoption datapoint yet that the
+  type-aware + compiler-rule surface has become sufficient for a large TypeScript codebase.
   DX is cross-cutting — architecture/boundaries depth → engineering-principles; bundler choice →
   RB-E-BUILD; supply-chain → RB-E-SECURITY. This entry is the feedback loop (CI/lint/hooks/
   onboarding) that keeps the others honest.

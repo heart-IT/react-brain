@@ -1,5 +1,5 @@
 {
-  "date": "2026-08-06",
+  "date": "2026-09-10",
   "fingerprints": {
     "ledger-hr": {
       "RB-E-COMPONENT-LIBS": "Radix UI",
@@ -48,6 +48,23 @@
       "RB-E-TYPESCRIPT": "TypeScript",
       "RB-E-REACT-CORE": "React 19.2.0",
       "RB-E-RN-VERSIONS": "RN 0.83.6"
+    },
+    "peerbarter": {
+      "RB-E-SVG": "@expo/vector-icons (deprecated SDK 56), react-native-svg",
+      "RB-E-NAV": "React Navigation",
+      "RB-E-LISTS": "FlashList",
+      "RB-E-P2P": "Autobase (multiwriter), Corestore, Holepunch (Hypercore stack), hrpc",
+      "RB-E-NATIVE": "Expo (managed native)",
+      "RB-E-MEDIA": "QR generation (qrcode-svg), expo-camera, expo-image-picker",
+      "RB-E-STORAGE": "expo-secure-store (secrets)",
+      "RB-E-POLISH": "expo-splash-screen",
+      "RB-E-DESKTOP": "Pear (mobile, Holepunch)",
+      "RB-E-BUILD": "Metro",
+      "RB-E-TESTING": "brittle (Holepunch TAP)",
+      "RB-E-DX": "Prettier, lunte (lint)",
+      "RB-E-TYPESCRIPT": "TypeScript",
+      "RB-E-REACT-CORE": "React 19.2.3",
+      "RB-E-RN-VERSIONS": "RN 0.86.0"
     }
   }
 }

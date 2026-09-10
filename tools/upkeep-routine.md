@@ -5,9 +5,15 @@ split by what can run without an LLM. Everything is **propose-only** for knowled
 deterministic fixes (dead links) are safe to surface; recommendation changes stay a
 human-reviewed diff.
 
+> **COHORT NOTE (2026-09-10):** `bitbarter` was RETIRED (its V0-era knowledge base was archived
+> ahead of retirement) and is gone from disk, so every command below that named it was failing on
+> that argument. The paths now point at **peerBarter**, the live Expo/RN sibling that occupies that
+> slot — note it is a FRESH project, explicitly *not* bitbarter's code lineage, so treat its pulse
+> history as starting 2026-09-10 rather than continuing bitbarter's.
+>
 > **Local vs cloud `/schedule` (updated 2026-07-06 — the repo now has a remote:**
 > **github.com/heart-IT/react-brain):** anything that reads the SIBLING APPS
-> (pulse drift, doctor, evidence, learn) stays **local** — ledgerhr/ourpot/bitbarter live
+> (pulse drift, doctor, evidence, learn) stays **local** — ledgerhr/ourpot/peerBarter live
 > only on this machine's filesystem. But corpus-only work is now cloud-schedulable: the
 > weekly newsletter HARVEST + challenge can run as a cloud `/schedule` agent that clones
 > the repo, edits `entries/<ID>.yaml`, runs `npm test`, and opens a **PR** (the propose-only
@@ -25,17 +31,17 @@ runs as the deterministic pre-step of the weekly harvest — `tools/local-harves
 one review branch; the old separate Monday cron is retired. Run any time by hand:
 
 ```sh
-node tools/cli.mjs pulse --today=$(date +%F) ../../ledgerhr ../../ourpot/ourpot ../../bitbarter
+node tools/cli.mjs pulse --today=$(date +%F) ../../ledgerhr ../../ourpot/ourpot ../../peerBarter
 ```
 
 (retired crontab line, for reference):
 
 ```cron
-0 9 * * 1  cd <repo-root> && /usr/bin/env node tools/cli.mjs pulse --today=$(date +\%F) ../../ledgerhr ../../ourpot/ourpot ../../bitbarter >> tools/pulse.log 2>&1
+0 9 * * 1  cd <repo-root> && /usr/bin/env node tools/cli.mjs pulse --today=$(date +\%F) ../../ledgerhr ../../ourpot/ourpot ../../peerBarter >> tools/pulse.log 2>&1
 ```
 
 Read `tools/pulse.log` weekly; act on DEAD links + undated/aging entries + drift.
-After a harvest lands, `react-brain briefing ../../ledgerhr ../../ourpot/ourpot ../../bitbarter`
+After a harvest lands, `react-brain briefing ../../ledgerhr ../../ourpot/ourpot ../../peerBarter`
 turns the week's corpus delta into a per-app action list (deterministic, cron-safe).
 
 ## Tier 2 — agentic upkeep (growth + correctness; weekly, LLM-driven)
@@ -163,7 +169,7 @@ The agent should, in order:
      same precedent as longho.dev's RSS-verified reading. This recovered the thoughtbot
      native-stack piece previously excluded as unverifiable.
    - Only exclude a candidate after WebFetch, curl-UA, AND the Wayback fallback all fail.
-3. **Completeness** — run `react-brain evidence ../ledgerhr ../ourpot ../bitbarter`; note new
+3. **Completeness** — run `react-brain evidence ../ledgerhr ../ourpot ../peerBarter`; note new
    blind spots / contradictions. Also run `react-brain census` — cohort adoption CHANGES since
    the last snapshot are evidence-grade signals (an app dropping/adopting a tracked lib
    outranks a download trend; feed notable deltas into challenge targets and entry notes).

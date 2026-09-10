@@ -25,7 +25,7 @@ git checkout -q main && git checkout -q -b "$BRANCH"
 # adoption). Zero LLM; baseline updates land on this branch for review like everything
 # else. Failures never block the harvest — the agent reads the logs either way.
 TODAY="$(date +%F)"
-node tools/cli.mjs pulse   --today="$TODAY" ../../ledgerhr ../../ourpot/ourpot ../../bitbarter >> tools/pulse.log   2>&1 || echo "pulse exited non-zero (see tools/pulse.log)"
+node tools/cli.mjs pulse   --today="$TODAY" ../../ledgerhr ../../ourpot/ourpot ../../peerBarter >> tools/pulse.log   2>&1 || echo "pulse exited non-zero (see tools/pulse.log)"
 node tools/cli.mjs signals --today="$TODAY" >> tools/signals.log 2>&1 || echo "signals exited non-zero"
 node tools/cli.mjs census  --today="$TODAY" >> tools/census.log  2>&1 || echo "census exited non-zero"
 

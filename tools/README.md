@@ -77,7 +77,7 @@ and GAPS rows carry **census field adoption** ("you ship X n/D; most-shipped Y m
 committed census snapshot, with honest denominators.
 Deterministic; complements the LLM mentor (which owns the judgment dimensions).
 ```sh
-node tools/react-brain-doctor.mjs ../../ledgerhr ../../ourpot/ourpot ../../bitbarter
+node tools/react-brain-doctor.mjs ../../ledgerhr ../../ourpot/ourpot ../../peerBarter
 node tools/react-brain-doctor.mjs . --json     # machine-readable — agents / mentor Phase 0
 ```
 
@@ -173,7 +173,7 @@ default), §3 EVIDENCE (field adoption per entry). Makes the encyclopedia self-c
 production code instead of only newsletters. Evidence is **derived** (regenerate), not
 stored; only *corrections* (knowledge learned) get written back to the YAML.
 ```sh
-node tools/react-brain-evidence.mjs ../ledgerhr ../ourpot ../bitbarter
+node tools/react-brain-evidence.mjs ../ledgerhr ../ourpot ../peerBarter
 ```
 
 ## `react-brain-pulse.mjs` — time / autonomy
@@ -182,7 +182,7 @@ reading/source URL: ok / DEAD / blocked / unreachable), §2 STALENESS (`updated:
 undated entries), §3 DRIFT (detect across repos, diff vs a stored baseline). **Proposes;
 never rewrites.**
 ```sh
-node tools/react-brain-pulse.mjs --today=YYYY-MM-DD ../ledgerhr ../ourpot ../bitbarter
+node tools/react-brain-pulse.mjs --today=YYYY-MM-DD ../ledgerhr ../ourpot ../peerBarter
 # flags: --no-links (skip network), --today=… (deterministic age math)
 # writes tools/.pulse-baseline.json for drift detection on the next run
 ```
