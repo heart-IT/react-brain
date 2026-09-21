@@ -30,12 +30,17 @@ mcp-server   ── distribution       (the corpus as MCP tools for any coding a
 | `.census-baseline.json` | `census` | ✓ | delete → next run rebaselines |
 | `.signals-baseline.json` | `signals` | ✓ | delete → next run rebaselines |
 | `predictions.jsonl` | `calibrate` (append-only ledger) | ✓ never rewrite | `--seed` adds; `--record` resolves |
-| `.doctor-memory.json` | `doctor` (outcome memory: resolved/persisting per repo) | ✓ | delete → doctor forgets visit history |
+| `.doctor-memory.json` | `doctor` (outcome memory: resolved/persisting per repo) | ✗ gitignored | delete → doctor forgets visit history; `RB_DOCTOR_MEMORY` redirects it (the eval gate does) |
 | `.registry-cache.json` | `doctor --preflight` (7d TTL) | ✗ gitignored | delete freely |
 | `.briefing-state.json` | `briefing` | ✗ gitignored | rewind after test runs |
 | `harvest-log/*.md` | disposition manifests (+ bench gold) | ✓ | never — they're the audit trail |
 | `harvest-log/LEDGER.md` | narrative pass history (in-repo since 2026-08-07) | ✓ append-only | append a dated section per pass |
 | `triage-rules.yaml` | auto-disposition policy (`prep` / `firsthand --manifest`) | ✓ | activate a rule only after `harvest rules` replays clean |
+
+> `harvest-log/` is RUNTIME DATA, not just an archive: `harvest prep` cross-references
+> every prior manifest, `harvest rules` replays 2439 adjudicated rows out of it, and
+> `harvest watchlist` aggregates it. It is ~85% of the npm tarball and stays there for
+> that reason — excluding it from `files[]` to slim the package breaks those three verbs.
 
 > YAML loads via the `yaml` npm dep (python3+pyyaml shim as zero-install fallback). The
 > detection table is fully data-driven: each entry declares its own `detect:` (package

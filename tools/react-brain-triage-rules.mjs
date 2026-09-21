@@ -182,8 +182,11 @@ function ruleForUrlAny(url, rules) {
 }
 
 // ── CLI ─────────────────────────────────────────────────────────────────────────
-if (process.argv[1] && import.meta.url.endsWith(process.argv[1].split('/').pop())) {
-  const CHECK = process.argv.includes('--check');
+// Exported rather than run as an import side-effect: `harvest rules` imports this
+// module as a LIBRARY too (loadRules/ruleForUrl for prep), so the entry-point guard
+// below was also suppressing the verb — `harvest rules --check` exited 0 in silence.
+export function runRulesCli(argv = process.argv.slice(2)) {
+  const CHECK = argv.includes('--check');
   const rules = loadRules();
   const n = rules.version_rules.length + rules.url_rules.length;
   if (!n) { console.log('no tools/triage-rules.yaml (or empty) — nothing to validate'); process.exit(0); }
@@ -205,3 +208,5 @@ if (process.argv[1] && import.meta.url.endsWith(process.argv[1].split('/').pop()
   }
   if (CHECK) console.log(`harvest rules --check ✓ — ${n} rule(s), no active-rule kept-collisions across ${rows} gold rows`);
 }
+
+if (process.argv[1] && import.meta.url.endsWith(process.argv[1].split('/').pop())) runRulesCli();

@@ -54,8 +54,8 @@ if (mode === 'firsthand') {
   process.argv = [process.argv[0], process.argv[1], ...args];
   await import('./react-brain-triage-bench.mjs');
 } else if (mode === 'rules') {
-  process.argv = [process.argv[0], process.argv[1], ...args];
-  await import('./react-brain-triage-rules.mjs');
+  const { runRulesCli } = await import('./react-brain-triage-rules.mjs');
+  runRulesCli(args);
 } else if (mode === 'prep') {
   // pre-triaged manifest skeleton: detect the next issue deterministically, then
   // cross-reference every link against the corpus + ALL prior manifests, so the
