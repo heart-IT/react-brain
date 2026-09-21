@@ -65,6 +65,8 @@ usage: react-brain <command> [args]
                        harvest PRs) · bench (judgment benchmark: replay a frozen
                        issue vs the adjudicated manifest; false skips ×3;
                        --model=<id> | --provider=claude-cli | --candidate=<json>)
+                       · rules [--check] (replay the triage rules over the gold manifests —
+                         the harvest half of npm test)
                        · watchlist (recurring skips + reopen signals)
   calibrate [...]      scored prediction track record: is confidence earned?
                        (--seed | --record <id> <held|weakened|overturned> | --today=…)

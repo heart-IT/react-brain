@@ -1,11 +1,12 @@
-// ── harvest-lib — shared primitives for the acquisition tools ──────────────────
+// ── harvest-lib — shared primitives for the acquisition + sampling tools ───────
 // Imported by react-brain-harvest.mjs (inventory/coverage/watchlist),
-// react-brain-firsthand.mjs (watch graph) and react-brain-verify-diff.mjs
-// (the CI receipts gate). Pure functions + fetch helpers, no CLI dispatch —
-// safe to import from anywhere.
+// react-brain-firsthand.mjs (watch graph), react-brain-verify-diff.mjs (the CI
+// receipts gate) and the sampling tools (census/pulse/signals) for the fetch,
+// concurrency and baseline primitives. Pure functions + fetch helpers, no CLI
+// dispatch — safe to import from anywhere.
 // ───────────────────────────────────────────────────────────────────────────────
 
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 
 export const UA_BROWSER = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36';
 export const UA_BOT = 'react-brain (+https://github.com/heart-IT/react-brain)';
@@ -22,12 +23,34 @@ export async function get(url, { accept, ua = UA_BOT, timeout = 20000 } = {}, at
   }
 }
 
-export async function pool(tasks, size = 8) {
-  const out = []; let i = 0;
-  await Promise.all(Array.from({ length: Math.min(size, tasks.length) }, async () => {
-    while (i < tasks.length) { const n = i++; out[n] = await tasks[n]().catch((err) => ({ err: String(err).slice(0, 120) })); }
+// the one concurrency primitive: results stay in input order, the worker count
+// never exceeds the work, and fn's rejection rejects the whole run.
+export async function mapLimit(items, limit, fn) {
+  const out = new Array(items.length); let i = 0;
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (i < items.length) { const idx = i++; out[idx] = await fn(items[idx], idx); }
   }));
   return out;
+}
+
+// thunk flavour, for tasks that carry their own args: a failure becomes a value
+// ({ err }) so one dead URL can't abort a whole harvest sweep.
+export const pool = (tasks, size = 8) =>
+  mapLimit(tasks, size, (t) => t().catch((err) => ({ err: String(err).slice(0, 120) })));
+
+// ── tracked baselines ─────────────────────────────────────────────────────────
+// census/pulse/signals each bank last run's snapshot in a tracked JSON file.
+// Two invariants, stated once: a corrupt or merge-conflicted file degrades to
+// "no baseline" (with the caller's warning) instead of crashing the run, and the
+// write is tmp+rename so a killed run can never truncate the tracked file.
+export function readBaseline(path, onCorrupt) {
+  try { return existsSync(path) ? JSON.parse(readFileSync(path, 'utf8')) : null; }
+  catch { onCorrupt?.(); return null; }
+}
+
+export function writeAtomic(path, text) {
+  writeFileSync(path + '.tmp', text);
+  renameSync(path + '.tmp', path);
 }
 
 // page chrome, share widgets, feeds — never content

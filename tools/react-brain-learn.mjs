@@ -23,6 +23,7 @@
 // ───────────────────────────────────────────────────────────────────────────────
 
 import { loadEntries, analyzeRepo, fit, trunc, GROUP_ORDER, trackRecord, TRACK_GLYPH, readingApplies } from './detect.mjs';
+import { flag, positionals } from './argv.mjs';
 
 // Domains to GUIDE a learner toward as gaps, per stage (foundations surface early;
 // hardening surfaces as the project matures). Detected domains are ALWAYS included
@@ -202,8 +203,8 @@ function printPath(a, entries, opts) {
 
 const argv = process.argv.slice(2);
 const flags = argv.filter((x) => x.startsWith('--'));
-const targets = argv.filter((x) => !x.startsWith('--'));
-const stageOverride = (flags.find((f) => f.startsWith('--stage=')) || '').split('=')[1] || null;
+const targets = positionals(argv);
+const stageOverride = flag(flags, 'stage', null);
 if (stageOverride && !['prototype', 'mvp', 'production', 'scale'].includes(stageOverride)) {
   console.error(`unknown --stage '${stageOverride}' (use prototype|mvp|production|scale)`);
   process.exit(1);

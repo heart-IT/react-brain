@@ -21,10 +21,11 @@
 // Results → bench/results/<model>[-with-corpus]-<date>.json (committed; the site renders them).
 // ───────────────────────────────────────────────────────────────────────────────
 
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { writeFileSync, mkdirSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 import { loadYaml, loadEntries, trunc } from './detect.mjs';
+import { flag } from './argv.mjs';
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 export const BANK_PATH = resolve(__dir, '../bench/questions.yaml');
@@ -164,7 +165,7 @@ async function run({ model, withCorpus, limit, today, viaCli = false }) {
 const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isMain) {
   const argv = process.argv.slice(2);
-  const get = (k, d) => (argv.find((a) => a.startsWith(`--${k}=`)) || `--${k}=${d}`).split('=').slice(1).join('=');
+  const get = (k, d) => flag(argv, k, d);
   if (argv.includes('--list')) {
     for (const q of loadBank()) console.log(`  ${q.id.padEnd(18)} [${q.entry} · verified ${q.verified}] ${q.question}`);
     console.log(`\n  ${loadBank().length} questions — every one a verified, dated corpus fact.`);

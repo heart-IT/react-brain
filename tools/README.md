@@ -101,7 +101,7 @@ spiral (repeating overruled advice until nobody reads the report) without ever l
 a stale decision hide a live problem; the mentor treats acknowledged items as settled
 and leads with re-opened ones.
 
-**Registry preflight (2026-07-16):** the corpus curates opinions on ~200 packages; the
+**Registry preflight (2026-07-16):** the corpus curates opinions on 238 packages (`react-brain lint` prints the live count); the
 registry knows facts about ALL of them. `doctor --preflight` sweeps the whole runtime
 dependency tree (including corpus-unmapped deps) for npm deprecation flags, abandonment
 (>18mo publish silence), and major-version lag — version-locked families (expo-*) fold to
@@ -197,7 +197,7 @@ set-differences the page against the issue's disposition manifest in
 `tools/harvest-log/` (an unaccounted link = exit 1), and **watchlist** aggregates
 URLs skipped in ≥2 manifests + standing reopen signals, so `cap`/`pre-ship` skips
 are deferred, not terminal. (2) Newsletters are weekly, editor-filtered batches —
-so **firsthand** derives a watch graph FROM the corpus itself (detect rows → ~190
+so **firsthand** derives a watch graph FROM the corpus itself (detect rows → ~205
 npm packages' dist-tags + deprecation flags; sources/readings → GitHub releases
 feeds; hosts cited ≥2× → author blog RSS, with well-known-path probing for
 docusaurus-style sites) and diffs it against `.firsthand-state.json` (committed,
@@ -386,19 +386,21 @@ node tools/react-brain-lint.mjs        # or: npx react-brain lint · npm run lin
 
 ## `mcp-server.mjs` — distribution / agents
 The encyclopedia as **MCP tools** for any coding agent (zero-dep stdio JSON-RPC — no SDK).
-`capsules` (a ~40-line orientation index — the token-efficient way in), `query` (one full
-entry on demand), `recommend` (context-resolved via the shared resolver), `doctor` (repo
-analysis as JSON), `stack` (greenfield plan). `.mcp.json` registers it for Claude Code in
+Nine tools: `capsules` (a ~50-line orientation index — the token-efficient way in), `query`
+(one full entry on demand), `recommend` (context-resolved via the shared resolver), `doctor`
+(repo analysis as JSON), `decide` (living decision record), `map` (repo pinboard), `migrate`
+(phased upgrade plan), `review` (diff-scoped gate), `stack` (greenfield plan). `.mcp.json` registers it for Claude Code in
 this repo; anywhere else:
 ```sh
 claude mcp add react-brain -- node <repo>/tools/mcp-server.mjs
 ```
 
 ## `../tests/eval.mjs` — golden-fixture eval (quality regression)
-Turns "the dry-run looked right" into assertions that run on every change: four committed
-fixtures (rn-smells, web-clean, p2p-pear, prod-no-boundary) checked via `doctor --json`
-(detection, fit, signals, stage heuristic, absent-rules), plus search routing, intent
-resolution (DATA+p2p → n/a), stack composition, and the MCP handshake. `npm test` = lint + eval.
+Turns "the dry-run looked right" into assertions that run on every change: five committed
+fixtures (rn-smells, web-clean, p2p-pear, prod-no-boundary, legacy-rn) checked via `doctor --json`
+and `migrate --json` (detection, fit, signals, stage heuristic, absent-rules, phased plans), plus
+search routing, intent resolution (DATA+p2p → n/a), stack composition, and the MCP handshake.
+`npm test` = lint + `harvest rules --check` + the triage-rules engine test + this eval.
 
 ## `challenge-routine.md` — adversarial validation (correctness)
 The judgment check: a challenger steelmans the case *against* each recommendation and tests
@@ -435,7 +437,7 @@ detection core, so they never disagree about what a recommendation means.
 `signals` asks npm; **census asks shipped software**. Downloads are gameable (the 2026-07
 TanStack-Start "60x surge" was one vendor's CI); the dependency choices of real, active,
 production OSS apps are not. Census fetches the `package.json` of a curated cohort
-(`tools/census-cohort.json` — 20 apps: Bluesky, Expensify, Mattermost, Rainbow, Ledger Live,
+(`tools/census-cohort.json` — 34 apps: Bluesky, Expensify, Mattermost, Rainbow, Ledger Live,
 Cal.com, Grafana, Signal Desktop…), runs the corpus's own detectors over them, and reports
 per-entry adoption with honest denominators (RN-only entries measure against RN apps).
 Snapshots diff against `tools/.census-baseline.json` (the pulse pattern), so repeated runs
@@ -449,7 +451,8 @@ npx react-brain census --json     # machine-readable aggregate
 
 ## `react-brain briefing <repo>` — the personalized, verified ecosystem changelog
 
-Six newsletters go in; one repo-specific page comes out. The corpus is a dated, fetch-verified
+Six newsletters go in (five still running — React Weekly retired 2026-09-21); one
+repo-specific page comes out. The corpus is a dated, fetch-verified
 stream of ecosystem *changes* (every entry edit is a git commit); `detect` knows what a repo
 uses. `briefing` intersects them: **what moved under YOUR stack since you last looked** —
 an `⚡ ACTION` section when a change explicitly names something the repo ships (deprecation,

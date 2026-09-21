@@ -9,15 +9,24 @@
 import { execFileSync, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
+import { tmpdir } from 'node:os';
+import { mkdtempSync, mkdirSync, rmSync, readFileSync, writeFileSync as wf } from 'node:fs';
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dir, '..');
 const FIX = (n) => join(__dir, 'fixtures', n);
+// doctor persists per-repo visit counters; children inherit this redirect, so the
+// gate stops rewriting tools/.doctor-memory.json with fixture rows. Cleared first —
+// visit counts must start from zero every run, locally as in CI.
+const DOCTOR_MEM = join(tmpdir(), 'rb-eval-doctor-memory.json');
+rmSync(DOCTOR_MEM, { force: true });
+process.env.RB_DOCTOR_MEMORY = DOCTOR_MEM;
 
 let pass = 0; const fails = [];
 const check = (cond, msg) => { if (cond) pass++; else fails.push(msg); };
-const doctor = (fixture) => JSON.parse(execFileSync(process.execPath,
-  [join(ROOT, 'tools/react-brain-doctor.mjs'), FIX(fixture), '--json'], { encoding: 'utf8' }));
+const doctorPath = (repo, ...flags) => JSON.parse(execFileSync(process.execPath,
+  [join(ROOT, 'tools/react-brain-doctor.mjs'), repo, '--json', ...flags], { encoding: 'utf8' }));
+const doctor = (fixture) => doctorPath(FIX(fixture));
 const byEntry = (d, id) => d.detected.find((x) => x.entry === id);
 const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
 
@@ -241,7 +250,6 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
 
 // ── 13. review: diff-scoped — blocking adds, introduced-only smells, CI exits ───
 {
-  const { mkdtempSync, mkdirSync, writeFileSync: wf, rmSync } = await import('node:fs');
   const { tmpdir } = await import('node:os');
   const T = mkdtempSync(join(tmpdir(), 'rb-review-'));
   const g = (...args) => execFileSync('git', ['-C', T, '-c', 'user.email=t@t', '-c', 'user.name=t', ...args], { encoding: 'utf8' });
@@ -290,7 +298,6 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
 // ── harvest bench: gold-manifest parsing + asymmetric judgment scoring ──────────
 {
   const { parseGoldManifest, scoreTriage, normalize } = await import(join(ROOT, 'tools/harvest-lib.mjs'));
-  const { readFileSync } = await import('node:fs');
   const gold = parseGoldManifest(readFileSync(join(ROOT, 'tools/harvest-log/twir-290.md'), 'utf8'));
   check(gold.length > 50, 'bench: gold manifest parses >50 URL rows');
   const screens = gold.find((r) => r.key === normalize('https://github.com/software-mansion/react-native-screens/releases/tag/4.26.0'));
@@ -317,7 +324,6 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
 
 // ── trajectory: git-history-aware suggestions (stalled migration + churn) ───────
 {
-  const { mkdtempSync, writeFileSync: wf, mkdirSync, rmSync } = await import('node:fs');
   const { tmpdir } = await import('node:os');
   const T = mkdtempSync(join(tmpdir(), 'rb-traj-'));
   try {
@@ -340,7 +346,7 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
     check(mig?.status === 'stalled' && mig.nowCount === 2 && mig.thenCount === 2, `trajectory: vector-icons migration reads STALLED at 2 files (got ${mig?.status}/${mig?.nowCount}/${mig?.thenCount})`);
     check(mig?.remaining?.length === 2, 'trajectory: remaining legacy files listed');
     check(d.priorities.some((p) => p.kind === 'finish' && /unstick|finish|STOP/i.test(p.text)), 'trajectory: stalled migration surfaces as a finish-priority');
-    const noH = JSON.parse(execFileSync(process.execPath, [join(ROOT, 'tools/react-brain-doctor.mjs'), T, '--json', '--no-history'], { encoding: 'utf8' }));
+    const noH = doctorPath(T, '--no-history');
     check(noH.trajectory === null, 'trajectory: --no-history skips the scan');
 
     // acknowledged findings: a recorded decision quiets the finding while its premise
@@ -361,17 +367,15 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
     check(re.acknowledged.length === 0, 'acks: broken-premise decision acknowledges nothing');
   } finally { rmSync(T, { recursive: true, force: true }); }
 }
-function doctorPath(p) { return JSON.parse(execFileSync(process.execPath, [join(ROOT, 'tools/react-brain-doctor.mjs'), p, '--json'], { encoding: 'utf8' })); }
 
 // ── swaps & upside: the aggressive layer (you use X — pick beats it on an axis) ──
 {
-  const { mkdtempSync, writeFileSync: wf, rmSync } = await import('node:fs');
   const { tmpdir } = await import('node:os');
   const T = mkdtempSync(join(tmpdir(), 'rb-swap-'));
   try {
     wf(join(T, 'package.json'), JSON.stringify({ name: 'swap-fix', version: '1.0.0', dependencies: {
       react: '19.2.0', 'react-native': '0.86.0', axios: '1.7.0', 'react-native-toast-message': '2.4.0', expo: '57.0.0' } }));
-    const d = JSON.parse(execFileSync(process.execPath, [join(ROOT, 'tools/react-brain-doctor.mjs'), T, '--json', '--no-scan', '--no-history'], { encoding: 'utf8' }));
+    const d = doctorPath(T, '--no-scan', '--no-history');
     const net = d.swaps.find((s) => s.entry === 'RB-E-NETWORKING');
     check(Boolean(net) && net.axis.length > 0 && /axios/i.test(net.yours), 'swaps: axios → head-to-head with a stated axis');
     check(d.swaps.some((s) => s.entry === 'RB-E-POLISH'), 'swaps: toast-message diverges → swap candidate');

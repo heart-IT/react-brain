@@ -22,10 +22,11 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync, existsSync, statSync } from 'node:fs';
 import { join, extname } from 'node:path';
 import { loadEntries, analyzeRepo, fit, trunc, matchDetector, adviseReadings,
-         loadModernDefaults, rnNamedImports, minVer, verLt } from './detect.mjs';
+         loadModernDefaults, rnNamedImports, minVer, verLt, skipReason } from './detect.mjs';
+import { flag } from './argv.mjs';
 
 const argv = process.argv.slice(2);
-const BASE = (argv.find((a) => a.startsWith('--base=')) || '--base=HEAD').split('=')[1];
+const BASE = flag(argv, 'base', 'HEAD');
 const CI = argv.includes('--ci');
 const JSON_OUT = argv.includes('--json');
 const targets = argv.filter((a) => !a.startsWith('--'));
@@ -39,7 +40,7 @@ const SRC_EXT = new Set(['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs']);
 const MAX_BYTES = 512 * 1024;
 
 const a = analyzeRepo(REPO);
-if (a.missing || a.notReact) { console.error(`(${a.name}: ${a.missing ? (a.malformed ? 'malformed package.json' : 'no package.json') : 'not a React/RN repo'})`); process.exit(1); }
+if (a.missing || a.notReact) { console.error(`(${a.name}: ${skipReason(a)})`); process.exit(1); }
 
 const git = (...args) => execFileSync('git', ['-C', a.path, ...args], { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
 let prefix;

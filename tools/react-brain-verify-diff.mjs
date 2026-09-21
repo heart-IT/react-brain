@@ -20,12 +20,13 @@
 
 import { execSync } from 'node:child_process';
 import { readFileSync, existsSync } from 'node:fs';
-import { dirname, join, relative } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { get, UA_BROWSER, pool, coverageCheck, waybackSnapshot } from './harvest-lib.mjs';
+import { flag } from './argv.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const BASE = ((process.argv.find((a) => a.startsWith('--base=')) || '').split('=')[1]) || 'main';
+const BASE = flag(process.argv, 'base', 'main');
 const SCOPE = ['skills/react-brain-mentor', 'encyclopedia', 'tools/harvest-log'];
 const sh = (cmd) => execSync(cmd, { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
 

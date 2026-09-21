@@ -7,7 +7,7 @@ confidence: medium
 updated: 2026-06-25
 platforms: [react, react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-STYLING
-defer_to_skill: design-systems-governance                     # tokens, theme parity, a11y intrinsics
+defer_to_skill: design-system                     # tokens, theme parity, a11y intrinsics
 related: [RB-E-COMPONENT-LIBS, RB-E-CROSSPLATFORM, RB-E-REACT-CORE]
 sources:
   - "https://www.spotvirtual.com/blog/why-were-breaking-up-with-css-in-js"
@@ -19,7 +19,7 @@ sources:
 > **Diataxis: Explanation.** This page builds *understanding* of the styling decision — the
 > reasoning behind the pick. It is not a tutorial: the candidate list and one-line tradeoffs
 > live in the index entry `RB-E-STYLING`; design-token, theme-parity, and accessibility-
-> intrinsic depth is owned by the `design-systems-governance` skill. Read this for the *why*.
+> intrinsic depth is owned by the `design-system` skill. Read this for the *why*.
 
 ## The one axis that organises everything: *when* styles are computed
 
@@ -91,7 +91,7 @@ it's simultaneously a *styling* strategy and a *code-sharing* one (`RB-E-CROSSPL
   not the newest entrant.
 - **Re-deriving the design system in CSS.** Tokens, theme parity (light/dark, dynamic type),
   and accessibility intrinsics (contrast, focus) are a *systems* concern — owned by
-  `design-systems-governance`, not by the styling library choice. Don't hand-roll them per
+  `design-system`, not by the styling library choice. Don't hand-roll them per
   component.
 - **Web+native styling as an afterthought.** If you share UI across platforms, styling and
   code-sharing are the same decision (React Strict DOM) — see `RB-E-CROSSPLATFORM`.
@@ -107,7 +107,7 @@ it's simultaneously a *styling* strategy and a *code-sharing* one (`RB-E-CROSSPL
 - **React core (`RB-E-REACT-CORE`).** The React Compiler weakens the old "a styling lib avoids
   re-renders" argument for *client* concerns; choose styling on the runtime-cost and theming
   axes, not as a memoisation workaround.
-- **Design-system depth (`design-systems-governance`).** Tokens, semantic naming, theme parity,
+- **Design-system depth (`design-system`).** Tokens, semantic naming, theme parity,
   a11y intrinsics, visual-regression — all owned there.
 
 ## In one paragraph
@@ -117,10 +117,10 @@ every render (even an actively-developed styled-components v7 stays runtime), so
 zero-runtime: **Tailwind + shadcn/ui** on the web (StyleX when you need atomic CSS at scale),
 and **NativeWind or StyleSheet/Unistyles** on React Native. Share styling with code via React
 Strict DOM when you go universal, and push tokens, theming, and accessibility down to
-`design-systems-governance` rather than re-deriving them per component.
+`design-system` rather than re-deriving them per component.
 
 ---
 
 *See also: `RB-E-COMPONENT-LIBS` (Tailwind + shadcn on the web), `RB-E-CROSSPLATFORM` (React
 Strict DOM as a shared-styling strategy), `RB-E-REACT-CORE` (Compiler interaction). Tokens,
-theme parity, a11y intrinsics: the `design-systems-governance` skill.*
+theme parity, a11y intrinsics: the `design-system` skill.*

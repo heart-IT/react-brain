@@ -22,6 +22,7 @@
 
 import { appendFileSync } from 'node:fs';
 import { loadDoc, readLedger, LEDGER_PATH } from './detect.mjs';
+import { today as todayOf, positionals } from './argv.mjs';
 
 // Horizon to re-examine a prediction, by stated confidence; fast-moving domains get a
 // shorter leash (their leads rot faster, so we hold them accountable sooner).
@@ -32,7 +33,7 @@ const FAST = new Set(['native', 'rn-versions', 'build-tooling', 'react-core', 'a
 const OUTCOMES = { held: 1, weakened: 0.5, overturned: 0 };   // calibration weight
 
 const flags = process.argv.slice(2);
-const today = (flags.find((f) => f.startsWith('--today=')) || '').split('=')[1] || new Date().toISOString().slice(0, 10);
+const today = todayOf(flags);
 
 function addMonths(dateStr, n) {
   const [y, m, d] = (dateStr || today).split('-').map(Number);
@@ -135,6 +136,6 @@ function scorecard() {
 if (flags.includes('--seed')) seed();
 else if (flags.includes('--record')) {
   const i = flags.indexOf('--record');
-  const [id, outcome, ...note] = flags.slice(i + 1).filter((f) => !f.startsWith('--'));
+  const [id, outcome, ...note] = positionals(flags.slice(i + 1));
   record(id, outcome, note.join(' '));
 } else scorecard();

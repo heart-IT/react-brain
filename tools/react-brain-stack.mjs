@@ -64,7 +64,7 @@ export function buildIntent(flags) {
   const platform = has('rn') ? 'react-native' : has('web') ? 'react' : 'both';
   const expo = has('expo');
   const p2p = has('p2p');
-  const stage = (flags.find((f) => f.startsWith('--stage=')) || '--stage=mvp').split('=')[1];
+  const stage = flag(flags, 'stage', 'mvp');
   // Context tokens fed to resolveRecommendation. Kept platform-pure: a token only goes
   // in when the intent actually implies it, so a clause like "new web CSS-in-JS → …" or
   // "offline / local-first → TanStack DB" can't capture an RN/P2P stack. For `both` we
@@ -206,6 +206,7 @@ function printStack(intent, entries) {
 // Run the CLI only when executed directly — the site (and anything else) imports
 // RECIPE/buildIntent/platMatch from here so there is exactly one source of truth.
 import { pathToFileURL } from 'node:url';
+import { flag } from './argv.mjs';
 const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 const flags = process.argv.slice(2).filter((x) => x.startsWith('--'));
 if (isMain && (flags.includes('--help') || flags.includes('-h'))) {

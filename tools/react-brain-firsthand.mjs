@@ -28,12 +28,13 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadEntries } from './detect.mjs';
 import { get as libGet, pool, satisfiesTripwire } from './harvest-lib.mjs';
+import { today } from './argv.mjs';
 
 const TOOLS = dirname(fileURLToPath(import.meta.url));
 const STATE_FILE = join(TOOLS, '.firsthand-state.json');
 const argv = process.argv.slice(2);
 const GRAPH_ONLY = argv.includes('--graph'), JSON_OUT = argv.includes('--json'), MANIFEST = argv.includes('--manifest');
-const TODAY = ((argv.find((a) => a.startsWith('--today=')) || '').split('=')[1]) || new Date().toISOString().slice(0, 10);
+const TODAY = today(argv);
 
 // hosts that are never author blogs (platforms, registries, media)
 const NOT_BLOG = /(^|\.)(github\.com|npmjs\.com|registry\.npmjs\.org|youtube\.com|youtu\.be|twitter\.com|x\.com|bsky\.app|dev\.to|medium\.com|archive\.org|web\.archive\.org)$/;

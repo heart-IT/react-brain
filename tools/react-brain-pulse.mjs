@@ -14,19 +14,21 @@
 // Usage:  node tools/react-brain-pulse.mjs [--today=YYYY-MM-DD] [--no-links] [repo ...]
 // ───────────────────────────────────────────────────────────────────────────────
 
-import { readFileSync, writeFileSync, existsSync, renameSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
-import { loadEntries, analyzeRepo } from './detect.mjs';
+import { loadEntries, analyzeRepo, skipReason } from './detect.mjs';
+import { UA_BROWSER, mapLimit, readBaseline, writeAtomic } from './harvest-lib.mjs';
+import { flag, positionals } from './argv.mjs';
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 const BASELINE = resolve(__dir, '.pulse-baseline.json');
 
 const args = process.argv.slice(2);
-const todayArg = args.find((a) => a.startsWith('--today='));
-const today = todayArg ? new Date(todayArg.split('=')[1] + 'T00:00:00Z') : new Date();
+const todayArg = flag(args, 'today', null);
+const today = todayArg ? new Date(todayArg + 'T00:00:00Z') : new Date();
 const noLinks = args.includes('--no-links');
-const repos = args.filter((a) => !a.startsWith('--'));
+const repos = positionals(args);
 const ageDays = (d) => Math.round((today - new Date(d + 'T00:00:00Z')) / 86400000);
 
 const entries = loadEntries();
@@ -49,7 +51,7 @@ async function checkUrl(url) {
   // Browser-ish UA: many hosts (medium.com, personal blogs behind bot-gates) 403/timeout a
   // tool UA but serve a browser one fine — the same lesson as the harvest playbook's curl -A
   // fallback (tools/upkeep-routine.md). Cuts false "unreachable/blocked" noise from §1.
-  const opt = (m, ms) => ({ method: m, redirect: 'follow', signal: AbortSignal.timeout(ms), headers: { 'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36 react-brain-pulse/0.1' } });
+  const opt = (m, ms) => ({ method: m, redirect: 'follow', signal: AbortSignal.timeout(ms), headers: { 'user-agent': `${UA_BROWSER} react-brain-pulse/0.1` } });
   try {
     let r = await fetch(url, opt('HEAD', 9000));
     if ([403, 405, 501, 0].includes(r.status)) { try { r = await fetch(url, opt('GET', 13000)); } catch { /* keep HEAD result */ } }
@@ -61,13 +63,7 @@ async function checkUrl(url) {
     return { url, status: 0, klass: 'unreachable', err: err === 'TimeoutError' || err === 'AbortError' ? 'timeout' : err };
   }
 }
-async function pool(items, n, fn) {
-  const out = []; let i = 0;
-  await Promise.all(Array.from({ length: Math.min(n, items.length) }, async () => {
-    while (i < items.length) { const idx = i++; out[idx] = await fn(items[idx]); }
-  }));
-  return out;
-}
+
 
 const urlMap = new Map(); // url -> {entries:Set, kind:'reading'|'source'|'watching'}
 for (const e of list) {
@@ -81,7 +77,7 @@ console.log(`\n${'─'.repeat(78)}\n§1  LINK HEALTH — ${urls.length} unique r
 if (noLinks) {
   console.log('  (skipped: --no-links)');
 } else {
-  const results = await pool(urls, 8, checkUrl);
+  const results = await mapLimit(urls, 8, checkUrl);
   const netErr = results.filter((r) => r.klass === 'unreachable' && ['ENOTFOUND', 'EAI_AGAIN', 'ECONNREFUSED', 'ENETUNREACH', 'timeout'].includes(r.err)).length;
   if (netErr === results.length && results.length) {
     console.log(`  ⚠ network unavailable in this environment (all fetches failed: ${results[0]?.err}).`);
@@ -122,13 +118,11 @@ if (!repos.length) {
 } else {
   const analyzed = repos.map((r) => [r, analyzeRepo(r)]);
   for (const [arg, a] of analyzed) if (!a || a.missing || a.notReact)
-    console.log(`  (skip ${arg}: ${!a || a.missing ? (a?.malformed ? 'malformed package.json' : 'no package.json') : 'not a React/RN repo'})`);
+    console.log(`  (skip ${arg}: ${skipReason(a)})`);
   const live = analyzed.map(([, a]) => a).filter((a) => a && !a.missing && !a.notReact);
   const fp = {}; // repo -> { entryId: labels }
   for (const a of live) { fp[a.name] = {}; for (const [id, info] of Object.entries(a.byEntry)) fp[a.name][id] = [...info.labels].sort().join(', '); }
-  let prev = null;
-  try { prev = existsSync(BASELINE) ? JSON.parse(readFileSync(BASELINE, 'utf8')) : null; }
-  catch { console.log('  ⚠ drift baseline unreadable (corrupt/conflicted) — re-baselining this run'); }
+  const prev = readBaseline(BASELINE, () => console.log('  ⚠ drift baseline unreadable (corrupt/conflicted) — re-baselining this run'));
   if (!prev) {
     console.log(`  baseline established for ${live.length} repo(s): ${live.map((a) => a.name).join(', ')}.`);
     console.log(`  → drift (added/removed/changed ecosystem choices) will report on the next run.`);
@@ -150,8 +144,7 @@ if (!repos.length) {
   // keep fingerprints of repos NOT analyzed this run (skipped/failed) — deleting them
   // would silently lose drift across the gap; write atomically
   const merged = { ...(prev?.fingerprints || {}), ...fp };
-  writeFileSync(BASELINE + '.tmp', JSON.stringify({ date: today.toISOString().slice(0, 10), fingerprints: merged }, null, 2));
-  renameSync(BASELINE + '.tmp', BASELINE);
+  writeAtomic(BASELINE, JSON.stringify({ date: today.toISOString().slice(0, 10), fingerprints: merged }, null, 2));
   console.log(`\n  baseline updated → ${BASELINE.replace(resolve(__dir, '..') + '/', '')}`);
 }
 

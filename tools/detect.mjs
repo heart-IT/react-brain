@@ -78,6 +78,11 @@ export function matchDetector(name) {
 
 const PLATFORM_PKGS = new Set(['react', 'react-dom', 'react-native']);
 
+// why a repo dropped out of a scan — one wording for every tool that skips one
+export const skipReason = (a) => !a || a.missing
+  ? (a?.malformed ? 'malformed package.json' : 'no package.json')
+  : 'not a React/RN repo';
+
 export function analyzeRepo(repoPath) {
   const p = resolve(repoPath);
   const pj = join(p, 'package.json');

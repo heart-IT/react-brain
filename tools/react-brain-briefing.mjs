@@ -18,12 +18,13 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 import { analyzeRepo, loadDoc, parseYamlStr, GROUP_ORDER } from './detect.mjs';
+import { flag, today } from './argv.mjs';
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dir, '..');
 const ARGS = process.argv.slice(2);
-const SINCE_ARG = (ARGS.find((a) => a.startsWith('--since=')) || '').slice(8) || null;
-const TODAY = (ARGS.find((a) => a.startsWith('--today=')) || '').slice(8) || new Date().toISOString().slice(0, 10);
+const SINCE_ARG = flag(ARGS, 'since', null);
+const TODAY = today(ARGS);
 const WRITE = ARGS.includes('--write');
 const repos = ARGS.filter((a) => !a.startsWith('--'));
 if (!repos.length) { console.error('usage: react-brain briefing <repo...> [--since=YYYY-MM-DD] [--write]'); process.exit(1); }

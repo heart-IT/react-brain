@@ -21,7 +21,7 @@ projects.
 
 | Pillar | What it is | Status |
 |--------|-----------|--------|
-| 🧠 **Encyclopedia** | Curated knowledge of the React + RN ecosystem — state, routing, data, lists, forms, styling, testing, native, OTA, AI tooling… with context-keyed recommendations and tradeoffs, synthesized from 6 cross-checked newsletters. | 45-entry grouped index ([`encyclopedia.yaml`](skills/react-brain-mentor/encyclopedia.yaml) + one file per entry in [`entries/`](skills/react-brain-mentor/entries/)) with `recommend` blocks, curated `reading` (and A/V `watching`); **42 `reviewed` long-form entries** in [`encyclopedia/`](encyclopedia/) |
+| 🧠 **Encyclopedia** | Curated knowledge of the React + RN ecosystem — state, routing, data, lists, forms, styling, testing, native, OTA, AI tooling… with context-keyed recommendations and tradeoffs, synthesized from 6 cross-checked newsletters (5 still running). | 45-entry grouped index ([`encyclopedia.yaml`](skills/react-brain-mentor/encyclopedia.yaml) + one file per entry in [`entries/`](skills/react-brain-mentor/entries/)) with `recommend` blocks, curated `reading` (and A/V `watching`); **42 `reviewed` long-form entries** in [`encyclopedia/`](encyclopedia/) |
 | 📚 **Tutorial** | The guided learning path through the encyclopedia (Diataxis-structured). | **first form shipped** as the *adaptive* `react-brain learn` path — a curriculum computed as (encyclopedia graph) × your repo, not static prose ([`tools/react-brain-learn.mjs`](tools/react-brain-learn.mjs)) |
 | 🧠 **Mentor skill** | A Claude skill that reads any React/RN project and gives a ranked, grounded improvement roadmap — routes to depth knowledge skills **and** cites the encyclopedia for breadth. | **draft — started here** |
 
@@ -42,8 +42,9 @@ command, one verb per moment of a project's life (see [`tools/`](tools/)):
 | **briefing** | `react-brain briefing <repo>` | what changed in the ecosystem that touches *your* stack — the corpus diff × your detected deps, receipts included (doctor = position · census = field · briefing = velocity) |
 | *(corpus upkeep)* | `evidence` · `pulse` · `calibrate` · `signals` · `lint` | self-audit · freshness · scored track record · live-npm reality check · mechanized invariants |
 
-**For agents (MCP):** `tools/mcp-server.mjs` serves the corpus as MCP tools — `capsules`
-(compact index) / `query` / `recommend` / `doctor` / `decide` / `stack` — zero-dep stdio; `.mcp.json`
+**For agents (MCP):** `tools/mcp-server.mjs` serves the corpus as 9 MCP tools — `capsules`
+(compact index) / `query` / `recommend` / `doctor` / `decide` / `map` / `migrate` / `review` /
+`stack` — zero-dep stdio; `.mcp.json`
 wires it for Claude Code here. From any other project:
 `claude mcp add react-brain -- npx -y @heart-it/react-brain mcp`.
 

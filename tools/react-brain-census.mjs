@@ -11,23 +11,25 @@
 //   node tools/react-brain-census.mjs [--json] [--cohort=path] [--today=YYYY-MM-DD]
 // ───────────────────────────────────────────────────────────────────────────────
 
-import { readFileSync, writeFileSync, existsSync, renameSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { matchDetector, loadEntries, GROUP_ORDER } from './detect.mjs';
+import { UA_BROWSER, mapLimit, readBaseline, writeAtomic } from './harvest-lib.mjs';
+import { flag, today } from './argv.mjs';
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 const ARGS = process.argv.slice(2);
 const JSON_OUT = ARGS.includes('--json');
-const COHORT_PATH = (ARGS.find((a) => a.startsWith('--cohort=')) || '').slice(9) || resolve(__dir, 'census-cohort.json');
-const TODAY = (ARGS.find((a) => a.startsWith('--today=')) || '').slice(8) || new Date().toISOString().slice(0, 10);
+const COHORT_PATH = flag(ARGS, 'cohort', resolve(__dir, 'census-cohort.json'));
+const TODAY = today(ARGS);
 const BASELINE_PATH = resolve(__dir, '.census-baseline.json');
 
 const cohort = JSON.parse(readFileSync(COHORT_PATH, 'utf8'));
 const entriesById = loadEntries();
 
 // ── fetch the cohort's package.json files (concurrency-limited, loud failures) ──
-const UA = { 'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/126.0 Safari/537.36 react-brain-census/0.1' };
+const UA = { 'user-agent': `${UA_BROWSER} react-brain-census/0.1` };
 async function fetchApp(app) {
   const url = `https://raw.githubusercontent.com/${app.repo}/${app.branch}/${app.path}`;
   try {
@@ -38,15 +40,7 @@ async function fetchApp(app) {
     return { ...app, deps };
   } catch (e) { return { ...app, error: e.name === 'TimeoutError' ? 'timeout' : (e.message || 'fetch failed').slice(0, 60) }; }
 }
-async function pool(items, n, fn) {
-  const out = []; let i = 0;
-  await Promise.all(Array.from({ length: n }, async () => {
-    while (i < items.length) { const idx = i++; out[idx] = await fn(items[idx]); }
-  }));
-  return out;
-}
-
-const results = await pool(cohort.apps, 6, fetchApp);
+const results = await mapLimit(cohort.apps, 6, fetchApp);
 const ok = results.filter((r) => r.deps);
 const failed = results.filter((r) => r.error);
 
@@ -99,11 +93,7 @@ if (!ok.length) {
   process.exit(1);
 }
 const changes = [];
-let baseline = null;
-if (existsSync(BASELINE_PATH)) {
-  try { baseline = JSON.parse(readFileSync(BASELINE_PATH, 'utf8')); }
-  catch { console.error('  ⚠ baseline unreadable (corrupt/conflicted) — velocity resets this run'); }
-}
+const baseline = readBaseline(BASELINE_PATH, () => console.error('  ⚠ baseline unreadable (corrupt/conflicted) — velocity resets this run'));
 if (baseline) {
   // a transiently-failed app keeps its last-known stack instead of round-tripping
   // through "left cohort" → "new in cohort" and losing its label history
@@ -120,8 +110,7 @@ if (baseline) {
 }
 // --json is a READ — it must not move the diff anchor for the next real run
 if (!JSON_OUT) {
-  writeFileSync(BASELINE_PATH + '.tmp', JSON.stringify(snapshot, null, 1));
-  renameSync(BASELINE_PATH + '.tmp', BASELINE_PATH);
+  writeAtomic(BASELINE_PATH, JSON.stringify(snapshot, null, 1));
 }
 
 // ── report ──────────────────────────────────────────────────────────────────────

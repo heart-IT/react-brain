@@ -47,7 +47,6 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "react-native-mmkv", label: "MMKV", token: "mmkv" }
   - { pkg: "@react-native-async-storage/async-storage", label: "AsyncStorage", token: "asyncstorage" }
   - { pkg: "@op-engineering/op-sqlite", label: "op-sqlite", token: "op-sqlite" }
-  - { pkg: "op-sqlite", label: "op-sqlite", token: "op-sqlite" }
   - { pkg: "expo-sqlite", label: "expo-sqlite", token: "sqlite" }
   - { pkg: "react-native-keychain", label: "Keychain (quiet since 2025-03)", token: "keychain" }
   - { pkg: "expo-secure-store", label: "expo-secure-store (secrets)", token: "secure-store" }

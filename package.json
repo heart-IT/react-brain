@@ -17,7 +17,10 @@
     "!tools/pulse.log",
     "!tools/census.log",
     "!tools/signals.log",
-    "!tools/.briefing-state.json"
+    "!tools/harvest.log",
+    "!tools/.registry-cache.json",
+    "!tools/.briefing-state.json",
+    "!tools/.doctor-memory.json"
   ],
   "scripts": {
     "stack": "node tools/cli.mjs stack",

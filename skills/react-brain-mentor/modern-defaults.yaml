@@ -93,10 +93,10 @@ swaps:
   - legacy: "TouchableOpacity (core)"
     modern: "Pressable → your design-system Button"
     entry: null                        # no ecosystem-selection entry; it's a rule
-    defer_to_skill: react-native-best-practices   # + design-systems-governance for the DS layer
+    defer_to_skill: react-native-best-practices   # + design-system for the DS layer
     axis: "modern press API, accessibility, visual consistency"
     strength: superseded
     effort: M
     detect: "import { TouchableOpacity } from 'react-native'"
     match: { rn_named_import: TouchableOpacity }
-    note: "Pressable is the modern primitive (richer press states, better a11y). The deeper win is not hand-rolling touchables at all — route presses through a design-system component (design-systems-governance). Rule-based, not a library pick."
+    note: "Pressable is the modern primitive (richer press states, better a11y). The deeper win is not hand-rolling touchables at all — route presses through a design-system component (design-system). Rule-based, not a library pick."

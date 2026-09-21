@@ -37,16 +37,16 @@
 //   node tools/react-brain-signals.mjs --no-registry          skip last-publish (downloads only)
 // ───────────────────────────────────────────────────────────────────────────────
 
-import { readFileSync, writeFileSync, existsSync, appendFileSync, renameSync } from 'node:fs';
+import { appendFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
-import { loadDoc, entryPackages, pkgsForPick, GROUP_ORDER, trunc, readLedger, LEDGER_PATH } from './detect.mjs';
+import { loadDoc, entryPackages, pkgsForPick, GROUP_ORDER, readLedger, LEDGER_PATH, loadCensus } from './detect.mjs';
+import { get, mapLimit, readBaseline, writeAtomic } from './harvest-lib.mjs';
+import { today as todayOf } from './argv.mjs';
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 const BASELINE = resolve(__dir, '.signals-baseline.json');
-const CENSUS_PATH = resolve(__dir, '.census-baseline.json');
-let CENSUS = null;   // a corrupt census baseline must not take signals down with it
-try { CENSUS = existsSync(CENSUS_PATH) ? JSON.parse(readFileSync(CENSUS_PATH, 'utf8')) : null; } catch { /* ships-in column simply absent */ }
+const CENSUS = loadCensus();   // a corrupt census baseline must not take signals down with it
 const MAINT_RE = /maintenance|deprecated|frozen|sunset|superseded|abandoned|unmaintained/i;
 // A maintenance KEYWORD near a package name is not a maintenance CLAIM about it. Three ways
 // that goes wrong, all observed in this corpus on 2026-08-18 (5 of 5 CLAIM flags were false):
@@ -63,7 +63,7 @@ const STALE_MONTHS = 12;       // a recommended default silent this long → ear
 const FRESH_MONTHS = 6;        // "maintenance" claim contradicted if published within this
 
 const flags = process.argv.slice(2);
-const today = (flags.find((f) => f.startsWith('--today=')) || '').split('=')[1] || new Date().toISOString().slice(0, 10);
+const today = todayOf(flags);
 const LIST = flags.includes('--list');
 const NO_REG = flags.includes('--no-registry');
 const RECORD = flags.includes('--record');
@@ -76,22 +76,13 @@ const monthsBetween = (iso) => {
 };
 const ageStr = (m) => m == null ? '?' : m < 1 ? 'days' : m < 24 ? `${m}mo` : `${(m / 12).toFixed(0)}y`;
 
-async function getJSON(url, ms = 9000) {
-  const ac = new AbortController();
-  const t = setTimeout(() => ac.abort(), ms);
-  try {
-    const r = await fetch(url, { signal: ac.signal, headers: { 'user-agent': 'react-brain-signals' } });
-    return r.ok ? await r.json() : null;
-  } catch { return null; } finally { clearTimeout(t); }
-}
-async function mapLimit(items, limit, fn) {
-  const out = new Array(items.length);
-  let i = 0;
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (i < items.length) { const idx = i++; out[idx] = await fn(items[idx], idx); }
-  }));
-  return out;
-}
+// null means "the registry didn't answer" — every caller renders that as '—' and the
+// merge-over-previous baseline keeps the last known value. harvest-lib's get() supplies
+// the retry-once (skipped on 4xx, which are answers, not noise).
+const getJSON = async (url, timeout = 9000) => {
+  try { return JSON.parse(await get(url, { ua: 'react-brain-signals', timeout })); }
+  catch { return null; }
+};
 const regName = (pkg) => pkg.startsWith('@') ? pkg.replace('/', '%2F') : pkg;
 
 // The downloads point API rate-limits bursts, so use the BULK form for unscoped packages
@@ -106,9 +97,7 @@ async function fetchDownloads(pkgs) {
     for (const p of chunk) out[p] = res ? (res[p]?.downloads ?? (res.package === p ? res.downloads : null)) : null;
   }
   await mapLimit(scoped, 4, async (p) => {
-    let n = (await getJSON(`https://api.npmjs.org/downloads/point/last-week/${p}`))?.downloads;
-    if (n == null) n = (await getJSON(`https://api.npmjs.org/downloads/point/last-week/${p}`))?.downloads; // 1 retry
-    out[p] = n ?? null;
+    out[p] = (await getJSON(`https://api.npmjs.org/downloads/point/last-week/${p}`))?.downloads ?? null;
   });
   return out;
 }
@@ -178,9 +167,7 @@ if (dlGotCount() === 0) {
 }
 function dlGotCount() { return uniquePkgs.filter((p) => dl[p] != null).length; }
 
-let base = null;
-try { base = existsSync(BASELINE) ? JSON.parse(readFileSync(BASELINE, 'utf8')) : null; }
-catch { console.error('  ⚠ baseline unreadable (corrupt/conflicted) — trends reset this run'); }
+const base = readBaseline(BASELINE, () => console.error('  ⚠ baseline unreadable (corrupt/conflicted) — trends reset this run'));
 const delta = (pkg) => {
   if (!base || base[pkg] == null || dl[pkg] == null) return '';
   const d = dl[pkg] - base[pkg];
@@ -281,6 +268,5 @@ if (!base) console.log(`\n  (baseline set — re-run later for ↑/↓ download 
 // merge over the previous baseline (a transiently-missed pkg keeps its last count instead
 // of losing trend history), and write atomically so a killed run can't truncate the file
 const fetched = { ...(base || {}), ...Object.fromEntries(uniquePkgs.filter((p) => dl[p] != null).map((p) => [p, dl[p]])) };
-writeFileSync(BASELINE + '.tmp', JSON.stringify(fetched, null, 0) + '\n');
-renameSync(BASELINE + '.tmp', BASELINE);
+writeAtomic(BASELINE, JSON.stringify(fetched, null, 0) + '\n');
 console.log('');

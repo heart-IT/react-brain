@@ -10,11 +10,12 @@
 //   node tools/react-brain-map.mjs <repo> [--json] [--dir=src/]
 // ───────────────────────────────────────────────────────────────────────────────
 
-import { loadEntries, mapRepo, trunc } from './detect.mjs';
+import { loadEntries, mapRepo, trunc, skipReason } from './detect.mjs';
+import { flag } from './argv.mjs';
 
 const argv = process.argv.slice(2);
 const JSON_OUT = argv.includes('--json');
-const DIR = (argv.find((a) => a.startsWith('--dir=')) || '').slice(6) || null;
+const DIR = flag(argv, 'dir', null);
 const targets = argv.filter((a) => !a.startsWith('--'));
 if (!targets.length) { console.error('usage: node tools/react-brain-map.mjs <repoPath> [--json] [--dir=src/]'); process.exit(1); }
 
@@ -23,7 +24,7 @@ const short = (id) => id.replace('RB-E-', '');
 
 for (const t of targets) {
   const m = mapRepo(t, entries);
-  if (m.missing || m.notReact) { console.log(`(skip ${m.name}: ${m.missing ? (m.malformed ? 'malformed package.json' : 'no package.json') : 'not a React/RN repo'})`); continue; }
+  if (m.missing || m.notReact) { console.log(`(skip ${m.name}: ${skipReason(m)})`); continue; }
   const files = DIR ? m.files.filter((f) => f.path.startsWith(DIR)) : m.files;
   if (JSON_OUT) { console.log(JSON.stringify({ ...m, files }, null, 1)); continue; }
 

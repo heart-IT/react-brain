@@ -14,7 +14,7 @@
 // Usage:  node tools/react-brain-evidence.mjs <repo> [<repo> ...]
 // ───────────────────────────────────────────────────────────────────────────────
 
-import { loadEntries, analyzeRepo, fit, GROUP_ORDER } from './detect.mjs';
+import { loadEntries, analyzeRepo, fit, GROUP_ORDER, skipReason } from './detect.mjs';
 
 // out-of-scope / expected-uncovered classification for the MISSING report
 // NOTE: the Holepunch data stack (hyper*, autobase, corestore, hrpc, blind-pairing) is now
@@ -41,7 +41,7 @@ const cls = (name) => {
 
 const analyzed = process.argv.slice(2).map((r) => [r, analyzeRepo(r)]);
 for (const [arg, a] of analyzed) if (!a || a.missing || a.notReact)
-  console.error(`(skip ${arg}: ${!a || a.missing ? (a?.malformed ? 'malformed package.json' : 'no package.json') : 'not a React/RN repo'})`);
+  console.error(`(skip ${arg}: ${skipReason(a)})`);
 const corpus = analyzed.map(([, a]) => a).filter((a) => a && !a.missing && !a.notReact);
 if (!corpus.length) { console.error('no React/RN repos in corpus'); process.exit(1); }
 const entries = loadEntries();

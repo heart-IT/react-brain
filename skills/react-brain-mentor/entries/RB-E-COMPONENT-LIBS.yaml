@@ -38,7 +38,7 @@ note: >
   belongs in a when-clause and not a default; the honest risk is a three-week-old rule set, not the
   idea.
   Split three ways: headless/unstyled (Base UI, React Aria, Radix) vs batteries-included (MUI/Chakra/Mantine/Ant, plus Meta's StyleX-based Astryx) vs own-the-code (shadcn). Web only. HEADLESS-LAYER SHIFT (verified vs the shadcn changelog, 2026-07-10): 'Base UI is the default component library in shadcn/ui' — Radix explicitly NOT deprecated (both supported), but the center of gravity for new shadcn work is now Base UI; MUI v9 is incrementally adopting the same primitives. UPDATE (verified vs the shadcn changelog, 2026-07-20): React Aria is now the THIRD first-class shadcn base (`shadcn init --base aria`) — all three headless layers install through the same tooling with per-base scoped registries, so a project standardizes on one without cross-contamination; Base UI remains the default. Astryx (beta, 2026) pairs compile-time StyleX styling with agent-ready scaffolding (CLI + MCP) — Meta open-sourced its 8-yr internal system (13,000+ apps); see RB-E-STYLING for StyleX.
-defer_to_skill: design-systems-governance
+defer_to_skill: design-system
 doc: "RB-E-COMPONENT-LIBS.md"   # long-form Explanation entry in content_dir
 updated: 2026-09-21   # @shadcn/lint — agent-first design-system linting for Tailwind v4 on ESLint or Oxlint (TWiR #297 · React Status #491) · Astryx pinned at 0.6.0 with its stated path to v1
 sources:

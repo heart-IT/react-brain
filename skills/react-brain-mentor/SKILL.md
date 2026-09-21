@@ -6,7 +6,7 @@ description: >
   platform(s) and maturity stage, then produces a RANKED, grounded improvement
   roadmap that teaches the why behind each suggestion — not a pass/fail gate.
   Orchestrates the existing knowledge skills (react-native-best-practices,
-  react-native-jsi, engineering-principles, design-systems-governance,
+  react-native-jsi, engineering-principles, design-system,
   parity-verify, diataxis-documentation) for DEPTH rather than re-encoding their
   rules, and cites the react-brain encyclopedia for BREADTH — ecosystem-selection
   guidance (which router/state/data/styling/forms library, and when). Use when
@@ -57,7 +57,7 @@ Two knowledge sources, cleanly divided:
   discovers and routes to them the same way `/review` does: globbing
   `~/.claude/skills/*/SKILL.md` and reading each composition block. (RN perf →
   `react-native-best-practices`; architecture → `engineering-principles`; JSI →
-  `react-native-jsi`; tokens/a11y → `design-systems-governance`; …)
+  `react-native-jsi`; tokens/a11y → `design-system`; …)
 - **Breadth** — the **react-brain encyclopedia** (`encyclopedia.yaml`) owns
   ecosystem *selection*: which router/state/data/styling/forms library, the
   tradeoffs, and the **context-keyed** recommendation. When an entry touches a
@@ -103,7 +103,7 @@ says *"for server state at MVP+, X wins on invalidation,"* never *"X is best."*
 
 **Current state (2026-09-10):** 45 entries across 6 groups, all `drafted`+ (0 stubs), 42
 `reviewed` with long-form `encyclopedia/<id>.md`, every entry with curated reading (plus an
-optional A/V `watching` list), synthesized from 6 cross-checked newsletters. Entries
+optional A/V `watching` list), synthesized from 6 cross-checked newsletters (5 still running; React Weekly retired 2026-09-21). Entries
 are reached two ways so none are orphaned (mechanized by `react-brain lint`): **cross-cutting**
 domains via the YAML's `assessment_dimensions`, and **feature/capability** domains via its
 `capability_map` (detected dep/need → entry) — so niche areas (media, maps, payments, editors,
@@ -122,8 +122,7 @@ Phase 0 treats `react-brain doctor <repo> --json` as ground truth for platform/s
 
 - **Defers to** `review` for pass/fail gating of a specific diff.
 - **Orchestrates / cites** `engineering-principles`, `react-native-best-practices`,
-  `react-native-jsi`, `design-systems-governance`, `typographic-grid-foundations`,
-  `parity-verify`, `diataxis-documentation`, `agentic-engineering-patterns`.
+  `react-native-jsi`, `design-system`, `parity-verify`, `diataxis-documentation`, `agentic-engineering-patterns`.
 - **Does not** re-encode their rules — it routes and cites.
 
 ## Status: draft

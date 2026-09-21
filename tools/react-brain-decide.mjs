@@ -14,8 +14,9 @@
 import { readFileSync, writeFileSync, existsSync, readdirSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
-import { loadDoc, loadEntries, searchEntries, resolveRecommendation, analyzeRepo,
+import { searchEntries, resolveRecommendation, analyzeRepo,
          entryPackages, readLedger, trackRecord, trunc } from './detect.mjs';
+import { flag, today } from './argv.mjs';
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 
@@ -25,13 +26,13 @@ const flags = argv.filter((a) => a.startsWith('--'));
 const pos = argv.filter((a) => !a.startsWith('--'));
 const TOPIC = pos[0];
 const REPO = pos[1] || '.';
-const OUT = (flags.find((f) => f.startsWith('--out=')) || '--out=docs/adr').split('=')[1];
+const OUT = flag(flags, 'out', 'docs/adr');
 const STDOUT = flags.includes('--stdout');
 // finding keys this decision ACKNOWLEDGES (kind:RB-E-X, e.g. smell:RB-E-CROSSPLATFORM) —
 // doctor folds matching findings out of its priorities while the premise holds,
 // and RE-OPENS them boosted when it breaks
-const QUIETS = ((flags.find((f) => f.startsWith('--quiets=')) || '').split('=')[1] || '').split(',').filter(Boolean);
-const TODAY = (flags.find((f) => f.startsWith('--today=')) || '').split('=')[1] || new Date().toISOString().slice(0, 10);
+const QUIETS = flag(flags, 'quiets', '').split(',').filter(Boolean);
+const TODAY = today(flags);
 if (!TOPIC) { console.error('usage: react-brain decide <topic> [repoPath] [--out=docs/adr] [--stdout] [--quiets=kind:RB-E-X,…]'); process.exit(1); }
 
 // ── resolve topic → entry ───────────────────────────────────────────────────────

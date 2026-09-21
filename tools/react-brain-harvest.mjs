@@ -29,7 +29,8 @@
 import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { get, UA_BROWSER, extractLinks, manifestKeys, normalize, coverageCheck, prepClassify, parseGoldManifest } from './harvest-lib.mjs';
+import { get, UA_BROWSER, extractLinks, normalize, coverageCheck, prepClassify, parseGoldManifest } from './harvest-lib.mjs';
+import { flag } from './argv.mjs';
 
 const TOOLS = dirname(fileURLToPath(import.meta.url));
 const LOG_DIR = join(TOOLS, 'harvest-log');
@@ -66,7 +67,7 @@ if (mode === 'firsthand') {
   if (!src) { console.error(`usage: harvest prep <source> [--issue=N] [--stdout] — sources: ${Object.keys(state.sources).join(', ')}`); process.exit(1); }
   if (!src.url_pattern) { console.log(`${key}: slug/RSS source (no url_pattern) — check ${src.archive} manually, then use inventory + hand-write the manifest`); process.exit(0); }
   const last = parseInt(String(src.last_processed).replace(/\D/g, ''), 10);
-  const forced = parseInt((args.find((a) => a.startsWith('--issue=')) || '').split('=')[1], 10);
+  const forced = parseInt(flag(args, 'issue', ''), 10);
   let issue = null, url = null;
   for (const c of forced ? [forced] : [last + 1, last + 2]) {
     const u = src.url_pattern.replace('{n}', c);
@@ -163,6 +164,6 @@ if (mode === 'firsthand') {
   console.log(`\n${signals.length} standing reopen signal(s):`);
   signals.forEach((s) => console.log(`   [${s.file}] ${s.line}`));
 } else {
-  console.error('usage: react-brain harvest <prep <source> | firsthand --manifest (bare poll is dry) [--graph|--json] | inventory <url> | coverage <url> <manifest.md> | verify-diff [--base=main] | bench [--model=id|--candidate=file] | watchlist>');
+  console.error('usage: react-brain harvest <prep <source> | firsthand --manifest (bare poll is dry) [--graph|--json] | inventory <url> | coverage <url> <manifest.md> | verify-diff [--base=main] | rules [--check] | bench [--model=id|--candidate=file] | watchlist>');
   process.exit(1);
 }

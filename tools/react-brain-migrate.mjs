@@ -14,7 +14,7 @@
 //   node tools/react-brain-migrate.mjs <repo> [--json]
 // ───────────────────────────────────────────────────────────────────────────────
 
-import { loadEntries, analyzeRepo, scanModernDefaults, minVer, verLt, trunc } from './detect.mjs';
+import { loadEntries, analyzeRepo, scanModernDefaults, minVer, verLt, trunc, skipReason } from './detect.mjs';
 
 const argv = process.argv.slice(2);
 const JSON_OUT = argv.includes('--json');
@@ -88,7 +88,7 @@ const PHASE_TITLES = {
 
 for (const t of targets) {
   const p = planFor(t);
-  if (p.missing || p.notReact) { console.log(`(skip ${p.name}: ${p.missing ? (p.malformed ? 'malformed package.json' : 'no package.json') : 'not a React/RN repo'})`); continue; }
+  if (p.missing || p.notReact) { console.log(`(skip ${p.name}: ${skipReason(p)})`); continue; }
   if (JSON_OUT) { console.log(JSON.stringify(p, null, 1)); continue; }
 
   console.log(`\n${'═'.repeat(78)}`);

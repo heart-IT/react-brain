@@ -7,7 +7,7 @@ confidence: medium
 updated: 2026-07-10
 platforms: [react]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-COMPONENT-LIBS
-defer_to_skill: design-systems-governance
+defer_to_skill: design-system
 related: [RB-E-STYLING, RB-E-A11Y, RB-E-AI-DEVTOOLS, RB-E-CROSSPLATFORM]
 sources:
   - "https://ui.shadcn.com/docs/changelog"
@@ -18,7 +18,7 @@ sources:
 
 > **Diataxis: Explanation.** This page builds *understanding* of the web component-library
 > landscape — the reasoning behind the picks. It is not a component catalog. Token/theming/a11y
-> governance is owned by `design-systems-governance`; styling engines by `RB-E-STYLING`. This
+> governance is owned by `design-system`; styling engines by `RB-E-STYLING`. This
 > entry is **web-only** — React Native UI routes to `RB-E-STYLING`/`RB-E-CROSSPLATFORM`.
 
 ## The one question that organises everything: who owns the code you'll be debugging in a year?
@@ -113,4 +113,4 @@ hand-roll the behavior layer — that's the part with the accessibility landmine
 
 *See also: `RB-E-STYLING` (the engine under the components), `RB-E-A11Y` (what headless does and
 doesn't guarantee), `RB-E-AI-DEVTOOLS` (agent scaffolding as a selection axis). Token/theming/
-lifecycle governance: the `design-systems-governance` skill.*
+lifecycle governance: the `design-system` skill.*

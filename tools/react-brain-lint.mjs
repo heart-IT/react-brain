@@ -5,7 +5,8 @@
 // corpus edit; `npm test` runs it. Exit 1 on errors; warnings don't fail.
 //
 //   ERRORS  — schema violations, unreachable entries, id/file mismatches, dup URLs
-//             within an entry, dup detect packages across entries, broken doc refs
+//             within an entry, dup detect packages across entries, broken doc refs,
+//             depth routing that names a skill the mentor doesn't orchestrate
 //   WARNS   — cross-entry duplicate reading URLs (sometimes deliberate), stale
 //             count claims in prose/comments
 // ───────────────────────────────────────────────────────────────────────────────
@@ -14,7 +15,7 @@ import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { dirname, join, resolve } from 'node:path';
-import { loadYaml, loadYamlMany, ENC_PATH, ENTRIES_DIR, GROUP_ORDER } from './detect.mjs';
+import { loadYaml, loadYamlMany, loadModernDefaults, ENC_PATH, ENTRIES_DIR, GROUP_ORDER } from './detect.mjs';
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 const MENTOR_PATH = resolve(__dir, '../skills/react-brain-mentor/react-brain-mentor.yaml');
@@ -197,6 +198,26 @@ for (const [cat, owners] of cats) {
   if (!reachable) err(`ORPHAN category '${cat}' (${owners.join(', ')}): no assessment_dimension and no capability_map row — invisible to the mentor`);
 }
 
+// ── depth routing: every deferred-to skill is one the mentor orchestrates ──────
+// These two lists drifted silently for two months when `design-systems-governance` and
+// `typographic-grid-foundations` merged upstream into `design-system`: entries, mentor
+// dimensions and swap rows kept routing depth audits at names that resolved to nothing.
+// The skills themselves live outside this repo (nothing to stat in CI), so the halves
+// are pinned to each other — a rename now has to land in both or the gate says so.
+const skillTargets = new Set((mentor.composition?.complements || []).map((c) => c.target).filter(Boolean));
+for (const { e } of entries)
+  if (e?.defer_to_skill && !skillTargets.has(e.defer_to_skill))
+    err(`${e.id}: defer_to_skill '${e.defer_to_skill}' is not a composition.complements target in react-brain-mentor.yaml`);
+for (const d of mentor.assessment_dimensions || [])
+  if (d.owner && !skillTargets.has(d.owner))
+    err(`mentor dimension '${d.id}': owner '${d.owner}' is not a composition.complements target`);
+for (const sw of loadModernDefaults().swaps || []) {
+  if (sw.defer_to_skill && !skillTargets.has(sw.defer_to_skill))
+    err(`modern-defaults '${sw.legacy}': defer_to_skill '${sw.defer_to_skill}' is not a composition.complements target`);
+  if (sw.entry && !ids.has(sw.entry))
+    err(`modern-defaults '${sw.legacy}': entry '${sw.entry}' is not a known entry id`);
+}
+
 // ── harvest resume state ↔ sources_digested (the two must never drift) ──────────
 const HARVEST_PATH = resolve(__dir, 'harvest-state.json');
 if (existsSync(HARVEST_PATH)) {
@@ -245,6 +266,28 @@ for (const p of DOC_PATHS) {
     if (Number(m[1]) !== n && Number(m[1]) > 10) warn(`${rel}: claims '${m[0]}', actual ${n} entries`);
   for (const m of txt.matchAll(/(\d+)\s+(?:are\s+)?`?reviewed`?/gi))
     if (Number(m[1]) !== nReviewed) warn(`${rel}: claims '${m[0]}', actual ${nReviewed} reviewed`);
+}
+
+// ── long-form doc freshness: the .md must not trail its entry ──────────────────
+// The terse entry moves on every harvest; the hand-written Explanation doc silently
+// falls behind (when this check landed, 35 of 42 reviewed entries trailed by up to
+// 96 days, with cited facts missing from the prose). One ranked line, not 35 — a
+// warning per entry would train the eye to skip the warning block. Catching up is a
+// writing pass, not a mechanical fix, so this never fails the gate.
+const docDrift = [];
+for (const { e } of entries) {
+  if (!e?.doc || !e.updated) continue;
+  const docPath = join(contentDir, e.doc);
+  if (!existsSync(docPath)) continue;                       // already an error above
+  const m = readFileSync(docPath, 'utf8').slice(0, 800).match(/^updated:\s*(\d{4}-\d{2}-\d{2})/m);
+  if (!m) { warn(`${e.id}: doc '${e.doc}' has no 'updated:' frontmatter — drift can't be tracked`); continue; }
+  const days = Math.round((Date.parse(String(e.updated).slice(0, 10)) - Date.parse(m[1])) / 86400000);
+  if (days > 0) docDrift.push({ id: e.id, days, doc: m[1], entry: String(e.updated).slice(0, 10) });
+}
+if (docDrift.length) {
+  docDrift.sort((a, b) => b.days - a.days);
+  const worst = docDrift.slice(0, 5).map((d) => `${d.id.replace('RB-E-', '')} ${d.days}d`).join(', ');
+  warn(`${docDrift.length} long-form doc(s) trail their entry (worst: ${worst}) — the .md is older than the facts it explains`);
 }
 
 // ── report ──────────────────────────────────────────────────────────────────────

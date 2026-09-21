@@ -46,7 +46,7 @@ note: >
   emerging successor (see RB-E-CROSSPLATFORM). The Tailwind-for-RN field is crowded
   ("Tailwind fatigue" — NativeWind, Uniwind, react-native-tailwind, …); the durable
   selection axis is runtime cost — zero-runtime/compiler approaches avoid JS-side style work.
-defer_to_skill: design-systems-governance  # tokens, theme parity, a11y intrinsics
+defer_to_skill: design-system  # tokens, theme parity, a11y intrinsics
 doc: "RB-E-STYLING.md"   # long-form Explanation entry in content_dir
 updated: 2026-09-21   # Tailwind Labs joined Shopify — OSS stays MIT under the same team, Tailwind Plus/ui.sh closed to new sign-ups (React Status #490)
 reading:

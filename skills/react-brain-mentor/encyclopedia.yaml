@@ -6,7 +6,8 @@
 # and what to use when. This file is the machine-readable INDEX the mentor skill
 # reads to give breadth/selection advice (MP-VETTED-OVER-PROMOTION).
 #
-# SOURCES: facts are synthesized from 6 cross-checked newsletters (React Native
+# SOURCES: facts are synthesized from 6 cross-checked newsletters, 5 still running
+#   (React Weekly retired 2026-09-21; its digested issues stay counted). (React Native
 # Rewind, This Week in React, React Status, React Digest, Native Weekly, React
 # Weekly) as of 2026-07-10; load-bearing version/security facts are verified against primary
 # sources (entries with `sources:` + `updated:`). Library picks in `recommend`
@@ -21,7 +22,7 @@
 #   Encyclopedia = BREADTH (ecosystem SELECTION + cross-cutting choices).
 #   It does NOT re-encode DEPTH rules owned by a knowledge skill (RN perf →
 #   react-native-best-practices; architecture → engineering-principles; a11y/
-#   tokens → design-systems-governance; JSI → react-native-jsi). Each entry names
+#   tokens → design-system; JSI → react-native-jsi). Each entry names
 #   a `defer_to_skill` for depth instead of restating its rules.
 #
 # HOW THE MENTOR USES THIS:

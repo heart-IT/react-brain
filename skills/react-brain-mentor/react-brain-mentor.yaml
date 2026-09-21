@@ -60,10 +60,8 @@ composition:
       on: "RN performance / rendering / bundle / state dimension routes here (depth)"
     - target: react-native-jsi
       on: "native module / JSI / New Architecture dimension routes here (depth)"
-    - target: design-systems-governance
-      on: "design tokens / accessibility / component lifecycle dimension routes here (depth)"
-    - target: typographic-grid-foundations
-      on: "typography / grid / layout craft dimension routes here (depth)"
+    - target: design-system
+      on: "design tokens / accessibility / component lifecycle / typography / layout craft dimension routes here (depth)"
     - target: parity-verify
       on: "iOS/Android behavioral parity dimension routes here (depth)"
     - target: diataxis-documentation
@@ -181,7 +179,7 @@ assessment_dimensions:
     encyclopedia_cat: forms
   - id: DIM-STYLING
     lens: "Styling approach, theming, design-token plumbing"
-    owner: design-systems-governance
+    owner: design-system
     encyclopedia_cat: styling
   - id: DIM-TYPES
     lens: "TypeScript rigor, public API surface, generics vs any, exported types"
@@ -194,7 +192,7 @@ assessment_dimensions:
     cross_ref: review
   - id: DIM-A11Y
     lens: "Accessibility: roles, labels, focus order, contrast, dynamic type, screen readers"
-    owner: design-systems-governance
+    owner: design-system
     encyclopedia_cat: accessibility
   - id: DIM-NATIVE
     lens: "Native modules, JSI/TurboModules, New Architecture, threading, C++ memory safety"

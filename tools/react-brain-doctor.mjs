@@ -10,11 +10,11 @@
 // Shared detection lives in ./detect.mjs (one source of truth, also used by evidence).
 // ───────────────────────────────────────────────────────────────────────────────
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { loadEntries, analyzeRepo, fit, trunc, GROUP_ORDER, trackRecord, TRACK_GLYPH, scanModernDefaults, scanSourceSignals, checkAdrs, adviseReadings, loadCensus, resolveRecommendation, trajectoryScan, matchDetector, minVer } from './detect.mjs';
-import { fetchDepDocs, classifyDepHealth, preflightVerdict } from './harvest-lib.mjs';
-import { pkgsForPick } from './detect.mjs';
+import { loadEntries, analyzeRepo, fit, trunc, GROUP_ORDER, trackRecord, TRACK_GLYPH, scanModernDefaults, scanSourceSignals, checkAdrs, adviseReadings, loadCensus, resolveRecommendation, trajectoryScan, matchDetector, minVer, pkgsForPick } from './detect.mjs';
+import { fetchDepDocs, classifyDepHealth, preflightVerdict, writeAtomic } from './harvest-lib.mjs';
+import { flag, positionals } from './argv.mjs';
 
 // Situational context tokens for resolveRecommendation — matched against the
 // corpus's "context → choice" when-clauses, mirroring learn's contextFor logic.
@@ -243,7 +243,11 @@ function swapsAndUpside(a, detectedRows, census) {
 // to last visit's advice. Baseline the priority keys per repo: RESOLVED (gone since
 // last visit — confirmed, trust), PERSISTING (n visits — escalate toward a decision
 // instead of repeating), NEW. Store commits with the repo like the other baselines.
-const MEM_PATH = new URL('.doctor-memory.json', import.meta.url).pathname;
+// RB_DOCTOR_MEMORY redirects the store: the eval gate points it at scratch so
+// fixture visits never churn (or ship) the tracked file.
+const RULE = `  ${'-'.repeat(74)}`;   // the section rule under every heading
+
+const MEM_PATH = process.env.RB_DOCTOR_MEMORY || new URL('.doctor-memory.json', import.meta.url).pathname;
 function outcomeMemory(a, priorities) {
   let mem = {}; try { mem = JSON.parse(readFileSync(MEM_PATH, 'utf8')); } catch { /* first ever run */ }
   const prev = mem[a.name] || { items: {} };
@@ -257,7 +261,7 @@ function outcomeMemory(a, priorities) {
     (seen > 1 ? outcomes.persisting : outcomes.fresh).push({ key: k, seen, text: p.text });
   }
   mem[a.name] = { items, visits: (prev.visits || 0) + 1, resolvedTotal: (prev.resolvedTotal || 0) + resolved.length };
-  try { writeFileSync(MEM_PATH, JSON.stringify(mem, null, 1)); } catch { /* read-only */ }
+  try { writeAtomic(MEM_PATH, JSON.stringify(mem, null, 1)); } catch { /* read-only, or no tmp dir */ }
   outcomes.visits = mem[a.name].visits; outcomes.hitRate = mem[a.name].resolvedTotal;
   return outcomes;
 }
@@ -294,7 +298,7 @@ function printReport(a, entries) {
     advice, modern, sigs, traj, acks, reg, sw, stage: a.stage });
   if (priorities.length) {
     console.log(`\n  ⚡ TOP PRIORITIES  (impact × effort heuristic — detail in the sections below)`);
-    console.log(`  ${'-'.repeat(74)}`);
+    console.log(RULE);
     priorities.forEach((p, i) => {
       console.log(`  ${i + 1}. ${p.reopened ? '⚡ ' : ''}${p.text}   [${p.kind} · ${p.entry.replace('RB-E-', '')} · ${p.score}]`);
       console.log(`     ${p.why}`);
@@ -303,16 +307,16 @@ function printReport(a, entries) {
   const outcomes = outcomeMemory(a, priorities);
   if (outcomes.visits > 1) {
     console.log(`\n  SINCE LAST VISIT  (visit #${outcomes.visits} — the advisor remembers)`);
-    console.log(`  ${'-'.repeat(74)}`);
+    console.log(RULE);
     for (const k of outcomes.resolved) console.log(`  ✓ resolved: ${k} — last visit's finding is gone; nice.`);
     for (const p of outcomes.persisting.filter((x) => x.seen >= 3)) console.log(`  ⏳ ${p.key} — visit #${p.seen} with no movement: decide it (react-brain decide … --quiets=${p.key.split(':').slice(0,2).join(':')}) or schedule it`);
     if (!outcomes.resolved.length && !outcomes.persisting.some((x) => x.seen >= 3)) console.log(`  (no resolutions; nothing persisting ≥3 visits)`);
   }
 
   console.log(`\n  DETECTED ECOSYSTEM CHOICES  (deterministic dep-scan)`);
-  console.log(`  ${'-'.repeat(74)}`);
+  console.log(RULE);
   console.log(`  ${'entry'.padEnd(20)}${'your choice'.padEnd(26)}${'fit'.padEnd(14)}status·conf · track`);
-  console.log(`  ${'-'.repeat(74)}`);
+  console.log(RULE);
   const tr = trackRecord();
   for (const { id, e, info } of detected) {
     const track = tr[id] ? `  ${TRACK_GLYPH[tr[id]]}` : '';
@@ -322,7 +326,7 @@ function printReport(a, entries) {
   const { swaps, upside } = sw;
   if (swaps.length || upside.length) {
     console.log(`\n  SWAPS & UPSIDE  (aggressive, corpus-grounded head-to-heads — weigh migration honestly)`);
-    console.log(`  ${'-'.repeat(74)}`);
+    console.log(RULE);
     for (const s of swaps) {
       if (s.grade === 'fresh-start') console.log(`  ≈ ${s.entry.replace('RB-E-', '')}: you use ${s.yours} — corpus says don't churn, but a fresh start would pick differently:`);
       else console.log(`  ⇄ ${s.entry.replace('RB-E-', '')}: you use ${s.yours} — the corpus pick beats it here:`);
@@ -345,7 +349,7 @@ function printReport(a, entries) {
   // TRAJECTORY — the time axis: migrations in flight, live vs frozen habits.
   if (traj?.git && (traj.migrations.length || Object.keys(traj.adoption).length)) {
     console.log(`\n  TRAJECTORY  (git history — the story, not the snapshot)`);
-    console.log(`  ${'-'.repeat(74)}`);
+    console.log(RULE);
     for (const m of traj.migrations) {
       const glyph = { 'in-progress': '⏩', stalled: '⏸', regressing: '⚠', done: '✅', 'unknown-age': '·' }[m.status];
       const since = m.status === 'stalled' && m.lastMovedAt ? ` (no movement since ${new Date(m.lastMovedAt * 1000).toISOString().slice(0, 10)})` : '';
@@ -362,7 +366,7 @@ function printReport(a, entries) {
 
   if (gapIds.length) {
     console.log(`\n  GAPS  (expected domain, nothing detected — may be built-in / N/A; verify)`);
-    console.log(`  ${'-'.repeat(74)}`);
+    console.log(RULE);
     for (const id of gapIds) {
       const c = census?.agg?.[id];
       const field = c ? `  [${c.appCount}/${c.denom} census apps ship this domain]` : '';
@@ -376,14 +380,14 @@ function printReport(a, entries) {
   if (reg) {
     if (reg.health.length) {
       console.log(`\n  DEP HEALTH  (registry facts for the WHOLE tree — including corpus-unmapped deps)`);
-      console.log(`  ${'-'.repeat(74)}`);
+      console.log(RULE);
       for (const h of reg.health)
         console.log(`  ${h.kind === 'deprecated' ? '✗' : '•'} ${h.pkg}  [${h.kind}${h.entry ? ` · ${h.entry.replace('RB-E-', '')}` : ''}]\n      ${trunc(h.detail, 118)}`);
     }
     if (reg.preflight) {
       const p = reg.preflight;
       console.log(`\n  UPGRADE PREFLIGHT — ${p.target}`);
-      console.log(`  ${'-'.repeat(74)}`);
+      console.log(RULE);
       console.log(`  ${p.blockers.length ? `✗ BLOCKED by ${p.blockers.length} dep(s)` : '✓ no peer-range blockers'} · ${p.bump.length} need a bump · ${p.ok} ok as installed · ${p.noPeer} unconstrained`);
       for (const b of p.blockers) console.log(`     ✗ ${b.pkg} — latest (${b.latest}) peers "${b.peer}"; nothing released supports the target`);
       for (const b of p.bump.slice(0, 12)) console.log(`     ↑ ${b.pkg} → ${b.to}  (peers "${b.peer}")`);
@@ -395,7 +399,7 @@ function printReport(a, entries) {
   // ACKNOWLEDGED — findings a recorded decision overrules while its premise holds.
   if (acknowledged.length) {
     console.log(`\n  ACKNOWLEDGED  (overruled by recorded decisions — premise holds, not re-argued)`);
-    console.log(`  ${'-'.repeat(74)}`);
+    console.log(RULE);
     for (const k of acknowledged)
       console.log(`  ☑ ${trunc(k.text, 78)}  [ADR-${k.adr} "${trunc(k.title, 36)}" · ${k.file}]`);
   }
@@ -403,7 +407,7 @@ function printReport(a, entries) {
   // FOR YOUR STACK — corpus readings whose tagged claims apply to this repo.
   if (advice.length) {
     console.log(`\n  FOR YOUR STACK  (readings whose claims apply to what you ship)`);
-    console.log(`  ${'-'.repeat(74)}`);
+    console.log(RULE);
     for (const v of advice.slice(0, 5)) {
       const via = v.trigger ? ` · via ${v.trigger}` : '';
       console.log(`  📖 ${v.claim}  [${v.entry.replace('RB-E-', '')}${via}]`);
@@ -416,7 +420,7 @@ function printReport(a, entries) {
   if (modern) {
     const { findings, scanned, capped } = modern;
     console.log(`\n  MODERNIZATION  (source scan — legacy core RN APIs → modern replacement)`);
-    console.log(`  ${'-'.repeat(74)}`);
+    console.log(RULE);
     if (!findings.length) {
       console.log(`  ✓ none of the tracked legacy core APIs found  (${scanned} source file${scanned === 1 ? '' : 's'} scanned)`);
     } else {
@@ -429,7 +433,7 @@ function printReport(a, entries) {
           console.log(`      ${f.files.slice(0, 8).join(', ')}${f.files.length > 8 ? ` +${f.files.length - 8} more` : ''}`);
         }
       }
-      console.log(`  ${'-'.repeat(74)}`);
+      console.log(RULE);
       console.log(`  ${scanned} files scanned${capped ? ` — CAPPED at ${scanned} (repo larger; results partial)` : ''}. legend:`);
       console.log(`  deprecated = fix regardless · superseded = modern is the default · context = only if the axis applies`);
       if (!SHOW_FILES) console.log(`  (re-run with --files to list the offending files)`);
@@ -441,7 +445,7 @@ function printReport(a, entries) {
     const { findings, scanned } = sigs;
     if (findings.length) {
       console.log(`\n  SOURCE SIGNALS  (patterns a dep-scan can't see — heuristic, verify in context)`);
-      console.log(`  ${'-'.repeat(74)}`);
+      console.log(RULE);
       for (const f of findings) {
         const where = f.absent ? 'absent' : `${f.count} file${f.count === 1 ? '' : 's'}`;
         console.log(`  ! ${f.signal}  [${f.entry.replace('RB-E-', '')} · ${where}]`);
@@ -455,7 +459,7 @@ function printReport(a, entries) {
   // DECISION RECORDS — living ADRs (react-brain decide) re-checked against the corpus.
   if (adrs.length) {
     console.log(`\n  DECISION RECORDS  (docs/adr — premises re-checked against the current corpus)`);
-    console.log(`  ${'-'.repeat(74)}`);
+    console.log(RULE);
     for (const rec of adrs) {
       if (!rec.flags.length) console.log(`  ✓ ${rec.file}  [${rec.entry} · ${rec.status}] premises hold`);
       else {
@@ -546,12 +550,12 @@ const CI = argv.includes('--ci');
 const BRIEF = argv.includes('--brief');  // --json consumers (mentor Phase-0/MCP): decisions-only payload                 // gate: exit 1 on expired/moved decision records or deprecated APIs
 // registry preflight (network, opt-in; 7d cache): --preflight = whole-tree dep health;
 // --target=pkg@x.y adds upgrade feasibility (peer-range blockers). Keeps default runs offline.
-const TARGET_STR = (argv.find((x) => x.startsWith('--target=')) || '').split('=')[1] || null;
+const TARGET_STR = flag(argv, 'target', null);
 const TARGET = TARGET_STR ? (() => { const i = TARGET_STR.lastIndexOf('@'); const v = TARGET_STR.slice(i + 1).split('.');
   return { pkg: TARGET_STR.slice(0, i), version: [v[0] || '0', v[1] || '0', v[2] || '0'].join('.') }; })() : null;
 const PREFLIGHT = argv.includes('--preflight') || Boolean(TARGET);
 const REG_CACHE = new URL('.registry-cache.json', import.meta.url).pathname;
-const targets = argv.filter((x) => !x.startsWith('--'));
+const targets = positionals(argv);
 if (!targets.length) { console.error('usage: node tools/react-brain-doctor.mjs <repoPath> [<repoPath> ...] [--no-scan] [--files] [--json] [--ci]'); process.exit(1); }
 const entries = loadEntries();
 const analyses = targets.map(analyzeRepo);

@@ -25,10 +25,11 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadEntries } from './detect.mjs';
 import { normalize, parseGoldManifest, scoreTriage, applyAdvocate } from './harvest-lib.mjs';
+import { flag as flagOf } from './argv.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const argv = process.argv.slice(2);
-const flag = (n, d = '') => ((argv.find((a) => a.startsWith(`--${n}=`)) || '').split('=')[1]) || d;
+const flag = (n, d = '') => flagOf(argv, n, d);
 const MODEL = flag('model', 'claude-sonnet-5');
 const FIXTURE = flag('fixture', 'twir-290');
 const CANDIDATE = flag('candidate');

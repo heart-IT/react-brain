@@ -195,14 +195,14 @@ The agent should, in order:
 
 5. **Correctness** — follow `tools/challenge-routine.md` on 2–3 rotating reviewed entries
    (oldest `updated:` first); record SURVIVES / WEAKENED / OVERTURNED.
-5. **Emit ONE reviewable delta** — dead links, undated/aging entries, drift, proposed new
+6. **Emit ONE reviewable delta** — dead links, undated/aging entries, drift, proposed new
    entries/reading/status-flips (with verified sources), new gaps, challenge verdicts. Order by
    leverage. Apply only the deterministic fixes automatically; queue knowledge changes for review.
    Knowledge edits go in `skills/react-brain-mentor/entries/<ID>.yaml` (one file per entry; a NEW
    entry = new file + a TOC slot in encyclopedia.yaml + `detect:`/`detect_source:` rows in the file).
-6. **Gate** — run `npm test` (lint invariants + the golden-fixture eval). A red gate means the
+7. **Gate** — run `npm test` (lint invariants + the golden-fixture eval). A red gate means the
    delta broke a corpus invariant or a known-good behavior; fix before recording.
-7. **Record** — update `tools/harvest-state.json` (last_processed + count + updated; lint
+8. **Record** — update `tools/harvest-state.json` (last_processed + count + updated; lint
    cross-checks the counts against sources_digested) and commit it WITH the delta (repo is under
    git). Append the dated narrative section to `tools/harvest-log/LEDGER.md` (in-repo since
    2026-08-07 — local and cloud runs alike; cloud runs also summarize in the PR description).

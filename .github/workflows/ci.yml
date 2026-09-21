@@ -1,6 +1,7 @@
-# Corpus + tools gate: lint (schema/TOC/reachability/dup-URL invariants) and the
-# golden-fixture eval (33 assertions over detection/fit/signals/routing/stack/MCP).
-# Both offline — no secrets, no network beyond npm ci.
+# Corpus + tools gate (`npm test`): corpus lint (schema/TOC/reachability/dup-URL
+# invariants), the harvest triage-rule check + engine tests, and the golden-fixture
+# eval (detection/fit/signals/routing/stack/MCP). All offline — no secrets, no
+# network beyond npm ci. Assertion counts are printed by the tools, not pinned here.
 name: ci
 on:
   push:

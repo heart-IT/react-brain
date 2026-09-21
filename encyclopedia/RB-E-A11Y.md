@@ -7,7 +7,7 @@ confidence: medium
 updated: 2026-07-16
 platforms: [react, react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-A11Y
-defer_to_skill: design-systems-governance                     # depth audit: contrast, intrinsics, dynamic type
+defer_to_skill: design-system                     # depth audit: contrast, intrinsics, dynamic type
 related: [RB-E-TESTING, RB-E-COMPONENT-LIBS, RB-E-AI-UI]
 sources:
   - "https://css-tricks.com/the-siren-song-of-arianotify/"
@@ -21,7 +21,7 @@ sources:
 > why the recommendation is semantics-first and test-enforced, and why it splits into two
 > platform dialects. It is not a WCAG checklist and not an API guide. The candidate facets and
 > one-line tradeoffs live in the index entry `RB-E-A11Y`; the depth audit — contrast,
-> intrinsics, dynamic type — is owned by the `design-systems-governance` skill. Read this for
+> intrinsics, dynamic type — is owned by the `design-system` skill. Read this for
 > the *why*.
 
 ## The one idea that organises everything: one semantic tree, two renderers
@@ -61,7 +61,7 @@ The per-platform mapping is mechanical once the duties are fixed:
 
 - **Web** → ARIA roles + keyboard focus management.
 - **React Native** → `accessibilityRole` / `accessibilityLabel` + screen-reader focus.
-- **Depth audit** (contrast, intrinsics, dynamic type) → the `design-systems-governance` skill.
+- **Depth audit** (contrast, intrinsics, dynamic type) → the `design-system` skill.
 
 ## The landscape, facet by facet
 
@@ -112,7 +112,7 @@ runtime tests, CI gates, and headless primitives that carry correct semantics by
 
 ## How it interacts with the rest of the stack
 
-- **Depth audit (`design-systems-governance`).** The defer skill. Contrast, accessibility
+- **Depth audit (`design-system`).** The defer skill. Contrast, accessibility
   intrinsics, and dynamic type are design-system-level audits, owned there; this page owns the
   *model* — semantics, focus, announcements, and their enforcement.
 - **Testing (`RB-E-TESTING`).** "Role-based queries, not data-testid" is a testing-strategy
@@ -137,13 +137,13 @@ reader does. On the web, announcements are migrating from `aria-live` hacks towa
 `ariaNotify()` (WAI-ARIA 1.3) — Firefox-only as of mid-2026, and prone to `alert()`-style
 overuse, so semantics stay first. The empty accessibility tree is the failure mode to fear,
 AI-generated UI ships it by default, and the depth audit (contrast, intrinsics, dynamic type)
-belongs to `design-systems-governance`.
+belongs to `design-system`.
 
 ---
 
 *See also: `RB-E-TESTING` (role-based queries as the enforcement seam), `RB-E-COMPONENT-LIBS`
 (headless primitives carry semantics by construction), `RB-E-AI-UI` (why enforcement must be
-systemic). Depth audit — contrast, intrinsics, dynamic type: the `design-systems-governance`
+systemic). Depth audit — contrast, intrinsics, dynamic type: the `design-system`
 skill. Background reading: Mat Marquis on `ariaNotify()`, Aurora Scharff's React a11y
 common-mistakes catalogue, and Frontend Masters on AI-generated UI's empty trees.*
 
