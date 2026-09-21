@@ -6,7 +6,7 @@ status: reviewed   # long-form entry written + source-checked → encyclopedia/R
 confidence: high
 platforms: [react, react-native]
 options:
-  - { name: "React 19.3 (current line)", tradeoff: "stable 2026-09-09; graduates <ViewTransition> and Fragment Refs from experimental, adds react-dom browser() + Trusted Types passthrough; <Activity>/useEffectEvent shipped in 19.2; RN 0.83+ runs React 19.2 — check RB-E-RN-VERSIONS before assuming 19.3 on native" }
+  - { name: "React 19.3 (current line)", tradeoff: "stable 2026-09-09; graduates <ViewTransition> and Fragment Refs from experimental, adds react-dom browser() + Trusted Types passthrough; <Activity>/useEffectEvent shipped in 19.2; RN 0.83+ runs React 19.2, and React 19.3.0 is SYNCED INTO RN 0.88, which is still a release candidate as of 2026-09-16 — so 19.3 reaches native on the 0.88 line, not before; check RB-E-RN-VERSIONS before assuming it" }
   - { name: "React Compiler 1.0 (STABLE)", tradeoff: "auto-memoizes — drops most useMemo/useCallback; stable since 2025-10 (Meta prod); Rust port MERGED into SWC — ships via Rspack 2.1's built-in loader (7–13x the Babel plugin); enable via Babel/SWC/Oxc/Vite-8 plugin" }
   - { name: "React Server Components (RSC)", tradeoff: "server-rendered components over the Flight protocol; web-only; Server Functions = the mutation path (security-sensitive — see RB-E-SECURITY)" }
   - { name: "<Activity>", tradeoff: "hide a subtree while preserving its state (defer/restore); 100% satisfaction in State-of-React 2025; pair with Effect cleanup" }
@@ -49,7 +49,7 @@ note: >
   <ViewTransition> is DOM-only for now.
 defer_to_skill: engineering-principles
 doc: "RB-E-REACT-CORE.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-10   # React 19.3 stable — tripwire fired (firsthand): ViewTransition + Fragment Refs graduate, browser() ships, Trusted Types, Context-in-RSC
+updated: 2026-09-21   # dated the 19.3-on-native answer: RN 0.88 (RC 2026-09-16) is the line that syncs React 19.3.0
 reading:
   - title: "Avoiding Server Component Waterfall Fetching with React 19 cache()"
     url: "https://aurorascharff.no/posts/avoiding-server-component-waterfall-fetching-with-react-19-cache/"
@@ -118,6 +118,7 @@ detect_source:   # source-level signals owned by this entry (regex over repo sou
     hint: "React Compiler 1.0 (stable) memoizes automatically — adopt it for new code instead of growing the hand-memoization surface; KEEP existing useMemo/useCallback when enabling (removal can change output — see reading: 'React Compiler at Eighteen Months')"
     unless_dep: ["babel-plugin-react-compiler", "react-compiler-runtime"]
 sources:
+  - "https://github.com/react/react-native/releases/tag/v0.88.0-rc.1"
   - "https://react.dev/blog/2026/09/09/react-19-3"
   - "https://react.dev/community/team"
   - "https://react.dev/reference/react-dom/browser"

@@ -22,6 +22,36 @@ recommend:
     - "existing react-native-web app → keep it (still works); just don't expand the bet"
     - "Expo + Next.js shared routing → Solito; incremental web reuse inside RN → Expo DOM Components"
 note: >
+  CHALLENGED 2026-09-21 — SURVIVES, WITH A NAMED COMPETITOR (this entry was the oldest reviewed
+  entry in the corpus at updated: 2026-06-17, and the challenge arrived on its own: Shopify
+  announced it is moving its mobile apps off React Native back to Swift and Kotlin). Take the
+  argument seriously, because it attacks this entry's PREMISE rather than its picks. Shopify's
+  stated reasoning, verified against the post: they adopted RN in 2020 to stop building features
+  twice, let developers work across the stack, and stop chasing parity; all three delivered; but
+  coding models got good enough that "building the same feature in Swift and Kotlin no longer
+  carries the cost it used to", so the VALUE of sharing an implementation fell while the value of
+  being close to platform capabilities and first-party tooling did not. Note what they explicitly do
+  NOT claim — not that RN is slow ("React Native apps can be fast. Ours are"), and not that it was
+  the wrong call ("React Native was the right choice for Shopify in 2020"). What they replace
+  sharing WITH is the genuinely new option in this entry's design space: duplicate the
+  implementation per platform, and hold parity through SHARED SPECIFICATIONS, TESTS AND REVIEW
+  CHECKPOINTS that agents execute — agents implementing an Android feature using the iOS version as
+  the reference. Call it "share the spec, not the code".
+  WHY THE DEFAULT ABOVE STILL STANDS ANYWAY, on this entry's own terms: (1) the default's
+  highest-leverage claim is about LOGIC, and Shopify's answer to logic parity is still a machine
+  maintaining two copies — cheaper than it was, but not free, and they say so plainly ("Native still
+  means building and maintaining software on two platforms, that cost has not disappeared"); (2)
+  their migration is not a stack swap a normal team can copy — they chose greenfield rebuilds, built
+  a bespoke checkpoint-gated system (Helix) to stop agent slop, and re-architected for headless
+  agent-drivable business logic (RB-E-AI-DEVTOOLS carries that as a reading, and it is the most
+  reusable part of the post); (3) this entry's scope is React web + React Native, where a shared
+  logic package also serves the WEB app — a dimension absent from Shopify's decision entirely. So
+  the honest calibration: if your organisation can staff and gate agent-maintained duplicate
+  implementations, "share the spec" is now a real alternative to "share the code", and at
+  Shopify's scale it won. For a team without that machinery, duplicating logic across platforms
+  still costs what it always did, and the shared logic/hooks package remains the lowest-risk win.
+  Recorded as a counter-datapoint, not a reversal — and revisit it if a second organisation of that
+  size publishes the same conclusion.
   When logic or components are duplicated across a web app and a native app, that
   duplication is the prime target — extract a shared package. VERIFIED SHIFT (2026):
   react-native-web has entered MAINTENANCE-ONLY mode — creator Nicolas Gallagher and
@@ -31,8 +61,12 @@ note: >
   keep working. Verified vs official RN sources, Callstack, and Gallagher's notes.
 defer_to_skill: engineering-principles  # boundaries/dependency direction
 doc: "RB-E-CROSSPLATFORM.md"   # long-form Explanation entry in content_dir
-updated: 2026-06-17
+updated: 2026-09-21   # CHALLENGED — SURVIVES: Shopify's move off RN attacks the share-an-implementation premise and answers it with "share the spec, not the code" (agent-maintained duplicates); default holds, competitor named · KMP+SwiftUI scaling reading
 reading:
+  - title: "How Does KMP with SwiftUI Scale on iOS?"
+    url: "https://andrei-calazans.com/posts/2026-09-14-how-kmp-with-swiftui-scales-on-ios/"
+    by: "Andrei Calazans"
+    what: "The best-measured statement of the ALTERNATIVE this entry's axis implies — share the logic layer, keep the UI native — taken to production scale on Kotlin Multiplatform: ~750 Kotlin and ~700 Swift files, all figures measured wall-clock on an M4 Pro with Xcode 26.5 / Kotlin 2.4.0 / Gradle 9.6.1 rather than estimated. Two structural facts are the transferable part. (1) iOS consumes the shared layer as ONE linked framework no matter how many Gradle modules it is split into, because every linked KMP framework embeds its own copy of the Kotlin/Native runtime, memory manager and GC — ship two and you get two uncoordinated collectors in one process, with Kotlin objects crossing a boundary neither manages, so the single umbrella framework is the SAFE shape and its link step is the price of that safety, not a tooling accident. 'Just split the framework' is therefore not a free lever. (2) The decision he rates highest is that Swift feature packages compile against Swift CONTRACTS (closure-struct protocols), not against the Kotlin framework — only a thin SharedBridge imports it — which is the same insulation principle this entry applies to platform-extension files. Useful whether or not you would pick KMP: it prices the seam that any share-the-logic architecture has to own."
   - title: "use dom — incrementally migrating web UI to native with React"
     url: "https://evanbacon.dev/blog/use-dom"
     by: "Evan Bacon (Expo)"
@@ -44,6 +78,8 @@ reading:
     by: "Callstack (Zattoo case study)"
     what: "TV/cross-platform RN case study: share until a platform gives a reason to split, telemetry-driven perf, team reorg, and a deflated, realistic account of AI's role. A concrete companion to this entry's share-by-layer thesis."
 sources:
+  - "https://shopify.engineering/back-to-native"
+  - "https://andrei-calazans.com/posts/2026-09-14-how-kmp-with-swiftui-scales-on-ios/"
   - "https://nicolasgallagher.com/one-react-for-web-and-native/"
   - "https://www.callstack.com/podcasts/from-react-native-web-to-react-strict-dom"
 detect_source:   # source-level signals owned by this entry (regex over repo source)

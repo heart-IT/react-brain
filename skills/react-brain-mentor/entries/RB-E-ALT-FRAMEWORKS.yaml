@@ -6,7 +6,7 @@ status: reviewed   # long-form entry written + source-checked
 confidence: low
 platforms: [react, react-native]
 options:
-  - { name: "Lynx (ByteDance)", tradeoff: "web-tech (HTML/CSS) + native render; dual-thread UI/logic; young ecosystem (open-sourced 2025) but moving fast — 4.0.0 released 2026-07-20 (verified vs the GitHub release); scaffold via create-rspeedy" }
+  - { name: "Lynx (ByteDance)", tradeoff: "web-tech (HTML/CSS) + native render; dual-thread UI/logic; young ecosystem (open-sourced 2025) but moving fast — 4.0.0 released 2026-07-20 (verified vs the GitHub release), with the 4.0 FEATURE ANNOUNCEMENT following on 2026-09-11 (see note); scaffold via create-rspeedy. MIND THE TWO VERSION LINES: the ENGINE is 4.x (4.0.3, 2026-09-11) while ReactLynx, the React binding you actually write against, is @lynx-js/react 0.126.1 and rspeedy 0.17.2 — so 'Lynx 4' does not mean the React layer is 1.0" }
   - { name: "Valdi (Snap)", tradeoff: "declarative TypeScript compiling to native views on iOS/Android/macOS; beta (beta-0.1.0), open-sourced by Snap Nov 2025 after ~8 yrs internal use" }
   - { name: "Flutter", tradeoff: "Dart; own render engine; large ecosystem; not React/JS" }
   - { name: "Kotlin Multiplatform", tradeoff: "share business logic across platforms; native UI per platform; SWM's same-app benchmark: KMP ~8x smaller + 2-4x faster startup on ANDROID, but iOS converges (RN uses 3-4x LESS memory there — UIKit rendering vs KMP's resident Skia)" }
@@ -15,11 +15,35 @@ recommend:
   when:
     - "share only business logic, keep native UI → Kotlin Multiplatform"
     - "team already invested in Dart / wants one render engine → Flutter (leaves React entirely)"
-note: "Context for teams weighing leaving the React/RN ecosystem. Newer entrants (Lynx, Valdi) are early — not endorsements. The KMP-vs-RN numbers come from Software Mansion's controlled same-app benchmark (see reading) — notable because an RN shop published results that favor KMP on Android. DACTYL LEAD (2026-09-10, adopted from harvest/2026-08-27; dactyl.dev reachable, verified): a different axis from every row above — an AI app-builder (from Deno) that generates GENUINE native SwiftUI from a prompt and previews it live through a SwiftUI-in-WebAssembly renderer in the browser, with no Mac, Xcode or React Native anywhere in the loop. There is no versioned SDK and no npm package, so it is not something you adopt into an existing codebase and not an option row — it is landscape: a no-code competitor at the 'skip React Native entirely' layer, not yet a tool a React/RN team would evaluate. Watch for a developer-facing SDK before promoting it."
+note: >
+  LYNX 4.0's ANNOUNCEMENT POST ARRIVED 2026-09-11 (2026-09-21 — a deliberate REOPEN: the 4.0.2
+  release was skipped on 2026-09-10 as unverifiable because its GitHub release body was EMPTY, and
+  the reopen signal recorded then was "a Lynx 4 announcement post". This is that post, written by
+  Lynx's rendering lead, so the skip is now converted). Note the shape of the release first: the
+  4.0.0 tag landed 2026-07-20, and the post describing what 4.0 actually does came seven weeks
+  later alongside 4.0.3 — so read the blog, not the tags, for this project's capabilities. What 4.0
+  is BETTING ON is AI, in two distinct ways worth separating. (1) Agents WRITING Lynx: the stated
+  problem is that coding agents fall back on Web conventions Lynx does not support, so Lynx now
+  publishes a project-local API reference (@lynx-js/lynx-api-docs) as a `lynx-api-docs` agent skill
+  an agent consults before writing — the same diagnosis this corpus records for React Native in
+  RB-E-AI-DEVTOOLS ("install a skills pack so it stops generating stale patterns"), reached
+  independently by a competing framework. (2) Agents GENERATING UI at runtime: Lynx A2UI has the
+  model emit structured protocol messages constrained by the application's own component catalog,
+  which Lynx renders as native UI and updates progressively as messages stream — an
+  interesting contrast with the React-side generative-UI approaches in RB-E-AI-UI, because the
+  constraint lives in a capability catalog rather than in typed component props. Beyond AI: foldable
+  support (the host passes window size changes so pages adapt with Flex and relative units),
+  expanded desktop CSS/Element capabilities, <webview> and <blur-view> open-sourced, global memory
+  queries, and production error/UI-node traces mapped back to source. None of this changes the
+  default below — RN's library depth is still the argument, and ReactLynx being 0.126.x is still
+  the reason this is a landscape row rather than a recommendation.
+  Context for teams weighing leaving the React/RN ecosystem. Newer entrants (Lynx, Valdi) are early — not endorsements. The KMP-vs-RN numbers come from Software Mansion's controlled same-app benchmark (see reading) — notable because an RN shop published results that favor KMP on Android. DACTYL LEAD (2026-09-10, adopted from harvest/2026-08-27; dactyl.dev reachable, verified): a different axis from every row above — an AI app-builder (from Deno) that generates GENUINE native SwiftUI from a prompt and previews it live through a SwiftUI-in-WebAssembly renderer in the browser, with no Mac, Xcode or React Native anywhere in the loop. There is no versioned SDK and no npm package, so it is not something you adopt into an existing codebase and not an option row — it is landscape: a no-code competitor at the 'skip React Native entirely' layer, not yet a tool a React/RN team would evaluate. Watch for a developer-facing SDK before promoting it.
 defer_to_skill: null
 doc: "RB-E-ALT-FRAMEWORKS.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-10   # Dactyl lead — AI-generated native SwiftUI previewed via WASM, a no-code axis — reconciled from harvest/2026-08-27
+updated: 2026-09-21   # Lynx 4.0 announcement post — REOPENED the 2026-09-10 unverifiable skip (empty release body); AI-first release (agent API-docs skill + A2UI generative UI), foldables; engine 4.x vs ReactLynx 0.126.x split recorded
 sources:
+  - "https://lynxjs.org/blog/lynx-4-0"
+  - "https://registry.npmjs.org/@lynx-js/react"
   - "https://dactyl.dev/"
   - "https://github.com/lynx-family/lynx"
   - "https://github.com/Snapchat/Valdi"

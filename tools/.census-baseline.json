@@ -1,5 +1,5 @@
 {
- "date": "2026-09-10",
+ "date": "2026-09-17",
  "cohort": {
   "fetched": 34,
   "total": 34,
@@ -52,6 +52,7 @@
     "FlashList",
     "Gesture Handler",
     "Jest",
+    "Legend List",
     "Lottie",
     "Mapbox RN",
     "Metro",
@@ -351,6 +352,7 @@
     "husky (git hooks)",
     "i18next",
     "lint-staged",
+    "react-dropzone",
     "react-i18next",
     "react-window",
     "styled-components"
@@ -411,7 +413,8 @@
     "Vitest",
     "Zod",
     "framer-motion / Motion",
-    "nuqs"
+    "nuqs",
+    "tus (resumable)"
    ]
   },
   "twenty": {
@@ -438,7 +441,8 @@
     "Vercel AI SDK",
     "Zod",
     "esbuild",
-    "framer-motion / Motion"
+    "framer-motion / Motion",
+    "react-dropzone"
    ]
   },
   "plane": {
@@ -452,7 +456,8 @@
     "Recharts",
     "SWR",
     "TypeScript",
-    "axios"
+    "axios",
+    "react-dropzone"
    ]
   },
   "appsmith": {
@@ -474,6 +479,7 @@
     "Sentry",
     "Tailwind",
     "TypeScript",
+    "Uppy",
     "axios",
     "husky (git hooks)",
     "lint-staged",
@@ -510,6 +516,7 @@
     "esbuild",
     "husky (git hooks)",
     "lint-staged",
+    "react-dropzone",
     "typescript-eslint",
     "visx",
     "webpack"
@@ -825,7 +832,8 @@
     "Vite",
     "esbuild",
     "framer-motion / Motion",
-    "nuqs"
+    "nuqs",
+    "react-dropzone"
    ]
   },
   "dub": {
@@ -1115,22 +1123,22 @@
    },
    "denom": 34
   },
+  "RB-E-LISTS": {
+   "appCount": 19,
+   "labels": {
+    "Legend List": 3,
+    "FlashList": 8,
+    "TanStack Table": 6,
+    "TanStack Virtual": 8,
+    "react-window": 5
+   },
+   "denom": 34
+  },
   "RB-E-MAPS": {
    "appCount": 2,
    "labels": {
     "Mapbox RN": 2,
     "react-map-gl": 1
-   },
-   "denom": 34
-  },
-  "RB-E-LISTS": {
-   "appCount": 19,
-   "labels": {
-    "FlashList": 8,
-    "Legend List": 2,
-    "TanStack Table": 6,
-    "TanStack Virtual": 8,
-    "react-window": 5
    },
    "denom": 34
   },
@@ -1225,6 +1233,15 @@
     "React Aria": 1
    },
    "denom": 20
+  },
+  "RB-E-UPLOADS": {
+   "appCount": 7,
+   "labels": {
+    "react-dropzone": 5,
+    "tus (resumable)": 1,
+    "Uppy": 1
+   },
+   "denom": 34
   },
   "RB-E-META-FRAMEWORKS": {
    "appCount": 5,

@@ -12,7 +12,7 @@ options:
   - { name: "react-native-game-engine", tradeoff: "entity-component loop for simple 2D games; effectively unmaintained (last release v1.2.0, 2020)" }
   - { name: "@react-three/fiber (three.js)", tradeoff: "declarative 3D scenes as React components; v9 runs in RN via expo-gl — the 3D-in-an-app path without a game engine" }
   - { name: "react-native-filament (Margelo)", tradeoff: "Google's Filament physically-based renderer as declarative React components — GPU-native (Metal on iOS, OpenGL/Vulkan on Android), mobile-first, ~4MB native dep (verified vs the docs); the mid ground between r3f-over-GL and embedding a game engine; 1.11.0, 1.4k★, but QUIET since 2026-05 (no npm publish or repo push in ~3 months, verified 2026-09-01) — check pulse before betting" }
-  - { name: "ReactVision (@reactvision/react-viro)", tradeoff: "AR/VR from one RN codebase (iPhone/Android AR + Meta Quest) — the maintained fork of react-viro; New Architecture (Fabric) REQUIRED; active (2.57.x, 2026-07)" }
+  - { name: "ReactVision (@reactvision/react-viro)", tradeoff: "AR/VR from one RN codebase (iPhone/Android AR + Meta Quest) — the maintained fork of react-viro; New Architecture (Fabric) REQUIRED; active — 3.0.0 published 2026-09-20 (verified vs npm; the registry description still states Fabric is required, so the major is a version-line move, not a new floor). The 2026-09-10 challenge rated this leg healthy and it has since shipped a major, which holds" }
   - { name: "react-native-visionos (Callstack)", tradeoff: "full RN fork targeting Apple Vision Pro / visionOS SDK (~1.1k★); CAUTION: pinned to RN 0.78 (2025-03), lags core by ~a year — verify parity before betting" }
 recommend:
   default: "2D / interactive visuals → react-native-skia. Declarative 3D inside a normal app → react-three-fiber (+expo-gl). Real game engine → embed Godot (react-native-godot) — but see its dormancy caveat before committing; this is the weakest link in this default. AR/VR → ReactVision. RN suits supplemental/interactive experiences more than AAA games."
@@ -23,6 +23,13 @@ recommend:
     - "mobile AR or cross-platform VR incl. Meta Quest → ReactVision (@reactvision/react-viro; New Arch required)"
     - "Apple Vision Pro app → react-native-visionos (Callstack fork; check its RN-version lag first)"
 note: >
+  SKIA IS CHANGING HANDS AND PACKAGE NAME (2026-09-21, pointer — RB-E-ANIMATION owns this thread
+  and carries the receipts + the tripwire): Shopify is leaving React Native. It sponsors
+  react-native-skia through the end of 2026; the author keeps developing it, forks the repo in the
+  coming months and republishes under a NEW NAME, and the Shopify repo is then archived. Nothing is
+  deprecated today — 2.12.0 shipped 2026-09-16, after the announcement. This entry's 2D default IS Skia, so the rename lands directly on the default — and note the
+  irony worth recording next to the Godot dormancy caveat: the 2D leg is healthy but changing
+  owner, while the game-engine leg is stagnant. Neither is a reason to switch today.
   Niche; RN suits supplemental/interactive experiences more than AAA games. AR/VR + 3D options
   added 2026-07-09 (gap flagged by Native Weekly #15's ReactVision feature, promoted on user's
   call): ReactVision is the maintained Viro lineage (verified vs npm — Fabric required, published
@@ -33,8 +40,9 @@ note: >
   the Horizon Store — a first-party 2D-panel path beside ReactVision's immersive AR/VR.
 defer_to_skill: react-native-best-practices
 doc: "RB-E-GAMES.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-10   # CHALLENGED — WEAKENED: the Godot pick has been dormant since 2025-11 (1.0.1, ~0★) while skia/r3f/ReactVision all stayed current
+updated: 2026-09-21   # Skia stewardship pointer (the 2D default changes owner + package name) · prior challenge verdict on the Godot leg still stands
 sources:
+  - "https://shopify.engineering/back-to-native"
   - "https://github.com/wcandillon/react-native-webgpu"
   - "https://registry.npmjs.org/@borndotcom/react-native-godot"
   - "https://registry.npmjs.org/@reactvision/react-viro/latest"

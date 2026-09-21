@@ -2575,3 +2575,142 @@ Delta: 8 entries touched (STATE · DX · ONDEVICE-AI ×2 · AI-DEVTOOLS · GAMES
 across the five files lint cross-checks — twice, since both 40→41→42 reviewed and 44→45 entries
 moved. Gates: lint clean (1 pre-existing shared-URL warning) · rules ✓ 1976 gold rows · engine 24 ✓
 · eval 139/139.
+
+## 2026-09-21 — the stewardship pass: Shopify leaves React Native · Expo SDK 58 beta · a stranded 74-row manifest recovered · React Weekly retired
+
+Eleven days of drift, nine newsletter issues, two firsthand manifests, 20 entries touched. The
+biggest pass since 2026-08-18, and for once the volume was not the interesting part.
+
+PREFLIGHT EARNED ITS PLACE, AGAIN — and differently than documented. `git branch --list 'harvest/*'`
+found `harvest/2026-09-17` and `tail tools/harvest.log` explained it: the scheduled run launched,
+hit the 600s background ceiling, and was terminated. The branch is EMPTY. But the run had already
+consumed the events — `.firsthand-state.json` and three baselines sat modified in the working tree,
+and `tools/harvest-log/firsthand-2026-09-17.md` was on disk with 74 untriaged TODO rows. This is a
+THIRD failure mode, distinct from both documented ones (unmerged branch / never ran): the job ran,
+burned its events, wrote a manifest, and died before triaging any of it. Left alone, those 74 events
+would never have been re-reported. Recovery was to treat the stranded manifest as this pass's input
+and poll fresh on top of it (33 more rows for the 09-17 → 09-21 window), which is why this pass
+carries two firsthand manifests. WORTH WIRING: the abort path should either not advance state or
+should leave a marker louder than a modified file; a manifest on disk with every row still TODO is
+the signature to look for.
+
+THE HEADLINE: SHOPIFY IS LEAVING REACT NATIVE (shopify.engineering/back-to-native, 2026-09-10 — one
+day after the last pass, which is why it was missed then). Carried independently by four sources
+this pass (TWiR #297, React Status #490, RN Rewind #57, React Weekly #38). Read in full and
+cross-checked against npm and the GitHub API rather than taken from the newsletters, which mattered:
+NOTHING IS ARCHIVED OR DEPRECATED YET, and @shopify/react-native-skia published 2.12.0 on 2026-09-16,
+six days AFTER the announcement. So the corpus records a dated stewardship transition, not a
+breakage. The three library consequences, each with a different shape:
+  · SKIA — sponsored through end-2026; the author keeps developing it, forks the repo "in the coming
+    months" and republishes under a NEW NAME; the Shopify repo is archived once that completes. The
+    practical consequence is a RENAME to follow, so RB-E-ANIMATION owns the thread and carries a
+    `deprecated: true` tripwire on the @shopify package (the standard signal for a rename), with
+    pointers from RB-E-CHARTS (every Skia-backed chart option inherits it), RB-E-GAMES (its 2D
+    default IS Skia) and RB-E-SVG (only the GPU escape-hatch clause, so small blast radius).
+  · FLASHLIST — ~2M downloads/week, Shopify commits only to fixing COMPATIBILITY-BREAKING issues
+    while it seeks a long-term steward, none announced. Verifiable corroboration: npm latest 2.3.2
+    was published 2026-06-10, already predating the announcement. The RECOMMENDATION DOES NOT
+    CHANGE (a maintained-for-compatibility library is not a broken one) but the bet does, so
+    RB-E-LISTS now says so plainly and points at Legend List, already in its when-clauses.
+  · RESTYLE — being archived, and NOT an option in this corpus, so nothing to fix. Recorded only as
+    context for the announcement's scope. A quiet vindication of narrow option lists.
+CHALLENGE, ARRIVING UNINVITED (step 5): the same post attacks RB-E-CROSSPLATFORM's PREMISE, and that
+entry was the oldest reviewed entry in the corpus (updated: 2026-06-17). Verdict SURVIVES, with a
+competitor named. Shopify's argument is not that RN is slow — they say the opposite, in writing
+("React Native apps can be fast. Ours are") — it is that coding agents cut the cost of building
+twice, so sharing an implementation lost value while platform-closeness kept it. What they replace
+it with is the genuinely new option: duplicate per platform and hold parity through shared
+SPECIFICATIONS, TESTS AND REVIEW CHECKPOINTS that agents execute. "Share the spec, not the code."
+The default holds for three reasons written into the entry: they still maintain two implementations
+and say so; their path is bespoke (greenfield rebuilds plus Helix, a purpose-built checkpoint-gated
+system, plus a re-architecture for headless agent-drivable logic); and this entry's scope includes
+a WEB app that a shared logic package also serves, a dimension absent from their decision.
+
+THE SECOND HEADLINE, denser and more actionable: EXPO SDK 58 BETA (2026-09-15), kept across SEVEN
+entries from one changelog. Expo Modules 2.0 moved from "iOS-only, undocumented" to BETA ON BOTH
+PLATFORMS, and brought the number that actually decides something — measured against a TURBOMODULE
+on Android it wins all twelve microbenchmarks (no-arg call 112ns vs 2,837ns; array of 20 objects
+10.7µs vs 149.8µs; event with an object 963ns vs 8,080ns), recorded WITH the caveat that these price
+the call boundary, not app speedups. Also: precompiled expo-modules-core halving clean four-ABI
+Android builds (~80s → ~39s); Expo Router's data loaders, SSR, middleware, native tabs and toolbars
+all GRADUATING from experimental while its core drops most of the forked React Navigation API;
+expo-widgets gaining ANDROID (each widget on its own Hermes runtime — a startup-budget question, not
+free code reuse), which half-retires RB-E-NATIVE-UI's "iOS-leaning" verdict alongside Voltra 2.3;
+expo-app-intents (alpha) for Siri/Spotlight/Apple Intelligence; @expo/agent-cli, which is the
+first-party agent layer the 2026-09-10 challenge PREDICTED when it moved RB-E-AI-DEVTOOLS to
+first-party-first; AppMetrics deprecated → Observe; and "Noxcturnal", Expo's Rust/oxc Metro
+transformer. That last one is where reading the fine print changed the entry: ~2x cold bundling
+sounds decisive until the activation rules land — it only runs with NO custom transform worker and
+NO Babel plugins, and it SKIPS files needing the Reanimated/Worklets transforms. Reanimated is
+near-universal, so for a real app this is partial, and RB-E-BUILD says that instead of the headline.
+
+THE NEAR-MISS WORTH THE WHOLE GATE: CVE-2026-39364, a HIGH-severity `server.fs.deny` bypass in the
+VITE DEV SERVER — this corpus's web build default. It sat far down React Status #491's link list,
+below where anyone skimming would stop, and surfaced ONLY because coverage demands a row per link.
+Cross-verified against the upstream advisory GHSA-v2wj-q39q-566r rather than the article alone:
+affected vite >=7.1.0 <=7.3.1 and >=8.0.0 <=8.0.4, patched 7.3.2 / 8.0.5, so RB-E-BUILD now carries
+a SECURITY FLOOR (the React Router floor precedent). Appending ?raw / ?import&raw to the @fs route
+skips deny-list filtering and returns .env files, certs or private source with a 200; it co-fires
+with three older bypasses of the same route, which is the real lesson — treat that deny-list as
+defence in depth, not a boundary. F5 measured a sustained August 2026 campaign hunting exposed dev
+servers (807 session-grouped attacks, ~32,000 events, cycling env/AWS/Azure/IaC-state wordlists,
+same cluster also probing Next.js CVE-2025-29927), so RB-E-SECURITY takes the generalizable half:
+your threat model has to include the tools you run while developing.
+
+GAP CLOSED (opened 2026-09-10): react-native-screen-choreography is now a NAMED option in
+RB-E-ANIMATION after two prior too-early skips at 0.4. The reopen was earned on facts TWiR did not
+report — the current release is 0.6.0 (2026-09-17, not the 0.5.0 the issue cited), and npm plus the
+README confirm expo-router >=56.1.1 as a declared peer with its own install guide and example app,
+which is exactly the Expo-Router-shaped hole the gap note described. Kept as a pinned when-clause,
+never a default: 0.x with 13 versions, 0.4→0.5 renamed most of the public API, another feature
+release seven days later, and a five-library native peer stack whose lower bounds the author himself
+calls "not a full tested compatibility matrix".
+
+CONSOLIDATION IS THE PASS'S REAL THEME, and it only appears if you read three keeps together:
+Shopify OUT of React Native, Margelo (Nitro, VisionCamera, MMKV) INTO Callstack with its libraries
+staying OSS under the same lead, and Tailwind Labs INTO Shopify with Tailwind staying MIT under the
+same team (Tailwind Plus/ui.sh closed to new sign-ups — a routing correction only, since neither is
+a pick here). Two of the three are reassuring and one is not; recorded side by side in RB-E-NATIVE
+and RB-E-STYLING because the durable point is that this corpus tracks WHO MAINTAINS a dependency,
+not just what it does.
+
+REACT WEEKLY RETIRED, on the pre-committed criterion rather than a fresh argument. The 2026-09-10
+decision said: if #37 also originates zero keeps, that is four consecutive, drop it. Measured: #37
+originated ZERO (jotai v3, RN 0.88-rc.0, the Rust-compiler post, Expo Modules 2.0, React 19.3, Expo
+Go login — every one already held) and #38 originated ZERO (Shopify, the KMP study, Discord
+New-Arch, SDK 58 — all carried by TWiR #297 or already held). Five consecutive, against a lifetime
+14% origination rate. Left listed in harvest-state with active:false so the ×30 count keeps matching
+sources_digested and the decision stays visible — with the irreversibility warning on the record:
+its RSS window is the latest 20 issues, so the backlog is now permanently unreachable.
+
+ADVOCATE PASS FOUND AN INCONSISTENCY IN MY OWN TRIAGE, which is the best thing it can do. I had
+skipped react-native-boost 2.0 as too-early for vendor claims and youth — while RB-E-BUILD already
+lists `facetpack` at v0.2 (2026-01, early-stage, vendor-claimed ~36x). Same standard, different
+verdict. FLIPPED: Boost is now an option row, and stating its mechanism justified the slot
+independently — it is the only row there that rewrites JSX at build time to SKIP RN component layers
+(render cost) rather than transforming faster (bundle time). Adoption caveat lives in the tradeoff
+text, not in an omission.
+
+SPOT-CHECK: 0 corrections — a first. Both sampled `[rule:npm-patch]` rows were genuinely patch-only
+(@tanstack/react-router 1.170.32→.34, react-native-qrcode-svg 6.3.21→.24; neither deprecated, both
+still patch-level today), and both sampled TWiR #296 skips hold. Rule admission re-verified by the
+gate across 2,439 gold rows, up from 1,976 — that +463 is this pass's own eleven adjudicated
+manifests entering the gold set, plus two issue fixtures frozen at prep time (twir-297,
+react-status-490) for `harvest bench`.
+
+A TOOL BUG BLOCKED A GATE AND WAS FIXED AT THE ROOT: `manifestKeys` in harvest-lib.mjs excluded `)`
+from its URL regex, so any link containing a parenthesis — RN Rewind #57 cited
+en.wikipedia.org/wiki/Holes_(novel) — could NOT be expressed in a manifest, and coverage could never
+reach 0 for that issue. No formatting workaround exists, so the regex now allows `)` inside a match
+and trims unbalanced trailing ones, which keeps `[text](url)` markdown parsing clean while making
+parenthesised URLs accountable. Caught the TWiR #298 stub trap again too: 200 OK, absent from the
+archive listing, og:title and h1 both literally "#298: ..." — the 2026-08-18 rule held.
+
+Delta: 21 entries touched (ANIMATION · LISTS · CHARTS · GAMES · SVG · NATIVE · NAV · NATIVE-UI ·
+BUILD · SECURITY · OBSERVABILITY · AI-DEVTOOLS · CROSSPLATFORM · STYLING · COMPONENT-LIBS ·
+RN-VERSIONS · REACT-CORE · ALT-FRAMEWORKS · ONDEVICE-AI · TESTING · DX), 0 new entries, 3 new
+tripwires (Skia rename, FlashList deprecation, screen-choreography 1.0), 1 challenge verdict
+(CROSSPLATFORM SURVIVES), 1 gap closed, 1 advocate flip, 1 source retired, 1 tool fix, 11 manifests.
+Gates: lint clean (1 pre-existing shared-URL warning) · coverage 0 unaccounted across all 7
+fetchable issues · verify-diff ✓ every added receipt checks out · rules ✓ 2,439 gold rows · engine
+24 ✓ · eval 139/139.

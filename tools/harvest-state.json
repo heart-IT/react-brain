@@ -6,57 +6,58 @@
     "`react-brain lint` cross-checks each `count` against encyclopedia.yaml sources_digested — they must match.",
     "Narrative harvest history (what each pass changed, process learnings) lives in tools/harvest-log/LEDGER.md — in-repo since 2026-08-07."
   ],
-  "updated": "2026-09-10",
+  "updated": "2026-09-21",
   "sources": {
     "this-week-in-react": {
       "name": "This Week in React",
       "archive": "https://thisweekinreact.com/newsletter",
-      "last_processed": "#296",
-      "count": 30,
+      "last_processed": "#297",
+      "count": 31,
       "cadence": "weekly",
-      "notes": "issue pages fetch directly at /newsletter/{n} — BUT a 200 IS NOT PROOF OF PUBLICATION: cross-check the ARCHIVE listing at /newsletter or reject titles ending in ': ...' before treating an issue as live (the 2026-08-18 #294-stub precedent, full story in LEDGER). #295 and #296 both carried by the archive listing and processed 2026-09-10; #297 expected Tue/Wed",
+      "notes": "issue pages fetch directly at /newsletter/{n} — BUT A 200 IS NOT PROOF OF PUBLICATION: cross-check the ARCHIVE listing at /newsletter or reject titles ending in ': ...' before treating an issue as live. That rule EARNED ITS KEEP AGAIN on 2026-09-21: /newsletter/298 returned 200 while the archive listing ended at #297, and both its og:title and <h1> read literally '#298: ...' — a stub, exactly the 2026-08-18 #294 precedent. #297 (processed 2026-09-21) was the densest issue in months: 74 links, headlined by Shopify leaving React Native and Expo SDK 58 beta. #298 expected to go live within days",
       "url_pattern": "https://thisweekinreact.com/newsletter/{n}"
     },
     "react-status": {
       "name": "React Status",
       "archive": "https://react.statuscode.com/issues",
-      "last_processed": "#489",
-      "count": 30,
+      "last_processed": "#491",
+      "count": 32,
       "cadence": "weekly",
-      "notes": "corroboration-heavy; headliners usually already held — #489 was the most extreme yet (nearly every item already dispositioned elsewhere in the same pass; its one keep was the Wieruch primitives essay). Probed FIRST per the standing note, and RE-PROBED on Thursday 2026-09-10 per the #486 precedent: no #490 (archive ends at #489, /issues/490 404s) — probe first next pass",
+      "notes": "corroboration-heavy; headliners usually already held. Probed FIRST per the standing note: #490 AND #491 were both live on 2026-09-21 and both processed. #490 originated the Tailwind-Labs-joins-Shopify keep; #491 originated the VITE DEV-SERVER CVE keep (CVE-2026-39364) — which sat FAR DOWN its link list and was only caught because the coverage gate demands a row per link. Lesson recorded: this source buries real finds below the headline items, so never triage it from the headlines alone. Next: probe #492 (publishes Thursdays)",
       "url_pattern": "https://react.statuscode.com/issues/{n}"
     },
     "react-digest": {
       "name": "React Digest",
       "archive": "https://reactdigest.net/digests",
-      "last_processed": "#2360",
-      "count": 25,
+      "last_processed": "#2365",
+      "count": 26,
       "cadence": "weekly",
-      "notes": "issues slug-titled by featured article; article/depth-driven — durable yield is usually one decision-guide reading, and #2360 yielded ZERO (an internals tutorial the corpus covers four ways + a TanStack Form v2 ALPHA). Archive moved: /digests 404s, use /newsletters or /newsletters.rss (newest-first, resolves the slug). Slug numbers are NOT sequential (2344 → 2350 → 2355 → 2360)"
+      "notes": "issues slug-titled by featured article; article/depth-driven. Archive: /newsletters or /newsletters.rss (newest-first, resolves the slug) — /digests 404s. Slug numbers are NOT sequential (2344 → 2350 → 2355 → 2360 → 2365). #2365 ('The browser's main thread is expensive', processed 2026-09-21) yielded ZERO keeps — 12 links, half of them sibling-newsletter cross-promotion, and its React items (React 19.3, the Rust compiler post, a React-internals tutorial) were all already held. That is TWO consecutive zero-yield issues (#2360, #2365); if #2370 also yields zero, measure its origination rate the way React Weekly's was measured before deciding whether it earns its slot"
     },
     "react-native-rewind": {
       "name": "React Native Rewind",
       "archive": "https://reactnativerewind.com/",
-      "last_processed": "#56",
-      "count": 56,
+      "last_processed": "#57",
+      "count": 57,
       "cadence": "weekly",
-      "notes": "slug-titled; each issue page carries an authoritative 'Issue #NN' label near the title — use THAT, not sequential guesswork, to resume. RSS at /newsletter-rss.xml (newest-first) now 307-redirects — curl -L; canonical host is www.thereactnativerewind.com. #56 (2026-09-10) was a single-theme issue on agent/CI device infrastructure — 13 links, one keep (Simlock); its EAS Simulator headliner is waitlist-gated"
+      "notes": "slug-titled; each issue page carries an authoritative 'Issue #NN' label near the title — use THAT, not sequential guesswork, to resume (verified again 2026-09-21: the two newest slugs labelled themselves #57 and #56). RSS at /newsletter-rss.xml (newest-first) 307-redirects — curl -L; canonical host is www.thereactnativerewind.com. #57 ('React Native is DEAD, Expo Modules 2.0, and a $49 Flutter knockoff') was almost entirely commentary on the Shopify announcement plus Expo Modules 2.0 — both kept from PRIMARY sources, so it originated nothing; its remaining links are background references (UIView, Yoga, Fabric, Impeller)"
     },
     "native-weekly": {
       "name": "Native Weekly",
       "archive": "https://nativeweekly.beehiiv.com/",
-      "last_processed": "#19",
-      "count": 9,
+      "last_processed": "#21",
+      "count": 11,
       "cadence": "~6-weekly (irregular)",
-      "notes": "nativeweekly.com is a shell — use the beehiiv archive (slugs like /p/aug-28-2026-issue-19); author also authors rnsec (watch self-promotion); strongest beat = agentic dev tooling. Cadence tightened: #18 2026-08-14 → #19 2026-08-28 (fortnightly?). Release-roundup rows mostly duplicate the firsthand watch — the articles are where its keeps are (#19: stale-ShadowNodes reading + the Reanimated 4.6/Worklets 0.12 flip arrived via its release table) | 2026-09-10: NO new issue — beehiiv archive still ends at #19 (aug-28), consistent with the ~fortnightly-to-6-weekly cadence; nothing processed this pass"
+      "notes": "nativeweekly.com is a shell — use the beehiiv archive (slugs like /p/sep-11-2026-issue-20). NOTE THE SLUG TYPO TRAP: #21's slug reads 'sep-18-2025-issue-21' (2025, not 2026) — trust the issue number, not the date in the slug. Author also authors rnsec (watch self-promotion). Cadence has tightened to roughly fortnightly: #19 2026-08-28 → #20 2026-09-11 → #21 2026-09-18. Two issues processed 2026-09-21. The standing read holds: its release-roundup rows duplicate the firsthand watch almost entirely (#21 was ~20 npm/GitHub rows, all corroboration) and the ARTICLES are where its keeps are — #20 originated the Margelo-joins-Callstack keep, which no other source this pass carried"
     },
     "react-weekly": {
       "name": "React Weekly",
       "archive": "https://react-weekly.dev/rss.xml",
-      "last_processed": "#36",
-      "count": 28,
+      "last_processed": "#38",
+      "count": 30,
       "cadence": "weekly (Sundays)",
-      "notes": "site + api.react-weekly.dev are JS-shell/auth-gated — harvest via rss.xml content:encoded (FULL bodies). Links inside are api.react-weekly.dev/track/click/<id> redirects: resolve each with `curl -L` before dispositioning. `harvest inventory`/`coverage` return 0 links on the issue URL, so the coverage gate cannot cover this source — the RSS-derived manifest is the record. RSS window = latest 20: a backlog >20 issues loses them permanently (issues 1-7 already unreachable). TanStack-heavy. | #36 (2026-09-06) was TWELVE-for-twelve already-held. DECISION 2026-09-10, measured rather than judged by impression: across issues 29-36 this source carries 65 dispositioned rows and ORIGINATED 9 keeps (14%) — comparable to expo.dev (18%) and well above callstack.com (4%). BUT origination is 0 for issues 34, 35 and 36 — three consecutive — which fits the structural read that its editorial overlaps TWiR + firsthand almost entirely, and that overlap grew as firsthand coverage grew. KEEP for one more issue. If #37 also originates zero keeps, that is four consecutive and the structural argument is proven: drop it then, and note that its RSS window is latest-20 so a dropped backlog is permanently unreachable. Do NOT re-derive this from a single quiet issue."
+      "notes": "RETIRED 2026-09-21 — do not process further issues; kept in this file so the ×30 count keeps matching encyclopedia sources_digested and the decision stays visible. The 2026-09-10 criterion was pre-committed precisely so this would not be re-argued from one quiet issue: 'if #37 also originates zero keeps, that is four consecutive and the structural argument is proven: drop it then.' Measured on 2026-09-21: #37 originated ZERO (all six links already-held or corroboration — jotai v3, RN 0.88-rc.0, the Rust-compiler post, Expo Modules 2.0, React 19.3, Expo Go login) and #38 originated ZERO (Shopify back-to-native, the KMP study, Discord New-Arch, SDK 58 — every one of them carried by TWiR #297 or already held). That is issues 34-38, FIVE consecutive with no origination, against a lifetime rate of 9 keeps / 65 rows (14%) across 29-36. The structural reason, now proven rather than suspected: its editorial is a subset of TWiR + the firsthand watch, and the overlap grew as firsthand coverage grew. IRREVERSIBILITY WARNING kept on the record: its RSS window is the latest 20 issues only, so this backlog becomes permanently unreachable (issues 1-7 already are). To resurrect it, re-measure origination over three fresh issues before trusting it again",
+      "active": false
     }
   }
 }

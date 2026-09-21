@@ -19,6 +19,13 @@ recommend:
     - "fully custom web viz → visx; quick standard charts → Recharts"
     - "heavy Skia/Reanimated perf → react-native-best-practices"
 note: >
+  SKIA IS CHANGING HANDS AND PACKAGE NAME (2026-09-21, pointer — RB-E-ANIMATION owns this thread
+  and carries the receipts + the tripwire): Shopify is leaving React Native. It sponsors
+  react-native-skia through the end of 2026; the author keeps developing it, forks the repo in the
+  coming months and republishes under a NEW NAME, and the Shopify repo is then archived. Nothing is
+  deprecated today — 2.12.0 shipped 2026-09-16, after the announcement. For this entry the exposure is broad rather than deep: Victory Native XL, react-native-graph and
+  react-native-livechart all render THROUGH Skia, so a rename propagates to their peer ranges, not
+  just to your own dependency list. Pin across the transition window.
   LEAD (2026-09-10, adopted from harvest/2026-09-03): @tanstack/charts reached 0.16, officially alpha
   and "ready to be field-tested" — a new web-charting entrant from the org already behind Query,
   Router, Table, Form and AI in this corpus, which is why it is worth tracking rather than ignoring.
@@ -48,7 +55,7 @@ note: >
   which is also the documented way to keep a row out of the default set.
 defer_to_skill: react-native-best-practices  # Skia/Reanimated render-perf depth
 doc: "RB-E-CHARTS.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-10   # primitives-vs-framework reading (React Status #489) · TanStack Charts 0.16 alpha LEAD — reconciled from harvest/2026-09-03
+updated: 2026-09-21   # Skia stewardship pointer — Shopify leaves RN, library moves to its author under a new name (every Skia-backed chart option inherits it)
 reading:
   - title: "Agentic Coding: Bet on the Primitives"
     url: "https://www.robinwieruch.de/agentic-coding-bet-on-primitives/"
@@ -69,6 +76,7 @@ reading:
     claim: "You ship Skia-backed RN charts (Victory Native XL or raw react-native-skia) — the rendering model underneath: JSI, immutable display lists, a unified WebGPU backend, and the canonical high-density line-chart-as-GPU-texture pattern."
     applies_when: { deps: ["victory-native", "@shopify/react-native-skia"], platforms: [react-native] }
 sources:
+  - "https://shopify.engineering/back-to-native"
   - "https://github.com/TanStack/charts/releases/tag/v0.16.0"
   - "https://www.robinwieruch.de/agentic-coding-bet-on-primitives/"
   - "https://registry.npmjs.org/victory-native/latest"

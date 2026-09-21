@@ -24,7 +24,7 @@ recommend:
   default: "FIRST-PARTY FIRST where it exists (challenge 2026-09-10): on Expo, start from Expo's own agent layer and add to it, rather than reaching for a third-party pack by reflex — the same now applies to React on the web via react-devtools-cdt-mcp. Then give a coding agent two things: RN KNOWLEDGE — a curated skills pack (Callstack agent-skills is the broadest at ~1.6k★, verified 2026-09-10; add Margelo react-native-skills for camera/native depth) — and EYES+HANDS on the running app — Maestro MCP if you already test with Maestro (see RB-E-TESTING), else agent-device (cross-platform) or Argent (iOS debug/profile depth). Add Reactotron MCP when the agent needs runtime state. Fast-moving (confidence: low) — most of these tools are months old; trial on one workflow before standardizing."
   when:
     - "agent writes RN code → install a skills pack (agent-skills / react-native-skills) so it stops generating stale patterns"
-    - "on Expo → start from Expo's FIRST-PARTY agent layer (docs.expo.dev/agents, verified 2026-09-01): the official `expo` plugin for Claude Code (claude plugin install expo@claude-plugins-official) / Codex, an Expo MCP server with live docs + EAS Build history + Update channels + TestFlight metadata, and an AGENTS.md that create-expo-app now generates pointing at your SDK's docs — Expo's own guide then hands device control to the same agent-device/Argent picks this entry makes"
+    - "on Expo → start from Expo's FIRST-PARTY agent layer (docs.expo.dev/agents, verified 2026-09-01): the official `expo` plugin for Claude Code (claude plugin install expo@claude-plugins-official) / Codex, an Expo MCP server with live docs + EAS Build history + Update channels + TestFlight metadata, and an AGENTS.md that create-expo-app now generates pointing at your SDK's docs — Expo's own guide then hands device control to the same agent-device/Argent picks this entry makes — and as of SDK 58 beta that first-party layer includes @expo/agent-cli, see note"
     - "agent must run and SEE the app (closed verify loop) → agent-device (cross-platform) or Argent (iOS debugger/profiler depth)"
     - "agent-generated E2E tests → Maestro MCP (owned by RB-E-TESTING)"
     - "agent needs runtime state / network inspection → Reactotron MCP"
@@ -32,6 +32,20 @@ recommend:
     - "agent-driven device work you repeat (QA sweeps, regression flows) → discover the flow once with the model, then agent-device replay it with zero model calls"
     - "how to WORK with agents (TDD, review discipline, cognitive debt) → agentic-engineering-patterns"
 note: >
+  THE FIRST-PARTY-FIRST DEFAULT GOT A CONCRETE TOOL (2026-09-21, verified vs the Expo SDK 58 beta
+  changelog of 2026-09-15): @expo/agent-cli is an experimental CLI that Expo describes as built by
+  agents and designed for agents. It sits on top of Expo CLI, EAS CLI and expo-doctor and falls
+  back to Expo CLI, so it is meant as a drop-in replacement rather than a new thing to learn:
+  `agents:setup` wires it up, `status` answers Expo Go compatibility WITHOUT starting the app, `dev`
+  decides for itself whether a build is needed and takes the fastest route to a running app, `smoke`
+  is dev plus a screenshot plus stop (a one-command "can this machine actually run the app"), and
+  `skills:sync` pulls co-located agent skills out of node_modules into the project. Every command
+  prints next steps, which is the actual design point — the failure it targets is an agent guessing
+  its way from Expo Go into a runtime error because nothing told it a development build was needed.
+  This is worth recording as CONFIRMATION rather than novelty: the 2026-09-10 challenge moved this
+  entry's default to first-party-first on the argument that Expo was building its own agent layer,
+  and a first-party agent CLI six days later is that argument landing. Still experimental and under
+  active development, so trial it on one workflow before standardizing (the entry-wide caveat).
   NEW entry (2026-07-09): the dominant recurring theme of Native Weekly issues 11–16 (Jan–Jun
   2026) — every single issue shipped agent-tooling news (agent-device ×3, two skills packs,
   Reactotron MCP, Argent, Expo SDK 55/56 AI tooling, Xcode 26.3 'agentic coding') — and the
@@ -61,8 +75,12 @@ note: >
   now has a live first-party leaderboard — check it before pinning a tool+model pair.
 defer_to_skill: agentic-engineering-patterns
 doc: null
-updated: 2026-09-10   # agent-device 0.21 + Argent 0.25 + cdt-mcp + Simlock · CHALLENGED — WEAKENED: default now leads first-party, matching this entry's own Expo when-clause
+updated: 2026-09-21   # @expo/agent-cli (SDK 58 beta) — the first-party agent layer the 2026-09-10 challenge predicted · Shopify's agent-addressable-architecture reading
 reading:
+  - title: "Native is now the future of mobile at Shopify"
+    url: "https://shopify.engineering/back-to-native"
+    by: "Mustafa Ali (Shopify Engineering)"
+    what: "Read here for the AGENT-WORKFLOW half of a post that is mostly famous for its framework decision (RB-E-CROSSPLATFORM owns that argument). Two mechanisms are transferable regardless of what you think about the framework call. (1) HELIX, their migration system, exists because pointing an LLM at a codebase and asking for the same features in another language produces unshippable volume even when you freeze specs and task files first; instead a developer points it at one screen, it proposes small ordered checkpoints reviewable in minutes, and each checkpoint must prove behavior with tests, match the running app in a visual review, survive two adversarial code reviewers and get a human's nod before the next one starts — with review feedback remembered so the loop needs less hand-holding over time. The generalizable rule is that the gate, not the prompt, is what makes agent output shippable. (2) AGENT-ADDRESSABLE ARCHITECTURE: they argue the real mobile bottleneck is the FEEDBACK loop, not code generation — agents change code in seconds but take minutes to verify through a simulator, because reading state via the accessibility tree or screenshots is slow and brittle. Their fix is architectural: keep business logic fully decoupled from UI and runnable headlessly on desktop, then expose it to agents through a CLI that inspects state, navigates and acts in milliseconds, with simulator control reserved for when UI truly matters. That principle is framework-independent — it is the same reason this entry rates tools that give an agent a closed verify loop."
   - title: "3 Minutes With an Agent, 9 Seconds on Replay"
     url: "https://www.callstack.com/blog/3-minutes-with-an-agent-9-seconds-on-replay"
     by: "Michał Pierzchala (Callstack)"
@@ -106,6 +124,8 @@ reading:
     claim: "You write agent context for React tooling — check what the tool already ships first: Next.js, MUI, Storybook and Playwright bundle their own MCP servers/docs/agents, which version with the package where hand-written summaries go stale."
     applies_when: { deps: ["next", "@mui/*", "storybook", "@playwright/*"], platforms: [react] }
 sources:
+  - "https://expo.dev/changelog/sdk-58-beta"
+  - "https://shopify.engineering/back-to-native"
   - "https://github.com/callstackincubator/simlock"
   - "https://github.com/react/react/tree/main/packages/react-devtools-cdt-mcp"
   - "https://registry.npmjs.org/modern-web-guidance/latest"

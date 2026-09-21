@@ -25,13 +25,30 @@ recommend:
     - "new web CSS-in-JS → avoid runtime libs on the per-render-cost axis (styled-components v7 is actively developed but still runtime); use zero-runtime/StyleX"
     - "RN needing Tailwind v4 parity with web today → NativeWind stable is TW3-era and its v5/TW4 line is preview-only; Uniwind (from the Unistyles authors, requires TW>=4) is the stable TW4 option"
 note: >
+  TAILWIND'S OWNER CHANGED, ITS LICENCE AND TEAM DID NOT (2026-09-09, verified vs Adam Wathan's
+  announcement on the Tailwind blog): Tailwind Labs has joined Shopify. This entry's web default is
+  Tailwind, so the stewardship question is load-bearing and the answer is reassuring on the axis
+  that matters: "Nothing changes with Tailwind CSS or any of our other open-source projects" —
+  everything stays MIT-licensed and the same team continues to lead and maintain it, now with
+  Shopify's backing. Wathan frames it as giving the framework "a stable long-term home where it will
+  be actively maintained", and states the number behind why that matters: installed over 110 million
+  times per week. What DOES change is commercial, and only matters if you were planning to buy —
+  they are no longer growing the business around Tailwind: existing Tailwind Plus and ui.sh
+  customers keep their access, but SIGN-UPS ARE CLOSED to new customers. Neither Tailwind Plus nor
+  ui.sh is a pick in this corpus, so nothing here depends on it; recorded because a reader who
+  bookmarked "buy Tailwind Plus for the component set" will now hit a closed door and should be
+  routed to shadcn/ui in RB-E-COMPONENT-LIBS instead. Worth reading next to the two other 2026
+  stewardship moves this corpus recorded in the same week — Shopify LEAVING React Native
+  (RB-E-LISTS, RB-E-ANIMATION) and Margelo joining Callstack (RB-E-NATIVE): the pattern is
+  consolidation under corporate maintainers, which cuts both ways and is exactly why this corpus
+  records who maintains a dependency, not just what it does.
   Web+native: react-native-web is in maintenance mode (2026); React Strict DOM is the
   emerging successor (see RB-E-CROSSPLATFORM). The Tailwind-for-RN field is crowded
   ("Tailwind fatigue" — NativeWind, Uniwind, react-native-tailwind, …); the durable
   selection axis is runtime cost — zero-runtime/compiler approaches avoid JS-side style work.
 defer_to_skill: design-systems-governance  # tokens, theme parity, a11y intrinsics
 doc: "RB-E-STYLING.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-10   # Linear's styled-components → StyleX production migration reading (criteria, measured payoff, enforcement) — TWiR #295
+updated: 2026-09-21   # Tailwind Labs joined Shopify — OSS stays MIT under the same team, Tailwind Plus/ui.sh closed to new sign-ups (React Status #490)
 reading:
   - title: "Styling Linear for the future with StyleX"
     url: "https://linear.app/now/styling-linear-for-the-future-stylex"
@@ -70,6 +87,7 @@ reading:
     claim: "You ship zero-runtime CSS-in-JS — the field converged on plain class-name output, so pick on atomicity and design-system features: next-yak/Linaria for a styled-components codebase, vanilla-extract or Panda for typed styles, StyleX at hundreds-of-teams scale."
     applies_when: { deps: ["linaria", "@linaria/*", "@vanilla-extract/*", "@pandacss/*", "next-yak", "@griffel/*", "@stylexjs/stylex"], platforms: [react] }
 sources:
+  - "https://tailwindcss.com/blog/tailwind-is-joining-shopify"
   - "https://linear.app/now/styling-linear-for-the-future-stylex"
   - "https://dx-styles.dev/blog/why-dx-styles/"
   - "https://www.spotvirtual.com/blog/why-were-breaking-up-with-css-in-js"

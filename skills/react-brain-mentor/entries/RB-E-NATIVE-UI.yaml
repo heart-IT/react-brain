@@ -6,9 +6,10 @@ status: reviewed   # long-form entry written + source-checked
 confidence: medium
 platforms: [react-native]
 options:
-  - { name: "expo-widgets (Expo)", tradeoff: "iOS home-screen widgets + Live Activities from Expo UI components — no SwiftUI/native code; STABLE in Expo SDK 56 (alpha in SDK 55); full env access, no pre-render" }
-  - { name: "Voltra (Callstack)", tradeoff: "Live Activities + widgets; SwiftUI-style layout (VStack/HStack); v2.0 (2026-06-18) rewrote to Turbo Modules → now works in BARE RN (no Expo Modules); iOS 16.2+ (interactive 17+), iOS 18+ activity families; v2 migration required" }
+  - { name: "expo-widgets (Expo)", tradeoff: "home-screen widgets + Live Activities from Expo UI components — no SwiftUI/native code; STABLE in Expo SDK 56 (alpha in SDK 55); full env access, no pre-render. NO LONGER iOS-ONLY: SDK 58 (beta) adds an ANDROID implementation — widgets run their own JS bundle on a dedicated Hermes runtime, with interactions and Material Colors" }
+  - { name: "Voltra (Callstack)", tradeoff: "Live Activities + widgets; SwiftUI-style layout (VStack/HStack); v2.0 (2026-06-18) rewrote to Turbo Modules → now works in BARE RN (no Expo Modules); iOS 16.2+ (interactive 17+), iOS 18+ activity families; v2 migration required. 2.3 (2026-09-15) adds SERVER-DRIVEN Dynamic Widgets (a widget fetches its own props from your server on a schedule, per placement, instead of the app pushing), PER-INSTANCE Android widget configuration that survives a launcher backup/restore (setWidgetInstanceConfiguration — two placements of one widget showing different cities), experimental JSON-diff Dynamic Live Activities on iOS, and an ArcProgressIndicator gauge for Android" }
   - { name: "Expo Targets", tradeoff: "native targets (widgets, App Clips, share extensions) in Swift/Kotlin or RN; multi-step setup" }
+  - { name: "expo-app-intents", tradeoff: "ALPHA (Expo SDK 58 beta) — exposes Apple App Intents, i.e. Siri, Shortcuts, Spotlight and Apple Intelligence, from an Expo app: intent types are declared in Swift INLINE MODULES under an `app-intents` directory (Apple's build-time metadata extraction only sees code in the app target), and the package delivers invocations to your JavaScript and stores entity values. `npx expo-app-intents init` scaffolds it. Docs and examples are still to come — prototype only" }
   - { name: "react-native-teleport", tradeoff: "portals rendering in the native layer (re-parenting); web + native. 1.2.0 fixes the visible flaw on Android: the old move used removeView()/addView(), which detached the view from the window and so disconnected the rendering surface behind a SurfaceView/TextureView — a black or white flash while the compositor waited for the next frame, worst on older devices and intermittent on new ones. 1.2 reparents an attached view with detachViewFromParent()/attachViewToParent() instead, keeping it in the window and its rendering resources alive, so teleporting video and maps no longer flickers. No API or config to adopt: the fast path is used only when both parents share an Android window with no active focus/layout transition, and it falls back to the old behavior otherwise" }
 recommend:
   default: "On Expo → expo-widgets for iOS widgets/Live Activities (stable in SDK 56, no native code). Bare RN → Voltra 2 (now bare-RN capable). Custom native targets / App Clips / share extensions → Expo Targets."
@@ -16,7 +17,36 @@ recommend:
     - "iOS widgets / Live Activities on Expo → expo-widgets (SDK 56, stable, no SwiftUI)"
     - "Live Activities on bare RN → Voltra 2 (Turbo Modules; no longer Expo-only)"
     - "widgets / App Clips / share extensions needing custom native → Expo Targets"
+    - "ANDROID home-screen widgets on Expo → expo-widgets now covers Android too (SDK 58 beta); on bare RN, or when a widget needs per-instance settings or server-driven props → Voltra 2.3"
+    - "Siri / Shortcuts / Spotlight / Apple Intelligence entry points → expo-app-intents (alpha; SDK 58 beta), or Expo Targets if you want to own the Swift"
 note: >
+  THE "iOS-LEANING" VERDICT BELOW IS NOW HALF-RETIRED (2026-09-21, verified vs the Expo SDK 58 beta
+  changelog of 2026-09-15 + the Voltra 2.3.0/2.3.1 releases): Android home-screen widgets arrived on
+  BOTH of this entry's main options in the same fortnight. expo-widgets gained an Android
+  implementation in which each widget runs its own JS bundle on a DEDICATED HERMES RUNTIME (with
+  interactions and Material Colors), and Voltra 2.3 made Android widgets individually configurable
+  with settings that survive a launcher backup/restore. The mechanism is the part worth carrying,
+  because it is also the cost: a widget with its own JS bundle and its own Hermes runtime is a
+  second app-sized thing to keep fast, so treat widget JS as a startup-budget question and not as
+  free reuse of your app code. iOS also moved on: Live Activities gained a `staleDate` option on
+  LiveActivity.start()/update(), stable ActivityKit identifiers and runtime widget configuration
+  changes, and Voltra added experimental Dynamic Live Activities driven by small JSON prop diffs
+  instead of a full re-rendered payload. What is still unsettled — and why confidence stays at
+  medium — is that the Android side is DAYS OLD on both options and expo-app-intents is alpha with
+  documentation still to come; the honest instruction remains: prototype your platform coverage
+  before committing a product surface to it.
+  @expo/ui GREW A NAVIGATION SURFACE (same changelog): NavigationStack, NavigationLink,
+  NavigationDestination, Toolbar, a navigationTitle modifier and two/three-column
+  NavigationSplitView on iOS, new Compose components (Image, DateRangePicker,
+  DateRangePickerDialog, VerticalSlider) on Android, and ShapeStyle-accepting modifiers
+  (background/tint/border/containerBackground/foregroundStyle) so a native view can be painted with
+  a material or gradient. Every component now has a screenshot in the docs, which sounds cosmetic
+  and is not: picking a native component you cannot see was the practical blocker. The fix most
+  likely to matter in an existing app is that views hosted inside <RNHostView> are now MEASURED
+  where SwiftUI/Compose actually placed them — which is what was behind dropped presses, gestures
+  stolen by an enclosing scrollable, and missing touches inside BottomSheet, Popover, AlertDialog
+  and DropdownMenu. One small ecosystem signal in passing: @expo/ui's web BottomSheet dropped the
+  unmaintained `vaul` for an in-house HTML <dialog>.
   Settling but still iOS-leaning. VERIFIED (2026-06): expo-widgets is STABLE in Expo SDK 56
   (alpha in SDK 55) — iOS widgets + Live Activities from Expo UI components without SwiftUI;
   Voltra 2.0 (2026-06-18) rewrote onto Turbo Modules and now runs in BARE RN (dropped the
@@ -27,7 +57,7 @@ note: >
   thread, no JS round-trips; relevant when native-UI surfaces must track gestures/animation.
 defer_to_skill: null
 doc: "RB-E-NATIVE-UI.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-10   # Teleport 1.2 Android fast reparenting — no empty frames for surface-backed views (video/maps) — TWiR #295
+updated: 2026-09-21   # ANDROID WIDGETS LAND on both options (expo-widgets SDK 58 beta — own JS bundle on a dedicated Hermes runtime; Voltra 2.3 per-instance config + server-driven props) · expo-app-intents alpha · @expo/ui navigation primitives + RNHostView measurement fix
 reading:
   - title: "Apple Home Screen Widgets with Expo (Continuous Native Generation)"
     url: "https://evanbacon.dev/blog/apple-home-screen-widgets"
@@ -47,6 +77,8 @@ watching:
     by: "Fernando Rojo, Szymon Rybczak & Oskar Kwaśniewski"
     what: "The v0 iOS team on what shipping a native-feel RN app took — including the upstream RN fixes it produced. Video companion to the v0 case study in `reading`."
 sources:
+  - "https://expo.dev/changelog/sdk-58-beta"
+  - "https://github.com/callstackincubator/voltra/releases/tag/v2.3.0"
   - "https://kirillzyusko.github.io/react-native-teleport/blog/1-2-0-android-fast-reparenting"
   - "https://expo.dev/blog/ios-widgets-and-live-activities-in-expo"
   - "https://github.com/callstackincubator/voltra/releases/tag/v2.0.0"

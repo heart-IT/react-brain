@@ -74,7 +74,7 @@ encyclopedia:
   content_dir: "../../encyclopedia"   # long-form entries land here as markdown, named <id>.md
   authoring_guide: "diataxis-documentation"
   updated: 2026-07-28
-  sources_digested: ["React Native Rewind ×56", "This Week in React ×30", "React Status ×30", "React Digest ×25", "Native Weekly ×9", "React Weekly ×28"]
+  sources_digested: ["React Native Rewind ×57", "This Week in React ×31", "React Status ×32", "React Digest ×26", "Native Weekly ×11", "React Weekly ×30"]   # React Weekly RETIRED 2026-09-21 (five consecutive issues originating zero keeps — see tools/harvest-state.json)
 
 # ------------------------------------------------------------------------------
 # GROUPS — table of contents. The mentor navigates by group, not by scanning all.

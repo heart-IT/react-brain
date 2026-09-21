@@ -22,6 +22,12 @@ recommend:
     - "icons → lucide-react-native or per-family @react-native-vector-icons/* (avoid the legacy monolithic react-native-vector-icons for new work; a codemod exists — and @expo/vector-icons is deprecated in SDK 56, same migration)"
     - "web → native <svg>; reuse the same icon set as React components"
 note: >
+  SKIA IS CHANGING HANDS AND PACKAGE NAME (2026-09-21, pointer — RB-E-ANIMATION owns this thread
+  and carries the receipts + the tripwire): Shopify is leaving React Native. It sponsors
+  react-native-skia through the end of 2026; the author keeps developing it, forks the repo in the
+  coming months and republishes under a NEW NAME, and the Shopify repo is then archived. Nothing is
+  deprecated today — 2.12.0 shipped 2026-09-16, after the announcement. Here Skia is only the escape hatch ("drop to Skia for GPU/animated/custom drawing"), so the
+  blast radius is small — react-native-svg, the actual default, is unaffected.
   react-native-svg (Software Mansion, v15.x, RN 0.78+) is the de-facto RN SVG primitive — it
   underpins most RN charts (Victory Native) and icon libraries (lucide-react-native peer-depends on
   it). Skia renders SVG too but with limits (no CSS / <text> / <animate>); use it for GPU/custom
@@ -35,7 +41,7 @@ note: >
   now complete on both bare RN and Expo.
 defer_to_skill: react-native-best-practices
 doc: "RB-E-SVG.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-16
+updated: 2026-09-21   # Skia stewardship pointer — affects only the GPU escape-hatch clause, not the react-native-svg default
 reading:
   - title: "Hello, Project Redraw"
     url: "https://wcandillon.dev/article/hello-project-redraw"
@@ -48,6 +54,7 @@ reading:
     claim: "You ship react-native-svg — the canonical workflow how-to: inline SVG, importing designer .svg files as components via react-native-svg-transformer, SvgUri/SvgXml, and animating SVGs."
     applies_when: { deps: ["react-native-svg"], platforms: [react-native] }
 sources:
+  - "https://shopify.engineering/back-to-native"
   - "https://registry.npmjs.org/react-native-svg/latest"
   - "https://github.com/oblador/react-native-vector-icons/blob/master/MIGRATION.md"
   - "https://expo.dev/changelog/sdk-56"

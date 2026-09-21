@@ -8,11 +8,11 @@ platforms: [react, react-native]
 options:
   - { name: "ScrollView/.map", tradeoff: "fine <20 static items only" }
   - { name: "FlatList", tradeoff: "RN baseline virtualization" }
-  - { name: "FlashList", tradeoff: "recycling; large RN lists (v2 = New Architecture ONLY; old arch → pin v1.x)" }
+  - { name: "FlashList", tradeoff: "recycling; large RN lists (v2 = New Architecture ONLY; old arch → pin v1.x). STEWARDSHIP IN TRANSITION — Shopify is leaving React Native and will only fix compatibility-breaking issues while it looks for a long-term steward; see note" }
   - { name: "react-window / react-virtual / HighTable", tradeoff: "web virtualization; HighTable handles billion-row tables (viewport-only DOM + scrollbar downscaling)" }
   - { name: "Legend List", tradeoff: "one virtualization engine for RN + web (v3.0 stable); SectionList + chat/anchoring APIs; signal-driven container pool → very small re-renders" }
 recommend:
-  default: "RN: FlashList for large lists, FlatList otherwise, ScrollView only for <20 static items. Web: TanStack Virtual (react-virtual) or react-window — both current (3.14.11 / 2.3.1, verified 2026-09-10), pick on API taste."
+  default: "RN: FlashList for large lists (still the pick — but read the stewardship note before betting a new codebase on it), FlatList otherwise, ScrollView only for <20 static items. Web: TanStack Virtual (react-virtual) or react-window — both current (3.14.13 / 2.3.1, verified 2026-09-21), pick on API taste."
   when:
     - "huge web tables (100k+ rows) → HighTable"
     - "one list engine across RN + web → Legend List"
@@ -20,6 +20,24 @@ recommend:
     - "text-heavy RN feeds where hundreds of flat labels mount at once → try react-native-plain-text for those labels (renders straight to UILabel/TextView, skipping RN's text layout pipeline; one string, one style, Fabric-only, 0.8.x beta as of 2026-08) and keep <Text> wherever you need nesting, mixed styles, press handling or selection — the two mix in one screen"
     - "exact thresholds / perf → react-native-best-practices owns the rules"
 note: >
+  FLASHLIST STEWARDSHIP IS IN TRANSITION (2026-09-21, verified vs Shopify's own announcement +
+  the npm registry): Shopify is migrating its apps off React Native back to Swift/Kotlin, and said
+  so in the same post that set out what happens to its libraries. For FlashList specifically —
+  which the post puts at ~2M downloads/week and calls "the default way to render high-performance
+  lists in React Native" — Shopify commits only to FIXING CRITICAL ISSUES THAT BREAK COMPATIBILITY,
+  and says it is in discussions with several companies about taking on long-term stewardship. No
+  transfer has been announced. What is verifiable today: the package is NOT deprecated on npm and
+  latest is 2.3.2, published 2026-06-10 — i.e. the last release already predates the announcement,
+  which is consistent with maintenance-only. The recommendation does NOT change: FlashList remains
+  the best RN answer for large lists and a maintained-for-compatibility library is not a broken one.
+  What changes is how you bet: if you are STARTING a large RN list surface now, price in that the
+  maintainer is leaving the ecosystem, and note that this entry already carries a cross-platform
+  alternative under active development (Legend List, v3.0 stable, RN + web) in the when-clauses. The
+  tripwire below fires if npm ever carries a deprecation flag (the usual signal for a rename or a
+  handover); a steward being NAMED is not machine-observable, so re-read the announcement thread
+  when this entry next comes up for challenge. The same announcement
+  archives Shopify's Restyle (not an option in this corpus) and hands react-native-skia to its
+  author under a new name — see RB-E-ANIMATION, which owns that thread.
   PLAIN TEXT PROMOTED skip→when-clause 2026-08-18 (2nd independent signal — TWiR #293 then RN
   Rewind #52 — which was the reopen condition recorded at the first skip; facts verified vs the
   repo README + npm 0.7.1; still pre-1.0 at 0.8.1, 2026-09-01): react-native-plain-text is a narrow micro-optimization, not a list
@@ -48,7 +66,7 @@ note: >
   and call the same Table methods, so this is an upgrade, not a rewrite.
 defer_to_skill: react-native-best-practices  # RN-RULE-USE-FLASHLIST owns the thresholds
 doc: "RB-E-LISTS.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-10   # web virtualization pin refresh: react-virtual 3.14.11 / react-window 2.3.1 (firsthand)
+updated: 2026-09-21   # FlashList stewardship in transition — Shopify leaving RN, critical-compat fixes only (TWiR #297 · Status #490 · RN Rewind #57)
 reading:
   - title: "How to Build the Fastest Apps: Break the Rules (App.js Conf 2026)"
     url: "https://www.youtube.com/watch?v=K3flMIHS-cI"
@@ -85,6 +103,8 @@ reading:
     claim: "You ship TanStack Table — v9 (stable 2026-08-04) splits feature state into per-feature atoms behind a reactivity contract so cell re-renders no longer depend on whole-table state; the same subscription-grain lesson as the list readings here."
     applies_when: { deps: ["@tanstack/react-table"], platforms: [react] }
 sources:
+  - "https://shopify.engineering/back-to-native"
+  - "https://registry.npmjs.org/@shopify/flash-list/latest"
   - "https://tanstack.com/blog/tanstack-table-v9-memory-performance"
   - "https://github.com/mdjastrzebski/react-native-plain-text"
   - "https://shopify.engineering/flashlist-v2"
@@ -117,3 +137,7 @@ migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-
     effort: M
     why: "v9 went stable 2026-08-04 and moves reactivity underneath the Table APIs — per-feature atoms behind a TableReactivityBindings contract, so grid re-renders track the state a cell actually uses instead of whole-table state; callers keep passing ordinary values and calling the same Table methods, so this is a version-line move rather than a rewrite"
     receipts: ["https://tanstack.com/blog/tanstack-table-v9-reactivity", "https://registry.npmjs.org/@tanstack/react-table/latest"]
+tripwires:   # standing caveats as executable conditions — evaluated by `harvest firsthand`; fired ⇒ do the then:, update prose, remove the row
+  - when: { pkg: "@shopify/flash-list", deprecated: true }
+    then: "FlashList formally deprecated on npm — the stewardship search failed; demote it from the default, promote Legend List, and add a migrate rule off @shopify/flash-list"
+    added: 2026-09-21

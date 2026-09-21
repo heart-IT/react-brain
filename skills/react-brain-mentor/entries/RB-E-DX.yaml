@@ -8,7 +8,7 @@ platforms: [react, react-native]
 options:
   - { name: "CI (GitHub Actions / similar)", tradeoff: "gate tests + typecheck + lint + build on every PR; the single highest-leverage DX baseline" }
   - { name: "lint/format — Biome or ESLint (flat) + Prettier", tradeoff: "Biome = one fast Rust tool (lint+format); ESLint flat + Prettier = bigger plugin ecosystem (react-hooks, react-compiler rules)" }
-  - { name: "Oxlint + oxlint-tsgolint (type-aware)", tradeoff: "the third lint lane, and the reason to re-evaluate: TYPE-AWARE linting went STABLE 2026-07-22 with tsgolint v7 — tracks TypeScript 7.0.2 and covers 59 of typescript-eslint's 61 type-aware rules (`oxlint --type-aware`). Oxlint 1.79 (2026-08-18) then ported the REACT COMPILER surface: 22 compiler-powered rules using the compiler's own validation passes, recommended-preset rules mapped into Oxlint's correctness category (replacing the old nursery react/react-compiler rule); react-hooks proper remains the ESLint-only piece" }
+  - { name: "Oxlint + oxlint-tsgolint (type-aware)", tradeoff: "the third lint lane, and the reason to re-evaluate: TYPE-AWARE linting went STABLE 2026-07-22 with tsgolint v7 — tracks TypeScript 7.0.2 and covers 59 of typescript-eslint's 61 type-aware rules (`oxlint --type-aware`). Oxlint 1.79 (2026-08-18) then ported the REACT COMPILER surface: 22 compiler-powered rules using the compiler's own validation passes, recommended-preset rules mapped into Oxlint's correctness category (replacing the old nursery react/react-compiler rule); react-hooks proper remains the ESLint-only piece. 1.83 (2026-09, verified vs the oxc release) updates its lint rules for REACT 19.3, so the Oxlint lane no longer trails the React line this corpus recommends in RB-E-REACT-CORE" }
   - { name: "git hooks — husky + lint-staged / lefthook", tradeoff: "run lint/format/tests pre-commit/pre-push; catch issues before CI" }
   - { name: "monorepo task runner — Turborepo / Nx + pnpm workspaces", tradeoff: "cached, parallel task graph across packages (see RB-E-BUILD)" }
   - { name: "dependency hygiene — renovate/dependabot + audit", tradeoff: "automated updates + npm/pnpm audit + install-script blocking (see RB-E-SECURITY)" }
@@ -64,7 +64,7 @@ note: >
   removes a dependency (changesets) rather than adding one.
 defer_to_skill: engineering-principles
 doc: "RB-E-DX.md"   # long-form Explanation entry in content_dir
-updated: 2026-08-24   # Oxlint 1.79 ports the React Compiler rules (22, correctness category) — ESLint-only surface is now react-hooks alone
+updated: 2026-09-21   # Oxlint 1.83 updates its rules for React 19.3 — the third lint lane keeps pace with the recommended React line
 reading:
   - title: "Best CI/CD for mobile apps in 2026: a practical comparison"
     url: "https://expo.dev/blog/best-ci-cd-for-mobile-apps"

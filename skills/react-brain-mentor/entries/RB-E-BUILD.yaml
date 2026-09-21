@@ -7,10 +7,12 @@ confidence: high
 platforms: [react, react-native]
 options:
   - { name: "Metro", tradeoff: "RN bundler; 0.87 ships with RN 0.87 (2026-08-11) — source-map generation 2x faster and source maps take half the memory (both feed React Native DevTools load time), TypeScript/ESM config files (metro.config.mts) are STABLE, package self-resolve lands, and support for YAML configs + .es6 extensions is REMOVED" }
-  - { name: "Vite 8 / Rspack 2.2 / webpack 5.110", tradeoff: "web bundlers; Vite 8 defaults to the Rust Rolldown bundler; Rspack 2 adds RSC + 2.1 ships the Rust React Compiler via its built-in SWC loader (7–13x the Babel plugin), and 2.2 (2026-08-26) is a performance release — ~3x faster built-in CSS parsing, ~5% off production builds, and HMR that no longer refetches CSS on a JS-only change (a 4.1 MB stylesheet went ~385 ms → ~6 ms per hot update), plus Browserslist Baseline targets; webpack 5.110 closes much of the config gap (zero-loader CSS/HTML/TS/Wasm + Vite-compatible import.meta APIs, and now built-in CSS/HTML minification + performance hints); Vite still the default for new web" }
+  - { name: "Vite 8 / Rspack 2.2 / webpack 5.111", tradeoff: "web bundlers; VITE SECURITY FLOOR: 8.0.5 / 7.3.2 (CVE-2026-39364, dev server — see note); Vite 8 defaults to the Rust Rolldown bundler; Rspack 2 adds RSC + 2.1 ships the Rust React Compiler via its built-in SWC loader (7–13x the Babel plugin), and 2.2 (2026-08-26) is a performance release — ~3x faster built-in CSS parsing, ~5% off production builds, and HMR that no longer refetches CSS on a JS-only change (a 4.1 MB stylesheet went ~385 ms → ~6 ms per hot update), plus Browserslist Baseline targets; webpack 5.110 closes much of the config gap (zero-loader CSS/HTML/TS/Wasm + Vite-compatible import.meta APIs, and now built-in CSS/HTML minification + performance hints) and 5.111 (2026-09-14) makes ESM OUTPUT STABLE, adds output.copy for static files and improves the CSS minimizer; Vite still the default for new web" }
   - { name: "Turborepo / Nx + pnpm/yarn workspaces", tradeoff: "monorepo task graph + caching; pnpm 12 (2026-08-26) is the Rust rewrite and is STABLE — see note" }
   - { name: "Expo vs bare RN", tradeoff: "managed velocity vs native control" }
+  - { name: "Noxcturnal (Expo, experimental)", tradeoff: "FIRST-PARTY Rust Metro transform worker — oxc under the hood, exposed to Node through napi-rs, shipped in Expo SDK 58 beta behind `experiments.noxcturnalTransformWorker`. Expo's own numbers: ~3x faster per-module transforms and ~2x faster cold bundling (largest test app, ~5,500 files: 5.26s → 2.46s, with 443 files still falling back to Babel). READ THE ACTIVATION RULES BEFORE BUDGETING THE WIN — see note; for most real apps it is partial, not total" }
   - { name: "react-native-swc", tradeoff: "Rust/SWC Metro transform — faster than Babel; custom Babel plugins need SWC equivalents (e.g. worklets plugin for Reanimated)" }
+  - { name: "react-native-boost 2.0", tradeoff: "ADVOCATE FLIP 2026-09-21 — a different mechanism from every transformer row here: it does not speed transforms up, it REWRITES your JSX at build time to skip RN component layers (Text/View and now Animated, ActivityIndicator, StyleSheet, Platform), so the win is render cost, not bundle time. 2.0 (2026-09-13, verified vs the release) replaces the Babel plugin with a METRO CONFIG PLUGIN — which is what makes the new optimizers possible — adds cross-file ancestor/helper analysis to bail out less, supports Uniwind, and validates runtime parity against RN 0.88 RC. The honest caveat is the whole product: its value proposition is behavioural PARITY with React Native while removing layers, which is a promise every release re-makes, so measure your own screens and keep the escape hatch. No independent adoption evidence in this corpus yet" }
   - { name: "facetpack (early)", tradeoff: "@ecrindigital/facetpack — Rust/OXC Metro transformer (claims ~36x Babel transforms), one-line metro.config, Babel fallback for Flow packages, Doctor CLI; v0.2 (2026-01), early-stage" }
   - { name: "RNRepo (Software Mansion)", tradeoff: "prebuilt native binaries via Maven; cuts CI build time (~50% reported)" }
   - { name: "Re.Pack 5 (Rspack)", tradeoff: "Metro alternative on Rust-based Rspack; module federation / super-apps" }
@@ -23,10 +25,54 @@ recommend:
     - "RN bundler alternative for module federation / super-apps → Re.Pack 5 (worth the complexity when independent teams need independent JS release cadences within one app — Callstack's own criterion)"
     - "want the Rolldown/Rollup plugin ecosystem on RN (experimental) → Rollipop — early alpha, prototype only, not an Expo path"
     - "slow RN CI → prebuilt binaries (RNRepo) and/or Rock build caching"
-    - "Babel is the Metro bottleneck → react-native-swc (SWC) or facetpack (OXC; early — pin + keep the Babel fallback)"
+    - "Babel is the Metro bottleneck → on Expo SDK 58+, try the first-party Noxcturnal transformer FIRST (one config flag, automatic Babel fallback) and measure; the third-party options (react-native-swc, facetpack) are for bare RN or when Noxcturnal's activation rules exclude your project — pin them and keep the Babel fallback"
     - "Pear app → esbuild-bundle to dist (desktop) or Metro + bare-pack for the Bare worker (mobile), not the web/Metro defaults — see RB-E-P2P"
     - "new web project → Vite; legacy web → webpack/Rspack"
 note: >
+  VITE DEV-SERVER SECURITY FLOOR — 8.0.5 / 7.3.2 (2026-09-21, verified against the upstream GitHub
+  advisory GHSA-v2wj-q39q-566r AND F5 Labs' August 2026 telemetry; surfaced by React Status #491):
+  CVE-2026-39364, rated HIGH, is a `server.fs.deny` bypass in the Vite DEVELOPMENT server.
+  Affected ranges are vite >=7.1.0 <=7.3.1 (patched 7.3.2) and >=8.0.0 <=8.0.4 (patched 8.0.5), so
+  anything on the current 8.3.x line is already clear — the floor is recorded because this corpus
+  recommends Vite and a reader may be pinned to an older line. The mechanism is worth understanding
+  rather than just patching: Vite exposes an internal @fs route to serve files from the host
+  filesystem and relies on the server.fs.deny deny-list to protect .env files, certificates and
+  private source; appending query parameters such as ?raw, ?import&raw or ?import&url&inline makes
+  the server skip deny-list filtering and return the file with a 200. It co-fires with three older
+  bypasses of the same route (CVE-2025-30208, CVE-2025-31125, CVE-2024-45811), which is the real
+  lesson: this route has been bypassed repeatedly, so treat deny-list filtering as defence in depth
+  and not as the boundary.
+  THE EXPOSURE CONDITION IS THE ACTIONABLE PART: Vite binds to localhost by default and is only
+  reachable if you expose it — `--host`, `server.host`, or a Docker port mapping that publishes the
+  dev server. That is not hypothetical. F5's honeynet recorded a sustained campaign against exposed
+  Vite dev servers in August 2026 — 807 session-grouped attacks and roughly 32,000 events —
+  cycling wordlists of env files, AWS keys, Azure tokens and Infrastructure-as-Code state files,
+  with the same source cluster also probing the Next.js middleware bypass (CVE-2025-29927). So the
+  standing rule for this entry: patch to the floor, and do not publish a dev server to a network
+  you do not control, including from CI containers and cloud dev boxes.
+  THE RUST-METRO-TRANSFORM RACE NOW HAS A FIRST-PARTY ENTRANT, AND ITS FINE PRINT IS THE STORY
+  (2026-09-21, verified vs the Expo SDK 58 beta changelog of 2026-09-15): "Noxcturnal" is a module
+  transformer written in Rust on top of oxc and bound into Node with napi-rs, and Expo measured
+  per-module transforms ~3x faster with end-to-end COLD bundling ~2x faster — their largest test
+  app, ~5,500 files, went 5.26s to 2.46s. Note what the same sentence says: 443 of those files still
+  fell back to Babel. The activation rules are why, and they decide whether this is worth anything
+  to YOUR app: it only turns on when the project has NO custom transform worker and NO Babel plugins
+  or presets, and it SKIPS files needing the Reanimated or Worklets Babel transforms. Reanimated is
+  close to universal in production RN, so the realistic reading for an existing app is a partial
+  win on the files that qualify, not the headline 2x — and for an app with any Babel plugin, no win
+  at all until Expo adds configuration (they say that is planned). It is also early enough that Expo
+  says the implementation and the numbers may change before stable. Two things follow for this
+  entry: the "Babel is the Metro bottleneck" when-clause now routes to the first-party option first
+  because it is one flag with an automatic fallback rather than a dependency with a plugin-porting
+  cost, and the third-party OXC/SWC transformers keep their slot precisely for the projects
+  Noxcturnal excludes. Warm bundling is unaffected either way — Metro's cache already covers it,
+  which is why this is framed as a cold-bundle and CI concern.
+  FEWER NEEDLESS NATIVE REBUILDS (same changelog): SDK 58 defaults `fingerprint` to the `balanced`
+  preset — bumping `version` in app.json or touching files inside node_modules no longer changes the
+  fingerprint, and native modules are hashed by package NAME AND VERSION rather than by their file
+  contents. This is the setting that decides whether CI rebuilds native or reuses a build, so a
+  stable hash with no extra config is a direct CI-minutes win; presets are configurable if you want
+  a stricter tradeoff.
   ENGINE + BUILD (verified vs RN 0.84 blog): Hermes V1 is the DEFAULT JS engine since RN 0.84
   (2026-02-11; experimental opt-in from 0.82, also opt-in in Expo SDK 55) — automatic if already
   on Hermes. RN 0.84 also ships PRECOMPILED iOS binaries by default (fetched at pod install,
@@ -88,7 +134,7 @@ note: >
   bins and registry revisions.
 defer_to_skill: null
 doc: "RB-E-BUILD.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-10   # pnpm 12 install-path fact corrected (npm `latest` is now 12.3.4) + Linux hardlink-first — reconciled from harvest/2026-09-03 · Rspack 2.2 / webpack 5.110 / Turbopack reading
+updated: 2026-09-21   # react-native-boost 2.0 added on the ADVOCATE PASS (build-time JSX rewriting — a mechanism no other row here covers) · VITE DEV-SERVER CVE-2026-39364 security floor 8.0.5 / 7.3.2, actively mass-scanned when exposed · Noxcturnal — Expo's first-party Rust/oxc Metro transformer (SDK 58 beta) with its activation limits · fingerprint `balanced` default · webpack 5.111 stable ESM output
 watching:
   - title: "How React Native Builds Actually Work (APK, AAB, IPA, APP)"
     url: "https://www.youtube.com/watch?v=1o0pEjYGUWM"
@@ -138,6 +184,11 @@ reading:
     by: "The Mythical Engineer"
     what: "Why RN Android builds are slow (conservative Gradle/Metro/C++ defaults) and how parallel Gradle, dynamic Metro workers, ccache, and single-architecture builds cut times from 20+ min to 2-5 min, with benchmarks. The RN-CI build-perf dimension the other readings here don't cover."
 sources:
+  - "https://github.com/kuatsu/react-native-boost/releases/tag/v2.0.0"
+  - "https://github.com/advisories/GHSA-v2wj-q39q-566r"
+  - "https://www.f5.com/labs/articles/cloud-takeover-mass-scanning-for-exposed-vite-endpoints-cve-2026-39364"
+  - "https://expo.dev/changelog/sdk-58-beta"
+  - "https://webpack.js.org/blog/2026-09-14-webpack-5-111/"
   - "https://webpack.js.org/blog/2026-08-29-webpack-5-110/"
   - "https://rspack.rs/blog/announcing-2-2"
   - "https://pnpm.io/blog/releases/12.0"

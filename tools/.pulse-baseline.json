@@ -1,5 +1,5 @@
 {
-  "date": "2026-09-10",
+  "date": "2026-09-17",
   "fingerprints": {
     "ledger-hr": {
       "RB-E-COMPONENT-LIBS": "Radix UI",
@@ -22,15 +22,13 @@
       "RB-E-NATIVE": "Expo (managed native)",
       "RB-E-MEDIA": "QR generation (qrcode-svg), expo-camera, expo-image-picker",
       "RB-E-POLISH": "expo-haptics, expo-splash-screen",
-      "RB-E-DESKTOP": "Pear (mobile, Holepunch)",
       "RB-E-ANIMATION": "Gesture Handler",
       "RB-E-SVG": "react-native-svg",
-      "RB-E-BUILD": "Metro",
       "RB-E-TESTING": "brittle (Holepunch TAP)",
       "RB-E-DX": "Prettier, husky (git hooks), lunte (lint)",
       "RB-E-TYPESCRIPT": "TypeScript",
       "RB-E-REACT-CORE": "React 19.2.3",
-      "RB-E-RN-VERSIONS": "RN 0.86.2"
+      "RB-E-RN-VERSIONS": "RN 0.86.3"
     },
     "bitbarter": {
       "RB-E-SVG": "@expo/vector-icons (deprecated SDK 56), react-native-svg",

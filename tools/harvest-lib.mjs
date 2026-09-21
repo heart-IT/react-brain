@@ -80,7 +80,17 @@ export function extractLinks(html, baseUrl) {
 
 export function manifestKeys(path) {
   const md = readFileSync(path, 'utf8');
-  return new Set([...md.matchAll(/https?:\/\/[^\s)|\]"'`]+/g)].map((m) => normalize(m[0])).filter(Boolean));
+  // `)` is allowed INSIDE the match and unbalanced trailing ones are trimmed, so a URL that
+  // legitimately contains parentheses (…/Holes_(novel), Wikipedia disambiguation, MSDN) is
+  // expressible in a manifest while `[text](url)` markdown still yields a clean url. Excluding
+  // `)` outright made such links impossible to account for, so coverage could never reach 0.
+  return new Set([...md.matchAll(/https?:\/\/[^\s|\]"'`]+/g)]
+    .map((m) => {
+      let u = m[0];
+      while (u.endsWith(')') && (u.split(')').length - 1) > (u.split('(').length - 1)) u = u.slice(0, -1);
+      return normalize(u);
+    })
+    .filter(Boolean));
 }
 
 // coverage = the extraction red-gate: external links on the issue page that the

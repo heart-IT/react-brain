@@ -13,7 +13,7 @@ options:
   - { name: "Storybook 10", tradeoff: "component workshop; web + RN run side-by-side; Vite 8 + Playwright/Vitest test integration + MCP" }
   - { name: "Radon IDE (Software Mansion)", tradeoff: "VS Code / Cursor RN debugging — device panel, click-to-inspect, React Profiler" }
   - { name: "Argent (Software Mansion) — NEW/experimental", tradeoff: "agentic toolkit giving an AI assistant control of the iOS Simulator (drive + inspect the running app) to shorten the debug loop; new, niche" }
-  - { name: "react-native-harness (Callstack) — NEW", tradeoff: "Jest-style describe/it tests running ON real devices/simulators (iOS/Android/web) with native-module access — the on-device unit/integration layer between Node-Jest and black-box Maestro; v1.3 (2026-05), early" }
+  - { name: "react-native-harness (Callstack) — NEW", tradeoff: "Jest-style describe/it tests running ON real devices/simulators (iOS/Android/web) with native-module access — the on-device unit/integration layer between Node-Jest and black-box Maestro; v1.5 (2026-09-17, verified vs the release) adds WINDOWS platform support, `harness ci` commands and a Metro config enhancer — the CI commands are the meaningful part, since an on-device test layer is only useful once it runs unattended; still young, pin it" }
 recommend:
   default: "Unit/component: Vitest (web) or Jest (RN) + React Testing Library. E2E: Playwright (web), Maestro (RN). MSW for API mocks; Storybook for component dev."
   when:
@@ -67,7 +67,7 @@ note: >
   one in a single worker — the fix for flaky retries that interfere with the rest of the suite.
 defer_to_skill: agentic-engineering-patterns  # TDD/verify discipline
 doc: "RB-E-TESTING.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-10   # Vitest 5 note + Jest 30.5 (whenCalledWith, describe-level retries) + Playwright pin 1.63 — firsthand · TWiR #295
+updated: 2026-09-21   # react-native-harness pin 1.3 → 1.5: Windows support + `harness ci` (unattended runs) + Metro config enhancer
 reading:
   - title: "Making React Testing Library Tests 43% Faster"
     url: "https://sigh.dev/posts/making-react-testing-library-faster/"
