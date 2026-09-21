@@ -97,7 +97,14 @@ The agent should, in order:
    re-adjudicating the same issues (cheapest method: diff the URLs it added to entries against
    the URLs main already holds; the remainder is its unique contribution). A `HARVEST-ABORT:`
    line means the scheduled job never ran, so the backlog is deeper than harvest-state.json
-   implies. THEN
+   implies. THIRD MODE, added 2026-09-21 after it cost the 09-17 run: the job RAN, advanced the
+   state (so the events are consumed and will never be re-reported), wrote its manifest, and then
+   died before triaging a single row — here the branch is EMPTY while `git status` shows
+   `.firsthand-state.json` + the baselines modified and an untriaged
+   `tools/harvest-log/firsthand-<date>.md` sitting on disk. The signature is a manifest whose rows
+   are ALL still `TODO`; `grep -c 'TODO' tools/harvest-log/firsthand-*.md` finds it in one command.
+   Do NOT re-poll and discard it — adopt that manifest as this pass's input and poll fresh on top
+   for the remaining window (which is why 2026-09-21 carries two firsthand manifests). THEN
    the newsletters — their irreplaceable job is
    UNKNOWN UNKNOWNS (new libs/domains the corpus doesn't track yet) + corroboration:
    from **`tools/harvest-state.json`** (in-repo
