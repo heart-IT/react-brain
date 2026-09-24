@@ -4,7 +4,7 @@ title: "About camera, video & real-time media (WebRTC, frame processing, filters
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: low
-updated: 2026-07-13
+updated: 2026-09-24
 platforms: [react, react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-MEDIA
 defer_to_skill: react-native-jsi   # frame processors / native modules; real-time perf → rt-audio-pipeline-audit
@@ -44,8 +44,8 @@ Each sub-problem gets its own tool. **VisionCamera** because its JSI frame proce
 base for custom real-time frame pipelines (v5 rebuilt on Nitro, consistent with `RB-E-NATIVE`);
 **expo-camera** when the job is just capturing photos or scanning codes. Calling goes through an
 SDK because raw `react-native-webrtc` is low-level (you wire signaling/SFU yourself) *and*
-near-dormant — 2 releases since mid-2024, pinned to Chromium M124 — which strengthens the
-SDK-over-raw-WebRTC advice; **LiveKit** is the open-source, self-hostable pick,
+patch-only on Chromium M124 (124.0.8, 2026-07-21, is the fifth 124.0.x patch since 2024-08,
+while LiveKit's own fork is on M144) — which strengthens the SDK-over-raw-WebRTC advice; **LiveKit** is the open-source, self-hostable pick,
 Daily/Agora/Stream the hosted ones. The caveat is part of the default, not an apology.
 
 ## The landscape, and when each piece earns its place
@@ -58,10 +58,23 @@ Ship it pinned-patch with a device-matrix pass; don't linger on v4 either (froze
 **expo-camera** — managed camera for Expo apps; simpler, fewer real-time hooks; the
 capture / scan-codes answer.
 
-**react-native-webrtc** — low-level bindings; near-dormant (above); inject into, don't build on.
+**react-native-webrtc** — low-level bindings; patch-only on M124 (above); inject into, don't
+build on.
 
 **LiveKit / Daily / Agora / Stream Video** — WebRTC conferencing SDKs (RN + web). LiveKit
-open-source + self-hostable; the others hosted infra.
+open-source + self-hostable; the others hosted infra. `@livekit/react-native` 3.0.0 (2026-09-11)
+peers LiveKit's own WebRTC fork (`@livekit/react-native-webrtc` ^144.2.0) and moves to
+LiveKit-prefixed WebRTC builds so it no longer collides with another WebRTC implementation in
+the same app.
+
+**Native call UI (CallKit / Android telecom)** — the incoming-call screen, hold/mute and VoIP
+push are a separate layer from media. `react-native-callkeep` is dormant (last publish
+2024-11-18) and built on the pre-Jetpack `android.telecom.ConnectionService`, and Android hands
+every FCM push to a single service per app, so a VoIP call push fights your existing
+notification library for that slot. The working alternatives parse VoIP pushes natively and
+relay the rest: on Expo, `expo-callkit-telecom` (0.5.0, Jetpack Core Telecom, needs
+`expo-notifications` and peers LiveKit's WebRTC fork); otherwise the calling SDK's own
+integration (Fishjam's RN client bundles call UI + push parsing).
 
 **Skia / Metal + MediaPipe / Vision / ML Kit** — the effects layer: GPU compositing (Skia/Metal)
 plus on-device segmentation/detection (MediaPipe on Android, Vision on iOS) for filters/effects.
@@ -88,7 +101,9 @@ stable `<Audio/>` component. The audio-*processing* layer — playback-only need
 - **Betting on v5 blind — or hiding on v4.** v5 is stabilizing (crashes + AE regression above);
   adopt it pinned-patch with a device-matrix pass. But v4 is frozen, so staying is also a cost.
 - **Staying on expo-av.** Deprecated, unpatched, out of Expo Go since SDK 55 — migrate.
-- **Raw react-native-webrtc as your calling foundation.** DIY calling on a near-dormant layer.
+- **Raw react-native-webrtc as your calling foundation.** DIY calling on a patch-only M124 layer.
+- **react-native-callkeep for new call UI.** Dormant, pre-Jetpack telecom, and blind to the
+  one-FCM-service collision.
 - **Over-trusting this entry.** Confidence is *low*: options lightly vetted, calling-SDK
   pricing/features unverified — prototyping per-device is part of the recommendation.
 
@@ -106,7 +121,7 @@ Camera, playback, and calling are **three different problems**: capture with **V
 (v5 on Nitro, GA 2026-04 but still stabilizing — pin a patch, run a device matrix) or
 **expo-camera**; play back with **expo-video/expo-audio** (expo-av is deprecated, out of Expo Go
 since SDK 55), display images with **expo-image**; buy calling as an SDK — **LiveKit** for
-open-source/self-hosted — because raw `react-native-webrtc` is near-dormant. For real-time
+open-source/self-hosted — because raw `react-native-webrtc` is patch-only on M124. For real-time
 effects the durable rule is **don't fork the pipeline**: segment off the hot path ("latest mask
 wins"), GPU-composite with Skia/Metal + MediaPipe/Vision, and inject processed VisionCamera
 frames into the existing WebRTC VideoSource. Confidence is low — prototype per-device first.

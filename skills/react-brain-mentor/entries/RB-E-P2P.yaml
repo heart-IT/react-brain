@@ -15,22 +15,43 @@ options:
   - { name: "hrpc + Hyperschema", tradeoff: "typed RPC + binary schema between the app (UI thread) and a local Bare worker" }
   - { name: "Pear / Bare", tradeoff: "Pear = the P2P runtime + content-addressed distribution (desktop & mobile); Bare = the lightweight JS runtime for mobile workers (bare-kit)" }
 recommend:
-  default: "Holepunch is a SERVERLESS, local-first alternative to the client-server + REST/GraphQL model: data is a local append-only log (Hypercore), merged across writers with Autobase, indexed in Hyperbee, synced peer-to-peer over Hyperswarm, and shipped by Pear. Choose it when serverless / offline-first / private / censorship-resistant matters; choose conventional client-server (RB-E-DATA + a hosted DB) when you want central control, SQL, and a familiar ops story."
+  default: "Holepunch (Hypercore logs held by Corestore, merged by Autobase, indexed in Hyperbee, synced over Hyperswarm, UI-to-worker calls over hrpc, shipped by Pear) — Pear desktop on react, Pear mobile via bare-kit on react-native — when serverless, offline-first, private or censorship-resistant is a requirement. When you want central control, SQL and a familiar ops story, the pick is conventional client-server (RB-E-DATA + a hosted DB) instead."
   when:
     - "offline-first / local-first / no-backend-ops / private / P2P → Holepunch (Hypercore + Autobase + Hyperbee + Hyperswarm)"
     - "multi-writer shared/collaborative state → Autobase over per-writer Hypercores"
+    - "files or large binary blobs shared peer-to-peer → Hyperdrive / Hyperblobs (P2P filesystem / blob store)"
+    - "app UI talking to a local Bare worker (bare-kit on react-native, Pear on desktop) → hrpc + Hyperschema (typed RPC + binary schema)"
     - "conventional CRUD with a central server/team → REST/GraphQL + TanStack Query (RB-E-DATA), not this"
     - "ANY Holepunch depth (replication, identity, schema, sessions, blind-pairing, Pear/Bare workflow) → holepunch-p2p-systems skill"
 note: >
-  The heartit ecosystem's backbone: ledgerhr (Pear desktop), ourpot + bitbarter (Pear mobile via
-  bare-kit) all run on Holepunch — so for these apps a conventional data-cache (TanStack Query),
-  hosted DB, REST API, and central server are N/A by design; the "data layer" is the Hypercore/
-  Autobase/Hyperbee stack queried locally via hrpc, and brittle (testing) + esbuild/bare-pack
-  (build) follow the Holepunch ecosystem, not the mainstream-React defaults. This entry exists so
-  the encyclopedia stops treating that stack as a deviation. Added 2026-06-25 after the
-  evidence-loop corpus self-audit found all three heartit apps on Holepunch with no entry to map
-  it to. DEPTH (correctness, replication, identity, sessions, Pear/Bare workflow) is owned by the
-  holepunch-p2p-systems skill.
+  Holepunch is an architecture fork, not a library slot: remove the server and its roles are
+  reassigned rather than deleted. Data is a local signed append-only log (Hypercore); Corestore
+  manages many of them; Autobase linearizes many writers' logs into one shared view; Hyperbee
+  indexes it for queries; Hyperswarm/HyperDHT discovers peers and encrypts connections with no
+  servers; Pear distributes the app content-addressed. Once chosen, a conventional data-cache
+  (TanStack Query), hosted DB, REST API and central server are N/A by design; the data layer is
+  queried locally via hrpc, and testing (brittle) and build (esbuild/bare-pack) follow the
+  Holepunch ecosystem rather than the mainstream-React defaults. A Holepunch stack is therefore
+  aligned, not a deviation.
+
+
+  HEARTIT BACKBONE: ledgerhr (Pear desktop), ourpot and bitbarter (Pear mobile via bare-kit) all
+  run on Holepunch → doctor reads their data, test and build layers against this entry, not
+  against the client-server defaults.
+
+
+  DEPTH: correctness, replication, identity, schema, sessions, blind-pairing and the Pear/Bare
+  workflow are owned by the holepunch-p2p-systems skill; this entry owns only the fork.
+
+
+  CROSS-REFERENCES: RB-E-DATA owns the conventional side of the fork (REST/GraphQL + TanStack
+  Query + a hosted DB). RB-E-TESTING owns the brittle lane; RB-E-BUILD owns the
+  esbuild/bare-pack lane.
+
+
+  HISTORY:
+  2026-06-25 GAP CLOSED: entry added after the evidence-loop self-audit found all three heartit
+  apps on Holepunch with no entry to map them to.
 defer_to_skill: holepunch-p2p-systems
 doc: "RB-E-P2P.md"   # long-form Explanation entry in content_dir
 updated: 2026-07-16

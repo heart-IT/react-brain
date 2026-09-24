@@ -4,7 +4,7 @@ title: "About SVG, vector graphics & icons"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: medium
-updated: 2026-07-16
+updated: 2026-09-24
 platforms: [react, react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-SVG
 defer_to_skill: react-native-best-practices                   # entry names the skill without scoping it
@@ -13,6 +13,8 @@ sources:
   - "https://registry.npmjs.org/react-native-svg/latest"
   - "https://github.com/oblador/react-native-vector-icons/blob/master/MIGRATION.md"
   - "https://expo.dev/changelog/sdk-56"
+  - "https://github.com/software-mansion/react-native-svg"
+  - "https://shopify.engineering/back-to-native"
 ---
 
 # About SVG, vector graphics & icons
@@ -27,7 +29,7 @@ sources:
 ## The one idea that organises everything: one primitive underneath
 
 React Native has one vector-graphics substrate: **react-native-svg** (Software Mansion,
-v15.x, RN 0.78+) — declarative `<Svg>`/`<Path>`, spanning iOS/Android/macOS/Windows plus
+v15.x; 15.13+ needs RN 0.78+) — declarative `<Svg>`/`<Path>`, spanning iOS/Android/macOS/Windows plus
 RN-Web. Everything else in this domain is positioned *relative to it*, not against it. It
 underpins most RN charts (Victory Native) and the icon libraries (lucide-react-native
 peer-depends on it); react-native-svg-transformer feeds it designer files by teaching
@@ -67,8 +69,10 @@ sets ship as plain React components you can reuse.
 ## The landscape, layer by layer
 
 **react-native-svg (Software Mansion)** — the substrate: the de-facto RN SVG primitive
-(v15.x, RN 0.78+), declarative `<Svg>`/`<Path>`, iOS/Android/macOS/Windows + RN-Web. It
-underpins most RN charts (Victory Native) and icon libraries.
+(v15.x), declarative `<Svg>`/`<Path>`, iOS/Android/macOS/Windows + RN-Web. It
+underpins most RN charts (Victory Native) and icon libraries. Its RN floor moves within 15.x:
+15.13+ requires RN 0.78+, 15.8+ requires 0.73+, 15.0+ requires 0.70+ — an app below 0.78 pins
+the matching older 15.x rather than latest.
 
 **react-native-svg-transformer (kristerkari)** — the asset pipeline: a Metro transformer
 that imports designer `.svg` files directly as React components; pairs with
@@ -78,7 +82,11 @@ inline SVG, transformer imports, SvgUri/SvgXml, animating SVGs.
 **@shopify/react-native-skia** — the exit: a GPU canvas that renders SVG (ImageSVG /
 `Skia.SVG.MakeFromString`) with limits — no CSS / `<text>` / `<animate>` — and does
 animated/custom vector drawing beyond declarative SVG. Routed via RB-E-ANIMATION and
-RB-E-CHARTS; use it for GPU/custom drawing, not as the default SVG renderer.
+RB-E-CHARTS; use it for GPU/custom drawing, not as the default SVG renderer. Its stewardship
+is changing: Shopify sponsors it through the end of 2026, after which the author forks and
+republishes it under a new name and the Shopify repo is archived. Nothing is deprecated yet
+(2.12.0 shipped 2026-09-16), and because Skia is only the exit here, the default is
+unaffected — RB-E-ANIMATION tracks the rename.
 
 **Redraw (William Candillon) — experimental** — the horizon: next-gen 2D graphics on
 WebGPU/TypeGPU — variable-stroke Bézier paths, vector feathering, physically-based 2D,
@@ -90,7 +98,7 @@ npm (subscriber early access), unstable API. Watch, not a production bet.
 **Icon sets** — the consumers: lucide-react-native (Lucide; peer-deps react-native-svg)
 and the per-family scoped `@react-native-vector-icons/*` packages. Two names are on the
 way out: the monolithic react-native-vector-icons is **superseded** by the scoped split
-(v11+, official codemod), and `@expo/vector-icons` is **deprecated** in Expo SDK 56 — the
+(v11+, official codemod; npm now flags the monolith deprecated), and `@expo/vector-icons` is **deprecated** in Expo SDK 56 — the
 wrapper became unnecessary; use the scoped packages directly. The entry carries both as
 migrate rows: superseded and deprecated respectively, both effort S, same codemod.
 
@@ -129,8 +137,8 @@ plain React components, so the same icon set serves both platforms.
 
 ## In one paragraph
 
-Vector graphics in React Native rests on **one primitive**: react-native-svg (v15.x, RN
-0.78+) is the substrate that charts (Victory Native) and icon sets (lucide-react-native
+Vector graphics in React Native rests on **one primitive**: react-native-svg (v15.x; 15.13+
+on RN 0.78+) is the substrate that charts (Victory Native) and icon sets (lucide-react-native
 peer-depends on it) stand on, fed by react-native-svg-transformer for designer `.svg`
 files. Skia is the deliberate exit — a GPU canvas for animated/custom drawing whose SVG
 support is bounded (no CSS / `<text>` / `<animate>`): **drawing, not documents**, never

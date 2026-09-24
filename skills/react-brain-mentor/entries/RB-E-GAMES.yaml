@@ -6,41 +6,86 @@ status: reviewed   # long-form entry written + source-checked
 confidence: low
 platforms: [react-native]
 options:
-  - { name: "react-native-skia", tradeoff: "GPU 2D drawing loop; common base for RN games/visuals" }
-  - { name: "react-native-godot (@borndotcom)", tradeoff: "embed the Godot engine (RTNGodotView; by Born & Migeran); runs off-thread (separate from RN's JS thread). CHALLENGED 2026-09-10 (WEAKENED): the package reached 1.0.1 and then stopped — npm last modified 2025-11-04, ten months quiet, and the migeran/react-native-godot repo shows ~0 stars (verified 2026-09-10). The off-thread embed is still the only real-game-engine route in RN, so this stays the row; treat it as a dormant dependency you are adopting deliberately, not a maintained default, and pin it" }
-  - { name: "WebGPU (react-native-webgpu, formerly react-native-wgpu)", tradeoff: "3D render pipelines on Google's Dawn (by William Candillon, not Software Mansion); UI-thread via Reanimated/worklets; advanced" }
-  - { name: "react-native-game-engine", tradeoff: "entity-component loop for simple 2D games; effectively unmaintained (last release v1.2.0, 2020)" }
-  - { name: "@react-three/fiber (three.js)", tradeoff: "declarative 3D scenes as React components; v9 runs in RN via expo-gl — the 3D-in-an-app path without a game engine. 9.8.0 (2026-09-22, verified vs the release) is 'now compatible with React 19.3.0' — the React line RN 0.88 syncs in — though the maintainers say not all new 19.3 APIs are supported yet, so move R3F and RN 0.88 together; it also configures roots synchronously (gated on the renderer when async, e.g. WebGPURenderer) and stops Strict Mode breaking the canvas" }
-  - { name: "react-native-filament (Margelo)", tradeoff: "Google's Filament physically-based renderer as declarative React components — GPU-native (Metal on iOS, OpenGL/Vulkan on Android), mobile-first, ~4MB native dep (verified vs the docs); the mid ground between r3f-over-GL and embedding a game engine; 1.11.0, 1.4k★, but QUIET since 2026-05 (no npm publish or repo push in ~3 months, verified 2026-09-01) — check pulse before betting" }
-  - { name: "ReactVision (@reactvision/react-viro)", tradeoff: "AR/VR from one RN codebase (iPhone/Android AR + Meta Quest) — the maintained fork of react-viro; New Architecture (Fabric) REQUIRED; active — 3.0.0 published 2026-09-20 (verified vs npm; the registry description still states Fabric is required, so the major is a version-line move, not a new floor). The 2026-09-10 challenge rated this leg healthy and it has since shipped a major, which holds" }
-  - { name: "react-native-visionos (Callstack)", tradeoff: "full RN fork targeting Apple Vision Pro / visionOS SDK (~1.1k★); CAUTION: pinned to RN 0.78 (2025-03), lags core by ~a year — verify parity before betting" }
+  - { name: "react-native-skia", tradeoff: "GPU 2D drawing loop; the common base for RN games and interactive visuals. @shopify/react-native-skia 2.12.0 (2026-09-16, verified vs npm); changing owner and package name, see note: SKIA." }
+  - { name: "react-native-godot (@borndotcom)", tradeoff: "Embeds the Godot engine (RTNGodotView; by Born & Migeran), running off RN's JS thread — the only real-game-engine route in RN. WEAKENED (2026-09-10 challenge): 1.0.1 (2025-11-04) is still the last npm publish (2026-09-24, verified vs npm), so adopt it as a dormant dependency and pin it. See note: GODOT." }
+  - { name: "WebGPU (react-native-webgpu, formerly react-native-wgpu)", tradeoff: "3D render and compute pipelines on Google's Dawn (by William Candillon, not Software Mansion); UI-thread via Reanimated/worklets; advanced. react-native-webgpu 0.10.2 (2026-09-16, verified vs npm); react-native-wgpu is deprecated, see note: WEBGPU RENAME." }
+  - { name: "react-native-game-engine", tradeoff: "Entity-component loop for simple 2D games; effectively unmaintained: 1.2.0 (2020-06-09) is the last release (2026-09-24, verified vs npm)." }
+  - { name: "@react-three/fiber (three.js)", tradeoff: "Declarative 3D scenes as React components; v9 runs in RN via expo-gl, the 3D-in-an-app path without a game engine. 9.8.0 (2026-09-22, verified vs the release) is compatible with React 19.3.0; see note: R3F 9.8." }
+  - { name: "react-native-filament (Margelo)", tradeoff: "Google's Filament physically-based renderer as declarative React components, GPU-native (Metal on iOS, OpenGL/Vulkan on Android), mobile-first, ~4MB native dep (verified vs the docs); the mid ground between R3F-over-GL and a game engine. 1.11.0, 1.4k★, QUIET since 2026-05-27; see note: FILAMENT." }
+  - { name: "ReactVision (@reactvision/react-viro)", tradeoff: "AR/VR from one RN codebase (iPhone/Android AR + Meta Quest), the maintained fork of react-viro; New Architecture (Fabric) required. 3.0.1 (2026-09-21, verified vs npm) peers RN >=0.86 <0.87 and Expo SDK 57 only; see note: REACTVISION 3." }
+  - { name: "react-native-visionos (Callstack)", tradeoff: "Full RN fork targeting Apple Vision Pro / visionOS (~1.1k★). CAUTION: @callstack/react-native-visionos 0.79.6 (2025-08-23, verified vs npm) is its latest release while RN core is on 0.87; see note: VISIONOS FORKS." }
+  - { name: "@reactvision/react-native-visionos", tradeoff: "ReactVision's visionOS fork (out-of-tree platform: ios/, android/ and visionos/ from one JS codebase), which exists so ViroReact renders on visionOS. 0.86.4 (2026-09-20, verified vs npm), tracking RN 0.86; see note: VISIONOS FORKS." }
 recommend:
-  default: "2D / interactive visuals → react-native-skia. Declarative 3D inside a normal app → react-three-fiber (+expo-gl). Real game engine → embed Godot (react-native-godot) — but see its dormancy caveat before committing; this is the weakest link in this default. AR/VR → ReactVision. RN suits supplemental/interactive experiences more than AAA games."
+  default: "2D / interactive visuals → react-native-skia. Declarative 3D inside a normal app → react-three-fiber (@react-three/fiber + expo-gl). Real game engine → embed Godot (react-native-godot), the weakest leg: dormant since 2025-11, pin it. AR/VR → ReactVision (RN 0.86 + Expo SDK 57 only). RN suits supplemental/interactive experiences more than AAA games; the RN version you are on decides the AR/VR and visionOS picks."
   when:
-    - "simple 2D game loop → react-native-game-engine"
-    - "3D / compute shaders → WebGPU (react-native-wgpu), advanced"
-    - "3D product views / scenes in an app → @react-three/fiber + expo-gl (no engine needed)"
-    - "mobile AR or cross-platform VR incl. Meta Quest → ReactVision (@reactvision/react-viro; New Arch required)"
-    - "Apple Vision Pro app → react-native-visionos (Callstack fork; check its RN-version lag first)"
+    - "simple 2D game loop → react-native-game-engine (only for an existing loop; unmaintained since 2020 — new 2D work goes to react-native-skia)"
+    - "3D / compute shaders → WebGPU (react-native-webgpu; advanced — not the deprecated react-native-wgpu)"
+    - "3D product views / scenes in an app → @react-three/fiber + expo-gl (no engine needed; move R3F 9.8 and RN 0.88 together)"
+    - "physically-based rendering of 3D models where R3F-over-GL falls short → react-native-filament (Margelo; quiet since 2026-05, pin it)"
+    - "mobile AR or cross-platform VR incl. Meta Quest, on RN 0.86 → ReactVision (@reactvision/react-viro 3.x; New Arch required)"
+    - "mobile AR / VR on RN 0.83-0.85 or Expo SDK 55-56 → ReactVision (@reactvision/react-viro 2.58.x, the last 2.x line)"
+    - "Meta Quest 2D-panel app, not immersive → expo-horizon-core (first-party config plugin; Expo Go on the Horizon Store)"
+    - "Apple Vision Pro app → @reactvision/react-native-visionos (tracks RN 0.86), else react-native-visionos (Callstack fork; last release 0.79.6)"
 note: >
-  SKIA IS CHANGING HANDS AND PACKAGE NAME (2026-09-21, pointer — RB-E-ANIMATION owns this thread
-  and carries the receipts + the tripwire): Shopify is leaving React Native. It sponsors
-  react-native-skia through the end of 2026; the author keeps developing it, forks the repo in the
-  coming months and republishes under a NEW NAME, and the Shopify repo is then archived. Nothing is
-  deprecated today — 2.12.0 shipped 2026-09-16, after the announcement. This entry's 2D default IS Skia, so the rename lands directly on the default — and note the
-  irony worth recording next to the Godot dormancy caveat: the 2D leg is healthy but changing
-  owner, while the game-engine leg is stagnant. Neither is a reason to switch today.
-  Niche; RN suits supplemental/interactive experiences more than AAA games. AR/VR + 3D options
-  added 2026-07-09 (gap flagged by Native Weekly #15's ReactVision feature, promoted on user's
-  call): ReactVision is the maintained Viro lineage (verified vs npm — Fabric required, published
-  2026-07); react-native-visionos verified vs the Callstack repo (latest v0.78.0, 2025-03 —
-  the version-lag caveat is the load-bearing fact); react-three-fiber v9 verified vs npm.
-  FIRST-PARTY QUEST (2026-07-10, verified vs the official RN blog): React Native now supports
-  Meta Quest / Horizon OS directly via the `expo-horizon-core` config plugin, with Expo Go on
-  the Horizon Store — a first-party 2D-panel path beside ReactVision's immersive AR/VR.
+  THE PICTURE: React Native suits supplemental and interactive experiences more than AAA games, so
+  each leg of the default is the lightest renderer that does the job: Skia for 2D, R3F over
+  expo-gl for 3D inside a normal app, and a real engine (Godot) only when you need game-engine
+  semantics. AR/VR and visionOS run on forks of RN itself, so there the RN version you ship is the
+  constraint that decides the pick.
+
+  REACTVISION 3 (2026-09-24, verified vs npm): @reactvision/react-viro 3.0.0 (2026-09-20) and
+  3.0.1 (2026-09-21) peer react-native >=0.86.0 <0.87.0, expo >=57.0.0 <58.0.0, react >=19.0.0
+  and @reactvision/react-native-visionos >=0.86.0 <0.87.0; the last 2.x (2.58.1, 2026-08-18) peered
+  RN >=0.83.0 <0.87.0 and Expo >=55.0.0 → 3.0 raises the floor to RN 0.86 / SDK 57, and neither
+  line admits RN 0.87 (current stable 0.87.1) → RN 0.87+ apps cannot take ReactVision today.
+
+  VISIONOS FORKS (2026-09-24, verified vs npm and the ReactVision README):
+  @callstack/react-native-visionos last released 0.79.6 on 2025-08-23;
+  @reactvision/react-native-visionos 0.86.4 shipped 2026-09-20 and is the fork ReactVision 3
+  requires → for a new Vision Pro app the ReactVision fork is the one tracking a recent RN.
+
+  WEBGPU RENAME (2026-09-24, verified vs npm): react-native-wgpu 0.5.17 (2026-07-08) carries an npm
+  deprecation ("renamed to react-native-webgpu") → install react-native-webgpu and update imports.
+
+  GODOT (2026-09-10 challenge, re-verified 2026-09-24 vs npm): @borndotcom/react-native-godot reached
+  1.0.1 on 2025-11-04 and has not published since; the migeran/react-native-godot repo showed ~0
+  stars (2026-09-10) → the off-thread embed is still the only real-game-engine route, but treat it
+  as a deliberately adopted dormant dependency, not a maintained default.
+
+  R3F 9.8 (2026-09-22, verified vs the release): @react-three/fiber 9.8.0 is "now compatible with
+  React 19.3.0", the React line RN 0.88 syncs in, though the maintainers say not all new 19.3 APIs
+  are supported yet → move R3F and RN 0.88 together. It also configures roots synchronously (gated
+  on the renderer when async, e.g. WebGPURenderer) and stops Strict Mode breaking the canvas.
+
+  FILAMENT (2026-09-24, verified vs npm and GitHub): react-native-filament 1.11.0 was published
+  2026-05-27 and the repo was last pushed the same day (1,415 stars) → about four months quiet;
+  check pulse before betting on it.
+
+  SKIA (2026-09-21, pointer): RB-E-ANIMATION owns the react-native-skia stewardship thread, its
+  receipts and its tripwire. Shopify sponsors Skia through the end of 2026; the author will fork
+  and republish under a new name and the Shopify repo is then archived. Nothing is deprecated
+  today (2.12.0 shipped 2026-09-16) → no reason to leave Skia, but this entry's 2D default is
+  what changes name.
+
+  QUEST (2026-07-10, verified vs the official RN blog): React Native supports Meta Quest / Horizon
+  OS directly via the expo-horizon-core config plugin, with Expo Go on the Horizon Store → a
+  first-party 2D-panel path beside ReactVision's immersive AR/VR.
+
+  HISTORY:
+  2026-09-24 CORRECTED: ReactVision 3.0 raises the peer floor to RN 0.86 / Expo SDK 57 (it was
+  recorded as a version-line move with no new floor); Callstack visionOS latest is 0.79.6
+  (2025-08-23), not 0.78 (2025-03); react-native-wgpu now carries an npm deprecation.
+  2026-09-24 REOPENED: R3F 9.8.0 React 19.3 compatibility.
+  2026-09-21 REOPENED: Skia stewardship pointer (the 2D default changes owner and package name).
+  2026-09-10 CHALLENGED → WEAKENED: Godot leg (npm quiet since 2025-11-04, ~0-star repo); the
+  ReactVision leg was rated healthy in the same challenge.
+  2026-09-01 REOPENED: react-native-filament recorded as quiet since 2026-05.
+  2026-07-10 GAP CLOSED: first-party Meta Quest path (expo-horizon-core).
+  2026-07-09 GAP CLOSED: AR/VR + 3D options added (ReactVision, react-native-visionos,
+  react-three-fiber), from Native Weekly #15.
 defer_to_skill: react-native-best-practices
 doc: "RB-E-GAMES.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-24   # R3F 9.8 React 19.3 compatibility; prior 2026-09-21: Skia stewardship pointer (the 2D default changes owner + package name) · prior challenge verdict on the Godot leg still stands
+updated: 2026-09-24   # ReactVision 3 peer floor RN 0.86/SDK 57, ReactVision visionOS fork 0.86.4, Callstack visionOS 0.79.6, react-native-wgpu deprecated; earlier today: R3F 9.8 React 19.3 compatibility; prior 2026-09-21: Skia stewardship pointer (the 2D default changes owner + package name) · prior challenge verdict on the Godot leg still stands
 sources:
   - "https://shopify.engineering/back-to-native"
   - "https://github.com/wcandillon/react-native-webgpu"
@@ -49,6 +94,8 @@ sources:
   - "https://github.com/callstack/react-native-visionos"
   - "https://reactnative.dev/blog/2026/02/24/react-native-comes-to-meta-quest"
   - "https://github.com/pmndrs/react-three-fiber/releases/tag/v9.8.0"
+  - "https://registry.npmjs.org/@reactvision/react-native-visionos"
+  - "https://registry.npmjs.org/@callstack/react-native-visionos"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "@reactvision/react-viro", label: "ReactVision (AR/VR)", token: "reactvision" }
   - { pkg: "@react-three/fiber", label: "react-three-fiber", token: "react-three" }

@@ -4,7 +4,7 @@ title: "About meta-frameworks (full-stack React)"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: medium
-updated: 2026-06-25
+updated: 2026-09-24
 platforms: [react, react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-META-FRAMEWORKS
 defer_to_skill: engineering-principles                        # boundaries / dependency direction
@@ -50,31 +50,36 @@ always there; router-first keeps the client app primary and the server optional.
 ## The default, and why
 
 > **Web:** Next.js is the safe default; choose **TanStack Start** when you want a
-> less-opinionated, Vite-native RSC stack. **React Native / universal:** Expo Router.
+> less-opinionated, Vite-native full-stack alternative (its RSC is still experimental and
+> Start itself is a v1 release candidate). **React Native / universal:** Expo Router.
 
 Next.js is the default for the boring-but-correct reason: it is the most-used, most-hired-for,
 most-documented full-stack React framework, and its App Router + RSC + Server Actions cover
 the common product app. **TanStack Start** is the considered alternative — Vite-native,
 router-first, RSC-as-protocol — for teams who feel Next's opinions as friction and want to
-own more of the stack. For **React Native / universal**, Expo Router is the meta-framework;
+own more of the stack. Hosting no longer separates them: Next's stable Adapter API (16.2)
+runs it off Vercel, and Start deploys first-party on Vercel since 2026-09-08. For **React Native / universal**, Expo Router is the meta-framework;
 the web frameworks here don't apply to native.
 
 ## The landscape, and when each one wins
 
 **Next.js** — the incumbent. Wins on ecosystem, hiring, hosting (first-class on Vercel,
 adapters elsewhere), and the most complete RSC + Server Actions story. Cost: opinions, and a
-steady security-patch cadence around the server surface.
+steady security-patch cadence around the server surface. Security fixes **do not backport**:
+each release patches only the current Active and Maintenance LTS minors (e.g. 16.3.6/15.5.26
+for the 2026-09-22 out-of-band critical), and monthly scheduled releases still get
+out-of-band additions. Choosing Next means committing to track its latest minors.
 
 **TanStack Start** — Vite-based, type-safe-router-first, RSC and Server Functions as explicit
-APIs, Server Actions deliberately omitted. Wins when you want a less-opinionated, Vite-native
+APIs (RSC still experimental), Server Actions deliberately omitted. Wins when you want a less-opinionated, Vite-native
 stack and tight control of the client/server seam.
 
-**React Router 7 (framework mode) / Remix** — Remix merged into React Router 7; full-stack
-loaders/actions for teams already living in React Router. (Remix 3 is a separate
-JSX-component pivot, distinct from this lineage.)
+**React Router 8 (framework mode) / Remix** — Remix merged into React Router (v7, now v8);
+full-stack loaders/actions for teams already living in React Router. (Remix 3 is a separate
+JSX-component pivot, distinct from this lineage; its release is set for 2026-10-02.)
 
 **Expo Router** — the RN/universal meta-framework: file-based routing, SDK-56-era decoupling
-from React Navigation, web SSR still maturing. The way a React Native app becomes "full-stack
+from React Navigation; SDK 58 (beta) makes data loaders, SSR and middleware stable. The way a React Native app becomes "full-stack
 + web" from one tree.
 
 **Astro / Waku / RedwoodSDK** — pick by *hosting + how much RSC*: Astro for content/marketing

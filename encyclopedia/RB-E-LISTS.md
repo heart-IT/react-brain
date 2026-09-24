@@ -4,7 +4,7 @@ title: "About lists & virtualization in React & React Native"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: high
-updated: 2026-07-01
+updated: 2026-09-24
 platforms: [react, react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-LISTS
 defer_to_skill: react-native-best-practices                   # RN-RULE-USE-FLASHLIST owns the thresholds
@@ -63,6 +63,12 @@ majority of lists.
 enough to reuse; v2's ground-up New-Architecture rewrite handles recycling, progressive
 rendering, and layout prediction (reading). Reach for it at scale, not reflexively. Note that
 v2 runs *only* on the New Architecture — old-arch apps must pin v1.x (or stay on FlatList).
+
+*Stewardship (verified 2026-09-24).* Shopify is leaving React Native and has put FlashList on
+critical-compatibility-fixes only while it looks for a long-term steward; the latest release
+(2.3.2) predates that announcement and npm carries no deprecation flag. FlashList stays the RN
+large-list default, but a team starting a large list surface where maintainer continuity matters
+more than maturity should pick Legend List, which ships actively on both platforms.
 
 **react-window / react-virtual / HighTable (web)** — web windowing. react-window/react-virtual
 cover normal long lists; **HighTable** handles *billion-row* tables with tricks the others don't

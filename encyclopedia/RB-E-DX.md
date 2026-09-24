@@ -4,7 +4,7 @@ title: "About developer experience — CI, lint/format, hooks, monorepo"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: high
-updated: 2026-06-25
+updated: 2026-09-24
 platforms: [react, react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-DX
 defer_to_skill: engineering-principles
@@ -34,15 +34,16 @@ you tell until the day it isn't true. So the DX question is never "which tools a
 
 > Gate **tests + typecheck + lint** on every PR in **CI**, and enforce the same locally with a
 > **pre-commit hook**. For lint/format, default to **Biome** (one fast tool) unless you need
-> ESLint's plugin ecosystem (react-hooks, react-compiler).
+> ESLint's **react-hooks** rules, in which case ESLint flat config + Prettier.
 
 CI on every PR is the single highest-leverage DX baseline — it's the gate that turns invariants
 from aspiration into fact. The pre-commit hook is the *cheap* copy of that gate: catch the
 obvious failures locally so they never burn a CI cycle (and never land). **Biome** is the default
 linter/formatter because it's one fast Rust tool doing lint+format with near-zero config; you
-switch to **ESLint flat config + Prettier** specifically when you need its plugin ecosystem —
-notably the `react-hooks` and `react-compiler` rules, which are load-bearing in the compiler era
-(`RB-E-REACT-CORE`).
+switch to **ESLint flat config + Prettier** specifically when you need the `react-hooks` rules,
+which are load-bearing in the compiler era (`RB-E-REACT-CORE`). React Compiler rules alone are no
+longer that reason: Oxlint 1.79+ ships 22 compiler-powered rules natively, and Biome 2.5.8 added
+`useReactCompiler` (nursery, opt-in).
 
 ## The landscape, and when each piece earns its place
 
@@ -53,13 +54,25 @@ non-negotiable baseline; everything else is optimization around it.
 ESLint+Prettier for the plugin ecosystem (react-hooks, react-compiler, jsx-a11y, import rules).
 The axis is "do I need specific ESLint plugins?" — if not, Biome.
 
+**Oxlint + oxlint-tsgolint** — the third lane. Type-aware linting went stable in 2026-07
+(`oxlint --type-aware`, 59 of typescript-eslint's 61 type-aware rules), so keeping
+typescript-eslint *only* for type-aware rules no longer holds. Oxlint can also load ESLint plugins
+through its jsPlugins host: getsentry/sentry runs `oxlint` as its only JS linter while still using
+a dozen-plus ESLint plugins that way. Leaving ESLint the linter does not mean leaving the ESLint
+plugin ecosystem — check that yours load before treating a missing rule as a blocker.
+
+**react-doctor** — a one-shot scan for React footguns (CI mode or agent skill), worth adding on
+top of lint when much of the React in a repo is agent-written (`RB-E-AI-DEVTOOLS`).
+
 **Git hooks — husky + lint-staged / lefthook** — the local pre-commit/pre-push gate. Run
 lint/format/affected-tests before code leaves the machine. It's the fast feedback that makes the
 CI gate rarely fail.
 
 **Monorepo task runner — Turborepo / Nx + pnpm workspaces** — a cached, parallel task graph so a
 many-package repo builds and tests *incrementally* (`RB-E-BUILD`). The thing that keeps CI fast as
-the repo grows.
+the repo grows. Since pnpm 11.11, pnpm also versions and releases the workspace (`pnpm change`,
+`pnpm version -r`, changesets-compatible files), so a pnpm monorepo no longer needs a separate
+changesets tool.
 
 **Dependency hygiene — renovate/dependabot + audit** — automated updates plus `npm`/`pnpm audit`
 and install-script blocking. This is where DX and security meet (`RB-E-SECURITY`); keeping deps
@@ -73,9 +86,8 @@ current and locked-down is a feedback loop too.
   enforced inconsistently and expensively; mechanize them so review can focus on design.
 - **Skipping the local gate.** Relying only on CI makes the loop slow and noisy; a pre-commit hook
   catches the trivial failures for free.
-- **Biome vs ESLint as identity, not need.** Pick on whether you need ESLint's plugins (react-
-  hooks/react-compiler), not on tribe. Many teams want those rules — that's a real reason to keep
-  ESLint.
+- **Biome vs ESLint as identity, not need.** Pick on whether you need ESLint's react-hooks
+  rules, not on tribe. Many teams want them — that's a real reason to keep ESLint.
 - **Monorepo without a task graph.** Running everything on every change doesn't scale; cache and
   parallelize (Turborepo/Nx) or CI time balloons.
 
@@ -95,8 +107,8 @@ current and locked-down is a feedback loop too.
 DX is the **feedback loop that keeps every other choice honest**, and its one principle is
 *mechanize your invariants*: an unenforced rule is a suggestion. So gate **tests + typecheck +
 lint** in **CI on every PR**, mirror it with a **pre-commit hook** for fast local feedback,
-default lint/format to **Biome** (switch to ESLint+Prettier when you need react-hooks/react-
-compiler plugins), and scale a monorepo with **pnpm + Turborepo**. If an app has tests but no CI,
+default lint/format to **Biome** (switch to ESLint+Prettier when you need the react-hooks
+rules; keep typescript-eslint only if Oxlint's type-aware lane misses a rule you use), and scale a monorepo with **pnpm + Turborepo**. If an app has tests but no CI,
 adding CI is the highest-leverage move available — and dependency automation ties this loop to
 `RB-E-SECURITY`.
 

@@ -4,7 +4,7 @@ title: "About on-device AI and ML in React Native"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: low                # the area moves faster than any recommendation can settle
-updated: 2026-09-10
+updated: 2026-09-24
 platforms: [react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-ONDEVICE-AI
 defer_to_skill: null
@@ -14,6 +14,7 @@ sources:
   - "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.10.1"
   - "https://registry.npmjs.org/@react-native-ai/llama/latest"
   - "https://github.com/mybigday/whisper.rn"
+  - "https://github.com/software-mansion-labs/react-native-rag/pull/23"
 ---
 
 # About on-device AI and ML in React Native
@@ -39,9 +40,9 @@ Keep the layers separate and the rest of the entry reads cleanly.
 
 ## The default, and why
 
-**Cross-platform on-device models → react-native-executorch. Apple-only →
-@react-native-ai/apple. Local RAG → react-native-rag, with a caveat that has grown
-teeth (below).**
+**Cross-platform on-device models → react-native-executorch (0.10+). Apple-only →
+@react-native-ai/apple. Local RAG → @react-native-ai/llama plus a local vector store, until
+react-native-rag releases support for the executorch rewrite (below).**
 
 executorch takes the cross-platform lane because it is the only option here that treats
 *both* platforms and *multiple accelerators* as first-class, and because its v0.10
@@ -70,8 +71,8 @@ runtimes are heavy and shipping every accelerator you do not call is pure app-si
 *@react-native-ai/apple* wins the Apple-only lane by not competing at all: it exposes
 Apple's own on-device LLM and SpeechAnalyzer, so there is no model to ship and nothing to
 accelerate. That is the cheapest possible on-device story when the constraint permits it.
-Its preview label is doing real work — the package has been quiet for months — so treat
-it as a platform bet rather than a maintained dependency.
+Its preview label is doing real work — its latest release, 0.12.0, dates from 2026-01-28
+— so treat it as a platform bet rather than a maintained dependency.
 
 ## The failure mode this entry now names: a version pincer
 
@@ -80,15 +81,16 @@ problem that only appears when you look at two packages together.
 
 react-native-rag is built against executorch's pre-rewrite API. executorch has since
 shipped the rewrite, kept the old surface alive behind a legacy entry point, and marked
-that entry point deprecated and slated for removal. Meanwhile the RAG library itself has
-not moved in months. So a team adopting local RAG today faces a pincer rather than a
-choice: pin executorch to the legacy path and inherit a deprecation with a stated
-expiry, or take the new architecture and discover the RAG layer may not follow.
+that entry point deprecated and slated for removal. The RAG library's last release is
+still 0.9.0 (2026-05-26). So a team adopting local RAG today faces a pincer rather than a
+choice: pin executorch to the old API and inherit a deprecation with a stated expiry, or
+take the new architecture before the RAG layer has followed.
 
-Neither branch is fatal, and the library is not abandoned. But it is a real risk that the
-recommendation previously hid, and the honest advice is now: if you are adopting the
-rewrite, prefer assembling the pipeline yourself from a generation engine plus a local
-vector store, and verify the pairing on a spike before committing a feature to it.
+The library is following: as of 2026-09-24 a breaking pull request migrating it to
+executorch 0.10 (#23) is open and active, but unmerged and unreleased. Until a release
+carries it, the advice holds: on the rewrite, assemble the pipeline yourself from a
+generation engine plus a local vector store, and verify the pairing on a spike before
+committing a feature to it. Re-check the package when that release lands.
 
 ## The landscape, and when each piece earns its place
 
@@ -99,7 +101,12 @@ binding when you want whisper.cpp models, and it now carries NVIDIA Parakeet alo
 Whisper — which is itself a useful signal that the runtime-versus-model split is real:
 the binding outlived the model it was named after.
 
-**Rolling your own RAG** is a legitimate lane rather than a fallback. A single engine that
+**Platform-specific providers.** On Android, @react-native-ai/adk puts Google's Gemini —
+on-device Gemini Nano and cloud models — behind one Vercel-AI-SDK provider. On iOS 26+,
+react-native-nitro-mlx runs Apple MLX LLMs plus TTS/STT through Nitro Modules; it is early
+and niche, so pin it.
+
+**Rolling your own RAG** is the default lane today, not a fallback. A single engine that
 runs both chat and embedding models means one dependency for the two halves of retrieval,
 which is precisely what makes a hand-rolled pipeline practical instead of a research
 project. Pair it with a local vector store.
@@ -139,6 +146,6 @@ answer in executorch, whose rewrite turned it into a library you can build pipel
 rather than one you accept pipelines from, with real per-silicon acceleration and an
 install that no longer drags every backend along. Take Apple's own stack when the product
 is Apple-only and you are content with a platform bet. For local RAG, know that the
-packaged option predates the rewrite it depends on — assemble the pipeline yourself if
-you are moving to the new architecture, budget RAM for generator and embedder together,
+packaged option predates the rewrite it depends on (its migration is an open pull request,
+not a release) — assemble the pipeline yourself on the new architecture, budget RAM for generator and embedder together,
 and spike on real devices before you design around any of it.

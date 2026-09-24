@@ -4,7 +4,7 @@ title: "About app security — boundaries, secrets, and supply chain (React & Re
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: high
-updated: 2026-07-02
+updated: 2026-09-21
 platforms: [react, react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-SECURITY
 defer_to_skill: review                                        # per-diff secret/injection/dependency checks
@@ -29,8 +29,9 @@ because risk, and responsibility, sit on a *specific* side of it:
 
 - **Client vs server.** The scariest React-specific CVEs of 2025–26 — the **RSC / Server-Function
   DoS family** (e.g. CVE-2026-23864, CVSS 7.5; React2DoS) and the Dec-2025 RSC source-exposure /
-  RCE issues — are **server-side** (`react-server-dom-*`, Next.js App Router). They are patched
-  across React 19.0.5 / 19.1.6 / 19.2.5 and **do not affect React Native**. Conflating "React had
+  RCE issues — are **server-side** (`react-server-dom-*`, Next.js App Router). They were first
+  patched across React 19.0.5 / 19.1.6 / 19.2.5, but the family recurs: after GHSA-wx67-qw84-cm4g
+  (2026-07) the floors are 19.0.8 / 19.1.9 / 19.2.8. None of it **affects React Native**. Conflating "React had
   a critical CVE" with "my RN app is exposed" is the most common scoping error.
 - **Client vs server, again (device trust).** Anything the client asserts about itself — "not
   jailbroken," "real device" — is *defeatable*, because the attacker owns the client. Client-side
@@ -65,14 +66,25 @@ finding (`RB-E-STORAGE`).
 **Supply-chain hardening** — install-script blocking (npm v12 default), install-age gating
 (`minimumReleaseAge` / min-release-age), and provenance. The response to the worm/compromise wave;
 the highest-leverage dependency controls — but install-script blocking is a *floor, not a ceiling*
-(malware shifts to import-time execution; see failure modes).
+(malware shifts to import-time execution; see failure modes). Two layers now sit outside your
+install: npm scans every newly published package for malware before it becomes installable
+(2026-07-28), and maintainers can use staged publishing (draft → 2FA-gated validate → finalize).
+Neither replaces the local layers — the keyv worm (2026-08-04) shipped with *valid* provenance a
+week after registry scanning went default.
+
+**Dev servers** — part of the attack surface, not just production. Vite's CVE-2026-39364 let an
+exposed dev server serve `.env` files and keys (fixed in 8.0.5 / 7.3.2; `RB-E-BUILD` owns the
+floor), and exposed dev servers were mass-scanned in August 2026. Anything reachable through
+`--host`, `server.host` or a Docker port mapping should be patched and kept away from secrets.
 
 **Device trust (jail-monkey v3 + server attestation)** — jail-monkey does client-side
 jailbreak/root/mock-location/debug detection (v3 adds New-Arch support), but it is **not** a
 substitute for server-side Play Integrity / DeviceCheck. Use it as a hint; enforce on the server.
 
-**Trusted Types (web)** — React integrates the browser Trusted Types API for XSS prevention;
-`dangerouslySetInnerHTML` needs an explicit policy. The web injection-surface control.
+**Trusted Types (web)** — the browser API that makes injection sinks demand policy-created
+objects instead of strings. React is only compatible from **19.3**: earlier versions coerced every
+value to a string, which an enforcing CSP rejects, so a CSP-enforced app needs React ≥19.3.
+`dangerouslySetInnerHTML` still needs an explicit policy. The web injection-surface control.
 
 **Dependency CVE scanning** — `npm`/`pnpm audit` and friends; route the *depth* (triage, per-diff)
 to the review skill's security phase rather than treating the encyclopedia as the scanner.
@@ -99,7 +111,8 @@ to the review skill's security phase rather than treating the encyclopedia as th
 
 - **React core / meta-frameworks (`RB-E-REACT-CORE`, `RB-E-META-FRAMEWORKS`).** The RSC/Server-
   Function server surface is where the React-specific CVEs live; patch cadence is part of choosing
-  a web framework. None of it reaches React Native.
+  a web framework, and `RB-E-META-FRAMEWORKS` owns the Next.js patch thread (including its
+  out-of-band critical RCE releases). None of it reaches React Native.
 - **Storage (`RB-E-STORAGE`).** Secrets → Keychain/secure-store, not AsyncStorage; the two entries
   share that rule.
 - **DX (`RB-E-DX`).** Supply-chain hardening (install-script blocking, dependency automation) lives

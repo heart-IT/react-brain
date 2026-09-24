@@ -4,7 +4,7 @@ title: "About the React Native release timeline — the version ladder"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: high
-updated: 2026-07-16
+updated: 2026-09-24
 platforms: [react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-RN-VERSIONS
 defer_to_skill: react-native-jsi                              # New-Arch internals: JSI, Fabric, TurboModules, Codegen
@@ -15,6 +15,10 @@ sources:
   - "https://reactnative.dev/blog/2026/06/11/react-native-0.86"
   - "https://expo.dev/changelog/sdk-57"
   - "https://expo.dev/blog/app-store-connect-minimum-sdk-26"
+  - "https://reactnative.dev/blog/2026/08/11/react-native-0.87"
+  - "https://github.com/react/react-native/releases/tag/v0.88.0-rc.2"
+  - "https://expo.dev/changelog/sdk-58-beta"
+  - "https://blog.cocoapods.org/CocoaPods-Specs-Repo/"
 ---
 
 # About the React Native release timeline — the version ladder
@@ -44,9 +48,11 @@ under your feet:
    what you get.
 3. **API permission.** `react-native init` deprecated → Expo recommended (0.76); `forwardRef`
    deprecated → ref-as-prop (0.78, with React 19); core `SafeAreaView` deprecated →
-   `safe-area-context` (0.81); and the 0.87 RC is a cleanup release that removes
-   long-deprecated APIs (`InteractionManager`, `SafeAreaView`), restricts deep imports, and
-   deprecates `ImageBackground`. Deprecations on one rung become removals a few rungs up.
+   `safe-area-context` (0.81); and 0.87 removes long-deprecated APIs (`InteractionManager`,
+   Modal `animated`, the deprecated StatusBar props), turns deep imports into
+   `react-native/Libraries/*` into type errors under the now-default Strict TypeScript API,
+   and deprecates `ImageBackground`. Core `SafeAreaView` is still deprecated, not removed.
+   Deprecations on one rung become removals a few rungs up.
 
 The floors move too, on other people's schedules: iOS 15.1 / Android API 24 minimums (0.76),
 Android 15's 16KB pages (0.77), Android 16 / API 36 with mandatory edge-to-edge (0.81), Node
@@ -55,8 +61,10 @@ Store Connect uploads must be built with Xcode 26 / iOS-26-family SDKs.
 
 ## The default, and why
 
-> Target the latest stable RN (0.86); the New Architecture is non-optional from 0.82, so plan
-> any migration around that line.
+> Target the latest stable RN (0.87, npm 0.87.1); the New Architecture is non-optional from
+> 0.82, so plan any migration around that line. Budget the 0.87 step as type-codemod work (the
+> Strict TypeScript API default) and finish it during the 0.88 cycle, because the
+> legacy-deep-imports bridge is removed in the release after 0.88.
 
 The recommendation names one line, because one line dominates: **0.82 is where the New
 Architecture became the only runtime.** Everything below it sits on an architecture frozen at
@@ -70,9 +78,24 @@ skipped the beta phase precisely because 0.86 was breaking-change-free — with 
 near-immediate optional upgrades as RN moves to six releases a year. Staying current is
 routine; falling behind the architecture line is the expensive state.
 
+## What changed the plan since 0.86 (verified 2026-09-24)
+
+**0.87 (stable 2026-08-11) is a type migration.** The Strict TypeScript API became the default,
+so deep imports into `react-native/Libraries/*` are type errors. The
+`react-native-legacy-deep-imports` customCondition is a bridge that the release blog keeps only
+through 0.88; the legacy types go in the release after. 0.87 also raises the toolchain floor
+(Node ≥ 22.13, Kotlin 2.0+, compileSdk 37). **0.88 is a release candidate** (rc.2, 2026-09-22):
+it states it is non-breaking, syncs React 19.3.0, and restores the `.js` fallback for legacy
+deep imports under that same condition, so the deadline is unchanged. **Expo SDK 58 beta** jumps
+from RN 0.86 straight to the 0.88 RC (no stable SDK carries 0.87) and requires the UIScene life
+cycle for iOS 27, which is your migration if you maintain the `ios` directory by hand.
+**CocoaPods trunk goes read-only on 2026-12-02**: existing pods keep resolving, but no library can
+publish a new version through trunk, which is why 0.87's experimental SwiftPM path matters even
+though CocoaPods stays the default.
+
 ## The landscape: reading the rungs
 
-The entry's twelve rows (0.76 → 0.87 RC) are one row per version, each carrying that
+The entry's thirteen rows (0.76 → 0.88 RC) are one row per version, each carrying that
 version's durable change. Beyond the three permission lines above, the rows carry a steady
 capability drip: CSS-ish styling — `display:contents`, `box-sizing`, `mixBlendMode`,
 `outline` (0.77) after `boxShadow` + `filter` (0.76); React 19 with Actions,
@@ -88,14 +111,13 @@ layout-prop native driver landing in 0.85.1; Android-15+ edge-to-edge in core (0
 
 Two usage notes carry the entry's trust model:
 
-- **Verification is per-row.** Rows marked ✓ (0.84–0.86) are verified against the official RN
+- **Verification is per-row.** Rows marked ✓ (0.84–0.87) are verified against the official RN
   release blogs; 0.76–0.83 come from release history + RN Rewind — verify a specific row
-  against the RN blog before quoting it as authoritative. The 0.87 row is RC-verified against
-  npm's `next` tag (per TWiR #289) and should be re-verified against the release blog when
-  stable lands.
+  against the RN blog before quoting it as authoritative. The 0.88 row is verified against the
+  rc.2 GitHub release and must be re-verified against the release blog when stable lands.
 - **Most teams ride the ladder via Expo.** The entry's mapping: SDK 55 = RN 0.83 + React
   19.2; SDK 56 = RN 0.85 + Expo UI stable; SDK 57 = RN 0.86 + React 19.2 (2026-06, verified
-  against the SDK 57 changelog). The Apple floor lands here too: SDK 54/55 EAS images already
+  against the SDK 57 changelog); SDK 58 beta = RN 0.88 RC + React 19.3. The Apple floor lands here too: SDK 54/55 EAS images already
   run Xcode 26, SDK ≤ 53 needs an explicit image opt-in — practically, stay ≥ SDK 54.
 
 For the *why it changed* behind the 0.76→0.82 arc — the old async JSON bridge giving way to
@@ -111,8 +133,9 @@ narrative, not a release note.
 - **Carrying polyfills past the rung that absorbed them.** `react-native-edge-to-edge` is
   redundant on ≥ 0.86 — Android-15+ edge-to-edge is in core; the entry's second migrate row
   exists to delete the package.
-- **Importing on borrowed time.** Still importing `InteractionManager`, core `SafeAreaView`,
-  or deep paths → the when-clause says migrate now; the 0.87 RC removes and restricts them.
+- **Importing on borrowed time.** Still importing `InteractionManager` or deep paths → migrate
+  now; 0.87 removed the first and made the second a type error. Core `SafeAreaView` is
+  deprecated (since 0.81) but not removed; move to `react-native-safe-area-context` anyway.
 - **Quoting pre-0.84 rows as gospel.** The corpus's own discipline: history-sourced rows get
   verified against the RN blog before load-bearing use.
 - **Missing floors that aren't RN's.** Node 22.11+ arrived with 0.84; the Xcode 26 upload
@@ -128,11 +151,11 @@ narrative, not a release note.
 - **Build & engine (`RB-E-BUILD`).** Hermes V1, precompiled iOS binaries, prebuilt artefacts,
   and Metro's cold-start work are the build-time face of the same rungs.
 - **React itself (`RB-E-REACT-CORE`).** RN versions pin React versions — 0.78 → React 19,
-  0.83 → React 19.2. The Actions/Compiler era arrives *via* this ladder.
+  0.83 → React 19.2, 0.88 → React 19.3. The Actions/Compiler era arrives *via* this ladder.
 - **Testing (`RB-E-TESTING`).** The 0.85 Jest-preset move is where the ladder reaches into
   test config.
 - **The migrate tool.** The entry's `migrate:` block is this page made executable: installed
-  `react-native` below 0.86 → a sequenced, receipted upgrade case assembled by
+  `react-native` below 0.87 → a sequenced, receipted upgrade case assembled by
   `react-brain migrate`.
 
 ## In one paragraph
@@ -141,10 +164,10 @@ The React Native version number is **an architecture timeline wearing a release 
 where you stand on the ladder decides what code you're allowed to write. The New Architecture
 went default (0.76) → Legacy frozen (0.80) → mandatory, opt-out ignored (0.82) → Legacy
 stripped (0.84); the engine went Hermes-only (0.81) → Hermes V1 default with precompiled iOS
-binaries (0.84); deprecated APIs (`InteractionManager`, core `SafeAreaView`, deep imports)
-fall off at the 0.87 cleanup release. Target the latest stable (0.86 — second consecutive
-zero-breaking-change release, bi-monthly cadence, Expo SDK 57 tracking it same-cycle), plan
-any migration around the 0.82 line, verify pre-0.84 rows against the RN blog before quoting
+binaries (0.84); deprecated APIs (`InteractionManager`, deep imports) fall off at 0.87,
+which also makes the Strict TypeScript API the default. Target the latest stable (0.87), budget
+that step as type-codemod work before the deep-imports bridge ends after 0.88, plan any
+migration around the 0.82 line, verify pre-0.84 rows against the RN blog before quoting
 them, and respect the floors that move on Apple's and Node's schedules, not yours.
 
 ---
@@ -166,7 +189,7 @@ From Bridge to Fabric" (Codeminer42).*
   3. "Staying current is routine; falling behind ... is the expensive state" — inference from
      bi-monthly cadence + two zero-breaking-change releases + Expo's near-immediate-upgrade
      experiment + the frozen/stripped Legacy line; the entry makes no explicit cost claim.
-  4. Grouping the twelve rows into permission lines + a capability drip is an editorial
+  4. Grouping the thirteen rows into permission lines + a capability drip is an editorial
      arrangement; every row fact is entry text, the grouping is not.
   5. "The line is a dependency of other decisions" — restatement of migrate.why's "every
      New-Arch-gated upgrade below unblocks at 0.82+"; the generalisation is editorial.

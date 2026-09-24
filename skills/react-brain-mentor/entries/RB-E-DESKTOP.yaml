@@ -7,52 +7,96 @@ confidence: medium
 platforms: [react]
 options:
   - { name: "Electron", tradeoff: "bundles its own Chromium + Node; largest ecosystem & most mature; deep Node/native access; heaviest install (~100–200MB)" }
-  - { name: "Tauri (2.x)", tradeoff: "Rust shell using the OS native webview (no bundled Chromium) → tiny builds (from ~600KB); desktop + mobile (iOS/Android); native logic in Rust" }
-  - { name: "Pake", tradeoff: "one-command wrapper that turns a web URL into a desktop app on Tauri; <10MB (~20x smaller than Electron); fast path to ship an existing site, not a full app framework" }
+  - { name: "Tauri (2.x)", tradeoff: "Rust shell using the OS native webview (no bundled Chromium) → tiny builds (from ~600KB); desktop + mobile (iOS/Android); native logic in Rust. @tauri-apps/cli 2.11.5 (2026-09-20, verified vs npm)" }
+  - { name: "Pake", tradeoff: "one-command wrapper that turns a web URL into a desktop app on Tauri; <10MB (~20x smaller than Electron); fast path to ship an existing site, not a full app framework. pake-cli 3.17.1 (2026-09-20, verified vs npm)" }
   - { name: "Pear (Holepunch)", tradeoff: "P2P/serverless desktop+mobile runtime (Bare); no central server, content-addressed distribution; depth → holepunch-p2p-systems" }
   - { name: "Capacitor (Ionic)", tradeoff: "wraps a web app into iOS/Android (and desktop via Electron) native shells; web-first teams shipping to mobile" }
   - { name: "PWA (no shell)", tradeoff: "installable from the browser; least native integration but zero packaging — try this before reaching for a shell" }
-  - { name: "Native SDK (Vercel Labs) — EXPERIMENTAL", tradeoff: "a THIRD renderer answer: neither bundled (Electron) nor borrowed (Tauri) — an OWNED engine drawing every pixel; declarative markup + TypeScript/Zig compiled to native at BUILD time (no browser, no WebView, no JS engine in the binary); TEA-style single update function, NOT React; 45+ built-in components, embedded automation server for coding agents; 3.6MB/~100ms calculator (vendor numbers); iOS/Android experimental; ironically ships a 16KiB-capped async-JSON WebView Bridge" }
-  - { name: "GTKX (1.2.x)", tradeoff: "the LINUX-NATIVE React answer — a React 19 renderer over GTK4: JSX creates GObject instances, no webview and no bundled browser, and the app is an ordinary Node process (node:fs, fetch, npm all work; GTK and JS share one thread). Stock React, so hooks/context/Suspense/portals and the React Compiler behave as usual. Linux ONLY and deliberately so — that narrowness is what lets it expose the whole toolkit instead of a cross-platform subset. Needs Linux, Node ≥24 and the GTK4/GLib dev packages; `npm create gtkx`. 1.1 (announced 2026-08-11) adds `gtkx deploy`, which generates the desktop entry + AppStream metainfo and builds .flatpak/.deb/.rpm/.AppImage from a config block instead of the eleven hand-written packaging files 1.0 required. 1.5 (blog 2026-08-27, no breaking changes) rounds out the app-in-practice layer: @gtkx/forms (React Hook Form adapter binding native Adwaita rows — Entry/PasswordEntry/Switch/Spin/ComboRow — with typed values and native invalid styling) and @gtkx/i18n (gettext POT/MO pipeline behind the real react-i18next API, with generated TS declarations enforcing message keys). Moving fast — @gtkx/react npm latest is 1.6.0 (2026-08-29) while the blog is at 1.5; pin it" }
-  - { name: "react-native-windows / react-native-macos (Microsoft)", tradeoff: "the RN-NATIVE desktop path — real native UI from RN code, no webview at all; rn-windows tracks core closely (0.84, 2026-06), rn-macos lags a few versions (0.81.x); for RN teams extending to desktop, not for packaging a web app" }
+  - { name: "Native SDK (Vercel Labs) — EXPERIMENTAL", tradeoff: "an OWNED engine drawing every pixel (neither bundled like Electron nor borrowed like Tauri): markup + TypeScript/Zig compiled to native at build time; TEA-style, NOT React. 3.6MB/~100ms calculator (vendor numbers); mobile experimental. Not picked while experimental; see note: NATIVE SDK" }
+  - { name: "GTKX (1.x)", tradeoff: "the LINUX-NATIVE React answer: a React 19 renderer over GTK4 (JSX creates GObject instances, no webview), run as an ordinary Node process; stock React, Linux ONLY by design. Needs Node ≥24 + GTK4/GLib dev packages. @gtkx/react 1.6.0 (2026-08-29, verified vs npm), moving fast — pin it; see note: GTKX" }
+  - { name: "react-native-windows / react-native-macos (Microsoft)", tradeoff: "the RN-NATIVE desktop path — real native UI from RN code, no webview; for RN teams extending to desktop, not for packaging a web app. rn-windows 0.84.0 (2026-06-18) tracks core closely; rn-macos 0.81.9 (2026-07-13) lags (verified vs npm)" }
 recommend:
-  default: "Lightweight desktop → Tauri 2 (native webview, tiny builds). Need maximum ecosystem / deep Node + native integration, or already on it → Electron. Just wrapping an existing web URL → Pake."
+  default: "Tauri 2 for a lightweight desktop app (OS native webview, tiny builds). The pick changes on need: deep Node/native integration, the biggest plugin ecosystem, or an existing Electron app goes to Electron; an existing web URL to wrap goes to Pake; no real OS integration needed goes to a PWA with no shell; React Native code rather than a web app goes to react-native-windows / react-native-macos."
   when:
     - "wrap an existing web URL fast → Pake (Tauri under the hood)"
     - "new lightweight desktop app, fine writing some Rust → Tauri 2"
     - "deep Node/native integration, biggest plugin ecosystem, or existing Electron app → Electron"
-    - "P2P / serverless / local-first desktop → Pear (Holepunch); the backend architecture is RB-E-P2P, depth → holepunch-p2p-systems"
-    - "web-first team also shipping mobile → Capacitor; minimal need → ship a PWA, skip the shell"
+    - "P2P / serverless / local-first desktop → Pear (Holepunch; the backend architecture is RB-E-P2P, depth in holepunch-p2p-systems)"
+    - "web-first team also shipping mobile → Capacitor"
+    - "no real OS integration needed → PWA (skip the shell)"
     - "existing REACT NATIVE codebase extending to desktop → react-native-windows / react-native-macos (native UI, shares RN code; check rn-macos version lag)"
-    - "Linux-only app that should look like a Linux app → GTKX (React over GTK4, no webview); anything cross-platform → back to the shells above"
+    - "Linux-only app that should look like a Linux app → GTKX (React over GTK4, no webview; anything cross-platform goes back to the shells above)"
 note: >
-  The durable selection axis is the renderer: Electron BUNDLES Chromium (large, uniform,
-  max ecosystem); Tauri (2.x stable) BORROWS the OS native webview (tiny — from ~600KB — but
-  rendering varies by platform webview) and adds iOS/Android. Pake (V3.12.0, 2026-06-21) is a
-  one-command web-URL→desktop wrapper built ON Tauri (<10MB, ~20x smaller than an Electron
-  equivalent) — great for shipping an existing site, not for a from-scratch app. Pear is the
-  heartit ecosystem's P2P desktop/mobile runtime (defer depth to holepunch-p2p-systems).
-  Tauri/Pake facts verified vs tauri.app + the Pake repo; Electron/Capacitor/PWA rows are
-  settled industry knowledge. RN-DESKTOP ADDED 2026-07-10 (React Weekly; verified vs npm +
-  microsoft/react-native-windows releases): this entry was structurally web-shell-only — for
-  teams whose CODE is React Native (not a web app), react-native-windows/-macos is the
-  share-your-RN-code answer; a different axis than the bundled-vs-borrowed-renderer choice.
-  GTKX PROMOTED skip→option 2026-08-18 (verified vs the 1.0 and 1.1 posts): the reopen signal
-  wired at TWiR #291 — "GTKX 1.0 stable → DESKTOP option row" — fired when 1.0 shipped 2026-08-04
-  (1.1 on 08-11). It closes a hole this entry had carried since it was written: every other row
-  reaches Linux through a webview (Electron bundles one, Tauri borrows one) or not at all, so
-  there was no Linux-NATIVE React row. Read it as the same shape as react-native-windows — share
-  React knowledge, not a web app — with the platform scope inverted: one OS, whole toolkit.
-  LEAD (2026-07-16 back-audit, TWiR #284): shirakaba/expo-desktop targets Expo → macOS/Windows
+  The durable selection axis is the renderer. Electron BUNDLES Chromium (large, uniform, maximum
+  ecosystem); Tauri (2.x stable) BORROWS the OS native webview (tiny — from ~600KB — but rendering
+  varies by platform webview) and adds iOS/Android; Pake and Pear also borrow. Three lanes skip
+  the webview: react-native-windows/-macos render RN code natively, GTKX renders React to GTK4 on
+  Linux, and Native SDK owns its renderer. The default is the lightest shell that grants the OS
+  access you need. Tauri/Pake facts are verified vs tauri.app and the Pake repo;
+  Electron/Capacitor/PWA rows are settled industry knowledge.
+
+
+  PAKE (2026-09-24, verified vs npm and the Pake README): a one-command web-URL→desktop wrapper
+  built ON Tauri, under 10MB and ~20x smaller than an Electron equivalent; pake-cli 3.17.1
+  (2026-09-20). → Good for shipping an existing site, not for a from-scratch app.
+
+
+  RN DESKTOP (2026-07-10, verified vs npm + microsoft/react-native-windows releases; pins
+  re-verified 2026-09-24): for teams whose CODE is React Native (not a web app),
+  react-native-windows/-macos is the share-your-RN-code answer — a different axis than the
+  bundled-vs-borrowed renderer. rn-windows is at 0.84.0, rn-macos at 0.81.9.
+
+
+  GTKX (2026-09-01, verified vs the 1.0, 1.1 and 1.5 posts and npm): the only Linux-NATIVE React
+  row; every other row reaches Linux through a webview or not at all. JSX creates GObject
+  instances; the app is an ordinary Node process (node:fs, fetch, npm all work; GTK and JS share
+  one thread); hooks, context, Suspense, portals and the React Compiler behave as usual. Linux
+  only, deliberately — that narrowness lets it expose the whole toolkit instead of a
+  cross-platform subset. Needs Linux, Node ≥24 and the GTK4/GLib dev packages; `npm create gtkx`.
+  1.0 shipped 2026-08-04. 1.1 (2026-08-11) adds `gtkx deploy`, which generates the desktop entry
+  + AppStream metainfo and builds .flatpak/.deb/.rpm/.AppImage from a config block instead of the
+  eleven hand-written packaging files 1.0 required. 1.5 (blog 2026-08-27, no breaking changes)
+  adds @gtkx/forms (React Hook Form adapter binding native Adwaita rows —
+  Entry/PasswordEntry/Switch/Spin/ComboRow — with typed values and native invalid styling) and
+  @gtkx/i18n (gettext POT/MO pipeline behind the real react-i18next API, with generated TS
+  declarations enforcing message keys). @gtkx/react on npm is 1.6.0 (2026-08-29) while the blog
+  is at 1.5 → pin it. Same shape as react-native-windows — share React knowledge, not a web app —
+  with the platform scope inverted: one OS, whole toolkit.
+
+
+  NATIVE SDK (2026-07-17, verified vs native-sdk.dev/bridge + /platform-support; mobile status
+  re-verified 2026-09-24): declarative markup + TypeScript/Zig compiled to native at BUILD time
+  (no browser, no WebView, no JS engine in the binary); a TEA-style single update function, NOT
+  React; 45+ built-in components and an embedded automation server for coding agents; desktop
+  hosts run full apps, mobile is experimental. It ships a 16KiB-capped async-JSON WebView
+  Bridge, and RN Rewind's critique stands quoted: async serialized JSON bridge + declarative
+  views + native renderer ≈ "inventing React Native 0.59". → The owned-renderer lane is real but
+  experimental; watch, don't bet.
+
+
+  EXPO-DESKTOP LEAD (2026-07-16, TWiR #284): shirakaba/expo-desktop targets Expo → macOS/Windows
   directly — early and unproven, but a third RN-desktop lane (vs Microsoft's forks) to watch.
-  NATIVE SDK PROMOTED lead→option 2026-07-17 (RN Rewind #49 = 2nd independent signal in a week,
-  resolving twir-290's too-early reopen condition; native-sdk.dev/bridge + /platform-support
-  verified): the owned-renderer lane is real but experimental — and RN Rewind's own critique
-  stands quoted: async serialized JSON bridge + declarative views + native renderer ≈ "inventing
-  React Native 0.59". Watch, don't bet.
+
+
+  CROSS-REFERENCES: RB-E-P2P owns the Pear backend architecture and the holepunch-p2p-systems
+  skill owns its depth; RB-E-SECURITY owns shell security; RB-E-CROSSPLATFORM owns sharing code
+  across web and native.
+
+
+  HISTORY:
+
+  2026-09-24 CORRECTED: Pake pin V3.12.0 (2026-06-21) → pake-cli 3.17.1 (2026-09-20).
+
+  2026-08-18 GAP CLOSED: GTKX promoted skip→option when 1.0 shipped (the reopen signal wired at
+  TWiR #291), filling the Linux-native React hole.
+
+  2026-07-17 GAP CLOSED: Native SDK promoted lead→option on a second independent signal in a
+  week (RN Rewind #49), resolving twir-290's too-early reopen condition.
+
+  2026-07-10 GAP CLOSED: RN-desktop rows added (React Weekly); the entry had been web-shell-only.
 defer_to_skill: engineering-principles   # shell↔web boundary; Pear depth → holepunch-p2p-systems; shell security → RB-E-SECURITY
 doc: "RB-E-DESKTOP.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-01   # GTKX 1.5: @gtkx/forms (RHF/Adwaita) + @gtkx/i18n (gettext via react-i18next API); pin 1.2.2 → 1.6.0 — React Status #488
+updated: 2026-09-24   # Pake pin V3.12.0 → 3.17.1; Tauri/rn-windows/rn-macos pins; prior 2026-09-01: GTKX 1.5: @gtkx/forms (RHF/Adwaita) + @gtkx/i18n (gettext via react-i18next API); pin 1.2.2 → 1.6.0 — React Status #488
 reading:
   - title: "The Conductor Rewrite: what they changed to make it fast"
     url: "https://performance.dev/the-conductor-rewrite"
@@ -74,6 +118,7 @@ sources:
   - "https://tauri.app/"
   - "https://github.com/tw93/Pake"
   - "https://github.com/microsoft/react-native-windows/releases"
+  - "https://registry.npmjs.org/pake-cli/latest"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "electron", label: "Electron", token: "electron" }
   - { pkg: "@tauri-apps/*", label: "Tauri", token: "tauri" }

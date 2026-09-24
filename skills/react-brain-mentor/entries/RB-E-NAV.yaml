@@ -6,88 +6,97 @@ status: reviewed   # long-form entry written + source-checked → encyclopedia/R
 confidence: medium
 platforms: [react, react-native]
 options:
-  - { name: "React Navigation", tradeoff: "RN default; mature; imperative + declarative" }
-  - { name: "Expo Router", tradeoff: "file-based; great if on Expo; convention over config; v56 (SDK 56) DECOUPLED from React Navigation — its own native-first core; direct @react-navigation/* imports no longer work alongside it. SDK 58 (beta) GRADUATES data loaders, SSR, middleware, native tabs, toolbars and the standard-navigation integration OUT of experimental — see note" }
-  - { name: "React Router (8.x)", tradeoff: "web routing; absorbed Remix; v8 (8.3.0, 2026-07, verified vs npm) RELEASED — ESM-only (drops CJS + react-router-dom), future flags on by default incl. middleware (v8_middleware flag removed — auth/logging/headers now first-class via RouterContextProvider); v7→v8 generally non-breaking if you're caught up on v7 future flags. SECURITY FLOOR: 8.3.0 / 7.18.0 — see note" }
-  - { name: "TanStack Router / Start", tradeoff: "type-safe web routing; signal-based core; Start is its RSC/SSR meta-framework (see RB-E-META-FRAMEWORKS)" }
-  - { name: "Next.js App Router", tradeoff: "web, full-framework routing + RSC (see RB-E-META-FRAMEWORKS)" }
+  - { name: "React Navigation", tradeoff: "The bare-RN default: mature, imperative + declarative, deeply customizable. 7.4.1 is latest; 8.0 is still alpha (8.0.0-alpha.48 on the next tag, 2026-09-22, verified vs npm). See note: REACT NAVIGATION 8" }
+  - { name: "Expo Router", tradeoff: "File-based, convention over config; the pick on Expo. Since v56 (SDK 56) its own native-first core, decoupled from React Navigation: direct @react-navigation/* imports no longer work alongside it. SDK 58 (beta) graduates data loaders, SSR, middleware and native tabs out of experimental. See note: EXPO ROUTER" }
+  - { name: "React Router (8.x)", tradeoff: "Web routing; absorbed Remix. v8 is ESM-only, drops react-router-dom and turns future flags (incl. middleware) on by default; 8.4.0 (2026-09-15, verified vs npm). SECURITY FLOOR: 8.3.0 on v8, 7.18.2 on v7. See note: REACT ROUTER SECURITY" }
+  - { name: "TanStack Router / Start", tradeoff: "Type-safe web routing on a signal-based core; Start is its RSC/SSR meta-framework (see RB-E-META-FRAMEWORKS)." }
+  - { name: "Next.js App Router", tradeoff: "Web, full-framework routing + RSC (see RB-E-META-FRAMEWORKS)." }
 recommend:
   default: "React Native → Expo Router if you're on Expo, else React Navigation. Web → use the meta-framework's router (see RB-E-META-FRAMEWORKS), or TanStack Router for a type-safe SPA."
   when:
     - "Expo app → Expo Router (file-based)"
     - "bare RN → React Navigation"
     - "type-safe web SPA without a meta-framework → TanStack Router"
-    - "web SPA already on React Router, or ecosystem/familiarity over route type-safety → React Router 8 (released, ESM-only; its typegen is framework-mode-only — which is why TanStack keeps the type-safe-SPA slot)"
-    - "adopting React Navigation 8 native tabs → still ALPHA in 2026; pin + verify against the RN8 release notes first"
-    - "links must survive a store install (invites, referrals, shared products) → deferred deep linking, i.e. an attribution SDK or Detour; plain Universal/App Links lose the intent at the store boundary (see reading)"
+    - "web SPA already on React Router, or ecosystem/familiarity over route type-safety → React Router 8 (at ≥8.3.0; a v7 app needs ≥7.18.2; its typegen is framework-mode-only, which is why TanStack Router keeps the type-safe-SPA slot)"
+    - "adopting React Navigation 8 native tabs → pin the exact 8.0 alpha (still alpha as of 8.0.0-alpha.48, 2026-09-22; verify against the RN8 release notes)"
+    - "links must survive a store install (invites, referrals, shared products) → deferred deep linking (an attribution SDK or Detour; plain Universal/App Links lose the intent at the store boundary, see reading 'Detour: deferred deep linking done right in Expo Router')"
 note: >
-  EXPO ROUTER'S EXPERIMENTAL SHELF EMPTIES IN SDK 58 (2026-09-15 beta, verified vs the Expo
-  changelog): data loaders, server-side rendering and middleware are STABLE and no longer need
-  experimental flags, and so are native tabs, toolbars and the standard-navigation integration. For
-  this entry that retires the "experimental UNSTABLE_loader data loaders" status recorded below —
-  the loader story is now a supported part of the router, with `setResponseHeaders({'Cache-Control':
-  'private, max-age=60'})` from expo-server inside a loader to let clients cache a loader response.
-  THE DECOUPLING FINISHED THE JOB IT STARTED IN v56: the navigation core was reworked so navigation
-  state is deterministic, and it "no longer carries most of the forked React Navigation API". Expo's
-  own read is that most apps will not notice — the ones that WILL are apps with a custom navigator
-  or any import from `expo-router/react-navigation`, where APIs have moved or been removed; there is
-  a migration guide and Expo asks for issues on anything missing. JavaScript Tabs, TopTabs and
-  Drawer now run through the same standard-navigation integration as NativeTabs, so the JS and
-  native tab paths behave consistently instead of diverging. Three more changes worth knowing
-  before an upgrade: async routes are now ON BY DEFAULT for web (route files split into separate
-  chunks; opt out with asyncRoutes: { web: false }), navigation uses React transitions to keep the
-  current screen visible while the next loads (with `activityEnabled` / NavigationAwareActivity to
-  hide inactive content while preserving its state), and per-screen error boundaries arrived
-  (unstable_settings.screenErrorBoundary, or <Stack unstable_screenErrorBoundary={...} />) so one
-  throwing screen shows fallback UI without unmounting the navigator. Also newly OPTIONAL peer deps
-  on Android: expo-symbols for NativeTabs.Trigger.Icon with `md`, and @expo/ui for Stack.Toolbar.
-  @expo/ui ALSO GREW REAL iOS NAVIGATION PRIMITIVES in SDK 58 — NavigationStack, NavigationLink,
-  NavigationDestination, Toolbar, the navigationTitle modifier and two/three-column
-  NavigationSplitView. That is not a router, and it does not replace anything recommended here, but
-  it is the first time a SwiftUI-native navigation surface is reachable from an Expo app without
-  writing the Swift yourself — relevant if you are building an iPad/split-view layout (RB-E-NATIVE-UI
-  owns the @expo/ui thread).
-  React Navigation 8.0 (ALPHA, announced 2025-12) makes NATIVE bottom tabs the default
-  (via react-native-screens — native look incl. iOS 26 liquid glass), adds native icon
-  components (SFSymbol on iOS / MaterialSymbol on Android — smaller bundles), reworks
-  TypeScript inference, and adds screen-history APIs (pushParams, persistor, inactiveBehavior
-  via React.Activity). Reflects the trend toward honouring platform UI. Still ALPHA in
-  2026 — pin/verify before adopting. Verified vs the React Navigation blog.
-  RN8 JULY PROGRESS (2026-07-08, verified vs the React Navigation blog): still PRE-STABLE (next
-  tag) — adds Suspense-enabled navigation (interruptible, concurrent), data loaders
-  (TanStack Query/Apollo prefetch — shipped as experimental UNSTABLE_loader here, STABLE in SDK 58
-  per the note above), full parent-navigator type inference (drops
-  CompositeNavigationProp), and a cross-library STANDARD NAVIGATION API so custom navigators work
-  in both React Navigation AND Expo Router — the first bridge across the newly-decoupled stacks.
-  Requires screens 4.25+, gesture-handler 3.0+, TS 6+.
-  UPDATE 2026-07-09: Expo Router v56 (SDK 56) NO LONGER DEPENDS on React Navigation —
-  "expo-router no longer depends on react-navigation"; code importing @react-navigation/*
-  directly breaks when adopting it (verified vs the SDK 56 changelog; a codemod exists —
-  npx expo-codemod sdk-56-expo-router-react-navigation-replace). The decoupling persists in
-  SDK 57 (expo-router 57.x ships zero @react-navigation/* deps, verified vs npm 2026-07-10).
-  The Expo-vs-bare split above now separates two DISTINCT navigation stacks, not one wrapper
-  over the other — which raises the cost of switching lanes later; weigh it at project setup.
-  Stress-tested 2026-07-10 (WEAKENED → React Router when-clause added; the TanStack type-safe-SPA
-  slot SURVIVED the 2.3x-downloads attack — RR's typegen is framework-mode-only). RE-CHALLENGED
-  2026-08-18 → HELD: same attack, bigger gap (react-router 44.2M/wk vs @tanstack/react-router
-  19.7M/wk, 2.2×), and the axis is unchanged at the source — React Router 8.3.0's type generation
-  "executes your route config (app/routes.ts by default)" and emits per-route-module +types, i.e.
-  it is tied to FRAMEWORK-mode conventions, so a declarative/data-mode SPA still does not get it
-  (verified vs reactrouter.com/explanation/type-safety). Popularity moved; the reason did not.
-  UPDATE 2026-07-16 (TWiR #290, verified vs the release): react-native-screens 4.26 marks the
-  Tabs API STABLE (requires RN 0.84+; FormSheet + Stack-v5 toolbar menus stay experimental) —
-  the native layer under RN8's native bottom tabs firms up while RN8 itself remains pre-stable.
-  REACT ROUTER SECURITY FLOOR (2026-07-28, verified vs the GitHub advisories): six advisories
-  published 2026-07-22 against react-router — including an unauthenticated DoS on the __manifest
-  endpoint (High, CVSS 7.6, affecting >=7.0.0 <7.18.0), an RSC-mode CSRF bypass that executes the
-  action before the 400 response, an RSCErrorHandler protocol-validation XSS, arbitrary
-  client-side constructor injection via SSR hydration, and two open-redirect variants (one a
-  CVE-2025-68470 bypass). Fixed in 8.3.0 and backported to 7.18.0 — the team advises upgrading to
-  one of those. Note the pattern: half of these live in the RSC/SSR surface, so the exposure
-  scales with how much of React Router's server side you actually use.
+  Navigation is two problems. On React Native it is native UI: a navigation state tree, platform
+  transitions and gestures, no URL. On the web it is the URL, and once a meta-framework is involved,
+  where data loads and where the server boundary sits. On RN the choice is "are you on Expo?", and
+  since SDK 56 that choice separates two distinct stacks (Expo Router's own core vs React
+  Navigation), not a wrapper over one library, so switching lanes later costs more; decide it at
+  project setup. Expo Router's measured cold-start premium on one low-end Android device (see
+  reading 'React Native Navigation Benchmarks') buys deep linking, lazy screens, file-based routing
+  and web support. On the web the meta-framework owns routing; the standalone slot goes to TanStack
+  Router because only it gives route type-safety to a plain SPA.
+
+  EXPO ROUTER (2026-09-15, verified vs the Expo SDK 58 beta and SDK 56 changelogs; npm 2026-09-24):
+  v56 made expo-router independent of react-navigation (codemod: npx expo-codemod
+  sdk-56-expo-router-react-navigation-replace), and expo-router 57.x ships zero @react-navigation/*
+  deps. SDK 58 (beta; expo 58.0.0-preview.6 on npm's next tag) makes data loaders, SSR and
+  middleware stable with no experimental flags, and native tabs, toolbars and the standard-navigation
+  integration stable too; a loader can call setResponseHeaders({'Cache-Control': 'private,
+  max-age=60'}) from expo-server to let clients cache its response. The navigation core was reworked
+  so state is deterministic, and it no longer carries most of the forked React Navigation API: most
+  apps won't notice, but a custom navigator or any import from expo-router/react-navigation must
+  follow the migration guide. JS Tabs, TopTabs and Drawer now run through the same
+  standard-navigation integration as NativeTabs. Before upgrading: web async routes are on by default
+  (asyncRoutes: { web: false } opts out); navigation uses React transitions to keep the current
+  screen visible while the next loads (activityEnabled / NavigationAwareActivity hide inactive
+  content while preserving state); per-screen error boundaries (unstable_settings.screenErrorBoundary
+  or <Stack unstable_screenErrorBoundary={...} />) keep the navigator mounted when one screen throws;
+  on Android, expo-symbols (NativeTabs.Trigger.Icon with md) and @expo/ui (Stack.Toolbar) are
+  optional peers. @expo/ui also gained iOS navigation primitives (NavigationStack, NavigationLink,
+  NavigationDestination, Toolbar, navigationTitle, two/three-column NavigationSplitView): not a
+  router, but a SwiftUI-native navigation surface for iPad/split-view layouts (RB-E-NATIVE-UI owns
+  it).
+
+  REACT NAVIGATION 8 (verified vs the React Navigation blog 2025-12-19 and 2026-07-08; npm
+  2026-09-24): still alpha, 8.0.0-alpha.48 on the next tag while latest is 7.4.1. It makes native
+  bottom tabs the default (via react-native-screens, including iOS 26 liquid glass), adds native icon
+  components (SFSymbol / MaterialSymbol), reworks TypeScript inference with full parent-navigator
+  inference (drops CompositeNavigationProp), adds screen-history APIs (pushParams, persistor,
+  inactiveBehavior via React.Activity), Suspense-enabled navigation, data loaders for TanStack
+  Query/Apollo prefetch (UNSTABLE_loader), and a cross-library standard navigation API so custom
+  navigators work in both React Navigation and Expo Router. Requires react-native-screens 4.25+,
+  gesture-handler 3.0+, TS 6+. Underneath, react-native-screens 4.26 (2026-07-16, verified vs the
+  release) marked its Tabs API stable (RN 0.84+; FormSheet and Stack-v5 toolbar menus are not yet).
+
+  REACT ROUTER 8 (verified vs remix.run/blog/react-router-v8 and npm): 8.0.0 shipped 2026-06-17;
+  8.4.0 (2026-09-15) is current. ESM-only with ES2022 targets; minimums Node 22.22.0+, React 19.2.7+,
+  Vite 7+; react-router-dom removed; the v8_* future flags (including middleware, now first-class via
+  RouterContextProvider) are the default. From a flags-current v7 the upgrade is generally
+  non-breaking.
+
+  ROUTE TYPE-SAFETY (2026-08-18, verified vs reactrouter.com/explanation/type-safety): React Router's
+  type generation executes the route config (app/routes.ts) and emits per-route-module +types, so it
+  is tied to framework mode; a declarative or data-mode SPA does not get it. Downloads favor React
+  Router (44.2M/wk vs 19.7M/wk for @tanstack/react-router, 2.2x, 2026-08-18) but the axis that decides
+  the SPA slot is type-safety, and it has not moved.
+
+  REACT ROUTER SECURITY (2026-09-24, verified vs the GitHub advisories): six advisories published
+  2026-07-22. Fixed in 7.18.0: unauthenticated __manifest DoS (CVE-2026-55685, High, CVSS 7.6,
+  >=7.0.0 <7.18.0), RSCErrorHandler protocol-validation XSS (CVE-2026-53667), SSR-hydration
+  constructor injection (CVE-2026-53666, from 6.4.0) and an external redirect via untrusted paths
+  that bypasses CVE-2025-68470 (CVE-2026-53669, from 6.0.0). Fixed in 7.18.2 / 8.3.0: the RSC-mode
+  CSRF bypass that executes the action before the 400 response (GHSA-qwww-vcr4-c8h2, >=7.12.0
+  <7.18.2 and >=8.0.0 <8.3.0). Fixed in 7.13.0 / react-router-dom 6.30.6: an open redirect leading
+  to XSS (CVE-2026-53668). The floor is therefore 8.3.0 on v8 and 7.18.2 on v7; v6 has no patched
+  release for the injection and redirect-bypass advisories, so v6 apps must move to v7 or v8. Half of
+  these live in the RSC/SSR surface, so exposure scales with how much of React Router's server side
+  you use.
+
+  RB-E-META-FRAMEWORKS owns framework-level routing (SSR/RSC); RB-E-CROSSPLATFORM owns sharing
+  navigation web↔native; RB-E-NATIVE-UI owns @expo/ui.
+
+  HISTORY:
+    2026-09-24 CORRECTED: the React Router v7 security floor is 7.18.2, not 7.18.0 (the RSC-mode CSRF fix landed in 7.18.2).
+    2026-08-18 CHALLENGED → SURVIVES: same downloads attack with a 2.2x gap; typegen still framework-mode-only, so the TanStack type-safe-SPA slot held.
+    2026-07-10 CHALLENGED → WEAKENED: React Router when-clause added; the TanStack type-safe-SPA slot survived the 2.3x-downloads attack.
 defer_to_skill: null
 doc: "RB-E-NAV.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-21   # Expo Router SDK 58: data loaders + SSR + middleware + native tabs graduate from experimental, nav core drops most of the forked React Navigation API, web async routes on by default
+updated: 2026-09-24   # RR v7 security floor corrected to 7.18.2; RR 8.4 + v8 minimums; RN8 still alpha.48; prior 2026-09-21: Expo Router SDK 58: data loaders + SSR + middleware + native tabs graduate from experimental, nav core drops most of the forked React Navigation API, web async routes on by default
 reading:
   - title: "React Native Navigation Benchmarks (State of RN Navigation)"
     url: "https://andrei-calazans.com/posts/2026-06-05-state-of-rn-navigation/"
@@ -154,6 +163,7 @@ sources:
   - "https://github.com/software-mansion/react-native-screens/releases/tag/4.26.0"
   - "https://remix.run/blog/react-router-v8"
   - "https://github.com/remix-run/react-router/security/advisories"
+  - "https://github.com/remix-run/react-router/security/advisories/GHSA-qwww-vcr4-c8h2"
 detect_source:   # source-level signals owned by this entry (regex over repo source)
   - pattern: "window\\.location\\.(?:href\\s*=|assign\\()"
     min_files: 2

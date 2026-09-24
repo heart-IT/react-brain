@@ -4,7 +4,7 @@ title: "About observability — three questions production must answer"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: medium
-updated: 2026-07-10
+updated: 2026-09-24
 platforms: [react, react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-OBSERVABILITY
 defer_to_skill: null
@@ -55,8 +55,12 @@ doesn't need dashboards; a production app without them is flying blind.
 **Sentry (v8)** — questions 1 and 2: crashes (JS + native + pre-bootstrap), tracing, release
 health; 8.17 added Turbo-Module tracking and Expo Router auto-instrumentation.
 
-**EAS Observe (Expo)** — question 3, natively: startup-metric sampling that traces a regression
-to a *specific build or OTA update* — the attribution layer store-and-OTA shipping needs.
+**EAS Observe (Expo)** — question 3, natively, plus much of question 2: real-session startup,
+time-to-interactive and update-apply metrics with every build and OTA update as a marker, so a
+regression traces to a *specific build or OTA update*. Generally available since 2026-08-25
+(SDK 55+; per-route metrics on 56+; JS error reporting in preview on 57+). Two limits change how
+you adopt it: turning it on needs a **new binary**, and it does **not capture native crashes** —
+keep Sentry (or your existing reporter) alongside, as Expo itself advises.
 
 **Firebase Crashlytics / Bugsnag** — established question-1 alternatives; Crashlytics is fine
 when you're already on Firebase.
@@ -64,6 +68,13 @@ when you're already on Firebase.
 **@callstack/inspector** — a gap-filler: React-level component profiling in **release builds**
 via React DevTools, no native changes. Dev-mode profiling lies about production; this is the
 honest lens. Very young (v0.1.x) — treat as experimental.
+
+**React DevTools 8.0** — the web profiling workflow moved: the Timeline profiler tab is gone
+(8.0.0, 2026-09-08) and React profiling now lives in the browser's Performance panel as React
+tracks. Guides that say "open the Timeline tab" predate it.
+
+**Rozenite** — day-to-day RN inspection panels (network, storage, performance) inside React Native
+DevTools; plugins are disabled in production builds.
 
 **The measurement readings** — Indeed's CWV-for-RN (build the *metrics*: TTFF/TTI/FID-analogues
 with composite scoring) and the 3perf hydration piece (web: one hydration mismatch re-creates the

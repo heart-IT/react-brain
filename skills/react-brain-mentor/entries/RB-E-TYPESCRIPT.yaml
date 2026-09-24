@@ -6,32 +6,58 @@ status: reviewed   # long-form entry written + source-checked → encyclopedia/R
 confidence: medium
 platforms: [react, react-native]
 options:
-  - { name: "strict mode tiers", tradeoff: "strict vs gradual adoption; TS 6.0 makes strict:true the default" }
-  - { name: "exported type surface", tradeoff: "what a library/package should export" }
-  - { name: "TypeScript 7 (native/Go)", tradeoff: "Go rewrite of tsc — 7.0 STABLE (7.0.2, 2026-07-08, verified vs npm): ~10x faster, up to 16x type-checking with parallelization, removes long-deprecated flags; TS 6.0 is the JS-based 'bridge' release to migrate through" }
-  - { name: "Flow (2026)", tradeoff: "Meta's type checker; syntax converged with TS, compiler ported to Rust; mostly Meta-internal now" }
+  - { name: "strict mode tiers", tradeoff: "strict vs gradual adoption for an existing codebase; the destination is fixed, because TS 6.0 made strict:true the default and TS 7.0 adopts 6.0's defaults (verified vs the TS 7.0 RC post)." }
+  - { name: "exported type surface", tradeoff: "what a library/package exports is its public API: keep it small, versioned, with no leaked internals. Heavy-generics libraries can cut type-instantiation cost 62-86% with named techniques (see reading: TypeScript Performance in TanStack Table V9)." }
+  - { name: "TypeScript 7 (native/Go)", tradeoff: "Go rewrite of tsc: ~10x faster than TS 6.0, 10.6x–16.7x on five large codebases with --checkers 8; makes every 6.0 deprecation a hard error and ships no compiler API yet. 7.0.2 (2026-07-08, verified vs npm 2026-09-24); see note: TOOLING GAP." }
+  - { name: "Flow (2026)", tradeoff: "Meta's type checker; syntax converged with TS and the compiler was ported to Rust, but it is mostly Meta-internal now, so it is not a pick outside Meta (see the Flow when-clause)." }
 recommend:
-  default: "Run strict TypeScript (strict:true, the TS 6 default) and export a small, deliberate public type surface from libraries."
+  default: "Run strict TypeScript (strict:true, the TS 6 default) on React and React Native alike, and export a small, deliberate public type surface from libraries. Move large repos to TypeScript 7 through the TS 6 bridge; what changes the timing is any tool that embeds the TS compiler API, which 7.0 does not ship."
   when:
-    - "library/package author → minimize + version the exported types; avoid leaking internals"
-    - "large repo with slow tsc → TS 7 (Go) is STABLE (~10x); migrate via the TS 6 bridge, following the VS Code pattern in reading"
-    - "Next.js repo moving to TS 7 → `next build` loads TypeScript's JS compiler API, which TS 7 does not yet expose; set experimental.useTypeScriptCli so the build shells out to the project-local tsc instead (experimental, 16.3 Preview)"
-    - "not at Meta → use TypeScript, not Flow; budget a Flow exit as a package-by-package program with type integrity preserved throughout (see the Yelp case in reading)"
-    - "React Native app on 0.87+ → the Strict TypeScript API is the default and deep imports into react-native/Libraries/* are type errors; see RB-E-RN-VERSIONS"
+    - "library/package author → minimal, versioned exported types (no leaked internals)"
+    - "large repo with slow tsc → TypeScript 7 via the TS 6 bridge (TS 6 and 7 side-by-side in CI, then 7 as default; the VS Code pattern in reading)"
+    - "tool that imports the TS compiler API (typescript-eslint, custom build steps) → @typescript/typescript6 aliased as `typescript` beside TS 7 (keeps the 6.0 API and a tsc6 binary) until TS 7.1 ships its new API"
+    - "Next.js repo moving to TS 7 → the tsc CLI checker (the `next build` default per the current docs, 16.3.6); leave experimental.useTypeScriptCli unset, because setting it to false makes the build exit under TS 7"
+    - "Flow codebase outside Meta → TypeScript (a package-by-package exit with type integrity kept throughout; the Yelp case in reading)"
+    - "React Native app on 0.87+ → Strict TypeScript API (the default: deep imports into react-native/Libraries/* are type errors; RB-E-RN-VERSIONS owns it)"
 note: >
-  TypeScript 7.0 (the Go/native rewrite of tsc) is STABLE — npm latest = 7.0.2, published
-  2026-07-08 (verified vs the npm registry; RC was 2026-06-18, stable landed on schedule).
-  ~10x vs TS 6.0, up to 16x type-checking with parallelization. Migrate incrementally through
-  TS 6 (the bridge release) per the VS Code case study in reading.
-  TOOLING GAP (2026-07-28, verified vs the Next.js docs): TS 7 ships the compiler, not yet its
-  JavaScript API — so tools that EMBED tsc lag the release. Next.js is the load-bearing example:
-  `next build` loads the TS compiler API, so TS 7 needs `experimental.useTypeScriptCli`, which
-  makes the build run the project-local `tsc` CLI instead ("enables TypeScript 7 support while
-  its JavaScript API is unavailable"; experimental, not recommended for production, 16.3 Preview).
-  Expect the same shape from other API-embedding tools — check yours before pinning typescript@7.
+  Strictness is a boundary discipline: the checker earns its keep where data crosses an edge, which
+  is exactly where teams switch it off with `any`. strict:true is now the default rather than a
+  stance, so the open questions are how an existing codebase gets there and how small the exported
+  type surface stays. The compiler itself changed engines: TypeScript 7 is the Go-native tsc, and
+  the only thing that decides when you move is whether your tooling needs the compiler API that 7.0
+  does not yet ship.
+
+  TS 7 STABLE (2026-07-08, verified vs npm + the TS 7.0 announcement): npm latest 7.0.2. About 10x
+  faster than TS 6.0 at the default --checkers 4; with --checkers 8 the post measures 10.6x (tldraw)
+  to 16.7x (VS Code) across five codebases, at the cost of more memory. 7.0 adopts 6.0's defaults and
+  turns every 6.0 deprecation into a hard error → clear deprecations on TS 6 first, then run 6 and 7
+  side-by-side in CI (the VS Code case in reading: type-checking 36s→5s).
+
+  TOOLING GAP (2026-09-24, verified vs the TS 7.0 announcement + the Next.js TypeScript docs): 7.0
+  ships no compiler API; the TypeScript team expects 7.1 to ship a new, different one. Until then,
+  tools that import `typescript` (typescript-eslint is the named example) stay on 6.0 through
+  @typescript/typescript6: alias `typescript` to it (it provides a tsc6 binary and re-exports the 6.0
+  API) and add a second alias for 7.0's tsc. Next.js closed its own gap: current docs (16.3.6) say
+  `next build` runs the project-local tsc CLI by default, so TS 7 needs no config, and setting
+  experimental.useTypeScriptCli to false makes the build exit under TS 7. Trade-offs of the CLI path:
+  the flag is still labelled experimental, diagnostics lose Next.js code frames, and the check covers
+  the whole tsconfig project, tests included → audit every other API-embedding tool before pinning
+  typescript@7.
+
+  FLOW EXIT (verified vs the Yelp post): outside Meta the answer is TypeScript, and the exit is a
+  program, not a codemod — convert deepest dependencies first and keep type-checking on everywhere.
+  The reading "Migrating a Large Flow Monorepo to TypeScript" holds the mechanism and numbers.
+
+  RB-E-RN-VERSIONS owns the RN 0.87 Strict TypeScript API default; RB-E-DX owns the CI typecheck
+  gate; RB-E-BUILD owns emit vs check.
+
+  HISTORY:
+  2026-09-24 CORRECTED: Next.js no longer needs experimental.useTypeScriptCli set (the tsc CLI checker is the `next build` default); "up to 16x" pinned to the 7.0 post's 16.7x with --checkers 8; @typescript/typescript6 added as the API bridge.
+  2026-08-18 GAP CLOSED: Flow→TS exit case (Yelp, 1.4M SLoC over 3y7m) + RN 0.87 Strict-API cross-ref.
+  2026-07-28 GAP CLOSED: TS 7 tooling gap — `next build` needed experimental.useTypeScriptCli (16.3 Preview).
 defer_to_skill: engineering-principles
 doc: "RB-E-TYPESCRIPT.md"   # long-form Explanation entry in content_dir
-updated: 2026-08-18   # Yelp Flow→TS case (1.4M SLoC, 3y7m) + RN 0.87 Strict-API default cross-ref
+updated: 2026-09-24   # Next.js tsc CLI checker is now the default (no flag), 16.7x pin, @typescript/typescript6 API bridge; prior 2026-08-18: Yelp Flow→TS case (1.4M SLoC, 3y7m) + RN 0.87 Strict-API default cross-ref
 reading:
   - title: "Migrating a Large Flow Monorepo to TypeScript"
     url: "https://engineeringblog.yelp.com/2026/08/migrating-a-large-flow-monorepo-to-typescript.html"
@@ -58,6 +84,8 @@ sources:
   - "https://registry.npmjs.org/typescript/latest"
   - "https://nextjs.org/docs/app/api-reference/config/next-config-js/useTypeScriptCli"
   - "https://engineeringblog.yelp.com/2026/08/migrating-a-large-flow-monorepo-to-typescript.html"
+  - "https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/"
+  - "https://nextjs.org/docs/app/api-reference/config/typescript"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "typescript", label: "TypeScript", token: "typescript" }
 detect_source:   # source-level signals owned by this entry (regex over repo source)

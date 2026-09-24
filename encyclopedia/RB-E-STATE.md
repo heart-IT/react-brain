@@ -4,7 +4,7 @@ title: "About state management in React & React Native"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: high
-updated: 2026-07-01
+updated: 2026-09-24
 platforms: [react, react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-STATE
 defer_to_skill: react-native-best-practices                   # re-render / perf depth
@@ -106,6 +106,15 @@ without the full interpreter.
 that underpin TanStack Router/Table/Form. Most apps consume these *transitively* via
 those libraries rather than adopting them directly as the app store; pick them
 deliberately only when you want signal-style reactivity as a foundation.
+
+**URL state — nuqs** — a third bucket beside server and client state: view state that must
+survive a refresh or a pasted link (filters, tabs, pagination, search) belongs in the URL
+query string, not a store. `nuqs` gives it a typed `useState`-like API on web routers
+(Next.js, React Router, Remix, TanStack Router, plain React SPA). It complements Zustand and
+TanStack Query rather than replacing either.
+
+**Jotai 3** (2026-09-08) keeps the hooks API; the move from v2 is packaging (ESM-only,
+React 18+, Node ≥22.12, `atomFamily` in `jotai-family`), owned by the entry's migrate rule.
 
 ## The second distinction: ownership vs subscription (the "render once" lens)
 

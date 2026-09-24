@@ -4,7 +4,7 @@ title: "About bottom sheets & modal sheets (React Native)"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: medium
-updated: 2026-08-18
+updated: 2026-09-24
 platforms: [react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-SHEETS
 defer_to_skill: react-native-best-practices
@@ -70,13 +70,15 @@ sheets whose gesture behavior is genuinely custom.
 When this entry was drafted (2026-07-16), `@gorhom/bottom-sheet` was the safe default and the
 native entrants were the interesting newcomers. A month of watching moved the line:
 
-- **The native option grew up.** `react-native-true-sheet` reached 3.11.11 (2026-08-12) while
+- **The native option grew up.** `react-native-true-sheet` reached 3.11.14 (2026-09-09) while
   publishing every few days, and it is no longer the *simpler* option — it is the more *complete*
   one: Fabric-only by design, native accessibility strings, built-in keyboard handling, side
   sheets for iPad and Android tablets, iOS 26+ Liquid Glass, first-class Reanimated interop, and a
-  sheet navigator for React Navigation. A 4.0.0-beta.3 line is already open.
+  sheet navigator for React Navigation. A 4.0 beta line is open (beta.18 on
+  2026-09-23), and its Reanimated 4, worklets and React Navigation peers are optional.
 - **The incumbent went quiet.** `@gorhom/bottom-sheet` sits at 5.2.14, published 2026-05-09, with
-  no repository push since that date and 74 open issues. It is not abandoned, and ~9.1k stars of
+  no repository push since that date; open issues went from 74 (2026-08-18) to 48
+  (2026-09-24) without a release. It is not abandoned, and ~9.1k stars of
   deployed base do not evaporate — but "safe default" is a claim about maintenance as much as
   about features, and that claim is weaker than it was.
 
@@ -88,7 +90,7 @@ Some sheets are not components at all. If the sheet is deep-linkable, appears in
 and owns its own data loading, it is a **route** that happens to be presented as a sheet.
 
 Two paths exist. `react-native-screens` can present a native-stack route as a FormSheet with
-detents — still experimental on the 4.x line (4.27.0, 2026-08-07; a 5.0.0-alpha.2 line is open),
+detents — still experimental on the 4.x line (4.28.0, 2026-09-14; a 5.0.0-alpha.3 line is open),
 so pin it. Or use `react-native-true-sheet`'s sheet navigator, which reaches the same shape
 without waiting on the screens rewrite. The decision is not "which library" but "is this a
 component or a destination" — and answering that first usually settles the library question.
@@ -99,7 +101,7 @@ The 34-app census (2026-08-18) finds a sheet library in 7 of 14 React Native app
 in 7 of them, `react-native-true-sheet` in 1. Adoption still points at the incumbent, which is
 what a *recent* inversion looks like — the argument moved before the ecosystem did. Two further
 reasons to hold this at medium confidence: `@swmansion/react-native-bottom-sheet` is still 0.x
-(0.16.2, with 0.17.0-next.1 on the `next` tag), and the option this entry now leads with has a
+(0.16.2, with 0.17.0-next.2 on the `next` tag), and the option this entry now leads with has a
 major version in beta. Both are wired as tripwires in the index entry, so a stable 1.0 or 4.0
 forces this page to be re-read rather than quietly aging.
 

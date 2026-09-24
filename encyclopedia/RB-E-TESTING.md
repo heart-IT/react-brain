@@ -4,7 +4,7 @@ title: "About testing strategy & tooling in React & React Native"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: high
-updated: 2026-06-25
+updated: 2026-09-24
 platforms: [react, react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-TESTING
 defer_to_skill: agentic-engineering-patterns                  # TDD / what-to-test / verify discipline
@@ -56,8 +56,10 @@ set of network mocks reused across every layer and in dev.
 **Jest / Vitest** — the unit/component runners. Vitest on the web (speed, Vite integration),
 Jest on RN (default, ecosystem). Pick by platform, not preference.
 
-**React Testing Library (14)** — behaviour-first component testing; v14 adds React 19 support and
-async APIs. It's not just a tool but a *philosophy enforcer* — its API makes implementation-
+**React Testing Library (14)** — behaviour-first component testing. The 14 is the React Native
+variant (RNTL), which adds React 19 support and async APIs and runs on its own host-element-only
+renderer; the web package is on 16.x. React core's `react-test-renderer` is deprecated — don't
+use it in new test code. It's not just a tool but a *philosophy enforcer* — its API makes implementation-
 detail testing awkward on purpose.
 
 **MSW (Mock Service Worker)** — network-level API mocking. The reason it matters: the *same*
@@ -68,8 +70,15 @@ layer. Reach for it the moment tests are API-heavy.
 test-healing) is the RN recommendation now that Expo archived Detox; Meticulous is record-based
 AI e2e. E2e is the smallest, slowest, highest-confidence layer — keep it few and critical-path.
 
+**react-native-harness** — Jest-style tests that run *on* real devices and simulators with
+native-module access: the layer between Node-Jest and black-box Maestro, for tests that must
+exercise real native modules. Since 1.5 it runs unattended in CI (`harness ci`); still young, so pin
+it.
+
 **Storybook (10)** — the component workshop (web + RN side by side), with Vitest/Playwright test
-integration. It's where component *development* and visual/interaction testing meet.
+integration. It's where component *development* and visual/interaction testing meet. On the web
+it is no longer the only home for component tests: Playwright 1.62 rebuilt component testing
+around stories and galleries, so browser-based component tests can live in Playwright.
 
 **Radon IDE** — RN debugging in VS Code/Cursor (device panel, click-to-inspect, Profiler); a
 DX-adjacent aid to the loop rather than a test type.

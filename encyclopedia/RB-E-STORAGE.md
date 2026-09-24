@@ -4,13 +4,14 @@ title: "About on-device storage & persistence"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: medium
-updated: 2026-07-13
+updated: 2026-09-24
 platforms: [react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-STORAGE
 defer_to_skill: null
 related: [RB-E-P2P, RB-E-SECURITY, RB-E-DATA]
 sources:
   - "https://react-native-async-storage.github.io/3.1/migration-to-3/"
+  - "https://github.com/OP-Engineering/op-sqlite/releases"
   - "https://github.com/mrousavy/react-native-mmkv/releases"
 ---
 
@@ -34,8 +35,9 @@ picks itself.
 
 ## The default, and why
 
-> Small key-value → react-native-mmkv (fast, synchronous). Relational/large → op-sqlite or
-> expo-sqlite. Secrets/tokens → Keychain / secure-store, never AsyncStorage.
+> Small key-value → react-native-mmkv (fast, synchronous). Relational/large → op-sqlite (perf) or
+> expo-sqlite (Expo first-party). Secrets/tokens → the OS Keychain/Keystore, never AsyncStorage:
+> expo-secure-store on Expo, react-native-keychain on bare RN.
 
 Three shapes, three homes. **MMKV** wins small key-value because it's fast and *synchronous* — no
 await ceremony for a boolean. **SQLite** wins structured data because "relational/large" is a
@@ -56,12 +58,21 @@ v4 is a full Nitro Modules rewrite (Oct 2025) that *restored* Old-Architecture c
 Latest is 4.3.x. Earns its place the moment you have frequent synchronous reads.
 
 **op-sqlite / expo-sqlite** — relational SQLite for structured/queryable data; op-sqlite is the
-high-perf JSI option (latest 17.x, 2026-06). The author's own deep-dive explains *why* it's fast
+high-perf JSI option (latest 18.2.5, 2026-09-20). The 18.0.0 major (2026-08-14) removed
+crsqlite, so an app using op-sqlite as the local half of a CRDT-synced store has to migrate that
+extension away before upgrading; 18.1 added RN 0.87 compatibility. The author's own deep-dive explains *why* it's fast
 and memory-light: lazy HostObject conversion, `std::variant` over a custom struct, key-sharing
 across result rows — with benchmarks.
 
-**react-native-keychain / expo-secure-store** — secure storage for tokens and secrets, backed by
-the platform Keychain/Keystore. Earns its place for every credential, unconditionally.
+**expo-secure-store / react-native-keychain** — secure storage for tokens and secrets, backed by
+the platform Keychain/Keystore. Earns its place for every credential, unconditionally. On Expo
+the default is `expo-secure-store` (first-party, released with the SDK). `react-native-keychain`
+is the bare-RN store and the pick for finer access-control/biometry options, but it has had no
+npm release since 10.0.0 (2025-03-23): pin it and re-check before new work on it.
+
+**WatermelonDB** — detected but not a default pick: `@nozbe/watermelondb` 0.28.0 (2025-04-07) is
+still its latest npm release. Keep it where it is already in use; new relational work goes to
+op-sqlite or expo-sqlite.
 
 **The P2P/local-first log** — in a Hypercore/Autobase app, the primary persistence is the
 Hypercore/Autobase/Hyperbee log itself, not KV or SQLite; KV like AsyncStorage is just for local
@@ -79,6 +90,9 @@ prefs there. That whole world is `RB-E-P2P`'s.
   migration, not a cliff.
 - **Avoiding MMKV v4 over Old-Arch fears.** Backwards: the v4 Nitro rewrite is what *restored*
   Old-Arch compat.
+- **Moving MMKV writes into a worklet to unblock JS.** MMKV writes are synchronous, but a worklet
+  moves the cost into serialization at the boundary rather than removing it (measured ~29.56ms
+  either way).
 - **Giving a local-first app a "main database".** In P2P apps the log is the source of truth;
   making SQLite/KV primary builds a second, divergent one. KV is for prefs only there.
 - **Persisting like it's still request/response.** The TanStack DB reading marks the shift to
@@ -101,8 +115,8 @@ prefs there. That whole world is `RB-E-P2P`'s.
 On-device storage is three problems, not one — classify by **data shape × secrecy** and each
 picks its own home: small key-value goes to **react-native-mmkv** (fast, synchronous; v4 is a
 Nitro rewrite that restored Old-Arch compat), relational/large data goes to **op-sqlite or
-expo-sqlite** (op-sqlite for high-perf JSI), and secrets go to **Keychain / secure-store — never
-AsyncStorage**. AsyncStorage itself remains fine for simple persisted prefs (v3.x is
+expo-sqlite** (op-sqlite for high-perf JSI), and secrets go to **the OS Keychain/Keystore (expo-secure-store on Expo, react-native-keychain
+on bare RN) — never AsyncStorage**. AsyncStorage itself remains fine for simple persisted prefs (v3.x is
 instance-based and needs RN 0.76+, with the v2 export kept for back-compat), and in P2P
 local-first apps the whole question shifts: the Hypercore/Autobase/Hyperbee log is the primary
 persistence, and everything on this page is just the prefs drawer.

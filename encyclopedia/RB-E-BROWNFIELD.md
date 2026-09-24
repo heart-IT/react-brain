@@ -4,7 +4,7 @@ title: "About brownfield integration & micro-frontends"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: low                # entry is lightly vetted; landscape includes alpha tooling
-updated: 2026-07-16
+updated: 2026-09-24
 platforms: [react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-BROWNFIELD
 defer_to_skill: engineering-principles                        # depth: generic architecture/code-quality judgment
@@ -35,12 +35,17 @@ each one owns a different clause of that contract:
 - **Init.** Who starts React Native, and how self-contained that start is.
   react-native-brownfield's whole pitch is a self-contained iOS init —
   `ReactNativeBrownfield.shared.startReactNative()`, wrapping RN core's
-  `RCTReactNativeFactory`. Expo's first-party path answers the same clause by packaging the
-  embed itself: the `npx brownfield package:ios` XCFramework flow.
+  `RCTReactNativeFactory`. Since 5.1.0 (2026-09-03) that init takes `preloadBundle`: the React
+  Host starts and the JS bundle evaluates in parallel with app launch instead of on the first
+  RN view (Android's `initialize` already did this), and `onBundleLoaded` now runs on the main
+  thread. Its brownfield-cli packages the embed as prebuilt XCFrameworks
+  (`npx brownfield package:ios`); Expo's first-party path answers the same clause with its own
+  `expo-brownfield` tooling, integrated or isolated (AAR/XCFramework artifacts).
 - **State.** What crosses the seam while both sides run. Brownie
   (`@callstack/brownie`) shares native↔JS state for brownfield and generates Swift + Kotlin
   types from `.brownie.ts` — the contract made literal, as generated types on both sides
-  (iOS + Android; stable, v3.13.x, 2026-06).
+  (iOS + Android; released in lockstep with react-native-brownfield since 4.0.0, 2026-07-06,
+  now 5.1.x).
 - **Deployment granularity.** How much ships independently. Granite (Toss) makes each screen
   an independently deployable ~200KB bundle on a CDN (ESBuild); Rock (Callstack) targets
   super-apps via micro-frontends plus native build caching.
@@ -67,24 +72,34 @@ navigation handoff — it does not cover, though its Zalando reading shows the h
 for when a native app — and usually an organisation around it — already exists. The two
 when-clauses split cleanly along the contract: adding RN screens to an existing native app is
 the init clause → react-native-brownfield; many teams shipping independent bundles is the
-deployment clause → Granite / Rock. The landscape is mostly Callstack/Toss tooling (several
-alpha) plus, since SDK 55, the first-party Expo path.
+deployment clause → Granite / Rock. The landscape is mostly Callstack/Toss tooling (Rock is
+still 0.x) plus, since SDK 55, the first-party Expo path.
+
+One version fact decides the react-native-brownfield major: 5.0.0 (2026-07-23) has exactly one
+breaking change, it drops Expo SDK 55. SDK-55 apps stay on 4.x, so upgrade the brownfield major
+together with the Expo SDK, not before it. The Expo Updates capability flip below is an SDK 55,
+and therefore 4.x, fact. The same library also covers a .NET MAUI host through a C# binding
+project over the same native binding.
 
 ## The landscape, facet by facet
 
 **react-native-brownfield (Callstack)** — the embed itself: RN inside an existing native
 app, with the self-contained iOS init (`startReactNative()` over `RCTReactNativeFactory`).
-The recommendation's named default for the add-RN-screens case.
+The recommendation's named default for the add-RN-screens case. Its brownfield-cli
+(`npx brownfield package:ios`) prebuilds XCFrameworks, which cuts hybrid iOS compile times ~39%
+(Callstack, 2026-07), and `preloadBundle` (5.1.0+) is the first thing to try when RN screens
+are blamed for a slow first open.
 
 **Expo brownfield (first-party, SDK 55+)** — the official Expo path for adding Expo/RN to an
-existing native app (docs.expo.dev/brownfield), built around the
-`npx brownfield package:ios` XCFramework flow. Two facts ride on that same prebuilt flow:
-it is what unlocked Expo Updates in isolated brownfield embeds, and it cuts hybrid iOS
-compile times ~39% (Callstack, 2026-07).
+existing native app (docs.expo.dev/brownfield), integrated or isolated (AAR/XCFramework
+artifacts), with its own `expo-brownfield` CLI. The isolated architecture is where Expo Updates
+was unlocked for embedded screens on SDK 55 (Callstack's walkthrough packages with
+`npx brownfield package:ios`, which is Callstack's brownfield-cli, not Expo's).
 
 **Brownie (@callstack/brownie)** — the state seam: native↔JS state sharing with Swift +
-Kotlin types generated from `.brownie.ts`, iOS + Android. Notably carries an explicit
-stability marker (v3.13.x, 2026-06) in a landscape the note labels "several alpha".
+Kotlin types generated from `.brownie.ts`, iOS + Android. Versioned in lockstep with
+react-native-brownfield and brownfield-cli since 4.0.0 (2026-07-06); pin all three to the same
+version.
 
 **Granite (Toss)** — micro-frontends: each screen an independently deployable ~200KB CDN
 bundle, built with ESBuild.
@@ -103,9 +118,9 @@ bridging, on-device LLM hardware variance.
   A greenfield app has no host to contract with; this shelf is for apps that already exist.
 - **Assuming OTA can't reach embedded screens.** Stale since SDK 55: the capability flip is
   the entry's own headline note, and it points at `RB-E-OTA` for that side of the story.
-- **Treating the landscape as uniformly stable.** The note says "several alpha" without
-  naming which; only Brownie carries an explicit stable version and date in the entry.
-  Verify the maturity of any specific tool before committing.
+- **Treating the landscape as uniformly stable.** Rock is still 0.x (0.15.2), and the
+  Callstack packages move a major at a time with the Expo SDK. Verify the maturity of any
+  specific tool before committing.
 - **Paying full hybrid compile cost.** The prebuilt-XCFramework flow exists partly because
   rebuilding RN inside a native app is expensive — ~39% faster hybrid iOS compiles is the
   measured win; Rock's native build caching is the same concern at super-app scale.
@@ -136,11 +151,11 @@ react-native-brownfield owns init (self-contained
 Brownie owns state (native↔JS sharing with Swift + Kotlin types generated from
 `.brownie.ts`); Granite and Rock own deployment shape (independently deployable ~200KB CDN
 bundles per screen; super-apps with native build caching); and Expo's first-party path (SDK
-55+) owns packaging via the `npx brownfield package:ios` XCFramework flow — which also
-unlocked Expo Updates in isolated brownfield embeds (previously a known limitation; see
-`RB-E-OTA`) and cut hybrid iOS compile times ~39%. It is a scale-stage concern in a
-landscape that is mostly Callstack/Toss tooling, several of them alpha: add RN screens →
-react-native-brownfield; many teams shipping independent bundles → Granite or Rock; verify
+55+, `expo-brownfield`) owns packaging, integrated or isolated. The isolated architecture
+unlocked Expo Updates in brownfield embeds on SDK 55 (previously a known limitation; see
+`RB-E-OTA`), and Callstack's brownfield-cli prebuilt XCFrameworks cut hybrid iOS compile times
+~39%. It is a scale-stage concern in a landscape that is mostly Callstack/Toss tooling (Rock
+still 0.x): add RN screens → react-native-brownfield (4.x on SDK 55, 5.x after); many teams shipping independent bundles → Granite or Rock; verify
 maturity before committing.
 
 ---

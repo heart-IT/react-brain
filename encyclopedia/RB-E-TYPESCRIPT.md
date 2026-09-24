@@ -4,7 +4,7 @@ title: "About TypeScript rigor & public API typing"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: medium
-updated: 2026-07-13
+updated: 2026-09-24
 platforms: [react, react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-TYPESCRIPT
 defer_to_skill: engineering-principles
@@ -12,6 +12,8 @@ related: [RB-E-DX, RB-E-BUILD]
 sources:
   - "https://devblogs.microsoft.com/typescript/announcing-typescript-7-0-rc/"
   - "https://registry.npmjs.org/typescript/latest"
+  - "https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/"
+  - "https://nextjs.org/docs/app/api-reference/config/typescript"
 ---
 
 # About TypeScript rigor & public API typing
@@ -55,8 +57,17 @@ args) cut type-instantiation cost 62–86%, with measurements.
 
 **TypeScript 7 (native/Go)** — the Go rewrite of `tsc`. **7.0 is STABLE**: npm latest is 7.0.2,
 published 2026-07-08 (verified against the npm registry; the RC was 2026-06-18, and stable landed
-on schedule). ~10x faster than TS 6.0, up to 16x on type-checking with parallelization, and it
-removes long-deprecated flags. Earns its place the moment a large repo has a slow `tsc`.
+on schedule). ~10x faster than TS 6.0 at the default `--checkers 4`; with `--checkers 8` the 7.0
+announcement measures 10.6x–16.7x across five large codebases, at more memory. It turns every 6.0
+deprecation into a hard error. Earns its place the moment a large repo has a slow `tsc`.
+
+**The tooling gap (verified 2026-09-24 vs the TS 7.0 announcement and the Next.js docs).** 7.0
+ships no compiler API; the TypeScript team expects 7.1 to ship a new, different one. Tools that
+import `typescript` (typescript-eslint is the named example) stay on 6.0 through
+`@typescript/typescript6`, aliased as `typescript` beside a second alias for 7.0's `tsc`. Next.js
+no longer needs a flag: its current docs (16.3.6) say `next build` runs the project-local `tsc` CLI
+by default, and setting `experimental.useTypeScriptCli` to `false` makes the build exit under TS 7.
+So the question that sets your TS 7 date is not speed but which of your tools embed the API.
 
 **TypeScript 6.0 (the bridge)** — the JS-based release you migrate *through*, not to. The VS Code
 case study is the pattern: their ~50-extension codebase cut type-checking 36s→5s (~7x) and editor
@@ -65,7 +76,11 @@ side-by-side in CI (TS 6 still emitting), then esbuild + TS 7 as the default.
 
 **Flow (2026)** — Meta's type checker. Syntax has converged with TS and the compiler was ported
 to Rust, but it's mostly Meta-internal now. The when-clause is one line: not at Meta → use
-TypeScript, not Flow.
+TypeScript, not Flow. Yelp's exit (1.4M SLoC, three years and seven months) shows the shape: a
+package-by-package program, deepest dependencies first, with type-checking never suspended.
+
+**React Native 0.87+** makes the Strict TypeScript API the default, so deep imports into
+`react-native/Libraries/*` become type errors; `RB-E-RN-VERSIONS` owns that migration.
 
 ## Tradeoffs and failure modes to name out loud
 
@@ -104,8 +119,8 @@ TypeScript rigor is a **boundary discipline**: run `strict:true` (the TS 6 defau
 is on where data crosses edges — `any` in bulk means it's off exactly where bugs concentrate, so
 prefer `unknown` + narrowing — and, as a library author, treat the exported type surface as a
 boundary too: small, versioned, no leaked internals. Meanwhile the compiler changed engines:
-**TS 7 (Go-native `tsc`) is stable** — 7.0.2 on npm as of 2026-07-08, ~10x faster, up to 16x
-type-checking with parallelization — and the proven adoption path is incremental: TS 6.0 as the
+**TS 7 (Go-native `tsc`) is stable** — 7.0.2 on npm as of 2026-07-08, ~10x faster, 16.7x at best
+with `--checkers 8` — and the proven adoption path is incremental: TS 6.0 as the
 low-churn bridge, 6 and 7 side-by-side in CI, then TS 7 as default, the way VS Code cut
 type-checking 36s→5s. Not at Meta? TypeScript, not Flow.
 

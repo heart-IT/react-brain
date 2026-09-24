@@ -4,7 +4,7 @@ title: "About in-app purchases & payments (React Native)"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: medium
-updated: 2026-08-18
+updated: 2026-09-24
 platforms: [react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-PAYMENTS
 defer_to_skill: null
@@ -61,8 +61,8 @@ you are down?*
 
 Both packages come out of the same place — the **OpenIAP** project (`hyodotdev/openiap`), which is
 the useful thing to understand here. They are not competitors so much as two runtimes for one
-protocol: `expo-iap` (5.3.1) is the Expo module, `react-native-iap` (16.3.1) the bare-RN wrapper,
-and they ship in lockstep — both published 2026-08-14.
+protocol: `expo-iap` (5.6.3) is the Expo module, `react-native-iap` (16.6.2) the bare-RN wrapper,
+and they ship in lockstep — both published 2026-09-19.
 
 That lockstep matters because this entry previously carried the opposite belief. Until 2026-08-04
 it said react-native-iap was "deprecated/archived → prefer expo-iap", which read an archived
@@ -72,10 +72,19 @@ deprecation flag. **Pick between them on runtime — Expo module vs bare wrapper
 
 One trap worth knowing before you install: on both packages the `next` dist-tag is *behind*
 `latest` (react-native-iap `next` = 15.4.0-rc.3, expo-iap `next` = 4.4.0-rc.7, verified
-2026-08-18). Reaching for `@next` here silently downgrades you a major version.
+2026-09-24); the same holds for RevenueCat's `react-native-purchases` (`next` = 8.9.1-vc-beta.1
+against `latest` 10.10.2). Reaching for `@next` here silently downgrades you a major version.
 
 Owning it means you also own receipt validation on a server you control, and the testing burden
 that comes with store sandboxes. That is the fee you pay instead of RevenueCat's.
+
+OpenIAP has started on that server half too. The OpenIAP Commerce Protocol is a vendor-neutral
+server-side contract for purchase verification, entitlements and lifecycle events, published as
+`@hyodotdev/openiap-commerce-protocol` (0.3.0, 2026-09-15; the unscoped
+`openiap-commerce-protocol` 0.1.0 is deprecated on npm). It is 0.x: evaluate it before building
+your validator on it. And since 2026-08-19 OpenIAP is backed by Amazon Developer, with store setup
+for Amazon and Horizon OS in its docs, so the protocol is no longer only an Apple/Google concern
+if you ship to Fire OS or Vega OS.
 
 ## The thing that is not a purchase at all: wallet passes
 

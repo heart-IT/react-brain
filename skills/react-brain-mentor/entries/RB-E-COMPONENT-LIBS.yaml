@@ -6,41 +6,67 @@ status: reviewed   # long-form entry written + source-checked → encyclopedia/R
 confidence: medium
 platforms: [react]
 options:
-  - { name: "Base UI (1.x)", tradeoff: "unstyled accessible primitives (Radix/MUI lineage); render-prop customization" }
+  - { name: "Base UI (1.x)", tradeoff: "unstyled accessible primitives (Radix/MUI lineage); render-prop customization. Install as @base-ui/react (1.8.0, 2026-09-04, verified vs npm 2026-09-24) — the old @base-ui-components/react name is deprecated on npm as renamed. See note: BASE UI RENAME" }
   - { name: "React Aria Components (1.x, Adobe)", tradeoff: "accessibility-first headless primitives; `render` prop pattern (not asChild)" }
   - { name: "Radix UI", tradeoff: "unstyled primitives; `asChild` composition; widely used under shadcn" }
-  - { name: "shadcn/ui", tradeoff: "copy-paste components (own the code) + Tailwind; CLI + registries; Base UI is the DEFAULT headless layer since July 2026 (4.13) — Radix stays supported, and React Aria joined as a THIRD first-class base later that month (`init --base aria`; per-base scoped registries, all 8 style variants); 2026-06 added chat components + the first headless @shadcn/react package; 2026-08 GitHub registries now install from PRIVATE repos too (via gh CLI credentials or GH_TOKEN in CI — internal design systems as registries, zero config); 2026-09 every registry component imports `cn` from the standalone `cn` package instead of a local lib/utils.ts, replacing the copied clsx+tailwind-merge helper every project used to hand-maintain — same call site, one dependency, and `shadcn add` installs it for projects created before the change (lib/utils.ts survives, re-exporting it)" }
-  - { name: "MUI (9) / Chakra (3) / Mantine (9) / Ant Design (6)", tradeoff: "batteries-included styled systems; MUI v9 is incrementally adopting Base UI primitives for new components (NumberField, MenuBar), not a full migration" }
+  - { name: "shadcn/ui", tradeoff: "copy-paste components (own the code) + Tailwind; CLI + registries. Base UI is the DEFAULT headless layer since 2026-07 (4.13); Radix stays supported and React Aria is a third first-class base (`init --base aria`). CLI 4.21.0 (2026-09-04, verified vs npm 2026-09-24). See note: SHADCN" }
+  - { name: "MUI (9) / Chakra (3) / Mantine (9) / Ant Design (6)", tradeoff: "batteries-included styled systems (majors verified vs npm 2026-09-24); MUI v9 is incrementally adopting Base UI primitives for new components (NumberField, MenuBar), not a full migration" }
   - { name: "HeroUI (3)", tradeoff: "React Aria + Tailwind; separate web + RN libraries sharing design tokens (not one cross-platform abstraction)" }
-  - { name: "Astryx (Meta)", tradeoff: "Meta's open-source design system on React + StyleX: 150+ accessible, themeable components, compile-time atomic styling, agent-ready scaffolding (CLI + MCP); grown 8 yrs internally, 13,000+ Meta apps; batteries-included; beta — 0.6.0 (2026-09-10, verified vs the release post) adds RESPONSIVE THEME RULES, a Selector that adapts which surface it presents, a reworked Neutral palette and six templates, and the team describes a specification-backed path toward v1. Useful calibration: still 0.6.x with a documented CLI upgrade step between minors, so treat version churn as the cost of adopting it early" }
+  - { name: "Astryx (Meta)", tradeoff: "Meta's open-source design system on React + StyleX: 150+ accessible, themeable components, compile-time atomic styling, agent-ready scaffolding (CLI + MCP); grown 8 yrs internally, 13,000+ Meta apps. Beta: @astryxdesign/core 0.6.x (0.6.0 released 2026-09-10; verified vs the release post + npm 2026-09-24). See note: ASTRYX" }
 recommend:
-  default: "Own-the-code: shadcn/ui (Base UI default since 2026-07; Radix still supported) + Tailwind — the default for product teams that want control."
+  default: "Own-the-code: shadcn/ui (Base UI default since 2026-07; Radix and React Aria also supported) + Tailwind — the default for product teams that want control."
   when:
-    - "max accessibility / headless primitives → React Aria Components or Base UI"
-    - "want batteries-included + don't want to own styling → MUI / Mantine / Chakra"
-    - "internal admin/enterprise → Ant Design or MUI"
+    - "max accessibility / headless primitives → React Aria Components, else Base UI"
+    - "want batteries-included + don't want to own styling → MUI (or Mantine / Chakra — same tier)"
+    - "internal admin/enterprise → Ant Design (or MUI)"
     - "Meta/StyleX-native, agent-ready design system → Astryx (beta at 0.6.x — vet component coverage before betting on it)"
-    - "agents keep violating your design system (ad-hoc padding, off-theme colors, invented variants) → @shadcn/lint, an agent-first linter for Tailwind v4 design systems; shadcn/ui is NOT required and it runs on ESLint or Oxlint, so it drops into an existing lint lane (see note)"
-    - "React Native UI → this entry is web-only; see RB-E-STYLING / RB-E-CROSSPLATFORM"
+    - "one design language across web and React Native via shared tokens → HeroUI (separate web + RN libraries; tokens are shared, code is not)"
+    - "agents keep violating your design system (ad-hoc padding, off-theme colors, invented variants) → @shadcn/lint (agent-first linter for Tailwind v4 design systems; shadcn/ui NOT required; runs on ESLint or Oxlint — see note)"
+    - "React Native UI → n/a (this entry is web-only; see RB-E-STYLING / RB-E-CROSSPLATFORM)"
 note: >
-  ENFORCEMENT ARRIVED AS A SEPARATE TOOL (2026-09-21, verified vs the repo + README): @shadcn/lint
-  is an "agent-first linter for Tailwind design systems" from the shadcn org — 2,240 stars, created
-  2026-09-02 and pushed as recently as 2026-09-20, so it is three weeks old and busy. The premise is
-  worth recording even for teams that never adopt it, because it names a failure this corpus has
-  otherwise only described in prose: a coding agent will cheerfully add padding to a Button that
-  owns its own padding, invent a variant, or reach past the theme, and TypeScript cannot catch any
-  of it. You declare what is allowed in terms of your own components, variants and theme, and a
-  violation produces an error that explains the rule and suggests a fix from what your design system
-  actually offers — i.e. the diagnostic is written for a machine to act on, not just for a human to
-  read. Two facts that decide whether it is reachable for you: it targets TAILWIND V4 projects and
-  does NOT require shadcn/ui, and it ships for BOTH ESLint and Oxlint, which means it lands in the
-  existing lint lane RB-E-DX already reasons about rather than adding a fourth. Young enough that it
-  belongs in a when-clause and not a default; the honest risk is a three-week-old rule set, not the
-  idea.
-  Split three ways: headless/unstyled (Base UI, React Aria, Radix) vs batteries-included (MUI/Chakra/Mantine/Ant, plus Meta's StyleX-based Astryx) vs own-the-code (shadcn). Web only. HEADLESS-LAYER SHIFT (verified vs the shadcn changelog, 2026-07-10): 'Base UI is the default component library in shadcn/ui' — Radix explicitly NOT deprecated (both supported), but the center of gravity for new shadcn work is now Base UI; MUI v9 is incrementally adopting the same primitives. UPDATE (verified vs the shadcn changelog, 2026-07-20): React Aria is now the THIRD first-class shadcn base (`shadcn init --base aria`) — all three headless layers install through the same tooling with per-base scoped registries, so a project standardizes on one without cross-contamination; Base UI remains the default. Astryx (beta, 2026) pairs compile-time StyleX styling with agent-ready scaffolding (CLI + MCP) — Meta open-sourced its 8-yr internal system (13,000+ apps); see RB-E-STYLING for StyleX.
+  The split is WHO OWNS THE CODE: headless primitives (Base UI, React Aria, Radix) own behavior and
+  leave styling to you; batteries-included systems (MUI, Chakra, Mantine, Ant, and Meta's
+  StyleX-based Astryx) own both; own-the-code (shadcn/ui) copies the styled component into your repo
+  over a headless layer. shadcn/ui is the product-team default because it puts the hard part
+  (accessible behavior) in a maintained dependency and the opinionated part (markup, styling) where
+  you can change it without forking. The headless layers are converging — Base UI is shadcn's
+  default and MUI v9 is adopting the same primitives — which de-risks the copied-code bet. Web only.
+
+  SHADCN (verified vs the shadcn changelog): HEADLESS BASES — Base UI became the default component
+  library in shadcn/ui (2026-07-10, 4.13), with Radix explicitly NOT deprecated; React Aria joined
+  as the THIRD first-class base (2026-07-20, `shadcn init --base aria`) with per-base scoped
+  registries and all 8 style variants, so a project standardizes on one base without
+  cross-contamination. 2026-06: chat components and the first headless @shadcn/react package.
+  2026-08: GitHub registries install from PRIVATE repos too (gh CLI credentials, or GH_TOKEN in CI),
+  so an internal design system can be a registry with zero config. 2026-09: every registry component
+  imports `cn` from the standalone `cn` package instead of a local lib/utils.ts, replacing the copied
+  clsx+tailwind-merge helper projects hand-maintained — same call site, one dependency; `shadcn add`
+  installs it for projects created before the change, and lib/utils.ts survives as a re-export.
+
+  BASE UI RENAME (2026-09-24, verified vs npm): @base-ui-components/react carries the npm
+  deprecation "Package was renamed to @base-ui/react"; @base-ui/react published 1.0.0 on 2025-12-11
+  and is at 1.8.0 (2026-09-04) → new installs use @base-ui/react.
+
+  @SHADCN/LINT (2026-09-21, verified vs the repo + README; npm 0.2.0 of 2026-09-22 verified
+  2026-09-24): an "agent-first linter for Tailwind design systems" from the shadcn org, 2,240 stars
+  and created 2026-09-02 (as of 2026-09-21). It names a failure the corpus otherwise describes only
+  in prose: a coding agent will add padding to a Button that owns its padding, invent a variant, or
+  reach past the theme, and TypeScript catches none of it. You declare what is allowed in terms of
+  your own components, variants and theme, and a violation produces an error that explains the rule
+  and suggests a fix from what your design system offers — a diagnostic written for a machine to act
+  on. Reachability: it targets TAILWIND V4 projects, does NOT require shadcn/ui, works with React,
+  Svelte and Vue, and ships for BOTH ESLint (9.30+) and Oxlint → it lands in the existing lint lane
+  RB-E-DX reasons about. Young, so it is a when-clause and not a default; the risk is a new rule set,
+  not the idea.
+
+  ASTRYX (0.6.0, 2026-09-10, verified vs the release post): Meta open-sourced its 8-year internal
+  system (13,000+ apps). 0.6.0 adds RESPONSIVE THEME RULES, a Selector that adapts which surface it
+  presents, a reworked Neutral palette and six templates, and the team describes a
+  specification-backed path toward v1. Still 0.6.x with a documented CLI upgrade step between
+  minors → treat version churn as the cost of adopting early. StyleX itself: RB-E-STYLING.
 defer_to_skill: design-system
 doc: "RB-E-COMPONENT-LIBS.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-21   # @shadcn/lint — agent-first design-system linting for Tailwind v4 on ESLint or Oxlint (TWiR #297 · React Status #491) · Astryx pinned at 0.6.0 with its stated path to v1
+updated: 2026-09-24   # Base UI ships as @base-ui/react (old scope deprecated on npm) · @shadcn/lint 0.2.0 + React/Svelte/Vue · Astryx npm @astryxdesign/core; prior 2026-09-21: @shadcn/lint — agent-first design-system linting for Tailwind v4 on ESLint or Oxlint (TWiR #297 · React Status #491) · Astryx pinned at 0.6.0 with its stated path to v1
 sources:
   - "https://github.com/shadcn-ui/lint"
   - "https://astryx.atmeta.com/blog/astryx-v0-6-0"

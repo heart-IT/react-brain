@@ -4,7 +4,7 @@ title: "About animation & gestures — where the per-frame work runs"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: medium
-updated: 2026-07-10
+updated: 2026-09-24
 platforms: [react, react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-ANIMATION
 defer_to_skill: react-native-best-practices
@@ -77,6 +77,23 @@ caveat that the benchmark's author built the winner; the *cost model* is the dur
 
 **Moti** — declarative sugar over Reanimated; dormant since early 2025. Fine if installed;
 prefer plain Reanimated or LayoutAnimation for new work.
+
+## Facts that change the pick (verified 2026-09-24)
+
+- **Reanimated 4.7 raises the floor.** 4.7.0 peers `react-native` 0.86 – 0.88 and
+  `react-native-worklets` 0.13.x; an app on RN 0.83–0.85 stays on 4.6 (Worklets 0.12.x). 4.7 also
+  makes the new layout-animations engine the default, and its rollback flag cannot be combined with
+  shared element transitions — shared-element apps have no rollback.
+- **Turn on Worklets Bundle Mode.** Below RN 0.87 it is the fix for the Hermes V1 per-worklet memory
+  regression (measured −~100MB PSS); on 0.87+ Software Mansion still recommends it. One independent
+  benchmark saw it regress cold start, so measure that when you switch.
+- **Skia is changing hands.** Shopify is leaving React Native; `react-native-skia`'s author will
+  fork it under a new package name and the Shopify repo will be archived. Nothing is deprecated yet
+  (2.12.0 shipped 2026-09-16) — pin across the transition.
+- **Expo Router shared elements** go to `react-native-screen-choreography` (0.x, pin the exact
+  version); React Navigation stacks keep `react-native-screen-transitions`.
+- **Interactive designer animation** (state machines) goes to Rive's Nitro line,
+  `@rive-app/react-native` (0.4.x, pin), not the legacy `rive-react-native`.
 
 ## Tradeoffs and failure modes to name out loud
 

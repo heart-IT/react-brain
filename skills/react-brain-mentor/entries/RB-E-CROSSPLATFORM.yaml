@@ -6,62 +6,87 @@ status: reviewed   # long-form entry written + source-checked → encyclopedia/R
 confidence: high
 platforms: [react, react-native]
 options:
-  - { name: "shared logic/hooks package", tradeoff: "platform-agnostic core in a workspace package" }
-  - { name: "platform-extension files (.web.tsx/.native.tsx)", tradeoff: "one API, per-platform impl" }
-  - { name: "React Strict DOM (Meta)", tradeoff: "write strict HTML/CSS rendering web + native; Babel flattens to real DOM + static CSS on web; emerging RN-Web successor; involved setup" }
-  - { name: "react-native-web", tradeoff: "MAINTENANCE MODE (2026) — maps RN primitives to HTML; still works, no major features coming" }
+  - { name: "shared logic/hooks package", tradeoff: "platform-agnostic core (business logic, state, data) in a workspace package; serves the web app and the native app alike — the highest-leverage, lowest-risk share" }
+  - { name: "platform-extension files (.web.tsx/.native.tsx)", tradeoff: "one API, per-platform implementation; keeps each file single-platform instead of Platform.OS branching" }
+  - { name: "React Strict DOM (Meta)", tradeoff: "write strict HTML/CSS rendering web + native; Babel flattens to real DOM + static CSS on web; emerging RN-Web successor; involved setup. 0.0.55 (2026-01-09, verified vs npm), pre-1.0" }
+  - { name: "react-native-web", tradeoff: "MAINTENANCE MODE (2026) — maps RN primitives to HTML; still works, no major features coming. 0.21.2 (2025-10-16, verified vs npm); see note: REACT-NATIVE-WEB" }
   - { name: "Tamagui", tradeoff: "cross-platform UI + optimizing compiler" }
-  - { name: "Expo Universal Components / @expo/ui", tradeoff: "single API → SwiftUI (iOS) / Jetpack Compose (Android) / react-dom (web); SDK 56 beta" }
+  - { name: "Expo Universal Components / @expo/ui", tradeoff: "single API → SwiftUI (iOS) / Jetpack Compose (Android) / react-dom or react-native-web (web); native APIs stable since SDK 56, web APIs still experimental (verified vs the SDK 56 changelog); see note: EXPO UI" }
   - { name: "Solito", tradeoff: "shared routing across Expo + Next.js; v5 dropped the RN-Web core dep" }
   - { name: "Expo DOM Components (`use dom`)", tradeoff: "render real web components inside RN via a webview wrapper (since Expo SDK 52); good for incremental web reuse" }
 recommend:
-  default: "Share a platform-agnostic logic/hooks package first (the highest-leverage, lowest-risk win). For shared UI on NEW projects, evaluate React Strict DOM or Expo Universal Components — not a fresh react-native-web bet."
+  default: "Shared logic/hooks package (a platform-agnostic workspace package used by both the React web app and the React Native app) first — the highest-leverage, lowest-risk win. For shared UI on NEW projects the pick is Expo Universal Components or React Strict DOM, not a fresh react-native-web bet. The pick changes only for an organisation that can staff and gate agent-maintained duplicate native implementations (see when)."
   when:
-    - "duplicated business logic across web + native → extract a shared workspace package now"
-    - "new universal UI → React Strict DOM or Expo Universal Components"
-    - "existing react-native-web app → keep it (still works); just don't expand the bet"
-    - "Expo + Next.js shared routing → Solito; incremental web reuse inside RN → Expo DOM Components"
+    - "duplicated business logic across web + native → shared logic/hooks package (extract a workspace package now)"
+    - "UI that must differ per platform behind one API → platform-extension files (.web.tsx/.native.tsx)"
+    - "new universal UI in an Expo app → Expo Universal Components (@expo/ui; native lanes stable, web lane experimental)"
+    - "new universal UI authored as strict HTML/CSS, web-first → React Strict DOM (pre-1.0, involved setup)"
+    - "existing react-native-web app → react-native-web (keep it; still works, just don't expand the bet)"
+    - "existing Tamagui design system → Tamagui (keep it; cross-platform UI with an optimizing compiler)"
+    - "Expo + Next.js shared routing → Solito"
+    - "incremental web reuse inside an RN app → Expo DOM Components (`use dom`)"
+    - "native-only mobile org that can staff and gate agent-maintained duplicate Swift/Kotlin implementations → share the spec, not the code (Shopify's route; see note: SHOPIFY)"
 note: >
-  CHALLENGED 2026-09-21 — SURVIVES, WITH A NAMED COMPETITOR (this entry was the oldest reviewed
-  entry in the corpus at updated: 2026-06-17, and the challenge arrived on its own: Shopify
-  announced it is moving its mobile apps off React Native back to Swift and Kotlin). Take the
-  argument seriously, because it attacks this entry's PREMISE rather than its picks. Shopify's
-  stated reasoning, verified against the post: they adopted RN in 2020 to stop building features
-  twice, let developers work across the stack, and stop chasing parity; all three delivered; but
-  coding models got good enough that "building the same feature in Swift and Kotlin no longer
-  carries the cost it used to", so the VALUE of sharing an implementation fell while the value of
-  being close to platform capabilities and first-party tooling did not. Note what they explicitly do
-  NOT claim — not that RN is slow ("React Native apps can be fast. Ours are"), and not that it was
-  the wrong call ("React Native was the right choice for Shopify in 2020"). What they replace
-  sharing WITH is the genuinely new option in this entry's design space: duplicate the
-  implementation per platform, and hold parity through SHARED SPECIFICATIONS, TESTS AND REVIEW
-  CHECKPOINTS that agents execute — agents implementing an Android feature using the iOS version as
-  the reference. Call it "share the spec, not the code".
-  WHY THE DEFAULT ABOVE STILL STANDS ANYWAY, on this entry's own terms: (1) the default's
-  highest-leverage claim is about LOGIC, and Shopify's answer to logic parity is still a machine
-  maintaining two copies — cheaper than it was, but not free, and they say so plainly ("Native still
-  means building and maintaining software on two platforms, that cost has not disappeared"); (2)
-  their migration is not a stack swap a normal team can copy — they chose greenfield rebuilds, built
-  a bespoke checkpoint-gated system (Helix) to stop agent slop, and re-architected for headless
-  agent-drivable business logic (RB-E-AI-DEVTOOLS carries that as a reading, and it is the most
-  reusable part of the post); (3) this entry's scope is React web + React Native, where a shared
-  logic package also serves the WEB app — a dimension absent from Shopify's decision entirely. So
-  the honest calibration: if your organisation can staff and gate agent-maintained duplicate
-  implementations, "share the spec" is now a real alternative to "share the code", and at
-  Shopify's scale it won. For a team without that machinery, duplicating logic across platforms
-  still costs what it always did, and the shared logic/hooks package remains the lowest-risk win.
-  Recorded as a counter-datapoint, not a reversal — and revisit it if a second organisation of that
-  size publishes the same conclusion.
-  When logic or components are duplicated across a web app and a native app, that
-  duplication is the prime target — extract a shared package. VERIFIED SHIFT (2026):
-  react-native-web has entered MAINTENANCE-ONLY mode — creator Nicolas Gallagher and
-  Zalando pivoted to React Strict DOM, and Software Mansion sees "no major features on
-  the horizon". For NEW universal web+native work, evaluate React Strict DOM or Expo
-  Universal Components rather than a fresh react-native-web bet; existing RN-Web apps
-  keep working. Verified vs official RN sources, Callstack, and Gallagher's notes.
+  Share by layer. Logic, state and data are platform-agnostic, so a shared workspace package is
+  the highest-leverage, lowest-risk win — and in a React web + React Native codebase it also
+  serves the web app. When logic or components are duplicated across a web app and a native app,
+  that duplication is the prime target. UI that diverges per platform is split by
+  platform-extension files so each file stays single-platform; widespread inline Platform.OS
+  branching means sharing happens at the wrong layer. Universal UI is picked only on a maintained
+  lane.
+
+
+  REACT-NATIVE-WEB (2026, verified vs official RN sources, Callstack and Gallagher's notes):
+  react-native-web has entered MAINTENANCE-ONLY mode — creator Nicolas Gallagher and Zalando
+  pivoted to React Strict DOM, and Software Mansion sees "no major features on the horizon". →
+  NEW universal web+native work goes to React Strict DOM or Expo Universal Components; existing
+  RN-Web apps keep working.
+
+
+  EXPO UI (2026-09-24, verified vs the SDK 56 changelog): SDK 56 made the Expo UI native APIs
+  stable and added universal components across Android, iOS and web, backed by
+  @expo/ui/jetpack-compose, @expo/ui/swift-ui and react-dom or react-native-web; the web APIs are
+  still experimental and likely to change. → Expo apps get a universal-UI lane without splitting
+  files; treat its web half as unstable.
+
+
+  SHOPIFY (2026-09-21, verified vs shopify.engineering/back-to-native): Shopify is moving its
+  mobile apps off React Native to Swift and Kotlin. It adopted RN in 2020 to stop building
+  features twice, let developers work across the stack and stop chasing parity; all three
+  delivered. Its reason to leave: coding models made "building the same feature in Swift and
+  Kotlin" no longer carry "the cost it used to", so sharing an implementation lost value while
+  platform closeness and first-party tooling did not. It does not claim RN is slow ("React Native
+  apps can be fast. Ours are") or was wrong ("React Native was the right choice for Shopify in
+  2020"). Its replacement is the new option in this design space: duplicate the implementation
+  per platform and hold parity through shared specifications, tests and review checkpoints that
+  agents execute, with an agent implementing a feature on Android using the iOS version as a
+  reference — "share the spec, not the code". The default still holds on this entry's terms: (1)
+  the default's claim is about LOGIC, and two agent-maintained copies are cheaper than before but
+  not free ("that cost has not disappeared"); (2) the migration is not a swap a normal team can
+  copy — greenfield rebuilds, a bespoke checkpoint-gated system (Helix), and business logic
+  re-architected to run headless for agents; (3) this entry's scope includes the web app, which a
+  shared logic package also serves and which Shopify's decision does not weigh. → A team with
+  that machinery has a real alternative to sharing code; a team without it still pays full price
+  for duplicated logic. The revisit trigger is a second organisation of that size publishing the
+  same conclusion.
+
+
+  CROSS-REFERENCES: RB-E-AI-DEVTOOLS owns the agent-workflow half of the Shopify thread (Helix,
+  headless agent-drivable business logic). The engineering-principles skill owns boundaries and
+  dependency direction for the shared package.
+
+
+  HISTORY:
+
+  2026-09-24 CORRECTED: the Expo UI row said "SDK 56 beta"; SDK 56 made the native APIs stable
+  and left only the web APIs experimental.
+
+  2026-09-21 CHALLENGED → SURVIVES: Shopify's move off RN attacked the share-an-implementation
+  premise with "share the spec, not the code" (agent-maintained duplicates); default holds,
+  competitor named as a when-clause.
 defer_to_skill: engineering-principles  # boundaries/dependency direction
 doc: "RB-E-CROSSPLATFORM.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-21   # CHALLENGED — SURVIVES: Shopify's move off RN attacks the share-an-implementation premise and answers it with "share the spec, not the code" (agent-maintained duplicates); default holds, competitor named · KMP+SwiftUI scaling reading
+updated: 2026-09-24   # Expo UI row corrected (SDK 56: native APIs stable, web experimental); RSD/RN-Web pins; prior 2026-09-21: CHALLENGED — SURVIVES: Shopify's move off RN attacks the share-an-implementation premise and answers it with "share the spec, not the code" (agent-maintained duplicates); default holds, competitor named · KMP+SwiftUI scaling reading
 reading:
   - title: "How Does KMP with SwiftUI Scale on iOS?"
     url: "https://andrei-calazans.com/posts/2026-09-14-how-kmp-with-swiftui-scales-on-ios/"
@@ -79,6 +104,7 @@ reading:
     what: "TV/cross-platform RN case study: share until a platform gives a reason to split, telemetry-driven perf, team reorg, and a deflated, realistic account of AI's role. A concrete companion to this entry's share-by-layer thesis."
 sources:
   - "https://shopify.engineering/back-to-native"
+  - "https://expo.dev/changelog/sdk-56"
   - "https://andrei-calazans.com/posts/2026-09-14-how-kmp-with-swiftui-scales-on-ios/"
   - "https://nicolasgallagher.com/one-react-for-web-and-native/"
   - "https://www.callstack.com/podcasts/from-react-native-web-to-react-strict-dom"

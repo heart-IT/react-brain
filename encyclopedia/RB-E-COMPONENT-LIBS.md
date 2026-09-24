@@ -4,7 +4,7 @@ title: "About component & headless-UI libraries — who owns the code"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: medium
-updated: 2026-07-10
+updated: 2026-09-24
 platforms: [react]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-COMPONENT-LIBS
 defer_to_skill: design-system
@@ -38,8 +38,8 @@ about which ownership split a team can live with.
 
 ## The default, and why
 
-> Own-the-code: **shadcn/ui** (Base UI default since 2026-07; Radix still supported) +
-> **Tailwind** — the default for product teams that want control.
+> Own-the-code: **shadcn/ui** (Base UI default since 2026-07; Radix and React Aria also
+> supported) + **Tailwind** — the default for product teams that want control.
 
 shadcn's model wins for product teams because it puts the *hard* part (accessible behavior) in a
 maintained dependency and the *opinionated* part (markup, styling) in your repo where you can
@@ -58,7 +58,14 @@ building a *design system*, not assembling an app.
 
 **shadcn/ui** — the own-the-code layer over that tier: CLI + registries, chat components
 (2026-06), and a first headless `@shadcn/react` package (tested behavior as a dependency while
-styling stays copy-paste).
+styling stays copy-paste). Since 2026-07-20 React Aria is a third first-class base
+(`shadcn init --base aria`) beside Base UI (the default) and Radix, with per-base scoped
+registries.
+
+*Current facts (verified vs npm 2026-09-24).* Base UI now installs as `@base-ui/react`; the old
+`@base-ui-components/react` name is deprecated on npm as renamed. When agents keep breaking the
+design system, `@shadcn/lint` (Tailwind v4 projects; shadcn/ui not required; ESLint or Oxlint)
+turns those violations into lint errors written for the agent to fix.
 
 **MUI / Mantine / Chakra / Ant Design** — batteries-included. The right call when shipping speed
 beats visual identity: internal tools, admin surfaces, enterprise CRUD. Ant for that enterprise

@@ -4,7 +4,7 @@ title: "About React core — the compiler era, RSC, and concurrent features"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: high
-updated: 2026-07-01
+updated: 2026-09-24
 platforms: [react, react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-REACT-CORE
 defer_to_skill: engineering-principles
@@ -12,6 +12,9 @@ related: [RB-E-STATE, RB-E-META-FRAMEWORKS, RB-E-SECURITY, RB-E-TYPESCRIPT]
 sources:
   - "https://react.dev/blog/2025/10/07/react-compiler-1"
   - "https://react.dev/blog/2025/12/11/denial-of-service-and-source-code-exposure-in-react-server-components"
+  - "https://react.dev/blog/2026/09/09/react-19-3"
+  - "https://rspack.rs/blog/announcing-2-1"
+  - "https://github.com/react/react-native/releases/tag/v0.88.0-rc.2"
   - "https://www.youtube.com/watch?v=K3flMIHS-cI"   # Meistrich, "Render once" (App.js Conf 2026) — render cost as the hidden bottleneck
 ---
 
@@ -29,7 +32,9 @@ and `React.memo` to stop needless re-renders. **The React Compiler (1.0, stable 
 precisely than humans reliably do — across early returns and conditional branches. So the new
 mental model is: **write straightforward code and let the compiler memoize; manual `useMemo`/
 `useCallback` become escape hatches, not defaults.** (Verified against the official React
-Compiler 1.0 announcement.)
+Compiler 1.0 announcement.) Escape hatches, not debris: when you enable the Compiler, keep the
+`useMemo`/`useCallback` calls you already have — removing them can change the compiler's output
+— and pin the exact compiler version if test coverage is thin.
 
 That single change cascades: the old "which state library avoids re-renders" reasoning weakens
 (`RB-E-STATE`), and "where are my missing memos" stops being a routine bug class.
@@ -38,22 +43,24 @@ That single change cascades: the old "which state library avoids re-renders" rea
 
 Three facts define core React in 2026, and they're easy to conflate:
 
-- **React-the-library** is mature and stable on the 19.x line (19.2 ships `<Activity>`,
-  `<ViewTransition>`, `useEffectEvent`, `use()`), and now lives under the independent **React
+- **React-the-library** is mature and stable on the 19.x line (19.2 shipped `<Activity>` and
+  `useEffectEvent`; 19.3, stable 2026-09-09, graduated `<ViewTransition>` and Fragment Refs and
+  added `browser()`), and now lives under the independent **React
   Foundation** (Linux Foundation, Feb 2026). Stability is the headline.
 - **React-the-protocol (RSC).** React Server Components are a *server* rendering model over the
   Flight wire protocol. This is a **web** concern delivered through meta-frameworks
   (`RB-E-META-FRAMEWORKS`); it does **not** apply to React Native, and its security issues are
   server-side (below, `RB-E-SECURITY`).
 - **React-the-projection (alternative runtimes).** Preact, the experimental `@tanstack/redact`,
-  Million, and the JSX-successor TSRX are *other ways to run React-shaped code*. Mostly
+  Million, the JSX-successor TSRX, and the Rust React-subset compiler Vidact (0.2.0-beta) are *other ways to run React-shaped code*. Mostly
   experimental; interesting, not production defaults.
 
 Keeping these three apart is most of "understanding modern React."
 
 ## The default, and why
 
-> Stay on **React 19.2** and turn on **React Compiler 1.0** — let it handle memoization.
+> Move to **React 19.3** (additive over 19.2) and turn on **React Compiler 1.0** for new code —
+> let it handle memoization, and keep existing `useMemo`/`useCallback` as escape hatches.
 
 This is the low-regret baseline: you're on the stable line, you get the concurrent features,
 and you delete a category of manual-memo busywork (and the bugs that come with getting it
@@ -61,10 +68,16 @@ wrong). New projects should adopt the Compiler from day one; existing apps can e
 incrementally. On the web, reach for **RSC via a meta-framework** when you actually need
 server rendering/data; on React Native, RSC simply doesn't apply.
 
+**On React Native, the React version follows the RN line** (verified 2026-09-24 against npm peer
+dependencies and the RN 0.88 RC notes): RN 0.83–0.87 run React 19.2; React 19.3 arrives with RN
+0.88, which is still a release candidate (rc.2, 2026-09-22). `<ViewTransition>` is DOM-only for
+now, so the 19.3 headline feature does not reach native even there.
+
 ## The landscape, and when each piece earns its place
 
-**React Compiler 1.0** — on by default for new code; the Rust port is the in-progress part, but
-the compiler itself is production-proven at Meta. Enable via the Babel/SWC/Oxc/Vite plugin
+**React Compiler 1.0** — on by default for new code; production-proven at Meta. The Rust port
+has landed in SWC and ships through Rspack 2.1's built-in SWC loader (7–13x faster than the
+Babel plugin). Enable via the Babel/SWC/Oxc/Vite plugin
 (`RB-E-BUILD`).
 
 **RSC + Server Functions** — server-rendered components and the mutation path. Web-only,
@@ -74,10 +87,12 @@ your architecture, not as a reflex.
 **Concurrent features** — `<Activity>` (hide a subtree while preserving its state — high
 satisfaction in State-of-React 2025), `useEffectEvent` (read latest values without re-subscribing
 effects), `use()` (read promises/context under Suspense), `<ViewTransition>` (animated
-transitions). Reach for them when the problem matches; they're tools, not obligations.
+transitions, stable in 19.3, DOM-only), Fragment Refs (stable in 19.3: attach events, focus and
+observers to a group of children without a wrapper element). `<Activity>` destroys and
+re-creates effects on every toggle, so pair it with effect cleanup. Reach for them when the problem matches; they're tools, not obligations.
 
 **Alternative runtimes** — Preact for bundle-size-critical web; treat `@tanstack/redact`,
-Million, and TSRX as experiments, not production bets. The decade of React libraries is the
+Million, TSRX, and Vidact as experiments, not production bets. The decade of React libraries is the
 reason to stay on React unless a concrete driver pushes you off (`RB-E-ALT-FRAMEWORKS`).
 
 ## Tradeoffs and failure modes to name out loud
@@ -87,10 +102,11 @@ reason to stay on React unless a concrete driver pushes you off (`RB-E-ALT-FRAME
   render paths, or you fight the optimizer (`RB-E-STATE`).
 - **Hand-memoizing by default in the compiler era.** Adding `useMemo`/`useCallback` everywhere
   is now noise — and occasionally counterproductive. Let the compiler work; reach for manual
-  memo only for measured, specific cases.
+  memo only for measured, specific cases. The mirror-image mistake is stripping the memoization
+  you already have when you enable it.
 - **Treating RSC as universal.** RSC/Server Functions are web + server. Assuming they apply to
   React Native, or that their CVEs affect RN, is a category error (`RB-E-SECURITY`).
-- **Chasing experimental runtimes.** Betting production on redact/Million/TSRX trades a vast,
+- **Chasing experimental runtimes.** Betting production on redact/Million/TSRX/Vidact trades a vast,
   battle-tested ecosystem for unproven speed claims.
 
 ## How it interacts with the rest of the stack
@@ -108,11 +124,11 @@ reason to stay on React unless a concrete driver pushes you off (`RB-E-ALT-FRAME
 
 ## In one paragraph
 
-Modern React is **stable, plural, and compiler-optimized**: stay on **19.2** and **turn on the
-React Compiler** so you stop hand-writing `useMemo`/`useCallback` (just don't mutate state
+Modern React is **stable, plural, and compiler-optimized**: move to **19.3** (on React Native,
+the version your RN line ships — 19.2 until RN 0.88) and **turn on the React Compiler** so you stop hand-writing `useMemo`/`useCallback` (just don't mutate state
 objects and defeat it). Keep the three Reacts straight — the library (stable, concurrent
 features), the protocol (RSC: web + server only, not RN, security-sensitive), and the projections
-(Preact/redact/Million/TSRX: mostly experimental). Reach for RSC and concurrent features when the
+(Preact/redact/Million/TSRX/Vidact: mostly experimental). Reach for RSC and concurrent features when the
 problem calls for them, and stay on React for its ecosystem unless a concrete driver pushes you
 off.
 

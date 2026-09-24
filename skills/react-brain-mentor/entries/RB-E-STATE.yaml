@@ -6,37 +6,53 @@ status: reviewed   # first long-form entry written + source-checked → encyclop
 confidence: high
 platforms: [react, react-native]
 options:
-  - { name: "useState/useReducer + Context", tradeoff: "zero-dep; re-render scope hard to control at scale" }
-  - { name: "Zustand", tradeoff: "tiny, selector-based; minimal boilerplate; a State-of-React-2025 favorite" }
-  - { name: "Jotai (3.x)", tradeoff: "atomic, fine-grained subscriptions; v3 (2026-09-08) keeps the public API (useAtom/useAtomValue/useSetAtom unchanged) but modernizes the package — ESM-only, React 18+, Node ≥22.12 — and splits atomFamily/babel plugins into separate packages (see migrate)" }
-  - { name: "Redux Toolkit (2.x)", tradeoff: "structured, devtools, larger surface; React-Redux `connect` HOC deprecated → use hooks" }
-  - { name: "XState (5.x) / XState Store", tradeoff: "state machines / statecharts for complex flows; Store 4.0 is a lighter signal-style store" }
-  - { name: "TanStack Store / Signals", tradeoff: "fine-grained reactive store (alien-signals core); underpins TanStack Router/Table/Form" }
-  - { name: "Legend State", tradeoff: "fine-grained observables + built-in sync/persistence; decouples state ownership from subscription so re-renders push to leaf nodes; smaller ecosystem than Zustand/Jotai" }
-  - { name: "nuqs", tradeoff: "type-safe VIEW state in the URL query string — like useState, but shareable, bookmarkable and back-button-safe. NOT a client-store replacement: a third, narrower bucket beside client state and server state, for the state that should survive a refresh or a pasted link (filters, tabs, pagination, search). Adapters for Next.js, Remix, React Router and others; 2.10 (2026-08) made the SPA adapter SSR-compatible for Astro/Inertia/Fastify. ~10.8k★, ~3.2M weekly downloads (verified 2026-09-10)" }
-  - { name: "TanStack Query", tradeoff: "for SERVER state/caching — pairs with a client-state lib, doesn't replace it; State-of-React favorite" }
+  - { name: "useState/useReducer + Context", tradeoff: "Zero-dep; right for local state and low-frequency globals. Every Context consumer re-renders on any value change, so re-render scope is hard to control at scale." }
+  - { name: "Zustand", tradeoff: "Tiny selector-based store with minimal boilerplate; selectors keep re-renders to the slice read. A State-of-React-2025 favorite (see note)." }
+  - { name: "Jotai (3.x)", tradeoff: "Atomic, fine-grained subscriptions for naturally derived state. v3 (2026-09-08, verified vs npm) keeps the hooks API but is ESM-only, React 18+, Node ≥22.12, with atomFamily and the babel plugins split out (see migrate)." }
+  - { name: "Redux Toolkit (2.x)", tradeoff: "Structured, devtools, larger surface; earns its weight on large teams with auditable transitions. React-Redux `connect` HOC deprecated → use hooks." }
+  - { name: "XState (5.x) / XState Store", tradeoff: "State machines / statecharts for flows where legal transitions are the hard part; Store 4.x is a lighter signal-style store." }
+  - { name: "TanStack Store / Signals", tradeoff: "Fine-grained reactive store (alien-signals core) underpinning TanStack Router/Table/Form; usually consumed transitively through those, not picked as the app store." }
+  - { name: "Legend State", tradeoff: "Fine-grained observables + built-in sync/persistence; decouples ownership from subscription so re-renders push to leaf nodes; smaller ecosystem than Zustand/Jotai. npm latest 2.1.15 (2024-08-30), v3 on the beta tag (3.0.0-beta.48, 2026-07-12; verified vs npm 2026-09-24)." }
+  - { name: "nuqs", tradeoff: "Type-safe view state in the URL query string: like useState, but shareable, bookmarkable and back-button-safe. A third bucket beside client and server state, not a store replacement. 2.10.1 (2026-08-25, verified vs npm); ~10.8k★. See note: URL STATE" }
+  - { name: "TanStack Query", tradeoff: "For SERVER state/caching; pairs with a client-state lib, doesn't replace it (RB-E-DATA owns it)." }
 recommend:
-  default: "Split the problem: TanStack Query for server state + Zustand for client/UI state. This is the common, low-regret 2026 pairing."
+  default: "TanStack Query for server state + Zustand for client/UI state (React and React Native). They solve different problems and compose, so most apps run both. Deviate when the app needs almost no shared state, when legal transitions are the hard part, when state belongs in the URL, or when an existing store already works (see when)."
   when:
-    - "tiny app / a few shared values → useState + Context (don't add a lib)"
+    - "tiny app / a few shared values → useState + Context (no library)"
     - "complex multi-step flows / statecharts → XState"
-    - "already on Redux and it's fine → keep RTK; don't migrate without a concrete pain"
-    - "want fine-grained atoms → Jotai"
-    - "state that must survive a refresh or a shared link (filters, tabs, pagination, search) → nuqs, in the URL — a third bucket, not a Zustand/Query replacement"
-note: "Separate server state (caching/sync) from client/UI state — different problems, different tools. State of React 2025 (3,760 devs): TanStack Query the #1 React library; Zustand crossed 50% usage + tops satisfaction; ~34% use no state library. Adversarially stress-tested 2026-06-25 (SURVIVES, high): nothing has overtaken Zustand, and local-first (TanStack DB) builds on TanStack Query rather than replacing it.
-  THIRD BUCKET NAMED (2026-09-10): this entry's own 'Component Communication Patterns' reading already
-  named 'URL params for view state' as a decision axis, but no option row named a LIBRARY for it —
-  nuqs is that library. Adopted from the unattended harvest/2026-09-03 run, whose advocate pass caught
-  it; the 2026-09-10 manual pass had skipped it after judging it against RB-E-NAV (an adapter matrix)
-  instead of against this entry's own open axis — the wrong entry, so the wrong question.
-  COHORT EVIDENCE (2026-09-10, verified by fetching each package.json directly): nuqs is in
-  production use in four census-cohort apps — Sentry 2.7.1, Cal.com 2.8.2, Supabase 2.7.1 and
-  Documenso ^2.8.9. Read that as a standing adoption level, NOT as a week's movement: these became
-  visible to `react-brain census` only when this entry gained a nuqs detect row in the same pass,
-  so the census diff reporting them as 'adopted' is an artifact of the new row."
+    - "already on Redux and it's fine → keep RTK (migrate only for a concrete pain)"
+    - "already on MobX or Valtio and it works → keep it (store-to-store migrations rarely repay their cost; MobX 7 needs React 18+, see migrate)"
+    - "want fine-grained atoms → Jotai (v3; see migrate for the v2-to-v3 move)"
+    - "leaf-level re-render hot paths where ownership must be decoupled from subscription → Legend State (see reading 'How to Build the Fastest Apps: Break the Rules'; the principle also works with Jotai atoms or Zustand selectors)"
+    - "state that must survive a refresh or a shared link (filters, tabs, pagination, search) → nuqs (in the URL, web; a third bucket, not a Zustand/Query replacement)"
+note: >
+  Server state (cached, can go stale, needs refetch/dedupe/invalidation) and client state (born and
+  dies on the client) are different problems with different tools, so the default is a pair, not one
+  library. State of React 2025 (3,760 devs): TanStack Query is the #1 React library; Zustand crossed
+  50% usage and tops satisfaction; ~34% use no state library. Local-first (TanStack DB) builds on
+  TanStack Query rather than replacing it.
+
+  URL STATE (2026-09-10, verified vs nuqs changelog and adapter docs, GitHub and each app's package.json): the entry's
+  'Component Communication Patterns' reading names URL params for view state as a decision axis;
+  nuqs is the library for it. Adapters are all web (Next.js, React SPA, Remix, React Router,
+  TanStack Router); 2.10 (2026-08-20) lets the React SPA adapter run server-rendered in Astro,
+  Fastify or Hono via a serverSearch prop. In production in four census-cohort apps:
+  Sentry 2.7.1, Cal.com 2.8.2, Supabase 2.7.1, Documenso ^2.8.9. That is a standing adoption level,
+  not a week's movement: census saw them only once this entry gained the nuqs detect row.
+
+  JOTAI 3 (2026-09-08, verified vs the v3 release and migration guide): a modernization, not a
+  rewrite; an app on v2 with no deprecation warnings should run on v3 as is. The migrate rule owns
+  the checklist.
+
+  RB-E-DATA owns server state and local-first sync; RB-E-FORMS owns why form fields stay out of the
+  global store; react-native-best-practices owns selector and re-render wiring rules.
+
+  HISTORY:
+    2026-09-10 GAP CLOSED: nuqs named for the URL view-state axis (reconciled from harvest/2026-09-03; the manual pass had judged it against RB-E-NAV instead of this entry); Jotai 3 migrate rule added.
+    2026-06-25 CHALLENGED → SURVIVES (high): nothing has overtaken Zustand; local-first (TanStack DB) builds on TanStack Query rather than replacing it.
 defer_to_skill: react-native-best-practices  # re-render/perf rules (e.g. RN-RULE-ATOMIC-STATE)
 doc: "RB-E-STATE.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-10   # nuqs named for the entry's existing URL-view-state axis — reconciled from harvest/2026-09-03 · Jotai 3 migrate rule (firsthand)
+updated: 2026-09-24   # Legend State status (npm latest 2.1.15, v3 beta); nuqs 2.10 adapter scope corrected; prior 2026-09-10: nuqs named for the entry's existing URL-view-state axis — reconciled from harvest/2026-09-03 · Jotai 3 migrate rule (firsthand)
 reading:
   - title: "Structural sharing, selectAtom, and why your Jotai atoms re-render too much"
     url: "https://www.peterp.me/articles/jotai-structural-sharing-vs-selectatom/"
@@ -80,6 +96,7 @@ reading:
     what: "The vocabulary attack on this entry's own subject: Russell argues that Redux, MobX, Zustand — and React itself — don't MANAGE state, they PROPAGATE it, and that real state management is about time and conflicts (the problem CRDTs and sync engines actually solve). Deliberately provocative, and Redux maintainer Mark Erikson pushed back publicly, so read it as a framing argument rather than a verdict. Its durable value here is a third axis next to the client-vs-server split: when your problem is concurrent edits and reconciliation, no propagation library is the answer — that's the local-first/sync-engine row (TanStack DB, Zero — see RB-E-DATA)."
 sources:
   - "https://nuqs.dev/docs/changelog"
+  - "https://nuqs.dev/docs/adapters"
   - "https://github.com/47ng/nuqs"
   - "https://2025.stateofreact.com/en-US/libraries/state-management/"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)

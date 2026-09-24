@@ -6,26 +6,65 @@ status: reviewed   # long-form entry written + source-checked → encyclopedia/R
 confidence: medium
 platforms: [react, react-native]
 options:
-  - { name: "React Hook Form", tradeoff: "uncontrolled, performant; RN-compatible" }
-  - { name: "Formik", tradeoff: "controlled, popular, heavier re-renders" }
-  - { name: "TanStack Form (1.x)", tradeoff: "type-safe; FormGroup API for multi-step forms" }
-  - { name: "Conform / Formisch (1.0)", tradeoff: "Conform = progressive-enhancement (web actions); Formisch = signal-based, schema-first (Valibot) and now STABLE at 1.0 (2026-08, semver-committed) across eight frameworks including Angular — the schema and form logic survive a UI or framework change, and because it needs no app-level setup you can migrate ONE form to try it; six of the eight frameworks ship migration guides" }
-  - { name: "Zod (4.6) / Valibot (validation)", tradeoff: "schema validation via any form lib; Standard Schema lets libs accept either. Zod 4.5 (2026-08) largely retires the 'Zod is the slow one' tradeoff: z.compile(schema) pre-compiles a schema for ~3–9x faster parsing on objects/arrays/unions (complex schemas gain most), `import \"zod/compile\"` at the entry point (or node --import zod/compile) auto-compiles every schema defined after it, z.validate(schema, input) is a boolean fast path up to 16x faster on INVALID data, and memory dropped ~9x — so the bundle-size argument for Valibot survives, the runtime-speed one mostly does not" }
+  - { name: "React Hook Form", tradeoff: "Uncontrolled and subscription-based: keystrokes stay out of React's render loop unless something watches them. Runs on DOM and React Native. See note: STATE MODEL" }
+  - { name: "Formik", tradeoff: "Controlled: every keystroke is React state, so long forms re-render the tree. Popular incumbent; not a new-project pick, kept where it already works." }
+  - { name: "TanStack Form (1.x)", tradeoff: "Store-backed fields with narrow subscriptions and end-to-end type inference; FormGroup API for multi-step forms." }
+  - { name: "Conform / Formisch (1.x)", tradeoff: "Conform = progressive enhancement for server-action web forms. Formisch = signal-based, schema-first (Valibot), stable since 1.0 (2026-08-20; 1.1.0 2026-09-08, verified vs npm 2026-09-24) across eight frameworks. See note: FORMISCH" }
+  - { name: "Zod (4.6) / Valibot (validation)", tradeoff: "Schema validation consumed by any form lib; Standard Schema keeps them swappable. Zod 4.5 z.compile() parses objects/arrays/unions ~3–9x faster with ~9x less memory, so Valibot's remaining edge is bundle size, not speed. Zod 4.6.5 (2026-09-13, verified vs npm). See note: ZOD SPEED" }
 recommend:
-  default: "React Hook Form + Zod — the common, performant, RN-compatible default."
+  default: "React Hook Form + Zod (React and React Native). Uncontrolled fields keep typing off the render path, and one Zod schema validates both the form and the server mutation. The pick changes for multi-step, type-critical forms and for progressively enhanced server-action web forms (see when)."
   when:
-    - "want maximal type-safety / multi-step → TanStack Form"
-    - "server-action / progressive-enhancement web forms → Conform"
+    - "maximal type-safety / multi-step wizard → TanStack Form"
+    - "server-action / progressive-enhancement web forms → Conform (web only)"
+    - "same form logic across several UI frameworks → Formisch (1.x; needs no app-level setup, so migrate one form at a time)"
     - "bundle-sensitive validation → Valibot instead of Zod (Standard Schema keeps it swappable)"
-    - "formatted/masked inputs (phone, card, currency) → this is a SEPARATE problem from your form library, and none of the options above own it; rifm is the established small answer (~1.4k★, shipping since 2018, 1.1.0 verified 2026-08-29) — a hook you wrap an input with, not a component library, so it composes with RHF/TanStack Form rather than replacing anything"
-    - "existing Formik that works → keep it unless re-render cost bites"
+    - "formatted/masked inputs (phone, card, currency) → rifm (a hook that wraps the input and composes with React Hook Form or TanStack Form; masking is a separate problem no form library owns)"
+    - "existing Formik that works → keep Formik (migrate only when re-render cost is measured on long forms or weak devices)"
+note: >
+  Forms are two decisions. First, where field state lives and what re-renders when it changes:
+  uncontrolled (React Hook Form) keeps keystrokes out of React entirely, store-backed with narrow
+  subscriptions (TanStack Form) keeps them in React but local, controlled (Formik, or hand-rolled
+  useState) re-renders the form tree per keystroke. Second, where validation truth lives: in one
+  schema (Zod or Valibot) imported by both the form and the server mutation, so the two cannot
+  drift. Standard Schema makes the validator swappable, so neither decision locks you in.
+
+  STATE MODEL (see reading 'React Hook Form Avoids State. TanStack Form Scopes It.', which owns the
+  mechanism): both libraries stay fast; a working RHF form is rarely worth rewriting, and broad
+  watch() calls are the path that re-couples RHF to re-renders.
+
+  ZOD SPEED (2026-09-24, verified vs zod.dev blog 4.5 and 4.6): Zod 4.5 (2026-08-28) z.compile(schema)
+  speeds parsing ~3–9x on objects, arrays and unions (complex schemas gain most); importing
+  "zod/compile" at the entry point (or node --import zod/compile) compiles every schema defined after
+  it; memory footprint dropped ~9x. Zod 4.6 (2026-09-09) adds .validate(), a boolean check that
+  short-circuits on the first issue — up to 35x faster than .safeParse().success on invalid input
+  with a compiled schema — and fixes a 4.5 out-of-memory regression in recursive schemas, so compiled
+  or recursive-schema users should be on ≥4.6. Consequence: the runtime-speed argument for Valibot
+  mostly no longer holds; the bundle-size argument does.
+
+  FORMISCH (2026-08-20, verified vs formisch.dev v1 post): stable at 1.0 with a semver commitment
+  (breaking changes only in majors, with upgrade notes), eight frameworks including Angular, six of
+  them with migration guides. The Valibot schema and form logic survive a UI or framework change.
+
+  MASKING (2026-08-29, verified vs npm and github.com/TrySound/rifm): input formatting (phone, card,
+  currency) is not owned by any form library here. rifm (1.1.0, 2026-08-29; repo since 2018) is a
+  small hook you wrap an input with, so it composes with RHF or TanStack Form rather than replacing
+  either.
+
+  RB-E-KEYBOARD owns RN form-screen keyboard behavior (insets, scrolling, focus travel);
+  RB-E-META-FRAMEWORKS owns server actions as the submit path; RB-E-STATE owns why form state stays
+  out of the global store.
+
+  HISTORY:
+    2026-09-24 CORRECTED: the boolean fast path is Zod 4.6 .validate() (up to 35x on invalid input with z.compile), not a 4.5 z.validate "up to 16x" (no source found for 16x).
+    2026-09-10 GAP CLOSED: masked-input facet opened (rifm), correcting the react-status-488 skip; Zod 4.5 z.compile and Formisch 1.0 added.
 defer_to_skill: null
 doc: "RB-E-FORMS.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-10   # Zod 4.5 z.compile/z.validate + Formisch 1.0 (TWiR #295) · masking facet opened — SPOT-CHECK CORRECTION of the react-status-488 rifm cap skip
+updated: 2026-09-24   # .validate() is Zod 4.6 (35x w/ compile), not 4.5 16x; Formisch 1.1; prior 2026-09-10: Zod 4.5 z.compile/z.validate + Formisch 1.0 (TWiR #295) · masking facet opened — SPOT-CHECK CORRECTION of the react-status-488 rifm cap skip
 sources:
   - "https://github.com/TrySound/rifm"
   - "https://formisch.dev/blog/formisch-v1/"
   - "https://zod.dev/blog/zod-4-5"
+  - "https://zod.dev/blog/zod-4-6"
   - "https://standardschema.dev/"
   - "https://tanstack.com/form/latest/docs/framework/react/guides/form-groups"
 reading:

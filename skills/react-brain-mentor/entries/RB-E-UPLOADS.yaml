@@ -6,43 +6,61 @@ status: drafted
 confidence: medium
 platforms: [react, react-native]
 options:
-  - { name: "react-dropzone", tradeoff: "the drop-zone INPUT, and only that: a hook that gives you drag-and-drop plus file selection with accept/size validation, and hands you File objects — you still write the transport. 20.1.1 (2026-08-20), ~11.6M weekly downloads (verified 2026-09-10), by far the largest deployed base here and the most common answer in the census cohort (5 of 34 apps). Right pick when the upload itself is a plain POST or a presigned PUT and what you were missing was the input" }
-  - { name: "Uppy (@uppy/*)", tradeoff: "the batteries-included end of the range: a Dashboard UI plus provider plugins (Google Drive, OneDrive, URL import, webcam, image editor) and a resumable transport, assembled from scoped packages. @uppy/core 6.0.1 (2026-09-07), ~1.1M weekly. Earns its size when users import from THIRD-PARTY sources or need a file manager rather than a file input — that provider surface is what nothing else here offers. Overkill for 'attach a photo'" }
-  - { name: "tus-js-client", tradeoff: "the RESUMABLE-PROTOCOL lane — an open protocol (tus) for uploads that survive a dropped connection and continue where they stopped, which is the property large-file uploads actually need. 4.3.1 (2026-01-13), ~1.5M weekly; quieter than the others because a finished protocol client does not churn. Requires a tus-capable server, so this is a decision about your BACKEND as much as your client — Supabase ships one, which is why it is the cohort's tus adopter" }
-  - { name: "@rpldy/uploady", tradeoff: "React-native-idiomatic upload state (queue, progress, retry) exposed through hooks/components rather than a UI kit — the middle ground between react-dropzone's input-only scope and Uppy's dashboard. 1.13.0 (2025-11-26, verified 2026-09-10) — ten months quiet and no cohort adoption on record, so treat it as viable-but-unvetted" }
-  - { name: "expo-file-system (RN, first-party)", tradeoff: "on React Native the honest answer for most apps: upload directly from a file URI with the platform's own networking, no extra dependency. 57.0.6 (2026-09-09), ships and versions with the Expo SDK. Pair it with the picker you already have (expo-image-picker / expo-document-picker — see RB-E-MEDIA); the gap it leaves is background continuation" }
-  - { name: "react-native-background-upload", tradeoff: "the RN answer for uploads that must continue while the app is backgrounded (native background transfer sessions). DORMANT: 6.6.0 last published 2022-10-07 with ~4.9k weekly downloads (verified 2026-09-10) — four years silent. Named because the CAPABILITY has no maintained alternative in the RN ecosystem, not because it is a safe dependency; if you need background upload, budget for reviewing or forking it, or move the requirement server-side" }
+  - { name: "react-dropzone", tradeoff: "the drop-zone INPUT only: a hook for drag-and-drop plus file selection with accept/size validation that hands you File objects — you still write the transport. Largest deployed base and the cohort's most common pick (5 of 34 apps). 20.1.1 (2026-08-20), ~11.6M weekly (verified 2026-09-10 vs npm)" }
+  - { name: "Uppy (@uppy/*)", tradeoff: "batteries-included: Dashboard UI, provider plugins (Google Drive, OneDrive, URL import, webcam, image editor) and a resumable transport, from scoped packages. Earns its size only for third-party imports or a file-manager UI; overkill for 'attach a photo'. @uppy/core 6.0.1 (2026-09-07), ~1.1M weekly (verified vs npm)" }
+  - { name: "tus-js-client", tradeoff: "the RESUMABLE-PROTOCOL lane: tus uploads survive a dropped connection and continue where they stopped. Requires a tus-capable server (Supabase ships one), so it is a backend decision too. 4.3.1 (2025-01-16, verified 2026-09-24 vs npm), ~1.5M weekly (2026-09-10); a finished protocol client does not churn" }
+  - { name: "@rpldy/uploady", tradeoff: "React-idiomatic upload state (queue, progress, retry) through hooks/components rather than a UI kit — between react-dropzone's input-only scope and Uppy's dashboard; the RN variant is @rpldy/native-uploady. 1.13.0 (2025-11-26, verified vs npm), ten months quiet, no cohort adoption: viable but unvetted" }
+  - { name: "expo-file-system (RN, first-party)", tradeoff: "on React Native the default: upload directly from a file URI with the platform's own networking, no extra dependency; pair it with the picker you already have (RB-E-MEDIA). Leaves background continuation uncovered. 57.0.6 (2026-09-09), versions with the Expo SDK" }
+  - { name: "react-native-background-upload", tradeoff: "native background transfer sessions, so uploads continue while the app is backgrounded. DORMANT: 6.6.0 last published 2022-10-07, ~4.9k weekly (verified 2026-09-10 vs npm). Named because the capability has no maintained RN alternative, not because it is a safe dependency; see note: REACT NATIVE" }
 recommend:
-  default: "Web: react-dropzone for the input plus your own transport (presigned PUT / plain POST) — that covers most products. Reach for tus-js-client when uploads are large enough that resumability matters AND your backend speaks tus; reach for Uppy when users import from third-party sources and you want a file manager, not a file input. React Native: upload straight from the file URI with expo-file-system and the picker you already use."
+  default: "react-dropzone for the input on web, plus your own transport (presigned PUT / plain POST); on React Native, expo-file-system uploading straight from the picked file URI. Two conditions change the web pick: large files on unreliable networks with a tus-capable backend pick tus-js-client; imports from third-party sources or a file-manager UI pick Uppy."
   when:
-    - "web, ordinary attachments (avatars, documents, images) → react-dropzone + a presigned URL; no upload framework needed"
-    - "large files over unreliable networks → the resumable protocol is the requirement, not a library preference → tus-js-client, and confirm the server side speaks tus before committing"
-    - "users import from Google Drive / OneDrive / a URL, or you need a file-manager UI → Uppy, whose provider plugins are the thing nothing else here replaces"
-    - "React Native, ordinary uploads → expo-file-system from the picked URI; adding an upload library is usually adding a dependency for a POST"
-    - "React Native, must keep uploading while backgrounded → react-native-background-upload is the only route, and it is dormant (2022) — treat adopting it as taking on maintenance"
-    - "the bytes are images/video you captured in-app → the picker and capture side belongs to RB-E-MEDIA; this entry starts once you hold a file"
-    - "upload endpoints accept files from untrusted users → the validation that matters is server-side (type sniffing, size caps, virus scanning); client-side accept/maxSize is UX, not a control — see RB-E-SECURITY"
+    - "web, ordinary attachments (avatars, documents, images) → react-dropzone (+ a presigned URL; no upload framework needed)"
+    - "large files over unreliable networks, where resumability is the requirement → tus-js-client (confirm the server speaks tus before committing)"
+    - "users import from Google Drive / OneDrive / a URL, or you need a file-manager UI → Uppy (its provider plugins are what nothing else here replaces)"
+    - "React app that wants upload queue, progress and retry as hooks without a UI kit → @rpldy/uploady (viable but unvetted; @rpldy/native-uploady on RN)"
+    - "React Native, ordinary uploads → expo-file-system (from the picked URI; an upload library would add a dependency for a POST)"
+    - "React Native, must keep uploading while backgrounded → react-native-background-upload (the only route, dormant since 2022 — adopting it means taking on its maintenance, or move the requirement server-side)"
+    - "the bytes are images/video you captured in-app → RB-E-MEDIA (owns the picker and capture side; this entry starts once you hold a file)"
+    - "upload endpoints accept files from untrusted users → server-side validation (type sniffing, size caps, virus scanning; client accept/maxSize is UX, not a control — see RB-E-SECURITY)"
 note: >
-  NEW entry (2026-09-10). Opened on cohort evidence rather than newsletter volume: probing the
-  census cohort's package.json files found 7 of 34 apps carrying a dedicated upload library, and
-  the split maps cleanly onto three different problems rather than three competing products —
-  react-dropzone in outline, twenty, plane, metabase and documenso (the INPUT), @uppy/* in
-  appsmith (PROVIDERS + file-manager UI), tus-js-client in supabase (RESUMABILITY, backed by a
-  tus-capable server). That is the shape of a real selection axis, and no entry among the prior 44
-  owned it; Uppy 6.0 surfacing twice in one harvest pass was the prompt to look.
-  READ THE THREE LANES AS PROBLEMS, NOT TIERS: picking Uppy because it "does more" is the common
-  mistake — its weight buys third-party providers, and if your users upload from their own device
-  you are paying for a surface you never render. Equally, react-dropzone does NOT upload anything;
-  teams reach for it expecting transport and then hand-roll the part that actually breaks.
-  THE REACT NATIVE SIDE IS GENUINELY THIN, and the entry says so rather than inventing a pick: not
-  one of the cohort's React Native apps carries an upload library, the maintained first-party path
-  (expo-file-system) covers foreground uploads, and the one library covering background continuation
-  has been silent since 2022 at ~4.9k weekly downloads. If background upload is a hard requirement,
-  that is a real gap to plan around — not a library to casually install.
-  Every version and download figure above was verified against the npm registry on 2026-09-10.
+  The upload libraries solve three different problems, not three tiers of one: the INPUT
+  (react-dropzone), third-party PROVIDERS plus a file-manager UI (Uppy), and RESUMABILITY over a
+  tus-capable server (tus-js-client). Picking Uppy because it "does more" is the common mistake —
+  its weight buys third-party providers, and if users upload from their own device you pay for a
+  surface you never render. Equally, react-dropzone does NOT upload anything; teams reach for it
+  expecting transport and then hand-roll the part that actually breaks.
+
+
+  COHORT EVIDENCE (2026-09-10, verified vs the census cohort's package.json files): 7 of 34 apps
+  carry a dedicated upload library, split by problem — react-dropzone in outline, twenty, plane,
+  metabase and documenso (INPUT); @uppy/* in appsmith (PROVIDERS + file-manager UI); tus-js-client
+  in supabase (RESUMABILITY, backed by its tus server). → The three lanes are a real selection
+  axis.
+
+
+  REACT NATIVE (2026-09-10, verified vs npm and the census cohort): the RN side is thin. None of the cohort's React
+  Native apps carries an upload library; the maintained first-party path (expo-file-system)
+  covers foreground uploads; the one library covering background continuation has been silent
+  since 2022 at ~4.9k weekly downloads. → If background upload is a hard requirement, plan for a
+  gap: review or fork that library, or move the requirement server-side.
+
+
+  CROSS-REFERENCES: RB-E-MEDIA owns pickers and capture; RB-E-SECURITY owns server-side upload
+  validation.
+
+
+  HISTORY:
+
+  2026-09-24 CORRECTED: tus-js-client 4.3.1 was dated 2026-01-13, npm says 2025-01-16;
+  @rpldy/uploady was called React-Native-idiomatic, but it is the React package and
+  @rpldy/native-uploady is the RN one.
+
+  2026-09-10 GAP CLOSED: entry opened on cohort evidence (7/34 apps, three distinct lanes); Uppy
+  6.0 appearing twice in one harvest pass prompted the probe.
 defer_to_skill: null
 doc: null
-updated: 2026-09-10   # NEW entry — opened on cohort evidence (7/34 apps, three distinct lanes)
+updated: 2026-09-24   # tus-js-client release date corrected; @rpldy/uploady is the React (not RN) package; prior 2026-09-10: NEW entry — opened on cohort evidence (7/34 apps, three distinct lanes)
 sources:
   - "https://registry.npmjs.org/react-dropzone/latest"
   - "https://registry.npmjs.org/@uppy%2Fcore/latest"
@@ -50,6 +68,7 @@ sources:
   - "https://registry.npmjs.org/react-native-background-upload/latest"
   - "https://registry.npmjs.org/expo-file-system/latest"
   - "https://uppy.io/blog/uppy-6.0/"
+  - "https://github.com/rpldy/react-uploady"
 reading:
   - title: "Uppy 6.0"
     url: "https://uppy.io/blog/uppy-6.0/"

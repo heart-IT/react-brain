@@ -6,32 +6,63 @@ status: reviewed   # long-form entry written + source-checked
 confidence: low
 platforms: [react-native]
 options:
-  - { name: "toasts — sonner-native", tradeoff: "port of Emil Kowalski's sonner (stacking, swipe, promise toasts); active (0.27.0 on 2026-08-15, verified vs npm); the design-led pick" }
-  - { name: "toasts — react-native-toast-message", tradeoff: "the JS incumbent (v2.5.2 on 2026-09-08, still active); simple, widely deployed, less polished motion" }
-  - { name: "toasts — burnt", tradeoff: "NATIVE toast/alert elements (SPIndicator on iOS, ToastAndroid); platform-authentic but less customizable; slower release cadence (0.13, 2025-03)" }
-  - { name: "haptics — expo-haptics", tradeoff: "the default — system haptics engine on iOS, vibration effects on Android; works in bare RN via Expo Modules" }
-  - { name: "haptics — react-native-haptic-feedback", tradeoff: "the bare-RN incumbent (v3.0, 2026-03); slightly lower-level trigger set" }
-  - { name: "splash — react-native-bootsplash", tradeoff: "the de-facto splash tool (v7.3) — asset generator CLI, edge-to-edge by default, works with Expo prebuild; imperative hide() when app is ready" }
-  - { name: "splash — expo-splash-screen", tradeoff: "the Expo default, ships with the template; config-plugin driven; fine unless you need bootsplash's generator/branding control" }
-  - { name: "image viewer — galeria (@nandorojo/galeria)", tradeoff: "native shared-element lightbox (v3.0.3 on 2026-05-28; iOS 16+ not re-verified) — fluid pinch/dismiss transitions the JS viewers can't match" }
-  - { name: "image viewer — react-native-image-viewing", tradeoff: "the JS incumbent — unmaintained since 2022; works, but no native transitions and aging" }
+  - { name: "toasts — sonner-native", tradeoff: "Port of Emil Kowalski's sonner (stacking, swipe, promise toasts); the design-led pick. 0.27.0 (2026-08-15, verified vs npm); see note: SONNER-NATIVE PEERS for its Reanimated 4.1+ floor." }
+  - { name: "toasts — react-native-toast-message", tradeoff: "The JS incumbent: simple, widely deployed, less polished motion, no native or Reanimated peers. 2.5.2 (2026-09-08, verified vs npm)." }
+  - { name: "toasts — burnt", tradeoff: "NATIVE toast/alert elements (SPIndicator on iOS, ToastAndroid on Android, sonner on web): platform-authentic, less customizable; Burnt.alert() falls back to a toast on Android. 0.13.0 (2025-03-10, verified vs npm) is still latest." }
+  - { name: "haptics — expo-haptics", tradeoff: "The default: Taptic Engine on iOS, Vibrator service on Android, Web Vibration API on web; runs in bare RN via Expo Modules. Versions track the Expo SDK (57.0.3, 2026-09-11, verified vs npm)." }
+  - { name: "haptics — react-native-haptic-feedback", tradeoff: "The bare-RN incumbent with a slightly lower-level trigger set; peers react-native >=0.71. 3.0.0 (2026-03-29, verified vs npm)." }
+  - { name: "splash — react-native-bootsplash", tradeoff: "The de-facto splash tool: asset generator CLI, edge-to-edge by default on Android, Expo plugin generates assets at prebuild; imperative hide() when the app is ready. 7.3.3 (2026-09-14, verified vs npm); see note: BOOTSPLASH." }
+  - { name: "splash — expo-splash-screen", tradeoff: "The Expo default, ships with the template, config-plugin driven; enough unless you need bootsplash's generator/branding control. Versions track the Expo SDK (57.0.9, 2026-09-11, verified vs npm)." }
+  - { name: "image viewer — galeria (@nandorojo/galeria)", tradeoff: "Native shared-element lightbox (Swift/Kotlin) with fluid pinch/dismiss transitions the JS viewers can't match; web is a simplified single-image version. 3.0.3 (2026-05-28, verified vs npm); see note: GALERIA FLOOR." }
+  - { name: "image viewer — react-native-image-viewing", tradeoff: "The JS incumbent: works, but no native transitions; not picked for new work because 0.2.2 (2022-04-18, verified vs npm) is its last publish." }
 recommend:
-  default: "Toasts → sonner-native (or burnt for platform-native elements). Haptics → expo-haptics. Splash → react-native-bootsplash on bare RN, expo-splash-screen on Expo (switch to bootsplash when you need its generator/branding control). Image lightbox → galeria. Each sub-domain is small — pick once, move on; the polish is in the details, not the library hunt. Lightly vetted (confidence: low)."
+  default: "Toasts → sonner-native (needs Reanimated 4.1+; burnt for platform-native elements). Haptics → expo-haptics. Splash → react-native-bootsplash on bare RN, expo-splash-screen on Expo until you need bootsplash's generator/branding control. Image lightbox → galeria (New Architecture, iOS 16.4+). Each sub-domain is small: pick once, move on. Lightly vetted (confidence: low)."
   when:
-    - "toast stack with real motion design → sonner-native; platform-authentic system toasts → burnt"
-    - "haptic feedback → expo-haptics (bare RN included); already on react-native-haptic-feedback → fine, don't churn"
-    - "splash/branding control or bare RN → react-native-bootsplash; stock Expo template → expo-splash-screen is already there"
-    - "tap-to-zoom image lightbox → galeria (native transitions); avoid starting new work on react-native-image-viewing (dormant since 2022)"
+    - "toast stack with real motion design → sonner-native (peers Reanimated ^4.1.1, worklets, Gesture Handler 2.28+, screens, svg)"
+    - "platform-authentic system toasts → burnt (SPIndicator / ToastAndroid)"
+    - "already on react-native-toast-message, or still on Reanimated 3 → react-native-toast-message (no Reanimated peer)"
+    - "haptic feedback → expo-haptics (bare RN included)"
+    - "already on react-native-haptic-feedback → react-native-haptic-feedback (fine, don't churn)"
+    - "splash/branding control or bare RN → react-native-bootsplash"
+    - "stock Expo template splash → expo-splash-screen (already installed)"
+    - "tap-to-zoom image lightbox → galeria (native transitions; New Architecture and iOS 16.4+)"
+    - "legacy architecture or iOS below 16.4 lightbox → react-native-image-viewing (last published 2022 — pin and own it)"
 note: >
-  NEW entry (2026-07-09): four recurring micro-domains that had no home — each surfaced by
-  Native Weekly's 2026 run (sonner-native, bootsplash 7, galeria, react-native-tickle) and
-  promoted on the user's call. All versions/dates verified vs npm 2026-07-09. Deliberately ONE
-  entry, not four: none of these carries enough selection weight alone, but together they are
-  the 'app feels finished' checklist. Skipped as too-early: react-native-tickle (Nitro haptics
-  w/ AHAP patterns — not yet on npm). expo-haptics/expo-splash-screen versions track the SDK.
+  Four recurring micro-domains — toasts, haptics, splash, image lightbox — kept as ONE entry because
+  none carries enough selection weight alone, but together they are the 'app feels finished'
+  checklist. The selection deserves minutes; the craft belongs in the details after the pick. The
+  one real fork is toasts (a designed stack vs platform-native elements); haptics and splash split
+  mechanically on Expo vs bare; the lightbox choice is a maintenance verdict.
+
+  SONNER-NATIVE PEERS (2026-09-24, verified vs npm 0.27.0): react-native-reanimated ^4.1.1,
+  react-native-worklets >=0.6.1, react-native-gesture-handler >=2.28.0, react-native-screens ^4.16.0,
+  react-native-svg ^15.12.1, react-native-safe-area-context ^5.6.0 → a Reanimated 3 app cannot adopt
+  it without the Reanimated 4 upgrade (RB-E-ANIMATION owns that thread); until then burnt or
+  react-native-toast-message, neither of which peers on Reanimated.
+
+  BOOTSPLASH (2026-09-24, verified vs GitHub releases + README): 7.0.0 made Android edge-to-edge
+  the default and moved Expo asset generation into prebuild; 7.3.0 (2026-04-08) switched the Android
+  implementation from Dialog to View with a mitigation for SurfaceControl errors on Android 12/13;
+  7.3.1 fixed RN 0.85 compatibility. The CLI generator is free for the logo; brand-image and
+  dark-mode asset generation need a paid license key (BOOTSPLASH_LICENSE_KEY) → that is the
+  'branding control' the switch from expo-splash-screen buys.
+
+  GALERIA FLOOR (2026-09-24, verified vs the 3.0.3 podspec + README): iOS deployment target 16.4 and
+  the New Architecture (Fabric) is required; peer expo → a legacy-architecture app or an iOS 16.0–16.3
+  target cannot use it.
+
+  BURNT (2026-09-24, verified vs npm + README): 0.13.0 from 2025-03-10 is still latest (~18 months
+  without a release); it depends on Expo Modules (peer expo).
+
+  react-native-tickle (Nitro haptics with AHAP patterns) was skipped as too early: still not on npm
+  (2026-09-24, verified vs npm).
+
+  HISTORY:
+    2026-09-24 CORRECTED: galeria floor was "iOS 16+" — it is iOS 16.4 and requires the New Architecture; sonner-native's Reanimated ^4.1.1 peer added; bootsplash's paid brand/dark-mode generator stated.
+    2026-07-09 GAP CLOSED: entry created from Native Weekly's 2026 run (sonner-native, bootsplash 7, galeria, react-native-tickle); versions verified vs npm.
 defer_to_skill: react-native-best-practices
 doc: "RB-E-POLISH.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-24   # version pins re-verified vs npm (sonner-native 0.27.0, toast-message 2.5.2, galeria 3.0.3, bootsplash 7.3.3); burnt still 0.13.0 from 2025-03 (~18 months quiet); prior 2026-07-16
+updated: 2026-09-24   # galeria floor iOS 16.4 + New Arch; sonner-native Reanimated ^4.1.1 peer; bootsplash paid brand generator; prior 2026-09-24: version pins re-verified vs npm (sonner-native 0.27.0, toast-message 2.5.2, galeria 3.0.3, bootsplash 7.3.3), burnt still 0.13.0; prior 2026-07-16
 reading:
   - title: "Building a toast component"
     url: "https://emilkowal.ski/ui/building-a-toast-component"
@@ -43,6 +74,8 @@ sources:
   - "https://registry.npmjs.org/sonner-native/latest"
   - "https://registry.npmjs.org/react-native-bootsplash/latest"
   - "https://registry.npmjs.org/@nandorojo/galeria/latest"
+  - "https://github.com/zoontek/react-native-bootsplash/releases"
+  - "https://github.com/nandorojo/galeria"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "sonner-native", label: "sonner-native (toasts)", token: "sonner-native" }
   - { pkg: "react-native-toast-message", label: "toast-message", token: "toast" }

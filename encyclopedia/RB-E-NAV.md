@@ -4,7 +4,7 @@ title: "About navigation & routing in React & React Native"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: medium
-updated: 2026-06-25
+updated: 2026-09-24
 platforms: [react, react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-NAV
 defer_to_skill: null
@@ -43,10 +43,11 @@ do I already have a meta-framework?"** Everything else follows.
 > with no meta-framework, TanStack Router.
 
 The RN default is about *fit*, not superiority. **React Navigation** is the mature, bare-RN
-baseline — imperative and declarative, deeply customizable. **Expo Router** layers
-file-based routing on top of it: if your project is already Expo, convention-over-config
-removes a class of boilerplate and gives you deep-linking and universal (web) routing close
-to free. The choice is "are you on Expo?", not "which is better."
+baseline — imperative and declarative, deeply customizable. **Expo Router** gives Expo apps
+file-based routing: convention-over-config removes a class of boilerplate and gives you
+deep-linking and universal (web) routing close to free. Since SDK 56 it runs on its own
+native-first core rather than on React Navigation, so the two are separate stacks and
+switching later costs more. The choice is "are you on Expo?", not "which is better."
 
 On the web, routing rarely stands alone anymore. If you've chosen Next.js or TanStack Start,
 **they own routing** — picking a separate router would fight the framework. The standalone
@@ -68,7 +69,11 @@ coupling. (It is also the RN/universal meta-framework — see `RB-E-META-FRAMEWO
 **React Router (8.x)** — the web workhorse that absorbed Remix. v8 is released, **ESM-only**
 (dropped CommonJS and the `react-router-dom` split), with future flags on by default; v7→v8
 is largely non-breaking if you kept up with v7's flags. Use it for web routing when you want
-a router (or framework mode) without committing to Next.
+a router (or framework mode) without committing to Next. **Security floor:** six advisories
+published 2026-07-22 (a High `__manifest` DoS, RSC-mode CSRF, XSS, hydration injection, open
+redirects) mean the minimum is **8.3.0 on v8 or 7.18.2 on v7**; v6 has no patched release for
+some of them, so v6 apps need to move. Its route type generation is framework-mode-only, which
+is why TanStack Router keeps the type-safe-SPA slot.
 
 **TanStack Router / Start** — type-safe routing with a signal-based core. **Router** is the
 SPA story (the strongest type-safety in the field); **Start** is its SSR/RSC meta-framework
@@ -88,6 +93,9 @@ care about.
   native tends to produce non-native transitions and gesture handling. Navigation is the
   layer where "share everything" hurts most (see `RB-E-CROSSPLATFORM`); share the *screens'
   logic*, not necessarily the navigator.
+- **Plain deep links across a store install.** Universal/App Links only work when the app is
+  already installed; invite and referral links that must survive the install need deferred deep
+  linking (an attribution SDK or Detour) resolved before the first screen mounts.
 - **Treating routing as pure UI on the web.** On the web the URL is also application state
   and a data trigger; modelling it as local component state (modals that should be routes,
   filters that should be search params) is a recurring smell.

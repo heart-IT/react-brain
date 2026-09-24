@@ -4,7 +4,7 @@ title: "About forms & validation — where state lives, where truth lives"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: medium
-updated: 2026-07-10
+updated: 2026-09-24
 platforms: [react, react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-FORMS
 defer_to_skill: null
@@ -64,11 +64,18 @@ when re-render cost actually bites (long forms, weak devices).
 **Conform** — the progressive-enhancement specialist for the server-action web: forms that work
 before hydration and validate against the same schema on submit (`RB-E-META-FRAMEWORKS`).
 
-**Formisch** — signal-based and schema-first (Valibot), pre-1.0; its one-core-six-frameworks
-build-time abstraction (see reading) is as interesting as the library.
+**Formisch** — signal-based and schema-first (Valibot), stable since 1.0 (2026-08-20, semver
+committed) across eight frameworks; it needs no app-level setup, so one form can move over at a
+time. Its build-time framework abstraction (see reading) is as interesting as the library.
 
-**Zod / Valibot** — the truth layer. Valibot's pitch is bundle size (tree-shakeable, matters at
-the marketing-page edge); Standard Schema makes the choice reversible.
+**Zod / Valibot** — the truth layer. Zod 4.5's `z.compile()` (~3–9x faster parsing, ~9x less
+memory) and Zod 4.6's short-circuiting `.validate()` removed most of the runtime-speed gap, so
+Valibot's remaining pitch is bundle size (tree-shakeable, matters at the marketing-page edge);
+Standard Schema makes the choice reversible.
+
+**Input masking** — formatting phone, card, or currency input is a separate problem that none of
+the form libraries own. `rifm` is a small hook you wrap an input with, so it composes with RHF or
+TanStack Form instead of replacing them.
 
 ## Tradeoffs and failure modes to name out loud
 

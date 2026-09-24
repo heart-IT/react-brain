@@ -4,7 +4,7 @@ title: "About rich-text & content editors"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: low
-updated: 2026-07-16
+updated: 2026-09-24
 platforms: [react, react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-EDITORS
 defer_to_skill: null                                          # entry declares no depth-audit skill
@@ -12,6 +12,8 @@ related: [RB-E-AI-UI, RB-E-KEYBOARD, RB-E-COMPONENT-LIBS]
 sources:
   - "https://github.com/software-mansion/react-native-enriched"
   - "https://github.com/software-mansion/react-native-enriched-markdown"
+  - "https://github.com/software-mansion/react-native-enriched-html/releases/tag/v1.0.0"
+  - "https://github.com/software-mansion/enriched-markdown/releases/tag/v1.0.2"
 ---
 
 # About rich-text & content editors
@@ -46,12 +48,11 @@ value is in the model and its transforms; the chrome is the detachable part.
 
 ## The default, and why
 
-> Most React apps → TipTap (ProseMirror power with React ergonomics); large-scale /
-> custom-node-heavy → Lexical; maximum control → ProseMirror directly; deeply custom React
-> schemas → Slate/Plate; Notion-style blocks → BlockNote. React Native →
-> react-native-enriched for rich-text input, react-native-enriched-markdown for (streaming)
-> Markdown display. Lightly vetted (confidence: low) — prototype against your real document
-> model before committing.
+> React web → TipTap (ProseMirror power with React ergonomics); large or custom-node-heavy
+> documents → Lexical; Notion-style blocks → BlockNote. React Native →
+> react-native-enriched-html for rich-text input and display (New Architecture only),
+> react-native-enriched-markdown for (streaming) Markdown. Lightly vetted (confidence: low) —
+> prototype against your real document model before committing.
 
 On web the ladder is mostly altitude over one model. TipTap is ProseMirror power with React
 ergonomics — headless, first-class React bindings, a rich extension ecosystem, the common
@@ -60,12 +61,12 @@ fast to adopt when the UX is block-based. ProseMirror directly sits below: maxim
 the editing pipeline, steeper curve. The two off-lineage picks are chosen *by their model
 needs*: Lexical (Meta) when the load is large docs and custom nodes — extensible and
 performance-focused — and Slate/Plate when the schema itself is deeply custom and React-first
-(Plate adds a batteries-included plugin system on Slate).
+(Plate adds a batteries-included plugin system on Slate; it now ships as `platejs`).
 
 React Native answers a different question first — the *surface*. Software Mansion's pair
-finally gives RN a native, non-WebView story: **react-native-enriched** for rich-text input,
-**react-native-enriched-markdown** for (streaming) Markdown display. Input and display are
-separate picks by design.
+finally gives RN a native, non-WebView story: **react-native-enriched-html** for rich-text
+input and its matching display, **react-native-enriched-markdown** for (streaming) Markdown.
+HTML documents and Markdown documents are separate picks by design.
 
 ## The landscape, option by option
 
@@ -80,20 +81,25 @@ off even when you adopt the higher layers.
 and custom nodes. It stands alone rather than building on ProseMirror.
 
 **Slate / Plate** — React-first customizable framework (Slate); Plate adds a
-batteries-included plugin system on top. The entry's when-clause routes "deeply custom React
-schemas" here.
+batteries-included plugin system on top, now published as `platejs` (`@udecode/plate` is
+deprecated). The entry's when-clause routes "deeply custom React schemas" here.
 
 **BlockNote** — Notion-style block editor on ProseMirror/TipTap; the fast-adoption pick for
-block-based UX.
+block-based UX. Note the license: `@blocknote/core` is MPL-2.0, not MIT.
 
-**react-native-enriched (Software Mansion)** — an RN rich-text *editor* on native
-UITextView/EditText, not a WebView; v0.8 adds EnrichedText for HTML rendering plus an
-experimental web target. Pre-1.0 and moving fast — the entry's when-clause says pin.
+**react-native-enriched-html (Software Mansion)** — the RN rich-text *editor*:
+`EnrichedTextInput` on native UITextView/EditText (not a WebView) plus the matching
+`EnrichedText` renderer, with stable iOS/Android/web support; New Architecture only. It is
+the old **react-native-enriched** renamed at 1.0.0 (2026-06-16) with no breaking changes; the
+old package is deprecated on npm and gets no updates, so an app on it swaps the package name
+and imports.
 
 **react-native-enriched-markdown (Software Mansion)** — a native RN Markdown
 renderer/editor with streaming support (GFM tables/math, mentions), built for AI-chat
-output; v0.7, pre-1.0. The pair surfaced across four consecutive Native Weekly issues
-(v0.3→v0.8, Feb–Jun 2026) and is verified against npm and the SWM repos.
+output; 1.0 since 2026-08-13, with block editing (H1–H6). 1.0.2 (2026-08-20) is breaking
+despite the patch number: the Expo config plugin is gone and feature flags (math, code
+highlighting) move into an `enriched-markdown` block in the app's `package.json`. The family
+surfaced across four consecutive Native Weekly issues (Feb–Jun 2026).
 
 ## Tradeoffs and failure modes to name out loud
 
@@ -108,11 +114,13 @@ output; v0.7, pre-1.0. The pair surfaced across four consecutive Native Weekly i
 - **Skipping the model prototype.** The recommendation's own closing instruction, doubled by
   low confidence: prototype against your real document model before committing. An editor
   that demos well on paragraphs can still fight your actual schema.
-- **Mixing up the RN pair.** react-native-enriched is the *input* pick; enriched-markdown is
-  the *display* pick (especially streaming AI-chat output). They are separate tools, not
-  versions of each other.
-- **Pre-1.0 drift.** Both SWM libraries are pre-1.0, and enriched went v0.3→v0.8 in five
-  months — "moving fast" is the entry's own label. Pin, per the when-clause.
+- **Mixing up the RN pair.** enriched-html is the HTML editor-and-renderer pick;
+  enriched-markdown is the Markdown pick (especially streaming AI-chat output). They are
+  separate tools, not versions of each other.
+- **Patch-level breaks.** Both SWM libraries are now 1.x, but enriched-markdown 1.0.2 removed
+  its Expo config plugin in a patch release — pin exact versions and read release notes.
+- **Staying on the old name.** react-native-enriched is deprecated and frozen at 0.8.1; the
+  fix is the rename to react-native-enriched-html, not a code migration.
 - **Reaching for a WebView.** The entry emphasises the native surface twice — "native
   UITextView/EditText (not a WebView)", "finally gives RN a native (non-WebView) rich-text
   editor" — marking the WebView-based approach as the thing being escaped.
@@ -139,9 +147,10 @@ ladder picks by model need: TipTap for most apps, Lexical for large docs and cus
 ProseMirror directly for full pipeline control, Slate/Plate for deeply custom React schemas,
 BlockNote for Notion-style blocks. Raw contentEditable — a view with no model — is quicksand
 (selection, IME, paste, undo); the frameworks exist precisely for this. React Native's
-question is the surface first: Software Mansion's react-native-enriched (native
-UITextView/EditText input, not a WebView) and react-native-enriched-markdown (streaming
-Markdown display for AI-chat output) — both pre-1.0, both pinned, both prototyped. Confidence
+question is the surface first: Software Mansion's react-native-enriched-html (native
+UITextView/EditText input and display, not a WebView; formerly react-native-enriched) and
+react-native-enriched-markdown (streaming Markdown for AI-chat output) — both 1.x, pinned
+exactly, prototyped. Confidence
 is low: prototype against your real document model before committing.
 
 ---

@@ -6,33 +6,65 @@ status: drafted
 confidence: low
 platforms: [react, react-native]
 options:
-  - { name: "Vercel AI SDK / json-render", tradeoff: "streaming chat + tool-calling; json-render renders model output as components (now RN too)" }
-  - { name: "assistant-ui / Tambo", tradeoff: "prebuilt chat/generative-UI components; Tambo 1.0 adds state persistence + streaming, self-host or cloud" }
-  - { name: "Cedar / Streamdown", tradeoff: "Cedar = agent-UI toolkit; Streamdown = streaming-markdown renderer for LLM output" }
-  - { name: "TanStack AI (@tanstack/ai + ai-react)", tradeoff: "type-safe TS AI SDK — streaming chat, tool calling, agents, host-side MCP client, generation hooks (useGenerateImage/Speech/Video, useTranscription) beyond chat; RC PHASE as of 2026-08-21 (0.48) — grown to 24 tree-shakable provider adapters and adopted AG-UI (20+ agent frameworks) as its official protocol; the first real Vercel-AI-SDK alternative, now stabilizing toward 1.0. 0.59 on npm (2026-09-24, ai-react 0.28.0 — same train; verified vs the GitHub release): FIRST-CLASS SUBAGENTS — chat({ subagents }) starts named child agents (router-spawned, or a synthetic tool when there is no router), the stream emits AG-UI SUBAGENT_* events keyed by subagentRunId, the client stores nested type:'subagent' parts, and useChat().subagents / part.subagent are the same live handle with stop(); in the React chat UI kit the same defineAgent list goes to options.subagents and a subagent card can style its own child's parts. 0.54 was 2026-09-10. Vercel became a GOLD TanStack partner 2026-09-08 and shipped two first-party adapters — @tanstack/ai-vercel-gateway (route chat/embeddings/image/summarization across providers behind one AI-Gateway key, with per-request provider preferences and fallbacks) and @tanstack/ai-sandbox-vercel (Vercel microVMs as the execution environment for TanStack AI's sandbox system, resumable by ID with files intact and a dev-server port for previews) — so the 'which agent' and 'where it runs' choices are now separable; note the competitive read: TanStack AI's main alternative is Vercel's own AI SDK" }
+  - { name: "Vercel AI SDK / json-render", tradeoff: "streaming chat + tool-calling, the default SDK (ai 7.0.x, verified vs npm 2026-09-24); json-render renders model output as components (now RN too)." }
+  - { name: "assistant-ui / Tambo", tradeoff: "prebuilt chat/generative-UI components; Tambo 1.0 adds state persistence + streaming, self-host or cloud." }
+  - { name: "Cedar / Streamdown", tradeoff: "Cedar = agent-UI toolkit; Streamdown = streaming-markdown renderer for LLM output on the WEB. The React Native sibling is a separate package; see note: RN STREAMING MARKDOWN." }
+  - { name: "TanStack AI (@tanstack/ai + ai-react)", tradeoff: "type-safe TS AI SDK: streaming chat, tool calling, agents, host-side MCP client, generation hooks beyond chat; the first real Vercel-AI-SDK alternative, in RC since 0.48 (2026-08-21). 0.59.0 (2026-09-24, verified vs npm + the GitHub release) adds first-class subagents; see note: TANSTACK AI." }
 recommend:
-  default: "Vercel AI SDK for streaming chat + tool-calling (TanStack AI is the emerging type-safe alternative — RC as of 2026-08, re-evaluate at 1.0); assistant-ui/Tambo for prebuilt chat UI; Streamdown to render streaming markdown. Very fast-moving (confidence: low) — treat picks as current-best, not settled."
+  default: "Vercel AI SDK for streaming chat + tool-calling on React and React Native; assistant-ui or Tambo for prebuilt chat UI; Streamdown to render streaming markdown on the web. TanStack AI is the type-safe alternative, still 0.x in RC, to re-weigh at 1.0. Fast-moving (confidence: low): treat picks as current-best, not settled."
   when:
     - "render model output as live components → json-render"
     - "agent-style UI → Cedar"
-    - "already TanStack-stack (Query/Router/Start) or want image/speech/video generation hooks → TanStack AI (RC, still 0.x — pin)"
+    - "already TanStack-stack (Query/Router/Start), or need image/speech/video generation hooks or subagents → TanStack AI (RC, still 0.x — pin)"
+    - "streaming LLM markdown in React Native → native markdown parsing off the JS thread (the Margelo reading; react-native-streamdown is the early SWM Labs option, spike before adopting)"
 note: >
-  RN STREAMING-MARKDOWN LEAD (2026-09-10, verified vs npm + repo; adopted from harvest/2026-08-27):
-  this entry's "Streamdown" option row is the WEB renderer. A distinct React Native sibling,
-  react-native-streamdown, lives under the software-mansion-LABS org (not the main software-mansion
-  org the rest of that family ships from) — ~399★, actively pushed, npm 0.3.0 (2026-09-10): early,
-  watch don't bet. The problem it targets is real and RN-specific: streaming incomplete Markdown from
-  an LLM token-by-token flickers (raw ** / * briefly visible) when you re-render JS-side per token,
-  and native parsing avoids that. Do not conflate the two packages when reading newsletter rows —
-  the 2026-09-10 twir-296 manifest initially did.
-  Distinct from on-device inference (RB-E-ONDEVICE-AI) — this is cloud-LLM app UI. Very
-  fast-moving; recommend tentatively (confidence: low). Adjacent: Vercel's Eve is a file-based agent framework (an agent =
-  a folder of tools/connections/channels/schedules; MCP connections, human-approval gates,
-  sandboxed subagents) — that's the agent BACKEND you'd then surface through these UI libs,
-  not a React UI library itself.
+  This entry is cloud-LLM app UI; on-device inference belongs to RB-E-ONDEVICE-AI. The category has
+  three layers: the SDK that streams tokens and runs tools (Vercel AI SDK, TanStack AI), the chat
+  components (assistant-ui, Tambo, Cedar), and the renderers for model output (json-render,
+  Streamdown). The default picks one library per layer; the live contest is the SDK layer, where
+  TanStack AI is converging on 1.0 and a tripwire re-opens the default when it gets there. Across
+  all three, the interoperable spec layer (A2UI/AG-UI/MCP) is where the category is standardizing
+  (see reading: Architectural Patterns for Generative UI in React).
+
+  TANSTACK AI (2026-09-24, verified vs the GitHub release + npm): RC PHASE since 2026-08-21 (0.48),
+  with 24 tree-shakable provider adapters and AG-UI (20+ agent frameworks) as its official protocol,
+  plus generation hooks (useGenerateImage/Speech/Video, useTranscription). 0.59 (ai-react 0.28.0,
+  same train) adds FIRST-CLASS SUBAGENTS: chat({ subagents }) starts named child agents
+  (router-spawned, or a synthetic tool when there is no router), the stream emits AG-UI SUBAGENT_*
+  events keyed by subagentRunId, the client stores nested type:'subagent' parts, and
+  useChat().subagents / part.subagent are the same live handle with stop(); in the React chat UI kit
+  the same defineAgent list goes to options.subagents and a subagent card can style its own child's
+  parts. 0.54 was 2026-09-10. Vercel became a GOLD TanStack partner 2026-09-08 and shipped two
+  first-party adapters: @tanstack/ai-vercel-gateway (route chat/embeddings/image/summarization across
+  providers behind one AI-Gateway key, with per-request provider preferences and fallbacks) and
+  @tanstack/ai-sandbox-vercel (Vercel microVMs as the execution environment for TanStack AI's sandbox
+  system, resumable by ID with files intact and a dev-server port for previews) → the "which agent"
+  and "where it runs" choices are now separable. Competitive read: TanStack AI's main alternative is
+  Vercel's own AI SDK.
+
+  RN STREAMING MARKDOWN (2026-09-24, verified vs npm + the repo): the "Streamdown" option row is the
+  WEB renderer. A distinct React Native sibling, react-native-streamdown, lives under the
+  software-mansion-LABS org (not the main software-mansion org the rest of that family ships from):
+  ~406★, npm 0.3.0 published 2026-09-04 — early, so spike it before adopting. The problem it targets
+  is real and RN-specific: streaming incomplete Markdown token-by-token flickers (raw ** / * briefly
+  visible) when you re-render JS-side per token, and native parsing avoids that. Do not conflate the
+  two packages when reading newsletter rows.
+
+  ADJACENT: Vercel's Eve is a file-based agent framework (an agent = a folder of
+  tools/connections/channels/schedules; MCP connections, human-approval gates, sandboxed subagents).
+  It is the agent BACKEND you would surface through these UI libs, not a React UI library.
+
+  HISTORY:
+  2026-09-24 CORRECTED: react-native-streamdown 0.3.0 was published 2026-09-04 (the note gave its 2026-09-10 check date as the version date).
+  2026-09-24 GAP CLOSED: TanStack AI 0.59 / ai-react 0.28 first-class subagents.
+  2026-09-10 GAP CLOSED: TanStack AI 0.54 + Vercel Gold partnership adapters; react-native-streamdown lead, distinct from the web Streamdown row (reconciled from harvest/2026-08-27).
+  2026-08-24 GAP CLOSED: TanStack AI enters RC (0.48, 24 providers, AG-UI official protocol).
+  2026-08-07 GAP CLOSED: boda.sh generative-UI architecture taxonomy.
+  2026-07-20 GAP CLOSED: Margelo RN chat-stack reading + TanStack AI 0.41.
+  2026-07-10 GAP CLOSED: TanStack AI added (three independent React Weekly signals, verified vs npm).
 defer_to_skill: null
 doc: null
-updated: 2026-09-24   # TanStack AI 0.59 / ai-react 0.28: first-class subagents (firsthand, verified vs the release); prior 2026-09-10: TanStack AI 0.54 + Vercel adapters (firsthand) · react-native-streamdown lead, distinct from the web Streamdown row — reconciled from harvest/2026-08-27
+updated: 2026-09-24   # TanStack AI 0.59 / ai-react 0.28: first-class subagents (firsthand, verified vs the release) · corrected react-native-streamdown 0.3.0 publish date (2026-09-04); prior 2026-09-10: TanStack AI 0.54 + Vercel adapters (firsthand) · react-native-streamdown lead, distinct from the web Streamdown row — reconciled from harvest/2026-08-27
 tripwires:   # standing caveats as executable conditions — evaluated by `harvest firsthand`; fired ⇒ do the then:, update prose, remove the row
   - when: { pkg: "@tanstack/ai", atleast: "1.0.0" }
     then: "TanStack AI hit 1.0 stable (default says 'RC as of 2026-08, re-evaluate at 1.0') — re-weigh the default vs Vercel AI SDK and update the option row + when-clause pins"
@@ -46,6 +78,8 @@ sources:
   - "https://tanstack.com/blog/vercel-partnership"
   - "https://tanstack.com/blog/generation-hooks"
   - "https://tanstack.com/blog/tanstack-ai-rc"
+  - "https://registry.npmjs.org/ai/latest"
+  - "https://registry.npmjs.org/react-native-streamdown"
 reading:
   - title: "Generative User Interfaces — rendering UI with language models"
     url: "https://ai-sdk.dev/docs/advanced/rendering-ui-with-language-models"

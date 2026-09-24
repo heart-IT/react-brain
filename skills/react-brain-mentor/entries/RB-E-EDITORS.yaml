@@ -6,44 +6,65 @@ status: reviewed   # long-form entry written + source-checked
 confidence: low
 platforms: [react, react-native]
 options:
-  - { name: "TipTap", tradeoff: "headless editor on ProseMirror with first-class React bindings; rich extension ecosystem; the common React default" }
-  - { name: "ProseMirror", tradeoff: "the powerful low-level toolkit (document model, transforms, plugins); max control, steeper curve; underpins TipTap/BlockNote" }
-  - { name: "Lexical (Meta)", tradeoff: "extensible, performance-focused editor framework from Meta; strong for large docs + custom nodes" }
-  - { name: "Slate / Plate", tradeoff: "React-first customizable framework (Slate); Plate adds a batteries-included plugin system on top" }
-  - { name: "BlockNote", tradeoff: "Notion-style block editor on ProseMirror/TipTap; fast to adopt for block-based UX" }
-  - { name: "react-native-enriched (Software Mansion)", tradeoff: "RN rich-text EDITOR on native UITextView/EditText (not a WebView); v0.8 adds EnrichedText for HTML rendering + experimental web; pre-1.0, moving fast" }
-  - { name: "react-native-enriched-markdown (Software Mansion)", tradeoff: "native RN Markdown renderer/editor with STREAMING support (GFM tables/math, mentions) — built for AI-chat output; reached 1.0.0 on 2026-08-13 (1.0.1 the same day), carrying a block-editing pipeline (H1–H6 blocks) into the input side; 1.0.1 moves the vendored tree-sitter/RaTeX assets to a postinstall download, with a package.json opt-out — check that against locked-down CI" }
-  - { name: "react-native-enriched-html (Software Mansion)", tradeoff: "native HTML renderer in the same family (1.1.1, 2026-08); web support maturing (sanitization, press handlers, text selection) on RN 0.86" }
+  - { name: "TipTap", tradeoff: "Headless editor on ProseMirror with first-class React bindings and a rich extension ecosystem; the common React default. @tiptap/react 3.31.3 (2026-09-04, verified vs npm)." }
+  - { name: "ProseMirror", tradeoff: "The low-level toolkit (document model, transforms, plugins) under TipTap and BlockNote: maximum control, steeper curve. prosemirror-view 1.42.5 (2026-09-21, verified vs npm)." }
+  - { name: "Lexical (Meta)", tradeoff: "Extensible, performance-focused editor framework from Meta; strong for large docs and custom nodes. Still 0.x: 0.51.0 (2026-09-17, verified vs npm)." }
+  - { name: "Slate / Plate", tradeoff: "React-first customizable framework (Slate, 0.126.x); Plate adds a batteries-included plugin system on top and now ships as platejs (53.3.14, 2026-09-19; @udecode/plate is deprecated in its favor, both verified vs npm)." }
+  - { name: "BlockNote", tradeoff: "Notion-style block editor on ProseMirror/TipTap; fast to adopt for block-based UX. @blocknote/core 0.55.0 (2026-09-22, verified vs npm) is MPL-2.0, not MIT." }
+  - { name: "react-native-enriched (Software Mansion)", tradeoff: "The old name of react-native-enriched-html: deprecated on npm at 0.8.1 (2026-06-16) and receives no further updates; see note: ENRICHED RENAME." }
+  - { name: "react-native-enriched-markdown (Software Mansion)", tradeoff: "Native RN Markdown renderer/editor with STREAMING support (GFM tables, math, mentions), built for AI-chat output; 1.0 added block editing (H1–H6). 1.0.2 (2026-08-20, verified vs npm) is a breaking patch; see note: ENRICHED-MARKDOWN 1.0.x." }
+  - { name: "react-native-enriched-html (Software Mansion)", tradeoff: "Native RN rich-text EDITOR (EnrichedTextInput on UITextView/EditText, not a WebView) plus the matching EnrichedText renderer, iOS/Android/web; New Architecture only. 1.1.1 (2026-08-14, verified vs npm); see note: ENRICHED RENAME." }
 recommend:
-  default: "Most React apps → TipTap (ProseMirror power with React ergonomics); large-scale / custom-node-heavy → Lexical; maximum control → ProseMirror directly; deeply custom React schemas → Slate/Plate; Notion-style blocks → BlockNote. React Native → react-native-enriched for rich-text input, react-native-enriched-markdown for (streaming) Markdown display. Lightly vetted (confidence: low) — prototype against your real document model before committing."
+  default: "React web → TipTap (ProseMirror power with React ergonomics); large or custom-node-heavy documents → Lexical; Notion-style blocks → BlockNote. React Native → react-native-enriched-html for rich-text input and display (New Architecture only), react-native-enriched-markdown for (streaming) Markdown. Lightly vetted (confidence: low) — prototype against your real document model before committing."
   when:
     - "standard rich text with extensions → TipTap"
-    - "Meta-scale performance / custom nodes → Lexical"
-    - "block-based (Notion-like) UX → BlockNote"
+    - "Meta-scale performance / custom nodes → Lexical (0.x — pin minors)"
+    - "block-based (Notion-like) UX → BlockNote (MPL-2.0)"
     - "full control of the editing pipeline → ProseMirror"
-    - "RN rich-text input → react-native-enriched (native views, no WebView; pre-1.0 — pin)"
-    - "RN Markdown display, esp. streaming AI-chat output → react-native-enriched-markdown (1.0 since 2026-08-13 — the pin-it-hard caveat now applies mainly to react-native-enriched itself)"
+    - "deeply custom React document schema → Slate, else Plate (platejs) for a batteries-included plugin set"
+    - "RN rich-text input or HTML display → react-native-enriched-html (native views, no WebView; New Architecture only)"
+    - "already on react-native-enriched → react-native-enriched-html (same library renamed at 1.0; swap the package and imports)"
+    - "RN Markdown display, esp. streaming AI-chat output → react-native-enriched-markdown (1.0.x; 1.0.2 removed the Expo config plugin)"
 note: >
-  NEW entry (2026-06-25): rich-text/content editing is a common, hard React need with real
-  library choices and was previously uncovered. Most React editors build on ProseMirror
-  (TipTap, BlockNote) or stand alone (Lexical, Slate). RN SIDE ADDED 2026-07-09: Software
-  Mansion's react-native-enriched family — surfaced in four consecutive Native Weekly issues
-  (v0.3→v0.8 across Feb–Jun 2026) — finally gives RN a native (non-WebView) rich-text editor
-  and a streaming Markdown renderer (both verified vs npm + the SWM repos; both pre-1.0).
-  Lightly vetted (confidence: low) — prototype before committing.
-  ENRICHED-HTML 1.1 (2026-08-07, verified vs the GitHub release + npm): the family's HTML
-  renderer is a standalone package (react-native-enriched-html) and its only ≥1.0 member —
-  1.1.0 (2026-07-30) hardens web (HTML sanitization, link/mention press handlers, text
-  selectability, ellipsizeMode/numberOfLines) on RN 0.86. TWiR #293's "full web feature
-  parity" framing is NOT in the release notes — treat web as maturing, not parity-complete.
+  Most React editors build on ProseMirror (TipTap, BlockNote) or stand alone (Lexical, Slate), so
+  the web pick is a choice of document-model layer: TipTap gives ProseMirror's model with React
+  ergonomics, Lexical trades that ecosystem for performance on large custom-node documents, and
+  ProseMirror or Slate directly buy control at the cost of building the editor yourself. On React
+  Native, Software Mansion's Enriched family gives native (non-WebView) editing and rendering.
+  Lightly vetted (confidence: low) — prototype against your real document model.
+
+  ENRICHED RENAME (2026-09-24, verified vs npm + the v1.0.0 GitHub release): react-native-enriched
+  was renamed react-native-enriched-html at 1.0.0 (2026-06-16) with no breaking changes; the old
+  package is deprecated on npm and receives no updates. enriched-html is the family's input
+  (EnrichedTextInput, uncontrolled, native UITextView/EditText) and display (EnrichedText) pair,
+  New Architecture only, with stable iOS/Android/web support per its README. 1.1.0 (2026-07-30)
+  added web link/mention press handlers, selectable EnrichedText and sanitization fixes. TWiR #293's
+  "full web feature parity" framing is NOT in the release notes.
+
+  ENRICHED-MARKDOWN 1.0.x (2026-09-24, verified vs the GitHub releases + npm): 1.0.0 (2026-08-13)
+  carried a block-editing pipeline (H1–H6 blocks) into the input side. 1.0.1 moved the vendored
+  tree-sitter/RaTeX assets to a postinstall download with a package.json opt-out — check it against
+  locked-down CI. 1.0.2 (2026-08-20) is breaking despite the patch number: the Expo config plugin
+  is removed and enableMath / enableCodeHighlight / codeHighlightLanguages now live in an
+  enriched-markdown block in the app's package.json (ENV vars and gradle properties deprecated as
+  fallbacks) → pin exact versions. Peer katex >=0.16.
+
+  HISTORY:
+    2026-09-24 CORRECTED: react-native-enriched was the pre-1.0 input pick — it is deprecated, renamed react-native-enriched-html at 1.0.0 (2026-06-16), which is the editor, not only an HTML renderer; enriched-markdown 1.0.2's breaking Expo-plugin removal added; Plate ships as platejs; BlockNote is MPL-2.0.
+    2026-08-18 REOPENED: enriched-markdown 1.0.0/1.0.1 — block-editing pipeline; assets moved to postinstall.
+    2026-08-07 GAP CLOSED: enriched-html 1.1.0 web hardening verified; TWiR #293's "full web feature parity" framing is not in its release notes.
+    2026-07-09 GAP CLOSED: RN side added (Software Mansion Enriched family, four consecutive Native Weekly issues).
+    2026-06-25 GAP CLOSED: entry created — rich-text editing was uncovered.
 defer_to_skill: null
 doc: "RB-E-EDITORS.md"   # long-form Explanation entry in content_dir
-updated: 2026-08-18   # enriched-markdown 1.0.0/1.0.1 — block-editing pipeline; assets move to postinstall
+updated: 2026-09-24   # react-native-enriched deprecated → enriched-html is the editor; enriched-markdown 1.0.2 breaking; platejs; version pins; prior 2026-08-18: enriched-markdown 1.0.0/1.0.1 — block-editing pipeline; assets move to postinstall
 sources:
   - "https://github.com/software-mansion/enriched-markdown/releases/tag/v1.0.1"
   - "https://github.com/software-mansion/react-native-enriched"
   - "https://github.com/software-mansion/react-native-enriched-markdown"
   - "https://github.com/software-mansion/react-native-enriched-html/releases/tag/v1.1.0"
+  - "https://github.com/software-mansion/react-native-enriched-html/releases/tag/v1.0.0"
+  - "https://github.com/software-mansion/enriched-markdown/releases/tag/v1.0.2"
 reading:
   - title: "The Unreasonable Effectiveness of the ProseMirror Model in Rich Text Transformation"
     url: "https://smoores.dev/post/unreasonable_effectiveness_of_prosemirror/"

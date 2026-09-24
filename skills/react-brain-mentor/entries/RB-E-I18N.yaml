@@ -6,19 +6,49 @@ status: reviewed   # long-form entry written + source-checked
 confidence: medium
 platforms: [react, react-native]
 options:
-  - { name: "next-intl (4.x)", tradeoff: "Next.js-first; v4.8 compiles ICU messages AOT to shrink bundles" }
-  - { name: "FormatJS / react-intl", tradeoff: "ICU message format; mature, framework-agnostic" }
-  - { name: "Lingui (6.x)", tradeoff: "compile-time message extraction; low-boilerplate; i18n directives" }
-  - { name: "i18next / react-i18next", tradeoff: "very popular, big plugin ecosystem; works web + RN" }
-  - { name: "fbtee", tradeoff: "modern continuation of Meta's deprecated fbt; v4.0 (2026-08, verified vs the GitHub release) REMOVED the Babel compiler entirely — the CLI is now a native Rust/Oxc executable, and @nkzw/babel-plugin-fbtee / babel-preset-fbtee are gone (use @nkzw/vite-plugin-fbtee or @nkzw/next-plugin-fbtee; a Babel-dependent workflow must stay on v3.3.0)" }
+  - { name: "next-intl (4.x)", tradeoff: "Next.js-first; since v4.8 compiles ICU messages ahead of time into minified ASTs run by a ~650-byte runtime, shrinking bundles. 4.14.7 (2026-09-24, verified vs npm)." }
+  - { name: "FormatJS / react-intl", tradeoff: "ICU message format at runtime; mature, framework-agnostic, the canonical ICU reference. react-intl 12.1.2 (2026-09-19, verified vs npm), peer React >=18." }
+  - { name: "Lingui (6.x)", tradeoff: "Compile-time message extraction; low-boilerplate; i18n directives. @lingui/core 6.8.0 (2026-09-23, verified vs npm)." }
+  - { name: "i18next / react-i18next", tradeoff: "Very popular, big plugin ecosystem; works web + RN. i18next 26.4.2 / react-i18next 17.0.15 (2026-09, verified vs npm; react-i18next peers i18next >=26.2)." }
+  - { name: "fbtee", tradeoff: "Modern continuation of Meta's deprecated fbt: inline translations, no keys or t() wrappers, a native Rust/Oxc compiler (no Babel since 4.0). 5.0.0 (2026-09-16, verified vs npm), peer React ^19; see note: FBTEE PIPELINE." }
 recommend:
-  default: "Next.js app → next-intl. Otherwise i18next (web + RN, huge ecosystem) or Lingui (compile-time, low boilerplate)."
+  default: "Next.js app → next-intl. Outside Next.js (web or React Native) → i18next (web + RN, huge ecosystem); Lingui instead when compile-time extraction and bundle size outweigh plugin reach."
   when:
-    - "bundle-size-sensitive → next-intl / Lingui (AOT-compiled messages)"
+    - "bundle-size-sensitive Next.js app → next-intl (AOT-compiled ICU messages)"
+    - "bundle-size-sensitive outside Next.js → Lingui (compile-time extraction)"
     - "need maximum plugin ecosystem / RN + web parity → i18next"
+    - "already on react-intl, or ICU messages shared with non-React code → FormatJS / react-intl (runtime ICU; mature)"
+    - "inline translations without keys, React 19 on Vite or Next.js 16+ → fbtee (5.x; a Babel-dependent pipeline stays on 3.3.0)"
+note: >
+  Separate the message FORMAT from the MACHINERY. The format is ICU (interpolation, plurals,
+  select, number/date skeletons), a stable Unicode standard shared by react-intl, next-intl and
+  Lingui, so the syntax investment survives a library change. The machinery either ships a parser
+  to every device (runtime) or compiles messages away at build time (next-intl's AST precompilation,
+  Lingui's extraction) — a bundle-size decision. The pick is framework-first: in Next.js,
+  next-intl; elsewhere i18next for reach and web + RN parity, Lingui for compile-time bundles.
+
+  FBTEE PIPELINE (2026-09-24, verified vs npm + README): 4.0 (2026-08-29, GitHub release) removed the
+  Babel compiler — @nkzw/babel-plugin-fbtee stops at 3.3.0, so a Babel-dependent workflow stays on
+  fbtee 3.3.0. 5.0.0 (2026-09-16) merged @nkzw/fbtee-cli and @nkzw/oxc-transform-fbtee (both now
+  deprecated on npm) into @nkzw/fbtee-compiler, a devDependency that carries the fbtee command;
+  runtime imports stay on fbtee. Integrations: @nkzw/vite-plugin-fbtee 5 (vite >=6.3) and
+  @nkzw/next-plugin-fbtee 5 (next >=16). Upgrading from 4 means installing the compiler package and
+  bumping the plugins to v5; commands are unchanged.
+
+  BROWSER TRANSLATORS (2026-09-24, reading 'What browser translators do to a live DOM'): Chrome's
+  translator, the Google bundle and Yandex detach React's text nodes, so updates freeze or
+  removeChild/insertBefore throw; the common crash guard hides the errors but leaves stale UI.
+  translate="no" on the element held on every engine tested; class="notranslate" did not → this is
+  a web production concern no i18n library covers. Edge and Firefox rewrite nodes in place and do
+  not break this way; Safari was unmeasured.
+
+  HISTORY:
+    2026-09-24 CORRECTED: fbtee row described 4.0 as current; 5.0.0 (2026-09-16) consolidated the compiler into @nkzw/fbtee-compiler; detect token formatjs given a when-clause.
+    2026-09-24 GAP CLOSED: browser-translator DOM-detach crash class (reading, React Digest #2370).
+    2026-09-01 GAP CLOSED: fbtee 4.0 removed the Babel pipeline (native Rust/Oxc CLI; v3.3.0 is the Babel terminus) — firsthand.
 defer_to_skill: null
 doc: "RB-E-I18N.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-24   # browser-translator DOM-detach crash class reading (React Digest #2370); prior 2026-09-01: fbtee 4.0: Babel pipeline removed, native Rust/Oxc CLI (breaking; v3.3.0 is the Babel terminus) — firsthand
+updated: 2026-09-24   # fbtee 5.0 compiler consolidation; version pins added; prior 2026-09-24: browser-translator DOM-detach crash class reading (React Digest #2370); prior 2026-09-01: fbtee 4.0: Babel pipeline removed, native Rust/Oxc CLI (breaking; v3.3.0 is the Babel terminus) — firsthand
 sources:
   - "https://github.com/amannn/next-intl/releases/tag/v4.8.0"
   - "https://github.com/nkzw-tech/fbtee"

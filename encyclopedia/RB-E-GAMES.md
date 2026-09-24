@@ -4,7 +4,7 @@ title: "About games, 3D & AR/VR — interactive / real-time rendering"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: low                # niche shelf; entry carries its own verify-before-betting caveats
-updated: 2026-07-16
+updated: 2026-09-24
 platforms: [react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-GAMES
 defer_to_skill: react-native-best-practices                   # entry names the skill without scoping it
@@ -15,6 +15,8 @@ sources:
   - "https://registry.npmjs.org/@reactvision/react-viro/latest"
   - "https://github.com/callstack/react-native-visionos"
   - "https://reactnative.dev/blog/2026/02/24/react-native-comes-to-meta-quest"
+  - "https://registry.npmjs.org/@reactvision/react-native-visionos"
+  - "https://registry.npmjs.org/@callstack/react-native-visionos"
 ---
 
 # About games, 3D & AR/VR — interactive / real-time rendering
@@ -56,43 +58,64 @@ metaphor.
 ## The default, and why
 
 > 2D / interactive visuals → react-native-skia. Declarative 3D inside a normal app →
-> react-three-fiber (+expo-gl). Real game engine → embed Godot (react-native-godot). AR/VR →
-> ReactVision. RN suits supplemental/interactive experiences more than AAA games.
+> react-three-fiber (@react-three/fiber + expo-gl). Real game engine → embed Godot
+> (react-native-godot), the weakest leg: dormant since 2025-11, pin it. AR/VR → ReactVision
+> (RN 0.86 + Expo SDK 57 only). RN suits supplemental/interactive experiences more than AAA
+> games; the RN version you are on decides the AR/VR and visionOS picks.
 
 Four shelves, split by what you are drawing, plus a ceiling the entry states twice: **RN suits
 supplemental/interactive experiences more than AAA games**. The when-clauses refine the
 shelves: a simple 2D game loop → react-native-game-engine (with its maintenance caveat); 3D or
 compute shaders → WebGPU, explicitly "advanced"; 3D product views / scenes in a normal app →
 @react-three/fiber + expo-gl, no engine needed; mobile AR or cross-platform VR including Meta
-Quest → ReactVision (New Architecture required); an Apple Vision Pro app →
-react-native-visionos, checking its RN-version lag first.
+Quest → ReactVision (New Architecture required; 3.x on RN 0.86, 2.58.x on RN 0.83-0.85); an
+Apple Vision Pro app → ReactVision's `@reactvision/react-native-visionos` fork (tracks RN 0.86),
+else Callstack's react-native-visionos.
 
 ## The landscape, facet by facet
 
 **react-native-skia** — the common base for RN games and interactive visuals: a GPU 2D drawing
 loop under a declarative API. The enduring design (per the Shopify reading): JSI, a custom
-React reconciler, Reanimated-driven animation.
+React reconciler, Reanimated-driven animation. It is changing hands (2026-09-21; `RB-E-ANIMATION`
+owns the thread): Shopify sponsors it through the end of 2026, then the author forks and
+republishes under a new name. Nothing is deprecated today, so there is no reason to leave it.
 
 **@react-three/fiber (three.js)** — declarative 3D scenes as React components; v9 runs in RN
 via expo-gl (verified vs npm). The path for 3D *inside* an app when you don't need an engine.
+9.8.0 (2026-09-22) is compatible with React 19.3.0, the React line RN 0.88 syncs in, but not
+every new 19.3 API is supported yet — upgrade R3F and RN 0.88 together.
 
 **react-native-godot (@borndotcom)** — embed the Godot engine itself (`RTNGodotView`; by Born
-& Migeran), running off-thread from RN's JS thread. The "real game engine" answer.
+& Migeran), running off-thread from RN's JS thread. The "real game engine" answer, and the
+weakest leg of the default: a 2026-09-10 challenge rated it WEAKENED because 1.0.1
+(2025-11-04) is still its last npm publish. Adopt it as a pinned, dormant dependency.
 
 **WebGPU (react-native-webgpu)** — 3D render pipelines on Google's Dawn, UI-thread via
 Reanimated/worklets. Advanced; note the identity details the entry pins down: formerly
-react-native-wgpu, by William Candillon, not Software Mansion.
+react-native-wgpu, by William Candillon, not Software Mansion. The old name now carries an npm
+deprecation ("renamed to react-native-webgpu"): install `react-native-webgpu` and update
+imports.
+
+**react-native-filament (Margelo)** — Google's Filament physically-based renderer as
+declarative React components, the mid ground between R3F-over-GL and a game engine. Quiet since
+its 1.11.0 publish on 2026-05-27; check pulse before betting on it.
 
 **react-native-game-engine** — entity-component loop for simple 2D games; effectively
 unmaintained (last release v1.2.0, 2020).
 
 **ReactVision (@reactvision/react-viro)** — AR/VR from one RN codebase: iPhone/Android AR plus
 Meta Quest. The maintained fork of react-viro; New Architecture (Fabric) REQUIRED; active
-(2.57.x, 2026-07, verified vs npm).
+(3.0.1, 2026-09-21, verified vs npm). The 3.0 major raised its peer range to react-native
+>=0.86.0 <0.87.0 and Expo SDK 57 (2.58.1 accepted RN 0.83-0.86 and SDK 55+); neither line
+admits RN 0.87, so an app on 0.87+ cannot take ReactVision today.
 
 **react-native-visionos (Callstack)** — a full RN fork targeting Apple Vision Pro / the
-visionOS SDK (~1.1k★). CAUTION, and the entry calls this the load-bearing fact: pinned to RN
-0.78 (2025-03), lagging core by about a year — verify parity before betting.
+visionOS SDK (~1.1k★). CAUTION, and the load-bearing fact: its latest npm release is 0.79.6
+(2025-08-23) while core is on 0.87 — verify parity before betting.
+
+**@reactvision/react-native-visionos** — ReactVision's visionOS fork, an out-of-tree platform
+(`ios/`, `android/` and `visionos/` from one JS codebase) that exists so ViroReact renders on
+visionOS. 0.86.4 (2026-09-20) tracks RN 0.86 and is the fork ReactVision 3 requires.
 
 **First-party Meta Quest (2026-07-10, verified vs the official RN blog)** — React Native now
 supports Meta Quest / Horizon OS directly via the `expo-horizon-core` config plugin, with Expo
@@ -111,9 +134,11 @@ package.json routes advice here.
 - **Pitching RN at an AAA game.** The ceiling appears in both the recommendation and the note:
   RN suits supplemental/interactive experiences more than AAA games. This shelf is for visuals,
   scenes, and embedded engines inside apps — niche by the entry's own word.
-- **Betting on the visionOS fork without checking the lag.** Pinned to RN 0.78 (2025-03),
-  about a year behind core — the entry marks this version-lag caveat as the load-bearing fact.
-  Verify parity before betting.
+- **Betting on a visionOS fork without checking the lag.** Callstack's last release is 0.79.6
+  (2025-08-23); ReactVision's fork tracks 0.86. Check which RN line each fork is on before
+  betting.
+- **Upgrading RN past 0.86 with ReactVision installed.** Both ReactVision lines peer
+  `react-native <0.87.0`; the RN upgrade and the AR/VR dependency must move together.
 - **ReactVision on the old architecture.** New Architecture (Fabric) is REQUIRED — a hard
   precondition, not a preference.
 - **Reaching for react-native-game-engine as if it were current.** It is the when-clause
@@ -134,7 +159,8 @@ package.json routes advice here.
   entry is loops and engines. (Pairing inherited from the animation doc, not this entry's
   text.)
 - **RN versions (`RB-E-RN-VERSIONS`).** Two of the AR/VR options are version/architecture
-  gates in disguise: visionos pinned to RN 0.78, ReactVision requiring Fabric. What your app
+  gates in disguise: the visionOS forks track specific RN lines (0.79 for Callstack, 0.86 for
+ReactVision), and ReactVision requires Fabric and peers RN 0.86 exactly. What your app
   can adopt depends on where core is.
 - **Performance depth (`react-native-best-practices`).** The defer skill; the entry names it
   without scoping. Render-perf rules and thresholds live there, not here.
@@ -147,10 +173,11 @@ a component tree — React orchestrates, the loop draws.** The default splits by
 face — JSI, a custom React reconciler, Reanimated-driven animation); declarative 3D inside a
 normal app → **react-three-fiber** v9 via expo-gl, no engine needed; a real game engine →
 **embed Godot** (`RTNGodotView`, off-thread from RN's JS thread); AR/VR → **ReactVision**, the
-maintained react-viro fork (Fabric required, active 2.57.x). WebGPU (Dawn, UI-thread via
-worklets) is the advanced 3D/compute path; react-native-game-engine still answers "simple 2D
-loop" but is unmaintained since 2020; react-native-visionos is pinned to RN 0.78 and lags core
-by about a year — verify before betting; and Meta Quest now has a first-party 2D-panel path
+maintained react-viro fork (Fabric required, 3.x peers RN 0.86 + Expo SDK 57). WebGPU (Dawn,
+UI-thread via worklets; install react-native-webgpu, the old react-native-wgpu name is
+deprecated) is the advanced 3D/compute path; react-native-game-engine still answers "simple 2D
+loop" but is unmaintained since 2020; Godot's embed is dormant since 2025-11; for Vision Pro,
+ReactVision's fork tracks RN 0.86 while Callstack's last release is 0.79.6; and Meta Quest now has a first-party 2D-panel path
 via `expo-horizon-core`. The ceiling is stated twice in the entry: RN suits
 supplemental/interactive experiences more than AAA games.
 

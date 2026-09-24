@@ -4,7 +4,7 @@ title: "About internationalization (i18n)"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: medium
-updated: 2026-07-16
+updated: 2026-09-24
 platforms: [react, react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-I18N
 defer_to_skill: null
@@ -14,6 +14,7 @@ sources:
   - "https://github.com/nkzw-tech/fbtee"
   - "https://next-intl.dev/blog/precompilation"
   - "https://formatjs.github.io/docs/core-concepts/icu-syntax/"
+  - "https://raw.githubusercontent.com/alievdavlat/translate-shield/main/research/article.md"
 ---
 
 # About internationalization (i18n)
@@ -47,8 +48,8 @@ is the real choice — and it is a bundle-size choice, not a features choice.
 
 ## The default, and why
 
-> Next.js app → next-intl. Otherwise i18next (web + RN, huge ecosystem) or Lingui
-> (compile-time, low boilerplate).
+> Next.js app → next-intl. Outside Next.js (web or React Native) → i18next (web + RN, huge
+> ecosystem); Lingui instead when compile-time extraction and bundle size outweigh plugin reach.
 
 The first question is framework, not fashion: **next-intl is Next.js-first**, and in a
 Next.js app it brings the AOT story (v4.8's build-time ICU compilation) with framework-shaped
@@ -60,8 +61,10 @@ integration. Outside Next.js the default forks on what you optimise for:
 - **Bundle and boilerplate → Lingui** (6.x). Compile-time message extraction, low-boilerplate
   authoring, i18n directives.
 
-The index entry's when-clauses restate the fork: *bundle-size-sensitive → next-intl / Lingui
-(AOT-compiled messages)*; *maximum plugin ecosystem or RN + web parity → i18next*.
+The index entry's when-clauses restate the fork: *bundle-size-sensitive → next-intl in Next.js,
+Lingui elsewhere*; *maximum plugin ecosystem or RN + web parity → i18next*; *already on
+react-intl → FormatJS / react-intl*; *inline, key-free translations on React 19 with Vite or
+Next.js 16+ → fbtee*.
 
 ## The landscape, and when each one wins
 
@@ -81,8 +84,12 @@ plugins, and web+RN parity outweigh the compile-time bundle story.
 **FormatJS / react-intl** — the mature, framework-agnostic home of the ICU message format
 itself. Its documentation is the canonical ICU reference regardless of which library you ship.
 
-**fbtee** — the modern continuation of Meta's deprecated `fbt`. The entry stakes no claim
-beyond that lineage; treat it as a named option to evaluate, not a graded one.
+**fbtee** — the modern continuation of Meta's deprecated `fbt`: inline translations with no
+keys and no `t()` wrappers, extracted by a compiler. 4.0 (2026-08-29) removed the Babel
+compiler — a Babel-dependent workflow stays on 3.3.0 — and 5.0.0 (2026-09-16) folded the CLI
+and Oxc transform into one devDependency, `@nkzw/fbtee-compiler`, with v5 Vite (>=6.3) and
+Next.js (>=16) plugins. It peers React ^19. It wins when inline, key-free authoring on a
+Vite or Next.js 16+ build is the goal.
 
 ## Tradeoffs and failure modes to name out loud
 
@@ -97,6 +104,12 @@ beyond that lineage; treat it as a named option to evaluate, not a graded one.
 - **Treating the format as lock-in.** The message syntax is ICU — a stable Unicode standard
   shared across react-intl, next-intl, and Lingui — so the syntax investment survives a
   library change; the machinery is what you'd swap.
+- **Browser page translators vs a live React tree (web).** Chrome's translator, the Google
+  bundle and Yandex detach React's text nodes and insert their own, so updates freeze on stale
+  text or `removeChild`/`insertBefore` throw; the widely pasted crash guard hides the errors but
+  not the freeze. `translate="no"` on the element held on every engine tested;
+  `class="notranslate"` did not. No i18n library covers this — it happens in the browser, not
+  in your catalogs.
 - **next-intl outside its home.** It is Next.js-first by the entry's own tradeoff line; the
   non-Next.js defaults are i18next and Lingui.
 - **Assuming all "compile-time" is the same compile.** The entry groups next-intl and Lingui
@@ -143,8 +156,7 @@ compile-time-vs-runtime tradeoff from first principles) and the FormatJS ICU syn
      next-intl's AST+650-byte-runtime design does) — the entry groups Lingui with next-intl
      under "AOT-compiled messages" but details the mechanism only for next-intl; this doc
      says so explicitly rather than transferring the claim.
-  3. fbtee — the entry gives only "modern continuation of Meta's deprecated fbt"; no
-     runtime/compile-time classification or recommendation is made here.
+  3. (resolved 2026-09-24) fbtee now has a verified pipeline description and a when-clause.
   4. "the syntax investment survives a library change" — inference from ICU being a stable
      Unicode standard shared across react-intl/next-intl/Lingui; the entry does not discuss
      migration between libraries.

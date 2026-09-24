@@ -4,7 +4,7 @@ title: "About keyboard handling & avoidance (React Native)"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: medium
-updated: 2026-07-13
+updated: 2026-09-24
 platforms: [react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-KEYBOARD
 defer_to_skill: react-native-best-practices
@@ -57,14 +57,16 @@ exactly once: *simple iOS-first spacing only*. Its Android behavior (snap, no pe
 and Android-15 edge-to-edge breakage are why it doesn't scale past that.
 
 **react-native-keyboard-controller** — the parity library. Synced animations on both platforms,
-edge-to-edge handled, and two shaped components: **KeyboardAwareScrollView** for *scrollable
+edge-to-edge handled (it runs Android's per-frame path on every version it supports), a
+`react-native-reanimated >=3.0.0` peer, and two shaped components: **KeyboardAwareScrollView** for *scrollable
 forms with multiple inputs* (the classic multi-field screen where the focused input must stay
 visible), and **KeyboardStickyView** for a *footer or toolbar riding the keyboard* (chat input
 bars, action footers).
 
-**react-native-avoid-softinput** — the alternative, an Android-focused soft-input avoidance
-library. It exists for the platform where core hurts most, but the cross-platform parity story
-belongs to keyboard-controller.
+**react-native-avoid-softinput** — the alternative, native-side avoidance on both Android and
+iOS: it translates the root view (or pads the parent scroll view) only when the focused input is
+covered. It keeps inputs visible; identical keyboard animation on both platforms is
+keyboard-controller's job. Its 9.x line declares a `react-native >=0.81.0` peer.
 
 ## Tradeoffs and failure modes to name out loud
 
@@ -75,12 +77,15 @@ belongs to keyboard-controller.
   flatters it. The snap is an Android-only symptom — iOS-first teams ship it without ever
   seeing it.
 - **Treating Android 15 as a rerun of old pain.** Edge-to-edge doesn't just make the keyboard
-  janky; it breaks the legacy `adjustResize` path that older workarounds leaned on.
+  janky; it breaks the legacy `adjustResize` path that older workarounds leaned on. From
+  Android 15 (API 35) edge-to-edge is forced by default for apps targeting that SDK, so an app
+  that fit on Android 11-14 stops resizing on 15 with no JS change.
 - **`KeyboardAvoidingView` in source without the parity dep.** This is literally the signal the
   entry's doctor flags: core usage with no `react-native-keyboard-controller` installed is a
   named smell, not a style preference.
-- **Reaching for avoid-softinput expecting breadth.** It is the Android-focused alternative;
-  synced two-platform animation is keyboard-controller's job.
+- **Reaching for avoid-softinput expecting animation parity.** It covers both platforms but
+  solves visibility of the focused input; synced two-platform animation is keyboard-controller's
+  job.
 
 ## How it interacts with the rest of the stack
 
@@ -102,7 +107,8 @@ Android, and breaks under Android-15 edge-to-edge (which kills legacy `adjustRes
 only for simple iOS-first spacing; for cross-platform parity use
 **react-native-keyboard-controller**, which syncs the two platforms' animation clocks and ships
 `KeyboardAwareScrollView` for scrollable forms and `KeyboardStickyView` for footers riding the
-keyboard. `react-native-avoid-softinput` remains the Android-focused alternative.
+keyboard. `react-native-avoid-softinput` remains the alternative for keeping focused inputs
+visible on both platforms.
 
 ---
 

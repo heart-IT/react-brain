@@ -25,8 +25,8 @@ sources:
 
 ## The one idea that organises everything: no server inverts everything
 
-Holepunch is, in the entry's own words, "a SERVERLESS, local-first alternative to the
-client-server + REST/GraphQL model." Remove the server and the familiar roles are not
+Holepunch is a serverless, local-first alternative to the client-server + REST/GraphQL
+model — in the entry's words, "an architecture fork, not a library slot." Remove the server and the familiar roles are not
 deleted — they are reassigned: **the keypair is the account, the append-only log is the
 database, the swarm is the endpoint.** Data lives in a local signed append-only log
 (Hypercore), is merged across writers by Autobase, indexed for querying by Hyperbee, and
@@ -45,12 +45,12 @@ ecosystem: ledgerhr (Pear desktop), ourpot and bitbarter (Pear mobile via bare-k
 
 ## The default, and why
 
-> Holepunch is a SERVERLESS, local-first alternative to the client-server + REST/GraphQL
-> model: data is a local append-only log (Hypercore), merged across writers with Autobase,
-> indexed in Hyperbee, synced peer-to-peer over Hyperswarm, and shipped by Pear. Choose it
-> when serverless / offline-first / private / censorship-resistant matters; choose
-> conventional client-server (RB-E-DATA + a hosted DB) when you want central control, SQL,
-> and a familiar ops story.
+> Holepunch (Hypercore logs held by Corestore, merged by Autobase, indexed in Hyperbee,
+> synced over Hyperswarm, UI-to-worker calls over hrpc, shipped by Pear) — Pear desktop on
+> react, Pear mobile via bare-kit on react-native — when serverless, offline-first, private
+> or censorship-resistant is a requirement. When you want central control, SQL and a
+> familiar ops story, the pick is conventional client-server (RB-E-DATA + a hosted DB)
+> instead.
 
 The default is an axis, not a winner. Neither side is the fallback: each is named with its
 own virtues. Holepunch earns the pick when the requirements are serverless, offline-first

@@ -4,7 +4,7 @@ title: "About UX polish primitives — toasts, haptics, splash screens, image vi
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: low
-updated: 2026-07-16
+updated: 2026-09-24
 platforms: [react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-POLISH
 defer_to_skill: react-native-best-practices                   # entry names the skill without scoping it
@@ -44,11 +44,11 @@ on, which is precisely all the weight they are asked to carry.
 
 ## The default, and why
 
-> Toasts → sonner-native (or burnt for platform-native elements). Haptics → expo-haptics.
-> Splash → react-native-bootsplash on bare RN, expo-splash-screen on Expo (switch to
-> bootsplash when you need its generator/branding control). Image lightbox → galeria. Each
-> sub-domain is small — pick once, move on; the polish is in the details, not the library
-> hunt. Lightly vetted (confidence: low).
+> Toasts → sonner-native (needs Reanimated 4.1+; burnt for platform-native elements).
+> Haptics → expo-haptics. Splash → react-native-bootsplash on bare RN, expo-splash-screen on
+> Expo until you need bootsplash's generator/branding control. Image lightbox → galeria (New
+> Architecture, iOS 16.4+). Each sub-domain is small: pick once, move on. Lightly vetted
+> (confidence: low).
 
 Four assignments and one discipline. Only one of the four is a real fork: toasts split on
 *whose motion design you want* — sonner-native for a designed toast stack, burnt for
@@ -62,16 +62,18 @@ dormant since 2022.
 ## The landscape, micro-domain by micro-domain
 
 **Toasts — the one real fork.** sonner-native is a port of Emil Kowalski's sonner
-(stacking, swipe, promise toasts), active (0.26.x, 2026-06), and the entry's design-led
-pick. What "design-led" means is spelled out by the entry's reading — Kowalski's own essay
+(stacking, swipe, promise toasts), active (0.27.0, 2026-08-15), and the entry's design-led
+pick. Its floor is real: peer deps require Reanimated ^4.1.1, react-native-worklets >=0.6.1,
+Gesture Handler >=2.28, screens ^4.16, svg ^15.12 and safe-area-context ^5.6, so a Reanimated 3
+app cannot adopt it without the Reanimated 4 upgrade. What "design-led" means is spelled out by the entry's reading — Kowalski's own essay
 on building a toast component: interruptible transitions over keyframes, index-scaled
 stacking, pause-on-hidden, momentum swiping, gap-filling hover pseudo-elements.
 Web-authored, but it is the canonical "why good toasts feel good" — the taste the toast
 pick imports. burnt takes the opposite bet: **native** toast/alert elements (SPIndicator
 on iOS, ToastAndroid) — platform-authentic but less customizable, on a slower release
-cadence (0.13, 2025-03). Between them sits react-native-toast-message, the JS incumbent
-(v2.4, still active 2026): simple, widely deployed, less polished motion — the entry lists
-it but routes no when-clause to it.
+cadence (0.13.0, 2025-03-10, still latest in 2026-09). Between them sits react-native-toast-message, the JS incumbent
+(2.5.2, 2026-09-08): simple, widely deployed, less polished motion, and no Reanimated peer —
+the pick when you are already on it or still on Reanimated 3.
 
 **Haptics — a default and a don't-churn.** expo-haptics is the default: the system haptics
 engine on iOS, vibration effects on Android — and it works in bare RN via Expo Modules, so
@@ -82,14 +84,17 @@ what it skipped: react-native-tickle (Nitro haptics with AHAP patterns) — not 
 too early.
 
 **Splash — split by workflow.** react-native-bootsplash is the de-facto splash tool
-(v7.3): an asset generator CLI, edge-to-edge by default, works with Expo prebuild, and an
+(7.3.3): an asset generator CLI, edge-to-edge by default on Android, assets generated at Expo
+prebuild, and an
 imperative `hide()` when the app is ready. expo-splash-screen is the Expo default that
 ships with the template, config-plugin driven — fine unless you need bootsplash's
-generator/branding control, which is also the named trigger for switching. Both expo-*
+generator/branding control, which is also the named trigger for switching. The generator
+handles the logo for free; brand-image and dark-mode assets need a paid license key
+(`BOOTSPLASH_LICENSE_KEY`), so the branding control has a price. Both expo-*
 packages version-track the SDK rather than releasing independently.
 
 **Image lightbox — a maintenance verdict.** galeria (@nandorojo/galeria) is a native
-shared-element lightbox (v3, 2026-05; iOS 16+) with fluid pinch/dismiss transitions the JS
+shared-element lightbox (3.0.3, 2026-05-28; iOS 16.4+ and the New Architecture required) with fluid pinch/dismiss transitions the JS
 viewers can't match. react-native-image-viewing is the JS incumbent — unmaintained since
 2022; it works, but no native transitions and aging. The when-clause is blunt: avoid
 starting new work on it.
@@ -109,8 +114,8 @@ starting new work on it.
   authenticity for control, and it should be taken knowingly.
 - **Betting on react-native-tickle today.** Nitro haptics with AHAP patterns is the
   direction to watch, but it is not yet on npm — the entry skipped it as too early.
-- **galeria's floor.** The native lightbox is v3 (2026-05) and iOS 16+; the entry states
-  the floor without an escape hatch below it.
+- **galeria's floor.** The native lightbox needs iOS 16.4+ and the New Architecture
+  (Fabric); below that floor the entry routes to react-native-image-viewing, pinned and owned.
 - **Over-trusting the picks.** The entry self-grades confidence: low — versions and dates
   verified against npm 2026-07-09, but the picks are lightly vetted, not battle-audited.
 
@@ -133,12 +138,12 @@ starting new work on it.
 
 UX polish in React Native is **a checklist, not four decisions**: toasts, haptics, splash
 screens, and image lightboxes are the "app feels finished" layer, each too small to
-deserve a library hunt — pick once, move on. The picks: sonner-native for toasts (or burnt
+deserve a library hunt — pick once, move on. The picks: sonner-native for toasts on Reanimated 4.1+ (or burnt
 when platform-native SPIndicator/ToastAndroid elements matter more than customization),
 expo-haptics for haptics (bare RN included, via Expo Modules; don't churn off
 react-native-haptic-feedback), react-native-bootsplash on bare RN or expo-splash-screen on
 stock Expo for splash (switch for bootsplash's generator/branding control), and galeria
-for image lightboxes (native shared-element transitions; iOS 16+) while avoiding new work
+for image lightboxes (native shared-element transitions; iOS 16.4+, New Architecture) while avoiding new work
 on the dormant react-native-image-viewing. The entry self-grades confidence: low — lightly
 vetted, npm-verified 2026-07-09 — and the design depth it points at is Kowalski's toast
 essay, because the polish is in the details, not the library hunt.
@@ -158,14 +163,14 @@ imports, and the canonical account of why good toasts feel good.*
   2. related: [] — the entry names no sibling RB-E entries, so the see-also footer points
      only at the defer skill and the reading; the "no sibling entries is consistent with
      the thesis" line is inference, not entry text.
-  3. react-native-toast-message has no when-clause in the entry — listed as the incumbent
-     with a one-line tradeoff; this doc stakes nothing further on it.
+  3. (resolved 2026-09-24) react-native-toast-message now has a when-clause: already on it,
+     or still on Reanimated 3.
   4. What react-native-best-practices audits for this entry — the entry declares the defer
      skill without scoping it (unlike e.g. RB-E-A11Y's scoped defer); no depth-split is
      described here beyond "the skill carries the RN practice depth".
   5. How much of Kowalski's web-authored toast rationale survives the RN port — the entry
      asserts the import ("the taste this entry's toast pick imports") but not the
      fidelity; not claimed.
-  6. galeria below iOS 16, and its Android behavior — the entry states "iOS 16+" with no
-     Android floor or fallback; nothing claimed.
+  6. galeria's Android floor — the 3.0.3 podspec sets iOS 16.4 and the README requires the
+     New Architecture; no Android minimum SDK is stated here.
 -->

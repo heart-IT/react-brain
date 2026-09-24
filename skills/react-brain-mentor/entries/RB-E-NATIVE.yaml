@@ -6,80 +6,96 @@ status: reviewed   # long-form entry written + source-checked → encyclopedia/R
 confidence: high
 platforms: [react-native]
 options:
-  - { name: "Expo modules", tradeoff: "managed, fast path for many needs" }
-  - { name: "Turbo Modules / Fabric (JSI)", tradeoff: "custom native; New Architecture" }
-  - { name: "Nitro Modules", tradeoff: "codegen-driven JSI; positioned as Turbo Modules' successor; vendor claims ~10x vs Turbo, ~100x vs Expo Modules — the Expo half of that claim is now STALE: Expo's own SDK-56/57 numbers put Expo Module calls on par with Turbo Modules (see note); Margelo joined Callstack 2026-09-01 (€20M+; Nitro/VisionCamera/mmkv stay open source, Rousavy keeps leading them), so the 'small independent vendor' half of the risk is smaller than it was — pre-1.0 churn is not" }
+  - { name: "Expo modules", tradeoff: "Managed, fast path for most native needs, in Swift/Kotlin. SDK 56 made calls 1.5–2× faster than SDK 55 (on par with Turbo Modules); Expo Modules 2.0 (beta on iOS + Android in the SDK 58 beta) is a further 2.5–5.6× on sync iOS calls and beat a TurboModule on all twelve Android microbenchmarks. See note: EXPO MODULES 2.0." }
+  - { name: "Turbo Modules / Fabric (JSI)", tradeoff: "Custom native on the New Architecture; zero-dep, in RN core and stable, which is why it stays the pick when Nitro's pre-1.0 churn is not worth the speed." }
+  - { name: "Nitro Modules", tradeoff: "Codegen-driven JSI, positioned as Turbo Modules' successor; vendor claims ~10x vs Turbo, ~100x vs Expo Modules — the Expo half is STALE (see note: EXPO MODULES 2.0). Pre-1.0 and third-party: 0.37.1 (2026-08-27, verified vs npm), still shipping breaking changes, so pin versions. See note: NITRO, STEWARDSHIP." }
 recommend:
-  default: "Target the New Architecture (mandatory ≥ RN 0.82). Reach for Expo Modules for most native needs; use Nitro Modules for performance-critical custom native."
+  default: "Target the New Architecture (the only runtime since RN 0.82). Expo Modules for most native needs; Turbo Modules for standard custom native with zero dependencies; Nitro Modules only for performance-critical custom native where you accept pre-1.0 churn. What changes the pick is how chatty the JS↔native boundary is and how much version churn you can absorb."
   when:
     - "most native integrations → Expo Modules (managed, fast path)"
-    - "perf-critical custom native (camera, audio, BLE) → Nitro Modules — but it's pre-1.0 (v0.37.0, 2026-08-20 — which moved Props and react::ComponentDescriptor into Nitro core via C++ templates and renamed CachedProp to ReactProp, keeping the old name as a deprecated alias: the churn is real and visible), third-party (not in RN core), and still ships breaking changes, so pin versions; for non-extreme needs, plain Turbo Modules are zero-dep, in-core, and stable"
-    - "standard custom native → Turbo Modules / Fabric"
-    - "still on Legacy Arch → migrate; it's frozen and being stripped from core"
+    - "new Expo module on the SDK 58 beta → Expo Modules 2.0 API (@ExpoModule/@JS; beta, docs still being written, views not covered — else the 1.0 DSL)"
+    - "perf-critical custom native (camera, audio, BLE) → Nitro Modules (pre-1.0, third-party, not in RN core: pin versions; 0.37 alone moved Props into Nitro core and renamed CachedProp to ReactProp)"
+    - "standard custom native → Turbo Modules / Fabric (zero-dep, in-core, stable)"
+    - "still on Legacy Arch → New Architecture migration (Legacy is frozen and stripped from core; budget the long tail, see the Discord reading)"
+    - "RN >= 0.86 with react-native-edge-to-edge installed → core edge-to-edge (drop the standalone package; below 0.86 it is still required)"
 note: >
-  ARCHITECTURE: the New Architecture (Fabric + Turbo Modules over JSI, no async bridge)
-  was the default for new projects from RN 0.76, became the ONLY runtime option in RN 0.82,
-  and RN 0.84 keeps stripping Legacy-Arch code from iOS + Android — all new native work targets
-  it; Legacy is effectively gone. Nitro Modules is consolidating the custom-native ecosystem
-  (mmkv v4, device-info, image, video, fetch, healthkit, geolocation moved to it; VisionCamera
-  v5 rewrote ~3,000 lines of JSI/C++ onto Nitro).
-  EDGE-TO-EDGE: RN 0.86 (2026-06-11) moved Android-15+ edge-to-edge into core, fixing
-  KeyboardAvoidingView / Dimensions / StatusBar — projects on RN >= 0.86 can DROP the
-  standalone `react-native-edge-to-edge` (zoontek); on RN < 0.86 it is still required.
-  Arch facts verified vs the RN 0.84 blog; edge-to-edge vs the RN 0.86 blog. The bridge interop
-  layer was fully removed in RN 0.85. Adversarially stress-tested 2026-06-25 (SURVIVES; Nitro
-  stability caveat added — Nitro is pre-1.0/third-party, Turbo Modules stay the stable in-core option).
-  EXPO SDK 56 (verified vs its changelog, 2026-07-09): expo-modules-core dropped the Objective-C++
-  intermediary for DIRECT Swift↔C++ JSI interop — "fewer hops means less call overhead", significant
-  native-module-call speedup, and Expo module authoring is "Swift all the way down". SDK 56 also lets
-  you write inline Expo Modules (Swift/Kotlin in-app with generated TypeScript). Expo Modules also
-  ships SHARED OBJECTS/REFS (verified vs docs.expo.dev/modules/shared-objects) — JS handles to live
-  native objects instead of serialized copies; the next-gen MediaLibrary/Contacts APIs are built on it.
-  EXPO MODULES 2.0 (2026-09-08, verified vs the Expo blog post): the authoring API is being replaced
-  by annotated plain Swift/Kotlin — @ExpoModule on a class, @JS on methods and properties, @Record on
-  a struct, a typed callable property for events — retiring the 1.0 result-builder DSL (Name/Function/
-  AsyncFunction/Property/Class/Events). Sync-vs-async is decided by Swift's own `async` keyword. The
-  numbers matter for the OPTION CHOICE above: SDK 56 made Expo Module calls 1.5–2× faster than SDK 55
-  and, per Expo, "on par with React Native's Turbo Modules"; on the same SDK the @JS path is a further
-  2.5–5.6× faster than 1.0 for SYNCHRONOUS calls (async is roughly unchanged — both share the promise
-  machinery; iPhone 16 Pro / iOS 27 / Release build, 100k calls) — because the macro reads the
-  signature at build time, so the 1.0 reflection path (allocate a boxed container, run each argument
-  through a dynamic converter into [Any], build a tuple) disappears. STATUS DISCIPLINE — MOVED 2026-09-21 (verified vs the SDK 58 beta
-  changelog, 2026-09-15): what was "iOS-only, undocumented, Android in progress, official beta is
-  SDK 58" is now IN BETA ON BOTH iOS AND ANDROID. Documentation is still being written during the
-  beta period (the early-look post remains the guide), and views are still not covered.
-  AND THE ANDROID NUMBERS ARE THE DECISION-RELEVANT ONES (same changelog): Expo measured 2.0 against
-  both 1.0 and a TURBOMODULE across twelve microbenchmarks. It beat 1.0 in every case (1.2× for
-  passing an array of 100 numbers, up to 39.9× for emitting an event with a number) and it beat the
-  TurboModule in every case too — a no-argument call 112 ns vs 2,837 ns, an array of 20 objects
-  10.7 µs vs 149.8 µs, emitting an event with an object 963 ns vs 8,080 ns. Treat these as
-  vendor-run microbenchmarks on call overhead, not app-level speedups: they price the BOUNDARY, which
-  is exactly what dominates chatty fine-grained bridges and is irrelevant to a module that makes one
-  call and does real work behind it. What they do settle is the direction of the old "on par with
-  Turbo Modules" claim — on Android call overhead, 2.0 is now ahead of it, not level with it.
-  BUILD TIME ALSO DROPPED, which is the part nobody adopts deliberately: expo-modules-core now ships
-  PRECOMPILED .so files for all four ABIs in debug and release, so clean builds and CI no longer
-  compile its C++ from source. Expo's blank-project test on an M3 Pro: a clean four-ABI Android debug
-  build went ~80s → ~39s, and they note the saving is larger on low-core CI runners (the removed
-  compiler work is >10 minutes of work that a 12-core machine was hiding through parallelism). Migration is incremental (both APIs merge in one
-  module; `expo-migrate-module` is an agent skill that converts the Swift side and reports what it
-  left behind). Stated design rationale worth carrying: the API is being shaped for coding agents —
-  models know Swift/Kotlin, not a bespoke DSL, and build-time type errors keep the fix loop short.
-  MARGELO JOINED CALLSTACK (2026-09-21, verified vs Margelo's own announcement — Native Weekly #20):
-  the agency behind Nitro Modules, VisionCamera and react-native-mmkv is now part of Callstack. The
-  reason it is recorded here rather than treated as industry gossip is that this corpus recommends
-  several of those libraries, so their stewardship is a selection input: the announcement states the
-  existing open-source libraries REMAIN open source and that Marc Rousavy continues to lead their
-  development. So this is continuity, not a handover risk — the opposite of the Skia/FlashList
-  situation in RB-E-ANIMATION / RB-E-LISTS, and worth holding side by side with those, because 2026
-  is consolidating RN's maintainer base: Shopify out, Margelo into Callstack, Tailwind into Shopify
-  (RB-E-STYLING).
-  LEAD (2026-07-16 back-audit; recurrence-grade — TWiR #284 AND #285): margelo/react-native-runtimes
-  runs RN components/business logic in ISOLATED Hermes runtimes — young, watch for adoption before
-  citing as an option.
+  THE PICTURE: the New Architecture (Fabric + Turbo Modules over JSI, no async bridge) is the only
+  runtime, so the choice is which authoring layer sits on JSI. Expo Modules is the default because
+  its call overhead is no longer a tax: Expo's own numbers put it level with Turbo Modules on SDK 56
+  and ahead of a TurboModule on Android with Expo Modules 2.0. Turbo Modules stay the stable in-core
+  option. Nitro Modules buys the lowest overhead at the price of pre-1.0 churn, which only pays off
+  for chatty, fine-grained boundaries (camera frames, audio, BLE).
+
+  ARCHITECTURE (verified vs the RN 0.84 blog): the New Architecture was the default for new projects
+  from RN 0.76, became the ONLY runtime option in RN 0.82, and RN 0.84 keeps stripping Legacy-Arch
+  code from iOS + Android; the bridge interop layer was fully removed in RN 0.85 → all new native
+  work targets it.
+
+  EXPO MODULES 2.0 (2026-09-21, verified vs the SDK 58 beta changelog of 2026-09-15; API from the
+  2026-09-08 Expo blog post): the authoring API becomes annotated plain Swift/Kotlin (@ExpoModule on
+  a class, @JS on methods and properties, @Record on a struct, a typed callable property for
+  events), retiring the 1.0 result-builder DSL (Name/Function/AsyncFunction/Property/Class/Events);
+  sync-vs-async is decided by Swift's own `async` keyword. It is IN BETA ON BOTH iOS AND ANDROID in
+  the SDK 58 beta; documentation is still being written (the early-look post remains the guide) and
+  views are not covered. iOS: on the same SDK the @JS path is 2.5–5.6× faster than 1.0 for
+  SYNCHRONOUS calls (async roughly unchanged; iPhone 16 Pro / iOS 27 / Release, 100k calls) because
+  the macro reads the signature at build time and the 1.0 reflection path disappears. Android:
+  across twelve microbenchmarks 2.0 beat 1.0 in every case (1.2× for an array of 100 numbers up to
+  39.9× for emitting an event with a number) and beat a TurboModule in every case (no-arg call
+  112 ns vs 2,837 ns; array of 20 objects 10.7 µs vs 149.8 µs; event with an object 963 ns vs
+  8,080 ns) → on Android call overhead 2.0 is ahead of Turbo Modules, not level. These are
+  vendor-run call-overhead microbenchmarks: they matter for chatty boundaries and are irrelevant
+  to a module that makes one call and does real work behind it. Migration is incremental (both APIs
+  merge in one module; the `expo-migrate-module` agent skill converts the Swift side and reports
+  what it left behind); Expo's stated rationale is that models know Swift/Kotlin, not a bespoke
+  DSL.
+
+  BUILD TIME (2026-09-21, verified vs the SDK 58 beta changelog): expo-modules-core ships
+  PRECOMPILED .so files for all four ABIs in debug and release → clean builds and CI no longer
+  compile its C++; Expo's blank-project clean four-ABI Android debug build on an M3 Pro went ~80s →
+  ~39s, with a larger saving on low-core CI runners.
+
+  EXPO SDK 56 (2026-07-09, verified vs its changelog): expo-modules-core dropped the Objective-C++
+  intermediary for DIRECT Swift↔C++ JSI interop ("fewer hops means less call overhead"), making
+  calls 1.5–2× faster than SDK 55 and, per Expo, "on par with React Native's Turbo Modules"; SDK 56
+  also allows inline Expo Modules (Swift/Kotlin in-app with generated TypeScript). Expo Modules
+  ships SHARED OBJECTS/REFS (verified vs docs.expo.dev/modules/shared-objects): JS handles to live
+  native objects instead of serialized copies; the next-gen MediaLibrary/Contacts APIs use them.
+
+  NITRO (verified vs the v0.37.0 release and npm): v0.37.0 (2026-08-20) moved Props and
+  react::ComponentDescriptor into Nitro core via C++ templates and renamed CachedProp to ReactProp
+  (old name kept as a deprecated alias) → the churn is real; this entry's tripwire fires at 1.0.
+  Nitro is consolidating custom native: mmkv v4, device-info, image, video, fetch, healthkit and
+  geolocation moved to it, and VisionCamera v5 rewrote ~3,000 lines of JSI/C++ onto it.
+
+  STEWARDSHIP (announced 2026-09-01, verified 2026-09-21 vs Margelo's announcement): Margelo, the
+  agency behind Nitro Modules, VisionCamera and react-native-mmkv, joined Callstack in a
+  transaction valuing Margelo at more than €20 million; the existing open-source libraries remain
+  open source and Marc Rousavy continues to lead them → continuity, not a handover risk; the
+  "small independent vendor" half of Nitro's risk shrank, the pre-1.0 half did not. Contrast
+  RB-E-ANIMATION (Skia) and RB-E-LISTS (FlashList), where Shopify is leaving; RB-E-STYLING owns
+  Tailwind into Shopify.
+
+  EDGE-TO-EDGE (verified vs the RN 0.86 blog): RN 0.86 (2026-06-11) moved Android-15+ edge-to-edge
+  into core, fixing KeyboardAvoidingView / Dimensions / StatusBar → on RN >= 0.86 drop the
+  standalone react-native-edge-to-edge (zoontek); below 0.86 it is still required.
+
+  LEAD (2026-07-16 back-audit; TWiR #284 and #285): margelo/react-native-runtimes runs RN
+  components/business logic in ISOLATED Hermes runtimes; young, not an option until adoption shows.
+
+  HISTORY:
+  2026-09-24 CORRECTED: the Expo Modules 2.0 reading claim still said iOS-only and undocumented in
+  SDK 57.
+  2026-09-21 REOPENED: Expo Modules 2.0 in beta on iOS and Android (SDK 58 beta), measured ahead of
+  a TurboModule on Android call overhead; precompiled expo-modules-core halves clean Android
+  builds; Margelo joined Callstack.
+  2026-09-10 REOPENED: Expo Modules 2.0 early look (iOS-only, undocumented at the time).
+  2026-07-09 REOPENED: Expo SDK 56 direct Swift↔C++ JSI interop, inline modules.
+  2026-06-25 CHALLENGED → SURVIVES: adversarial stress test; Nitro stability caveat added (pre-1.0,
+  third-party; Turbo Modules stay the stable in-core option).
 defer_to_skill: react-native-jsi  # owns JSI memory/threading rules
 doc: "RB-E-NATIVE.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-21   # Expo Modules 2.0 → BETA on iOS *and* Android (SDK 58 beta) + measured ahead of a TurboModule on Android call overhead · precompiled expo-modules-core halves clean Android builds · Margelo joined Callstack
+updated: 2026-09-24   # Expo Modules 2.0 reading claim corrected (beta on iOS + Android, not iOS-only); prior 2026-09-21: Expo Modules 2.0 → BETA on iOS *and* Android (SDK 58 beta) + measured ahead of a TurboModule on Android call overhead · precompiled expo-modules-core halves clean Android builds · Margelo joined Callstack
 reading:
   - title: "React Native Bridgeless: race conditions with concurrent JS runtimes"
     url: "https://ospfranco.com/concurrent-engines-crash/"
@@ -97,7 +113,7 @@ reading:
     url: "https://expo.dev/blog/an-early-look-at-expo-modules-2-0"
     by: "Tomasz Sapeta (Expo)"
     what: "The first-party walkthrough of the API change behind this entry's Expo Modules 2.0 note: each 1.0 DSL component folded into ordinary Swift (Function/AsyncFunction → a method marked @JS, Property → a var, a record → a struct, an event → one typed callable property), with the migration path (both APIs coexist in one module; the expo-migrate-module agent skill does the Swift side and lists what it couldn't). Also states the mechanism behind the speedup — build-time signatures replace 1.0's per-call reflection — and what is NOT done yet: views, Android, generated TypeScript declarations, and documentation."
-    claim: "You author Expo Modules — 2.0 replaces the result-builder DSL with annotated plain Swift/Kotlin (@ExpoModule/@JS/@Record); it is iOS-only and undocumented in SDK 57 (official beta lands in SDK 58), and both APIs coexist so you can migrate a function at a time."
+    claim: "You author Expo Modules — 2.0 replaces the result-builder DSL with annotated plain Swift/Kotlin (@ExpoModule/@JS/@Record); it is in beta on iOS and Android in the SDK 58 beta (docs in progress), and both APIs coexist so you can migrate a function at a time."
     applies_when: { deps: ["expo-modules-core"], platforms: [react-native] }
   - title: "How to Make Pure JSI Code Faster in React Native (Part 1)"
     url: "https://blog.margelo.com/make-jsi-run-faster"

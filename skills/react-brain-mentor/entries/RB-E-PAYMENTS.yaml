@@ -6,48 +6,65 @@ status: reviewed   # long-form entry written + source-checked → encyclopedia/R
 confidence: medium
 platforms: [react-native]
 options:
-  - { name: "expo-iap (5.5.1)", tradeoff: "OpenIAP-compliant IAP; Google Play Billing v8 / Apple StoreKit; avoids ejecting. Verified 2026-09-10 — still shipping in lockstep with react-native-iap" }
-  - { name: "react-native-iap (16.5.1)", tradeoff: "long-standing community IAP wrapper; its STANDALONE repo is archived but the package is NOT deprecated — it moved into the hyodotdev/openiap monorepo and still ships in lockstep with expo-iap (16.5.1 / 5.5.1, verified 2026-09-10). DIST-TAG TRAP: on both packages the `next` tag is BEHIND `latest` (react-native-iap next = 15.4.0-rc.3, expo-iap next = 4.4.0-rc.7, verified 2026-08-18) — installing @next silently downgrades you a major" }
-  - { name: "RevenueCat (react-native-purchases 10.7.1)", tradeoff: "hosted subscription infra + entitlements across stores; fees vs less server work. Also brings remote-configurable paywalls and pricing experiments — features of the hosting decision, not separate choices" }
-  - { name: "@premieroctet/react-native-wallet (1.0.2)", tradeoff: "Apple PassKit / Google Wallet passes (tickets, loyalty, coupons) — NOT tap-to-pay; iOS needs a Pass Type ID + entitlements. MIND THE PACKAGE NAME: bare `react-native-wallet` on npm is an UNRELATED 2020 module (1.0.8, erikpoort, Apple-Wallet-only); the library meant here is the scoped @premieroctet one — last published 2025-06-26, so treat it as stable-but-quiet and pin it" }
+  - { name: "expo-iap", tradeoff: "OpenIAP-compliant IAP as an Expo module (Google Play Billing v8 / Apple StoreKit) without ejecting; you own receipt validation. 5.6.3 (2026-09-19, verified vs npm), released in lockstep with react-native-iap. See note: OPENIAP PACKAGES." }
+  - { name: "react-native-iap", tradeoff: "The long-standing community IAP wrapper for bare RN, same OpenIAP code as expo-iap; its standalone repo is archived but the package is NOT deprecated. 16.6.2 (2026-09-19, verified vs npm). Never install @next: see note: DIST-TAG TRAP." }
+  - { name: "RevenueCat (react-native-purchases)", tradeoff: "Hosted subscription infra + entitlements across stores; fees vs less server work. Remote-configurable paywalls and pricing experiments come with the hosting decision, not as separate choices. 10.10.2 (2026-09-24, verified vs npm)." }
+  - { name: "@premieroctet/react-native-wallet", tradeoff: "Apple PassKit / Google Wallet passes (tickets, loyalty, coupons), NOT tap-to-pay; iOS needs a Pass Type ID + entitlements. 1.0.2 (2025-06-26) is still the latest release (2026-09-24, verified vs npm): stable-but-quiet, pin it. Not bare react-native-wallet, see note: WALLET NAME." }
 recommend:
-  default: "Subscriptions → RevenueCat (it absorbs receipt validation + entitlement infra). Direct store billing without a third party → expo-iap (Expo) or react-native-iap."
+  default: "Subscriptions → RevenueCat (it absorbs receipt validation and entitlement infra). Direct store billing without a third party → expo-iap on Expo, react-native-iap on bare RN; both are the same OpenIAP code, so the runtime picks between them, not liveness. What changes the pick is whether you will run a validation/entitlement backend."
   when:
-    - "small team, subscriptions, don't want a billing backend → RevenueCat"
-    - "one-time purchases / avoid vendor fees → expo-iap / react-native-iap (you own validation)"
+    - "small team, subscriptions, no billing backend → RevenueCat (react-native-purchases)"
+    - "one-time purchases or avoiding vendor fees, Expo app → expo-iap (you own validation)"
+    - "one-time purchases or avoiding vendor fees, bare RN app → react-native-iap (you own validation; install @latest, never @next)"
+    - "owning server-side receipt validation on the OpenIAP libraries → @hyodotdev/openiap-commerce-protocol (0.x, evaluate before adopting; not the deprecated unscoped openiap-commerce-protocol)"
     - "wallet passes (tickets/loyalty/coupons) → @premieroctet/react-native-wallet (set up an Apple Pass Type ID + entitlements; not tap-to-pay)"
-    - "remote paywall config / pricing A-B tests → that is RevenueCat's tooling layer, not a separate library decision"
+    - "remote paywall config / pricing A-B tests → RevenueCat (its tooling layer, not a separate library decision)"
 note: >
-  Store rules + receipt validation make IAP testing-heavy; hosted options (RevenueCat) trade
-  fees for less backend.
-  STALE FACT CORRECTED (2026-08-04, firsthand watch): this entry previously called
-  react-native-iap "deprecated/archived → prefer expo-iap". That read an archived REPO as a dead
-  SERVER-SIDE LAYER (2026-09-02, verified vs the GitHub release; adopted from harvest/2026-09-03):
-  openiap-commerce-protocol 0.1.0 extends OpenIAP past the client SDKs these two rows wrap — a
-  vendor-neutral SERVER-side contract shipping generated validator artifacts and a portable
-  conformance runner. Relevant to the receipt-validation half of an IAP build, which the client
-  libraries above deliberately do not own; 0.1.0, so evaluate rather than adopt.
-  OPENIAP BACKING (2026-08-19, verified vs openiap.dev/docs/updates/announcements): the OpenIAP
-  project is now backed by AMAZON DEVELOPER, and its docs carry store setup for Amazon and Horizon
-  OS alongside Apple/Google — so the protocol these two libraries implement is no longer a
-  two-storefront concern, which matters if you ship to Fire OS or Vega OS.
-  PACKAGE. Both libraries moved into the hyodotdev/openiap monorepo (the OpenIAP protocol project;
-  the old hyochan/react-native-iap and hyochan/expo-iap repos were archived 2026-04-26 on the way
-  out) and both are actively released from it: react-native-iap 16.0.2 and expo-iap 5.0.1 shipped
-  the SAME day (2026-08-03), neither carries an npm deprecation flag. Pick between them on runtime
-  (Expo module vs bare RN wrapper), not on liveness.
-  GRADUATED drafted → reviewed 2026-08-18 (upkeep-routine step 4), and the graduation found a REAL
-  ERROR rather than confirming the entry: the wallet option row was written as `react-native-wallet`,
-  which on npm is an unrelated 2020 package (1.0.8, Apple-Wallet-only, erikpoort). The library the
-  row actually describes — PassKit AND Google Wallet, from premieroctet, which the entry already
-  linked in sources — is published as @premieroctet/react-native-wallet (1.0.2, 2025-06-26). Same
-  failure the twir-291 spot-check caught with tsrx/octanejs: an npm NAME that resolves is not the
-  same as the npm name resolving to YOUR library. Verify identity (repository field), not existence.
-  Version state re-verified 2026-08-18: react-native-iap 16.3.1 and expo-iap 5.3.1 (both 2026-08-14,
-  lockstep intact), react-native-purchases 10.7.1 (2026-08-13), no deprecation flags anywhere.
+  THE PICTURE: store rules and receipt validation make IAP testing-heavy, and the real decision is
+  who runs the entitlement backend. RevenueCat rents it to you (fees, less server work); expo-iap
+  and react-native-iap give you the client half and leave validation and cross-store entitlement
+  reconciliation to you.
+
+  OPENIAP PACKAGES (2026-09-24, verified vs npm): both libraries are released from the
+  hyodotdev/openiap monorepo (the npm repository field of both points there) and still ship in
+  lockstep: react-native-iap 16.6.2 and expo-iap 5.6.3 both on 2026-09-19. The old
+  hyochan/react-native-iap and hyochan/expo-iap repos were archived 2026-04-26 on the way into the
+  monorepo; neither package carries an npm deprecation flag → pick on runtime (Expo module vs bare
+  RN wrapper), not on liveness. expo-iap does not supersede react-native-iap.
+
+  DIST-TAG TRAP (2026-09-24, verified vs npm): the `next` tag is BEHIND `latest` on
+  react-native-iap (next 15.4.0-rc.3), expo-iap (next 4.4.0-rc.7) and react-native-purchases (next
+  8.9.1-vc-beta.1) → installing @next silently downgrades you a major.
+
+  SERVER-SIDE LAYER (2026-09-24, verified vs npm; first recorded 2026-09-02 vs the GitHub
+  release): the OpenIAP Commerce Protocol extends OpenIAP past the client SDKs into a
+  vendor-neutral SERVER-side contract for purchase verification, entitlements, lifecycle events
+  and REST/GraphQL bindings, shipping generated validator artifacts and a portable conformance
+  runner. It now publishes as @hyodotdev/openiap-commerce-protocol (0.3.0, 2026-09-15); the
+  unscoped openiap-commerce-protocol 0.1.0 is deprecated on npm → this is the receipt-validation
+  half the client libraries do not own; still 0.x, so evaluate rather than adopt.
+
+  OPENIAP BACKING (2026-08-19, verified vs openiap.dev/docs/updates/announcements): OpenIAP is
+  backed by Amazon Developer, and its docs carry store setup for Amazon and Horizon OS alongside
+  Apple/Google → the protocol these libraries implement matters if you ship to Fire OS or Vega OS.
+
+  WALLET NAME (2026-08-18, verified vs npm): bare react-native-wallet on npm is an unrelated 2020
+  package (1.0.8, erikpoort, Apple-Wallet-only); the PassKit + Google Wallet library is
+  @premieroctet/react-native-wallet → verify identity (repository field), not existence.
+
+  HISTORY:
+  2026-09-24 REOPENED: pins react-native-iap 16.5.1 → 16.6.2, expo-iap 5.5.1 → 5.6.3,
+  react-native-purchases 10.7.1 → 10.10.2; commerce protocol moved to the @hyodotdev scope (0.3.0),
+  unscoped 0.1.0 deprecated.
+  2026-09-10 REOPENED: OpenIAP backed by Amazon; lockstep pins 16.5.1 / 5.5.1; commerce protocol
+  0.1.0 server contract reconciled from harvest/2026-09-03.
+  2026-08-18 CORRECTED: the wallet row named bare react-native-wallet (an unrelated 2020 package);
+  the library is @premieroctet/react-native-wallet. Graduated drafted → reviewed.
+  2026-08-04 CORRECTED: react-native-iap was called "deprecated/archived → prefer expo-iap"; the
+  archived thing was the standalone repo, not the package.
 defer_to_skill: null
 doc: "RB-E-PAYMENTS.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-10   # OpenIAP backed by Amazon (TWiR #295) + iap lockstep pins (firsthand) · openiap-commerce-protocol 0.1.0 server contract — reconciled from harvest/2026-09-03
+updated: 2026-09-24   # pins iap 16.6.2 / expo-iap 5.6.3 / purchases 10.10.2, commerce protocol → @hyodotdev scope 0.3.0 (unscoped deprecated); prior 2026-09-10: OpenIAP backed by Amazon (TWiR #295) + iap lockstep pins (firsthand) · openiap-commerce-protocol 0.1.0 server contract — reconciled from harvest/2026-09-03
 sources:
   - "https://github.com/hyodotdev/openiap/releases/tag/openiap-commerce-protocol-0.1.0"
   - "https://www.openiap.dev/docs/updates/announcements"
@@ -57,6 +74,7 @@ sources:
   - "https://registry.npmjs.org/expo-iap/latest"
   - "https://github.com/premieroctet/react-native-wallet"
   - "https://registry.npmjs.org/@premieroctet%2Freact-native-wallet"
+  - "https://registry.npmjs.org/@hyodotdev%2Fopeniap-commerce-protocol"
 reading:
   - title: "Cross-platform subscription state: sharing entitlements between Android and iOS"
     url: "https://www.revenuecat.com/blog/engineering/cross-platform-subscription/"

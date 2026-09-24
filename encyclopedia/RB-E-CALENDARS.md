@@ -4,7 +4,7 @@ title: "About calendars, date pickers & event grids"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: low                # entry is lightly vetted — prototype before committing
-updated: 2026-07-16
+updated: 2026-09-24
 platforms: [react, react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-CALENDARS
 defer_to_skill: react-native-best-practices                   # list/gesture performance discipline
@@ -46,11 +46,12 @@ about demand: most apps need the first; calendar-app UX needs the second.
 
 ## The default, and why
 
-> Date picking / marked-dates UI → react-native-calendars (the de-facto) or
-> @marceloterreiro/flash-calendar when performance and design-system theming matter. A full
-> event-grid UX (native-calendar-style day/week views with drag and pinch) →
-> @super-calendar/native — new in 2026, prototype first. Web event calendars →
-> react-big-calendar or FullCalendar. Lightly vetted (confidence: low).
+> Date picking / marked dates → react-native-calendars (the de-facto), or
+> @marceloterreiro/flash-calendar when list performance and design-system theming matter.
+> Native event grid with drag and pinch (day/week views) → @super-calendar/native — new in
+> 2026, prototype on low-end devices first. Web event calendar → react-big-calendar;
+> FullCalendar when you need its Premium timeline/resource views. Lightly vetted
+> (confidence: low).
 
 The default is a router over the split, not a single winner. On the picker side it names two
 lanes: the de-facto suite when adoption and coverage matter, and the performance-first one
@@ -68,28 +69,32 @@ date-marking suite: Agenda, Calendar, CalendarList. Its tradeoff is stated as a 
 adoption, older architecture — and the entry leaves it at that; it is the default answer for
 picker/marking needs on adoption grounds.
 
-**@marceloterreiro/flash-calendar (2.x)** — the performance-first picker, born at Shopify:
-windowed via a FlashList peer dep, tiny (~18kb min), headless-ish theming aimed at design
+**@marceloterreiro/flash-calendar (2.x)** — the performance-first picker:
+windowed via a FlashList (`@shopify/flash-list` >=2) peer dep, tiny (18kb minified, 6kb gzip), headless-ish theming aimed at design
 systems. The entry draws its boundary explicitly: picker/marking focus, **not an event
 grid**.
 
 **@super-calendar/native (2.x)** — the new (2026) gesture-driven event grid:
 month/week/day/3-day/schedule views, pinch-to-zoom time grid, drag-to-create/resize,
 recurring events, time zones; virtualized and paged. It carries a real stack requirement —
-Reanimated 4 + Gesture Handler + Legend List — and `@super-calendar/dom` renders the same
+peer deps Reanimated >=4 <5, react-native-worklets >=0.5, Gesture Handler >=2.16 and
+`@legendapp/list` >=3, so a Reanimated 3 app upgrades first — and `@super-calendar/dom` renders the same
 core on web (the reading describes a platform-free core with native and DOM renderers). It
 earned its row through two independent signals in one week: TWiR #288, then headlining RN
 Rewind ~#48.
 
-**react-native-calendar-strip (2.x)** — the horizontal week-strip header pattern; a narrow,
-settled use case with its own when-clause.
+**react-native-calendar-strip (2.x)** — the horizontal week-strip header pattern; a narrow
+use case with its own when-clause. 2.2.6 (2022-05-11) is its last publish: adopt it only if you
+are willing to own it.
 
 **Web: FullCalendar / react-big-calendar (1.20)** — the established web event-calendar
-components; FullCalendar is the batteries-included commercial-tier option.
+components. react-big-calendar is MIT. FullCalendar is MIT for its standard features;
+timeline and resource views are in a paid Premium tier (from $480 per fullcalendar.io/pricing),
+so react-big-calendar is the MIT default and FullCalendar the pick when those views are required.
 
 Version trust: the versions above are verified against npm (react-native-calendars 1.1314 ·
-flash-calendar 2.0.0 · @super-calendar/native 2.1.5 · calendar-strip 2.2.6 ·
-react-big-calendar 1.20), and Super Calendar's package names, views, and stack requirements
+flash-calendar 2.0.0 · @super-calendar/native 2.11.0 · calendar-strip 2.2.6 ·
+react-big-calendar 1.20 · FullCalendar 7.1.0; re-checked 2026-09-24), and Super Calendar's package names, views, and stack requirements
 against its docs.
 
 ## Tradeoffs and failure modes to name out loud

@@ -7,34 +7,56 @@ confidence: medium
 platforms: [react, react-native]
 options:
   - { name: "fetch (built-in)", tradeoff: "the default on both platforms — RN's WHATWG polyfill over native networking, the browser's native fetch on web; fine for most apps" }
-  - { name: "expo/fetch", tradeoff: "WinterTC-compliant fetch with streaming — installed as the GLOBAL fetch since Expo SDK 56 (no import needed); the modern managed default" }
-  - { name: "react-native-nitro-fetch (Margelo)", tradeoff: "drop-in native fetch on Cronet (Android) / URLSession (iOS) — HTTP/1-2-3+QUIC, Brotli, disk cache, prefetch-before-navigation, worklet parsing off the JS thread; measured ~1.3x vs built-in, and now a PRODUCTION receipt: Expensify measured 15-30% faster requests and −267ms iOS / −650ms Android P50 startup (see reading); v1.6.3 (2026-08, verified vs npm), RN 0.75+" }
-  - { name: "axios", tradeoff: "the ubiquitous promise client (interceptors, defaults, wide team familiarity); runs over XHR in RN — no reason to churn OFF it, little reason to start ON it for new work" }
-  - { name: "ky / ofetch", tradeoff: "small fetch wrappers (retries, hooks, typed convenience) — web-leaning; ky 2.x, ofetch (unjs)" }
+  - { name: "expo/fetch", tradeoff: "WinterTC-compliant fetch with streaming; installed as the global fetch since Expo SDK 56 (no import needed; opt out with EXPO_PUBLIC_USE_RN_FETCH=1) — the modern managed default (verified vs the SDK 56 changelog)" }
+  - { name: "react-native-nitro-fetch (Margelo)", tradeoff: "drop-in native fetch on Cronet (Android) / URLSession (iOS): HTTP/1-2-3+QUIC, Brotli, disk cache, prefetch, worklet parsing off the JS thread. Vendor harness ~1.3x (~23%) vs built-in; Expensify in production: 15-30% faster requests, −267ms iOS / −650ms Android P50 warm start. 1.7.0 (2026-09-12, verified vs npm), RN 0.75+; see note: NITRO-FETCH" }
+  - { name: "axios", tradeoff: "the ubiquitous promise client (interceptors, defaults, wide team familiarity); runs over XHR in RN — no reason to churn OFF it, little reason to start ON it for new work. 1.20.0 (2026-08-26, verified vs npm)" }
+  - { name: "ky / ofetch", tradeoff: "small fetch wrappers (retries, hooks, typed convenience), web-leaning. ky 2.1.0 (2026-08-28), ofetch (unjs) 1.5.1 (2025-11-01), verified vs npm" }
 recommend:
-  default: "Use fetch — on Expo SDK 56+ you are already on expo/fetch globally. The bigger win in most apps is the CACHE layer above it (TanStack Query, RB-E-DATA), not the client. Reach for react-native-nitro-fetch only when the network layer is a MEASURED hot path (cold-start requests, media, HTTP/3 backends) or you need prefetch/worklet parsing."
+  default: "fetch (built-in) on both platforms: the browser's native fetch on react; on react-native the built-in fetch, which on Expo SDK 56+ is already expo/fetch globally. The bigger win in most apps is the CACHE layer above it (TanStack Query, RB-E-DATA), not the client. The pick changes to react-native-nitro-fetch only when the network layer is a MEASURED hot path (cold-start requests, media, HTTP/3 backends) or you need prefetch/worklet parsing."
   when:
-    - "team already on axios → keep it; interceptor ergonomics are real and migration buys little"
-    - "streaming responses (AI/chat tokens, SSE-style) → expo/fetch or nitro-fetch (streaming + TextDecoder) — see RB-E-AI-UI"
-    - "measured network hot path / prefetch-before-navigation / HTTP-3 backend → react-native-nitro-fetch (drop-in)"
-    - "server-state caching, retries, invalidation → that's TanStack Query territory (RB-E-DATA), regardless of client"
-    - "P2P / Holepunch app → there may be no HTTP layer at all; transport is Hyperswarm streams (RB-E-P2P)"
+    - "team already on axios → axios (keep it; interceptor ergonomics are real and migration buys little)"
+    - "web team already on ky or ofetch → ky / ofetch (keep it; a thin fetch wrapper, same reasoning as axios)"
+    - "streaming responses (AI/chat tokens, SSE-style) → expo/fetch, else react-native-nitro-fetch (streaming + TextDecoder; see RB-E-AI-UI)"
+    - "measured network hot path / prefetch-before-navigation / HTTP-3 backend on react-native → react-native-nitro-fetch (drop-in)"
+    - "server-state caching, retries, invalidation → TanStack Query (RB-E-DATA), regardless of client"
+    - "P2P / Holepunch app → n/a (there may be no HTTP layer at all; transport is Hyperswarm streams, RB-E-P2P)"
 note: >
-  ABORT MODERNIZATION (2026-07-17, RN Rewind #49; commit verified): RN forked the 7-years-dormant
-  abort-controller polyfill IN-TREE (dropping it and event-target-shim), wired it to RN's own
-  EventTarget, and added the missing modern API — AbortSignal.timeout(), AbortSignal.any(),
-  AbortSignal.abort(reason), signal.throwIfAborted(). Landed on main against 0.87 (next release):
+  The HTTP client is the least consequential of three layers. RN's built-in fetch is a JS
+  polyfill over native networking; expo/fetch standardizes that API (WinterTC + streaming);
+  nitro-fetch swaps the ENGINE (Cronet/URLSession, HTTP/3) behind the same API. Every serious
+  client is fetch-shaped, so client choice is low-stakes compared to cache design above it
+  (RB-E-DATA), and only the engine swap below it buys measurable speed — which is why the
+  default is plain fetch and the engine swap is gated on a measured hot path.
+
+
+  NITRO-FETCH (2026-09-24, verified vs npm, its README and the Margelo/Expensify blog): the
+  vendor harness measures 23.2% average / 1.30× (10 runs, release build, Wi-Fi, no prefetch).
+  Expensify's global replacement of fetch/Headers/Request/Response gave 15-30% faster requests;
+  prefetching the one critical startup request before the JS runtime loads (account-scoped
+  prefetch keys, pre-runtime token refresh) moved P50 warm start 1,676→1,409ms on iOS and
+  3,223→2,573ms on Android. On Android Cronet you own certificate pinning. Floors (1.7.0 peer
+  dependencies): react-native-nitro-modules ≥0.36.1; react-native-worklets ≥0.8.0, optional,
+  needed only for worklet parsing.
+
+
+  ABORT MODERNIZATION (2026-09-24, verified vs commit 6f3375a and the GitHub compare against
+  v0.87.0): RN replaced the dormant abort-controller polyfill with an in-tree fork wired to RN's
+  own EventTarget (dropping event-target-shim) and added AbortSignal.timeout(), AbortSignal.any(),
+  AbortSignal.abort(reason) and signal.throwIfAborted(). It shipped in RN 0.87.0 → on RN ≥0.87,
   web cancellation patterns (per-request deadlines, merged signals) work unmodified.
-  NEW entry (2026-07-09): the fetch-layer choice had no home — flagged as a gap candidate in the
-  Native Weekly first-harvest (nitro-fetch featured twice; SDK 56 made expo/fetch the global
-  default, verified vs the SDK 56 changelog) and promoted on the user's call. The durable axis:
-  RN's built-in fetch is a JS polyfill over native networking; expo/fetch standardizes it
-  (WinterTC + streaming); nitro-fetch swaps the ENGINE (Cronet/URLSession, HTTP/3) behind the
-  same API. Client choice is low-stakes compared to cache design — hence the DATA cross-refs.
-  nitro-fetch facts verified vs its repo (benchmarks are vendor-run; ~23% on their harness).
+
+
+  CROSS-REFERENCES: RB-E-DATA owns caching, retries and invalidation; RB-E-AI-UI owns the
+  streaming-token UI; RB-E-P2P owns the no-HTTP lane.
+
+
+  HISTORY:
+
+  2026-07-09 GAP CLOSED: the fetch-layer choice had no home; entry promoted from the Native
+  Weekly first harvest (nitro-fetch featured twice; SDK 56 made expo/fetch the global default).
 defer_to_skill: null
 doc: "RB-E-NETWORKING.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-01   # Expensify production receipt for nitro-fetch (15-30% requests, −200ms+ startup; margelo blog) + pin 1.6.1 → 1.6.3
+updated: 2026-09-24   # nitro-fetch pin 1.6.3 → 1.7.0; abort modernization shipped in RN 0.87.0; axios/ky/ofetch pins; prior 2026-09-01: Expensify production receipt for nitro-fetch (15-30% requests, −200ms+ startup; margelo blog) + pin 1.6.1 → 1.6.3
 reading:
   - title: "react-native-nitro-fetch — architecture & benchmarks"
     url: "https://github.com/margelo/react-native-nitro-fetch"
@@ -53,6 +75,8 @@ sources:
   - "https://github.com/margelo/react-native-nitro-fetch"
   - "https://expo.dev/changelog/sdk-56"
   - "https://registry.npmjs.org/axios/latest"
+  - "https://registry.npmjs.org/react-native-nitro-fetch/latest"
+  - "https://margelo.com/blog/speeding-up-expensifys-networking-with-nitro-fetch"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "axios", label: "axios", token: "axios" }
   - { pkg: "react-native-nitro-fetch", label: "nitro-fetch", token: "nitro-fetch" }

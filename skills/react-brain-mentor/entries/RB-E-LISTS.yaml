@@ -8,65 +8,75 @@ platforms: [react, react-native]
 options:
   - { name: "ScrollView/.map", tradeoff: "fine <20 static items only" }
   - { name: "FlatList", tradeoff: "RN baseline virtualization" }
-  - { name: "FlashList", tradeoff: "recycling; large RN lists (v2 = New Architecture ONLY; old arch → pin v1.x). STEWARDSHIP IN TRANSITION — Shopify is leaving React Native and will only fix compatibility-breaking issues while it looks for a long-term steward; see note" }
+  - { name: "FlashList", tradeoff: "recycling; large RN lists (v2 = New Architecture ONLY; old arch → pin v1.x). 2.3.2 (2026-06-10, verified vs npm 2026-09-24, not deprecated); Shopify is leaving React Native and only fixes compatibility-breaking issues while it seeks a long-term steward. See note: FLASHLIST STEWARDSHIP" }
   - { name: "react-window / react-virtual / HighTable", tradeoff: "web virtualization; HighTable handles billion-row tables (viewport-only DOM + scrollbar downscaling)" }
-  - { name: "Legend List", tradeoff: "one virtualization engine for RN + web (v3.0 stable); SectionList + chat/anchoring APIs; signal-driven container pool → very small re-renders" }
+  - { name: "Legend List", tradeoff: "one virtualization engine for RN + web (v3 stable; 3.4.0, 2026-09-21, verified vs npm 2026-09-24); SectionList + chat/anchoring APIs; signal-driven container pool → very small re-renders" }
 recommend:
-  default: "RN: FlashList for large lists (still the pick — but read the stewardship note before betting a new codebase on it), FlatList otherwise, ScrollView only for <20 static items. Web: TanStack Virtual (react-virtual) or react-window — both current (3.14.13 / 2.3.1, verified 2026-09-21), pick on API taste."
+  default: "RN: FlashList for large lists, FlatList otherwise, ScrollView only for <20 static items. Web: TanStack Virtual (react-virtual) or react-window — both current (3.14.13 / 2.3.3, verified vs npm 2026-09-24); pick on API taste."
   when:
     - "huge web tables (100k+ rows) → HighTable"
     - "one list engine across RN + web → Legend List"
-    - "old-architecture RN app → FlashList v2 is New-Arch-only; pin FlashList v1.x or stay on FlatList"
-    - "text-heavy RN feeds where hundreds of flat labels mount at once → try react-native-plain-text for those labels (renders straight to UILabel/TextView, skipping RN's text layout pipeline; one string, one style, Fabric-only, 0.8.x beta as of 2026-08) and keep <Text> wherever you need nesting, mixed styles, press handling or selection — the two mix in one screen"
-    - "exact thresholds / perf → react-native-best-practices owns the rules"
+    - "new large RN list surface where maintainer continuity outweighs library maturity → Legend List (actively released; FlashList is on critical-fixes-only while Shopify seeks a steward)"
+    - "old-architecture RN app → FlashList v1.x (pinned; v2 is New-Arch-only), else FlatList"
+    - "text-heavy RN feeds where hundreds of flat labels mount at once → react-native-plain-text for those labels (renders straight to UILabel/TextView; one string, one style, New Architecture only, 0.8.x pre-1.0; keep <Text> where you need nesting, mixed styles, press handling or selection — the two mix in one screen)"
+    - "exact thresholds / perf → react-native-best-practices (owns the rules)"
 note: >
-  FLASHLIST STEWARDSHIP IS IN TRANSITION (2026-09-21, verified vs Shopify's own announcement +
-  the npm registry): Shopify is migrating its apps off React Native back to Swift/Kotlin, and said
-  so in the same post that set out what happens to its libraries. For FlashList specifically —
+  A list's cost scales with the nodes it MOUNTS, not the length of its data, so every tool here
+  renders only what is on or near the screen — by windowing (mount the viewport, unmount the rest:
+  FlatList, react-window, react-virtual) or by recycling (re-bind a fixed pool of views: FlashList).
+  On React Native, FlatList's windowing is the baseline and FlashList's recycling wins at scale, where
+  mount/unmount churn dominates; ScrollView mounts everything and is correct only for a few static
+  rows. On the web the same logic applies to DOM nodes. Legend List is the one engine that covers
+  both platforms. Exact thresholds are owned by react-native-best-practices (RN-RULE-USE-FLASHLIST).
+
+  FLASHLIST STEWARDSHIP (2026-09-21, verified vs Shopify's announcement + npm; npm re-checked
+  2026-09-24): Shopify is migrating its apps off React Native back to Swift/Kotlin. For FlashList —
   which the post puts at ~2M downloads/week and calls "the default way to render high-performance
   lists in React Native" — Shopify commits only to FIXING CRITICAL ISSUES THAT BREAK COMPATIBILITY,
-  and says it is in discussions with several companies about taking on long-term stewardship. No
-  transfer has been announced. What is verifiable today: the package is NOT deprecated on npm and
-  latest is 2.3.2, published 2026-06-10 — i.e. the last release already predates the announcement,
-  which is consistent with maintenance-only. The recommendation does NOT change: FlashList remains
-  the best RN answer for large lists and a maintained-for-compatibility library is not a broken one.
-  What changes is how you bet: if you are STARTING a large RN list surface now, price in that the
-  maintainer is leaving the ecosystem, and note that this entry already carries a cross-platform
-  alternative under active development (Legend List, v3.0 stable, RN + web) in the when-clauses. The
-  tripwire below fires if npm ever carries a deprecation flag (the usual signal for a rename or a
-  handover); a steward being NAMED is not machine-observable, so re-read the announcement thread
-  when this entry next comes up for challenge. The same announcement
-  archives Shopify's Restyle (not an option in this corpus) and hands react-native-skia to its
-  author under a new name — see RB-E-ANIMATION, which owns that thread.
-  PLAIN TEXT PROMOTED skip→when-clause 2026-08-18 (2nd independent signal — TWiR #293 then RN
-  Rewind #52 — which was the reopen condition recorded at the first skip; facts verified vs the
-  repo README + npm 0.7.1; still pre-1.0 at 0.8.1, 2026-09-01): react-native-plain-text is a narrow micro-optimization, not a list
-  engine — it bypasses RN's text layout pipeline by rendering to the platform's native label
-  widget, and buys that with a hard constraint (single string, single style; no nested <Text>,
-  no press handling or selection). It requires the New Architecture and does not run in Expo Go.
-  Treat it as cell-content tuning AFTER virtualization is right, and measure before adopting.
-  V9 ALSO MOVED THE SCALE CEILING (added 2026-08-18 on spot-check — this post had been carried as a
-  `cap` skip since React Status #486, and re-reading it overturned that: it is not a duplicate of the
-  reactivity story, it changes a threshold this entry recommends on). V8 built every row/cell/header
-  object with its own copy of every method, each carrying its own closure scope, so memory scaled
-  with objects created; V9 hangs those methods on shared prototypes cached per table. Measured on the
-  authors' Playwright/CDP benchmark: up to ~90% less memory on large tables, moving the practical
-  browser ceiling from ~1–1.5M rows before hitting ~4GB to roughly 10–16M. Two honest edges they
-  state themselves — small tables (10 rows × 8 cols, all features) use slightly MORE memory in v9
-  because of added memoization, and one breaking change came with the refactor. The consequence
-  here: "huge web tables → HighTable" is now a call about DOM/UX at that size, not about Table
-  running out of memory first.
-  TANSTACK TABLE v9 IS STABLE (9.0.0 on npm 2026-08-04, verified vs the registry — the beta line
-  had been carried as a skip since #291). v9 moves REACTIVITY underneath the Table APIs: instead of
-  one table-state object that adapters wrap from the outside, feature state is split into separate
-  atoms (pagination, row selection, column sizing, …) behind a shared `TableReactivityBindings`
-  contract, so each of its 9 framework adapters plugs in native signals (Angular/Solid/Vue) or
-  TanStack Store. The point is grain — selecting a row updates that checkbox and the selected-row
-  counter without making every cell depend on whole-table state. Callers still pass ordinary values
-  and call the same Table methods, so this is an upgrade, not a rewrite.
+  and says it is in discussions with several companies about long-term stewardship. No transfer has
+  been announced. The package is NOT deprecated on npm and latest is 2.3.2, published 2026-06-10, so
+  the last release already predates the announcement, consistent with maintenance-only → FlashList
+  stays the RN large-list default (maintained-for-compatibility is not broken), but a team starting a
+  large list surface now should price in that the maintainer is leaving; Legend List is the
+  actively-developed RN + web alternative. The tripwire fires on an npm deprecation flag (the usual
+  signal of a rename or handover); a steward being NAMED is not machine-observable, so re-read the
+  announcement thread when this entry is next challenged. The same announcement archives Restyle
+  (not an option here) and hands react-native-skia to its author under a new name — RB-E-ANIMATION
+  owns that thread.
+
+  PLAIN TEXT (facts verified vs the repo README + props guide; npm 0.8.2, 2026-09-02, verified
+  2026-09-24): react-native-plain-text is a cell-content micro-optimization, not a list engine. It
+  bypasses RN's text layout pipeline by rendering to the platform's native label widget (UILabel /
+  TextView) and buys that with a hard constraint: single string, single style, no nested <Text>, no
+  press handling (wrap it in a Pressable) and no selection (listed as To Do). It requires the New
+  Architecture and does not run in Expo Go → adopt it AFTER virtualization is right, and measure
+  first.
+
+  TANSTACK TABLE V9 (9.0.0 stable on npm 2026-08-04, verified vs the registry and the two TanStack
+  v9 posts): REACTIVITY moved underneath the Table APIs. Instead of one table-state object that
+  adapters wrap from the outside, feature state is split into atoms (pagination, row selection,
+  column sizing, …) behind a shared `TableReactivityBindings` contract, so each of its 9 framework
+  adapters plugs in native signals (Angular/Solid/Vue) or TanStack Store; selecting a row updates
+  that checkbox and the selected-row counter without making every cell depend on whole-table state.
+  Callers still pass ordinary values and call the same Table methods, so this is an upgrade, not a
+  rewrite. MEMORY: v8 built every row/cell/header object with its own copy of every method, each
+  with its own closure scope; v9 hangs those methods on shared prototypes cached per table. On the
+  authors' Playwright/CDP benchmark that is up to ~90% less memory on large tables, moving the
+  practical browser ceiling from ~1–1.5M rows (at ~4GB) to roughly 10–16M. Their own edges: small
+  tables (10 rows × 8 cols, all features) use slightly MORE memory in v9 because of added
+  memoization, and the refactor carried one breaking change → "huge web tables → HighTable" is now a
+  call about DOM/UX at that size, not about Table running out of memory first.
+
+  HISTORY:
+  2026-08-18 REOPENED: react-native-plain-text promoted from skip to a when-clause on its 2nd
+  independent signal (TWiR #293, then RN Rewind #52) — the reopen condition recorded at the first
+  skip.
+  2026-08-18 REOPENED: the TanStack Table v9 memory post, carried as a cap skip since React Status
+  #486, was re-read and kept — it moves the HighTable threshold.
+  2026-08-04 GAP CLOSED: TanStack Table v9 went stable (the beta line had been a skip since #291).
 defer_to_skill: react-native-best-practices  # RN-RULE-USE-FLASHLIST owns the thresholds
 doc: "RB-E-LISTS.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-21   # FlashList stewardship in transition — Shopify leaving RN, critical-compat fixes only (TWiR #297 · Status #490 · RN Rewind #57)
+updated: 2026-09-24   # react-window 2.3.3 + plain-text 0.8.2 pins refreshed vs npm; prior 2026-09-21: FlashList stewardship in transition — Shopify leaving RN, critical-compat fixes only (TWiR #297 · Status #490 · RN Rewind #57)
 reading:
   - title: "How to Build the Fastest Apps: Break the Rules (App.js Conf 2026)"
     url: "https://www.youtube.com/watch?v=K3flMIHS-cI"

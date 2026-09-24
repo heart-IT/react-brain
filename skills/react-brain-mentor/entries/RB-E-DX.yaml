@@ -6,73 +6,88 @@ status: reviewed   # long-form entry written + source-checked → encyclopedia/R
 confidence: high
 platforms: [react, react-native]
 options:
-  - { name: "CI (GitHub Actions / similar)", tradeoff: "gate tests + typecheck + lint + build on every PR; the single highest-leverage DX baseline" }
-  - { name: "lint/format — Biome or ESLint (flat) + Prettier", tradeoff: "Biome = one fast Rust tool (lint+format); ESLint flat + Prettier = bigger plugin ecosystem (react-hooks, react-compiler rules)" }
-  - { name: "Oxlint + oxlint-tsgolint (type-aware)", tradeoff: "the third lint lane, and the reason to re-evaluate: TYPE-AWARE linting went STABLE 2026-07-22 with tsgolint v7 — tracks TypeScript 7.0.2 and covers 59 of typescript-eslint's 61 type-aware rules (`oxlint --type-aware`). Oxlint 1.79 (2026-08-18) then ported the REACT COMPILER surface: 22 compiler-powered rules using the compiler's own validation passes, recommended-preset rules mapped into Oxlint's correctness category (replacing the old nursery react/react-compiler rule); react-hooks proper remains the ESLint-only piece. 1.83 (2026-09, verified vs the oxc release) updates its lint rules for REACT 19.3, so the Oxlint lane no longer trails the React line this corpus recommends in RB-E-REACT-CORE" }
-  - { name: "git hooks — husky + lint-staged / lefthook", tradeoff: "run lint/format/tests pre-commit/pre-push; catch issues before CI" }
-  - { name: "monorepo task runner — Turborepo / Nx + pnpm workspaces", tradeoff: "cached, parallel task graph across packages (see RB-E-BUILD)" }
-  - { name: "dependency hygiene — renovate/dependabot + audit", tradeoff: "automated updates + npm/pnpm audit + install-script blocking (see RB-E-SECURITY)" }
-  - { name: "react-doctor (Million)", tradeoff: "npx react-doctor — one-shot codebase scan for React footguns (state/effects/perf/a11y/security), CI mode + installable as an agent skill; 13.5k★, from the Million.js/react-scan team; positioned as the lint layer for agent-written React (see RB-E-AI-DEVTOOLS)" }
+  - { name: "CI (GitHub Actions / similar)", tradeoff: "Gate tests + typecheck + lint + build on every PR — the single highest-leverage DX baseline, because an invariant that is not gated silently rots." }
+  - { name: "lint/format — Biome or ESLint (flat) + Prettier", tradeoff: "Biome is one fast Rust tool for lint + format; ESLint flat + Prettier has the bigger plugin ecosystem and the only react-hooks rules. @biomejs/biome 2.5.14 (2026-09-16), eslint 10.11.0 (2026-09-18), prettier 3.9.9 (2026-09-23; all verified vs npm)." }
+  - { name: "Oxlint + oxlint-tsgolint (type-aware)", tradeoff: "The third lint lane: type-aware linting is stable (59 of typescript-eslint's 61 type-aware rules) and 22 React Compiler-powered rules are native; it can also host ESLint plugins via jsPlugins. oxlint 1.85.0 (2026-09-21), oxlint-tsgolint 7.0.2002 (2026-09-18; both verified vs npm). See note: OXLINT." }
+  - { name: "git hooks — husky + lint-staged / lefthook", tradeoff: "Run lint/format/tests pre-commit or pre-push so issues are caught before CI. husky 9.1.7 (2024-11-18), lint-staged 17.5.1 (2026-09-10), lefthook 2.1.14 (2026-09-14; all verified vs npm)." }
+  - { name: "monorepo task runner — Turborepo / Nx + pnpm workspaces", tradeoff: "Cached, parallel task graph across packages; pnpm 11.11+ also versions and releases the workspace. turbo 2.11.3 (2026-09-22), nx 23.2.1 (2026-09-09), pnpm 12.6.0 (2026-09-22; all verified vs npm). See note: PNPM RELEASE MANAGEMENT; bundler/pnpm 12 depth in RB-E-BUILD." }
+  - { name: "dependency hygiene — renovate/dependabot + audit", tradeoff: "Automated updates + npm/pnpm audit + install-script blocking; RB-E-SECURITY owns the supply-chain thread." }
+  - { name: "react-doctor (Million)", tradeoff: "npx react-doctor: one-shot scan for React footguns (state/effects/perf/a11y/security), CI mode, installable as an agent skill; the lint layer for agent-written React (see RB-E-AI-DEVTOOLS). 0.9.14 (2026-09-12, verified vs npm); ~14.9k stars (2026-09-24, verified vs GitHub)." }
 recommend:
-  default: "Gate tests + typecheck + lint on every PR in CI, and enforce the same locally with a pre-commit hook. For lint/format, default to Biome (one fast tool) unless you need ESLint's plugin ecosystem (react-hooks, react-compiler)."
+  default: "Gate tests + typecheck + lint on every PR in CI, and enforce the same locally with a pre-commit hook. For lint/format, default to Biome (one fast tool) unless you need ESLint's react-hooks rules, in which case ESLint flat config + Prettier."
   when:
-    - "has tests but no CI → add CI FIRST; invariants that aren't gated silently rot (a real finding in audited production apps)"
-    - "needs ESLint react-hooks / react-compiler rules → ESLint flat config + Prettier over Biome — but the exclusivity is now react-hooks only: Oxlint 1.79 carries the React Compiler rules natively, and Biome 2.5.8 began closing the same gap (see note)"
-    - "kept typescript-eslint ONLY for type-aware rules → re-evaluate: oxlint --type-aware is stable and covers 59/61 of them"
-    - "multi-package repo → pnpm workspaces + Turborepo for a cached task graph; pnpm 11.11+ also versions and releases the workspace itself (see note) — no separate changesets tool needed"
-    - "normative styleguide but no linter config → wire the rules into lint so they're enforced mechanically, not by review"
-    - "lots of agent-written React landing in the repo → add a react-doctor pass (CI or agent skill) on top of lint"
+    - "has tests but no CI → CI (GitHub Actions or similar; add it FIRST — ungated invariants silently rot, a real finding in audited production apps)"
+    - "needs ESLint react-hooks rules → ESLint flat config + Prettier (react-hooks is the remaining ESLint-only surface; React Compiler rules are native in Oxlint 1.79+ and in Biome 2.5.8+ nursery)"
+    - "kept typescript-eslint ONLY for type-aware rules → Oxlint + oxlint-tsgolint (`oxlint --type-aware`, stable, 59/61 rules; ESLint plugins can run through Oxlint's jsPlugins)"
+    - "no git hook yet → husky + lint-staged (run lint/format on staged files; lefthook covers the same job if already installed)"
+    - "multi-package repo → pnpm workspaces + Turborepo (cached task graph; Nx if the repo already runs it; pnpm 11.11+ versions and releases the workspace, so no separate changesets tool)"
+    - "normative styleguide but no linter config → lint config (encode the styleguide rules so they are enforced mechanically, not by review)"
+    - "lots of agent-written React landing in the repo → react-doctor (a CI or agent-skill pass on top of lint)"
 note: >
-  COHORT SIGNAL (2026-09-10, `react-brain census` delta, verified by fetching the package.json):
-  SENTRY has moved its lint lane — getsentry/sentry now carries oxlint 1.81.0 and NO eslint or
-  typescript-eslint at all. This is a real week-over-week change, not a tracking artifact (Oxlint was
-  already in the census baseline), and it is the first cohort app on record to drop ESLint outright
-  rather than run the two side by side. It does not overturn the react-hooks caveat below — a repo
-  can simply accept not having those rules — but it is the strongest adoption datapoint yet that the
-  type-aware + compiler-rule surface has become sufficient for a large TypeScript codebase.
-  FOLLOW-UP (2026-09-24, census delta 'sentry adopted ESLint', verified vs package.json + oxlint.config.ts):
-  read 'NO eslint' above as 'no ESLint RUN'. The eslint package (10.8.0) is back in
-  getsentry/sentry's devDependencies, but lint:js is still just `oxlint` (Oxlint 1.83.0), the repo
-  root has no ESLint config file, and oxlint.config.ts loads a dozen-plus ESLint plugins (unicorn,
-  import, react, @tanstack/query, boundaries, jest-dom, regexp, react-you-might-not-need-an-effect,
-  e18e) through Oxlint's jsPlugins. The durable lesson is that leaving ESLint the LINTER does not
-  mean leaving the ESLint PLUGIN ecosystem — check whether the plugins you depend on run under
-  Oxlint's JS-plugin host before treating a missing native rule as a blocker.
-  DX is cross-cutting — architecture/boundaries depth → engineering-principles; bundler choice →
-  RB-E-BUILD; supply-chain → RB-E-SECURITY. This entry is the feedback loop (CI/lint/hooks/
-  onboarding) that keeps the others honest.
-  BIOME STARTS ON THE REACT-COMPILER GAP (2026-08-13, verified vs the Biome rule docs): 2.5.8 adds
-  `useReactCompiler`, which RUNS React Compiler in lint mode and surfaces its actionable
-  diagnostics (e.g. a hook called inside a conditional). It self-scopes — it only runs when the
-  nearest package.json declares React ≥19 — but it is in the NURSERY group at `information`
-  severity, i.e. experimental and off by default; you opt in per-rule. That narrows, without
-  closing, the "ESLint is the only lane with react-hooks/react-compiler rules" reason above:
-  treat it as a signal about where Biome is heading, not yet as parity.
-  LINT LANDSCAPE SHIFT (2026-07-28, verified vs the Oxc release post): type-aware linting is no
-  longer a reason to stay on typescript-eslint — tsgolint v7 shipped stable, tracking TypeScript
-  7.0.2 with 59 of typescript-eslint's 61 type-aware rules behind `oxlint --type-aware`. The
-  remaining ESLint-only surface for React work NARROWED AGAIN 2026-08-18 (verified vs the Oxc
-  blog): Oxlint 1.79 ships 22 React Compiler-powered rules (the compiler's validation passes,
-  recommended presets → correctness category), so react-compiler linting is no longer ESLint's
-  exclusive either — react-hooks is what the recommend clause above still keys on. Same
-  announcement: `oxc-transform-react` applies React Compiler's automatic memoization ~10× faster
-  than the Babel plugin in Oxc's preliminary benchmark, wired into @vitejs/plugin-react 6.1.0 —
-  the build-side companion for repos adopting the compiler (RB-E-REACT-CORE has the compiler
-  default itself).
-  MONOREPO RELEASE MANAGEMENT MOVED INTO pnpm (2026-07-28, verified vs the pnpm 11.11-11.14 post
-  — this fires the twir-290 reopen signal on the merged pnpm RFC, which said "DX/BUILD candidate
-  when it lands in a pnpm release"): `pnpm change` records changesets-compatible `.changeset/*.md`
-  intents, a bare `pnpm version -r` consumes them across the workspace with dependent propagation
-  through `workspace:` ranges and a committed `.changeset/ledger.yaml` that keeps cherry-picks and
-  merge-backs safe, and `pnpm lane` runs per-package prerelease lanes. Config lives under a
-  `versioning` key in pnpm-workspace.yaml; changelogs default to REGISTRY storage (composed at
-  publish time, no committed CHANGELOG.md) unless you set `versioning.changelog.storage:
-  repository`. Same releases add `pnpm doctor` (installation/environment diagnosis with non-zero
-  exit, --json, --offline) and fix a path-traversal vulnerability. For a pnpm monorepo this
-  removes a dependency (changesets) rather than adding one.
+  DX is the feedback loop that keeps the other entries honest: CI gates, lint, hooks and onboarding
+  turn review-time opinions into mechanical checks. The default holds because CI on every PR is the
+  cheapest control that catches everything else, and a local hook moves the same check to before the
+  push. The lint choice is decided by one question — do you need ESLint's react-hooks rules? — since
+  type-aware rules and React Compiler rules are no longer ESLint-exclusive.
+
+  OXLINT (2026-07-28 and 2026-08-18, verified vs the Oxc release posts; version re-checked 2026-09-24
+  vs npm): tsgolint v7 made type-aware linting stable, tracking TypeScript 7.0.2 with 59 of
+  typescript-eslint's 61 type-aware rules behind `oxlint --type-aware`, so type-aware rules alone are
+  no longer a reason to keep typescript-eslint. Oxlint 1.79 (2026-08-18) ships 22 React
+  Compiler-powered rules that use the compiler's own validation passes, with the recommended-preset
+  rules mapped into Oxlint's correctness category (replacing the old nursery react/react-compiler
+  rule); react-hooks proper remains ESLint-only. Oxlint 1.83 (2026-09-14, verified vs the Oxc
+  release) updates its lint rules for React 19.3, the React line RB-E-REACT-CORE recommends. The same
+  2026-08-18 announcement: `oxc-transform-react` applies React Compiler's automatic memoization ~10×
+  faster than the Babel plugin in Oxc's preliminary benchmark, wired into @vitejs/plugin-react 6.1.0
+  (RB-E-REACT-CORE owns the compiler default).
+
+  BIOME useReactCompiler (2026-08-13, verified vs the Biome rule docs): 2.5.8 adds `useReactCompiler`,
+  which runs React Compiler in lint mode and surfaces its actionable diagnostics (e.g. a hook called
+  inside a conditional). It only runs when the nearest package.json declares React ≥19, and it sits in
+  the nursery group at `information` severity — off by default, opt in per rule. It narrows the
+  React-rules gap without closing it: read it as Biome's direction, not parity.
+
+  COHORT SIGNAL: SENTRY RUNS OXLINT, NOT ESLINT (2026-09-10 and 2026-09-24, `react-brain census`
+  deltas, verified vs getsentry/sentry package.json + oxlint.config.ts): getsentry/sentry's lint:js
+  is just `oxlint` (Oxlint 1.83.0), with no typescript-eslint and no ESLint config file at the repo
+  root — the first cohort app on record to stop running ESLint rather than run both. The eslint
+  package (10.8.0) is back in its devDependencies because oxlint.config.ts loads a dozen-plus ESLint
+  plugins (unicorn, import, react, @tanstack/query, boundaries, jest-dom, regexp,
+  react-you-might-not-need-an-effect, e18e) through Oxlint's jsPlugins. Consequence: leaving ESLint
+  the LINTER does not mean leaving the ESLint PLUGIN ecosystem — check whether the plugins you depend
+  on run under Oxlint's JS-plugin host before treating a missing native rule as a blocker. It does not
+  overturn the react-hooks condition (a repo can accept not having those rules), but it is the
+  strongest datapoint that the type-aware + compiler-rule surface suffices for a large TypeScript
+  codebase.
+
+  PNPM RELEASE MANAGEMENT (2026-07-28, verified vs the pnpm 11.11-11.14 post; pnpm 12 keeps pnpm 11's
+  commands and settings per the 12.0 post, RB-E-BUILD owns pnpm 12): `pnpm change` records
+  changesets-compatible `.changeset/*.md` intents; a bare `pnpm version -r` consumes them across the
+  workspace with dependent propagation through `workspace:` ranges and a committed
+  `.changeset/ledger.yaml` that keeps cherry-picks and merge-backs safe; `pnpm lane` runs per-package
+  prerelease lanes. Config lives under a `versioning` key in pnpm-workspace.yaml; changelogs default to
+  REGISTRY storage (composed at publish time, no committed CHANGELOG.md) unless you set
+  `versioning.changelog.storage: repository`. The same releases add `pnpm doctor` (installation and
+  environment diagnosis with non-zero exit, --json, --offline) and fix a path-traversal vulnerability.
+  For a pnpm monorepo this removes a dependency (changesets) rather than adding one.
+
+  CROSS-REFERENCES: engineering-principles owns architecture/boundaries depth; RB-E-BUILD owns bundler
+  choice and pnpm 12; RB-E-SECURITY owns supply chain; RB-E-AI-DEVTOOLS owns the agent-written-code
+  review layer.
+
+  HISTORY:
+  2026-09-24 CORRECTED: "Sentry has NO eslint" read as "no ESLint run" — eslint is back as a
+  devDependency to host plugins under Oxlint's jsPlugins; Oxlint pin moved 1.83 → 1.85.0.
+  2026-09-21 REOPENED: Oxlint 1.83 updates its rules for React 19.3.
+  2026-09-10 REOPENED: census delta — Sentry moved its lint lane to Oxlint.
+  2026-08-18 WEAKENED: react-compiler linting no longer ESLint-exclusive (Oxlint 1.79).
+  2026-08-13 REOPENED: Biome 2.5.8 useReactCompiler (nursery).
+  2026-07-28 WEAKENED: type-aware rules no longer a reason to keep typescript-eslint (tsgolint v7).
+  2026-07-28 GAP CLOSED: pnpm 11.11+ workspace versioning fires the twir-290 reopen signal.
 defer_to_skill: engineering-principles
 doc: "RB-E-DX.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-24   # Sentry's Oxlint lane runs ESLint plugins via jsPlugins (census follow-up); prior 2026-09-21: Oxlint 1.83 updates its rules for React 19.3 — the third lint lane keeps pace with the recommended React line
+updated: 2026-09-24   # version receipts re-checked vs npm (Oxlint 1.85.0, pnpm 12.6.0); Sentry's Oxlint lane runs ESLint plugins via jsPlugins (census follow-up); prior 2026-09-21: Oxlint 1.83 updates its rules for React 19.3 — the third lint lane keeps pace with the recommended React line
 reading:
   - title: "Best CI/CD for mobile apps in 2026: a practical comparison"
     url: "https://expo.dev/blog/best-ci-cd-for-mobile-apps"

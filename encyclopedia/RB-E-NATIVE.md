@@ -4,7 +4,7 @@ title: "About native modules & the New Architecture (React Native)"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: high
-updated: 2026-06-25
+updated: 2026-09-24
 platforms: [react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-NATIVE
 defer_to_skill: react-native-jsi                              # JSI memory/threading depth
@@ -44,12 +44,15 @@ The New Architecture is **the** architecture. It became the default for new proj
 began stripping Legacy-Architecture code from iOS and Android. Legacy was frozen at 0.80 and
 is effectively gone. So "should we migrate to the New Architecture?" is no longer a question —
 **all new native work targets it**, and apps still on Legacy are on borrowed time
-(`RB-E-RN-VERSIONS`). (Verified against the official RN 0.84 and 0.86 release blogs.)
+(`RB-E-RN-VERSIONS`). (Verified against the official RN 0.84 and 0.86 release blogs.) One
+dependency falls out of this too: RN 0.86 moved Android-15+ edge-to-edge into core, so on RN
+0.86+ the standalone `react-native-edge-to-edge` can be dropped; below 0.86 it is still needed.
 
 ## The default, and why
 
-> Target the New Architecture (mandatory ≥ RN 0.82). Reach for **Expo Modules** for most
-> native needs; use **Nitro Modules** for performance-critical custom native.
+> Target the New Architecture (the only runtime since RN 0.82). Expo Modules for most native
+> needs; Turbo Modules for standard custom native with zero dependencies; Nitro Modules only for
+> performance-critical custom native where you accept pre-1.0 churn.
 
 The selection is about *how much native you're writing and how hot the path is*. **Expo
 Modules** is the managed fast-path: a clean Swift/Kotlin authoring model that covers the vast
@@ -59,6 +62,19 @@ Modules** — codegen-driven JSI, positioned as Turbo Modules' successor — is 
 choice and is consolidating the ecosystem (mmkv v4, device-info, image, video, fetch, and
 VisionCamera v5 all moved onto it). **Turbo Modules / Fabric** directly is the standard path
 when you're writing conventional custom native and don't need Nitro's edge.
+
+Two facts moved this default in 2026. First, Expo Modules stopped being the slow option: SDK 56
+dropped the Objective-C++ hop for direct Swift↔C++ JSI interop, making calls 1.5–2× faster and,
+per Expo, on par with Turbo Modules; Expo Modules 2.0 (annotated plain Swift/Kotlin —
+`@ExpoModule`, `@JS`, `@Record` — in beta on iOS and Android in the SDK 58 beta, docs still being
+written) is faster again, and on Android it beat a TurboModule on all twelve of Expo's
+call-overhead microbenchmarks. Those are vendor microbenchmarks of the boundary: they matter for
+chatty modules, not for one call that does real work. Second, Nitro is still **pre-1.0 and
+third-party** (0.37.x; 0.37.0 alone moved Props into Nitro core and renamed `CachedProp` to
+`ReactProp`), so pin its version; Turbo Modules stay the stable in-core option when that churn
+is not worth the speed. Its stewardship is steady: Margelo, which builds Nitro, VisionCamera and
+react-native-mmkv, joined Callstack (announced 2026-09-01), with the libraries staying open
+source and Marc Rousavy still leading them.
 
 ## The landscape, and when each one wins
 

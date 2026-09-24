@@ -6,88 +6,103 @@ status: reviewed   # long-form entry written + source-checked → encyclopedia/R
 confidence: high
 platforms: [react, react-native]
 options:
-  - { name: "jail-monkey (v3)", tradeoff: "client-side jailbreak/root + mock-location + debug detection; v3 adds New-Arch support; NOT a substitute for server-side Play Integrity / DeviceCheck" }
-  - { name: "react-native-keychain / expo-secure-store", tradeoff: "store tokens/secrets in Keychain/Keystore, not AsyncStorage (see RB-E-STORAGE)" }
-  - { name: "dependency CVE scanning", tradeoff: "npm/pnpm audit; route depth to the review skill's security phase" }
-  - { name: "supply-chain hardening", tradeoff: "install-script blocking (npm v12 default), install-age gating (min-release-age / npmMinimalAgeGate), provenance, and since 2026-07 npm's own publish-time malware scan — provenance alone is not enough" }
-  - { name: "Trusted Types (web)", tradeoff: "browser API that makes injection sinks (innerHTML) demand TrustedHTML/TrustedScript objects from your policy instead of raw strings, under Content-Security-Policy: require-trusted-types-for 'script'; React only became compatible in 19.3 — earlier versions coerced every value with '' + value, turning Trusted Types objects back into strings the browser rejects, so a CSP-enforced app needs React ≥19.3; dangerouslySetInnerHTML still needs an explicit policy" }
-  - { name: "rnsec (RN/Expo security scanner)", tradeoff: "zero-config static scanner — 63 rules across storage/network/auth/secrets/crypto, CI-ready (exit codes, PR comments, JSON/HTML reports); young + single-author (~500★, v1.3) — a cheap CI layer, not a substitute for per-diff review" }
-  - { name: "DeepSec (Vercel Labs)", tradeoff: "open-source AI security-scan harness — agents trace data flows on YOUR infra with YOUR Claude/Codex subscription; produces severity-rated findings (NOT auto-fix PRs), ~10–20% false-positive rate per Vercel; framework-agnostic, new" }
+  - { name: "jail-monkey (v3)", tradeoff: "Client-side jailbreak/root + mock-location + debug detection; v3 adds New-Arch support. Defeatable on the device, so NOT a substitute for server-side Play Integrity / DeviceCheck. 3.0.0 (2026-04-28, verified vs npm)." }
+  - { name: "react-native-keychain / expo-secure-store", tradeoff: "Store tokens/secrets in Keychain/Keystore, never AsyncStorage (plaintext); RB-E-STORAGE owns the storage thread. react-native-keychain 10.0.0 (2025-03-23), expo-secure-store 57.0.4 (2026-09-11; both verified vs npm)." }
+  - { name: "dependency CVE scanning", tradeoff: "npm/pnpm audit for known CVEs; route per-diff depth to the review skill's security phase. Catches published CVEs only — it does not see a freshly poisoned version." }
+  - { name: "supply-chain hardening", tradeoff: "Install-script blocking (npm v12 default), install-age gating (min-release-age / npmMinimalAgeGate), staged publishing, provenance, and npm's publish-time malware scan (since 2026-07-28) — provenance alone is not enough. npm 12.1.0 (2026-09-22, verified vs npm). See note: SUPPLY CHAIN." }
+  - { name: "Trusted Types (web)", tradeoff: "Browser API that makes injection sinks (innerHTML) demand TrustedHTML/TrustedScript from your policy under CSP `require-trusted-types-for 'script'`. React is compatible from 19.3 (2026-09-09) — a CSP-enforced app needs React ≥19.3; dangerouslySetInnerHTML still needs an explicit policy. See note: TRUSTED TYPES." }
+  - { name: "rnsec (RN/Expo security scanner)", tradeoff: "Zero-config static scanner — 63 rules across storage/network/auth/secrets/crypto, CI-ready (exit codes, PR comments, JSON/HTML reports). Young and single-author: a cheap CI layer, not a substitute for per-diff review. 1.3.0 (2026-04-19, verified vs npm); ~500★ (2026-07-09)." }
+  - { name: "DeepSec (Vercel Labs)", tradeoff: "Open-source AI security-scan harness: agents trace data flows on YOUR infra with YOUR Claude/Codex subscription; severity-rated findings (NOT auto-fix PRs), ~10–20% false-positive rate per Vercel; framework-agnostic. deepsec 2.3.10 (2026-09-23, verified vs npm)." }
 recommend:
   default: "Secrets in Keychain/secure-store (never AsyncStorage); harden the supply chain (block install scripts, gate install-age); device trust via server-side attestation; route per-diff secret/injection checks to the review skill."
   when:
-    - "device-trust requirement → server-side Play Integrity / DeviceCheck (jail-monkey is client-side only, defeatable)"
-    - "web XSS surface → Trusted Types (requires React ≥19.3 to work under an enforcing CSP) + sanitized dangerouslySetInnerHTML"
-    - "RSC/Server Functions on web → patch React to 19.2.8 / 19.1.9 / 19.0.8 (recurring server-function DoS CVEs); does not affect RN"
-    - "want a cheap CI gate for RN-specific security footguns → rnsec scan (young — treat findings as leads, route confirmations to the review skill)"
+    - "device-trust requirement, or jail-monkey installed → server-side Play Integrity / DeviceCheck (jail-monkey is client-side only and defeatable; keep it as a signal, not the gate)"
+    - "web XSS surface → Trusted Types (needs React ≥19.3 under an enforcing CSP; plus sanitized dangerouslySetInnerHTML)"
+    - "RSC/Server Functions on web → patched React (19.2.8 / 19.1.9 / 19.0.8 floors for the recurring server-function DoS; does not affect React Native)"
+    - "dev server reachable beyond localhost (--host, server.host, a Docker port mapping) → patched Vite (≥8.0.5 / ≥7.3.2 for CVE-2026-39364; RB-E-BUILD owns the floor) and no secrets beside the dev server"
+    - "want a cheap CI gate for RN-specific security footguns → rnsec (young — treat findings as leads, route confirmations to the review skill)"
+    - "want an AI-driven data-flow scan of your own codebase → DeepSec (severity-rated findings, ~10–20% false positives; not auto-fix)"
+    - "known-CVE check on dependencies → dependency CVE scanning (npm/pnpm audit in CI; depth via the review skill)"
 note: >
-  DEV-TIME SURFACES GET SCANNED TOO (2026-09-21, verified against GHSA-v2wj-q39q-566r and F5 Labs'
-  August 2026 telemetry; React Status #491): CVE-2026-39364 is a HIGH-severity `server.fs.deny`
-  bypass in the VITE DEV SERVER — query parameters such as ?raw or ?import&raw make its @fs route
-  skip deny-list filtering and serve .env files, certificates or private source with a 200. Fixed in
-  8.0.5 and 7.3.2 (affected: >=8.0.0 <=8.0.4 and >=7.1.0 <=7.3.1); RB-E-BUILD carries the floor and
-  the mechanism. It earns a place in THIS entry for a reason that generalises past Vite: the
-  vulnerability is only reachable when a development server is exposed beyond localhost, and F5
-  measured a sustained August 2026 campaign doing exactly that hunting — 807 session-grouped
-  attacks, ~32,000 events, cycling wordlists of env files, AWS keys, Azure tokens and IaC state
-  files, from a cluster that also probed the Next.js middleware bypass CVE-2025-29927. The durable
-  rule: your threat model has to include the tools you run while developing, not just what you ship
-  — dev servers, and the credentials sitting next to them, are an actively scanned attack surface
-  whenever `--host`, `server.host` or a Docker port mapping makes them reachable.
-  DURABLE SCOPING FACT: the React Server Components DoS family (CVE-2026-23864, CVSS 7.5;
-  React2DoS CVE-2026-23869) and the Dec-2025 RSC source-exposure/RCE issues are SERVER-SIDE
-  (react-server-dom-*; Next.js App Router) and do NOT affect React Native; patched across
-  React 19.0.5 / 19.1.6 / 19.2.5. The family RECURS — treat the floor as a moving target, not
-  a one-time patch: GHSA-wx67-qw84-cm4g (High, CVSS 7.5, 2026-07, verified vs the advisory) is
-  another server-function DoS (crafted HTTP requests → OOM / excessive CPU) affecting
-  react-server-dom-webpack/parcel/turbopack 19.0.0–19.0.7, 19.1.0–19.1.8 and 19.2.0–19.2.7,
-  patched in 19.0.8 / 19.1.9 / 19.2.8. Same scoping as before — no server, no RSC-capable
-  bundler, no exposure. The 2025–26 SUPPLY-CHAIN wave (Shai-Hulud worm, the
-  @tanstack/* npm compromise, axios RAT) is the bigger practical risk — hence npm v12 blocking
-  install scripts by default + install-age gating. Live CVEs belong in a security feed, not this
-  encyclopedia; for per-diff secret/injection/dependency checks defer to the review skill.
-  PROVENANCE (2026-07-09): rnsec was surfaced by Native Weekly — whose author ALSO authors rnsec —
-  so it was independently vetted before inclusion (repo checked: ~500★, 63 rules, CI integrations,
-  active v1.3 2026-04). Kept with the young/single-author caveat; watch whether it earns adoption.
-  INCIDENT LEDGER UPDATE (2026-07-10): the Vercel April-2026 incident (verified vs Vercel's
-  bulletin) — a compromised third-party AI tool (Context.ai) led through an employee's Google
-  Workspace to decryption of customers' plaintext-decryptable "non-sensitive" env vars; npm
-  packages unaffected. Lessons: mark platform env vars SENSITIVE, and treat AI dev-tools as
-  supply-chain surface. The TanStack npm compromise now has its first-party postmortem (reading).
-  HARDENING TOOLKIT ADDITION (2026-07-10, verified vs the nuqs post): npm STAGED PUBLISHING
-  (draft → 2FA-gated validate → finalize) + local tarball-hash reproduction — the maintainer-side
-  countermeasure to the TanStack-style CI-compromise chain ("assume GitHub itself is compromised");
-  joins install-script blocking and install-age gating as the third supply-chain layer.
-  PLATFORM-SIDE FIX (2026-07-16 back-audit, verified vs the GitHub changelog): actions/checkout
-  v7 ships safer pull_request_target defaults — closing the exact 'Pwn Request' door the
-  TanStack postmortem reading documents; pin checkout ≥7 in CI.
-  REGISTRY-SIDE LAYER (2026-07-28, verified vs the GitHub changelog): npm now scans every newly
-  published package for malware BEFORE it becomes installable — default and non-negotiable, with
-  three outcomes (publish, hold for manual review, block, with an appeal path) and a typical 5–15
-  minute publish delay. Packages with legitimate security-relevant capability must now declare it
-  as DUAL-USE: a `contentPolicy` field in package.json plus a text-only DISCLOSURE file describing
-  the functionality and its intended use; the declaration must persist across versions and
-  publishing requires 2FA. This is the first defense in the chain that runs on the REGISTRY rather
-  than in your install or CI — it raises the floor against the Shai-Hulud/axios-RAT family but
-  catches only "the malware we can detect", so it stacks with, and does not replace, install-script
-  blocking, install-age gating and egress control. Maintainers: budget the delay into release
-  pipelines (this repo publishes via OIDC trusted publishing).
-  FIRST-PARTY UMBRELLA (2026-08-07, verified vs the GitHub post): "Disrupting supply chain
-  attacks on npm and GitHub Actions" (github.blog, 2026-07-28) is the one link that bundles the
-  whole 2026 program — staged publishing (May), npm v12 install-script defaults (June),
-  72-hour read-only lock on high-impact accounts after email changes or 2FA-recovery use (June),
-  Actions hardening (checkout defaults, workflow-execution policies, read-only cache for
-  untrusted workflows), and a 3-day default Dependabot cooldown (July) — install-age gating is
-  now a PLATFORM default, not just a local countermeasure. See reading.
-  LIVE COUNTEREXAMPLE (2026-08-07, verified vs the Aikido incident report): the keyv compromise
-  (2026-08-04) — maintainer GitHub account takeover → poisoned versions published WITH VALID
-  GitHub-Actions provenance → preinstall-hook dropper (downloads Bun, harvests npm/GitHub/AWS/
-  Vault/Stripe/Slack credentials) → self-replicating worm: 444 packages / 1,381 versions /
-  ~2B combined monthly installs within a day. Receipts for two standing claims at once:
-  provenance alone is not enough (the signatures were valid), and registry-side scanning catches
-  only what it can detect (the worm shipped a week after publish-time scanning went default,
-  2026-07-28). Install-script blocking + install-age gating remain the layers that bite.
-  Incident is ongoing — promote to a reading when a definitive postmortem lands.
+  Security for a React or React Native app is mostly about where secrets live, who is allowed to
+  trust the device, and what your dependencies run — not about the framework. Secrets go in the
+  platform keystore because AsyncStorage is plaintext; device trust is decided on the server
+  because anything on the device can be tampered with; and the supply chain is the largest
+  practical risk: the 2025–26 incidents (Shai-Hulud, the @tanstack/* compromise, axios RAT, keyv)
+  were dependency and CI compromises, not React bugs. Live CVEs belong in a
+  security feed; this entry records the durable rules and the floors that recur.
+
+  SUPPLY CHAIN (2026-07-10 to 2026-08-07, verified vs the GitHub changelogs, the GitHub umbrella post,
+  the nuqs post and the Aikido keyv report): defenses now stack in four places. INSTALL: npm v12 blocks
+  install scripts by default, and install-age gating is a platform default (3-day Dependabot
+  cooldown). PUBLISH: npm staged publishing (draft → 2FA-gated validate → finalize) plus local
+  tarball-hash reproduction is the maintainer-side answer to a TanStack-style CI compromise ("assume
+  GitHub itself is compromised"). REGISTRY (2026-07-28): npm scans every newly published package
+  for malware before it becomes installable — default and non-negotiable, outcomes publish / hold for
+  manual review / block (with appeal), typically a 5–15 minute publish delay; packages with
+  legitimate security-relevant capability must declare DUAL-USE via a `contentPolicy` field in
+  package.json plus a text-only DISCLOSURE file, persisted across versions, with 2FA required. CI:
+  actions/checkout v7 ships safer pull_request_target defaults, closing the 'Pwn Request' door the
+  TanStack postmortem documents → pin checkout ≥7. GitHub's umbrella post (2026-07-28) bundles the
+  program: staged publishing (May), npm v12 install-script defaults (June), a 72-hour read-only lock
+  on high-impact accounts after email changes or 2FA-recovery use (June), Actions hardening, and the
+  Dependabot cooldown (July). The keyv compromise (2026-08-04) is the live counterexample: a
+  maintainer GitHub account takeover published poisoned versions WITH VALID GitHub-Actions
+  provenance, a preinstall-hook dropper (downloads Bun, harvests npm/GitHub/AWS/Vault/Stripe/Slack
+  credentials) and a self-replicating worm — 444 packages / 1,381 versions / ~2B combined monthly
+  installs within a day, a week after registry scanning went default. Consequence: provenance alone
+  is not enough, registry scanning catches only what it can detect, and install-script blocking +
+  install-age gating remain the layers that bite — with egress control and Node's permission model
+  for the execution-time door (NodeSource reading). Maintainers: budget the publish delay into
+  release pipelines (this repo publishes via OIDC trusted publishing). The keyv incident was ongoing
+  at last check; promote it to a reading when a definitive postmortem lands.
+
+  AI DEV-TOOLS ARE SUPPLY CHAIN (2026-07-10, verified vs Vercel's April-2026 bulletin): a compromised
+  third-party AI tool (Context.ai) led through an employee's Google Workspace to decryption of
+  customers' plaintext-decryptable "non-sensitive" env vars; npm packages were unaffected → mark
+  platform env vars SENSITIVE, and treat AI dev-tools as supply-chain surface.
+
+  DEV SERVERS ARE ATTACK SURFACE (2026-09-21, verified vs GHSA-v2wj-q39q-566r and F5 Labs' August 2026
+  telemetry; React Status #491): CVE-2026-39364 is a HIGH-severity `server.fs.deny` bypass in the
+  Vite dev server — query parameters such as ?raw or ?import&raw make its @fs route skip deny-list
+  filtering and serve .env files, certificates or private source with a 200. Fixed in 8.0.5 and
+  7.3.2 (affected: >=8.0.0 <=8.0.4 and >=7.1.0 <=7.3.1); RB-E-BUILD owns the floor and the mechanism.
+  It is only reachable when the dev server is exposed beyond localhost, and F5 measured a sustained
+  August 2026 campaign hunting exactly that: 807 session-grouped attacks, ~32,000 events, cycling
+  wordlists of env files, AWS keys, Azure tokens and IaC state files, from a cluster that also probed
+  the Next.js middleware bypass CVE-2025-29927 → your threat model includes the tools you run while
+  developing: dev servers and the credentials beside them are actively scanned whenever `--host`,
+  `server.host` or a Docker port mapping makes them reachable.
+
+  RSC SCOPING (verified vs the React 2025-12-11 post and GHSA-wx67-qw84-cm4g): the React Server
+  Components DoS family (CVE-2026-23864, CVSS 7.5; React2DoS CVE-2026-23869) and the Dec-2025 RSC
+  source-exposure/RCE issues are SERVER-SIDE (react-server-dom-*; Next.js App Router) and do NOT
+  affect React Native; first patched across React 19.0.5 / 19.1.6 / 19.2.5. The family recurs, so the
+  floor moves: GHSA-wx67-qw84-cm4g (High, CVSS 7.5, 2026-07) is another server-function DoS
+  (crafted HTTP requests → OOM / excessive CPU) affecting react-server-dom-webpack/parcel/turbopack
+  19.0.0–19.0.7, 19.1.0–19.1.8 and 19.2.0–19.2.7, patched in 19.0.8 / 19.1.9 / 19.2.8 — the current
+  floors. No server and no RSC-capable bundler means no exposure.
+
+  TRUSTED TYPES (verified vs the React 19.3 post, 2026-09-09): React before 19.3 coerced every value
+  with '' + value, turning Trusted Types objects back into strings the browser rejects under an
+  enforcing CSP → a CSP-enforced app needs React ≥19.3.
+
+  RNSEC PROVENANCE (2026-07-09): rnsec was surfaced by Native Weekly, whose author also authors
+  rnsec, so it was vetted independently before inclusion (repo checked: ~500★, 63 rules, CI
+  integrations, v1.3 2026-04). Kept with the young/single-author caveat; adoption is the open
+  question.
+
+  CROSS-REFERENCES: RB-E-META-FRAMEWORKS owns Next.js security patches, including the 2026-09-22
+  out-of-band critical RCE release; RB-E-BUILD owns the Vite floor; RB-E-STORAGE owns secure
+  storage; the review skill owns per-diff secret/injection/dependency checks.
+
+  HISTORY:
+  2026-09-21 REOPENED: dev-server attack surface — Vite CVE-2026-39364 with measured mass-scanning.
+  2026-08-07 GAP CLOSED: GitHub's supply-chain umbrella post; keyv compromise as counterexample.
+  2026-07-28 REOPENED: npm publish-time malware scanning + dual-use metadata.
+  2026-07-16 GAP CLOSED: actions/checkout v7 pull_request_target defaults (back-audit).
+  2026-07-10 GAP CLOSED: Vercel April-2026 incident; npm staged publishing.
+  2026-07-09 GAP CLOSED: rnsec added.
 defer_to_skill: review
 doc: "RB-E-SECURITY.md"   # long-form Explanation entry in content_dir
 updated: 2026-09-21   # dev-server attack surface: Vite CVE-2026-39364 (server.fs.deny bypass, fixed 8.0.5/7.3.2) with measured mass-scanning of exposed dev servers — React Status #491

@@ -6,39 +6,82 @@ status: reviewed   # long-form entry written + source-checked → encyclopedia/R
 confidence: low
 platforms: [react, react-native]
 options:
-  - { name: "VisionCamera (v5, Nitro)", tradeoff: "RN camera with JSI frame processors; v5 rebuilt on Nitro; the base for custom real-time frame pipelines (see RB-E-NATIVE)" }
-  - { name: "expo-camera", tradeoff: "managed camera for Expo apps; simpler, fewer real-time hooks than VisionCamera" }
-  - { name: "react-native-webrtc", tradeoff: "low-level WebRTC bindings; you wire signaling/SFU yourself; near-dormant (2 releases since mid-2024, pinned to Chromium M124) — strengthens the SDK-over-raw-WebRTC advice" }
-  - { name: "LiveKit / Daily / Agora / Stream Video", tradeoff: "WebRTC conferencing SDKs (RN + web); LiveKit is open-source + self-hostable, the others are hosted infra" }
-  - { name: "Skia / Metal + MediaPipe / Vision / ML Kit", tradeoff: "GPU compositing (Skia/Metal) + on-device segmentation/detection (MediaPipe on Android, Vision on iOS) for filters/effects" }
-  - { name: "expo-video / expo-audio", tradeoff: "media PLAYBACK (not capture or calling) — the replacements for expo-av, which is DEPRECATED (removed from Expo Go in SDK 55, no longer patched); expo-video splits player logic (VideoPlayer) from view (VideoView)" }
-  - { name: "expo-image", tradeoff: "image DISPLAY — the modern replacement for core <Image>: disk/memory caching, blurhash/thumbhash placeholders, transitions, faster decode; works in bare RN, not just Expo" }
-  - { name: "react-native-audio-api (Software Mansion)", tradeoff: "Web Audio API for RN — audio graphs, effects/filters via MediaElementAudioSourceNode; 0.13 (2026-07, verified vs npm) ships a stable <Audio/> component; the AUDIO-processing layer (playback-only needs → expo-audio)" }
+  - { name: "VisionCamera (v5, Nitro)", tradeoff: "RN camera with JSI frame processors, rebuilt on Nitro in v5; the base for custom real-time frame pipelines (RB-E-NATIVE owns Nitro). 5.2.3 (2026-08-20, verified vs npm); v4 frozen at 4.7.3 (2025-11-12). See note: VISIONCAMERA V5." }
+  - { name: "expo-camera", tradeoff: "Managed camera for Expo apps; simpler, fewer real-time hooks than VisionCamera; the scanner that works in Expo Go." }
+  - { name: "react-native-webrtc", tradeoff: "Low-level WebRTC bindings; you wire signaling/SFU yourself. Patch-only on Chromium M124: 124.0.8 (2026-07-21, verified vs npm) is the fifth 124.0.x patch since 2024-08, while LiveKit's fork is on M144 — prefer a calling SDK. See note: WEBRTC LINES." }
+  - { name: "LiveKit / Daily / Agora / Stream Video", tradeoff: "WebRTC conferencing SDKs (RN + web); LiveKit is open-source + self-hostable, the others are hosted infra. @livekit/react-native 3.0.0 (2026-09-11, verified vs npm) moved to LiveKit-prefixed WebRTC builds; see note: WEBRTC LINES." }
+  - { name: "Skia / Metal + MediaPipe / Vision / ML Kit", tradeoff: "GPU compositing (Skia/Metal) + on-device segmentation/detection (MediaPipe on Android, Vision on iOS) for filters/effects. See note: FILTER PIPELINE." }
+  - { name: "expo-video / expo-audio", tradeoff: "Media PLAYBACK (not capture or calling), the replacements for expo-av, which is DEPRECATED (removed from Expo Go in SDK 55, no longer patched); expo-video splits player logic (VideoPlayer) from view (VideoView)." }
+  - { name: "expo-image", tradeoff: "Image DISPLAY, the modern replacement for core <Image>: disk/memory caching, blurhash/thumbhash placeholders, transitions, faster decode; works in bare RN, not just Expo." }
+  - { name: "react-native-audio-api (Software Mansion)", tradeoff: "Web Audio API for RN: audio graphs, effects/filters via MediaElementAudioSourceNode; the 0.13 line (2026-07, verified vs npm) ships a stable <Audio/> component. The AUDIO-processing layer; playback-only needs go to expo-audio." }
 recommend:
-  default: "Camera → VisionCamera (frame processors) or expo-camera (managed); video calling → LiveKit (open-source) or a hosted SDK (Daily/Agora/Stream); real-time filters → process VisionCamera frames + GPU-composite and inject into the WebRTC source; image display → expo-image over core <Image>. Calling-SDK specifics are lightly vetted (confidence: low) — prototype perf per-device before committing."
+  default: "Camera → VisionCamera (frame processors) or expo-camera (managed). Video calling → LiveKit (open-source, self-hostable) or a hosted SDK (Daily/Agora/Stream), not raw react-native-webrtc. Real-time filters → process VisionCamera frames, GPU-composite, inject into the existing WebRTC source. Playback → expo-video/expo-audio; images → expo-image. Calling-SDK specifics are lightly vetted (confidence: low): prototype per-device."
   when:
-    - "custom real-time effects (blur / segmentation / virtual bg) → VisionCamera frame processors + Skia/Metal + MediaPipe/Vision"
-    - "self-hosted / open-source calling → LiveKit; fastest managed setup → Daily / Agora / Stream"
+    - "custom real-time effects (blur / segmentation / virtual bg) → VisionCamera frame processors (+ Skia/Metal + MediaPipe/Vision, injected into the WebRTC VideoSource)"
+    - "self-hosted / open-source calling → LiveKit (@livekit/react-native 3.x)"
+    - "fastest managed calling setup → Daily / Agora / Stream (hosted SDK; pick on pricing and features, not yet verified here)"
+    - "raw WebRTC with your own signaling/SFU → react-native-webrtc (M124 line, patch-only; only when no calling SDK fits)"
     - "just capture photos → expo-camera (or VisionCamera for advanced)"
-    - "scan a code → choose by the native engine, not the wrapper (see the engine map in reading); no custom camera UI needed → a one-call platform scanner, overlays/validation → VisionCamera + barcode plugin, Expo Go → expo-camera"
-    - "shipping camera to prod NOW → VisionCamera v5 (GA 2026-04) is still stabilizing: open iOS-26 teardown/race crashes + an AE regression vs v4, and ~85% of installs remain on v4 (2026-07) — adopt v5 pinned-patch with a device-matrix pass; don't linger on v4 (frozen since 2025-11)"
+    - "code scanning, no custom camera UI → platform scanner (one call; choose by the native engine, not the wrapper — see the barcode reading's engine map)"
+    - "code scanning with overlays / validation → VisionCamera + barcode plugin"
+    - "code scanning inside Expo Go → expo-camera"
+    - "shipping camera to prod NOW → VisionCamera v5 (pinned patch + a device-matrix pass; still stabilizing, see note; don't linger on v4, frozen since 2025-11)"
     - "displaying images (caching, blurhash placeholders, transitions) → expo-image, not core <Image>"
-    - "video/audio playback → expo-video / expo-audio; migrate off expo-av (deprecated, unpatched, out of Expo Go since SDK 55)"
-    - "audio PROCESSING (graphs, effects, filters, real-time) → react-native-audio-api (Web Audio API); real-time discipline → rt-audio-pipeline-audit"
-    - "real-time pipeline correctness & perf → react-native-jsi (frame processors) + rt-audio-pipeline-audit (the real-time discipline transfers from audio)"
-    - "native call UI (CallKit / Android telecom — incoming-call screen, hold/mute, VoIP push) → NOT react-native-callkeep for new work: dormant (last npm publish 2024-11, verified) and built on the pre-Jetpack android.telecom.ConnectionService; and there is a second, source-independent trap the dormancy hides — Android delivers every FCM push to ONE service per app, so the VoIP call push competes for that slot with whatever notification library you already ship, which is why the working alternatives parse VoIP pushes natively and RELAY the rest to expo-notifications/RN Firebase/your own handler. Use expo-callkit-telecom (Jetpack Core Telecom, needs Expo + expo-notifications; young, 0.4.x 2026-06) or your calling SDK's own integration (Fishjam's RN client bundles call UI + push parsing — Software Mansion's recommendation of its own platform, but the callkeep diagnosis verified independently vs npm)"
+    - "video/audio playback → expo-video / expo-audio (migrate off expo-av: deprecated, unpatched, out of Expo Go since SDK 55)"
+    - "audio PROCESSING (graphs, effects, filters, real-time) → react-native-audio-api (Web Audio API; real-time discipline: rt-audio-pipeline-audit)"
+    - "real-time pipeline correctness & perf → react-native-jsi skill (frame processors), then rt-audio-pipeline-audit (the real-time discipline transfers from audio)"
+    - "native call UI (CallKit / Android telecom: incoming-call screen, hold/mute, VoIP push) on Expo → expo-callkit-telecom (0.5.x; Jetpack Core Telecom; needs expo-notifications; not react-native-callkeep, see note: CALL UI)"
+    - "native call UI when your calling SDK ships its own call-UI + push integration → the calling SDK's integration (e.g. Fishjam's RN client)"
 note: >
-  NEW domain entry (2026-06-25), surfaced by a Margelo deep-dive (see `reading`) the index
-  previously had nowhere to put. Durable real-time lesson it teaches: DON'T fork the WebRTC
-  stack — intercept camera frames, run segmentation/detection OFF the hot path (~20-30ms,
-  "latest mask wins" rather than blocking), GPU-composite, and inject the result into the
-  EXISTING WebRTC VideoSource (the source doesn't care who produces frames). VisionCamera v5
-  (Nitro/JSI) is the frame-processor base (consistent with RB-E-NATIVE). Options are lightly
-  vetted — recommend tentatively (confidence: low) and prototype on-device; calling-SDK specifics
-  (pricing, features) are not yet verified here.
+  THE PICTURE: real-time media in RN is built by composing, not forking. The durable lesson from
+  the Margelo filters deep-dive: DON'T fork the WebRTC stack. Intercept camera frames, run
+  segmentation/detection OFF the hot path, GPU-composite, and inject the result into the EXISTING
+  WebRTC VideoSource (the source doesn't care who produces frames). The same stance runs through
+  the rest of the entry: a calling SDK over raw WebRTC, VisionCamera frame processors over a
+  custom camera, and platform scanners over wrappers. Options are lightly vetted (confidence:
+  low); calling-SDK specifics (pricing, features) are not verified here, so prototype on-device.
+
+  FILTER PIPELINE (verified vs the Margelo deep-dive): segmentation/detection runs off the hot
+  path (~20-30ms, "latest mask wins" rather than blocking), MediaPipe on Android and
+  Vision on iOS, composited with Metal/Skia; the gotchas are YUV↔I420/NV12 conversion, monotonic
+  timestamps and buffer pooling. Encoder, transport and signaling stay untouched.
+
+  WEBRTC LINES (2026-09-24, verified vs npm and the LiveKit 3.0.0 release): react-native-webrtc
+  is patch-only on Chromium M124 (124.0.4 2024-08-14 through 124.0.8 2026-07-21).
+  @livekit/react-native 3.0.0 (2026-09-11) peers LiveKit's own fork @livekit/react-native-webrtc
+  ^144.2.0 and moves to LiveKit-prefixed WebRTC builds (io.github.webrtc-sdk:android-prefixed on
+  Android, the LiveKitWebRTC pod on iOS) to prevent collisions with any other WebRTC
+  implementation → an app mixing LiveKit with another WebRTC library should take 3.x; the
+  maintained WebRTC line in RN today is LiveKit's.
+
+  CALL UI (verified vs the Software Mansion callkeep-alternatives post, 2026-08-26, and npm):
+  react-native-callkeep is dormant (4.3.16, 2024-11-18, still its latest) and built on the
+  pre-Jetpack android.telecom.ConnectionService. A second, source-independent trap the dormancy
+  hides: Android hands every FCM push to a single service per app, so the VoIP call push fights
+  whatever notification library you already ship for that slot → the working alternatives parse
+  VoIP pushes natively and RELAY other FCM messages to expo-notifications, RN Firebase or your own
+  handler. expo-callkit-telecom 0.5.0 (2026-09-09, verified vs npm) uses Jetpack Core Telecom and
+  peers expo, expo-notifications and @livekit/react-native-webrtc >=144.0.0, so it assumes
+  LiveKit's WebRTC fork. Fishjam's RN client bundles call UI + push parsing; that is Software
+  Mansion recommending its own platform, but the callkeep diagnosis is verified independently.
+
+  VISIONCAMERA V5 (5.0.0 2026-04-16 and v4's last publish 4.7.3 2025-11-12, verified vs npm):
+  v5 is still stabilizing: open iOS-26 teardown/race crashes + an AE regression vs v4, and ~85% of
+  installs remain on v4 (2026-07) → adopt v5 pinned-patch with a device-matrix pass; v4 is frozen.
+
+  EXPO-AV (verified vs the SDK 55 changelog): expo-av is deprecated, removed from Expo Go in SDK 55
+  and no longer patched → the migrate row sequences expo-video + expo-audio.
+
+  HISTORY:
+  2026-09-24 REOPENED: react-native-webrtc now five M124 patches (was "2 releases since mid-2024");
+  LiveKit RN 3.0.0 prefixed WebRTC builds; expo-callkit-telecom 0.4.x → 0.5.0 (LiveKit WebRTC
+  peer).
+  2026-09-10 GAP CLOSED: native-call-UI clause gains the Android FCM one-service-slot collision,
+  reconciled from harvest/2026-08-27.
+  2026-06-25 GAP CLOSED: entry created from the Margelo video-call filters deep-dive.
 defer_to_skill: react-native-jsi   # frame processors / native modules; real-time perf → rt-audio-pipeline-audit
 doc: "RB-E-MEDIA.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-10   # native-call-UI clause gains the Android FCM one-service-slot collision — reconciled from harvest/2026-08-27
+updated: 2026-09-24   # react-native-webrtc release count corrected (5 M124 patches), LiveKit RN 3.0.0 prefixed WebRTC, expo-callkit-telecom 0.5.0; prior 2026-09-10: native-call-UI clause gains the Android FCM one-service-slot collision — reconciled from harvest/2026-08-27
 reading:
   - title: "Building a video call app with filters"
     url: "https://blog.margelo.com/building-videocall-app-with-filters"
@@ -78,6 +121,7 @@ sources:
   - "https://margelo.com/blog/react-native-barcode-scanner"
   - "https://blog.margelo.com/building-videocall-app-with-filters"
   - "https://expo.dev/changelog/sdk-55"
+  - "https://github.com/livekit/client-sdk-react-native/releases/tag/%40livekit%2Freact-native%403.0.0"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "react-native-vision-camera", label: "VisionCamera", token: "visioncamera" }
   - { pkg: "expo-camera", label: "expo-camera", token: "expo-camera" }

@@ -4,7 +4,7 @@ title: "About alternatives to React Native (cross-platform frameworks)"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: low                # newer entrants (Lynx, Valdi) are early — the entry says "not endorsements"
-updated: 2026-07-16
+updated: 2026-09-24
 platforms: [react, react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-ALT-FRAMEWORKS
 defer_to_skill: null                                          # entry declares no depth-audit skill
@@ -69,10 +69,16 @@ above): decisive on Android, converging on iOS with the memory result favoring R
 React/JS. The when-clause spells out the price: it leaves React entirely.
 
 **Lynx (ByteDance)** — web-tech (HTML/CSS) plus native render, with a dual-thread UI/logic
-split; young ecosystem (open-sourced 2025); scaffolded via create-rspeedy.
+split; young ecosystem (open-sourced 2025); scaffolded via create-rspeedy. Mind the two version
+lines: the engine is 4.x (4.0.3, 2026-09-11) while ReactLynx, the React binding you write
+against, is `@lynx-js/react` 0.126.x with rspeedy 0.18.0, so "Lynx 4" does not mean the React
+layer is 1.0. That 0.x layer is why Lynx stays a landscape row. The 4.0 announcement
+(2026-09-11) bets on AI: an `lynx-api-docs` agent skill so coding agents stop writing Web
+conventions Lynx does not support, and Lynx A2UI, where a model emits structured messages
+constrained by the app's component catalog and Lynx renders them as native UI.
 
 **Valdi (Snap)** — declarative TypeScript compiling to native views on iOS/Android/macOS;
-beta (beta-0.1.0), open-sourced by Snap in Nov 2025 after ~8 years of internal use. Long
+beta (beta-0.2.0, 2026-09-22, a pre-release for testing), open-sourced by Snap in Nov 2025 after ~8 years of internal use. Long
 internal history, very early public life — both halves matter.
 
 **The web-side exits** — the entry's platforms include plain React, and its reading list
@@ -83,7 +89,10 @@ migrated a marketing/content site to Web Components (Custom Elements + Astro + n
 ~3KB vs ~63KB, 100KB saved), with nanotags addressing the boilerplate/accessibility tradeoffs
 — durable do-you-even-need-React reasoning. And Strawberry Browser rewrote 130K lines from
 React to Svelte in two weeks, contrasting virtual-DOM overhead with compiled reactivity and
-documenting the LLM-migration ruleset that kept the Svelte idiomatic.
+documenting the LLM-migration ruleset that kept the Svelte idiomatic. The fourth web case is
+the one with a when-clause: inside a byte-budgeted embed (a checkout widget, a third-party
+extension), Shopify's Checkout Blocks migration shows `react-reconciler` alone costs ~89KB, so
+swapping to Preact via `@preact/compat` is usually the largest single cut available.
 
 **On watch, not on the shelf** — the entry carries a tripwire (added 2026-07-16): if solid-js
 reaches 2.0.0 stable, re-triage the skipped "SolidJS 2.0: A React Developer's First Look" and
@@ -99,7 +108,7 @@ process note, not a candidate.
   input, DX and ecosystem are others — and the default already prices the ecosystem input as
   a decade of libraries.
 - **Betting on the early entrants.** Lynx open-sourced in 2025 with a young ecosystem; Valdi
-  is beta-0.1.0. The note is explicit that listing them is context, not endorsement.
+  is beta-0.2.0; ReactLynx is 0.126.x on a 4.x engine. The note is explicit that listing them is context, not endorsement.
 - **Forgetting the exit is total (Flutter).** Dart, its own render engine, not React/JS — the
   decade of libraries does not come along.
 - **Treating the benchmark as production evidence.** The apps were identical and
@@ -154,8 +163,8 @@ and Strawberry Browser on leaving React on the web.*
   3. Related entries are inferred: RB-E-REACT-CORE via that doc's own pointer to this entry
      (plus the shared decade-of-libraries clause); RB-E-CROSSPLATFORM and RB-E-META-FRAMEWORKS
      are editorial placements. The entry names no related entries.
-  4. The entry gives no when-clause for Lynx or Valdi — they are landscape rows only; this doc
-     invents none.
+  4. The entry gives no when-clause for Lynx or Valdi — their rows state why they are not
+     picked (0.x React layer, beta); this doc invents none.
   5. The web-side exits (MDN, Evil Martians, Strawberry) are grounded only in reading
      annotations, not option rows — the doc presents them as case-study evidence, not
      candidates.

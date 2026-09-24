@@ -4,7 +4,7 @@ title: "About over-the-air (OTA) JS updates & release channels (React Native)"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: medium
-updated: 2026-07-13
+updated: 2026-09-24
 platforms: [react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-OTA
 defer_to_skill: null
@@ -60,8 +60,21 @@ SDK 56). The first-party pick for any Expo app.
 keep the battle-tested client. More ops work than EAS; earns its place under a no-vendor rule.
 
 **hot-updater** — self-hosted open-source OTA (gronxb), explicitly positioned as the CodePush
-successor. Actively maintained (v0.35.x, 2026-07) but younger than expo-updates — the self-host
-pick when you don't want the Expo client at all.
+successor. Actively maintained (0.36.x as of 2026-09; v1 in release candidates, which warn of
+breaking changes) but younger than expo-updates — the self-host pick when you don't want the Expo
+client at all.
+
+**XPREM (ex expo-open-ota)** — the ready-made server for the row above: a Go implementation of the
+Expo Updates protocol with rollouts, instant rollback and A/B branch splitting on your own bucket.
+Take it when you self-host but want to keep the expo-updates client.
+
+**Codemagic Patch** — self-hosted OTA from the CodePush lineage whose edge is operability (a
+dashboard, CLI and a CI vendor) rather than protocol. Still 0.x (0.5.0 as of 2026-09-23): evaluate
+it, don't standardize on it.
+
+**Delta (Zepto)** — self-hosted binary-delta patching for fleets where full-bundle pushes cost real
+money (a 20MB Hermes bundle × 1M installs ≈ $1,700 per push at CloudFront list). On Expo, EAS
+Update's bsdiff diffing answers the same economics first-party.
 
 **code-push-server (standalone)** — Microsoft's open-sourced server, compatible with the legacy
 react-native-code-push client. A self-host *stopgap* that keeps an existing CodePush app alive
@@ -82,6 +95,9 @@ Migrate (urgency: dead) to hot-updater or expo-updates + EAS Update.
 - **Conflating abort with rollback.** They are *distinct mitigations* — halting an in-progress
   rollout vs republishing a known-good update — and the time to learn the difference is before
   the incident, not during it.
+- **Trusting pre-merge CI to validate the update.** An OTA update drops new JS onto a native binary
+  already on users' devices; ordinary CI never exercises that pairing. Gate each push behind an E2E
+  run against the updated bundle on the build it lands on (SWSH's pipeline is the worked example).
 - **Expecting OTA to carry a native change.** Store policy allows updating interpreted
   JS/assets within guidelines; native changes always require a store release
   (`RB-E-RN-VERSIONS`). Every OTA pipeline needs the "does this touch native?" gate.

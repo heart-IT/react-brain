@@ -6,25 +6,65 @@ status: reviewed   # long-form entry written + source-checked → encyclopedia/R
 confidence: high
 platforms: [react, react-native]
 options:
-  - { name: "TanStack Query (5.x)", tradeoff: "cache, retries, invalidation; framework-agnostic" }
-  - { name: "SWR", tradeoff: "lighter, hook-first" }
-  - { name: "RTK Query", tradeoff: "if already on Redux Toolkit" }
-  - { name: "Apollo Client (4.x) / urql / Relay (21)", tradeoff: "GraphQL: Relay v21 adds first-party TS + experimental RSC; Apollo 4.2 type-safe defaults" }
-  - { name: "tRPC", tradeoff: "end-to-end type-safe RPC (no schema/codegen) when client + server are both TS; not for public/polyglot APIs" }
-  - { name: "TanStack DB / Zero / TinyBase / RSC", tradeoff: "local-first sync/stores (TanStack DB, Zero 1.0, TinyBase 9) and server-fetched RSC are emerging data-layer alternatives; TanStack DB 0.6 (2026-03) added SQLite-backed persistence (browser WASM, RN/Expo, Node, Electron) + offline transactions — real offline now, still 0.x" }
+  - { name: "TanStack Query (5.x)", tradeoff: "Cache, dedupe, retries, invalidation; transport- and platform-agnostic, so the data layer is shared web + RN code. 5.103.2 (2026-09-21, verified vs npm). See note: IMPERATIVE API" }
+  - { name: "SWR", tradeoff: "Lighter, hook-first stale-while-revalidate with a smaller surface than TanStack Query; alike in model, so pick by ergonomics, not capability." }
+  - { name: "RTK Query", tradeoff: "Server-state cache shipped inside Redux Toolkit: one mental model and devtools if you are already on RTK. Never adopt Redux just to get it." }
+  - { name: "Apollo Client (4.x) / urql / Relay (21)", tradeoff: "GraphQL clients; worth it only when the backend is a real graph. Relay v21 adds first-party TS + experimental RSC; Apollo 4.2 type-safe defaults, 4.3 custom scalars and a TypeScript 5.9 floor (4.3.1, 2026-09-18, verified vs npm). See note: APOLLO 4.3" }
+  - { name: "tRPC", tradeoff: "End-to-end type-safe RPC (no schema/codegen) when client + server are both TS; not for public/polyglot APIs." }
+  - { name: "TanStack DB / Zero / TinyBase / RSC", tradeoff: "Local-first sync stores and server-fetched RSC (web only). TanStack DB 0.6 (2026-03) added SQLite-backed persistence (browser WASM, RN/Expo, Node, Electron) + offline transactions; still 0.x. TinyBase has no when-clause here. See note: LOCAL-FIRST" }
 recommend:
-  default: "TanStack Query for REST/server-state caching — the default for client-side data fetching."
+  default: "TanStack Query (React and React Native). It caches server state for REST or any transport, and the same data-layer code runs on web and native. The pick changes with the backend: a GraphQL graph, a private all-TypeScript API, offline-first sync, server rendering, or a P2P stack (see when)."
   when:
-    - "GraphQL backend → Apollo Client (or Relay for first-party TS + scale)"
+    - "GraphQL backend → Apollo Client (normalized cache, batteries included), else urql (lighter, composable)"
+    - "large cross-referenced entity graph with compiler-driven discipline → Relay (21; first-party TS; scope it to entity data, see reading 'You Should Not Use Relay for Everything')"
     - "client + server both TypeScript, private API → tRPC (type-safety with no codegen)"
-    - "offline / local-first / collaborative → TanStack DB or Zero"
-    - "P2P / serverless / Holepunch backend → data lives in the Hypercore/Autobase stack queried locally via hrpc; a client cache (TanStack Query) is N/A by design — see RB-E-P2P"
-    - "server-rendered web → fetch in RSC and skip a client cache where you can; the sharper test is whether data changes ON ITS OWN (polling/pushes) — if it only changes when the user acts, useActionState + useOptimistic cover it (see reading)"
+    - "offline / local-first / collaborative → TanStack DB or Zero (a sync-engine architecture commitment, not a drop-in cache; see note: LOCAL-FIRST)"
+    - "P2P / serverless / Holepunch backend → n/a (data lives in the Hypercore/Autobase stack queried locally via hrpc; a client cache does not apply by design; RB-E-P2P owns this)"
+    - "server-rendered web (RSC) where data changes only when the user acts → no client cache (fetch in Server Components; useActionState + useOptimistic cover writes; web only, see reading 'Coordinating Optimistic Updates in Next.js'). Data that changes on its own (polling, pushes) keeps the default"
     - "already on Redux Toolkit → RTK Query"
-note: "Server state ≠ client state (see RB-E-STATE). TanStack Query is the #1 React library in State of React 2025; it's transport- and platform-agnostic, so the data layer is shared code across web + RN. Adversarially stress-tested 2026-06-25 (SURVIVES, high): RSC complements (doesn't displace) the cache; TanStack DB builds ON TanStack Query; Zero reached 1.0 (2026-06) with React Native support. IMPERATIVE-API MODERNIZATION (5.102, 2026-08, verified vs the PR): new queryClient query()/infiniteQuery() replace fetchQuery/fetchInfiniteQuery and DEPRECATE prefetchQuery/ensureQueryData (additive, old methods warn but work) — they respect select and skipToken, which the old ones ignored; prefer them in new imperative/prefetch code, incl. the route-context prefetch patterns in the tkdodo readings."
+    - "already on SWR, or modest needs with a hook-first preference → SWR (switching to TanStack Query rarely pays without a concrete missing feature)"
+note: >
+  Server state is not client state (RB-E-STATE owns the split). Staleness, dedupe, retry and
+  invalidation are one problem cluster, and a server-state cache solves it generically; hand-rolling
+  it in a client store or a useEffect rebuilds that cluster with bugs. TanStack Query is the #1 React
+  library in State of React 2025, and because it is transport- and platform-agnostic the data layer
+  is shared code across web and RN. RSC complements the cache on the web rather than displacing it.
+  Cost is per cache write (see reading 'What Does a GraphQL / Server-State Client Cost You Per
+  Request?'), so keep firehose data out of the expensive path whichever client you pick.
+
+  IMPERATIVE API (2026-08-22, verified vs TanStack/query PR #10658 and npm 5.102.0): new
+  queryClient.query() and infiniteQuery() replace fetchQuery/fetchInfiniteQuery; fetchQuery,
+  prefetchQuery and ensureQueryData now carry @deprecated tags but still work (additive change). The
+  new methods respect select, enabled and skipToken, which the old ones ignored, and throw when
+  enabled is false or queryFn is skipToken with no cached data to return → use them in new
+  imperative/prefetch code, including the route-context prefetch pattern in the TkDodo readings
+  (which still show ensureQueryData).
+
+  APOLLO 4.3 (2026-09-11, verified vs the apollo-client GitHub release): custom scalars in
+  InMemoryCache (a field-policy scalar option, auto-serialized variables); the minimum supported
+  TypeScript is now 5.9.x → check the TS version before upgrading; `skip` in useQuery/useSubscription
+  is deprecated in favor of skipToken. Current 4.3.1 (2026-09-18, verified vs npm).
+
+  LOCAL-FIRST (2026-09-24, verified vs npm): @tanstack/db 0.9.2 (2026-09-14; @tanstack/react-db
+  0.4.1), built on TanStack Query and still 0.x; its 0.6 (2026-03-25) SQLite persistence made real
+  offline possible. Zero 1.9.0 (2026-08-14), with React Native support; npm dates 1.0.0 to
+  2026-03-24. TinyBase 10.0.1 (2026-09-24, a major; 9.0.0 was 2026-07-03). All three are an
+  architecture commitment for products where offline or realtime is core, not a way to avoid a
+  loading spinner.
+
+  RSC TEST (verified vs the Aurora Scharff reading, which owns the mechanism): in a server-rendered
+  web app a client cache earns its place only when data changes on its own; otherwise it means
+  keeping two caches in sync. RSC does not apply to React Native.
+
+  RB-E-P2P owns the Holepunch data path; RB-E-META-FRAMEWORKS owns RSC and route loaders;
+  RB-E-STATE owns client state.
+
+  HISTORY:
+    2026-09-24 CORRECTED: PR #10658 deprecates fetchQuery as well as prefetchQuery/ensureQueryData, via @deprecated tags; npm dates Zero 1.0.0 to 2026-03-24, not 2026-06.
+    2026-06-25 CHALLENGED → SURVIVES (high): RSC complements the client cache; TanStack DB builds on TanStack Query; Zero 1.0 ships React Native support.
 defer_to_skill: null
 doc: "RB-E-DATA.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-01   # TanStack Query 5.102: query()/infiniteQuery() supersede fetchQuery/prefetchQuery/ensureQueryData (additive) — React Status #488
+updated: 2026-09-24   # Apollo 4.3 (TS 5.9 floor), Zero 1.9, TinyBase 10, TanStack DB 0.9; fetchQuery also deprecated; prior 2026-09-01: TanStack Query 5.102: query()/infiniteQuery() supersede fetchQuery/prefetchQuery/ensureQueryData (additive) — React Status #488
 reading:
   - title: "Reliable Query Prefetching with TanStack Router"
     url: "https://tkdodo.eu/blog/reliable-query-prefetching-with-tanstack-router"
@@ -87,6 +127,7 @@ reading:
 sources:
   - "https://aurorascharff.no/posts/coordinating-optimistic-updates-in-nextjs/"
   - "https://github.com/TanStack/query/pull/10658"
+  - "https://github.com/apollographql/apollo-client/releases/tag/%40apollo%2Fclient%404.3.0"
   - "https://2025.stateofreact.com/en-US/libraries/"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "@tanstack/react-query", label: "TanStack Query", token: "tanstack query" }

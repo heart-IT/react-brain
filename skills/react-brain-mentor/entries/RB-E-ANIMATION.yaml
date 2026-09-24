@@ -6,116 +6,140 @@ status: reviewed   # long-form entry written + source-checked → encyclopedia/R
 confidence: medium
 platforms: [react, react-native]
 options:
-  - { name: "Reanimated 4", tradeoff: "UI-thread + CSS-style animations/transitions; worklets split into react-native-worklets; requires New Arch. 4.6.0 (2026-08, verified vs the release) supports RN 0.83–0.87, pairs with Worklets 0.12.x, and fires the CSS animation/transition callbacks (onCSSAnimationStart/End/Iteration/Cancel, onCSSTransition*) natively on iOS + Android. 4.7.0 (2026-09-18) makes the NEW LAYOUT-ANIMATIONS ENGINE THE DEFAULT — see note before upgrading, the rollback flag and shared-element transitions are mutually exclusive. 4.7.0 also RAISES THE FLOOR: its npm peer ranges (verified vs registry.npmjs.org 2026-09-24) are react-native 0.86 - 0.88 and react-native-worklets 0.13.x, so an app on RN 0.83-0.85 stays on 4.6 (0.83 - 0.87, Worklets 0.12.x)" }
+  - { name: "Reanimated 4", tradeoff: "UI-thread worklet + CSS-style animations/transitions; New Architecture only. 4.7.0 (2026-09-18, verified vs npm 2026-09-24) peers react-native 0.86 - 0.88 + react-native-worklets 0.13.x and makes the new layout-animations engine the default; 4.6.0 (2026-08-21) peers RN 0.83 - 0.87 + Worklets 0.12.x. See note: REANIMATED 4.7" }
   - { name: "Gesture Handler 3.0", tradeoff: "native gestures; v3 adds a hook-based API built for the React Compiler + Reanimated 4, and a single unified Touchable button component that replaces (and deprecates) the library's 9 legacy button/touchable exports" }
-  - { name: "react-native-worklets (0.13.x)", tradeoff: "the worklets runtime under Reanimated 4 (now its own package; an earlier '8.0' claim here was WRONG, caught by the firsthand watch); 0.11 added experimental Hermes-bytecode worklets + Shareable values across isolated runtimes. 0.12 (WeakRef on worklet runtimes, Bundle Mode script loading on par with RN's own loaders) is what Reanimated 4.6 pairs with. 0.13.0 (2026-09-18, npm latest verified 2026-09-24; peer react-native 0.86 - 0.88) is what Reanimated 4.7 pairs with and adds: a standalone networking module (fetch/XHR/Blob/FormData/AbortController) for Bundle Mode runtimes — createWorkletRuntime takes an enableNetworking option defaulting to true, replacing the FETCH_PREVIEW_ENABLED preview flag — a Rust/OXC port of the Babel plugin (react-native-worklets/plugin-oxc/babel) for Bundle Mode, createSynchronizable({ fixedType }) with setDirty, and Swift Package Manager integration on iOS (verified vs the 0.13.0 changelog). TURN ON BUNDLE MODE (stable since 0.10) — below RN 0.87 it is the fix for the Hermes V1 memory regression, and worth it regardless; see note" }
-  - { name: "react-native-skia (2.x)", tradeoff: "GPU 2D drawing; v2.1 plays Lottie via Skottie; pairs with Reanimated. STEWARDSHIP MOVING — Shopify is leaving RN; the author takes the library to a NEW PACKAGE NAME and the Shopify repo gets archived; see note" }
+  - { name: "react-native-worklets (0.13.x)", tradeoff: "the worklets runtime under Reanimated 4, its own package. 0.13.0 (2026-09-18, verified vs npm 2026-09-24; peer react-native 0.86 - 0.88) pairs with Reanimated 4.7, 0.12.x with 4.6. Turn Bundle Mode on (stable since 0.10) and measure cold start. See note: WORKLETS BUNDLE MODE, WORKLETS 0.13" }
+  - { name: "react-native-skia (2.x)", tradeoff: "GPU 2D drawing; v2.1 plays Lottie via Skottie; pairs with Reanimated. 2.12.0 (2026-09-16, verified vs npm 2026-09-24). Stewardship is moving to its author under a NEW PACKAGE NAME and the Shopify repo will be archived; pin across the window. See note: SKIA STEWARDSHIP" }
   - { name: "lottie-react-native", tradeoff: "designer Lottie/JSON animations; v7 adds visionOS" }
-  - { name: "Rive — @rive-app/react-native (Nitro) / rive-react-native (legacy)", tradeoff: "designer-driven INTERACTIVE vector animation (state machines) — the Lottie alternative; the SDK was rewritten on Nitro under Rive's official scope (@rive-app/react-native, 0.4.x EARLY line): files/view-models become shared typed HybridObjects — Margelo-measured up to 94× multi-view loads + ~4.7× lower memory vs legacy (rewrite authors' own benchmark); legacy unscoped pkg at 9.8.3, quiet since 2026-04" }
+  - { name: "Rive — @rive-app/react-native (Nitro) / rive-react-native (legacy)", tradeoff: "designer-driven INTERACTIVE vector animation (state machines), the Lottie alternative. The Nitro rewrite @rive-app/react-native (0.4.20, 2026-08-19, early line — pin) shares files/view-models as typed HybridObjects: up to 94× multi-view loads + ~4.7× lower memory vs legacy (rewrite authors' own benchmark). Legacy rive-react-native 9.8.5 (2026-07-17). See note: RIVE" }
   - { name: "react-native-morph-view (Software Mansion)", tradeoff: "GPU image-morph transitions (Metal/AGSL shaders, metaball blend); RN 0.76+, iOS 15.1+/Android 13+; niche/new" }
   - { name: "Animated (core)", tradeoff: "built-in; RN 0.85 shared backend allows layout-prop animation with the native driver (from 0.85.1)" }
-  - { name: "Moti / LayoutAnimation", tradeoff: "declarative transitions; Moti wraps Reanimated — but it is DORMANT, not merely slow: npm 0.30.0 published 2025-01-29 and the repo has taken no commits since 2025-03-11 (verified 2026-08-18), while its own dependency list still pins framer-motion ^6.5.1 and its react-native-reanimated peer is a wildcard, so nothing warns you on Reanimated 4. Fine if already installed and working; do NOT start new work on it — plain Reanimated or LayoutAnimation is the live path" }
-  - { name: "react-native-screen-choreography", tradeoff: "shared-element transitions that DO cover Expo Router (peer-deps expo-router >=56.1.1 OR @react-navigation/native-stack >=6, validated on 7.x) — typed defineTransition recipes, native forward preparation on iOS + Android, reduced-motion support. 0.6.0 (2026-09-17, verified vs npm + README + release notes) — still 0.x and moving FAST: pin it, and read the note on the peer stack before adopting" }
-  - { name: "react-native-screen-transitions", tradeoff: "custom screen/shared-element transitions FOR React Navigation (blank-stack navigator, bounds-driven navigation.zoom(), gesture choreography); featured on the official React Navigation blog; v4.0 (2026-08-27, verified vs npm + the migration guide) is a FLOOR-RAISE: requires React 19.2 + Reanimated 4 + Worklets 0.8 — the v3 line stays available for React <19.2 / Reanimated 3 / React Navigation 6 stacks, and most v3 transition code carries over unchanged" }
+  - { name: "Moti / LayoutAnimation", tradeoff: "declarative transitions. Moti wraps Reanimated but is DORMANT: npm 0.30.0 (2025-01-29), no repo commits since 2025-03-11 (verified 2026-08-18), and its wildcard Reanimated peer means nothing warns you on Reanimated 4. Keep it if installed and working; start new work on LayoutAnimation or plain Reanimated" }
+  - { name: "react-native-screen-choreography", tradeoff: "shared-element transitions that cover Expo Router (peers expo-router >=56.1.1 OR @react-navigation/native-stack >=6) with typed defineTransition recipes, native forward preparation on iOS + Android, reduced-motion support. 0.6.0 (2026-09-17, verified vs npm + README + release notes); 0.x and moving fast — pin it. See note: SCREEN-CHOREOGRAPHY" }
+  - { name: "react-native-screen-transitions", tradeoff: "custom screen/shared-element transitions FOR React Navigation (blank-stack navigator, bounds-driven navigation.zoom(), gesture choreography); featured on the official React Navigation blog. v4.0 (2026-08-27, verified vs npm + the migration guide) requires React 19.2 + Reanimated 4 + Worklets 0.8; stay on v3 for React <19.2 / Reanimated 3 / React Navigation 6" }
   - { name: "react-native-ease", tradeoff: "animations driven entirely by Core Animation/ObjectAnimator — no per-frame JS OR UI-thread worklet work; author-run benchmark shows it holding frame budget at view counts where Reanimated saturates; young, and see the benchmark-bias caveat in reading" }
-  - { name: "Motion / framer-motion (WEB)", tradeoff: "the web (React DOM) animation default — declarative layout/exit/gesture animation; Motion is framer-motion's successor; React Native uses Reanimated instead" }
+  - { name: "Motion / framer-motion (WEB)", tradeoff: "the web (React DOM) animation default — declarative layout/exit/gesture animation; Motion is framer-motion's successor; React Native uses Reanimated instead. See note: MOTION 13" }
 recommend:
-  default: "React Native → Reanimated 4 + Gesture Handler 3 for real UI-thread animation & gestures (core Animated only for trivial cases). Web (React DOM) → Motion (framer-motion's successor) for declarative layout/exit/gesture animation."
+  default: "React Native → Reanimated 4 + Gesture Handler 3 for UI-thread animation and gestures, with Worklets Bundle Mode on; core Animated (native driver) only for trivial cases. Web (React DOM) → Motion (framer-motion's successor). Reanimated 4.7 needs RN 0.86+; older apps take the RN 0.83–0.85 clause."
   when:
-    - "web animation (React DOM) → Motion / framer-motion — Reanimated & Gesture Handler are React Native only"
-    - "custom/GPU drawing or visuals → react-native-skia"
-    - "designer-made animations → lottie-react-native (or Skia/Skottie)"
-    - "designer animations that need INTERACTIVITY/state machines, or many Rive views sharing files → Rive; new work goes to the Nitro line @rive-app/react-native (0.4.x, early — pin), not the quiet legacy package"
-    - "image-to-image morph transition → react-native-morph-view (GPU shader; niche, lead-level)"
-    - "simple fade/slide, want declarative → LayoutAnimation or a Reanimated entering/exiting preset (RN); Motion (web). Moti reads as the ergonomic choice here but is dormant — see the option row"
-    - "custom screen / shared-element transitions on React Navigation → react-native-screen-transitions (new; pin)"
-    - "shared-element transitions on EXPO ROUTER → react-native-screen-choreography (the only pick here that supports it; 0.x, pin it, prototype first)"
-    - "hundreds of concurrently-animating views blowing the frame budget → benchmark react-native-ease (fully native-driven; young)"
-    - "heavy animation perf → route to react-native-best-practices"
+    - "web animation (React DOM) → Motion / framer-motion — Reanimated and Gesture Handler are React Native only"
+    - "React Native app on RN 0.83–0.85 → Reanimated 4.6 (with Worklets 0.12.x; 4.7 peers RN 0.86 - 0.88 and Worklets 0.13.x)"
+    - "custom/GPU drawing or visuals → react-native-skia (pin: the package name changes when its author's fork publishes)"
+    - "designer-made animations → lottie-react-native, else Skia's Skottie player"
+    - "designer animations that need INTERACTIVITY/state machines, or many Rive views sharing files → Rive (new work on the Nitro line @rive-app/react-native, 0.4.x — pin; not the legacy package)"
+    - "image-to-image morph transition → react-native-morph-view (GPU shader; niche)"
+    - "simple declarative fade/slide on React Native → LayoutAnimation, else a Reanimated entering/exiting preset (Moti is dormant — see its row)"
+    - "custom screen / shared-element transitions on React Navigation → react-native-screen-transitions (pin)"
+    - "shared-element transitions on EXPO ROUTER → react-native-screen-choreography (the only pick that supports it; 0.x — pin the exact version, prototype on real screens)"
+    - "hundreds of concurrently-animating views blowing the frame budget → react-native-ease (fully native-driven; young — benchmark it on your screens first)"
+    - "heavy animation perf → react-native-best-practices (owns the perf rules)"
 note: >
-  SKIA'S STEWARDSHIP MOVES, AND THE PACKAGE NAME WILL CHANGE (2026-09-21, verified vs Shopify's
-  announcement + npm + the GitHub API): Shopify is migrating its apps off React Native, and stated
-  what happens to react-native-skia — it SPONSORS the library through the end of 2026, William
-  Candillon (its author) continues working on it beyond that, he will FORK THE REPO in the coming
-  months and publish under a NEW NAME, and the original Shopify repo is archived once that
-  transition completes. Nothing has broken yet and nothing is deprecated: @shopify/react-native-skia
-  latest is 2.12.0, published 2026-09-16 — six days AFTER the announcement — and neither the repo
-  nor the npm package carries an archive/deprecation flag (checked 2026-09-21). The practical
-  consequence is a rename you will have to follow, not a library to abandon: keep using it, but
-  expect to change the dependency name (and this corpus's detect rows) when the fork publishes, and
-  prefer pinning over floating ranges across that window. This thread is owned here; RB-E-CHARTS,
-  RB-E-GAMES and RB-E-SVG carry pointers because Skia sits under their recommendations too. The
-  same announcement puts FlashList on critical-fixes-only (RB-E-LISTS owns that) and archives
-  Restyle, which this corpus never recommended.
-  REANIMATED 4.7.0 FLIPS A DEFAULT (2026-09-18, verified vs the release): layout animations now run
-  on the NEW light-tree-based engine by default. If it regresses your app the documented escape is
-  the USE_LEGACY_LAYOUT_ANIMATIONS_PROXY feature flag — but read the constraint before you rely on
-  it, because it is the interesting part: the LEGACY engine does not support shared element
-  transitions, so that flag and ENABLE_SHARED_ELEMENT_TRANSITIONS cannot both be on. An app doing
-  shared-element work has no rollback; it upgrades onto the new engine or stays below 4.7.
-  RN 0.85 (2026-04) introduced a shared C++ animation backend so Animated and Reanimated
-  ride one engine (built with Software Mansion). Heavy-animation perf routes to
-  react-native-best-practices. RIVE (added 2026-07-13, Margelo blog pass): the RN SDK's
-  Nitro rewrite ships as NEW scoped @rive-app/react-native (0.4.14) while legacy
-  rive-react-native sits at 9.8.3 (both verified vs npm 2026-07-13) — a supersession in
-  progress; WATCH for the new line reaching 1.0 or a formal legacy deprecation before
-  adding a migrate rule (wired as tripwires 2026-07-16 — firsthand fires when either lands). WEB: Motion (the framer-motion successor) is the web
-  animation default — added 2026-06-25 after the evidence-loop corpus self-audit flagged
-  that this [react]-platform entry had options/recommend for React Native only, no web pick
-  (caught from ledgerhr's framer-motion usage). Verified vs the official RN 0.85 blog.
-  HERMES V1 WORKLET MEMORY REGRESSION — FIXED IN RN 0.87 (history, kept because it still bites
-  every app below 0.87; original finding 2026-07-28, verified vs the Software Mansion writeup and
-  reproduced independently in the Calazans benchmark below): Hermes V1 attached ~512KB of debug
-  metadata to EVERY eval'd worklet, and Worklets' Legacy Eval Mode ships animation code to the UI
-  runtime as strings — so memory scaled with unique worklets triggered. Software Mansion measured
+  The selection axis is which thread pays for every frame. Reanimated 4 runs animation code as
+  worklets on the UI thread, so JS-thread work cannot stutter it, and Gesture Handler 3 recognizes
+  gestures natively and feeds those worklets directly — that pair is the React Native default. Since
+  RN 0.85 (2026-04, verified vs the official RN 0.85 blog) core Animated and Reanimated ride one
+  shared C++ animation backend built with Software Mansion, so the built-in is a native-driven option
+  for trivial cases, not a competing engine. Fully native drivers (react-native-ease) remove per-frame
+  worklet cost when hundreds of views animate at once; Skia is for drawing, not view properties. On
+  the web the same reasoning lands on Motion. Heavy-animation perf routes to
+  react-native-best-practices.
+
+  REANIMATED 4.7 (2026-09-18 release; peers verified vs registry.npmjs.org 2026-09-24): two changes
+  decide the upgrade. FLOOR: 4.7.0 peers react-native 0.86 - 0.88 and react-native-worklets 0.13.x;
+  4.6.0 (2026-08-21) peers 0.83 - 0.87 and 0.12.x, so an app on RN 0.83–0.85 stays on 4.6. 4.6 also
+  fires the CSS animation/transition callbacks (onCSSAnimationStart/End/Iteration/Cancel,
+  onCSSTransition*) natively on iOS + Android. DEFAULT FLIP: layout animations now run on the NEW
+  light-tree-based engine. The documented escape is the USE_LEGACY_LAYOUT_ANIMATIONS_PROXY feature
+  flag, but the legacy engine does not support shared element transitions, so that flag and
+  ENABLE_SHARED_ELEMENT_TRANSITIONS cannot both be on → an app doing shared-element work has no
+  rollback; it upgrades onto the new engine or stays below 4.7.
+
+  WORKLETS BUNDLE MODE (Hermes V1 finding 2026-07-28, verified vs the Software Mansion writeup and
+  reproduced in the Calazans benchmark in reading; RN 0.87 fix verified vs the v0.87.0 tag's
+  package.json; Worklets 0.12 verified vs the worklets-0.12.0 release): Hermes V1 attached ~512KB of
+  debug metadata to EVERY eval'd worklet, and Worklets' Legacy Eval Mode ships animation code to the
+  UI runtime as strings, so memory scaled with unique worklets triggered. Software Mansion measured
   Expensify's bundle at 1,000+ unique worklets, with 100+ evaluated just to initialize (≥50MB at
   startup). The Hermes fix was backported to 250829098.0.15, and RN 0.87 (2026-08-11) pins
-  hermes-compiler 250829098.0.16 — verified vs the v0.87.0 tag's package.json — so the regression
-  is closed from 0.87 up. BELOW 0.87 the ladder still applies, in preference order: turn on
-  WORKLETS BUNDLE MODE (exposes the mmap'd bytecode bundle instead of eval'ing strings — measured
-  −~100MB PSS, ~45%, native heap ~142MB→~32MB, with frame rate and CPU unchanged), the
-  experimental bytecode option for Legacy Eval Mode, or pin Hermes 250829098.0.15. TURN ON BUNDLE
-  GAP CLOSED 2026-09-21 (opened 2026-09-10; react-native-screen-choreography had been skipped twice
-  as too-early at 0.4, TWiR #296): 0.6.0 is now a NAMED option above rather than an absence. What
-  moved it, verified vs npm, the README and the 0.5/0.6 release notes: Expo Router is a declared
-  peer (>=56.1.1) with its own installation guide and example app, so the Expo-Router-shaped hole
-  this note described is filled by something real; 0.5 added typed `defineTransition` recipes and
-  native forward preparation on BOTH platforms (destination layout-stability checks, batched target
-  measurement) plus Android CI benchmarks; 0.6 added scoped Enter/Exit reveals with reduced-motion
-  support, `presentationProgress`, and duration-based springs. Why it is a PIN and not a default,
-  from the same receipts: it is 0.x with 13 published versions, and 0.4→0.5 renamed most of the
-  public API (SharedElement.Live→SharedElement, makeLiveTransition→makeTransition, StandInContainer→
-  TransitionSurface, and ~6 type renames) with another feature release seven days later. It also
-  drags in a FIVE-LIBRARY native peer stack — Reanimated >=4, Worklets >=0.8, Screens >=4 and
-  react-native-teleport >=1.2 on top of the navigator — and the author states plainly that those
-  lower bounds are "not a full tested compatibility matrix". So: prototype it on your real screens,
-  pin the exact version, and rebuild native (pods on iOS) because forward preparation is native.
-  COUNTER-DATAPOINT (2026-09-10, TWiR #296 — the RN navigation benchmark cited in RB-E-NAV): its
-  author reports Bundle Mode REGRESSING cold start, because it must parse the whole bundle, while
-  measuring Reanimated + Worklets at a ~125 MB RAM premium (a second Hermes runtime, almost all
-  anonymous heap). That is one device and one trivial app against SWM's own guidance, so the
-  recommendation below stands — but measure cold start when you turn Bundle Mode on, rather than
-  treating it as free.
-  MODE REGARDLESS: SWM still recommends it for its own performance gains, and Worklets 0.12
-  (2026-08-11) brought its script loading to parity with React Native's own loaders — local
-  bundles are mmapped instead of held in an in-memory std::string for the app's lifetime, and
-  Android dev-server bundles stream to a cache file (verified vs the worklets-0.12.0 release).
-  SKIA 2.10 MOVED OFF HostObject (2026-07-23, verified vs the release + the published manifest):
-  the release's one feature is "migrate from host objects to native states" (#3964) — Skia's JSI
-  objects now use NativeState rather than HostObject, the direction the Hermes team favors because
-  HostObject routes every property access back through a C++ trampoline. Its published peer range
-  is react-native >= 0.78 and react >= 19.0, with react-native-reanimated >= 4.0.0 and
-  react-native-worklets >= 0.7.0 as OPTIONAL peers — i.e. Skia does not force Reanimated on you,
-  but if you pair them the v4 line is the floor.
-  MOTION 13 (web; 2026-08-06, verified vs npm + the motion.dev upgrade guide): one breaking
-  change — drops @emotion/is-prop-valid as an auto-detected optional dependency, so
-  styled-components/Emotion codebases must inject the prop-validation function via MotionConfig
-  (or invert composition so the styling library controls prop forwarding) or previously-filtered
-  props leak onto the DOM. framer-motion (the legacy package name) moved to 13.0.0 in lockstep;
-  neither package is deprecated.
+  hermes-compiler 250829098.0.16, so the regression is closed from 0.87 up. BELOW 0.87, in
+  preference order: turn on Bundle Mode (exposes the mmap'd bytecode bundle instead of eval'ing
+  strings — measured −~100MB PSS, ~45%, native heap ~142MB→~32MB, frame rate and CPU unchanged), the
+  experimental bytecode option for Legacy Eval Mode, or pin Hermes 250829098.0.15. ON 0.87+ turn
+  Bundle Mode on anyway: Software Mansion recommends it for its own performance gains, and Worklets
+  0.12 (2026-08-11) brought its script loading to parity with React Native's own loaders — local
+  bundles are mmapped instead of held in an in-memory std::string for the app's lifetime, and Android
+  dev-server bundles stream to a cache file. COUNTER-DATAPOINT (2026-09-10, TWiR #296 — the RN
+  navigation benchmark cited in RB-E-NAV): its author reports Bundle Mode REGRESSING cold start,
+  because it must parse the whole bundle, while measuring Reanimated + Worklets at a ~125 MB RAM
+  premium (a second Hermes runtime, almost all anonymous heap). That is one device and one trivial
+  app against Software Mansion's guidance, so the recommendation stands → measure cold start when you
+  turn Bundle Mode on rather than treating it as free.
+
+  WORKLETS 0.13 (2026-09-18, verified vs the 0.13.0 changelog; npm latest verified 2026-09-24): the
+  line Reanimated 4.7 pairs with. It adds a standalone networking module
+  (fetch/XHR/Blob/FormData/AbortController) for Bundle Mode runtimes — createWorkletRuntime takes an
+  enableNetworking option defaulting to true, replacing the FETCH_PREVIEW_ENABLED preview flag — a
+  Rust/OXC port of the Babel plugin (react-native-worklets/plugin-oxc/babel) for Bundle Mode,
+  createSynchronizable({ fixedType }) with setDirty, and Swift Package Manager integration on iOS.
+  Earlier lines: 0.11 added experimental Hermes-bytecode worklets + Shareable values across isolated
+  runtimes; 0.12 added WeakRef on worklet runtimes and the Bundle Mode loader parity above.
+
+  SCREEN-CHOREOGRAPHY (2026-09-21, verified vs npm, the README and the 0.5/0.6 release notes): the
+  Expo Router shared-element pick. Expo Router is a declared peer (>=56.1.1) with its own installation
+  guide and example app; 0.5 added typed `defineTransition` recipes and native forward preparation on
+  BOTH platforms (destination layout-stability checks, batched target measurement) plus Android CI
+  benchmarks; 0.6 added scoped Enter/Exit reveals with reduced-motion support,
+  `presentationProgress`, and duration-based springs. Why it is a PIN and not a default: it was 0.x
+  with 13 published versions at 0.6.0, and 0.4→0.5 renamed most of the public API
+  (SharedElement.Live→SharedElement, makeLiveTransition→makeTransition,
+  StandInContainer→TransitionSurface, and ~6 type renames) with another feature release seven days
+  later. It also drags in a FIVE-LIBRARY native peer stack — Reanimated >=4, Worklets >=0.8, Screens
+  >=4 and react-native-teleport >=1.2 on top of the navigator — and the author states that those
+  lower bounds are "not a full tested compatibility matrix" → prototype it on your real screens, pin
+  the exact version, and rebuild native (pods on iOS) because forward preparation is native.
+
+  RIVE (2026-07-13, Margelo blog pass; versions verified vs npm 2026-09-24): the RN SDK's Nitro
+  rewrite ships as the scoped @rive-app/react-native (0.4.20, 2026-08-19) while the legacy unscoped
+  rive-react-native is at 9.8.5 (2026-07-17) — a supersession in progress. The migrate rule waits for
+  the new line reaching 1.0 or a formal legacy deprecation; both are wired as tripwires.
+
+  SKIA STEWARDSHIP (2026-09-21, verified vs Shopify's announcement + npm + the GitHub API): Shopify is
+  migrating its apps off React Native. It SPONSORS react-native-skia through the end of 2026; William
+  Candillon (its author) continues working on it beyond that, will FORK THE REPO in the coming months
+  and publish under a NEW NAME, and the original Shopify repo is archived once that transition
+  completes. Nothing is deprecated: @shopify/react-native-skia latest is 2.12.0, published 2026-09-16
+  — six days AFTER the announcement — and neither the repo nor the npm package carries an
+  archive/deprecation flag (checked 2026-09-21; npm re-checked 2026-09-24) → keep using it, pin
+  rather than float across the window, and expect to change the dependency name (and this corpus's
+  detect rows) when the fork publishes. This thread is owned here; RB-E-CHARTS, RB-E-GAMES and
+  RB-E-SVG carry pointers. The same announcement puts FlashList on critical-fixes-only (RB-E-LISTS
+  owns that) and archives Restyle, which this corpus never recommended.
+
+  SKIA 2.10 MOVED OFF HostObject (2026-07-23, verified vs the release + the published manifest): the
+  release's one feature is "migrate from host objects to native states" (#3964) — Skia's JSI objects
+  now use NativeState rather than HostObject, the direction the Hermes team favors because HostObject
+  routes every property access back through a C++ trampoline. Its published peer range is
+  react-native >= 0.78 and react >= 19.0, with react-native-reanimated >= 4.0.0 and
+  react-native-worklets >= 0.7.0 as OPTIONAL peers → Skia does not force Reanimated on you, but if you
+  pair them the v4 line is the floor.
+
+  MOTION 13 (web; 2026-08-06, verified vs npm + the motion.dev upgrade guide): one breaking change —
+  it drops @emotion/is-prop-valid as an auto-detected optional dependency, so styled-components/Emotion
+  codebases must inject the prop-validation function via MotionConfig (or invert composition so the
+  styling library controls prop forwarding) or previously-filtered props leak onto the DOM.
+  framer-motion (the legacy package name) moved to 13.0.0 in lockstep; neither package is deprecated.
+
+  HISTORY:
+  2026-09-24 CORRECTED: legacy rive-react-native is at 9.8.5 (2026-07-17), not 9.8.3 "quiet since
+  2026-04".
+  2026-09-21 GAP CLOSED: Expo Router shared-element transitions → react-native-screen-choreography 0.6
+  (opened 2026-09-10; skipped twice as too-early at 0.4, TWiR #296).
+  2026-07-17 CORRECTED: react-native-worklets is a 0.x line, not '8.0'.
+  2026-06-25 GAP CLOSED: web (React DOM) pick Motion added — the [react]-platform entry had
+  recommended for React Native only.
 defer_to_skill: react-native-best-practices
 doc: "RB-E-ANIMATION.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-24   # Reanimated 4.7 floor (RN 0.86-0.88, Worklets 0.13.x) + Worklets 0.13 row; prior 2026-09-21: Skia stewardship moves to its author under a new name (Shopify leaves RN) · Reanimated 4.7 new layout-animations engine is the default · Expo-Router shared-element GAP CLOSED with screen-choreography 0.6
+updated: 2026-09-24   # Reanimated 4.7 floor (RN 0.86-0.88, Worklets 0.13.x) + Worklets 0.13 row · legacy rive-react-native 9.8.5 correction; prior 2026-09-21: Skia stewardship moves to its author under a new name (Shopify leaves RN) · Reanimated 4.7 new layout-animations engine is the default · Expo-Router shared-element GAP CLOSED with screen-choreography 0.6
 reading:
   - title: "React Native Gesture Handler's Touchable: The Button We Wish We Had Sooner"
     url: "https://swmansion.com/blog/react-native-gesture-handler-s-touchable-the-button-we-wish-we-had-sooner/"

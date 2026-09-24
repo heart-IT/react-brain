@@ -4,7 +4,7 @@ title: "About authentication & identity in React and React Native"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: low                # the options are mature; the entry's editorial judgment is young
-updated: 2026-09-10
+updated: 2026-09-24
 platforms: [react, react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-AUTH
 defer_to_skill: null
@@ -14,6 +14,8 @@ sources:
   - "https://github.com/better-auth/better-auth/releases/tag/v1.7.0"
   - "https://invertase.io/blog/react-native-firebase-v26-release"
   - "https://github.com/auth0/react-native-auth0/releases/tag/v5.10.0"
+  - "https://registry.npmjs.org/@clerk%2Fclerk-expo"
+  - "https://github.com/auth0/react-native-auth0/blob/master/CHANGELOG.md"
 ---
 
 # About authentication & identity in React and React Native
@@ -58,7 +60,9 @@ deploy on.
 teams actually buy is the **prebuilt UI plus organizations and MFA**, and Clerk ships those
 with a first-class Expo SDK, so a React and React Native product gets one identity system
 rather than two integrations. You pay in per-MAU pricing and vendor dependency, which is
-the honest trade: you are renting the user row.
+the honest trade: you are renting the user row. The Expo SDK is now `@clerk/expo`; the older
+`@clerk/clerk-expo` carries an npm deprecation pointing at Clerk's Core 3 upgrade guide, so
+an Expo app still on it has a package migration to plan.
 
 *Backend-bundled auth* wins whenever it applies, and the reason is not technical merit —
 it is that a second identity system means two sources of truth about the same person,
@@ -73,15 +77,17 @@ because auth was a domain gap in the corpus until 2026-07.
 
 **Auth.js / NextAuth** is the case that needs stating precisely, because "maintenance"
 is easy to over-read. It is under Better Auth's stewardship: security and bug fixes
-continue, and the stated path transitions users toward Better Auth. It is **not formally
-deprecated** — which is exactly why the corpus refuses to ship a migrate rule for it. A
+continue (@auth/core and next-auth both published on 2026-07-20), and the stated path
+transitions users toward Better Auth. It is **not formally deprecated** — which is exactly why the corpus refuses to ship a migrate rule for it. A
 migrate rule is an instruction to spend a team's time; that instruction should wait for a
 formal deprecation or EOL, not for a vibe about momentum. Until then it is a when-clause:
 if you are already on it, plan the migration rather than deepening the investment.
 
 **Auth0** wins where the requirement is not "authentication" but *federation* — SSO, SAML,
 an existing corporate IdP. That is a procurement-shaped requirement, and the enterprise IdP
-is the shape that fits it. Its React Native SDK stays actively developed.
+is the shape that fits it. Its React Native SDK stays actively developed — and 5.11.1
+(2026-09-08) deprecates the client-side Management API and the legacy MFA methods on the
+auth client, so code using either should move off them.
 
 **expo-auth-session** is the DIY lane on React Native: a browser-based OAuth/OIDC primitive
 where you own token handling, session lifetime, and the correctness burden. Choosing it is

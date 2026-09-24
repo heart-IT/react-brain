@@ -6,23 +6,42 @@ status: reviewed   # long-form entry written + source-checked → encyclopedia/R
 confidence: medium
 platforms: [react-native]
 options:
-  - { name: "KeyboardAvoidingView (core)", tradeoff: "built-in; smooth on iOS (scheduled animation w/ predefined curves) but SNAPS on Android (no per-frame insets); breaks under Android-15 edge-to-edge" }
-  - { name: "react-native-keyboard-controller (Kirill Zyusko)", tradeoff: "the modern de-facto fix — synced iOS/Android keyboard animations via WindowInsetsAnimationCallback; ships KeyboardAwareScrollView / KeyboardStickyView; handles edge-to-edge" }
-  - { name: "react-native-avoid-softinput", tradeoff: "alternative, Android-focused soft-input avoidance" }
+  - { name: "KeyboardAvoidingView (core)", tradeoff: "Built in, zero dependencies; smooth on iOS (LayoutAnimation: scheduled start + duration + curve) but SNAPS on Android (one keyboardDidShow snapshot, no per-frame insets) and breaks under Android-15 edge-to-edge. See note: THE PICTURE." }
+  - { name: "react-native-keyboard-controller (Kirill Zyusko)", tradeoff: "The cross-platform parity fix: identical iOS/Android keyboard animation (Android per-frame WindowInsetsAnimationCallback on every supported version), edge-to-edge handled, ships KeyboardAwareScrollView and KeyboardStickyView. 1.22.5 (2026-09-11, verified vs npm); needs Reanimated, see note: FLOORS." }
+  - { name: "react-native-avoid-softinput", tradeoff: "Native-side avoidance for Android and iOS: translates the root view (or pads the parent scroll view) only when the focused input is covered; AvoidSoftInputView for modals. 9.0.1 (2026-09-13, verified vs npm); see note: FLOORS." }
 recommend:
-  default: "Core KeyboardAvoidingView is fine for simple iOS-first layouts; for cross-platform parity (especially Android + edge-to-edge) use react-native-keyboard-controller — KeyboardAwareScrollView for forms, KeyboardStickyView for footers."
+  default: "iOS-only or iOS-first layouts with simple spacing: core KeyboardAvoidingView. Any screen that must behave the same on Android (and every Android app targeting SDK 35, where edge-to-edge is forced): react-native-keyboard-controller — KeyboardAwareScrollView for forms, KeyboardStickyView for footers. The condition that changes the pick is Android parity."
   when:
     - "scrollable forms with multiple inputs → keyboard-controller KeyboardAwareScrollView"
     - "footer/toolbar riding the keyboard → keyboard-controller KeyboardStickyView"
-    - "simple iOS-first spacing only → core KeyboardAvoidingView may suffice"
+    - "simple iOS-first spacing only, Android parity not required → KeyboardAvoidingView (core; no dependency)"
+    - "app already on avoid-softinput and it keeps focused inputs uncovered → react-native-avoid-softinput (keep; move to keyboard-controller when identical iOS/Android keyboard animation is the requirement)"
 note: >
-  Keyboard handling is a top RN pain point: iOS uses scheduled animation with predefined curves,
-  modern Android delivers per-frame insets (WindowInsetsAnimationCallback), and Android-15 edge-to-
-  edge breaks legacy adjustResize — which is why core KeyboardAvoidingView snaps on Android. New
-  entry surfaced from a Margelo deep-dive (see reading); pairs with RB-E-FORMS for form screens.
+  THE PICTURE: iOS and Android animate the keyboard on different clocks. iOS posts a scheduled
+  animation (start, duration, curve) that UI can ride; modern Android delivers per-frame insets
+  through WindowInsetsAnimationCallback. Core KeyboardAvoidingView uses LayoutAnimation on iOS and
+  the legacy keyboardDidShow event on Android, a single snapshot fired after the keyboard has
+  finished moving, so it is smooth on iOS and snaps on Android. react-native-keyboard-controller
+  runs the app-driven per-frame path on every Android version it supports, which is what gives
+  parity. Pairs with RB-E-FORMS for form screens.
+
+  EDGE-TO-EDGE (verified vs the Margelo deep-dive): from Android 15 (API 35) edge-to-edge is forced
+  by default for apps targeting that SDK, and edge-to-edge breaks the adjustResize contract (the
+  window no longer resizes when the keyboard appears) → layouts that relied on adjustResize on
+  Android 11-14 stop fitting on Android 15 with no JS change; core KeyboardAvoidingView is not a fix.
+
+  FLOORS (2026-09-24, verified vs npm): react-native-keyboard-controller 1.22.5 declares a
+  react-native-reanimated >=3.0.0 peer → adopting it means adopting Reanimated.
+  react-native-avoid-softinput 9.0.1 declares react-native >=0.81.0 and react >=19.1.0 peers and
+  supports the latest RN plus the two previous minors → apps below RN 0.81 fall outside its peer
+  range.
+
+  HISTORY:
+  2026-09-24 CORRECTED: react-native-avoid-softinput was described as Android-focused; its README
+  states Android and iOS support.
 defer_to_skill: react-native-best-practices
 doc: "RB-E-KEYBOARD.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-13
+updated: 2026-09-24   # registry pins + peer floors added, avoid-softinput platform claim corrected; prior 2026-07-13
 reading:
   - title: "The Go-To Guide for Understanding Keyboards in React Native (Part 1)"
     url: "https://blog.margelo.com/deep-dive-in-keyboard-handling"
@@ -32,6 +51,7 @@ reading:
     applies_when: { absent_deps: ["react-native-keyboard-controller", "react-native-avoid-softinput"], platforms: [react-native] }
 sources:
   - "https://blog.margelo.com/deep-dive-in-keyboard-handling"
+  - "https://registry.npmjs.org/react-native-avoid-softinput/latest"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "react-native-keyboard-controller", label: "keyboard-controller", token: "keyboard-controller" }
   - { pkg: "react-native-avoid-softinput", label: "avoid-softinput", token: "avoid-softinput" }

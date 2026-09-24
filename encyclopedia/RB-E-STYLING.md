@@ -4,7 +4,7 @@ title: "About styling & theming in React & React Native"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: medium
-updated: 2026-06-25
+updated: 2026-09-24
 platforms: [react, react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-STYLING
 defer_to_skill: design-system                     # tokens, theme parity, a11y intrinsics
@@ -69,11 +69,20 @@ NativeWind is the most-adopted Tailwind-for-RN; **Unistyles** moves styling into
 engine for fast theming and variants; zero-runtime/Babel-plugin variants avoid JS-side style
 work entirely.
 
+*Which Tailwind major (verified vs npm 2026-09-24).* NativeWind's stable line (4.2.7) is Tailwind
+v3-era; its Tailwind-v4 line (v5) is still a release candidate. **Uniwind** (from the Unistyles
+authors) is the stable option that requires Tailwind >=4 — the pick when an RN app needs Tailwind
+v4 parity with its web build today.
+
+*Stewardship (2026-09-09).* Tailwind Labs joined Shopify; Tailwind CSS stays MIT-licensed under the
+same team, so the web default holds. Tailwind Plus and ui.sh closed sign-ups to new customers —
+reach for shadcn/ui (`RB-E-COMPONENT-LIBS`) for an owned component set instead.
+
 **Tamagui** — a cross-platform design-system + optimizing compiler; a batteries-included route
 when you want a *component system with theming*, not just primitives (also `RB-E-CROSSPLATFORM`).
 
 **styled-components / runtime CSS-in-JS** — still **runtime** CSS-in-JS. It's actively
-developed again (v7 prerelease, 2026-06, adds RN-parity features) — but v7 stays runtime, so
+developed again (v7 prerelease builds through 2026-09-08, RN-parity features) — but v7 stays runtime, so
 the advice is unchanged: don't place a *new* web bet on runtime CSS-in-JS — prefer zero-runtime
 or StyleX.
 

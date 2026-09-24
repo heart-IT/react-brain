@@ -4,7 +4,7 @@ title: "About networking & the HTTP client layer"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: medium
-updated: 2026-07-16
+updated: 2026-09-24
 platforms: [react, react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-NETWORKING
 defer_to_skill: null                                          # entry declares no depth-audit skill
@@ -47,10 +47,11 @@ and whether a measured hot path justifies touching the engine below.
 
 ## The default, and why
 
-> Use fetch — on Expo SDK 56+ you are already on expo/fetch globally. The bigger win in most
-> apps is the CACHE layer above it (TanStack Query, RB-E-DATA), not the client. Reach for
-> react-native-nitro-fetch only when the network layer is a MEASURED hot path (cold-start
-> requests, media, HTTP/3 backends) or you need prefetch/worklet parsing.
+> fetch (built-in) on both platforms: the browser's native fetch on react; on react-native
+> the built-in fetch, which on Expo SDK 56+ is already expo/fetch globally. The bigger win in
+> most apps is the CACHE layer above it (TanStack Query, RB-E-DATA), not the client. The pick
+> changes to react-native-nitro-fetch only when the network layer is a MEASURED hot path
+> (cold-start requests, media, HTTP/3 backends) or you need prefetch/worklet parsing.
 
 The default is to do nothing. fetch is already the default on both platforms — RN's WHATWG
 polyfill over native networking, the browser's native fetch on web — and it is fine for most
@@ -74,10 +75,14 @@ are already using it.
 
 **react-native-nitro-fetch (Margelo)** — the engine swap: drop-in native fetch on Cronet
 (Android) / URLSession (iOS), bringing HTTP/1-2-3+QUIC, Brotli, disk cache,
-prefetch-before-navigation, and worklet parsing off the JS thread. v1.5, ~900 stars, RN
-0.75+. The entry carries two performance numbers — "measured ~1.3x vs built-in" on the
-option row, "~23% on their harness" in the note — and grades both the same way: vendor-run;
-measure your own hot path. Its README doubles as the layer's best explainer — what actually
+prefetch-before-navigation, and worklet parsing off the JS thread. 1.7.0 (2026-09-12), RN
+0.75+. Its own harness measures ~23% (1.30×) over built-in fetch — one number, stated two
+ways, vendor-run. The production calibration point is Expensify's rollout: 15-30% faster
+requests from the global swap, and a P50 warm-start cut of 1,676→1,409ms on iOS and
+3,223→2,573ms on Android from prefetching the one critical startup request before the JS
+runtime loads. The same rollout names the sharp edge: on Android, Cronet needed a custom
+certificate-pinning implementation. Measured wins like these are what the entry's gate asks
+for. Its README doubles as the layer's best explainer — what actually
 backs fetch on each platform, what HTTP/3+QUIC/Brotli/disk-cache buy, the benchmark
 methodology — and the entry says to read it even if you keep built-in fetch.
 
@@ -86,7 +91,7 @@ it runs over XHR in RN. The entry's verdict is symmetric and calm: no reason to 
 it, little reason to start *on* it for new work.
 
 **ky / ofetch** — small fetch wrappers (retries, hooks, typed convenience), web-leaning; ky
-2.x, ofetch (unjs). Listed without a when-clause — this page stakes nothing further on them.
+2.x, ofetch (unjs). Same verdict as axios: a team already on one keeps it.
 
 ## Tradeoffs and failure modes to name out loud
 
@@ -102,6 +107,10 @@ it, little reason to start *on* it for new work.
 - **Rebuilding the cache inside the client.** Hand-rolled retry/cache/invalidation logic in
   interceptors is TanStack Query territory implemented worse, regardless of which client
   hosts it.
+- **Hand-rolled cancellation on old RN.** Since RN 0.87.0 the in-tree AbortController
+  supports AbortSignal.timeout(), AbortSignal.any(), AbortSignal.abort(reason) and
+  signal.throwIfAborted(), so web cancellation patterns (per-request deadlines, merged
+  signals) work unmodified; below 0.87 those four APIs are missing.
 - **Raw XMLHttpRequest.** The entry's source-level smell: raw XHR bypasses the fetch layer's
   streaming/abort semantics. Prefer fetch or the app's chosen client.
 - **Streaming through the wrong client.** AI/chat tokens (SSE-style) need a streaming-capable
@@ -129,7 +138,8 @@ are already on expo/fetch globally, WinterTC-compliant with streaming — and sp
 attention on TanStack Query (RB-E-DATA), because caching, retries, and invalidation are
 where most apps win, regardless of client. The engine swap, react-native-nitro-fetch
 (Cronet/URLSession: HTTP/3+QUIC, Brotli, disk cache, prefetch, worklet parsing), is drop-in
-but gated on a *measured* hot path — its numbers (~1.3x / ~23%) are vendor-run. axios earns
+but gated on a *measured* hot path — its harness number (~23%, 1.30×) is vendor-run, and
+Expensify's 15-30% faster requests is the production calibration point. axios earns
 a symmetric verdict: no reason to churn off it, little reason to start on it. Streaming
 (AI/chat tokens) routes to expo/fetch or nitro-fetch; raw XHR is a smell that bypasses
 streaming/abort semantics; and in a P2P app the whole layer may not exist — transport is
@@ -149,11 +159,9 @@ fetch.*
      design", "the bigger win is the CACHE layer above it", the polyfill→standardize→engine
      axis) but the "commodity" label and the three-layer diagram wording are editorial
      arrangement.
-  2. The two nitro-fetch numbers (~1.3x on the option row, ~23% on the vendor harness) are
-     both in the entry and are not reconciled there; this doc reports both as given, both
-     flagged vendor-run.
-  3. ky / ofetch — one-line tradeoff only, no when-clause in the entry; no recommendation is
-     made here.
+  2. The two nitro-fetch harness numbers are one measurement: the README table gives
+     23.2% average as 1.30× (verified 2026-09-24).
+  3. ky / ofetch — the entry's when-clause is keep-if-already-on; no further recommendation.
   4. axios-over-XHR is scoped to RN exactly as the entry states it; no claim about axios's
      web transport is made.
   5. Whether expo/fetch is usable outside Expo (bare RN, web) — not stated in the entry; not

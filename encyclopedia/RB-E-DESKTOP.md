@@ -4,7 +4,7 @@ title: "About desktop apps & web-to-native shells for React"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: medium
-updated: 2026-06-25
+updated: 2026-09-24
 platforms: [react]             # React-DOM apps packaged as installable desktop clients
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-DESKTOP
 defer_to_skill: engineering-principles                        # shell↔web boundary; Pear depth → holepunch-p2p-systems; shell security → RB-E-SECURITY
@@ -71,9 +71,9 @@ The ordering is deliberate. Start by asking whether you need a shell at all; the
 borrowed-renderer path (small, modern) unless a concrete need — uniform rendering, a mature
 plugin, or heavy Node use — pulls you to Electron. The verified facts behind the picks:
 **Tauri 2.x is stable**, uses the OS webview, and spans desktop *and* mobile; **Pake**
-(V3.12.0, 2026-06-21) is a one-command web-URL→desktop wrapper built **on** Tauri, landing
-**under 10 MB — roughly 20× smaller than the Electron equivalent**. (Sources: tauri.app; the
-Pake repository.)
+is a one-command web-URL→desktop wrapper built **on** Tauri, landing
+**under 10 MB — roughly 20× smaller than the Electron equivalent** (pake-cli 3.17.1,
+2026-09-20). (Sources: tauri.app; the Pake repository; npm.)
 
 ## The landscape, and when each one wins
 
@@ -117,6 +117,14 @@ updating, zero packaging or signing. It wins whenever you don't truly need deep 
 it is the lightest possible "desktop app." Its ceiling is the browser sandbox — limited
 filesystem, no arbitrary native APIs, weaker offline/background story than a real shell.
 **Try this first; reach for a shell only when you hit that ceiling.**
+
+**Three lanes with no webview at all.** If your code is **React Native** rather than a web
+app, the entry points to **react-native-windows / react-native-macos** — real native UI from
+RN code (rn-windows 0.84.0 tracks core closely; rn-macos 0.81.9 lags). For a **Linux-only**
+app that should look like a Linux app, **GTKX** renders stock React to GTK4 as an ordinary
+Node process — no webview, Linux only by design, moving fast enough to pin. **Native SDK**
+(Vercel Labs) owns its renderer and compiles markup + TypeScript/Zig to native, but it is not
+React and its mobile support is experimental, so the entry lists it without picking it.
 
 ## Tradeoffs and failure modes to name out loud
 

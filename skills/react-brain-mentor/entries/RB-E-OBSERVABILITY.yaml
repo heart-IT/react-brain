@@ -6,30 +6,78 @@ status: reviewed   # long-form entry written + source-checked → encyclopedia/R
 confidence: medium
 platforms: [react, react-native]
 options:
-  - { name: "Sentry (v8)", tradeoff: "crash + perf; v8 captures crashes before RN bootstraps via sentry.options.json (fixes 'TestFlight instant death')" }
-  - { name: "EAS Observe (Expo)", tradeoff: "production performance monitoring, GA since 2026-08 (open beta May→Aug; verified vs the GA post): install expo-observe, wrap the root in <ObserveRoot> and call markInteractive() — it then reports startup (cold/warm), time-to-interactive/time-to-render, bundle load and EAS Update download/apply times from real sessions, with P50/P90/P99 across devices, plus JS errors and device context. Two things Sentry-style tools don't give you: every build AND OTA update lands as a marker so a regression traces to the release that caused it, and the Expo Router integration breaks time-to-interactive down PER ROUTE. Metrics are queryable from the EAS CLI (JSON, for handing to an agent; there is an eas-observe Expo Skill). GA pricing is per-EVENT, not per-MAU: 100K events/mo free, $19/mo (500K, Starter) / $199/mo (Production), $5/M beyond, 90-day retention. Floors: SDK 55+ (per-route metrics 56+, error reporting 57+), and enabling it needs a NEW BINARY, not just config. Expo-only, and NOT a crash reporter — it doesn't capture native crashes; Expo's own guidance is to keep Sentry alongside. SDK 58 (beta) grows the error side — ObserveErrorBoundary and reportError, an errorHandlingEnabled option, Observe.registerIntegration, an expo-image integration, and Observe.clientId (the EAS client id stamped on every event) — and DEPRECATES the AppMetrics export in favour of Observe: if you wired this up during the beta and import AppMetrics, rename it" }
-  - { name: "Firebase Crashlytics / Bugsnag", tradeoff: "established crash reporting" }
-  - { name: "Rozenite (Callstack incubator)", tradeoff: "plug-and-play PANELS inside React Native DevTools — install a plugin and it appears in the existing DevTools window, no extra server, window or browser tab, with live network/storage/performance panels. Fills the hole between 'React DevTools shows me the component tree' and 'I need a whole APM': the day-to-day RN inspection surface. Works on Expo and bare RN across Metro and Re.Pack (Rozenite >=2.0 needs Expo SDK 52+ / RN 0.76+ / Re.Pack 5.2+), reaches Lynx via rspeedy and RN Web via a browser extension (both experimental), and you can write your own type-safe panel. Plugins are auto-DISABLED in production builds, so no plugin code ships to users. ~656★, active since 2025-07, at 2.4 (verified 2026-09-10) — young but past the prototype stage. Agent angle worth knowing: `rozenite agent tap` streams plugin/runtime state to stdout, which is the same job the Reactotron MCP row in RB-E-AI-DEVTOOLS does — so on an RN project this can serve both the human debugging surface and the agent one" }
-  - { name: "React DevTools 8.0", tradeoff: "8.0 (2026-09-08) changes the profiling workflow, not just the UI: the TIMELINE PROFILER TAB IS REMOVED — React profiling moves to the browser's own Performance panel, which now carries React tracks — while the Suspense tab is ON BY DEFAULT (see what caused a component to suspend without enabling anything), the browser Elements panel gains a React Element pane that maps the inspected DOM node to its component, and <Activity> subtrees are shown and dimmed when hidden. If a runbook or blog post tells you to open the Timeline tab, it is out of date" }
-  - { name: "@callstack/inspector", tradeoff: "React-level component profiling in RELEASE builds via React DevTools, zero native changes — fills the release-profiling hole; VERY young (v0.1.x, 2026-06)" }
+  - { name: "Sentry (v8)", tradeoff: "Crash + performance monitoring on both platforms; v8 of @sentry/react-native captures crashes before RN bootstraps via sentry.options.json (the 'instant death on TestFlight' class). @sentry/react-native 8.28.0 (2026-09-24, verified vs npm); web uses @sentry/react 11.0.0 (2026-09-23, verified vs npm)." }
+  - { name: "EAS Observe (Expo)", tradeoff: "Production performance monitoring for Expo apps: real-session startup/TTI/bundle-load/update-apply metrics with every build and OTA update as a marker, plus per-route TTI. Not a crash reporter — no native crashes, keep Sentry alongside. GA 2026-08-25 (verified vs the GA post); expo-observe 57.0.24 (2026-09-24, verified vs npm). See note: EAS OBSERVE." }
+  - { name: "Firebase Crashlytics / Bugsnag", tradeoff: "Established crash reporting; neither gives Observe-style build/update attribution. @react-native-firebase/crashlytics 26.4.0 (2026-09-05), @bugsnag/react-native 9.0.0 (2026-09-22, new major; both verified vs npm)." }
+  - { name: "Rozenite (Callstack incubator)", tradeoff: "Plug-and-play panels inside React Native DevTools (network/storage/performance, custom type-safe panels), no extra window or server; plugins are auto-disabled in production builds. rozenite 2.4.0 (2026-09-03, verified vs npm). See note: ROZENITE." }
+  - { name: "React DevTools 8.0", tradeoff: "8.0.0 (2026-09-08, verified vs CHANGELOG) removes the Timeline profiler tab — React profiling moves to the browser Performance panel's React tracks — and turns the Suspense tab on by default. A runbook that says 'open the Timeline tab' is out of date. See note: REACT DEVTOOLS 8.0." }
+  - { name: "@callstack/inspector", tradeoff: "React-level component profiling in RELEASE builds via React DevTools, zero native changes — the honest lens, since dev-mode profiling misrepresents production. 0.1.1 (2026-05-22, verified vs npm): very young." }
 recommend:
-  default: "Sentry for crash + performance monitoring (v8 catches pre-bootstrap crashes); add error boundaries and wire it up at the production stage."
+  default: "Sentry for crash + performance monitoring on React and React Native (v8 of the RN SDK catches pre-bootstrap crashes); add app/route-level error boundaries and wire them to it at the production stage."
   when:
-    - "on Expo (SDK 55+) and want build/OTA regression tracing, or per-route time-to-interactive → add EAS Observe (GA; expo-observe + markInteractive(); needs a new binary — keep your crash reporter, it doesn't capture native crashes)"
-    - "already on Firebase → Crashlytics is fine for crashes"
+    - "on Expo (SDK 55+) and want build/OTA regression tracing or per-route time-to-interactive → EAS Observe (add alongside Sentry; expo-observe + markInteractive(); needs a new binary; does not capture native crashes)"
+    - "already on Firebase → Firebase Crashlytics (for crashes; add Sentry or EAS Observe for performance)"
+    - "already on Bugsnag → Bugsnag (keep it for crashes; 9.0.0 is a new major, read its changelog before upgrading)"
+    - "need component-level profiling of a RELEASE build → @callstack/inspector (0.1.x; dev-mode profiles misrepresent production)"
+    - "profiling React on the web or following an older runbook → React DevTools 8.0 (browser Performance panel React tracks; the Timeline tab is gone)"
+    - "day-to-day React Native inspection (network, storage, performance) → Rozenite (inside React Native DevTools; Expo SDK 52+ / RN 0.76+ / Re.Pack 5.2+)"
 note: >
-  Production-stage concern (the mentor emphasizes observability + error boundaries at production).
-  @callstack/inspector added 2026-07-10 (verified vs npm) — profile React components in release
-  builds; v0.1.x, treat as experimental.
-  NAME CHANGE TO KNOW (2026-09-21, verified vs the Expo SDK 58 beta changelog): expo-observe's
-  `AppMetrics` export is DEPRECATED in favour of `Observe`. Worth recording because the old name is
-  what open-beta-era tutorials and snippets use, so a copied example will now warn; the replacement
-  is a rename, not a re-architecture. Three smaller deprecations in the same release touch code that
-  observability setups tend to own: expo-file-system File.md5 → File.digest(), expo-modules-core
-  NativeArrayBuffer → ArrayBuffer, and on @expo/ui iOS backgroundOverlay → background.
+  Observability is three questions, not one tool: did it crash, is it slow, and which release did it.
+  Sentry holds the default because one SDK covers the first two on both platforms, and v8 of the RN
+  SDK closed the classic blind spot of crashes before the JS bundle loads. Error boundaries are the
+  collection points that turn an uncaught render error from a blank tree into a report, which is why
+  the source scan flags production repos with none. It is a production-stage concern: a prototype
+  does not need dashboards; a production app without them cannot see what users hit.
+
+  EAS OBSERVE (2026-08-25 GA, verified vs the Expo GA post; open beta May→Aug): install expo-observe,
+  wrap the root in <ObserveRoot> and call markInteractive(); it reports startup (cold/warm),
+  time-to-interactive/time-to-render, bundle load and EAS Update download/apply times from real
+  sessions, P50/P90/P99 across devices, plus JS errors and device context. Two things Sentry-style
+  tools do not give: every build AND OTA update lands as a marker, so a regression traces to the
+  release that caused it, and the Expo Router / React Navigation integration breaks time-to-interactive
+  down per route. Metrics are queryable from the EAS CLI as JSON (there is an eas-observe Expo Skill
+  for agent handoff). Pricing is per event, not per MAU: 100K events/mo free; Starter $19/mo and
+  Production $199/mo each include 500K; $5 per million beyond; 90-day minimum retention. Floors: SDK
+  55+ for startup metrics, 56+ for per-route metrics, 57+ for JS error reporting (in preview); enabling
+  it needs a new binary, not just config. It does not capture native crashes, and Expo's own guidance
+  is to keep Sentry alongside.
+
+  EXPO-OBSERVE SDK 58 SURFACE (2026-09-21, verified vs the Expo SDK 58 beta changelog): the error side
+  grows — ObserveErrorBoundary and reportError, an errorHandlingEnabled option,
+  Observe.registerIntegration, an expo-image integration, and Observe.clientId (the EAS client id
+  stamped on every event) — and the `AppMetrics` export is DEPRECATED in favour of `Observe`. Beta-era
+  tutorials use the old name, so a copied example now warns; the fix is a rename. Three smaller
+  deprecations in the same release touch code observability setups tend to own: expo-file-system
+  File.md5 → File.digest(), expo-modules-core NativeArrayBuffer → ArrayBuffer, and @expo/ui iOS
+  backgroundOverlay → background.
+
+  REACT DEVTOOLS 8.0 (2026-09-08, verified vs the React DevTools CHANGELOG): the Timeline profiler tab
+  is removed and React profiling moves to the browser's Performance panel, which carries React tracks;
+  the Suspense tab is on by default (see what caused a component to suspend); the browser Elements
+  panel gains a React Element pane mapping the inspected DOM node to its component; <Activity>
+  subtrees are shown and dimmed when hidden.
+
+  ROZENITE (2026-09-10, verified vs the GitHub repo and v2.3.0 release notes; version re-checked
+  2026-09-24 vs npm): fills the gap between "React DevTools shows me the component tree" and "I need a
+  whole APM". Works on Expo and bare RN across Metro and Re.Pack; Rozenite >=2.0 needs Expo SDK 52+ /
+  RN 0.76+ / Re.Pack 5.2+. Reaches Lynx via rspeedy and RN Web via a browser extension (both
+  experimental). About 656 stars, active since 2025-07 — young but past the prototype stage. Agent
+  angle: `rozenite agent tap` streams plugin/runtime state to stdout, the same job the Reactotron MCP
+  row in RB-E-AI-DEVTOOLS does, so on an RN project it serves both the human debugging surface and the
+  agent one.
+
+  CROSS-REFERENCES: RB-E-OTA owns staged rollout and rollback (the action side of Observe's
+  attribution); RB-E-AI-DEVTOOLS owns agent-facing runtime inspection (Reactotron MCP);
+  RB-E-META-FRAMEWORKS owns rendering strategy behind the web metrics.
+
+  HISTORY:
+  2026-09-24 REOPENED: version receipts re-checked vs npm; Bugsnag 9.0.0 (2026-09-22) and the web
+  Sentry SDK major (@sentry/react 11) recorded.
+  2026-09-21 REOPENED: expo-observe AppMetrics deprecated → Observe; SDK 58 error-reporting surface.
+  2026-07-10 GAP CLOSED: @callstack/inspector added (release-build profiling, verified vs npm).
 defer_to_skill: null
 doc: "RB-E-OBSERVABILITY.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-21   # expo-observe AppMetrics DEPRECATED → Observe, plus the SDK 58 error-reporting surface (ObserveErrorBoundary/reportError/clientId)
+updated: 2026-09-24   # version receipts re-checked vs npm: Bugsnag 9.0.0 major, @sentry/react 11; prior 2026-09-21: expo-observe AppMetrics DEPRECATED → Observe, plus the SDK 58 error-reporting surface (ObserveErrorBoundary/reportError/clientId)
 sources:
   - "https://expo.dev/changelog/sdk-58-beta"
   - "https://github.com/callstackincubator/rozenite/releases/tag/v2.3.0"

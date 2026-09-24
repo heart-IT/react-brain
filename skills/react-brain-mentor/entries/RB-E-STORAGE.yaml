@@ -6,23 +6,64 @@ status: reviewed   # long-form entry written + source-checked → encyclopedia/R
 confidence: medium
 platforms: [react-native]   # narrowed 2026-07-13: all options are RN; no web storage guidance held yet
 options:
-  - { name: "@react-native-async-storage/async-storage", tradeoff: "simple async key-value; v3.x is instance-based (createAsyncStorage), getMany/setMany/removeMany, requires RN 0.76+; v2 default export kept for back-compat" }
-  - { name: "react-native-mmkv (v4)", tradeoff: "fast synchronous key-value; v4 is a full Nitro Modules rewrite (restores Old-Arch compat); common AsyncStorage replacement" }
-  - { name: "op-sqlite / expo-sqlite", tradeoff: "relational SQLite; op-sqlite is high-perf JSI" }
-  - { name: "expo-secure-store (57.0.3)", tradeoff: "secure storage for tokens/secrets on the Keychain/Keystore; first-party, ships with the Expo SDK and releases with it (57.0.3, 2026-09-10 verified vs npm) — the default secrets store on any Expo app" }
-  - { name: "react-native-keychain (10.0.0)", tradeoff: "the bare-RN secrets store, and the one to choose when you need finer access-control/biometry configuration than secure-store exposes. QUIET: no npm release since 2025-03-23 (17 months), 180 open issues, though the repo still gets commits (pushed 2026-04-29) — pin it and re-check before starting new work on it" }
+  - { name: "@react-native-async-storage/async-storage", tradeoff: "Simple async key-value for prefs with no perf concern. v3 is instance-based (createAsyncStorage, getMany/setMany/removeMany) with the v2 default export kept for back-compat. 3.1.1 (2026-05-29, verified vs npm); see note: ASYNCSTORAGE V3." }
+  - { name: "react-native-mmkv (v4)", tradeoff: "Fast synchronous key-value, the common AsyncStorage replacement; v4 is a full Nitro Modules rewrite (restores Old-Arch compat). Writes block the JS thread and a worklet does not offload them (see reading). 4.3.2 (2026-06-22, verified vs npm)." }
+  - { name: "op-sqlite / expo-sqlite", tradeoff: "Relational SQLite for structured/queryable data; op-sqlite is the high-perf JSI option, expo-sqlite the first-party Expo one. op-sqlite 18.2.5 (2026-09-20), expo-sqlite 57.0.3 (2026-09-11), both verified vs npm; see note: OP-SQLITE 18." }
+  - { name: "expo-secure-store", tradeoff: "Secrets/tokens on the Keychain/Keystore; first-party, ships and releases with the Expo SDK — the default secrets store on any Expo app. 57.0.4 (2026-09-11, verified vs npm)." }
+  - { name: "react-native-keychain (10.0.0)", tradeoff: "The bare-RN secrets store, and the pick when you need finer access-control/biometry configuration than secure-store exposes. QUIET: 10.0.0 (2025-03-23) is still the latest npm release (2026-09-24, verified vs npm); see note: KEYCHAIN." }
 recommend:
-  default: "Small key-value → react-native-mmkv (fast, synchronous). Relational/large → op-sqlite or expo-sqlite. Secrets/tokens → the OS Keychain/Keystore, never AsyncStorage — on Expo that is expo-secure-store, on bare RN react-native-keychain."
+  default: "Small key-value → react-native-mmkv (fast, synchronous). Relational/large → op-sqlite (perf) or expo-sqlite (Expo first-party). Secrets/tokens → the OS Keychain/Keystore, never AsyncStorage: expo-secure-store on Expo, react-native-keychain on bare RN. What changes the pick is data shape and secrecy, not platform."
   when:
-    - "simple persisted prefs, no perf concern → AsyncStorage is fine"
-    - "frequent synchronous reads → MMKV"
-    - "structured/queryable data → SQLite (op-sqlite for perf)"
-    - "secrets on an Expo app → expo-secure-store (first-party, released with the SDK); reach for react-native-keychain when you need access-control options it doesn't expose — and note keychain has not published since 2025-03-23"
-    - "P2P / local-first app → primary persistence is the Hypercore/Autobase/Hyperbee log, not KV/SQLite (KV like AsyncStorage is just for local prefs) — see RB-E-P2P"
-note: "AsyncStorage v3.x moved to instance-based storage (createAsyncStorage) and requires React Native 0.76+ (NOT New-Arch-only — that earlier claim was wrong; verified vs the v3 migration docs). react-native-mmkv v4 is a full Nitro rewrite (Oct 2025) that restored Old-Arch compat. Latest: async-storage 3.1.x, mmkv 4.3.x, op-sqlite 18.2.1 (2026-09-09). 18.2.0 adds `executeSync` on a PREPARED STATEMENT — the synchronous path for a statement you reuse in a tight loop — plus an Android fix that stops op-sqlite applying the Kotlin plugin when AGP already provides it; take 18.2.1, which reverts a per-runtime PropNameID cache from 18.2.0. OP-SQLITE 18 IS BREAKING (2026-08-14, verified vs the GitHub releases): 18.0.0 REMOVES crsqlite — if you were using op-sqlite as the local half of a CRDT-synced store, that extension is gone and the migration is yours; it also rebinds hooks/reactive flush to their runtime generation and drops an internal mutex in favour of self-cleaning databases. 18.1 adds initial Swift Package Manager support and RN 0.87 compatibility, so on 0.87 this is the line to be on."
+    - "simple persisted prefs, no perf concern → AsyncStorage (@react-native-async-storage/async-storage 3.x; needs RN 0.76+)"
+    - "frequent synchronous reads → MMKV (react-native-mmkv v4)"
+    - "structured/queryable data on an Expo app, no measured SQLite bottleneck → expo-sqlite"
+    - "structured/queryable data where query throughput or memory matters → op-sqlite (18.x; not if you depend on crsqlite)"
+    - "secrets on an Expo app → expo-secure-store (first-party, released with the SDK)"
+    - "secrets on bare RN, or access-control/biometry options secure-store does not expose → react-native-keychain (pin 10.0.0; no npm release since 2025-03-23)"
+    - "app already on WatermelonDB → WatermelonDB (keep; @nozbe/watermelondb 0.28.0, 2025-04-07, is the latest npm release — new relational work goes to op-sqlite or expo-sqlite)"
+    - "P2P / local-first app → Hypercore/Autobase/Hyperbee log as primary persistence (KV like AsyncStorage only for local prefs; RB-E-P2P owns it)"
+note: >
+  THE PICTURE: "where do I store this" is three questions: small key-value (prefs, flags), relational
+  or large structured data (anything you query), and secrets (tokens, credentials). Each optimizes a
+  different thing (read latency, queryability, OS-level protection), so each has a different home.
+  The classic failure is one tool answering all three; AsyncStorage is fine for prefs, wrong as a
+  database and never a token vault.
+
+  OP-SQLITE 18 (2026-09-24, verified vs the GitHub releases): 18.0.0 (2026-08-14) REMOVES crsqlite →
+  an app using op-sqlite as the local half of a CRDT-synced store loses that extension and owns the
+  migration; 18.0 also binds hooks/reactive flush to their runtime generation and drops an internal
+  mutex in favour of self-cleaning databases. 18.1.0 adds initial Swift Package Manager support and
+  RN 0.87 compatibility → on RN 0.87 this is the line to be on. 18.2.0 adds executeSync on a
+  prepared statement (the synchronous path for a statement reused in a tight loop), stops applying
+  the Kotlin plugin when AGP already provides it, and reverts a per-runtime PropNameID cache; 18.2.1
+  adds watchOS. 18.2.3 awaits transaction commit and preserves finalized handles, 18.2.4 fixes a
+  use-after-free in the commit hook callback, 18.2.5 bumps sqlite/sqlcipher → take 18.2.5.
+
+  ASYNCSTORAGE V3 (verified vs the v3 migration docs): minimum RN 0.76 on iOS/Android (macOS 0.78,
+  visionOS/windows 0.79); it is NOT New-Arch-only. getItem/setItem/removeItem/getAllKeys/clear keep
+  their v2 signatures, multiGet is renamed getMany, and the default export still points to v2
+  storage → the move to createAsyncStorage is an incremental migration, not a cliff.
+
+  KEYCHAIN (2026-09-24, verified vs npm and GitHub): react-native-keychain has had no npm release
+  since 10.0.0 on 2025-03-23 (18 months); the repo was last pushed 2026-04-29 and shows 194 open
+  issues/PRs → pin it and re-check before starting new work on it.
+
+  MMKV WRITES: MMKV writes are synchronous and block the JS thread; the Calazans measurement (see
+  reading) shows a worklet moves the ~29.56ms cost into serialization rather than removing it.
+
+  RB-E-P2P owns local-first persistence (the Hypercore/Autobase/Hyperbee log); RB-E-SECURITY owns
+  secrets policy; RB-E-DATA owns server-state caching.
+
+  HISTORY:
+  2026-09-24 CORRECTED: the 18.2 PropNameID-cache revert ships in 18.2.0, not 18.2.1 (18.2.1 adds
+  watchOS); op-sqlite pin 18.2.1 → 18.2.5, secure-store 57.0.3 → 57.0.4.
+  2026-09-10 REOPENED: op-sqlite 18.1.1 → 18.2.1 (executeSync on prepared statements), secure-store
+  57.0.2 → 57.0.3.
+  2026-08-18 REOPENED: op-sqlite 18.0.0 (2026-08-14) is breaking (crsqlite removed).
+  2026-07-06 CORRECTED: AsyncStorage v3 requires RN 0.76+ but is not New-Arch-only.
 defer_to_skill: null
 doc: "RB-E-STORAGE.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-10   # op-sqlite 18.1.1 → 18.2.1 (executeSync on prepared statements) + secure-store 57.0.2 → 57.0.3 (firsthand)
+updated: 2026-09-24   # op-sqlite 18.2.1 → 18.2.5 (commit-hook use-after-free fix) + PropNameID revert attributed to 18.2.0, secure-store 57.0.4, keychain quiet 18 months; prior 2026-09-10: op-sqlite 18.1.1 → 18.2.1 (executeSync on prepared statements) + secure-store 57.0.2 → 57.0.3 (firsthand)
 sources:
   - "https://github.com/OP-Engineering/op-sqlite/releases/tag/18.2.0"
   - "https://github.com/OP-Engineering/op-sqlite/releases"

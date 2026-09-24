@@ -6,34 +6,69 @@ status: reviewed   # long-form entry written + source-checked
 confidence: low
 platforms: [react-native]
 options:
-  - { name: "react-native-brownfield (Callstack)", tradeoff: "embed RN in an existing native app; self-contained iOS init via ReactNativeBrownfield.shared.startReactNative() (wraps RN core's RCTReactNativeFactory); 5.1.0 (2026-09-03) adds `preloadBundle` — without it RN only builds the factory and defers bundle evaluation to the first RN view, so the first screen pays for it; with it the React Host starts and the JS bundle evaluates in parallel with the rest of app launch (Android's ReactNativeBrownfield.initialize already did this). Note the timing change that comes with it: onBundleLoaded now runs on the MAIN thread, not the JS thread. THIRD HOST PLATFORM: it also ships a .NET MAUI variant — a C# binding project (XCFramework on iOS, AAR on Android) over the same native binding as the Swift/Obj-C and Kotlin/Java paths — which matters where the existing native host is MAUI rather than pure iOS/Android (see reading)" }
-  - { name: "Brownie (@callstack/brownie)", tradeoff: "share native↔JS state for brownfield; generates Swift + Kotlin types from .brownie.ts; iOS + Android; stable (v3.13.x, 2026-06)" }
-  - { name: "Granite (Toss)", tradeoff: "micro-frontend: each screen an independently deployable ~200KB bundle on CDN (ESBuild)" }
-  - { name: "Rock (Callstack)", tradeoff: "super-apps via micro-frontends + native build caching" }
-  - { name: "Expo brownfield (first-party)", tradeoff: "SDK 55+: official Expo path for adding Expo/RN to an existing native app (docs.expo.dev/brownfield; `npx brownfield package:ios` XCFramework flow) — the first-party alternative to the Callstack tooling" }
+  - { name: "react-native-brownfield (Callstack)", tradeoff: "Embeds RN in an existing iOS, Android or .NET MAUI app; iOS init via ReactNativeBrownfield.shared.startReactNative() over RCTReactNativeFactory; brownfield-cli prebuilt XCFrameworks cut hybrid iOS compiles ~39% (Callstack, 2026-07). 5.1.0 (2026-09-03, verified vs release) adds iOS preloadBundle; 5.x drops Expo SDK 55. See note: STARTUP, VERSION FLOOR." }
+  - { name: "Brownie (@callstack/brownie)", tradeoff: "Shares native↔JS state for brownfield; generates Swift + Kotlin types from .brownie.ts; iOS + Android. Released from the react-native-brownfield repo in lockstep with it since 4.0.0 (2026-07-06): 5.1.x, verified vs npm." }
+  - { name: "Granite (Toss)", tradeoff: "Micro-frontend: each screen an independently deployable ~200KB bundle on CDN (ESBuild). @granite-js/react-native 1.0.45 (2026-09-16, verified vs npm)." }
+  - { name: "Rock (Callstack)", tradeoff: "Super-apps via micro-frontends + native build caching. rock 0.15.2 (2026-09-16, verified vs npm; callstackincubator/rock), still 0.x." }
+  - { name: "Expo brownfield (first-party)", tradeoff: "SDK 55+: official Expo path for adding Expo/RN to an existing native app, integrated or isolated (AAR/XCFramework artifacts) (docs.expo.dev/brownfield); the first-party alternative to the Callstack tooling, with its own expo-brownfield CLI. expo-brownfield 57.0.23 (2026-09-24, verified vs npm)." }
 recommend:
-  default: "A scale-stage concern: embed RN into a native app with react-native-brownfield (+ ReactNativeFactory on iOS). For independently-deployable screens / super-apps, look at Granite or Rock."
+  default: "A scale-stage concern. Adding RN screens to an existing iOS/Android (or .NET MAUI) app → react-native-brownfield (5.1+ for iOS preloadBundle), or Expo brownfield when the RN side is an Expo project and you want the first-party path. Independently deployable screens / super-apps → Granite or Rock. The Expo SDK version decides the react-native-brownfield major."
   when:
-    - "add RN screens to an existing native app → react-native-brownfield"
-    - "many teams shipping independent bundles → Granite (Toss) / Rock"
-    - "deciding brownfield vs a greenfield rewrite → choose by where the risk sits (continuity vs owning a runtime boundary); a checkpointed greenfield with a real brownfield fallback tests it — see reading"
+    - "add RN screens to an existing native app → react-native-brownfield (5.1+)"
+    - "Expo project embedded in a native app, first-party tooling preferred → Expo brownfield (expo-brownfield; integrated or isolated)"
+    - "Expo SDK 55 app embedding RN → react-native-brownfield 4.x (5.0 drops SDK 55; upgrade the brownfield major with the SDK)"
+    - "slow first open of RN screens in a brownfield iOS app → react-native-brownfield preloadBundle (5.1.0+)"
+    - "native host is a .NET MAUI app → react-native-brownfield (its C# binding over the same native binding)"
+    - "native host and RN screens share state → Brownie (@callstack/brownie, same version as react-native-brownfield)"
+    - "many teams shipping independently deployable screen bundles from a CDN → Granite (Toss)"
+    - "super-app with micro-frontends and native build caching → Rock (Callstack; 0.x)"
+    - "deciding brownfield vs a greenfield rewrite → checkpointed greenfield with a real brownfield fallback (choose by where the risk sits: continuity vs owning a runtime boundary; see the Callstack delivery-question reading)"
 note: >
-  For embedding RN into native apps or splitting a super-app — a scale-stage concern; mostly
-  Callstack/Toss tooling (several alpha) plus, since SDK 55, a first-party Expo path.
-  CAPABILITY FLIP (2026-07-10, verified vs the Callstack article body): Expo Updates now works
-  in an ISOLATED brownfield architecture with SDK 55 — OTA for embedded RN screens was
-  previously a known limitation ("that limitation is a thing of the past"); see RB-E-OTA. The
-  same prebuilt-XCFramework flow also cuts hybrid iOS compile times ~39% (Callstack, 2026-07).
-  STARTUP (2026-09-10, verified vs the 5.1.0 GitHub release): a brownfield app's RN screens are
-  usually blamed for a slow first open — `preloadBundle` on iOS is the first thing to try, since it
-  moves bundle evaluation off the first-view critical path and onto app launch.
+  THE PICTURE: brownfield is a scale-stage concern: embedding RN into native apps or splitting a
+  super-app. The tooling is mostly Callstack's (react-native-brownfield, Brownie, Rock) and
+  Toss's (Granite), plus, since SDK 55, a first-party Expo path. react-native-brownfield is the
+  default because it covers iOS, Android and .NET MAUI hosts over one native binding; the
+  question that picks the major is which Expo SDK the embedded app is on.
+
+  STARTUP (2026-09-10, verified vs the 5.1.0 GitHub release): without preloadBundle, iOS builds the
+  RCTReactNativeFactory only and defers bundle evaluation to the first RN view, so the first
+  screen pays for it; with preloadBundle (5.1.0, 2026-09-03) the React Host starts and the JS
+  bundle evaluates in parallel with the rest of app launch (Android's
+  ReactNativeBrownfield.initialize already did this) → it is the first thing to try when RN
+  screens are blamed for a slow first open. Timing change: onBundleLoaded now runs on the MAIN
+  thread, not the JS thread.
+
   VERSION FLOOR (2026-07-28, verified vs the GitHub release): @callstack/react-native-brownfield
-  5.0.0 (2026-07-23) has exactly one breaking change — it DROPS Expo SDK 55 support (brownfield-cli
-  bumps to 5.0.0 with it). SDK-55 apps stay on the 4.x line; the SDK-55 capability flip above is
-  therefore a 4.x fact. Pair the brownfield major with the Expo SDK upgrade, not before it.
+  5.0.0 (2026-07-23) has exactly one breaking change: it DROPS Expo SDK 55 support (brownfield-cli
+  bumps to 5.0.0 with it) → SDK-55 apps stay on 4.x; pair the brownfield major with the Expo SDK
+  upgrade, not before it.
+
+  LOCKSTEP (2026-09-24, verified vs npm): @callstack/brownie, @callstack/brownfield-cli and
+  @callstack/react-native-brownfield share version numbers and release dates from 4.0.0
+  (2026-07-06) on; Brownie's earlier 3.x line ended at 3.15.0 (2026-07-02) → pin all three to the
+  same version.
+
+  EXPO UPDATES (2026-07-10, verified vs the Callstack article body): Expo Updates works in an
+  ISOLATED brownfield architecture with SDK 55; OTA for embedded RN screens was previously a known
+  limitation. Because 5.x drops SDK 55, this is a react-native-brownfield 4.x fact. RB-E-OTA owns
+  the OTA thread.
+
+  MAUI HOST: react-native-brownfield ships a .NET MAUI variant, a C# binding project (XCFramework
+  on iOS, AAR on Android) over the same native binding as the Swift/Obj-C and Kotlin/Java paths;
+  the cost is mostly NuGet coexisting with npm/CocoaPods/Gradle (see reading).
+
+  HISTORY:
+  2026-09-24 CORRECTED: `npx brownfield package:ios` was credited to the Expo path; the
+  `brownfield` bin belongs to @callstack/brownfield-cli (Expo's CLI is expo-brownfield).
+  2026-09-24 CORRECTED: Brownie was pinned "stable v3.13.x (2026-06)"; it moved to lockstep with
+  react-native-brownfield at 4.0.0 (2026-07-06) and is on 5.1.x.
+  2026-09-10 REOPENED: react-native-brownfield 5.1.0 preloadBundle; .NET MAUI host variant +
+  reading reconciled from harvest/2026-09-03.
+  2026-07-28 REOPENED: 5.0.0 drops Expo SDK 55.
+  2026-07-10 REOPENED: capability flip, Expo Updates in isolated brownfield on SDK 55.
 defer_to_skill: engineering-principles
 doc: "RB-E-BROWNFIELD.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-10   # brownfield 5.1.0 preloadBundle (firsthand) · .NET MAUI host variant + reading — reconciled from harvest/2026-09-03
+updated: 2026-09-24   # Brownie 3.13.x → lockstep 5.1.x, Rock/Granite/expo-brownfield pins; prior 2026-09-10: brownfield 5.1.0 preloadBundle (firsthand) · .NET MAUI host variant + reading — reconciled from harvest/2026-09-03
 sources:
   - "https://www.callstack.com/blog/react-native-in-net-maui-a-practical-brownfield-integration-guide"
   - "https://github.com/callstack/react-native-brownfield"

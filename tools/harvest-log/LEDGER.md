@@ -2864,3 +2864,94 @@ spot-check (0 corrections) stands for the day; not repeated.
 Delta: 1 entry touched (AI-UI), 0 new entries, 0 tripwires fired, 1 manifest extended. Gates: lint
 clean (2 pre-existing warnings) · rules ✓ 2,623 gold rows · engine 24 ✓ · eval 139/139 · verify-diff
 1/1 · watchlist reviewed (no ≥2-issue recurrences from this window).
+
+## 2026-09-24c — the entry audit: all 45 entries restructured, re-verified, docs brought in line
+
+NOT a harvest pass. A full-corpus revision to one contract (organized · efficient · correct · complete ·
+unambiguous · maintainable), run as seven parallel batches by TOC group, each entry read against its
+sources and the npm registry, then gated together. 44 of 45 entries changed (A11Y had no facts to
+move); all 42 long-form docs verified against their entries, contradictions fixed, and every doc's
+`updated:` brought level — the "38 long-form docs trail their entry" lint warning is gone.
+
+THE CONTRACT, in one paragraph: option rows carry what-it-is + where-it-wins + one compact status
+receipt and point at the note for depth; `recommend.default` names the pick per platform and the one
+condition that changes it, with no hedge that is not a when-clause; every when-clause is
+`condition → PICK (qualifier)` with the pick name first (the resolver reads the label up to the first
+parenthesis); the note is a thesis paragraph, then one labelled paragraph per topic with its receipt,
+cross-references as pointers to the owning entry, and a HISTORY paragraph of dated verdict lines
+(CHALLENGED → SURVIVES/WEAKENED, REOPENED, GAP CLOSED, CORRECTED) that replaces the narrative the
+LEDGER already holds. Frozen: detect, detect_source, migrate, tripwires, reading titles/URLs/
+applies_when, sources (add-only), status/confidence/doc. Verified by a script diff against HEAD:
+0 frozen-field changes, 0 reading-structure changes, 0 sources removed.
+
+WHAT THE CORRECTNESS PASS CAUGHT (every one verified against npm or the cited source, receipts in
+the entries): eight npm DEPRECATIONS the corpus did not know — @clerk/clerk-expo → @clerk/expo,
+@base-ui-components/react → @base-ui/react, react-native-wgpu → react-native-webgpu,
+react-native-enriched → react-native-enriched-html, the react-native-vector-icons monolith,
+@udecode/plate → platejs, the unscoped openiap-commerce-protocol → @hyodotdev/…, and fbtee 4's
+CLI/transform packages → @nkzw/fbtee-compiler (fbtee is 5.0.0, a major past the pin). MAPS pricing was
+wrong in both directions: Google's NATIVE Maps SDK is unlimited free ($7/1k is the web Dynamic Maps
+price after 10k/month) and Mapbox mobile bills per monthly active user (free to 25k, then $4/1k), not
+$0.50/1k. TYPESCRIPT told Next.js users to set experimental.useTypeScriptCli; Next 16.3 runs the
+project-local tsc by default and setting it false exits the build under TS 7. The React Router
+security floor is 7.18.2, not 7.18.0 (the RSC CSRF fix), and v6 has no patched release. RN 0.87
+DEPRECATED core SafeAreaView; the when-clause said removed. Zod's .validate() shipped in 4.6 at up to
+35x, not 4.5 at 16x (no source for 16x). Delta IS on npm (@zepto-labs/react-native-delta 1.0.0 since
+2026-07-01; the entry said not yet). ReactVision 3.0.1 needs RN >=0.86 <0.87 — it does raise the floor,
+and no released line accepts 0.87+. flash-calendar was not "born at Shopify". react-native-avoid-
+softinput supports iOS. executorch npm latest is 0.10.2 (0.10.4 is a -libs tag), and react-native-rag's
+0.10 migration is an OPEN PR, so the local-RAG default moved to @react-native-ai/llama + sqlite-vec.
+Expo Modules 2.0 is in beta on iOS AND Android. Plus ~60 minor/major pin refreshes (Vite+ 1.0.0-rc.0,
+NativeWind 5.0.0-rc.0, @bugsnag/react-native 9, react-router 8.4, Apollo 4.3.1, TinyBase 10, Oxlint
+1.85, pnpm 12.6, hot-updater 0.36, LiveKit RN 3.0, …).
+
+AMBIGUITY REMOVED where the resolver could misfire: 19 detect tokens had no clause in their entry's
+recommend text (valtio, mobx, swr, urql, ky, ofetch, corestore, hrpc, uploady, bugsnag, inspector,
+husky, lefthook, lint-staged, nx, adk, mlx, formatjs, enriched-html, leaflet, avoid-softinput,
+watermelondb, scanning) — all reachable now. STYLING's "Tailwind v4" and "at scale" clauses matched the
+`tailwind` and `scale` context tokens by accident; reworded. Two clauses carried two arrows; one
+(UPLOADS) parsed the wrong pick. Three notes had a later paragraph spliced mid-sentence (ANIMATION's
+Bundle Mode thread, PAYMENTS, NAV's SDK-56/57 thread told three times).
+
+SIZE: the corpus GREW 14.8% (505 KB → 581 KB) despite the de-duplication — every entry gained
+verified pins with receipts, HISTORY lines, and the when-clauses that make every option reachable.
+"Efficient" here meant no fact told twice, not fewer bytes.
+
+FOLLOW-UPS (frozen fields and tooling, not changed in this pass):
+- detect rows: @base-ui-components/* misses @base-ui/react; react-native-wgpu row now signals a
+  deprecated package (needs react-native-webgpu); react-native-enriched row likewise (needs
+  enriched-html + platejs rows); Delta, fbtee and BROWNFIELD have no detect rows at all; MEDIA maps
+  react-native-qrcode-svg (a generator) to "scanning" and expo-image-picker to "camera".
+- migrate rows: NAV's React Router row says 7.18.0, should be 7.18.2; @clerk/clerk-expo → @clerk/expo
+  is missing.
+- option names (frozen by policy): BUILD "Vite+ (beta)" is now an RC.
+- resolver: META's default label parses as "Web: Next" (splits on the "." in Next.js); AUTH's
+  "(expo-auth-session or custom)" condition matches the `expo` token so every Expo repo resolves to
+  the hand-rolling clause; NAV with react-navigation detected resolves to the RN8-alpha clause.
+  All pre-existing.
+- readings without claim/applies_when: CROSSPLATFORM (use dom, Zattoo, KMP).
+- watch/revisit caveats with no tripwire behind them, by entry: ANIMATION screen-transitions ·
+  CHARTS @tanstack/charts 1.0 + Skia rename · COMPONENT-LIBS Astryx v1, @shadcn/lint · STYLING
+  NativeWind v5 latest · NAV/META Remix 3 (2026-10-02), RN8 alpha exit, SDK 58 stable, TanStack Start
+  RC exit · STATE Legend State v3 · CROSSPLATFORM second-org corroboration · DESKTOP Native SDK,
+  expo-desktop · AUTH Agent Auth · OBSERVABILITY Rozenite · SECURITY rnsec, keyv postmortem · BUILD
+  boost independent evidence · ONDEVICE-AI react-native-rag ≥0.10, apple preview · AI-UI streamdown ·
+  RN-VERSIONS CocoaPods trunk 2026-12-02, 0.88 stable · CALENDARS Super Calendar · POLISH tickle,
+  burnt · MAPS expo-maps, better-maps · SVG Redraw · EDITORS old enriched · GAMES ReactVision cap,
+  Godot, Filament · STORAGE keychain · PAYMENTS commerce protocol 0.x · ALT-FRAMEWORKS Dactyl ·
+  NATIVE react-native-runtimes · MEDIA VisionCamera v5. NETWORKING and P2P have none at all.
+- claims kept verbatim because no source could confirm them: Uniwind Pro price; @shadcn/lint stars;
+  gifted-vs-victory download figures; Lovable download figures; State of React 2025 figures; Zero RN
+  support; TanStack DB 0.6 SQLite list; DESKTOP Electron/Capacitor/PWA rows are unsourced; P2P/UPLOADS
+  cohort claims; Bun 1.4 "2026-07" (npm says 2026-08-20); rnsec ~500★; "RN 0.80+" for
+  @react-native-ai/apple (peer says >=0.76); nitro-mlx ~100★; Flow Rust port; RN 0.84 Node floor
+  (blog 22.11+ vs engines >=20.19.4); ariaNotify Firefox-only; Redraw not on npm; Lingui directives;
+  Lexical large docs; react-native-maps no offline-region API; VisionCamera v5 iOS-26 crashes / ~85%
+  on v4; Expo brownfield "SDK 55+"; expo-migrate-module skill; "Expo Targets" package; OBSERVABILITY
+  doc "Sentry 8.17 Turbo-Module tracking"; whether React 19.3 falls outside GHSA-wx67.
+- verify-diff's deprecation matcher picks a substring (`expo`, `react`, `ai`) out of sentences about a
+  different package — 40 false-positive warnings this pass; the matcher should anchor on the full
+  package name.
+
+Gates: lint clean (1 pre-existing shared-URL warning; doc-drift warning GONE) · rules ✓ 2,623 gold
+rows · engine 24 ✓ · eval 139/139 · verify-diff 50/50 added receipts ok · frozen-field diff 0.

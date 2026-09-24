@@ -4,7 +4,7 @@ title: "About charting & data visualization"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: low
-updated: 2026-07-16
+updated: 2026-09-24
 platforms: [react, react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-CHARTS
 defer_to_skill: react-native-best-practices                   # Skia/Reanimated render-perf depth
@@ -72,8 +72,10 @@ honest caveat, from the entry itself, that the latter two are newer/niche.
 
 **Victory Native (XL)** — the RN standard-charts default: Skia-backed, mature, broad chart
 types. One freshness fact matters when you audit it: the **active** Victory line is
-`victory-native` XL (41.26, 2026-06, verified against npm); the web `victory` package moves
-slowly. Judge the family by the XL line.
+`victory-native` XL (42.0.1, 2026-08-31, verified against npm 2026-09-24); the web `victory`
+package is dormant (last publish 2025-01-14). Judge the family by the XL line. v42 is a
+floor-raise major: it needs `@shopify/react-native-skia` >=2.6.0 and Reanimated >=3.19.1 — on
+older versions stay on 41.x.
 
 **react-native-skia (build-your-own)** — max control and max performance, more code. This is
 the "custom/realtime rendering" escape hatch, and the Shopify piece is its physics textbook:
@@ -81,21 +83,28 @@ JSI, immutable display lists, WebGPU backend, line-chart-as-GPU-texture.
 
 **react-native-graph (Margelo)** — Skia-based **line** graphs with gesture scrubbing. Its
 history is a lesson in reading release pages: **rebooted at v1.2 (2026-04) onto current Skia
-APIs after roughly two years of dormancy**. Line-focused — the entry's own instruction is to
+APIs after roughly two years of dormancy**, and it has kept shipping since (1.4.0, 2026-08-24). Line-focused — the entry's own instruction is to
 check it covers your chart types before adopting.
 
 **react-native-livechart** — Skia + Reanimated + Gesture Handler; realtime/finance focus with
 crosshair scrubbing; newer and niche. The entry's note is explicit: ignore its satirical
 "degen mode" framing — that is not a selection axis.
 
-**react-native-gifted-charts** — declarative and quick to adopt. The entry stakes no renderer
-claim for it; it wins on adoption speed, and that is the extent of what this page can say.
+**react-native-gifted-charts** — declarative and quick to adopt. It renders through
+`react-native-svg`, not Skia (its npm peer dependency), so it sits off the Skia axis: the pick
+when adoption speed matters more than a GPU renderer.
 
 **Recharts / visx / Chart.js (web)** — Recharts batteries-included, visx low-level D3
 primitives; Chart.js is listed in the same web group without a graded tradeoff. Beneath visx
 sits **d3** itself, and its npm silhouette needs the same freshness literacy as Victory's:
 **d3's 2-year publish gap is maturity, not abandonment** — it is the stable substrate under
 visx.
+
+**Skia is changing hands (2026-09-21).** Shopify is leaving React Native; `react-native-skia`'s
+author will fork it under a new package name and the Shopify repo will be archived. Victory
+Native XL, react-native-graph and react-native-livechart all render through Skia, so the rename
+reaches their peer ranges too — pin Skia-backed chart stacks across the transition
+(`RB-E-ANIMATION` owns the thread).
 
 ## Tradeoffs and failure modes to name out loud
 
@@ -106,8 +115,8 @@ visx.
   line-focused by design — the entry literally says to check it covers your chart types. The
   scrubbing demo is not a commitment to breadth.
 - **Reading npm dates as health.** Two opposite errors, both named in the entry's freshness
-  note: d3's 2-year gap is maturity, not abandonment; and the slow-moving web `victory`
-  package is not the active line — victory-native XL (41.26, 2026-06) is. Publish cadence
+  note: d3's 2-year gap is maturity, not abandonment; and the dormant web `victory`
+  package is not the active line — victory-native XL (42.0.1, 2026-08-31) is. Publish cadence
   only means something relative to a library's role in the stack.
 - **Dormancy that *did* matter.** react-native-graph sat dormant for ~2 years before its
   v1.2 (2026-04) reboot onto current Skia APIs — for Skia-adjacent libraries, "does it target
@@ -142,7 +151,7 @@ the durable axis. On web, **D3 does math/layout while React owns the DOM** (Rech
 batteries-included, visx low-level primitives; d3's 2-year publish quiet is maturity, not
 abandonment). On React Native the renderer is **Skia on the GPU** — JSI, immutable display
 lists, a WebGPU backend, high-density line charts as GPU textures — under both the default
-(**Victory Native XL**, 41.26 active line) and the escape hatch (build-your-own
+(**Victory Native XL**, 42.x active line) and the escape hatch (build-your-own
 react-native-skia). Realtime/finance stays Skia-based via react-native-graph (line-focused,
 rebooted v1.2 2026-04 after ~2y dormancy — check chart-type coverage) or
 react-native-livechart (newer/niche; ignore the satirical framing). Pick by renderer and
@@ -166,8 +175,6 @@ Candillon's RN graphics deep-dive (the Skia/WebGPU render model).*
      owns the DOM" and "low-level D3 primitives"; neither literally names SVG. The label
      comes from the assigned organizing idea; body text prefers "DOM/SVG" and the RB-E-SVG
      cross-reference is inferred, not stated in the entry.
-  3. react-native-gifted-charts' renderer (SVG vs Skia vs other) — not stated in the entry;
-     this doc explicitly declines to classify it.
   4. Chart.js — listed in the entry's web option group with no individual tradeoff; no
      renderer or recommendation claim is made here.
   5. "Graduating from XL to build-your-own changes how much chart you hand-write, not what

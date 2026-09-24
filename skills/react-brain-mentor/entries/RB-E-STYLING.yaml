@@ -7,48 +7,57 @@ confidence: medium
 platforms: [react, react-native]
 options:
   - { name: "StyleSheet (RN)", tradeoff: "built-in; manual theming" }
-  - { name: "NativeWind (v4 stable; v5/TW4 preview)", tradeoff: "Tailwind for RN; most-adopted (~1.3M dl/wk) — but the stable line is Tailwind v3-era; the Tailwind-v4 line (v5) is preview-only" }
+  - { name: "NativeWind (v4 stable; v5/TW4 RC)", tradeoff: "Tailwind for RN; most-adopted (~1.3M dl/wk, npm API 2026-09-24). Stable 4.2.7 (2026-09-14) is the Tailwind v3-era line; the Tailwind-v4 line is 5.0.0-rc.0 (2026-09-13) on the preview/rc tags, not yet latest (verified vs npm 2026-09-24). See note: TAILWIND V4 ON RN" }
   - { name: "Unistyles", tradeoff: "C++/Nitro styling engine; fast theming + variants" }
-  - { name: "Uniwind", tradeoff: "Tailwind w/ C++ styling engine + animated themes; Pro is paid (~$99/seat/yr)" }
-  - { name: "@mgcrea/react-native-tailwind", tradeoff: "Babel-plugin / zero-runtime Tailwind — no JS-side styling overhead; micro-adoption (<1k dl/wk). (The unscoped npm name react-native-tailwind is a dead 2020 package — don't cite it)" }
+  - { name: "Uniwind", tradeoff: "Tailwind w/ C++ styling engine + animated themes, from the Unistyles authors; the stable Tailwind-v4 option for RN — 1.12.0 (2026-09-04, verified vs npm 2026-09-24) peers tailwindcss >=4 and react-native >=0.81. Pro is paid (~$99/seat/yr)" }
+  - { name: "@mgcrea/react-native-tailwind", tradeoff: "Babel-plugin / zero-runtime Tailwind — no JS-side styling overhead; micro-adoption (~1.1k dl/wk, npm API 2026-09-24). (The unscoped npm name react-native-tailwind is a dead 2020 package — don't cite it)" }
   - { name: "Tamagui", tradeoff: "cross-platform design-system + optimizing compiler" }
-  - { name: "StyleX (0.18, Meta)", tradeoff: "atomic compile-time CSS; sx={} prop; strong web story, RN support emerging; first marquee non-Meta production adopter on record — Linear migrated off styled-components across 1,000+ PRs (see reading)" }
-  - { name: "styled-components", tradeoff: "runtime CSS-in-JS — avoid for new web work on the per-render-cost axis, not abandonment: v7 is in active prerelease (2026-06, RN-parity features) but stays runtime; prefer zero-runtime/StyleX" }
+  - { name: "StyleX (0.19, Meta)", tradeoff: "atomic compile-time CSS; sx={} prop; strong web story, RN support emerging; 0.19.1 (2026-09-15, verified vs npm 2026-09-24). First marquee non-Meta production adopter on record: Linear migrated off styled-components across 1,000+ PRs (see reading)" }
+  - { name: "styled-components", tradeoff: "runtime CSS-in-JS — avoid for new web work on the per-render-cost axis, not abandonment: v7 is in active prerelease (builds through 2026-09-08; stable 6.5.3, verified vs npm 2026-09-24) with RN-parity features, but stays runtime; prefer zero-runtime/StyleX" }
   - { name: "CSS-in-JS (web)", tradeoff: "runtime cost; prefer zero-runtime variants" }
   - { name: "React Strict DOM", tradeoff: "strict HTML/CSS compiled to static CSS on web + RN styles on native; see RB-E-CROSSPLATFORM" }
 recommend:
   default: "Web: Tailwind (pair with shadcn/ui — RB-E-COMPONENT-LIBS). React Native: NativeWind if you want Tailwind, else StyleSheet/Unistyles. Prefer zero-runtime/compiler approaches on both."
   when:
-    - "design-system with variants/theming → Tamagui or Unistyles"
-    - "Meta-style atomic CSS at scale → StyleX"
+    - "RN needing TW4 parity with web today → Uniwind (stable, requires Tailwind >=4; NativeWind's v5/TW4 line is still RC)"
+    - "design-system with variants/theming shared across web + native → Tamagui"
+    - "RN-only design-system with variants/theming → Unistyles"
+    - "Meta-style atomic CSS for a large web codebase → StyleX"
     - "web+native shared styling → React Strict DOM (RB-E-CROSSPLATFORM)"
-    - "new web CSS-in-JS → avoid runtime libs on the per-render-cost axis (styled-components v7 is actively developed but still runtime); use zero-runtime/StyleX"
-    - "RN needing Tailwind v4 parity with web today → NativeWind stable is TW3-era and its v5/TW4 line is preview-only; Uniwind (from the Unistyles authors, requires TW>=4) is the stable TW4 option"
+    - "new web CSS-in-JS → StyleX, else another zero-runtime library (runtime libs pay per render; styled-components v7 is actively developed but still runtime)"
 note: >
-  TAILWIND'S OWNER CHANGED, ITS LICENCE AND TEAM DID NOT (2026-09-09, verified vs Adam Wathan's
-  announcement on the Tailwind blog): Tailwind Labs has joined Shopify. This entry's web default is
-  Tailwind, so the stewardship question is load-bearing and the answer is reassuring on the axis
-  that matters: "Nothing changes with Tailwind CSS or any of our other open-source projects" —
-  everything stays MIT-licensed and the same team continues to lead and maintain it, now with
-  Shopify's backing. Wathan frames it as giving the framework "a stable long-term home where it will
-  be actively maintained", and states the number behind why that matters: installed over 110 million
-  times per week. What DOES change is commercial, and only matters if you were planning to buy —
-  they are no longer growing the business around Tailwind: existing Tailwind Plus and ui.sh
-  customers keep their access, but SIGN-UPS ARE CLOSED to new customers. Neither Tailwind Plus nor
-  ui.sh is a pick in this corpus, so nothing here depends on it; recorded because a reader who
-  bookmarked "buy Tailwind Plus for the component set" will now hit a closed door and should be
-  routed to shadcn/ui in RB-E-COMPONENT-LIBS instead. Worth reading next to the two other 2026
-  stewardship moves this corpus recorded in the same week — Shopify LEAVING React Native
-  (RB-E-LISTS, RB-E-ANIMATION) and Margelo joining Callstack (RB-E-NATIVE): the pattern is
-  consolidation under corporate maintainers, which cuts both ways and is exactly why this corpus
-  records who maintains a dependency, not just what it does.
-  Web+native: react-native-web is in maintenance mode (2026); React Strict DOM is the
-  emerging successor (see RB-E-CROSSPLATFORM). The Tailwind-for-RN field is crowded
-  ("Tailwind fatigue" — NativeWind, Uniwind, react-native-tailwind, …); the durable
-  selection axis is runtime cost — zero-runtime/compiler approaches avoid JS-side style work.
+  The durable selection axis is WHEN style work happens: runtime CSS-in-JS (styled-components,
+  Emotion) serializes styles during every render, while compile-time and zero-runtime approaches
+  (Tailwind, StyleX, the zero-runtime RN engines) move that work to the build. That is why the web
+  default is Tailwind with shadcn/ui (RB-E-COMPONENT-LIBS) and why runtime CSS-in-JS is avoided for
+  new work on cost, not abandonment. On React Native the Tailwind field is crowded ("Tailwind
+  fatigue" — NativeWind, Uniwind, react-native-tailwind, …); choose on runtime cost and on which
+  Tailwind major you need, not on novelty.
+
+  TAILWIND V4 ON RN (2026-09-24, verified vs npm): NativeWind's latest is 4.2.7 (2026-09-14), the
+  Tailwind v3-era line; its Tailwind-v4 line is 5.0.0-rc.0 (2026-09-13) on the preview/rc dist-tags.
+  Uniwind 1.12.0 (2026-09-04) peers tailwindcss >=4 and react-native >=0.81 → an RN app that needs
+  Tailwind v4 parity with its web build today goes to Uniwind; NativeWind stays the pick for Tailwind
+  v3-era RN work.
+
+  TAILWIND STEWARDSHIP (2026-09-09, verified vs Adam Wathan's announcement on the Tailwind blog):
+  Tailwind Labs joined Shopify. "Nothing changes with Tailwind CSS or any of our other open-source
+  projects": everything stays MIT-licensed and the same team leads and maintains it, now with
+  Shopify's backing, for a framework installed over 110 million times per week → the web default
+  holds. The commercial side closed: existing Tailwind Plus and ui.sh customers keep access, but
+  sign-ups are closed to new customers, so a reader planning to buy Tailwind Plus for a component
+  set should go to shadcn/ui (RB-E-COMPONENT-LIBS). Shopify leaving React Native is a separate thread
+  (RB-E-LISTS, RB-E-ANIMATION own it).
+
+  WEB+NATIVE: react-native-web is in maintenance mode (2026); React Strict DOM is the emerging
+  successor — RB-E-CROSSPLATFORM owns that thread.
+
+  HISTORY:
+  2026-09-24 CORRECTED: NativeWind's v5/TW4 line is at RC (5.0.0-rc.0), not preview-only; StyleX is
+  on 0.19, not 0.18; @mgcrea/react-native-tailwind is ~1.1k dl/wk, not <1k.
 defer_to_skill: design-system  # tokens, theme parity, a11y intrinsics
 doc: "RB-E-STYLING.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-21   # Tailwind Labs joined Shopify — OSS stays MIT under the same team, Tailwind Plus/ui.sh closed to new sign-ups (React Status #490)
+updated: 2026-09-24   # NativeWind v5 at RC, Uniwind TW4 peer floor, StyleX 0.19, styled-components v7 prerelease date (npm); prior 2026-09-21: Tailwind Labs joined Shopify — OSS stays MIT under the same team, Tailwind Plus/ui.sh closed to new sign-ups (React Status #490)
 reading:
   - title: "Styling Linear for the future with StyleX"
     url: "https://linear.app/now/styling-linear-for-the-future-stylex"

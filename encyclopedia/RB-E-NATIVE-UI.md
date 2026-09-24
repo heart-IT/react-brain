@@ -4,7 +4,7 @@ title: "About native UI extensions — Live Activities, widgets, App Clips, port
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: medium             # entry: settling but still iOS-leaning
-updated: 2026-07-16
+updated: 2026-09-21
 platforms: [react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-NATIVE-UI
 defer_to_skill: null                                          # entry declares no depth-audit skill
@@ -51,15 +51,15 @@ The candidates are three different answers to that question, plus one option out
   native layer, web + native. One line in the entry, and the who-compiles lens does not apply
   to it; this doc scopes it accordingly rather than inventing detail.
 
-One scoping note the entry itself supplies: this story is grounded for iOS — SwiftUI targets,
-ActivityKit, iOS version gates. The note calls the area settling but still iOS-leaning, and
-Compose appears only in the worklets item below.
+One scoping note: most of this story is grounded for iOS — SwiftUI targets, ActivityKit, iOS
+version gates. Android arrived in September 2026 on both main options (below): the iOS side is
+settled, the Android side is days old.
 
 ## The default, and why
 
-> On Expo → expo-widgets for iOS widgets/Live Activities (stable in SDK 56, no native code).
-> Bare RN → Voltra 2 (now bare-RN capable). Custom native targets / App Clips / share
-> extensions → Expo Targets.
+> iOS widgets / Live Activities: expo-widgets on Expo (stable since SDK 56, no native code),
+> Voltra 2 on bare RN. Android widgets: expo-widgets on Expo SDK 58 (beta), Voltra 2.3 on bare
+> RN. Custom native targets / App Clips / share extensions → Expo Targets.
 
 The split follows who can compile for you. On Expo, the platform does it — expo-widgets, no
 native code, stable as of SDK 56. On bare RN, Voltra 2's Turbo-Modules rewrite made it the
@@ -71,19 +71,29 @@ Targets hands you the target itself, in Swift/Kotlin or RN, at the cost of multi
 
 **expo-widgets (Expo)** — iOS widgets + Live Activities from Expo UI components, no
 SwiftUI/native code; stable in SDK 56, alpha in SDK 55 (VERIFIED 2026-06); full env access, no
-pre-render. The on-Expo default.
+pre-render. The on-Expo default. SDK 58 (beta, 2026-09-15) adds an Android implementation in
+which each widget runs its own JS bundle on a dedicated Hermes runtime — a second app-sized
+thing to keep fast, so widget JS is a startup-budget question, not free reuse of app code.
 
 **Voltra (Callstack)** — Live Activities + widgets with SwiftUI-style layout (VStack/HStack).
 The v2.0 rewrite (2026-06-18, Turbo Modules) is the capability flip of this entry: bare-RN
 capable, Expo Modules no longer required, v2 migration required. iOS 16.2+; interactive 17+;
-iOS 18+ activity families.
+iOS 18+ activity families. 2.3 (2026-09-15) adds server-driven widgets (a widget fetches its own
+props on a schedule) and per-instance Android widget configuration that survives a launcher
+backup/restore — the bare-RN answer for Android widgets.
+
+**expo-app-intents** — ALPHA in the SDK 58 beta: exposes Apple App Intents (Siri, Shortcuts,
+Spotlight, Apple Intelligence) from an Expo app. Intent types are still declared in Swift inline
+modules, because Apple's build-time metadata extraction only sees code in the app target. Docs
+are still to come: prototype only.
 
 **Expo Targets** — native targets (widgets, App Clips, share extensions) in Swift/Kotlin or
 RN; multi-step setup. The custom-native answer, sitting on the CNG mechanism the Bacon reading
 documents.
 
 **react-native-teleport** — portals rendering in the native layer via re-parenting; web +
-native. Grouped by the entry with the less-settled options.
+native. 1.2.0 fixed the visible Android flaw: reparenting an attached view instead of
+remove/add keeps the rendering surface alive, so teleporting video and maps no longer flashes.
 
 **Expo UI + worklets (2026-07-10, verified vs the post's og:description)** — Expo UI
 integrates react-native-worklets: SwiftUI and Compose state can be driven SYNCHRONOUSLY on the
@@ -106,9 +116,9 @@ row is its video companion: the v0 team on the upstream RN fixes the app produce
   Which SDK you are on decides which claim is true for you.
 - **Ignoring the iOS version gates.** Voltra's floor is iOS 16.2, interactivity needs 17+,
   activity families need iOS 18+. These are OS gates, not library choices.
-- **Treating the shelf as cross-platform.** The entry's note is blunt: settling but still
-  iOS-leaning; Android widgets and the portal/other options remain less settled — prototype
-  platform coverage before committing.
+- **Treating the Android side as settled.** Android widgets landed on both expo-widgets (SDK 58
+  beta) and Voltra 2.3 in the same fortnight of September 2026; they are days old. Prototype
+  platform coverage before committing a product surface.
 - **Forgetting the update channel is a design decision.** HTTP-refresh vs APNs-push is the Add
   Jam reading's named tradeoff, and it belongs to the platform-constraint layer that outlasts
   any single library.
@@ -139,8 +149,8 @@ the OS's shapes from JS (Voltra — SwiftUI-style VStack/HStack, bare-RN capable
 Turbo-Modules rewrite, iOS 16.2+/17+/18+ gates); or you author the native target yourself
 (Expo Targets — widgets, App Clips, share extensions in Swift/Kotlin or RN, multi-step setup,
 on the CNG pbxproj machinery). react-native-teleport's native-layer portals sit outside that
-question, and the whole shelf is settling but still iOS-leaning — Android widgets and the
-portal options are less settled, so prototype platform coverage before committing. When these
+question. iOS is settled; Android widgets arrived on both expo-widgets (SDK 58 beta) and Voltra
+2.3 in September 2026 and are days old, so prototype platform coverage before committing. When these
 surfaces must track gestures or animation, Expo UI's worklets integration drives SwiftUI and
 Compose state synchronously on the UI thread, no JS round-trips.
 

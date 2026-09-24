@@ -6,76 +6,128 @@ status: drafted
 confidence: low
 platforms: [react, react-native]
 options:
-  - { name: "agent-skills (Callstack)", tradeoff: "curated skill packs for coding agents — RN best practices, upgrade playbook, brownfield migration, library scaffolding; installs into Claude Code / Cursor / Codex / Gemini CLI; the broadest pack (~1.5k★)" }
-  - { name: "react-native-skills (Margelo)", tradeoff: "RN-focused skills (VisionCamera and native-module depth) via `npx skills add margelo/react-native-skills`; younger/smaller than Callstack's" }
-  - { name: "agent-device (Callstack)", tradeoff: "agent-native CLI: AI agents drive real iOS/Android/tvOS/macOS/web devices & simulators — a11y snapshots, actions, replayable scripts; v0.21.0 (npm + GitHub, verified 2026-09-10), iterating fast — 0.20 redesigned gesture execution, added Maestro compatibility through a typed engine, and shipped REPLAY: save a completed agent-driven flow as a script and re-run it with zero model calls (see reading); 0.21 (2026-09-08) cut iOS-Simulator cold opens 27–40% across six benchmark screens, shrank the measured install from 9.89 MB to 4.44 MB by bundling deps, and added TAKEOVER — pause a remote-device run, do a step by hand, let the agent continue — with breaking changes (batch steps take structured `input`; `perf` now requires an operation such as frames/memory; the deprecated SDK rotate wrapper is gone), so pin it" }
-  - { name: "Argent (Software Mansion)", tradeoff: "MCP server + skills: simulator control, debugger attach (React tree + JS), console/HTTP monitoring, correlated React+iOS profiling; 0.25.0 (verified vs the GitHub release 2026-09-09; 0.17 first; 0.24 added PHYSICAL iOS device support, so it is no longer simulator-only; 0.25 adds attaching to devices from EXTERNAL device providers, script steps inside flows, and reading a WebView's web DOM in `describe` on Android) extends beyond iOS — tvOS/Android TV/Vega OS, cloud agents for autonomous bug repro, Argent Lens design review; also listed in RB-E-TESTING" }
+  - { name: "agent-skills (Callstack)", tradeoff: "curated skill packs for coding agents — RN best practices, upgrade playbook, brownfield migration, library scaffolding; installs into Claude Code / Cursor / Codex / Gemini CLI; the broadest pack (~1.7k★, verified vs GitHub 2026-09-24)." }
+  - { name: "react-native-skills (Margelo)", tradeoff: "RN-focused skills (VisionCamera and native-module depth) via `npx skills add margelo/react-native-skills`; younger/smaller than Callstack's (~170★, verified vs GitHub 2026-09-24)." }
+  - { name: "agent-device (Callstack)", tradeoff: "agent-native CLI: AI agents drive real iOS/Android/tvOS/macOS/web devices & simulators — a11y snapshots, actions, and REPLAY of a saved flow with zero model calls. 0.21 cut iOS-Simulator cold opens 27–40% and broke some commands, so pin it; npm 0.21.13 (2026-09-24, verified vs npm). See note: AGENT-DEVICE." }
+  - { name: "Argent (Software Mansion)", tradeoff: "MCP server + skills: simulator and PHYSICAL iOS device control, debugger attach (React tree + JS), console/HTTP monitoring, correlated React+iOS profiling; also tvOS/Android TV/Vega OS. npm 0.25.2 (2026-09-18, verified vs npm 2026-09-24); see note: ARGENT. Also listed in RB-E-TESTING." }
   - { name: "Maestro MCP / Maestro Viewer", tradeoff: "agents drive devices and GENERATE E2E flows on the tool the ecosystem already tests with — see RB-E-TESTING (which owns the testing depth)" }
   - { name: "Reactotron MCP", tradeoff: "the classic RN debugger exposes runtime state/network to coding agents via MCP (reactotron-core-server 3.3.0, 2026-05)" }
-  - { name: "Expo AI tooling", tradeoff: "SDK 55+ ships agent-focused tooling (Expo skills at docs.expo.dev/skills, MCP integration) for Claude/Cursor/Codex as part of the framework — THIS is the durable part. Expo Agent, their hosted web app-building agent, is DEAD: closed beta ended, agent.expo.dev goes away after 2026-07-31 (export your projects), with Expo saying it would rather integrate with the harnesses developers already use than build its own IDE" }
+  - { name: "Expo AI tooling", tradeoff: "SDK 55+ ships agent tooling as part of the framework (Expo skills, the Expo MCP server, the `expo` agent plugin, @expo/agent-cli in the SDK 58 beta) — the durable, first-party layer; see note: EXPO FIRST-PARTY LAYER. Expo Agent, the hosted app-building agent, is DEAD (wound down 2026-07-20)." }
   - { name: "TanStack Intent (ALPHA)", tradeoff: "a DISTRIBUTION mechanism, not a pack: agent skills ship INSIDE npm packages and are discovered via the node_modules dependency graph, version-pinned with staleness detection; rolling out in TanStack DB first" }
-  - { name: "modern-web-guidance (Google Chrome)", tradeoff: "the WEB counterpart to the RN skill packs above, and a different shape: not a linter or a codegen tool but a SEARCH INDEX over curated best-practice guides, consulted BEFORE writing HTML/CSS/DOM code — `npx modern-web-guidance search \"<action phrase>\"` returns ranked hits with ids, the web features used, a tokenCount and a similarity score; `retrieve <id>` returns the guide as markdown. Guides carry Baseline-keyed fallbacks, so \"is this safe yet?\" becomes a date comparison with the fallback attached. Semantic search runs locally through a small on-device model (no API key, works offline; telemetry to Google is on by default — DISABLE_TELEMETRY=1). Framework-agnostic. 0.0.x, published continuously" }
-  - { name: "react-devtools-cdt-mcp (React team) — EXPERIMENTAL", tradeoff: "the React team's own route to giving an agent React-level insight in the BROWSER, and it is not shaped like the other rows: NOT an MCP server and not something you add to an MCP client config, but a browser LIBRARY you import in the page under test (`import 'react-devtools-cdt-mcp/register'` BEFORE react, so the DevTools hook is installed first), which then registers React inspection and profiling tools into chrome-devtools-mcp through Chrome's experimental third-party developer-tools API. Requires chrome-devtools-mcp 1.3.0+ and `--categoryExperimentalThirdParty=true`, and is labelled experimental by its own README — web only, and the complement to the device-driving rows above" }
-  - { name: "Simlock (Callstack incubator) — EARLY", tradeoff: "the row for a problem the other tools here create: they each drive ONE device, and parallel agents left alone with simctl/avdmanager grab whatever they see, then boot, erase and install over each other. Simlock replaces that with a single primitive — LEASE a device — from a daemon that provisions one if nothing matching is free (capacity derived from machine CPU/RAM), queues fairly when saturated (--timeout / --no-wait escape hatches), shuts idle devices down to reclaim RAM then deletes them to reclaim disk, and reboots a leased device under the same lease if its process dies outside simlock. A daemon runs as a WORKER owning its own machine's devices or as a GATEWAY that owns none and fronts workers, which dial OUT over one WebSocket uplink — so a Mac behind NAT joins a fleet with a URL and a join token, no inbound port. VERY EARLY: npm 0.2.0 (first published 2026-08-21), ~13★ (verified 2026-09-10) — the LEASE primitive is the durable idea here, not the implementation" }
-  - { name: "Metrognome (Uphold)", tradeoff: "an AUTONOMOUS performance loop rather than a hands-on-the-device tool: propose a hypothesis → drive the app (it orchestrates agent-device and Callstack's profiling tooling rather than shipping its own) → measure N times → keep the change only if it beats the noise, else revert; accepted fixes land as separate commits carrying their before/after numbers, and every experiment (kept OR rejected) appends to a performance-memory file committed in the repo so the next run doesn't re-test a dead end. npm `metrognome` 0.2.6 (2026-08-08, github.com/uphold/metrognome) — early, and the strongest idea in it is the gate, not the automation" }
+  - { name: "modern-web-guidance (Google Chrome)", tradeoff: "the WEB counterpart to the RN skill packs: a local SEARCH INDEX over curated best-practice guides with Baseline-keyed fallbacks, consulted BEFORE writing HTML/CSS/DOM code; works offline, telemetry on by default (DISABLE_TELEMETRY=1). 0.0.x, published continuously; see note: WEB GUIDANCE." }
+  - { name: "react-devtools-cdt-mcp (React team) — EXPERIMENTAL", tradeoff: "the React team's route to React-level insight for an agent in the BROWSER: a library imported in the page under test that registers React inspection/profiling tools into chrome-devtools-mcp 1.3.0+. Web only; experimental per its README. 0.1.0 (2026-09-09, verified vs npm 2026-09-24); see note: BROWSER." }
+  - { name: "Simlock (Callstack incubator) — EARLY", tradeoff: "a device-LEASE daemon for parallel agents: provisions a matching simulator/emulator when none is free, queues fairly, reclaims idle devices, and fronts remote workers over one outbound WebSocket. VERY EARLY: npm 0.2.0 (2026-08-21), ~14★ (verified 2026-09-24); the lease primitive is the durable idea. See note: SIMLOCK." }
+  - { name: "Metrognome (Uphold)", tradeoff: "an AUTONOMOUS performance loop: hypothesis → drive the app (via agent-device + Callstack's profiling tooling) → measure N times → keep a change only if it beats the noise, else revert; every experiment lands in a committed performance-memory file. npm 0.2.6 (2026-08-08, verified vs npm 2026-09-24), early; the gate is the durable idea." }
   - { name: "React Native Evals (Callstack)", tradeoff: "open-source benchmark suite for WHICH MODEL writes good RN code — task dataset by category/library, TS+Bun runner, judge + methodology whitepaper; the model-selection layer under all the tools above" }
-  - { name: "ReactBench (Million)", tradeoff: "WHICH MODEL writes good REACT-WEB code — Write React / Fix React tasks from real merged PRs, graded by behavioral tests + react-doctor's 400+ deterministic rules (see RB-E-DX) in clean-room containers; public leaderboard (2026-07: GPT 5.6 Terramax/Solmax 53%, Fable 5xhigh 46% Pass@1); the web counterpart to RN Evals" }
+  - { name: "ReactBench (Million)", tradeoff: "WHICH MODEL writes good REACT-WEB code — Write/Fix React tasks from real merged PRs, graded by behavioral tests + react-doctor's 400+ rules (RB-E-DX) in clean-room containers; public leaderboard (2026-07: GPT 5.6 Terramax/Solmax 53%, Fable 5xhigh 46% Pass@1)." }
 recommend:
-  default: "FIRST-PARTY FIRST where it exists (challenge 2026-09-10): on Expo, start from Expo's own agent layer and add to it, rather than reaching for a third-party pack by reflex — the same now applies to React on the web via react-devtools-cdt-mcp. Then give a coding agent two things: RN KNOWLEDGE — a curated skills pack (Callstack agent-skills is the broadest at ~1.6k★, verified 2026-09-10; add Margelo react-native-skills for camera/native depth) — and EYES+HANDS on the running app — Maestro MCP if you already test with Maestro (see RB-E-TESTING), else agent-device (cross-platform) or Argent (iOS debug/profile depth). Add Reactotron MCP when the agent needs runtime state. Fast-moving (confidence: low) — most of these tools are months old; trial on one workflow before standardizing."
+  default: "First-party first: on Expo start from Expo's own agent layer; on React web, the React team's react-devtools-cdt-mcp. Then give the agent RN KNOWLEDGE (Callstack agent-skills; add Margelo react-native-skills for camera/native depth) and EYES+HANDS on the running app: Maestro MCP if you already test with Maestro, else agent-device (cross-platform) or Argent (iOS debug/profile depth). Fast-moving (confidence: low): trial one workflow before standardizing."
   when:
-    - "agent writes RN code → install a skills pack (agent-skills / react-native-skills) so it stops generating stale patterns"
-    - "on Expo → start from Expo's FIRST-PARTY agent layer (docs.expo.dev/agents, verified 2026-09-01): the official `expo` plugin for Claude Code (claude plugin install expo@claude-plugins-official) / Codex, an Expo MCP server with live docs + EAS Build history + Update channels + TestFlight metadata, and an AGENTS.md that create-expo-app now generates pointing at your SDK's docs — Expo's own guide then hands device control to the same agent-device/Argent picks this entry makes — and as of SDK 58 beta that first-party layer includes @expo/agent-cli, see note"
-    - "agent must run and SEE the app (closed verify loop) → agent-device (cross-platform) or Argent (iOS debugger/profiler depth)"
+    - "agent writes RN code → a skills pack (Callstack agent-skills, else Margelo react-native-skills) so it stops generating stale patterns"
+    - "on Expo → Expo's first-party agent layer (docs.expo.dev/agents: the `expo` plugin for Claude Code / Codex, the Expo MCP server, create-expo-app's AGENTS.md, and @expo/agent-cli from the SDK 58 beta; see note)"
+    - "agent must run and SEE the app on iOS and Android (closed verify loop) → agent-device"
+    - "agent must debug or profile an iOS app (React tree, JS debugger, correlated React+iOS profiling) → Argent"
     - "agent-generated E2E tests → Maestro MCP (owned by RB-E-TESTING)"
     - "agent needs runtime state / network inspection → Reactotron MCP"
-    - "agent writes WEB frontend code (HTML/CSS/DOM) → modern-web-guidance as a pre-write consult; the RN skill packs above don't cover the web platform"
-    - "agent-driven device work you repeat (QA sweeps, regression flows) → discover the flow once with the model, then agent-device replay it with zero model calls"
+    - "agent inspects or profiles React in the BROWSER → react-devtools-cdt-mcp (experimental; needs chrome-devtools-mcp 1.3.0+)"
+    - "agent writes WEB frontend code (HTML/CSS/DOM) → modern-web-guidance (a pre-write consult; the RN skill packs don't cover the web platform)"
+    - "agent-driven device work you repeat (QA sweeps, regression flows) → agent-device replay (discover the flow once with the model, re-run with zero model calls)"
+    - "several agents share one machine's simulators/emulators → Simlock (very early; adopt the lease pattern, pin the tool)"
+    - "agent does performance work → Metrognome (or its gate: measure N times, keep only what beats the noise floor)"
+    - "consuming a library that ships skills inside its npm package (TanStack DB first) → TanStack Intent (alpha)"
+    - "choosing the model for RN code → React Native Evals"
+    - "choosing the model for React-web code → ReactBench"
+    - "choosing a device tool + model pair → AppControlBench (leaderboard over Argent and agent-device × Claude/GPT lines)"
     - "how to WORK with agents (TDD, review discipline, cognitive debt) → agentic-engineering-patterns"
 note: >
-  THE FIRST-PARTY-FIRST DEFAULT GOT A CONCRETE TOOL (2026-09-21, verified vs the Expo SDK 58 beta
-  changelog of 2026-09-15): @expo/agent-cli is an experimental CLI that Expo describes as built by
-  agents and designed for agents. It sits on top of Expo CLI, EAS CLI and expo-doctor and falls
-  back to Expo CLI, so it is meant as a drop-in replacement rather than a new thing to learn:
-  `agents:setup` wires it up, `status` answers Expo Go compatibility WITHOUT starting the app, `dev`
-  decides for itself whether a build is needed and takes the fastest route to a running app, `smoke`
-  is dev plus a screenshot plus stop (a one-command "can this machine actually run the app"), and
-  `skills:sync` pulls co-located agent skills out of node_modules into the project. Every command
-  prints next steps, which is the actual design point — the failure it targets is an agent guessing
-  its way from Expo Go into a runtime error because nothing told it a development build was needed.
-  This is worth recording as CONFIRMATION rather than novelty: the 2026-09-10 challenge moved this
-  entry's default to first-party-first on the argument that Expo was building its own agent layer,
-  and a first-party agent CLI six days later is that argument landing. Still experimental and under
-  active development, so trial it on one workflow before standardizing (the entry-wide caveat).
-  NEW entry (2026-07-09): the dominant recurring theme of Native Weekly issues 11–16 (Jan–Jun
-  2026) — every single issue shipped agent-tooling news (agent-device ×3, two skills packs,
-  Reactotron MCP, Argent, Expo SDK 55/56 AI tooling, Xcode 26.3 'agentic coding') — and the
-  corpus had no home for the SELECTION question 'which agent tooling for RN development'.
-  Distinct from RB-E-AI-UI (AI in the product) and RB-E-ONDEVICE-AI (models on device): this
-  is AI at DEV time. Device-driving TESTING tools (Maestro MCP, Argent, Radon IDE) stay owned
-  by RB-E-TESTING; this entry is the cross-tool map. All options fetch-verified 2026-07-09
-  (GitHub repos, npm, SWM blog). Everything here is pre-1.0-culture — pin versions, expect churn.
-  FIRST CASUALTY (2026-07-28, verified vs the Expo changelog): Expo Agent — carried here since
-  2026-07-09 as "waitlist beta … track, don't bet" — was wound down on 2026-07-20, five weeks
-  after this entry first listed it; the hosted agent at agent.expo.dev stops working after
-  2026-07-31. Expo's stated reasoning is the useful signal, not the shutdown: rather than build a
-  web-based harness and IDE, integrate with the harnesses developers already customize deeply.
-  That is the shape of this whole category — the SKILLS/MCP layer (portable, rides whatever
-  harness you use) outlives the hosted-product layer. Weight option rows accordingly.
-  THE WEB SIDE WAS MISSING UNTIL 2026-08-18: every skills-pack row here was React Native (Callstack,
-  Margelo, Expo), which quietly implied the corpus had no answer for "my agent writes stale web
-  frontend code". Google Chrome's modern-web-guidance fills it, and its shape is worth copying:
-  a searchable index of current guidance with Baseline-keyed fallbacks, consulted before writing —
-  not a linter run afterwards. It also draws the boundary this category keeps blurring: a skill
-  supplies the STANDARD, something else (you or the agent) still has to read the code.
-  BENCHMARK LAYER (2026-08-07, verified vs appcontrolbench.swmansion.com): SWM Labs'
-  AppControlBench compares agent-tool × model configurations (Argent and agent-device — the two
-  device-driving options this entry tracks — against Claude/GPT lines) on real iOS app-control
-  tasks: ~120 configs with completion/time/cost leaderboards (best on record 2026-08-03: 98%
-  completion at $0.22/run, Claude Haiku + Argent 0.15). The selection question this entry owns
-  now has a live first-party leaderboard — check it before pinning a tool+model pair.
+  This entry is AI at DEV time; AI in the product belongs to RB-E-AI-UI and models on the device to
+  RB-E-ONDEVICE-AI, and RB-E-TESTING owns the testing depth of the device-driving tools. A coding
+  agent needs three things: KNOWLEDGE of current patterns (skills packs, first-party agent layers),
+  EYES AND HANDS on the running app (device tools that close the verify loop), and a GATE that decides
+  what to keep (measurement, review). Two lessons shape the picks. The portable skills/MCP layer
+  outlives hosted products, so where a framework ships its own agent layer, start there. And the
+  model, not the device, is the cost of device work, so spend model turns discovering a flow once and
+  replay it after. Everything here is pre-1.0 culture: pin versions and expect churn.
+
+  EXPO FIRST-PARTY LAYER (2026-09-21, verified vs the Expo SDK 58 beta changelog of 2026-09-15; the
+  docs.expo.dev/agents layer verified 2026-09-01): @expo/agent-cli is an experimental CLI Expo
+  describes as built by agents and designed for agents (npm 1.0.16, 2026-09-16 — the 1.x number
+  does not mean stable). It sits on Expo CLI, EAS CLI and expo-doctor and falls back to Expo CLI, so
+  it is a drop-in replacement: `agents:setup` wires it up, `status` answers Expo Go compatibility
+  WITHOUT starting the app, `dev` decides whether a build is needed and takes the fastest route to a
+  running app, `smoke` is dev plus a screenshot plus stop, and `skills:sync` pulls co-located agent
+  skills out of node_modules. Every command prints next steps; the failure it targets is an agent
+  guessing its way from Expo Go into a runtime error because nothing said a development build was
+  needed. It confirms the 2026-09-10 first-party-first default. Expo's own guide hands device control
+  to the same agent-device/Argent picks this entry makes.
+
+  AGENT-DEVICE (0.21.0 verified vs the GitHub release 2026-09-10; npm 0.21.13 on 2026-09-24): 0.20
+  redesigned gesture execution, added Maestro compatibility through a typed engine, and shipped
+  REPLAY — save a completed agent-driven flow as a script and re-run it with zero model calls (see
+  reading: 3 Minutes With an Agent, 9 Seconds on Replay). 0.21 (2026-09-08) cut iOS-Simulator cold
+  opens 27–40% across six benchmark screens, shrank the measured install from 9.89 MB to 4.44 MB by
+  bundling deps, and added TAKEOVER (pause a remote-device run, do a step by hand, let the agent
+  continue). Breaking in 0.21: batch steps take structured `input`; `perf` requires an operation such
+  as frames/memory; the deprecated SDK rotate wrapper is gone → pin it.
+
+  ARGENT (0.25.0 verified vs the GitHub release 2026-09-09; npm 0.25.2 on 2026-09-24): 0.17 was the
+  first release tracked here; 0.24 added PHYSICAL iOS device support, so it is no longer
+  simulator-only; 0.25 adds attaching to devices from EXTERNAL device providers, script steps inside
+  flows, and reading a WebView's web DOM in `describe` on Android. Beyond iOS it reaches tvOS/Android
+  TV/Vega OS, cloud agents for autonomous bug repro, and Argent Lens design review.
+
+  BROWSER (react-devtools-cdt-mcp, per its README): NOT an MCP server and not
+  something you add to an MCP client config, but a browser LIBRARY imported in the page under test
+  (`import 'react-devtools-cdt-mcp/register'` BEFORE react, so the DevTools hook is installed first),
+  which registers React inspection and profiling tools into chrome-devtools-mcp through Chrome's
+  experimental third-party developer-tools API. Requires chrome-devtools-mcp 1.3.0+ and
+  `--categoryExperimentalThirdParty=true`. It complements the device-driving rows.
+
+  WEB GUIDANCE (2026-08-18): Google Chrome's modern-web-guidance filled the gap where every skills
+  pack here was React Native. `npx modern-web-guidance search "<action phrase>"` returns ranked hits
+  with ids, the web features used, a tokenCount and a similarity score; `retrieve <id>` returns the
+  guide as markdown. Guides carry Baseline-keyed fallbacks, so "is this safe yet?" becomes a date
+  comparison with the fallback attached. Semantic search runs locally through a small on-device
+  model (no API key); framework-agnostic. A skill supplies the STANDARD; you or the agent still read
+  the code (see reading: Testing Google's modern-web-guidance skill against a real React app).
+
+  SIMLOCK (per the repo README): the other tools each drive ONE device, and parallel
+  agents left alone with simctl/avdmanager grab whatever they see, then boot, erase and install over
+  each other. Simlock's single primitive is a LEASE from a daemon that provisions a device if nothing
+  matching is free (capacity derived from machine CPU/RAM), queues fairly when saturated (--timeout /
+  --no-wait), shuts idle devices down to reclaim RAM then deletes them to reclaim disk, and reboots a
+  leased device under the same lease if its process dies outside simlock. A daemon runs as a WORKER
+  owning its machine's devices or as a GATEWAY fronting workers, which dial OUT over one WebSocket
+  uplink, so a Mac behind NAT joins a fleet with a URL and a join token, no inbound port.
+
+  BENCHMARK LAYER (2026-08-07, verified vs appcontrolbench.swmansion.com): SWM Labs' AppControlBench
+  compares agent-tool × model configurations (Argent and agent-device against Claude/GPT lines) on
+  real iOS app-control tasks: ~120 configs with completion/time/cost leaderboards (best on record
+  2026-08-03: 98% completion at $0.22/run, Claude Haiku + Argent 0.15) → check it before pinning a
+  tool+model pair. React Native Evals and ReactBench answer the model question for RN and React-web
+  code.
+
+  EXPO AGENT WOUND DOWN (2026-07-28, verified vs the Expo changelog): Expo Agent, carried here from
+  2026-07-09 as "waitlist beta … track, don't bet", was wound down on 2026-07-20; agent.expo.dev stops
+  working after 2026-07-31. Expo's stated reason is the signal: rather than build a web-based harness
+  and IDE, integrate with the harnesses developers already customize. That is why this entry weights
+  the skills/MCP layer over hosted products.
+
+  HISTORY:
+  2026-09-24 GAP CLOSED: Shopify Helix primary-source reading (VLM UI-review gate); star counts and npm pins refreshed (agent-skills ~1.7k★ reconciles the row's ~1.5k and the default's ~1.6k).
+  2026-09-21 GAP CLOSED: @expo/agent-cli (SDK 58 beta), the first-party agent layer the 2026-09-10 challenge predicted; Shopify agent-addressable-architecture reading.
+  2026-09-10 CHALLENGED → WEAKENED: the default now leads first-party, matching this entry's own Expo when-clause.
+  2026-09-10 GAP CLOSED: agent-device 0.21, Argent 0.23 → 0.25 (physical iOS devices), react-devtools-cdt-mcp, Simlock.
+  2026-09-01 GAP CLOSED: Expo first-party agent layer (docs.expo.dev/agents) + saschb2b survey; Argent 0.21 → 0.23.
+  2026-08-24 CORRECTED: agent-device pin 0.20.9 → 0.20.10 (a phantom tag became real on npm + GitHub).
+  2026-08-18 GAP CLOSED: replay economics (agent-device), modern-web-guidance (the web side), Metrognome.
+  2026-08-07 GAP CLOSED: AppControlBench leaderboard + Expo model-shootout reading.
+  2026-07-28 CORRECTED: Expo Agent wound down — the first option-row casualty.
+  2026-07-20 GAP CLOSED: ReactBench row + Argent autonomous-repro receipt.
+  2026-07-09 GAP CLOSED: entry created — agent tooling ran through every Native Weekly issue 11–16 (Jan–Jun 2026); all options fetch-verified.
 defer_to_skill: agentic-engineering-patterns
 doc: null
-updated: 2026-09-24   # Shopify Helix primary-source reading (VLM UI-review gate); prior 2026-09-21: @expo/agent-cli (SDK 58 beta) — the first-party agent layer the 2026-09-10 challenge predicted · Shopify's agent-addressable-architecture reading
+updated: 2026-09-24   # Shopify Helix primary-source reading (VLM UI-review gate) · star counts and npm pins refreshed (agent-skills ~1.7k★, agent-device 0.21.13, Argent 0.25.2, Simlock ~14★); prior 2026-09-21: @expo/agent-cli (SDK 58 beta) — the first-party agent layer the 2026-09-10 challenge predicted · Shopify's agent-addressable-architecture reading
 reading:
   - title: "Native is now the future of mobile at Shopify"
     url: "https://shopify.engineering/back-to-native"

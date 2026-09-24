@@ -4,12 +4,13 @@ title: "About accessibility across web & native"
 diataxis: explanation          # understanding-oriented: the *why* behind the index recommendation
 status: reviewed
 confidence: medium
-updated: 2026-07-16
+updated: 2026-08-18
 platforms: [react, react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-A11Y
 defer_to_skill: design-system                     # depth audit: contrast, intrinsics, dynamic type
 related: [RB-E-TESTING, RB-E-COMPONENT-LIBS, RB-E-AI-UI]
 sources:
+  - "https://css-tricks.com/blocked-aria-hidden-fix/"
   - "https://css-tricks.com/the-siren-song-of-arianotify/"
   - "https://certificates.dev/blog/accessibility-in-react-common-mistakes-and-how-to-fix-them"
   - "https://frontendmasters.com/blog/ai-generated-ui-is-inaccessible-by-default/"
@@ -75,6 +76,14 @@ sites: focus on *route changes* and *modal changes*, where the visual context mo
 keyboard focus is left behind. Native focus is a different mechanism — screen-reader focus —
 but the duty is identical: when the UI moves, the user's position in the tree must move with it.
 
+The web closing sequence has one ordering rule: **focus has to leave a region before that
+region becomes hidden or inert.** The browser's "Blocked aria-hidden … its descendant retained
+focus" warning is correct, and the popular fixes — `blur()` the active element, wrap the close
+in `setTimeout`, strip `aria-hidden` — silence the console while leaving a screen-reader user
+stranded. The fix is a reorder: move focus out first, then hide or inert the region, and inert
+the closing overlay itself. Native `<dialog>` with `.showModal()` runs that sequence for you;
+restoring focus to an element that has since left the DOM is the one case you still handle.
+
 **Announcing dynamic updates** — the change layer, and the one facet in mid-transition on the
 web. Today's mechanism is the hidden **`aria-live` region**, a hack whose timing and support
 failures are well catalogued. The coming primitive is **`ariaNotify()`** (WAI-ARIA 1.3):
@@ -107,6 +116,8 @@ runtime tests, CI gates, and headless primitives that carry correct semantics by
   were navigating fine. If a role or state change already expresses it, don't also say it.
 - **Betting on `ariaNotify()` today.** Firefox-only as of mid-2026. Treat it as the direction
   of travel, keep `aria-live` fallbacks.
+- **Hiding a region that still holds focus.** `blur()`, `setTimeout` and deleting
+  `aria-hidden` silence the warning, not the bug; move focus out first, then hide/inert.
 - **Focus left behind on route/modal changes.** The visual context moved; keyboard focus
   didn't. This is the most common shape of the focus-management failure on the web side.
 

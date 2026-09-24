@@ -4,7 +4,7 @@ title: "About sharing code across React (web) & React Native"
 diataxis: explanation
 status: reviewed
 confidence: high
-updated: 2026-06-17
+updated: 2026-09-24
 platforms: [react, react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-CROSSPLATFORM
 defer_to_skill: engineering-principles                        # boundaries / dependency direction
@@ -12,6 +12,8 @@ related: [RB-E-STATE, RB-E-DATA, RB-E-STYLING, RB-E-NAV, RB-E-META-FRAMEWORKS]
 sources:
   - "https://nicolasgallagher.com/one-react-for-web-and-native/"
   - "https://www.callstack.com/podcasts/from-react-native-web-to-react-strict-dom"
+  - "https://shopify.engineering/back-to-native"
+  - "https://expo.dev/changelog/sdk-56"
 ---
 
 # About sharing code across React (web) & React Native
@@ -52,8 +54,11 @@ reversible and low-risk. Depth on package boundaries and dependency direction is
 
 ## The default, and why
 
-> **Share a logic/hooks package first.** For shared *UI* on **new** projects, evaluate
-> **React Strict DOM** or **Expo Universal Components** — not a fresh `react-native-web` bet.
+> **Shared logic/hooks package** (a platform-agnostic workspace package used by both the
+> React web app and the React Native app) first — the highest-leverage, lowest-risk win. For
+> shared *UI* on **new** projects the pick is **Expo Universal Components** or **React Strict
+> DOM**, not a fresh `react-native-web` bet. The pick changes only for an organisation that
+> can staff and gate agent-maintained duplicate native implementations.
 
 The UI clause carries a verified, load-bearing 2026 shift (below). The ordering — logic
 before UI — is deliberate: it front-loads the cheap, certain wins and defers the hard,
@@ -87,8 +92,10 @@ ecosystem — you're betting on the trajectory, not the maturity.
 
 **Expo Universal Components / `@expo/ui`** — a single component API that renders as **native
 SwiftUI (iOS) / Jetpack Compose (Android) / react-dom (web)**. Wins on platform *fidelity*
-(real native controls, not bridged approximations) and pairs naturally with an Expo app;
-the tradeoff is Expo coupling and newness.
+(real native controls, not bridged approximations) and pairs naturally with an Expo app,
+which is why the entry picks it first for new universal UI inside Expo. Since SDK 56 the
+native APIs are stable; the web half (backed by react-dom or react-native-web) is still
+experimental and likely to change. The tradeoff is Expo coupling and an unstable web lane.
 
 **Tamagui** — cross-platform UI kit with an optimizing compiler; a more batteries-included
 route when you want a component system rather than primitives.
@@ -99,6 +106,20 @@ navigation is one mental model across web and native (see `RB-E-NAV`).
 **Expo DOM Components (`use dom`)** — render real *web* components inside a React Native app
 via a webview wrapper. The pragmatic escape hatch for **incremental** reuse of existing web
 UI in a native shell, not a foundation for a whole app.
+
+## The strongest counter-argument: share the spec, not the code
+
+In September 2026 Shopify announced it is moving its mobile apps off React Native to Swift
+and Kotlin. It does not say RN was slow or wrong — "React Native was the right choice for
+Shopify in 2020." Its reason is that coding agents made building the same feature twice
+cheap enough that sharing an *implementation* lost its value; parity is now held by shared
+specifications, tests and review checkpoints that agents execute. The entry records this as
+a named competitor, not a reversal: two agent-maintained copies are cheaper but not free
+("that cost has not disappeared"), Shopify's route needed greenfield rebuilds and a bespoke
+checkpoint-gated system (Helix), and its decision weighs no web app — the case where a shared
+logic package pays twice. An organisation with that machinery has a real alternative; one
+without it still pays full price for duplicated logic. The agent-workflow half of the thread
+lives in `RB-E-AI-DEVTOOLS`.
 
 ## Tradeoffs and failure modes to name out loud
 
@@ -129,7 +150,9 @@ UI in a native shell, not a foundation for a whole app.
 Don't try to "write once, run anywhere"; **share by layer.** Extract a platform-agnostic
 logic + state + data package first — the cheap, certain, reversible win. Defer shared *UI*
 until you need it, and when you do, bet new work on **React Strict DOM** or **Expo Universal
-Components**, not on `react-native-web` (now maintenance-only). Honor platform UI
+Components**, not on `react-native-web` (now maintenance-only). Only an organisation that
+can gate agent-maintained duplicate native code has a real alternative: share the spec, not
+the code. Honor platform UI
 conventions rather than flattening them. This layered discipline is precisely the
 duplication `react-brain` is built to help teams collapse.
 

@@ -4,7 +4,7 @@ title: "About data fetching & server state in React & React Native"
 diataxis: explanation
 status: reviewed
 confidence: high
-updated: 2026-06-17
+updated: 2026-09-24
 platforms: [react, react-native]
 index_entry: ../skills/react-brain-mentor/encyclopedia.yaml   # see entry RB-E-DATA
 defer_to_skill: null
@@ -87,6 +87,13 @@ and you may not need a client-side cache for read paths at all. This shifts the 
 from "which client cache?" to "what runs where?" (see `RB-E-META-FRAMEWORKS`). The catch
 lives on the *mutation* path — Server Functions have a real DoS-CVE history (`RB-E-SECURITY`)
 — and RSC is a **web concern; it does not apply to React Native.**
+The sharper test for whether an RSC app needs a client cache at all is whether the data
+**changes on its own** (polling, pushes). If it changes only when the user acts,
+`useActionState` + `useOptimistic` cover writes with no client cache; adding TanStack Query or
+SWR there means keeping two caches (server and client) in sync.
+
+**P2P / Holepunch backends** — a client cache does not apply by design: the data lives in the
+Hypercore/Autobase stack and is queried locally (see `RB-E-P2P`).
 
 ## Tradeoffs and failure modes to name out loud
 
