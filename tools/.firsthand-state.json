@@ -81,7 +81,7 @@
    "deprecated": false
   },
   "expo-router": {
-   "latest": "57.0.22",
+   "latest": "57.0.23",
    "deprecated": false
   },
   "react-router-dom": {
@@ -105,7 +105,7 @@
    "deprecated": false
   },
   "astro": {
-   "latest": "7.3.4",
+   "latest": "7.3.5",
    "deprecated": false
   },
   "waku": {
@@ -145,7 +145,7 @@
    "deprecated": false
   },
   "expo-auth-session": {
-   "latest": "57.0.12",
+   "latest": "57.0.13",
    "deprecated": false
   },
   "@react-native-firebase/auth": {
@@ -245,11 +245,11 @@
    "deprecated": false
   },
   "framer-motion": {
-   "latest": "13.4.2",
+   "latest": "13.4.3",
    "deprecated": false
   },
   "motion": {
-   "latest": "13.4.2",
+   "latest": "13.4.3",
    "deprecated": false
   },
   "lottie-react-native": {
@@ -301,7 +301,7 @@
    "deprecated": false
   },
   "next-intl": {
-   "latest": "4.14.6",
+   "latest": "4.14.7",
    "deprecated": false
   },
   "react-i18next": {
@@ -377,7 +377,7 @@
    "deprecated": true
   },
   "lucide-react-native": {
-   "latest": "1.47.0",
+   "latest": "1.48.0",
    "deprecated": false
   },
   "@expo/vector-icons": {
@@ -473,11 +473,11 @@
    "deprecated": false
   },
   "expo-modules-core": {
-   "latest": "57.0.18",
+   "latest": "57.0.19",
    "deprecated": false
   },
   "expo": {
-   "latest": "57.0.24",
+   "latest": "57.0.25",
    "deprecated": false
   },
   "react-native-vision-camera": {
@@ -497,7 +497,7 @@
    "deprecated": false
   },
   "expo-video": {
-   "latest": "57.0.4",
+   "latest": "57.0.5",
    "deprecated": false
   },
   "react-native-audio-api": {
@@ -509,7 +509,7 @@
    "deprecated": false
   },
   "expo-image-picker": {
-   "latest": "57.0.19",
+   "latest": "57.0.20",
    "deprecated": false
   },
   "react-native-mmkv": {
@@ -553,7 +553,7 @@
    "deprecated": false
   },
   "react-native-purchases": {
-   "latest": "10.10.1",
+   "latest": "10.10.2",
    "deprecated": false
   },
   "react-native-iap": {
@@ -585,7 +585,7 @@
    "deprecated": false
   },
   "vite": {
-   "latest": "8.3.0",
+   "latest": "8.3.1",
    "deprecated": false
   },
   "esbuild": {
@@ -737,15 +737,15 @@
    "deprecated": false
   },
   "@tanstack/ai": {
-   "latest": "0.58.0",
+   "latest": "0.59.0",
    "deprecated": false
   },
   "@tanstack/ai-react": {
-   "latest": "0.27.3",
+   "latest": "0.28.0",
    "deprecated": false
   },
   "agent-device": {
-   "latest": "0.21.12",
+   "latest": "0.21.13",
    "deprecated": false
   },
   "reactotron-react-native": {
@@ -851,8 +851,8 @@
    "title": "v1.8.0"
   },
   "amannn/next-intl": {
-   "id": "tag:github.com,2008:Repository/314533356/v4.14.6",
-   "title": "v4.14.6"
+   "id": "tag:github.com,2008:Repository/314533356/v4.14.7",
+   "title": "v4.14.7"
   },
   "nkzw-tech/fbtee": {
    "id": "tag:github.com,2008:Repository/301313081/v5.0.0",
@@ -907,8 +907,8 @@
    "title": "v1.0.2"
   },
   "callstack/react-native-brownfield": {
-   "id": "tag:github.com,2008:Repository/196995247/@callstack/react-native-brownfield@5.1.0",
-   "title": "@callstack/react-native-brownfield@5.1.0"
+   "id": "tag:github.com,2008:Repository/196995247/@callstack/react-native-brownfield@5.1.1",
+   "title": "@callstack/react-native-brownfield@5.1.1"
   },
   "wcandillon/react-native-webgpu": {
    "id": "tag:github.com,2008:Repository/816390466/v0.10.2",
@@ -975,16 +975,16 @@
    "title": "reactotron-react-native@5.3.1"
   },
   "callstack/agent-device": {
-   "id": "tag:github.com,2008:Repository/1146193768/v0.21.12",
-   "title": "v0.21.12"
+   "id": "tag:github.com,2008:Repository/1146193768/v0.21.13",
+   "title": "v0.21.13"
   },
   "react/react-native": {
    "id": "tag:github.com,2008:Repository/29028775/v0.88.0-rc.2",
    "title": "0.88.0-rc.2"
   },
   "shirakaba/expo-desktop": {
-   "id": "tag:github.com,2008:Repository/949207990/expo-desktop-template-bare-minimum@54.81.1-beta.6",
-   "title": "expo-desktop-template-bare-minimum@54.81.1-beta.6"
+   "id": "tag:github.com,2008:Repository/949207990/expo-desktop-template-blank-typescript@54.81.1-beta.1",
+   "title": "expo-desktop-template-blank-typescript@54.81.1-beta.1"
   },
   "margelo/react-native-runtimes": {
    "id": "tag:github.com,2008:Repository/1243782787/@react-native-runtimes/state@0.1.0-alpha.2",
@@ -1121,6 +1121,14 @@
   "kuatsu/react-native-boost": {
    "id": "tag:github.com,2008:Repository/937406465/v2.0.2",
    "title": "Release 2.0.2"
+  },
+  "vercel/next.js": {
+   "id": "tag:github.com,2008:Repository/70107786/v16.4.0-canary.43",
+   "title": "v16.4.0-canary.43"
+  },
+  "pmndrs/react-three-fiber": {
+   "id": "tag:github.com,2008:Repository/172521926/v9.8.0",
+   "title": "v9.8.0"
   }
  },
  "blogs": {
@@ -1234,7 +1242,7 @@
   },
   "blog.logrocket.com": {
    "feed": "https://blog.logrocket.com/feed",
-   "lastId": "https://blog.logrocket.com/?p=214587"
+   "lastId": "https://blog.logrocket.com/?p=158980"
   },
   "docs.expo.dev": {
    "feed": null,
@@ -1347,6 +1355,10 @@
   "astryx.atmeta.com": {
    "feed": "https://astryx.atmeta.com/rss.xml",
    "lastId": "https://astryx.atmeta.com/blog/astryx-v0-6-0"
+  },
+  "raw.githubusercontent.com": {
+   "feed": null,
+   "lastId": null
   }
  },
  "updated": "2026-09-24",

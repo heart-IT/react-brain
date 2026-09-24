@@ -2832,3 +2832,35 @@ RN Rewind 57 → 58, React Digest 26 → 27. Gold rows 2,439 → 2,600.
 Gates: lint clean (2 pre-existing warnings) · coverage 0 unaccounted on TWiR #298, Rewind #58 and
 Digest #2370 · verify-diff ✓ every added receipt checks out (10 URLs) · rules ✓ 7 rules, 2,600 gold rows ·
 engine 24 ✓ · eval 139/139.
+
+## 2026-09-24b — the same-day reconcile: scheduled branch merged · TanStack AI 0.59 subagents
+
+**Sources:** the 09:00 scheduled run's `harvest/2026-09-24` branch (reviewed, gates re-run, merged
+--ff-only, branch deleted) + a fresh firsthand poll over the remaining window (23 events, 13
+rule-dispositioned, 10 judged). No newsletter had a newer issue than the branch's state: TWiR
+archive ends at #298, RN Rewind's newest slug is #58, React Digest's RSS head is #2370, Native
+Weekly's archive ends at #21, and React Status #492 was still a 404 on the Thursday re-probe.
+
+PREFLIGHT DID ITS JOB: the unmerged branch was fast-forwardable on top of main, its four manifests
+had zero TODO rows (the two `TODO` grep hits in twir-298.md are header prose, not rows), and all of
+its gates re-passed in a throwaway worktree before the merge — npm test 139/139, verify-diff 10/10,
+coverage 0 unaccounted on all three newsletter issues. Its delta was reconciled by reading, not
+redone: 13 entries, headlined by the Next.js out-of-band 16.3.6 RCE, Reanimated 4.7's RN floor,
+RN 0.88 rc.2 and the Sentry-lint correction.
+
+ONE KEEP from the afternoon window: TanStack AI 0.59.0 + ai-react 0.28.0 (both 2026-09-24,
+verified vs the GitHub release) add FIRST-CLASS SUBAGENTS — `chat({ subagents })` starts named child
+agents, the stream emits AG-UI `SUBAGENT_*` events keyed by `subagentRunId`, nested
+`type:'subagent'` parts land in the client, and `useChat().subagents` / `part.subagent` are the same
+live handle with `stop()`. RB-E-AI-UI's option row moves 0.54 → 0.59 with the mechanism stated,
+since it is the first orchestration primitive on that row rather than another adapter.
+
+SKIPS (advocate pass: 0 flips): brownfield 5.1.1 is a patch whose iOS `popToNative()` fix touches a
+method the entry never describes; the expo-desktop tag is a TEMPLATE prerelease (the package itself
+is at 1.0.0-beta.8, still pre-release); lucide 1.48, next-intl 4.14.7 and agent-device 0.21.13 are
+corroboration of held facts; the three LogRocket posts are off-scope or how-to. The morning run's
+spot-check (0 corrections) stands for the day; not repeated.
+
+Delta: 1 entry touched (AI-UI), 0 new entries, 0 tripwires fired, 1 manifest extended. Gates: lint
+clean (2 pre-existing warnings) · rules ✓ 2,623 gold rows · engine 24 ✓ · eval 139/139 · verify-diff
+1/1 · watchlist reviewed (no ≥2-issue recurrences from this window).

@@ -60,3 +60,31 @@ Same disposition discipline as newsletter manifests; verify before keeping.
 | [engineering.fb.com: "Open-Sourcing Rebalancer: A Generic, High-Performance Library for Solving Assignment Problems"](https://engineering.fb.com/2026/09/21/open-source/rebalancer-generic-high-performance-library-assignment-problems/) → RB-E-STYLING | skipped: off-scope — an assignment-problem solver library, unrelated to the corpus |
 | [engineering.fb.com: "Inside Petal: Building the World’s First Petabit-Class Transoceanic Subsea Cable"](https://engineering.fb.com/2026/09/21/connectivity/petal-petabit-transoceanic-subsea-cable/) → RB-E-STYLING | skipped: off-scope — a subsea cable |
 | [pnpm.io: "pnpm 12.6"](https://pnpm.io/blog/releases/12.6) → RB-E-BUILD, RB-E-DX | skipped: corroboration — every new feature is opt-in (autoDedupe via pnpm-workspace.yaml, --save-types / saveTypes, relocatable node_modules, file:/link: catalog protocols; the 'automatic type installation' in the headline is opt-in per the post); RB-E-BUILD holds pnpm 12 stable. Second consecutive pnpm 12.x post skipped (12.4 on twir-297). Reopen: a default-behavior change |
+
+## Later the same day — 23 further event(s)
+
+| event | disposition |
+|---|---|
+| [expo-router  57.0.22 → 57.0.23](https://registry.npmjs.org/expo-router/latest) → RB-E-NAV | skipped: patch release [rule:npm-patch] |
+| [astro  7.3.4 → 7.3.5](https://registry.npmjs.org/astro/latest) → RB-E-META-FRAMEWORKS | skipped: patch release [rule:npm-patch] |
+| [expo-auth-session  57.0.12 → 57.0.13](https://registry.npmjs.org/expo-auth-session/latest) → RB-E-AUTH | skipped: patch release [rule:npm-patch] |
+| [framer-motion  13.4.2 → 13.4.3](https://registry.npmjs.org/framer-motion/latest) → RB-E-ANIMATION | skipped: patch release [rule:npm-patch] |
+| [motion  13.4.2 → 13.4.3](https://registry.npmjs.org/motion/latest) → RB-E-ANIMATION | skipped: patch release [rule:npm-patch] |
+| [next-intl  4.14.6 → 4.14.7](https://registry.npmjs.org/next-intl/latest) → RB-E-I18N | skipped: patch release [rule:npm-patch] |
+| [lucide-react-native  1.47.0 → 1.48.0](https://registry.npmjs.org/lucide-react-native/latest) → RB-E-SVG | skipped: corroboration — icon-set minor (1.48 adds icons + exports __iconNode); RB-E-SVG asserts no version |
+| [expo-modules-core  57.0.18 → 57.0.19](https://registry.npmjs.org/expo-modules-core/latest) → RB-E-NATIVE | skipped: patch release [rule:npm-patch] |
+| [expo  57.0.24 → 57.0.25](https://registry.npmjs.org/expo/latest) → RB-E-NATIVE | skipped: patch release [rule:npm-patch] |
+| [expo-video  57.0.4 → 57.0.5](https://registry.npmjs.org/expo-video/latest) → RB-E-MEDIA | skipped: patch release [rule:npm-patch] |
+| [expo-image-picker  57.0.19 → 57.0.20](https://registry.npmjs.org/expo-image-picker/latest) → RB-E-MEDIA | skipped: patch release [rule:npm-patch] |
+| [react-native-purchases  10.10.1 → 10.10.2](https://registry.npmjs.org/react-native-purchases/latest) → RB-E-PAYMENTS | skipped: patch release [rule:npm-patch] |
+| [vite  8.3.0 → 8.3.1](https://registry.npmjs.org/vite/latest) → RB-E-BUILD | skipped: patch release [rule:npm-patch] |
+| [@tanstack/ai  0.58.0 → 0.59.0](https://registry.npmjs.org/@tanstack/ai/latest) → RB-E-AI-UI | kept → RB-E-AI-UI: pin 0.54 → 0.59; first-class subagents (chat({ subagents }), AG-UI SUBAGENT_* events, useChat().subagents live handle) — verified vs the @tanstack/ai@0.59.0 GitHub release (2026-09-24) |
+| [@tanstack/ai-react  0.27.3 → 0.28.0](https://registry.npmjs.org/@tanstack/ai-react/latest) → RB-E-AI-UI | kept → RB-E-AI-UI: same release train as @tanstack/ai 0.59 (0.28.0 carries the subagent parts + useChat().subagents) |
+| [agent-device  0.21.12 → 0.21.13](https://registry.npmjs.org/agent-device/latest) → RB-E-AI-DEVTOOLS | skipped: patch release [rule:npm-patch] |
+| [shirakaba/expo-desktop: expo-desktop-template-blank-typescript@54.81.1-beta.1](https://github.com/shirakaba/expo-desktop/releases/tag/expo-desktop-template-blank-typescript%4054.81.1-beta.1) → RB-E-DESKTOP | skipped: pre-ship — a TEMPLATE package prerelease; expo-desktop itself is at 1.0.0-beta.8 (2026-09-24, marked pre-release). Reopen on expo-desktop 1.0.0 stable (the engine's prerelease→stable guard covers it) |
+| [amannn/next-intl: v4.14.7](https://github.com/amannn/next-intl/releases/tag/v4.14.7) → RB-E-I18N | skipped: corroboration — duplicate of the npm patch row above; 4.14.7 only adds an optional @types/react peer for pnpm/yarn global virtual stores |
+| [callstack/react-native-brownfield: @callstack/react-native-brownfield@5.1.1](https://github.com/callstack/react-native-brownfield/releases/tag/%40callstack%2Freact-native-brownfield%405.1.1) → RB-E-BROWNFIELD | skipped: patch — 5.1.1 fixes iOS popToNative() closing every RN screen instead of the topmost + an Android back-callback leak after fragment destruction; RB-E-BROWNFIELD does not describe popToNative, and the 5.1.0 preloadBundle facts it holds are unchanged. Reopen if a 5.x minor changes the startup/preload contract |
+| [callstack/agent-device: v0.21.13](https://github.com/callstack/agent-device/releases/tag/v0.21.13) → RB-E-AI-DEVTOOLS | skipped: corroboration — duplicate of the agent-device npm patch row above (iOS AX-bridge selected/hittable fixes, recording overlay fix); the 0.21 line is already on the RB-E-AI-DEVTOOLS option row |
+| [blog.logrocket.com: "What is the Double Diamond design process?"](https://blog.logrocket.com/ux-design/double-diamond-design-process/) → RB-E-LISTS, RB-E-SVG | skipped: off-scope — UX design-process explainer, no library or React selection fact |
+| [blog.logrocket.com: "Getting started with Meilisearch: A complete guide"](https://blog.logrocket.com/getting-started-with-meilisearch/) → RB-E-LISTS, RB-E-SVG | skipped: off-scope — search-backend setup guide, outside the capability map |
+| [blog.logrocket.com: "pnpm vs. npm: Which package manager should you use?"](https://blog.logrocket.com/pnpm-vs-npm-which-package-manager-use/) → RB-E-LISTS, RB-E-SVG | skipped: how-to — package-manager comparison; RB-E-BUILD already holds the pnpm 12 Rust-rewrite fact, and the post adds no selection fact beyond it |
