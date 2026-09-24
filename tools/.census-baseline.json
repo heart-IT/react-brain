@@ -1,5 +1,5 @@
 {
- "date": "2026-09-17",
+ "date": "2026-09-24",
  "cohort": {
   "fetched": 34,
   "total": 34,
@@ -258,7 +258,6 @@
     "axios",
     "expo-haptics",
     "gorhom bottom-sheet",
-    "haptic-feedback",
     "i18next",
     "react-i18next",
     "react-native-svg",
@@ -293,9 +292,7 @@
     "AsyncStorage",
     "Expo (managed native)",
     "Firebase Auth",
-    "FlashList",
     "Gesture Handler",
-    "Legend List",
     "MMKV",
     "Metro",
     "Nitro Modules",
@@ -310,7 +307,6 @@
     "Skia",
     "Storybook",
     "Tailwind",
-    "Tamagui",
     "TanStack Query",
     "Uniwind",
     "Vitest",
@@ -393,6 +389,7 @@
    "name": "Supabase Studio",
    "platform": "react",
    "labels": [
+    "Lexical",
     "MSW",
     "Next.js",
     "Radix UI",
@@ -772,6 +769,7 @@
    "name": "Sentry (frontend)",
    "platform": "react",
    "labels": [
+    "ESLint",
     "Emotion",
     "Jest",
     "MobX (7.x line)",
@@ -879,6 +877,7 @@
     "TanStack Virtual",
     "TypeScript",
     "Vite",
+    "Vitest",
     "Zod",
     "Zustand",
     "axios",
@@ -914,6 +913,7 @@
     "Vite",
     "Vitest",
     "Zero",
+    "Zod",
     "react-intl"
    ]
   },
@@ -992,13 +992,13 @@
    "denom": 34
   },
   "RB-E-EDITORS": {
-   "appCount": 9,
+   "appCount": 10,
    "labels": {
     "TipTap": 5,
     "ProseMirror": 2,
+    "Lexical": 3,
     "BlockNote": 1,
-    "Slate": 1,
-    "Lexical": 2
+    "Slate": 1
    },
    "denom": 34
   },
@@ -1030,7 +1030,7 @@
     "expo-haptics": 5,
     "expo-splash-screen": 4,
     "sonner-native (toasts)": 2,
-    "haptic-feedback": 6,
+    "haptic-feedback": 5,
     "bootsplash": 5
    },
    "denom": 14
@@ -1076,9 +1076,9 @@
    "denom": 34
   },
   "RB-E-FORMS": {
-   "appCount": 21,
+   "appCount": 22,
    "labels": {
-    "Zod": 14,
+    "Zod": 15,
     "React Hook Form": 12,
     "Formik": 2,
     "TanStack Form": 1,
@@ -1095,7 +1095,7 @@
     "Detox": 2,
     "MSW": 9,
     "React Testing Library": 14,
-    "Vitest": 8,
+    "Vitest": 9,
     "Playwright": 9
    },
    "denom": 34
@@ -1107,7 +1107,7 @@
     "lint-staged": 9,
     "Oxlint": 8,
     "Prettier": 13,
-    "ESLint": 16,
+    "ESLint": 17,
     "lefthook": 1,
     "typescript-eslint": 5,
     "Biome": 1,
@@ -1124,10 +1124,10 @@
    "denom": 34
   },
   "RB-E-LISTS": {
-   "appCount": 19,
+   "appCount": 18,
    "labels": {
-    "Legend List": 3,
-    "FlashList": 8,
+    "Legend List": 2,
+    "FlashList": 7,
     "TanStack Table": 6,
     "TanStack Virtual": 8,
     "react-window": 5
@@ -1200,7 +1200,6 @@
     "styled-components": 6,
     "Tailwind": 11,
     "Uniwind": 1,
-    "Tamagui": 1,
     "Linaria (frozen by design)": 1,
     "Emotion": 3
    },

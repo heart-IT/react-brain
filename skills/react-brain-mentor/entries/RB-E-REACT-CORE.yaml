@@ -12,13 +12,13 @@ options:
   - { name: "<Activity>", tradeoff: "hide a subtree while preserving its state (defer/restore); 100% satisfaction in State-of-React 2025; pair with Effect cleanup" }
   - { name: "<ViewTransition> / use()", tradeoff: "STABLE in 19.3: wraps a subtree, animates enter/exit/update/share on Transition-marked updates (startTransition, Suspense reveal, useDeferredValue) via the browser View Transition API; addTransitionType picks per-cause animations; DOM-ONLY — RN support still in progress. use() reads promises/context under Suspense" }
   - { name: "Fragment Refs", tradeoff: "STABLE in 19.3: ref on a <Fragment> yields a FragmentInstance over the children as a GROUP — addEventListener/dispatchEvent (first-level), focus/focusLast/blur (depth-first), observeUsing with an Intersection/ResizeObserver, getClientRects/scrollIntoView; attaches behavior to third-party components that never exposed a ref, with no wrapper <div> distorting layout" }
-  - { name: "alternative React runtimes", tradeoff: "Preact (small, drop-in-ish); experimental @tanstack/redact (~9KB, claims 2–3x, TanStack-Start-scoped); Million; TSRX = a JSX-successor compiling to React/Preact/Solid — mostly experimental" }
+  - { name: "alternative React runtimes", tradeoff: "Preact (small, drop-in-ish); experimental @tanstack/redact (~9KB, claims 2–3x, TanStack-Start-scoped); Million; TSRX = a JSX-successor compiling to React/Preact/Solid; Vidact = a Rust compiler that turns React-syntax components + hooks into direct DOM updates (components run once; site claims an 8.1 kB gzipped counter; 0.2.0-beta on npm, and unsupported React is a COMPILE ERROR, not a fallback, so it is a deliberate subset — its author reports one production app, grep.codemod.com, on it; verified vs the site + npm 2026-09-24, no independent benchmark read) — mostly experimental" }
 recommend:
   default: "Move to React 19.3 (stable 2026-09-09, additive over 19.2) and turn on React Compiler 1.0 for new code — let it handle memoization; keep existing useMemo/useCallback as escape hatches (don't strip them — removing can change the compiler's output), and pin the exact compiler version if test coverage is thin."
   when:
     - "new project → React 19.3 + Compiler from day one"
     - "web data-fetching/SSR → RSC via a meta-framework (RB-E-META-FRAMEWORKS); React Native → RSC does not apply"
-    - "bundle-size-critical web → consider Preact; treat @tanstack/redact / Million / TSRX as experimental, not production bets"
+    - "bundle-size-critical web → consider Preact; treat @tanstack/redact / Million / TSRX / Vidact as experimental, not production bets"
 note: >
   React Compiler reached 1.0 STABLE (2025-10-07) and is production-ready — new code can drop
   most manual memoization. The Rust port LANDED: merged into SWC and shipping via Rspack 2.1's
@@ -49,7 +49,7 @@ note: >
   <ViewTransition> is DOM-only for now.
 defer_to_skill: engineering-principles
 doc: "RB-E-REACT-CORE.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-21   # dated the 19.3-on-native answer: RN 0.88 (RC 2026-09-16) is the line that syncs React 19.3.0
+updated: 2026-09-24   # Vidact added to the experimental-runtimes lead list (2nd sighting: TWiR #296 + React Digest #2370); prior 2026-09-21: dated the 19.3-on-native answer: RN 0.88 (RC 2026-09-16) is the line that syncs React 19.3.0
 reading:
   - title: "Avoiding Server Component Waterfall Fetching with React 19 cache()"
     url: "https://aurorascharff.no/posts/avoiding-server-component-waterfall-fetching-with-react-19-cache/"
@@ -125,6 +125,7 @@ sources:
   - "https://react.dev/blog/2025/10/07/react-compiler-1"
   - "https://react.dev/blog/2025/12/11/denial-of-service-and-source-code-exposure-in-react-server-components"
   - "https://rspack.rs/blog/announcing-2-1"
+  - "https://www.vidact.dev/"
 tripwires:   # standing caveats as executable conditions — evaluated by `harvest firsthand`; fired ⇒ do the then:, update prose, remove the row
   - when: { pkg: "react-native", atleast: "0.89.0" }
     then: "Check whether the RN release line moved off React 19.2 — this entry's current-line row and RB-E-RN-VERSIONS both assert 'RN 0.83+ runs React 19.2', and <ViewTransition> is DOM-only pending RN support"

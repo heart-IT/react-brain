@@ -25,13 +25,13 @@ note: >
   headlining RN Rewind ~#48). The durable split is PICKER/MARKING calendars (react-native-calendars,
   flash-calendar) vs full EVENT GRIDS (super-calendar; web's FullCalendar/react-big-calendar) — most
   apps need the first, calendar-app UX needs the second. Versions verified vs npm
-  (react-native-calendars 1.1314 · flash-calendar 2.0.0 · @super-calendar/native 2.1.5 ·
+  (react-native-calendars 1.1314 · flash-calendar 2.0.0 · @super-calendar/native 2.1.5 (2.11.0 by 2026-09-15, verified vs npm) ·
   calendar-strip 2.2.6 · react-big-calendar 1.20); Super Calendar's package names, views, and
   Reanimated-4/Gesture-Handler/Legend-List requirements verified vs its docs. Lightly vetted
   (confidence: low) — prototype gesture perf on low-end devices before committing.
 defer_to_skill: react-native-best-practices
 doc: "RB-E-CALENDARS.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-16
+updated: 2026-09-24   # @super-calendar/native pin refreshed (2.11.0); other version pins unchanged and re-checked (calendars 1.1314, flash-calendar 2.0.0, big-calendar 1.20); peer-dep claims NOT re-verified; prior 2026-07-16
 reading:
   - title: "Super Calendar — docs (views, gestures & architecture)"
     url: "https://super-calendar.afonsojramos.me/"

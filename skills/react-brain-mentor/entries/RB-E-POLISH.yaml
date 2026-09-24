@@ -6,14 +6,14 @@ status: reviewed   # long-form entry written + source-checked
 confidence: low
 platforms: [react-native]
 options:
-  - { name: "toasts — sonner-native", tradeoff: "port of Emil Kowalski's sonner (stacking, swipe, promise toasts); active (0.26.x, 2026-06); the design-led pick" }
-  - { name: "toasts — react-native-toast-message", tradeoff: "the JS incumbent (v2.4, still active 2026); simple, widely deployed, less polished motion" }
+  - { name: "toasts — sonner-native", tradeoff: "port of Emil Kowalski's sonner (stacking, swipe, promise toasts); active (0.27.0 on 2026-08-15, verified vs npm); the design-led pick" }
+  - { name: "toasts — react-native-toast-message", tradeoff: "the JS incumbent (v2.5.2 on 2026-09-08, still active); simple, widely deployed, less polished motion" }
   - { name: "toasts — burnt", tradeoff: "NATIVE toast/alert elements (SPIndicator on iOS, ToastAndroid); platform-authentic but less customizable; slower release cadence (0.13, 2025-03)" }
   - { name: "haptics — expo-haptics", tradeoff: "the default — system haptics engine on iOS, vibration effects on Android; works in bare RN via Expo Modules" }
   - { name: "haptics — react-native-haptic-feedback", tradeoff: "the bare-RN incumbent (v3.0, 2026-03); slightly lower-level trigger set" }
   - { name: "splash — react-native-bootsplash", tradeoff: "the de-facto splash tool (v7.3) — asset generator CLI, edge-to-edge by default, works with Expo prebuild; imperative hide() when app is ready" }
   - { name: "splash — expo-splash-screen", tradeoff: "the Expo default, ships with the template; config-plugin driven; fine unless you need bootsplash's generator/branding control" }
-  - { name: "image viewer — galeria (@nandorojo/galeria)", tradeoff: "native shared-element lightbox (v3, 2026-05; iOS 16+) — fluid pinch/dismiss transitions the JS viewers can't match" }
+  - { name: "image viewer — galeria (@nandorojo/galeria)", tradeoff: "native shared-element lightbox (v3.0.3 on 2026-05-28; iOS 16+ not re-verified) — fluid pinch/dismiss transitions the JS viewers can't match" }
   - { name: "image viewer — react-native-image-viewing", tradeoff: "the JS incumbent — unmaintained since 2022; works, but no native transitions and aging" }
 recommend:
   default: "Toasts → sonner-native (or burnt for platform-native elements). Haptics → expo-haptics. Splash → react-native-bootsplash on bare RN, expo-splash-screen on Expo (switch to bootsplash when you need its generator/branding control). Image lightbox → galeria. Each sub-domain is small — pick once, move on; the polish is in the details, not the library hunt. Lightly vetted (confidence: low)."
@@ -31,7 +31,7 @@ note: >
   w/ AHAP patterns — not yet on npm). expo-haptics/expo-splash-screen versions track the SDK.
 defer_to_skill: react-native-best-practices
 doc: "RB-E-POLISH.md"   # long-form Explanation entry in content_dir
-updated: 2026-07-16
+updated: 2026-09-24   # version pins re-verified vs npm (sonner-native 0.27.0, toast-message 2.5.2, galeria 3.0.3, bootsplash 7.3.3); burnt still 0.13.0 from 2025-03 (~18 months quiet); prior 2026-07-16
 reading:
   - title: "Building a toast component"
     url: "https://emilkowal.ski/ui/building-a-toast-component"

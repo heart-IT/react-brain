@@ -2714,3 +2714,121 @@ tripwires (Skia rename, FlashList deprecation, screen-choreography 1.0), 1 chall
 Gates: lint clean (1 pre-existing shared-URL warning) · coverage 0 unaccounted across all 7
 fetchable issues · verify-diff ✓ every added receipt checks out · rules ✓ 2,439 gold rows · engine
 24 ✓ · eval 139/139.
+
+## 2026-09-24 — Next.js's out-of-band critical RCE · Reanimated 4.7 raises the RN floor · RN 0.88 rc.2 · Sentry's "ESLint" is a plugin host
+
+Three days after the last pass: one firsthand manifest (53 events), three newsletter issues (TWiR #298,
+RN Rewind #58, React Digest #2370), 12 entries touched, 0 new entries. Native Weekly has nothing past #21;
+React Status #492 was probed on the Thursday and is not live (404 ×2, archive ends at #491) — probe it next pass.
+
+PREFLIGHT: no unmerged harvest branches; `tail tools/harvest.log` showed only this run's own header; no
+`firsthand-*.md` with TODO rows (`grep -c TODO` all 0) and `.firsthand-state.json` was unmodified at the
+start, so no stranded manifest to adopt. The three modified baselines in `git status` were this run's
+Tier 1. The firsthand poll was run with `--manifest` and finished in the same session (28 TODO → 0).
+
+KEEPS, each with the receipt it was verified against:
+- NEXT.JS OUT-OF-BAND SECURITY RELEASE (RB-E-META-FRAMEWORKS + a new tripwire). 2026-09-22: 16.3.6 / 15.5.26
+  for GHSA-vcvr-r3jv-pc5j, CVSS 9.5 critical, RCE in the Node `next/og` ImageResponse via Satori's SVG
+  escaping; affected `>=16.2.0 <16.3.6`, only when attacker-controlled values reach the SVG, Edge
+  ImageResponse not affected, 15.x not vulnerable (hardening only). Scheduled release 2026-09-30 announced
+  for 16.3.7 / 15.5.27 (1 critical, 2 high, 5 medium, 1 low). Receipts: all three nextjs.org posts fetched,
+  the GHSA page (Critical / 9.5 / workaround text), npm dist-tags (`latest` 16.3.6, `backport` 15.5.26) and
+  publish times. The tripwire fires when `next` reaches 16.3.7. It is the third way the scheduled-release
+  program has bent (July on schedule, August a day early with a second critical, September an unscheduled
+  release a week before the scheduled one).
+- REANIMATED 4.7 RAISES THE FLOOR + WORKLETS 0.13 (RB-E-ANIMATION). Registry peers, read by me:
+  Reanimated 4.7.0 needs react-native `0.86 - 0.88` and worklets `0.13.x`; 4.6.0 was `0.83 - 0.87` /
+  `0.12.x`. So RN 0.83-0.85 apps are stuck on 4.6. This also repaired a stale row that still said
+  "react-native-worklets (0.11.x)". The 0.13 changelog claims (networking module for Bundle Mode runtimes,
+  `enableNetworking` replacing `FETCH_PREVIEW_ENABLED`, OXC Babel plugin port, `createSynchronizable`
+  `fixedType`, SPM) were checked against the page text.
+- RN 0.88.0-rc.2 (RB-E-RN-VERSIONS). Release body read: Metro floor 0.87.1, two TurboModule ArrayBuffer
+  reverts ("0.88 is a non-breaking release"), and the `.js` fallback for legacy deep imports RESTORED under
+  the `react-native-legacy-deep-imports` condition. npm: `next` = rc.2, `latest` still 0.87.1.
+- SENTRY'S "ADOPTED ESLINT" CENSUS DELTA (RB-E-DX). The 09-10 entry said getsentry/sentry has NO eslint.
+  Fetched package.json + oxlint.config.ts: `eslint` 10.8.0 is back in devDependencies, but `lint:js` is
+  still just `oxlint`, the repo root has no ESLint config, and `oxlint.config.ts` loads a dozen-plus ESLint
+  plugins through `jsPlugins`. So the earlier claim is corrected to "no ESLint RUN", and the datapoint's
+  real lesson is that leaving ESLint the linter does not mean leaving its plugin ecosystem.
+- SHOPIFY HELIX, PRIMARY SOURCE (RB-E-AI-DEVTOOLS reading). shopify.engineering/helix fetched and the
+  gate section read: the vision-model UI-review gate (Gemini lists each difference with severity and
+  location; INVALID when states differ; scope grows per checkpoint; pixel diffing rejected) is the facet
+  the held back-to-native reading only summarizes. Vendor account, no timings, said so in the entry.
+- BROWSER TRANSLATORS VS THE LIVE DOM (RB-E-I18N reading; React Digest #2370's only origination, a real
+  gap). Article read directly: Chrome/Google-bundle/Yandex detach the text node, Edge/Firefox rewrite in
+  place, the pasted no-op crash guard freezes the UI, `translate="no"` held everywhere while
+  `class="notranslate"` failed on Yandex. Caveats kept in the entry (one probe page, Safari unmeasured, the
+  author sells a 3★ competing library).
+- VIDACT (RB-E-REACT-CORE experimental lead list). Reopened the TWiR #296 too-early skip on its own
+  terms: second sighting + npm beta (`beta` 0.2.0-beta.8) + the author's own production app; site claims
+  read, no independent benchmark, so it lands as a lead, not a pick.
+- SMALLER: R3F 9.8 is compatible with React 19.3 (RB-E-GAMES; move it with RN 0.88); Valdi's stale
+  `beta-0.1.0` pin refreshed to `beta-0.2.0` with the "release notes to follow" caveat (RB-E-ALT-FRAMEWORKS).
+- PULSE AGING FOLD-IN (MAPS, CALENDARS, POLISH, all 70d on a 60d window): re-verified their version pins
+  against npm and refreshed the stale ones (better-maps 1.2.1, react-google-maps 1.10.1, maplibre 11.4,
+  super-calendar 2.11, sonner-native 0.27, toast-message 2.5.2, galeria 3.0.3). `updated:` states that
+  ONLY pins were re-verified; pricing, New-Arch floor, peer-dependency and iOS-floor claims were not.
+
+NOTABLE SKIPS (reopen signals are in the manifests):
+- EAS Simulator, third sighting (RN Rewind #56, TWiR #297, now #58 + Expo's self-healing post). The newest
+  Expo post still says "early access. Join the waitlist." — the cap skip's reopen signal (GA) has not fired.
+- Screens 5.0 alpha 3 (third sighting of the alpha train; pre-ship, reopen 5.0 stable), React Redux 9.4
+  alpha signals (pre-ship), the RN "secondary JavaScript runtimes" RFC #1023 (open, unmerged, no comments;
+  would move Worklets' Bundle Mode plumbing into core), Screenmap (second sighting, 6 weeks old, reopen:
+  named production user), executorch `v0.10.5-libs` (a Qualcomm NPU backend artifact, not an npm
+  release), the Calazans KMP/Rust-UniFFI posts (unmeasured advocacy), Revopush (second sighting but same
+  source, so not "independent").
+- Not kept because unverifiable: "Redact 0.1" (TWiR's href is literally `http://releases/`, a broken
+  newsletter link) and "Nitro LazyJSON" (the RN Rewind headline claim exists only in an x.com tweet; no npm
+  package or GitHub repo by that name).
+
+ADVOCATE PASS over my own skips: re-argued oxlint 1.84/1.85 (checked the release bodies: the "nested config"
+line is Vite+-mode only — skip stands), react.dev `<img>` page (reference page, not a selection fact),
+Astro React 7.0, react-redux signals, RFC #1023, Screenmap, Revopush, Nitro LazyJSON (searched npm and
+GitHub: nothing). 0 flips.
+
+SPOT-CHECK of the previous issue (twir-297): the one `cap` skip (EAS cloud simulators) UPHELD, as above;
+2 random skips — Stim 1.0 (63★, not held; now 1.8.0 on npm, still too-early) and pnpm 12.4 (pnpm 12 is
+held; 12.6 this pass also opt-in-only) — both UPHELD; the only rule row (PostHog tracking link,
+`sponsor-tracking-domain`) correct. 0 corrections.
+
+TIER 1: pulse 431 URLs, 0 dead; 1 blocked (the Hermes stable-release blog on github.com, HTTP 429 — the
+raw file and the contents API both return 200, so it is rate limiting, not a dead link); 3 aging entries
+(handled above); no stack drift. Signals: 5 standing flags unchanged (react-router out-downloads
+TanStack Router 2.4x; axios vs nitro-fetch; corestore vs autobase; d3 and react-native-keychain STALE).
+Census deltas: ledger dropped haptic-feedback; sentry adopted ESLint (resolved above); supabase adopted
+Lexical; infisical adopted Vitest; tldraw adopted Zod; UNISWAP dropped FlashList, Legend List and Tamagui
+(verified: `apps/mobile/package.json` lost `@shopify/flash-list`, `@legendapp/list` and
+`@tamagui/babel-plugin` between the 2026-08-07 and 2026-09-23 release snapshots) — no entry cites Uniswap,
+so nothing to correct yet.
+
+PROCESS LEARNINGS:
+- Subagent-supplied identifiers need an independent check: the Next.js agent's CVE number
+  (`CVE-2026-94545`) never appeared in anything I could fetch, so it was left out and only the GHSA id and
+  the CVSS score (both seen on the advisory page) were written down.
+- A `verify-diff` receipt fails on github.com HTML pages (HTTP 429) when the repo is too new for a Wayback
+  snapshot. Cite `raw.githubusercontent.com/...` for a brand-new repo's document and
+  `github.com/.../blob/...` only when Wayback has it. Hit twice this pass (translate-shield, Sentry config).
+- The lint caps a reading's `claim:` at 260 chars; both new readings tripped it on the first pass.
+- pnpm 12.6's headline in the newsletter ("automatic type installation") is opt-in in the post.
+
+FOLLOW-UPS (not done here; out of scope for the harvest):
+1. React Status #492 is due; probe it first next pass.
+2. Uniswap Mobile's move off both list libraries and the Tamagui babel plugin: find what replaced them; if it
+   is a Tamagui exit, challenge RB-E-STYLING's "design system → Tamagui or Unistyles" line and the list
+   adoption claims.
+3. MAPS / CALENDARS / POLISH are only pin-fresh: burnt (the "or" alternative in POLISH's recommend line) has
+   had no npm release since 2025-03; react-native-calendar-strip 2022-05; their pricing/floor claims need a
+   real challenge pass.
+4. 38 long-form `.md` docs trail their entries (worst CROSSPLATFORM 96d, DX 91d, META-FRAMEWORKS 91d);
+   META-FRAMEWORKS.md and DX.md now lag today's edits too.
+5. Screens 5.0 has no NAV coverage at all; if it reaches stable, that is a new-facet entry, not a pin.
+
+Delta: 12 entries touched (META-FRAMEWORKS · ANIMATION · RN-VERSIONS · DX · AI-DEVTOOLS · I18N ·
+REACT-CORE · GAMES · ALT-FRAMEWORKS · MAPS · CALENDARS · POLISH), 0 new entries, 2 new readings
+(183 → 185 reading URLs), 1 new tripwire (0 fired), 4 manifests (firsthand 53 events: 25 rule + 28
+judged; TWiR #298 68 links; RN Rewind #58 27; React Digest #2370 13). Sources digested: TWiR 31 → 32,
+RN Rewind 57 → 58, React Digest 26 → 27. Gold rows 2,439 → 2,600.
+Gates: lint clean (2 pre-existing warnings) · coverage 0 unaccounted on TWiR #298, Rewind #58 and
+Digest #2370 · verify-diff ✓ every added receipt checks out (10 URLs) · rules ✓ 7 rules, 2,600 gold rows ·
+engine 24 ✓ · eval 139/139.

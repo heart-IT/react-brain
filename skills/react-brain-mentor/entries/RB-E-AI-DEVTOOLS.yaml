@@ -75,12 +75,18 @@ note: >
   now has a live first-party leaderboard — check it before pinning a tool+model pair.
 defer_to_skill: agentic-engineering-patterns
 doc: null
-updated: 2026-09-21   # @expo/agent-cli (SDK 58 beta) — the first-party agent layer the 2026-09-10 challenge predicted · Shopify's agent-addressable-architecture reading
+updated: 2026-09-24   # Shopify Helix primary-source reading (VLM UI-review gate); prior 2026-09-21: @expo/agent-cli (SDK 58 beta) — the first-party agent layer the 2026-09-10 challenge predicted · Shopify's agent-addressable-architecture reading
 reading:
   - title: "Native is now the future of mobile at Shopify"
     url: "https://shopify.engineering/back-to-native"
     by: "Mustafa Ali (Shopify Engineering)"
     what: "Read here for the AGENT-WORKFLOW half of a post that is mostly famous for its framework decision (RB-E-CROSSPLATFORM owns that argument). Two mechanisms are transferable regardless of what you think about the framework call. (1) HELIX, their migration system, exists because pointing an LLM at a codebase and asking for the same features in another language produces unshippable volume even when you freeze specs and task files first; instead a developer points it at one screen, it proposes small ordered checkpoints reviewable in minutes, and each checkpoint must prove behavior with tests, match the running app in a visual review, survive two adversarial code reviewers and get a human's nod before the next one starts — with review feedback remembered so the loop needs less hand-holding over time. The generalizable rule is that the gate, not the prompt, is what makes agent output shippable. (2) AGENT-ADDRESSABLE ARCHITECTURE: they argue the real mobile bottleneck is the FEEDBACK loop, not code generation — agents change code in seconds but take minutes to verify through a simulator, because reading state via the accessibility tree or screenshots is slow and brittle. Their fix is architectural: keep business logic fully decoupled from UI and runnable headlessly on desktop, then expose it to agents through a CLI that inspects state, navigates and acts in milliseconds, with simulator control reserved for when UI truly matters. That principle is framework-independent — it is the same reason this entry rates tools that give an agent a closed verify loop."
+  - title: "Helix: the internal tool powering Shopify's native migration"
+    url: "https://shopify.engineering/helix"
+    by: "Shopify Engineering (2026-09-21)"
+    what: "The primary source for the gate mechanics the back-to-native reading above only summarizes, and its most transferable part is HOW they verify UI equivalence when nobody can specify it. The four gates run in order and a failed gate cannot be overridden by the agent. Gate 1 (behavior): a CLI exposes the same screen state and actions as the app, so tests run without a simulator and the agent can iterate dozens of times before taking a single screenshot; a subagent generates per-checkpoint integration tests from the reference code, and those tests define what 'proven' means. Gate 2 (UI review) is the one they credit for near-1:1 output: pixel diffing is rejected because two UI frameworks never produce identical bytes, so an orchestrator (GPT) captures matching-state screenshots of reference and new app and asks Gemini — chosen for its spatial awareness — to act as a perfectionist design reviewer that must list every difference with a severity and an on-screen location, judged proportionally to each screenshot's dimensions; fixable differences are blockers by default, the reviewer can return INVALID when the two screenshots show different states (the orchestrator then re-captures), and review scope grows with each checkpoint (a skeleton checkpoint is checked only for nav bar and title). Gate 3: two independent, context-isolated reviewer agents check the new code against the documented target architecture and every finding must be fixed. Vendor-side account of their own process: no acceptance rates or timings are given."
+    claim: "You port or rebuild screens with agents — Shopify's Helix swaps pixel diffing for a vision model that lists each visual difference with severity and location, scoped to what the current checkpoint built."
+    applies_when: { platforms: [react-native], stages: [production, scale] }
   - title: "3 Minutes With an Agent, 9 Seconds on Replay"
     url: "https://www.callstack.com/blog/3-minutes-with-an-agent-9-seconds-on-replay"
     by: "Michał Pierzchala (Callstack)"
@@ -126,6 +132,7 @@ reading:
 sources:
   - "https://expo.dev/changelog/sdk-58-beta"
   - "https://shopify.engineering/back-to-native"
+  - "https://shopify.engineering/helix"
   - "https://github.com/callstackincubator/simlock"
   - "https://github.com/react/react/tree/main/packages/react-devtools-cdt-mcp"
   - "https://registry.npmjs.org/modern-web-guidance/latest"

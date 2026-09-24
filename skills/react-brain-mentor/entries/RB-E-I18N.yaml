@@ -18,11 +18,17 @@ recommend:
     - "need maximum plugin ecosystem / RN + web parity → i18next"
 defer_to_skill: null
 doc: "RB-E-I18N.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-01   # fbtee 4.0: Babel pipeline removed, native Rust/Oxc CLI (breaking; v3.3.0 is the Babel terminus) — firsthand
+updated: 2026-09-24   # browser-translator DOM-detach crash class reading (React Digest #2370); prior 2026-09-01: fbtee 4.0: Babel pipeline removed, native Rust/Oxc CLI (breaking; v3.3.0 is the Babel terminus) — firsthand
 sources:
   - "https://github.com/amannn/next-intl/releases/tag/v4.8.0"
   - "https://github.com/nkzw-tech/fbtee"
 reading:
+  - title: "What browser translators do to a live DOM"
+    url: "https://raw.githubusercontent.com/alievdavlat/translate-shield/main/research/article.md"
+    by: "translate-shield research (measured 2026-09-02)"
+    what: "Measured account of the production crash class where a user turns on the browser's page translator and a React app breaks — the failure that i18n libraries do not cover because it happens in the browser, not in your message catalogs. Chrome's built-in translator, the Google bundle on other Chromium/Gecko/WebKit browsers and Yandex do NOT edit your text node: they build a new one wrapped in a <font> (Yandex: <ya-tr-span>) and detach yours, so React's reference points at an orphan — removeChild/insertBefore throw NotFoundError (two uncaught throws unmounted a whole root in their test app) and text writes land where nobody reads them, so a counter increments in memory while the screen keeps the old number. Edge's and Firefox's translators rewrite the live node in place and do not break this way. The widely pasted crash guard (no-op removeChild/insertBefore when the node is not a child; the thread is facebook/react#11538, opened 2018 and closed won't-fix) removes the errors but leaves the UI frozen on stale values. The cheap opt-out held on every engine tested: translate=\"no\" on the element; class=\"notranslate\" did NOT (Yandex translated it). Restoring the original node and letting the translator retranslate shows 100-150 ms of source-language text per update, versus 0 ms when the new value is mirrored into the translator's own wrapper. Caveats the author states: the flicker figure is from one probe page, one Chrome version and four updates; Safari is unmeasured; the author ships the competing translate-shield library (0.1.1, 3 stars), so treat the library as unproven even though the measurements are reproducible (Playwright commands in the repo)."
+    claim: "You ship a React web app to users who translate pages in Chrome — the translator detaches your text nodes, so updates freeze or removeChild throws; translate=\"no\" held on every engine tested, class=\"notranslate\" did not."
+    applies_when: { platforms: [react], stages: [production, scale] }
   - title: "Ahead-of-time compilation for next-intl"
     url: "https://next-intl.dev/blog/precompilation"
     by: "Jan Amann (next-intl author)"

@@ -30,6 +30,14 @@ note: >
   rather than run the two side by side. It does not overturn the react-hooks caveat below — a repo
   can simply accept not having those rules — but it is the strongest adoption datapoint yet that the
   type-aware + compiler-rule surface has become sufficient for a large TypeScript codebase.
+  FOLLOW-UP (2026-09-24, census delta 'sentry adopted ESLint', verified vs package.json + oxlint.config.ts):
+  read 'NO eslint' above as 'no ESLint RUN'. The eslint package (10.8.0) is back in
+  getsentry/sentry's devDependencies, but lint:js is still just `oxlint` (Oxlint 1.83.0), the repo
+  root has no ESLint config file, and oxlint.config.ts loads a dozen-plus ESLint plugins (unicorn,
+  import, react, @tanstack/query, boundaries, jest-dom, regexp, react-you-might-not-need-an-effect,
+  e18e) through Oxlint's jsPlugins. The durable lesson is that leaving ESLint the LINTER does not
+  mean leaving the ESLint PLUGIN ecosystem — check whether the plugins you depend on run under
+  Oxlint's JS-plugin host before treating a missing native rule as a blocker.
   DX is cross-cutting — architecture/boundaries depth → engineering-principles; bundler choice →
   RB-E-BUILD; supply-chain → RB-E-SECURITY. This entry is the feedback loop (CI/lint/hooks/
   onboarding) that keeps the others honest.
@@ -64,7 +72,7 @@ note: >
   removes a dependency (changesets) rather than adding one.
 defer_to_skill: engineering-principles
 doc: "RB-E-DX.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-21   # Oxlint 1.83 updates its rules for React 19.3 — the third lint lane keeps pace with the recommended React line
+updated: 2026-09-24   # Sentry's Oxlint lane runs ESLint plugins via jsPlugins (census follow-up); prior 2026-09-21: Oxlint 1.83 updates its rules for React 19.3 — the third lint lane keeps pace with the recommended React line
 reading:
   - title: "Best CI/CD for mobile apps in 2026: a practical comparison"
     url: "https://expo.dev/blog/best-ci-cd-for-mobile-apps"
@@ -78,6 +86,7 @@ reading:
     applies_when: { deps: ["expo"], stages: [scale] }
 sources:
   - "https://biomejs.dev/linter/rules/use-react-compiler/"
+  - "https://raw.githubusercontent.com/getsentry/sentry/master/oxlint.config.ts"
   - "https://medium.com/doctolib/expo-without-eas-scaling-the-react-native-developer-experience-of-an-app-with-90m-users-2694ea841805"
   - "https://github.com/millionco/react-doctor"
   - "https://oxc.rs/blog/2026-07-22-type-aware-linting-stable"

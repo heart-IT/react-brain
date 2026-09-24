@@ -10,7 +10,7 @@ options:
   - { name: "react-native-godot (@borndotcom)", tradeoff: "embed the Godot engine (RTNGodotView; by Born & Migeran); runs off-thread (separate from RN's JS thread). CHALLENGED 2026-09-10 (WEAKENED): the package reached 1.0.1 and then stopped — npm last modified 2025-11-04, ten months quiet, and the migeran/react-native-godot repo shows ~0 stars (verified 2026-09-10). The off-thread embed is still the only real-game-engine route in RN, so this stays the row; treat it as a dormant dependency you are adopting deliberately, not a maintained default, and pin it" }
   - { name: "WebGPU (react-native-webgpu, formerly react-native-wgpu)", tradeoff: "3D render pipelines on Google's Dawn (by William Candillon, not Software Mansion); UI-thread via Reanimated/worklets; advanced" }
   - { name: "react-native-game-engine", tradeoff: "entity-component loop for simple 2D games; effectively unmaintained (last release v1.2.0, 2020)" }
-  - { name: "@react-three/fiber (three.js)", tradeoff: "declarative 3D scenes as React components; v9 runs in RN via expo-gl — the 3D-in-an-app path without a game engine" }
+  - { name: "@react-three/fiber (three.js)", tradeoff: "declarative 3D scenes as React components; v9 runs in RN via expo-gl — the 3D-in-an-app path without a game engine. 9.8.0 (2026-09-22, verified vs the release) is 'now compatible with React 19.3.0' — the React line RN 0.88 syncs in — though the maintainers say not all new 19.3 APIs are supported yet, so move R3F and RN 0.88 together; it also configures roots synchronously (gated on the renderer when async, e.g. WebGPURenderer) and stops Strict Mode breaking the canvas" }
   - { name: "react-native-filament (Margelo)", tradeoff: "Google's Filament physically-based renderer as declarative React components — GPU-native (Metal on iOS, OpenGL/Vulkan on Android), mobile-first, ~4MB native dep (verified vs the docs); the mid ground between r3f-over-GL and embedding a game engine; 1.11.0, 1.4k★, but QUIET since 2026-05 (no npm publish or repo push in ~3 months, verified 2026-09-01) — check pulse before betting" }
   - { name: "ReactVision (@reactvision/react-viro)", tradeoff: "AR/VR from one RN codebase (iPhone/Android AR + Meta Quest) — the maintained fork of react-viro; New Architecture (Fabric) REQUIRED; active — 3.0.0 published 2026-09-20 (verified vs npm; the registry description still states Fabric is required, so the major is a version-line move, not a new floor). The 2026-09-10 challenge rated this leg healthy and it has since shipped a major, which holds" }
   - { name: "react-native-visionos (Callstack)", tradeoff: "full RN fork targeting Apple Vision Pro / visionOS SDK (~1.1k★); CAUTION: pinned to RN 0.78 (2025-03), lags core by ~a year — verify parity before betting" }
@@ -40,7 +40,7 @@ note: >
   the Horizon Store — a first-party 2D-panel path beside ReactVision's immersive AR/VR.
 defer_to_skill: react-native-best-practices
 doc: "RB-E-GAMES.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-21   # Skia stewardship pointer (the 2D default changes owner + package name) · prior challenge verdict on the Godot leg still stands
+updated: 2026-09-24   # R3F 9.8 React 19.3 compatibility; prior 2026-09-21: Skia stewardship pointer (the 2D default changes owner + package name) · prior challenge verdict on the Godot leg still stands
 sources:
   - "https://shopify.engineering/back-to-native"
   - "https://github.com/wcandillon/react-native-webgpu"
@@ -48,6 +48,7 @@ sources:
   - "https://registry.npmjs.org/@reactvision/react-viro/latest"
   - "https://github.com/callstack/react-native-visionos"
   - "https://reactnative.dev/blog/2026/02/24/react-native-comes-to-meta-quest"
+  - "https://github.com/pmndrs/react-three-fiber/releases/tag/v9.8.0"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "@reactvision/react-viro", label: "ReactVision (AR/VR)", token: "reactvision" }
   - { pkg: "@react-three/fiber", label: "react-three-fiber", token: "react-three" }
