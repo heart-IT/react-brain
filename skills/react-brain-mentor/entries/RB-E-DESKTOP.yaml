@@ -14,7 +14,7 @@ options:
   - { name: "PWA (no shell)", tradeoff: "installable from the browser; least native integration but zero packaging — try this before reaching for a shell" }
   - { name: "Native SDK (Vercel Labs) — EXPERIMENTAL", tradeoff: "an OWNED engine drawing every pixel (neither bundled like Electron nor borrowed like Tauri): markup + TypeScript/Zig compiled to native at build time; TEA-style, NOT React. 3.6MB/~100ms calculator (vendor numbers); mobile experimental. Not picked while experimental; see note: NATIVE SDK" }
   - { name: "GTKX (1.x)", tradeoff: "the LINUX-NATIVE React answer: a React 19 renderer over GTK4 (JSX creates GObject instances, no webview), run as an ordinary Node process; stock React, Linux ONLY by design. Needs Node ≥24 + GTK4/GLib dev packages. @gtkx/react 1.6.0 (2026-08-29, verified vs npm), moving fast — pin it; see note: GTKX" }
-  - { name: "react-native-windows / react-native-macos (Microsoft)", tradeoff: "the RN-NATIVE desktop path — real native UI from RN code, no webview; for RN teams extending to desktop, not for packaging a web app. rn-windows 0.84.0 (2026-06-18) tracks core closely; rn-macos 0.81.9 (2026-07-13) lags (verified vs npm)" }
+  - { name: "react-native-windows / react-native-macos (Microsoft)", tradeoff: "the RN-NATIVE desktop path — real native UI from RN code, no webview; for RN teams extending to desktop, not for packaging a web app. rn-windows 0.84.0 (2026-06-18, preview 0.85.0-preview.2) tracks core closely; rn-macos jumped 0.81→0.83.0 (2026-09-30, its first 0.83 release, syncing core RN 0.83.10) and lags core RN by one minor instead of three (verified vs npm + GitHub)." }
 recommend:
   default: "Tauri 2 for a lightweight desktop app (OS native webview, tiny builds). The pick changes on need: deep Node/native integration, the biggest plugin ecosystem, or an existing Electron app goes to Electron; an existing web URL to wrap goes to Pake; no real OS integration needed goes to a PWA with no shell; React Native code rather than a web app goes to react-native-windows / react-native-macos."
   when:
@@ -85,6 +85,9 @@ note: >
 
   HISTORY:
 
+  2026-10-01 REOPENED: react-native-macos jumped 0.81.9 → 0.83.0 (first 0.83 release, syncs core RN
+  0.83.10), narrowing its lag behind react-native-windows (0.84.0) from three minors to one.
+
   2026-09-24 CORRECTED: Pake pin V3.12.0 (2026-06-21) → pake-cli 3.17.1 (2026-09-20).
 
   2026-08-18 GAP CLOSED: GTKX promoted skip→option when 1.0 shipped (the reopen signal wired at
@@ -96,7 +99,7 @@ note: >
   2026-07-10 GAP CLOSED: RN-desktop rows added (React Weekly); the entry had been web-shell-only.
 defer_to_skill: engineering-principles   # shell↔web boundary; Pear depth → holepunch-p2p-systems; shell security → RB-E-SECURITY
 doc: "RB-E-DESKTOP.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-24   # Pake pin V3.12.0 → 3.17.1; Tauri/rn-windows/rn-macos pins; prior 2026-09-01: GTKX 1.5: @gtkx/forms (RHF/Adwaita) + @gtkx/i18n (gettext via react-i18next API); pin 1.2.2 → 1.6.0 — React Status #488
+updated: 2026-10-01   # react-native-macos 0.81.9 → 0.83.0 (first 0.83 release, narrows the rn-windows lag to one minor); prior 2026-09-24: Pake pin V3.12.0 → 3.17.1; Tauri/rn-windows/rn-macos pins; prior 2026-09-01: GTKX 1.5: @gtkx/forms (RHF/Adwaita) + @gtkx/i18n (gettext via react-i18next API); pin 1.2.2 → 1.6.0 — React Status #488
 reading:
   - title: "The Conductor Rewrite: what they changed to make it fast"
     url: "https://performance.dev/the-conductor-rewrite"
@@ -119,6 +122,7 @@ sources:
   - "https://github.com/tw93/Pake"
   - "https://github.com/microsoft/react-native-windows/releases"
   - "https://registry.npmjs.org/pake-cli/latest"
+  - "https://github.com/microsoft/react-native-macos/releases/tag/react-native-macos%400.83.0"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "electron", label: "Electron", token: "electron" }
   - { pkg: "@tauri-apps/*", label: "Tauri", token: "tauri" }

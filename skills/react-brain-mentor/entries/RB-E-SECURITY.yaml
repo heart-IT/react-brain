@@ -19,6 +19,7 @@ recommend:
     - "device-trust requirement, or jail-monkey installed → server-side Play Integrity / DeviceCheck (jail-monkey is client-side only and defeatable; keep it as a signal, not the gate)"
     - "web XSS surface → Trusted Types (needs React ≥19.3 under an enforcing CSP; plus sanitized dangerouslySetInnerHTML)"
     - "RSC/Server Functions on web → patched React (19.2.8 / 19.1.9 / 19.0.8 floors for the recurring server-function DoS; does not affect React Native)"
+    - "TanStack Start app → @tanstack/react-start ≥1.168.60 (CVE-2026-102989, critical reflected XSS in server-function response handling; solid-start ≥1.168.57, vue-start ≥1.168.56, start-server-core ≥1.169.39)"
     - "dev server reachable beyond localhost (--host, server.host, a Docker port mapping) → patched Vite (≥8.0.5 / ≥7.3.2 for CVE-2026-39364; RB-E-BUILD owns the floor) and no secrets beside the dev server"
     - "want a cheap CI gate for RN-specific security footguns → rnsec (young — treat findings as leads, route confirmations to the review skill)"
     - "want an AI-driven data-flow scan of your own codebase → DeepSec (severity-rated findings, ~10–20% false positives; not auto-fix)"
@@ -83,6 +84,15 @@ note: >
   19.0.0–19.0.7, 19.1.0–19.1.8 and 19.2.0–19.2.7, patched in 19.0.8 / 19.1.9 / 19.2.8 — the current
   floors. No server and no RSC-capable bundler means no exposure.
 
+  TANSTACK START XSS (2026-09-30, verified vs tanstack.com/blog and npm): CVE-2026-102989, a CRITICAL
+  reflected XSS in TanStack Start's server-function response handling — a crafted server-function URL
+  can return attacker-controlled HTML from the app's origin, so a user who opens the link runs the
+  attacker's JS with that user's session. Affected: @tanstack/react-start 1.143.12–1.168.59,
+  @tanstack/solid-start 1.143.12–1.168.56, @tanstack/vue-start 1.143.12–1.168.55,
+  @tanstack/start-server-core 1.143.12–1.169.38. Patched: react-start ≥1.168.60, solid-start ≥1.168.57,
+  vue-start ≥1.168.56, start-server-core ≥1.169.39. Edge mitigations help temporarily; full protection
+  needs a rebuild+redeploy on the patched version, not just a dependency bump.
+
   TRUSTED TYPES (verified vs the React 19.3 post, 2026-09-09): React before 19.3 coerced every value
   with '' + value, turning Trusted Types objects back into strings the browser rejects under an
   enforcing CSP → a CSP-enforced app needs React ≥19.3.
@@ -97,6 +107,10 @@ note: >
   storage; the review skill owns per-diff secret/injection/dependency checks.
 
   HISTORY:
+  2026-10-01 REOPENED: TanStack Start critical reflected XSS, CVE-2026-102989 (server-function response
+  handling; floors react-start ≥1.168.60 / solid-start ≥1.168.57 / vue-start ≥1.168.56 /
+  start-server-core ≥1.169.39); added the GitHub Security Lab AI-agent reading (24 Android CVEs,
+  human-review-required caveat).
   2026-09-21 REOPENED: dev-server attack surface — Vite CVE-2026-39364 with measured mass-scanning.
   2026-08-07 GAP CLOSED: GitHub's supply-chain umbrella post; keyv compromise as counterexample.
   2026-07-28 REOPENED: npm publish-time malware scanning + dual-use metadata.
@@ -105,8 +119,14 @@ note: >
   2026-07-09 GAP CLOSED: rnsec added.
 defer_to_skill: review
 doc: "RB-E-SECURITY.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-21   # dev-server attack surface: Vite CVE-2026-39364 (server.fs.deny bypass, fixed 8.0.5/7.3.2) with measured mass-scanning of exposed dev servers — React Status #491
+updated: 2026-10-01   # TanStack Start CVE-2026-102989 (critical reflected XSS in server-function response handling, floors react-start 1.168.60 / solid-start 1.168.57 / vue-start 1.168.56 / start-server-core 1.169.39); added GitHub Security Lab AI-agent reading; prior 2026-09-21: dev-server attack surface: Vite CVE-2026-39364 (server.fs.deny bypass, fixed 8.0.5/7.3.2) with measured mass-scanning of exposed dev servers — React Status #491
 reading:
+  - title: "How we found 24 Android vulnerabilities using our open source AI security agent"
+    url: "https://github.blog/security/how-we-found-24-android-vulnerabilities-using-our-open-source-ai-security-agent/"
+    by: "GitHub Security Lab"
+    what: "Real-world evidence for the DeepSec-style pattern of this entry: GitHub's open-source Taskflow Agent combines AI prompts with structured, PLATFORM-SPECIFIC workflows (not generic prompting) to find real bugs — 24 Android vulnerabilities across shipped apps, including a location-tracking injection in OsmAnd and a deeplink-based account takeover in Wikipedia's Android app. The caveat that matters: the authors state LLMs struggle to estimate severity and produce false positives, so every finding still needs review by a researcher who knows the mobile platform — automation finds candidates, it doesn't replace the review."
+    claim: "You're evaluating an AI security scanner (DeepSec or similar) — platform-specific taskflows beat generic prompting at finding real bugs, but treat every finding as a candidate: LLMs misjudge severity and produce false positives, so a human who knows the platform still reviews each one."
+    applies_when: { platforms: [react-native] }
   - title: "The React2Shell Story"
     url: "https://lachlan.nz/blog/the-react2shell-story"
     by: "Lachlan Davidson"
@@ -160,6 +180,8 @@ sources:
   - "https://nuqs.dev/blog/staged-publishing-for-supply-chain-security"
   - "https://github.blog/changelog/2026-06-18-safer-pull_request_target-defaults-for-github-actions-checkout/"
   - "https://github.blog/changelog/2026-07-28-npm-publish-time-malware-scanning-and-dual-use-metadata/"
+  - "https://tanstack.com/blog/tanstack-start-security-update-cve-2026-102989"
+  - "https://github.blog/security/how-we-found-24-android-vulnerabilities-using-our-open-source-ai-security-agent/"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "rnsec", label: "rnsec (security scanner)", token: "rnsec" }
   - { pkg: "jail-monkey", label: "jail-monkey", token: "jail-monkey" }

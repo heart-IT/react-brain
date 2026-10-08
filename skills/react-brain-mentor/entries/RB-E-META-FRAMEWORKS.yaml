@@ -6,12 +6,12 @@ status: reviewed   # long-form entry written + source-checked → encyclopedia/R
 confidence: medium
 platforms: [react, react-native]
 options:
-  - { name: "Next.js (16.x)", tradeoff: "Most-used; App Router + RSC + Server Actions. Adapter API STABLE in 16.2 (co-designed w/ OpenNext/Netlify/Cloudflare — verified adapters: Vercel + Bun shipped, others in dev) settles off-Vercel portability. Security fixes land only on the latest minors; 16.3.6 (2026-09-22, verified vs npm). See note: NEXT SECURITY" }
+  - { name: "Next.js (16.x)", tradeoff: "Most-used; App Router + RSC + Server Actions. Adapter API STABLE in 16.2 (co-designed w/ OpenNext/Netlify/Cloudflare — verified adapters: Vercel + Bun shipped, others in dev) settles off-Vercel portability. Security fixes land only on the latest minors; 16.3.8 (2026-09-30, verified vs npm). See note: NEXT SECURITY" }
   - { name: "TanStack Start", tradeoff: "Vite-based (Rsbuild 2 also supported since 2026-06); SSR + Server Functions; RSC support EXPERIMENTAL into early v1; deliberately omits Server Actions for security; less opinionated than Next. Still v1 RC (verified vs tanstack.com/start 2026-09-24). Hosting no longer separates it from Next. See note: TANSTACK START" }
   - { name: "React Router 8 (framework mode) / Remix", tradeoff: "Remix merged into React Router; full-stack loaders/actions. Remix 3 is a separate JSX-component pivot away from RR (see note: REMIX 3). RB-E-NAV owns React Router versions and its security floor." }
   - { name: "Expo Router", tradeoff: "The RN/universal meta-framework; decoupled from React Navigation since SDK 56; SDK 58 (beta) makes data loaders, SSR and middleware stable with no experimental flags (RB-E-NAV owns the detail)." }
-  - { name: "Astro / Waku / RedwoodSDK", tradeoff: "Astro = content/islands; Waku 1.0-rc (rc.1 2026-09-18, verified vs npm) = minimal RSC whose SLICES are its distinctive feature (see note: WAKU); RedwoodSDK 1.x = Vite+RSC+Cloudflare." }
-  - { name: "Vinext (Cloudflare)", tradeoff: "Vite-based Next.js rebuild; 1.0.0-beta (2026-07-04) drops the experimental label, now beta.12 (2026-09-24, verified vs npm) — maturing, but AI-generated origins + the security issues Vercel flagged warrant re-verification before any production bet" }
+  - { name: "Astro / Waku / RedwoodSDK", tradeoff: "Astro = content/islands; Waku 1.0-rc (rc.2 2026-09-28, verified vs npm) = minimal RSC whose SLICES are its distinctive feature (see note: WAKU); RedwoodSDK 1.x = Vite+RSC+Cloudflare." }
+  - { name: "Vinext (Cloudflare)", tradeoff: "Vite-based Next.js rebuild; reached STABLE 1.0 (2026-09-28, verified vs npm + the Cloudflare post) — Pages Router support added (was App Router only), >99% compat on customer-requested features, 'cache warming' moves prerendering from build time to Cloudflare's network, two-command migration (vinext check && vinext init). Cloudflare states production customers on high-traffic apps; still re-verify the AI-generated origins + the security issues Vercel flagged before your own production bet." }
 recommend:
   default: "Web: Next.js is the safe default; choose TanStack Start when you want a less-opinionated, Vite-native full-stack alternative (Server Functions stable; RSC opt-in and still experimental; Start itself is v1 RC). Picking Next commits you to tracking its latest minors, because security fixes do not backport. RN/universal: Expo Router."
   when:
@@ -19,7 +19,7 @@ recommend:
     - "Cloudflare-first stack → RedwoodSDK"
     - "want minimal RSC, no lock-in → Waku (RC as of 2026-09-18; 1.0-stable tripwire wired)"
     - "full-stack loaders/actions on an existing React Router app → React Router 8 framework mode (RB-E-NAV owns its security floor)"
-    - "evaluating Vinext → not production-ready; don't bet on it yet"
+    - "evaluating Vinext → reached stable 1.0 with claimed production customers; still re-verify independently before your own production bet (AI-generated origins, unresolved security concerns Vercel raised)"
 note: >
   A meta-framework owns SSR/RSC, data loading, the server boundary and the build; routing alone is
   RB-E-NAV's. Context-key the pick by hosting target and by how much RSC you actually need. Next.js
@@ -45,17 +45,33 @@ note: >
   ImageResponse via improper escaping in Satori's SVG output. Affected: >=16.2.0 <16.3.6, and only
   where attacker-controlled values reach SVG content, attributes or styles (if you cannot upgrade,
   don't pass them); the Edge ImageResponse is not affected, and 15.x is not vulnerable (15.5.26 is
-  hardening only). The scheduled September release lands 2026-09-30 (16.3.7 / 15.5.27; announced:
-  9 vulnerabilities, 1 critical, 2 high, 5 medium, 1 low), so an app on 16.3.x faces two patch
-  windows inside eight days. Consequence: the schedule makes dates predictable but has already
-  slipped early and gone out-of-band; budget for tracking latest minors, not for a monthly slot.
+  hardening only). The scheduled September release (16.3.7, 2026-09-29) was a bug-fix-only build with
+  no security content; the actual scheduled fixes shipped 2026-09-30 as 16.3.8 / 15.5.27 and covered
+  7 of the originally-announced 9 vulnerabilities — 1 High: CVE-2026-94483/GHSA-cjq9-62q9-8jv4 (SSRF
+  via an allow-listed remote URL in Image Optimization; unaffected if images.remotePatterns is
+  unconfigured); 5 Medium: CVE-2026-94543/GHSA-4jqv-mc3x-m676 (self-hosted Pages Router SSG/ISR
+  cache-entry cross-route substitution), CVE-2026-94484/GHSA-mcj8-r9mp-w47p (root catch-all +
+  SSG/ISR cache poisoning from one unauthenticated request → cross-user content + persistent DoS),
+  CVE-2026-94485/GHSA-f87g-xv8r-7p7x (App Router metadata image routes ignore dynamicParams on
+  webpack builds; Turbopack unaffected), GHSA-h694-7cp9-m8p3 (nested 'use cache' functions mis-key on
+  a root param, leaking non-attacker-controlled cached content across param values), and
+  CVE-2026-94544/GHSA-3w37-wq28-93x7 (pending 'use cache' fills leak Draft Mode content into
+  regular/persisted responses when Cache Components + Draft Mode previews overlap); 1 Low:
+  CVE-2026-94486/GHSA-39w2-rjm5-chcv (next dev's MCP endpoint lacks origin checks, letting a
+  malicious site read disk paths/source snippets/routes/logs off a developer's machine). The
+  remaining 2 (1 Critical, 1 High) were POSTPONED for upstream coordination with no committed date.
+  Consequence: the schedule makes dates predictable but has already slipped early, gone out-of-band,
+  split across three releases (16.3.6/.7/.8) inside eight days, and still has a critical outstanding
+  — budget for tracking latest minors continuously, not for a monthly slot.
 
   NEXT 16.3 (2026-08-03, verified vs nextjs.org/blog/next-16-3 and npm): 16.3 is stable. Instant
   navigations (Cache Components + Partial Prefetching) remain opt-in via the cacheComponents and
   partialPrefetching flags, which the team plans to make default in a future major.
 
   TANSTACK START (2026-07-10, verified vs React Weekly; 2026-09-08 vs the TanStack–Vercel
-  partnership post): RSC is experimental into early v1. Lovable, the largest AI app-builder, defaults
+  partnership post): RSC is experimental into early v1. A critical reflected-XSS CVE (CVE-2026-102989,
+  2026-09-30) was patched at @tanstack/react-start ≥1.168.60 — floor and detail owned by RB-E-SECURITY.
+  Lovable, the largest AI app-builder, defaults
   new projects to Start SSR since 2026-05, and that inflates Start's npm surge (~60x since Jan 2026)
   through platform CI, so raw downloads are not team adoption; Next held flat (~160-175M/mo). Vercel
   became a Gold TanStack partner on 2026-09-08 with a first-party Start deployment guide (Git deploys
@@ -71,7 +87,7 @@ note: >
 
   WAKU (verified vs Daishi Kato's post and npm): slices are reusable components with independent
   render config; lazy slices resemble Astro server islands and mix across static and dynamic pages.
-  1.0.0-rc.1 (2026-09-18).
+  1.0.0-rc.2 (2026-09-28, verified vs npm; no notable changes surfaced over rc.1).
 
   LANDSCAPE (2026-07-16, verified vs the Vercel post): Vercel and Shopify are rebuilding Hydrogen
   together, moving Shopify's React meta-framework toward the Vercel/Next stack rather than an
@@ -81,11 +97,13 @@ note: >
   attack surface; RB-E-REACT-CORE owns the RSC primitive.
 
   HISTORY:
+    2026-10-01 REOPENED: Vinext reached stable 1.0 (Pages Router support, >99% compat, cache-warming, Cloudflare claims production customers) — the option row's "not production-ready" stance softened, caveats kept.
+  2026-10-01 ⚡TRIP FIRED (next ≥16.3.7): the scheduled September security release shipped 2026-09-30 as 16.3.8/15.5.27 (16.3.7 itself, 2026-09-29, carried no security content) — 7 of 9 announced vulnerabilities patched (1 High, 5 Medium, 1 Low; CVEs/GHSAs now in the SEPTEMBER note), 2 (1 Critical, 1 High) postponed for upstream coordination; also added the TanStack Start critical-XSS pointer (RB-E-SECURITY owns CVE-2026-102989).
     2026-09-24 CORRECTED: Next.js 16.3 shipped stable 2026-08-03 (the 16.3 reading still called it a preview); Waku is at rc.1; Expo Router SSR is no longer alpha in SDK 58.
     2026-07-10 CHALLENGED → WEAKENED: caveats applied (Start RSC experimental, download surge inflated by Lovable CI, no backports); the Next default and the how-much-RSC context-key SURVIVED the migration-wave attack.
 defer_to_skill: engineering-principles
 doc: "RB-E-META-FRAMEWORKS.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-24   # restructure; 16.3 stable, Waku rc.1, Vinext beta.12, RR 8 row name; out-of-band 16.3.6/15.5.26 critical next/og ImageResponse RCE + the 2026-09-30 scheduled release; prior 2026-09-10: TanStack Start first-party on Vercel (firsthand) · Remix 3 RC ships 2026-10-02 at Remix Jam — reconciled from harvest/2026-09-03
+updated: 2026-10-01   # Vinext reached stable 1.0; September security release resolved: 16.3.8/15.5.27 shipped 7 of 9 CVEs (1 critical + 1 high postponed); TanStack Start CVE-2026-102989 pointer added; Waku pin rc.1 → rc.2; prior 2026-09-24: restructure; 16.3 stable, Waku rc.1, Vinext beta.12, RR 8 row name; out-of-band 16.3.6/15.5.26 critical next/og ImageResponse RCE + the 2026-09-30 scheduled release; prior 2026-09-10: TanStack Start first-party on Vercel (firsthand) · Remix 3 RC ships 2026-10-02 at Remix Jam — reconciled from harvest/2026-09-03
 reading:
   - title: "How we migrated lovable.dev away from Next.js and turned it into another Lovable app"
     url: "https://lovable.dev/blog/how-we-migrated-lovable-dev-away-from-nextjs"
@@ -139,7 +157,11 @@ sources:
   - "https://nextjs.org/blog/august-2026-security-release"
   - "https://nextjs.org/blog/nextjs-security-update-september-22-2026"
   - "https://nextjs.org/blog/upcoming-nextjs-security-release-september-2026"
+  - "https://nextjs.org/blog/september-2026-security-release"
   - "https://github.com/vercel/next.js/security/advisories/GHSA-vcvr-r3jv-pc5j"
+  - "https://tanstack.com/blog/tanstack-start-security-update-cve-2026-102989"
+  - "https://blog.cloudflare.com/vinext-nextjs-on-vite/"
+  - "https://registry.npmjs.org/vinext/latest"
   - "https://newsletter.daishikato.com/p/waku-s-unique-feature-slices"
   - "https://waku.gg/blog/waku-v1-rc"
   - "https://vercel.com/blog/vercel-and-shopify-are-rebuilding-hydrogen"
@@ -156,6 +178,3 @@ tripwires:   # standing caveats as executable conditions — evaluated by `harve
   - when: { pkg: "waku", atleast: "1.0.0" }
     then: "Waku hit 1.0 stable (option row says '1.0-beta = minimal RSC') — update the option row + the 'still beta' when-clause"
     added: 2026-07-16
-  - when: { pkg: "next", atleast: "16.3.7" }
-    then: "The scheduled September security release shipped (announced: 1 critical, 2 high, 5 medium, 1 low; 16.3.7/15.5.27) — read the advisories, replace the 'announced' figures in the SEPTEMBER note with the actual CVEs/patched versions, then remove this row"
-    added: 2026-09-24

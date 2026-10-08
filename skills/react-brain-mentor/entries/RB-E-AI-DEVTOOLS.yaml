@@ -11,9 +11,10 @@ options:
   - { name: "agent-device (Callstack)", tradeoff: "agent-native CLI: AI agents drive real iOS/Android/tvOS/macOS/web devices & simulators — a11y snapshots, actions, and REPLAY of a saved flow with zero model calls. 0.21 cut iOS-Simulator cold opens 27–40% and broke some commands, so pin it; npm 0.21.13 (2026-09-24, verified vs npm). See note: AGENT-DEVICE." }
   - { name: "Argent (Software Mansion)", tradeoff: "MCP server + skills: simulator and PHYSICAL iOS device control, debugger attach (React tree + JS), console/HTTP monitoring, correlated React+iOS profiling; also tvOS/Android TV/Vega OS. npm 0.25.2 (2026-09-18, verified vs npm 2026-09-24); see note: ARGENT. Also listed in RB-E-TESTING." }
   - { name: "Maestro MCP / Maestro Viewer", tradeoff: "agents drive devices and GENERATE E2E flows on the tool the ecosystem already tests with — see RB-E-TESTING (which owns the testing depth)" }
+  - { name: "TesterArmy (Agentic CI for Expo) — NEW/vendor", tradeoff: "a hosted agent that reads a PR's description + diff, builds via EAS Workflows (iOS Simulator + Android emulator profiles, fingerprint-gated rebuilds), then clicks through the app like a user and posts results/recordings as PR checks. Commercial/closed-source — verified only via Expo's guest-post announcement (2026-09-30) and one customer case study (Juno); no independent adoption signal, physical-device support still 'working on'. Not open source, so no star-count sanity check like the other rows here." }
   - { name: "Reactotron MCP", tradeoff: "the classic RN debugger exposes runtime state/network to coding agents via MCP (reactotron-core-server 3.3.0, 2026-05)" }
   - { name: "Expo AI tooling", tradeoff: "SDK 55+ ships agent tooling as part of the framework (Expo skills, the Expo MCP server, the `expo` agent plugin, @expo/agent-cli in the SDK 58 beta) — the durable, first-party layer; see note: EXPO FIRST-PARTY LAYER. Expo Agent, the hosted app-building agent, is DEAD (wound down 2026-07-20)." }
-  - { name: "TanStack Intent (ALPHA)", tradeoff: "a DISTRIBUTION mechanism, not a pack: agent skills ship INSIDE npm packages and are discovered via the node_modules dependency graph, version-pinned with staleness detection; rolling out in TanStack DB first" }
+  - { name: "TanStack Intent (ALPHA)", tradeoff: "a DISTRIBUTION mechanism, not a pack: agent skills ship INSIDE npm packages and are discovered via the node_modules dependency graph, version-pinned with staleness detection; rolling out in TanStack DB first. @tanstack/intent 0.5.0 (2026-09-30, verified vs npm + the release post) adds the MAINTENANCE side — TypeScript-validated code examples inside skills, staleness tracking tied to source changes, and CI workflow integration with automated repair suggestions, aimed at the failure mode where a rename/API change ships but the bundled skill still tells an agent the old name." }
   - { name: "modern-web-guidance (Google Chrome)", tradeoff: "the WEB counterpart to the RN skill packs: a local SEARCH INDEX over curated best-practice guides with Baseline-keyed fallbacks, consulted BEFORE writing HTML/CSS/DOM code; works offline, telemetry on by default (DISABLE_TELEMETRY=1). 0.0.x, published continuously; see note: WEB GUIDANCE." }
   - { name: "react-devtools-cdt-mcp (React team) — EXPERIMENTAL", tradeoff: "the React team's route to React-level insight for an agent in the BROWSER: a library imported in the page under test that registers React inspection/profiling tools into chrome-devtools-mcp 1.3.0+. Web only; experimental per its README. 0.1.0 (2026-09-09, verified vs npm 2026-09-24); see note: BROWSER." }
   - { name: "Simlock (Callstack incubator) — EARLY", tradeoff: "a device-LEASE daemon for parallel agents: provisions a matching simulator/emulator when none is free, queues fairly, reclaims idle devices, and fronts remote workers over one outbound WebSocket. VERY EARLY: npm 0.2.0 (2026-08-21), ~14★ (verified 2026-09-24); the lease primitive is the durable idea. See note: SIMLOCK." }
@@ -28,6 +29,7 @@ recommend:
     - "agent must run and SEE the app on iOS and Android (closed verify loop) → agent-device"
     - "agent must debug or profile an iOS app (React tree, JS debugger, correlated React+iOS profiling) → Argent"
     - "agent-generated E2E tests → Maestro MCP (owned by RB-E-TESTING)"
+    - "want a PR-scoped agentic E2E gate on Expo/EAS without owning the harness → TesterArmy (vendor, new; evaluate on a non-critical repo first)"
     - "agent needs runtime state / network inspection → Reactotron MCP"
     - "agent inspects or profiles React in the BROWSER → react-devtools-cdt-mcp (experimental; needs chrome-devtools-mcp 1.3.0+)"
     - "agent writes WEB frontend code (HTML/CSS/DOM) → modern-web-guidance (a pre-write consult; the RN skill packs don't cover the web platform)"
@@ -114,6 +116,7 @@ note: >
   the skills/MCP layer over hosted products.
 
   HISTORY:
+  2026-10-01 GAP CLOSED: TesterArmy (vendor Agentic CI for Expo/EAS) added, NEW/vendor-caveated; TanStack Intent 0.5 maintenance tooling (staleness tracking, TS-validated examples, CI repair suggestions).
   2026-09-24 GAP CLOSED: Shopify Helix primary-source reading (VLM UI-review gate); star counts and npm pins refreshed (agent-skills ~1.7k★ reconciles the row's ~1.5k and the default's ~1.6k).
   2026-09-21 GAP CLOSED: @expo/agent-cli (SDK 58 beta), the first-party agent layer the 2026-09-10 challenge predicted; Shopify agent-addressable-architecture reading.
   2026-09-10 CHALLENGED → WEAKENED: the default now leads first-party, matching this entry's own Expo when-clause.
@@ -127,7 +130,7 @@ note: >
   2026-07-09 GAP CLOSED: entry created — agent tooling ran through every Native Weekly issue 11–16 (Jan–Jun 2026); all options fetch-verified.
 defer_to_skill: agentic-engineering-patterns
 doc: null
-updated: 2026-09-24   # Shopify Helix primary-source reading (VLM UI-review gate) · star counts and npm pins refreshed (agent-skills ~1.7k★, agent-device 0.21.13, Argent 0.25.2, Simlock ~14★); prior 2026-09-21: @expo/agent-cli (SDK 58 beta) — the first-party agent layer the 2026-09-10 challenge predicted · Shopify's agent-addressable-architecture reading
+updated: 2026-10-01   # TesterArmy (Agentic CI for Expo/EAS, vendor) added · TanStack Intent 0.5.0 maintenance tooling; prior 2026-09-24: Shopify Helix primary-source reading (VLM UI-review gate) · star counts and npm pins refreshed (agent-skills ~1.7k★, agent-device 0.21.13, Argent 0.25.2, Simlock ~14★); prior 2026-09-21: @expo/agent-cli (SDK 58 beta) — the first-party agent layer the 2026-09-10 challenge predicted · Shopify's agent-addressable-architecture reading
 reading:
   - title: "Native is now the future of mobile at Shopify"
     url: "https://shopify.engineering/back-to-native"
@@ -195,6 +198,8 @@ sources:
   - "https://registry.npmjs.org/metrognome/latest"
   - "https://www.callstack.com/blog/an-ai-agent-for-measured-react-native-performance-fixes"
   - "https://appcontrolbench.swmansion.com/"
+  - "https://expo.dev/blog/agentic-ci-for-expo-apps-with-testerarmy"
+  - "https://tanstack.com/blog/intent-0.5-skills-you-can-maintain"
   - "https://www.reactbench.com/blog"
   - "https://expo.dev/changelog/expo-agent-ending-the-closed-beta-and-winding-the-project-down"
   - "https://swmansion.com/blog/closing-the-agent-loop-autonomous-react-native-bug-reproduction-with-argent/"

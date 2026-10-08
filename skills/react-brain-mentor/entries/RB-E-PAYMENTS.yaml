@@ -6,8 +6,8 @@ status: reviewed   # long-form entry written + source-checked → encyclopedia/R
 confidence: medium
 platforms: [react-native]
 options:
-  - { name: "expo-iap", tradeoff: "OpenIAP-compliant IAP as an Expo module (Google Play Billing v8 / Apple StoreKit) without ejecting; you own receipt validation. 5.6.3 (2026-09-19, verified vs npm), released in lockstep with react-native-iap. See note: OPENIAP PACKAGES." }
-  - { name: "react-native-iap", tradeoff: "The long-standing community IAP wrapper for bare RN, same OpenIAP code as expo-iap; its standalone repo is archived but the package is NOT deprecated. 16.6.2 (2026-09-19, verified vs npm). Never install @next: see note: DIST-TAG TRAP." }
+  - { name: "expo-iap", tradeoff: "OpenIAP-compliant IAP as an Expo module (Google Play Billing v8 / Apple StoreKit) without ejecting; you own receipt validation. 5.8.2 (2026-09-30, verified vs npm), released in lockstep with react-native-iap. See note: OPENIAP PACKAGES." }
+  - { name: "react-native-iap", tradeoff: "The long-standing community IAP wrapper for bare RN, same OpenIAP code as expo-iap; its standalone repo is archived but the package is NOT deprecated. 16.7.2 (2026-09-30, verified vs npm). Never install @next: see note: DIST-TAG TRAP." }
   - { name: "RevenueCat (react-native-purchases)", tradeoff: "Hosted subscription infra + entitlements across stores; fees vs less server work. Remote-configurable paywalls and pricing experiments come with the hosting decision, not as separate choices. 10.10.2 (2026-09-24, verified vs npm)." }
   - { name: "@premieroctet/react-native-wallet", tradeoff: "Apple PassKit / Google Wallet passes (tickets, loyalty, coupons), NOT tap-to-pay; iOS needs a Pass Type ID + entitlements. 1.0.2 (2025-06-26) is still the latest release (2026-09-24, verified vs npm): stable-but-quiet, pin it. Not bare react-native-wallet, see note: WALLET NAME." }
 recommend:
@@ -25,9 +25,10 @@ note: >
   and react-native-iap give you the client half and leave validation and cross-store entitlement
   reconciliation to you.
 
-  OPENIAP PACKAGES (2026-09-24, verified vs npm): both libraries are released from the
+  OPENIAP PACKAGES (2026-10-01, verified vs npm): both libraries are released from the
   hyodotdev/openiap monorepo (the npm repository field of both points there) and still ship in
-  lockstep: react-native-iap 16.6.2 and expo-iap 5.6.3 both on 2026-09-19. The old
+  lockstep: react-native-iap 16.7.2 and expo-iap 5.8.2 both on 2026-09-30 (and both on 2026-09-26
+  before that). The old
   hyochan/react-native-iap and hyochan/expo-iap repos were archived 2026-04-26 on the way into the
   monorepo; neither package carries an npm deprecation flag → pick on runtime (Expo module vs bare
   RN wrapper), not on liveness. expo-iap does not supersede react-native-iap.
@@ -53,6 +54,8 @@ note: >
   @premieroctet/react-native-wallet → verify identity (repository field), not existence.
 
   HISTORY:
+  2026-10-01 REOPENED: pins react-native-iap 16.6.2 → 16.7.2, expo-iap 5.6.3 → 5.8.2 — still lockstep
+  (both 2026-09-26 and again 2026-09-30).
   2026-09-24 REOPENED: pins react-native-iap 16.5.1 → 16.6.2, expo-iap 5.5.1 → 5.6.3,
   react-native-purchases 10.7.1 → 10.10.2; commerce protocol moved to the @hyodotdev scope (0.3.0),
   unscoped 0.1.0 deprecated.
@@ -64,7 +67,7 @@ note: >
   archived thing was the standalone repo, not the package.
 defer_to_skill: null
 doc: "RB-E-PAYMENTS.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-24   # pins iap 16.6.2 / expo-iap 5.6.3 / purchases 10.10.2, commerce protocol → @hyodotdev scope 0.3.0 (unscoped deprecated); prior 2026-09-10: OpenIAP backed by Amazon (TWiR #295) + iap lockstep pins (firsthand) · openiap-commerce-protocol 0.1.0 server contract — reconciled from harvest/2026-09-03
+updated: 2026-10-01   # pins iap 16.6.2 → 16.7.2 / expo-iap 5.6.3 → 5.8.2, still lockstep; prior 2026-09-24: purchases 10.10.2, commerce protocol → @hyodotdev scope 0.3.0 (unscoped deprecated); prior 2026-09-10: OpenIAP backed by Amazon (TWiR #295) + iap lockstep pins (firsthand) · openiap-commerce-protocol 0.1.0 server contract — reconciled from harvest/2026-09-03
 sources:
   - "https://github.com/hyodotdev/openiap/releases/tag/openiap-commerce-protocol-0.1.0"
   - "https://www.openiap.dev/docs/updates/announcements"

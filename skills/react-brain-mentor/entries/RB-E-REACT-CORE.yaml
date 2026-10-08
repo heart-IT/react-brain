@@ -12,7 +12,7 @@ options:
   - { name: "<Activity>", tradeoff: "hide a subtree while preserving its state (defer/restore); 100% satisfaction in State-of-React 2025; effects are destroyed and re-created on every toggle, so pair it with effect cleanup (see reading: The hidden cost of React.Activity)." }
   - { name: "<ViewTransition> / use()", tradeoff: "<ViewTransition> is STABLE in 19.3: animates enter/exit/update/share on Transition-marked updates via the browser View Transition API; DOM-ONLY, RN support in progress. use() reads promises/context under Suspense." }
   - { name: "Fragment Refs", tradeoff: "STABLE in 19.3: a ref on a <Fragment> yields a FragmentInstance over its children as a group (events, focus, observers, scrollIntoView), so you can attach behavior to components that expose no ref without a layout-distorting wrapper <div>." }
-  - { name: "alternative React runtimes", tradeoff: "Preact (small, drop-in-ish) is the production option. @tanstack/redact (~9KB, claims 2–3x, TanStack-Start-scoped), Million, TSRX (a JSX successor) and Vidact (a Rust React-subset compiler, 0.2.0-beta) are mostly experimental; see note: ALTERNATIVE RUNTIMES." }
+  - { name: "alternative React runtimes", tradeoff: "Preact (small, drop-in-ish) is the production option. @tanstack/redact (0.1.0, 23.3KB vs React's 69.2KB gzipped — 66% smaller; synchronous, not concurrent), Million, TSRX (a JSX successor) and Vidact (a Rust React-subset compiler, 0.2.0-beta) are mostly experimental; see note: ALTERNATIVE RUNTIMES." }
 recommend:
   default: "Move to React 19.3 (stable 2026-09-09, additive over 19.2) and turn on React Compiler 1.0 for new code; keep existing useMemo/useCallback as escape hatches (removing them can change the compiler's output). On React Native, React follows the RN line: 19.2 on RN 0.83–0.87, 19.3 only from RN 0.88, still a release candidate."
   when:
@@ -69,13 +69,24 @@ note: >
   Vidact is a Rust compiler that turns React-syntax components + hooks into direct DOM updates
   (components run once; the site claims an 8.1 kB gzipped counter). Unsupported React is a COMPILE
   ERROR, not a fallback, so it is a deliberate subset; its author reports one production app,
-  grep.codemod.com. @tanstack/redact is TanStack-Start-scoped; TSRX compiles to React/Preact/Solid.
+  grep.codemod.com. @tanstack/redact (0.1.0, 2026-09-30, verified vs GitHub + npm) is "an alternative
+  logical projection of React with 100% API compliancy" — SYNCHRONOUS rendering instead of React's
+  concurrent scheduler (no time-slicing, no priority-based updates, simpler transitions/Suspense),
+  which is also its cost: useOptimistic and useFormStatus are no-ops. 23.3KB vs React 19.3.0's
+  69.2KB gzipped (66% smaller), microbenchmarks favor it on most scenarios especially state updates;
+  deployed in production on tanstack.com and tannerlinsley.com, which is more real-world mileage than
+  the other experimental runtimes here have. TSRX compiles to React/Preact/Solid.
 
   RB-E-SECURITY owns the RSC/Server-Function CVEs and Trusted Types; RB-E-META-FRAMEWORKS owns how
   RSC is productised; RB-E-STATE owns how the Compiler changes store choice; RB-E-RN-VERSIONS owns the
   RN release line.
 
   HISTORY:
+  2026-10-01 CORRECTED: @tanstack/redact's figures replaced with verified ones (0.1.0, 23.3KB vs
+  React's 69.2KB gzipped, synchronous not concurrent, useOptimistic/useFormStatus no-ops, production
+  on tanstack.com/tannerlinsley.com) — the prior "~9KB, claims 2-3x" was unverified; added the Aurora
+  Scharff reading (state-proximity over global state, shown via rebuilding React Router's global
+  hooks in Next.js).
   2026-09-24 GAP CLOSED: Vidact added to the experimental runtimes (2nd sighting: TWiR #296 + React Digest #2370); React-on-native ranges verified vs npm peer deps; RN 0.88 status moved to rc.2.
   2026-09-21 GAP CLOSED: dated the 19.3-on-native answer — RN 0.88 (RC) is the line that syncs React 19.3.0.
   2026-09-10 GAP CLOSED: React 19.3 stable (tripwire fired) — <ViewTransition> + Fragment Refs graduate, browser(), Trusted Types, Context in RSC.
@@ -84,7 +95,7 @@ note: >
   2026-06-25 CHALLENGED → SURVIVES: adversarial stress test; caveat applied — don't strip existing memoization when enabling the Compiler.
 defer_to_skill: engineering-principles
 doc: "RB-E-REACT-CORE.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-24   # RN 0.88 status moved to rc.2 (2026-09-22) and React-on-native ranges verified vs npm peer deps (0.83–0.87 → ^19.2, 0.88 RC → ^19.3) · Vidact added to the experimental-runtimes lead list (2nd sighting: TWiR #296 + React Digest #2370); prior 2026-09-21: dated the 19.3-on-native answer: RN 0.88 (RC 2026-09-16) is the line that syncs React 19.3.0
+updated: 2026-10-01   # @tanstack/redact figures corrected + verified (0.1.0); added the Aurora Scharff state-proximity reading; prior 2026-09-24: RN 0.88 status moved to rc.2 (2026-09-22) and React-on-native ranges verified vs npm peer deps (0.83–0.87 → ^19.2, 0.88 RC → ^19.3) · Vidact added to the experimental-runtimes lead list (2nd sighting: TWiR #296 + React Digest #2370); prior 2026-09-21: dated the 19.3-on-native answer: RN 0.88 (RC 2026-09-16) is the line that syncs React 19.3.0
 reading:
   - title: "Avoiding Server Component Waterfall Fetching with React 19 cache()"
     url: "https://aurorascharff.no/posts/avoiding-server-component-waterfall-fetching-with-react-19-cache/"
@@ -140,6 +151,12 @@ reading:
     what: "The composition facet these readings otherwise skip — they explain how React RENDERS, this explains how to SHAPE a component API as an app grows. A production team's four-rung ladder with the named pain that justifies each climb: plain props (where most components should stay) → compound components with slots (when a row sprouts a prop for every shape) → a Composer plus Providers (when the same UI must render data from swappable or deferred sources) → lifted state behind a contract (when state must cross a boundary and the layout should stay pure). The first two rungs use no context at all. Its governing rule is the useful one: an abstraction earns its place by making a CURRENT requirement simpler, never by betting on a future you can't see."
     claim: "You create Context in many files — climb the composition ladder instead of reaching for providers by default: plain props, then compound components with slots, and only then a Composer + Providers, each rung justified by a named pain."
     applies_when: { platforms: [react, react-native] }
+  - title: "Rebuilding React Router's Global Hooks in Next.js"
+    url: "https://aurorascharff.no/posts/rebuilding-react-routers-global-hooks-in-nextjs/"
+    by: "Aurora Scharff"
+    what: "A durable restatement of React's own architecture rule, reached by trying to port React Router's global useNavigation()/useFetchers() to Next.js: keep state close to the interaction it describes, then lift it only when more of the tree needs it. Framework-level global hooks capture EVERY navigation automatically; the Next.js replacement (a Context provider that pending/optimistic actions explicitly report into) only sees what is routed through it — explicit participation instead of implicit coverage. Shown working for filter updates across components and coordinated optimistic updates between calendar elements, not just navigation."
+    claim: "You're tempted to add a global pending/navigation Context because React Router has one — in Next.js (or anywhere without framework-level interception) you re-derive the same value by having each interaction explicitly report into a shared provider; components that never opt in never see it, which is the tradeoff, not a bug."
+    applies_when: { deps: ["next"], platforms: [react] }
   - title: "React Compiler at Eighteen Months"
     url: "https://saschb2b.com/blog/react-compiler-year-in-review"
     by: "Sascha Becker"
@@ -157,6 +174,8 @@ sources:
   - "https://github.com/react/react-native/releases/tag/v0.88.0-rc.2"
   - "https://registry.npmjs.org/react-native"
   - "https://react.dev/blog/2026/09/09/react-19-3"
+  - "https://aurorascharff.no/posts/rebuilding-react-routers-global-hooks-in-nextjs/"
+  - "https://github.com/TanStack/redact"
   - "https://react.dev/community/team"
   - "https://react.dev/reference/react-dom/browser"
   - "https://react.dev/blog/2025/10/07/react-compiler-1"

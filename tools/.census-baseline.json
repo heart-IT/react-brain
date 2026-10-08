@@ -1,5 +1,5 @@
 {
- "date": "2026-09-24",
+ "date": "2026-10-01",
  "cohort": {
   "fetched": 34,
   "total": 34,
@@ -121,6 +121,7 @@
     "Expo (managed native)",
     "Gesture Handler",
     "Jest",
+    "Keychain (quiet since 2025-03)",
     "MMKV",
     "Metro",
     "Nitro Modules",
@@ -138,9 +139,9 @@
     "Zustand",
     "axios",
     "bootsplash",
-    "expo-av (DEPRECATED → expo-video/expo-audio)",
     "expo-camera",
     "expo-haptics",
+    "expo-video (playback)",
     "gorhom bottom-sheet",
     "keyboard-controller",
     "react-native-svg",
@@ -288,7 +289,6 @@
    "name": "Uniswap Mobile",
    "platform": "react-native",
    "labels": [
-    "Apollo Client",
     "AsyncStorage",
     "Expo (managed native)",
     "Firebase Auth",
@@ -427,7 +427,6 @@
     "MSW",
     "Mantine",
     "Oxlint",
-    "Playwright",
     "Prettier",
     "React Hook Form",
     "React Router",
@@ -957,7 +956,7 @@
     "AsyncStorage": 11,
     "MMKV": 6,
     "WatermelonDB": 2,
-    "Keychain (quiet since 2025-03)": 8,
+    "Keychain (quiet since 2025-03)": 9,
     "expo-sqlite": 1,
     "expo-secure-store (secrets)": 1
    },
@@ -985,7 +984,7 @@
    "appCount": 15,
    "labels": {
     "TanStack Query": 11,
-    "Apollo Client": 2,
+    "Apollo Client": 1,
     "SWR": 2,
     "Zero": 1
    },
@@ -1016,11 +1015,10 @@
    "labels": {
     "expo-camera": 5,
     "expo-image-picker": 3,
-    "expo-video (playback)": 2,
+    "expo-video (playback)": 3,
     "QR generation (qrcode-svg)": 6,
     "VisionCamera": 7,
-    "react-native-webrtc": 2,
-    "expo-av (DEPRECATED → expo-video/expo-audio)": 1
+    "react-native-webrtc": 2
    },
    "denom": 34
   },
@@ -1096,7 +1094,7 @@
     "MSW": 9,
     "React Testing Library": 14,
     "Vitest": 9,
-    "Playwright": 9
+    "Playwright": 8
    },
    "denom": 34
   },

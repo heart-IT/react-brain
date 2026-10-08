@@ -66,7 +66,7 @@ note: >
   minors → treat version churn as the cost of adopting early. StyleX itself: RB-E-STYLING.
 defer_to_skill: design-system
 doc: "RB-E-COMPONENT-LIBS.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-24   # Base UI ships as @base-ui/react (old scope deprecated on npm) · @shadcn/lint 0.2.0 + React/Svelte/Vue · Astryx npm @astryxdesign/core; prior 2026-09-21: @shadcn/lint — agent-first design-system linting for Tailwind v4 on ESLint or Oxlint (TWiR #297 · React Status #491) · Astryx pinned at 0.6.0 with its stated path to v1
+updated: 2026-10-01   # added the "Props Are Not a Design System" reading (variants/modifiers over raw style props); prior 2026-09-24: Base UI ships as @base-ui/react (old scope deprecated on npm) · @shadcn/lint 0.2.0 + React/Svelte/Vue · Astryx npm @astryxdesign/core; prior 2026-09-21: @shadcn/lint — agent-first design-system linting for Tailwind v4 on ESLint or Oxlint (TWiR #297 · React Status #491) · Astryx pinned at 0.6.0 with its stated path to v1
 sources:
   - "https://github.com/shadcn-ui/lint"
   - "https://astryx.atmeta.com/blog/astryx-v0-6-0"
@@ -78,11 +78,18 @@ sources:
   - "https://astryx.atmeta.com/blog/how-astryx-works"
   - "https://ui.shadcn.com/docs/changelog/2026-06-chat-components"
   - "https://ui.shadcn.com/docs/changelog"
+  - "https://vitonsky.net/blog/2026/09/18/design-system/"
 reading:
   - title: "Building an LLM-safe design system"
     url: "https://polar.sh/blog/orbit-llm-safe-design-system"
     by: "Polar"
     what: "Argues a design system should become the only expressible decisions for LLM-authored code — token-only props, a polymorphic Box, StyleX compile-time enforcement. A durable take on component libraries in the AI-coding era."
+  - title: "Props Are Not a Design System"
+    url: "https://vitonsky.net/blog/2026/09/18/design-system/"
+    by: "vitonsky"
+    what: "Constrain component APIs to SEMANTIC choices, not stylistic ones: `<Button variant=\"primary\" size=\"xl\">` over `<Button radius=\"xl\" fontSize=\"xl\" fontWeight={500}>`. A variant is the observable unit of a design system — you can see exactly which ones exist and update them all at once; arbitrary style props can't be enumerated or audited. Modifiers stay first-class API, not an escape hatch: stacking many modifiers on one call site is the signal to cut a new variant instead. Framework-agnostic (works with BEM, CSS Modules, Chakra recipes) — the same discipline the LLM-safe-design-system reading argues for, from the opposite direction (enumerable surface, not token-only props)."
+    claim: "You're designing a component's prop API — expose variants and modifiers (semantic, enumerable), not raw style props (radius/fontSize/fontWeight): if a call site stacks many modifiers, that's the signal to add a variant instead."
+    applies_when: { platforms: [react] }
   - title: "Building design components with action props using async React"
     url: "https://aurorascharff.no/posts/building-design-components-with-action-props-using-async-react/"
     by: "Aurora Scharff"

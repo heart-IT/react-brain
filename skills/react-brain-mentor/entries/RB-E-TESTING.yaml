@@ -8,7 +8,7 @@ platforms: [react, react-native]
 options:
   - { name: "Jest (30.5) / Vitest (5)", tradeoff: "Unit runners: Vitest is faster on web, Jest is the RN default. Both majors converged on per-argument mocking (Jest `fn.whenCalledWith`, Vitest `vi.when(spy).calledWith`). jest 30.5.2 (2026-09-18), vitest 5.0.1 (2026-09-15; both verified vs npm). See note: JEST 30.5, VITEST 5." }
   - { name: "React Testing Library (14)", tradeoff: "Behavior-first component tests with web and RN variants; the 14 is RN Testing Library, which adds React 19 support + async APIs and renders host elements only. @testing-library/react-native 14.0.1 (2026-06-23), web @testing-library/react 16.3.3 (2026-08-27; both verified vs npm). See note: RNTL RENDERER." }
-  - { name: "MSW (Mock Service Worker)", tradeoff: "Network-level API mocking; the same mocks serve unit, e2e and dev. msw 2.15.0 (2026-07-08, verified vs npm)." }
+  - { name: "MSW (Mock Service Worker)", tradeoff: "Network-level API mocking; the same mocks serve unit, e2e and dev. msw 3.0.1 (2026-09-30, verified vs npm) is a breaking major — RN projects on `msw/native` should hold on 2.x. See note: MSW 3.0." }
   - { name: "Playwright (1.63) / Maestro / Detox / Meticulous", tradeoff: "E2E: Playwright for web; Maestro is Expo's recommended native e2e and bundles an MCP server for coding agents; Expo archived Detox; Meticulous is record-based AI e2e. @playwright/test 1.63.0 (2026-09-04), detox 20.51.4 (2026-06-16; both verified vs npm), Maestro CLI 2.10.0 (2026-08-31, verified vs GitHub). See note: PLAYWRIGHT 1.62, MAESTRO." }
   - { name: "Storybook 10", tradeoff: "Component workshop; web + RN run side by side; Vite 8 + Playwright/Vitest test integration + MCP. storybook 10.6.0 (2026-09-02, verified vs npm; 11 is in alpha)." }
   - { name: "Radon IDE (Software Mansion)", tradeoff: "VS Code / Cursor RN debugging: device panel, click-to-inspect, React Profiler." }
@@ -89,10 +89,28 @@ note: >
   support, `harness ci` commands and a Metro config enhancer. The CI commands are the meaningful part:
   an on-device test layer is only useful once it runs unattended.
 
+  MSW 3.0 (3.0.0 shipped 2026-09-28, 3.0.1 bugfix 2026-09-30, verified vs the GitHub release notes,
+  the official integration docs and npm 2026-10-01): ESM-only now, drops Node 18/20 (floor is Node 22)
+  and requires TypeScript 5.9+. The RN-relevant break: `msw/native` is removed in favor of
+  `@msw/react-native` (docs: install `msw @msw/react-native`, replace `setupServer` from `msw/native`
+  with `network` from the new package — it preconfigures `network` for RN and polyfills the standard
+  APIs RN lacks) — BUT the package is NOT YET on the public npm registry (checked 2026-10-01: 404),
+  so the documented migration path isn't actually installable yet; the mswjs/react-native GitHub repo
+  is still labeled an experiment. Other breaks: `graphql` moves to the `msw/graphql` subpath (now an
+  optional peer dep), `handleRequest()` is removed for `defineNetwork()`, `onUnhandledRequest` is
+  renamed `onUnhandledFrame`, cookies are no longer Node-managed, and `worker.stop()` returns a
+  Promise. Consequence: web-only projects can take 3.0 after an ESM/Node-22 check; RN projects using
+  `msw/native` stay on 2.x until `@msw/react-native` actually publishes — re-verify npm before
+  upgrading, the docs are ahead of the release.
+
   CROSS-REFERENCES: RB-E-P2P owns Holepunch testing (brittle); RB-E-A11Y shares the role-query thread
   (TkDodo reading); agentic-engineering-patterns owns test discipline.
 
   HISTORY:
+  2026-10-01 REOPENED: MSW 3.0 (ESM-only, Node 22 floor, `msw/native` removed; the official docs name
+  and document `@msw/react-native` as the replacement, but it is not yet on the public npm registry —
+  RN projects should hold on 2.x and re-check npm before migrating); added the Kent C. Dodds "You Own the Outcome"
+  reading (verify AI-written code by outcome, not by reading every diff line).
   2026-09-24 CORRECTED: react-native-harness 1.5 date 2026-09-17 → 2026-09-14 and Playwright 1.63.0
   date 2026-09-10 → 2026-09-04 (npm publish times); Playwright 1.62 release date is 2026-07-24; "React Testing Library (14)" disambiguated —
   14 is RNTL, web RTL is 16.
@@ -104,7 +122,7 @@ note: >
   2026-07-07 GAP CLOSED: Maestro MCP.
 defer_to_skill: agentic-engineering-patterns  # TDD/verify discipline
 doc: "RB-E-TESTING.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-24   # corrected harness 1.5 and Playwright 1.63 publish dates; RTL(14)=RNTL vs web RTL 16; prior 2026-09-21: react-native-harness pin 1.3 → 1.5: Windows support + `harness ci` (unattended runs) + Metro config enhancer
+updated: 2026-10-01   # MSW 3.0 breaking major (ESM-only, Node 22 floor, msw/native removed w/ no published RN replacement); prior 2026-09-24: corrected harness 1.5 and Playwright 1.63 publish dates; RTL(14)=RNTL vs web RTL 16; prior 2026-09-21: react-native-harness pin 1.3 → 1.5: Windows support + `harness ci` (unattended runs) + Metro config enhancer
 reading:
   - title: "Making React Testing Library Tests 43% Faster"
     url: "https://sigh.dev/posts/making-react-testing-library-faster/"
@@ -124,6 +142,12 @@ reading:
     what: "The bridge between this entry and RB-E-A11Y: querying by data-testid silently hides inaccessible markup, while role/label queries fail exactly when a real assistive-tech user would — so accessible queries are both the better test AND a free a11y audit. Sharpens the Testing-Library philosophy the two Dodds pieces establish."
     claim: "You ship Testing Library — query by role/label, not data-testid: accessible queries are both the stronger test and a free a11y audit; testid queries silently hide inaccessible markup."
     applies_when: { deps: ["@testing-library/*"] }
+  - title: "You Own the Outcome: Product Engineering in the Age of AI"
+    url: "https://kentcdodds.com/blog/you-own-the-outcome"
+    by: "Kent C. Dodds"
+    what: "Reframes what 'ownership' means when an agent writes the code: agents produce output, you own the outcome. Practical shifts — align on the problem/success-criteria/constraints BEFORE asking for implementation; ask the agent for multiple options with tradeoffs, weighted by reversibility (one-way doors like a public API name vs two-way doors); and verify by outcome (tests, checks, does it actually work) rather than by reading every line of the diff, which only works if verification is automated and trustworthy."
+    claim: "You review AI-generated code — verify by outcome (automated tests/checks that you trust), not by reading every diff line; spend your judgment on the problem definition and irreversible decisions, not on typing."
+    applies_when: { deps: ["jest", "vitest"] }
   - title: "Write tests. Not too many. Mostly integration."
     url: "https://kentcdodds.com/blog/write-tests"
     by: "Kent C. Dodds"
@@ -144,6 +168,10 @@ sources:
   - "https://github.com/mdjastrzebski/test-renderer"
   - "https://github.com/microsoft/playwright/releases/tag/v1.62.0"
   - "https://shopify.engineering/mobile-e2e-testing"
+  - "https://github.com/mswjs/msw/releases/tag/v3.0.0"
+  - "https://github.com/mswjs/react-native"
+  - "https://mswjs.io/guides/integrations/react-native"
+  - "https://kentcdodds.com/blog/you-own-the-outcome"
 migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-brain migrate`)
   - from: { pkg: "react-test-renderer" }
     to: "React Native Testing Library v14 (host-element role/label queries)"

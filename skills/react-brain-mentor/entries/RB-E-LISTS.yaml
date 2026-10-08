@@ -18,7 +18,7 @@ recommend:
     - "one list engine across RN + web → Legend List"
     - "new large RN list surface where maintainer continuity outweighs library maturity → Legend List (actively released; FlashList is on critical-fixes-only while Shopify seeks a steward)"
     - "old-architecture RN app → FlashList v1.x (pinned; v2 is New-Arch-only), else FlatList"
-    - "text-heavy RN feeds where hundreds of flat labels mount at once → react-native-plain-text for those labels (renders straight to UILabel/TextView; one string, one style, New Architecture only, 0.8.x pre-1.0; keep <Text> where you need nesting, mixed styles, press handling or selection — the two mix in one screen)"
+    - "text-heavy RN feeds where hundreds of flat labels mount at once → react-native-plain-text for those labels (renders straight to UILabel/TextView; one string, one style, New Architecture only, 0.9.x pre-1.0; its unified `Text` selector auto-falls-back to RN `<Text>` for nesting/mixed styles/press/selection, so you no longer have to audit each element by hand)"
     - "exact thresholds / perf → react-native-best-practices (owns the rules)"
 note: >
   A list's cost scales with the nodes it MOUNTS, not the length of its data, so every tool here
@@ -44,13 +44,16 @@ note: >
   (not an option here) and hands react-native-skia to its author under a new name — RB-E-ANIMATION
   owns that thread.
 
-  PLAIN TEXT (facts verified vs the repo README + props guide; npm 0.8.2, 2026-09-02, verified
-  2026-09-24): react-native-plain-text is a cell-content micro-optimization, not a list engine. It
+  PLAIN TEXT (facts verified vs the repo README + props guide; npm 0.9.0, 2026-09-25, verified
+  2026-10-01): react-native-plain-text is a cell-content micro-optimization, not a list engine. It
   bypasses RN's text layout pipeline by rendering to the platform's native label widget (UILabel /
   TextView) and buys that with a hard constraint: single string, single style, no nested <Text>, no
   press handling (wrap it in a Pressable) and no selection (listed as To Do). It requires the New
   Architecture and does not run in Expo Go → adopt it AFTER virtualization is right, and measure
-  first.
+  first. 0.9.0 adds a unified `Text` SELECTOR component: it renders `PlainText` for simple strings
+  and falls back to RN's own `<Text>` for anything `PlainText` doesn't support (nesting, mixed
+  styles), so existing code can adopt it without manually auditing which elements qualify — the
+  per-element single-style/no-nesting constraint itself is unchanged.
 
   TANSTACK TABLE V9 (9.0.0 stable on npm 2026-08-04, verified vs the registry and the two TanStack
   v9 posts): REACTIVITY moved underneath the Table APIs. Instead of one table-state object that
@@ -68,6 +71,9 @@ note: >
   call about DOM/UX at that size, not about Table running out of memory first.
 
   HISTORY:
+  2026-10-01 REOPENED: react-native-plain-text 0.9.0 adds a unified `Text` selector component
+  (auto-falls back to RN `<Text>` for nesting/mixed styles) — adoption no longer needs a manual
+  per-element audit.
   2026-08-18 REOPENED: react-native-plain-text promoted from skip to a when-clause on its 2nd
   independent signal (TWiR #293, then RN Rewind #52) — the reopen condition recorded at the first
   skip.
@@ -76,7 +82,7 @@ note: >
   2026-08-04 GAP CLOSED: TanStack Table v9 went stable (the beta line had been a skip since #291).
 defer_to_skill: react-native-best-practices  # RN-RULE-USE-FLASHLIST owns the thresholds
 doc: "RB-E-LISTS.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-24   # react-window 2.3.3 + plain-text 0.8.2 pins refreshed vs npm; prior 2026-09-21: FlashList stewardship in transition — Shopify leaving RN, critical-compat fixes only (TWiR #297 · Status #490 · RN Rewind #57)
+updated: 2026-10-01   # plain-text 0.8.2 → 0.9.0: unified Text selector component (auto-fallback to RN <Text>); prior 2026-09-24: react-window 2.3.3 + plain-text 0.8.2 pins refreshed vs npm; prior 2026-09-21: FlashList stewardship in transition — Shopify leaving RN, critical-compat fixes only (TWiR #297 · Status #490 · RN Rewind #57)
 reading:
   - title: "How to Build the Fastest Apps: Break the Rules (App.js Conf 2026)"
     url: "https://www.youtube.com/watch?v=K3flMIHS-cI"

@@ -9,7 +9,7 @@ options:
   - { name: "Reanimated 4", tradeoff: "UI-thread worklet + CSS-style animations/transitions; New Architecture only. 4.7.0 (2026-09-18, verified vs npm 2026-09-24) peers react-native 0.86 - 0.88 + react-native-worklets 0.13.x and makes the new layout-animations engine the default; 4.6.0 (2026-08-21) peers RN 0.83 - 0.87 + Worklets 0.12.x. See note: REANIMATED 4.7" }
   - { name: "Gesture Handler 3.0", tradeoff: "native gestures; v3 adds a hook-based API built for the React Compiler + Reanimated 4, and a single unified Touchable button component that replaces (and deprecates) the library's 9 legacy button/touchable exports" }
   - { name: "react-native-worklets (0.13.x)", tradeoff: "the worklets runtime under Reanimated 4, its own package. 0.13.0 (2026-09-18, verified vs npm 2026-09-24; peer react-native 0.86 - 0.88) pairs with Reanimated 4.7, 0.12.x with 4.6. Turn Bundle Mode on (stable since 0.10) and measure cold start. See note: WORKLETS BUNDLE MODE, WORKLETS 0.13" }
-  - { name: "react-native-skia (2.x)", tradeoff: "GPU 2D drawing; v2.1 plays Lottie via Skottie; pairs with Reanimated. 2.12.0 (2026-09-16, verified vs npm 2026-09-24). Stewardship is moving to its author under a NEW PACKAGE NAME and the Shopify repo will be archived; pin across the window. See note: SKIA STEWARDSHIP" }
+  - { name: "react-native-skia (2.x)", tradeoff: "GPU 2D drawing; v2.1 plays Lottie via Skottie; pairs with Reanimated. 2.13.0 (2026-09-24, verified vs npm + GitHub) REMOVES legacy-architecture support — apps still on the old architecture are capped at 2.12.x. Stewardship is moving to its author under a NEW PACKAGE NAME and the Shopify repo will be archived; pin across the window. See note: SKIA STEWARDSHIP" }
   - { name: "lottie-react-native", tradeoff: "designer Lottie/JSON animations; v7 adds visionOS" }
   - { name: "Rive — @rive-app/react-native (Nitro) / rive-react-native (legacy)", tradeoff: "designer-driven INTERACTIVE vector animation (state machines), the Lottie alternative. The Nitro rewrite @rive-app/react-native (0.4.20, 2026-08-19, early line — pin) shares files/view-models as typed HybridObjects: up to 94× multi-view loads + ~4.7× lower memory vs legacy (rewrite authors' own benchmark). Legacy rive-react-native 9.8.5 (2026-07-17). See note: RIVE" }
   - { name: "react-native-morph-view (Software Mansion)", tradeoff: "GPU image-morph transitions (Metal/AGSL shaders, metaball blend); RN 0.76+, iOS 15.1+/Android 13+; niche/new" }
@@ -107,11 +107,13 @@ note: >
   migrating its apps off React Native. It SPONSORS react-native-skia through the end of 2026; William
   Candillon (its author) continues working on it beyond that, will FORK THE REPO in the coming months
   and publish under a NEW NAME, and the original Shopify repo is archived once that transition
-  completes. Nothing is deprecated: @shopify/react-native-skia latest is 2.12.0, published 2026-09-16
-  — six days AFTER the announcement — and neither the repo nor the npm package carries an
-  archive/deprecation flag (checked 2026-09-21; npm re-checked 2026-09-24) → keep using it, pin
+  completes. Nothing is deprecated: @shopify/react-native-skia latest is 2.13.0 (2026-09-24) — eight
+  days AFTER the announcement — and neither the repo nor the npm package carries an
+  archive/deprecation flag (checked 2026-09-21; npm re-checked 2026-10-01) → keep using it, pin
   rather than float across the window, and expect to change the dependency name (and this corpus's
-  detect rows) when the fork publishes. This thread is owned here; RB-E-CHARTS, RB-E-GAMES and
+  detect rows) when the fork publishes. 2.13.0 REMOVES legacy-architecture support entirely (New
+  Architecture only from here) — an app still on the old architecture cannot take Skia past 2.12.x,
+  on top of the pending rename. This thread is owned here; RB-E-CHARTS, RB-E-GAMES and
   RB-E-SVG carry pointers. The same announcement puts FlashList on critical-fixes-only (RB-E-LISTS
   owns that) and archives Restyle, which this corpus never recommended.
 
@@ -130,6 +132,8 @@ note: >
   framer-motion (the legacy package name) moved to 13.0.0 in lockstep; neither package is deprecated.
 
   HISTORY:
+  2026-10-01 REOPENED: Skia 2.13.0 removes legacy-architecture support entirely — apps on the old
+  architecture are capped at 2.12.x, on top of the pending author-fork rename.
   2026-09-24 CORRECTED: legacy rive-react-native is at 9.8.5 (2026-07-17), not 9.8.3 "quiet since
   2026-04".
   2026-09-21 GAP CLOSED: Expo Router shared-element transitions → react-native-screen-choreography 0.6
@@ -139,7 +143,7 @@ note: >
   recommended for React Native only.
 defer_to_skill: react-native-best-practices
 doc: "RB-E-ANIMATION.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-24   # Reanimated 4.7 floor (RN 0.86-0.88, Worklets 0.13.x) + Worklets 0.13 row · legacy rive-react-native 9.8.5 correction; prior 2026-09-21: Skia stewardship moves to its author under a new name (Shopify leaves RN) · Reanimated 4.7 new layout-animations engine is the default · Expo-Router shared-element GAP CLOSED with screen-choreography 0.6
+updated: 2026-10-01   # Skia 2.13.0 removes legacy-architecture support (New Arch only); prior 2026-09-24: Reanimated 4.7 floor (RN 0.86-0.88, Worklets 0.13.x) + Worklets 0.13 row · legacy rive-react-native 9.8.5 correction; prior 2026-09-21: Skia stewardship moves to its author under a new name (Shopify leaves RN) · Reanimated 4.7 new layout-animations engine is the default · Expo-Router shared-element GAP CLOSED with screen-choreography 0.6
 reading:
   - title: "React Native Gesture Handler's Touchable: The Button We Wish We Had Sooner"
     url: "https://swmansion.com/blog/react-native-gesture-handler-s-touchable-the-button-we-wish-we-had-sooner/"
@@ -198,6 +202,7 @@ sources:
   - "https://reactnavigation.org/blog/2026/04/27/building-custom-screen-transitions"
   - "https://registry.npmjs.org/react-native-screen-transitions/latest"
   - "https://github.com/Shopify/react-native-skia/releases/tag/v2.10.0"
+  - "https://github.com/Shopify/react-native-skia/releases/tag/v2.13.0"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "react-native-reanimated", label: "Reanimated", token: "reanimated" }
   - { pkg: "react-native-gesture-handler", label: "Gesture Handler", token: "gesture handler" }

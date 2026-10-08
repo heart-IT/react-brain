@@ -18,7 +18,7 @@ options:
   - { name: "Re.Pack 5 (Rspack)", tradeoff: "Metro alternative on Rust-based Rspack for module federation / super-apps. @callstack/repack 5.3.0 (2026-08-05, verified vs npm)." }
   - { name: "Rock (Callstack)", tradeoff: "Native build-artifact caching (reported 35min → <4min); works with Metro or Re.Pack. rock 0.15.2 (2026-09-16, verified vs npm)." }
   - { name: "Rollipop (early alpha)", tradeoff: "Metro replacement powered by Rolldown (the Rust bundler behind Vite 8): Rollup/Rolldown plugin ecosystem, Yarn PnP by default, dev dashboard; bare RN CLI only (no Expo). 1.0.0-alpha.29 (2026-07-25, verified vs npm): early-alpha, not production." }
-  - { name: "Vite+ (beta)", tradeoff: "VoidZero's unified toolchain — one CLI over Vite, Vitest, Rolldown, tsdown, Oxlint, Oxfmt; MIT; framework-agnostic. Now a release candidate: vite-plus 1.0.0-rc.0 (2026-09-22, verified vs npm + the release), which moves to Vitest 5 and drops Node 20. See note: VITE+." }
+  - { name: "Vite+", tradeoff: "VoidZero's unified toolchain — one CLI over Vite, Vitest, Rolldown, tsdown, Oxlint, Oxfmt; MIT; framework-agnostic. STABLE 1.0 (2026-09-30, verified vs the release post + npm), ~2M downloads/week. It orchestrates existing tools (not a framework, package manager, or Vite replacement) — your Vite plugins and package manager keep working. See note: VITE+." }
 recommend:
   default: "Web: Vite 8 (Rolldown). React Native: Metro (+ Hermes V1, precompiled iOS binaries). Monorepo: pnpm workspaces + Turborepo. Expo for managed velocity."
   when:
@@ -31,7 +31,7 @@ recommend:
     - "Pear app → esbuild-bundle to dist (desktop) or Metro + bare-pack for the Bare worker (mobile), not the web/Metro defaults — see RB-E-P2P"
     - "new web project → Vite 8"
     - "legacy web app on webpack → webpack 5.111 (zero-loader defaults, stable ESM output), else Rspack 2 for Rust build speed"
-    - "want one CLI over the whole VoidZero stack (bundler, test runner, linter, formatter) → Vite+ (1.0 RC; Node 22.18+; start with new projects — its migrate command may need manual follow-up)"
+    - "want one CLI over the whole VoidZero stack (bundler, test runner, linter, formatter) → Vite+ (STABLE 1.0; Node 22.18+; its migrate command may still need manual follow-up on existing multi-tool setups)"
     - "need native control Expo does not give → bare RN (Expo vs bare: managed velocity traded for native control)"
 note: >
   The build layer is splitting along one line: Rust tools are replacing JavaScript tools inside the
@@ -95,14 +95,18 @@ note: >
   halves node_modules materialization from a warm store on btrfs; plus project-aware global bins and
   registry revisions. RB-E-DX owns pnpm's workspace versioning (`pnpm change` / `pnpm version -r`).
 
-  VITE+ (2026-07-02 beta, verified vs the VoidZero announcement; 2026-09-24 RC, verified vs npm and
-  the v1.0.0-rc.0 release): one CLI over the VoidZero stack, MIT, framework-agnostic. The beta was
-  "stable, but not yet complete" with a migration command that may need manual follow-up. 1.0.0-rc.0
-  (2026-09-22) moves `vp test` to Vitest 5 (run `vp migrate` from the workspace root first), narrows
-  the CLI's Node range to ^22.18.0 || ^24.11.0 || >=26.0.0 (Node 20 dropped), removes the bundled
-  oxlint/oxfmt executable wrappers (editor integrations move to `vp lint --lsp` / `vp fmt --lsp`), and
-  requires verified npm provenance for standalone installs and upgrades. An RC, not 1.0: adopt on new
-  projects, and migrate existing multi-tool setups after 1.0.
+  VITE+ (2026-07-02 beta, verified vs the VoidZero announcement; 2026-09-22 RC; STABLE 1.0 shipped
+  2026-09-30, verified vs the announcement post): one CLI over the VoidZero stack, MIT,
+  framework-agnostic — `vp env` manages the Node runtime, `vp install` wraps your chosen package
+  manager, and nine core commands cover scaffold-to-build. The beta was "stable, but not yet
+  complete" with a migration command that may need manual follow-up; 1.0.0-rc.0 (2026-09-22) moved
+  `vp test` to Vitest 5 (run `vp migrate` from the workspace root first), narrowed the CLI's Node
+  range to ^22.18.0 || ^24.11.0 || >=26.0.0 (Node 20 dropped), removed the bundled oxlint/oxfmt
+  executable wrappers (editor integrations move to `vp lint --lsp` / `vp fmt --lsp`), and required
+  verified npm provenance for standalone installs/upgrades. 1.0 explicitly positions itself as
+  NEITHER a framework, NOR a package manager, NOR a Vite replacement — it orchestrates the tools you
+  already use (your Vite plugins, your package manager) behind one coordinated CLI and shared
+  caching; now a real adoption target, not just new-project-only.
 
   REACT-NATIVE-BOOST (2026-09-21 advocate pass, verified vs the v2.0.0 release): 2.0 (2026-09-13)
   replaces the Babel plugin with a METRO CONFIG PLUGIN — which is what makes the new optimizers
@@ -163,6 +167,7 @@ note: >
   RB-E-REACT-CORE owns the React Compiler default; RB-E-META-FRAMEWORKS owns Next.js/Turbopack.
 
   HISTORY:
+  2026-10-01 GAP CLOSED: Vite+ reached STABLE 1.0 (~2M downloads/week) — the RC tracking note graduates to an adoption target, not just new-project-only.
   2026-09-24 REOPENED: Vite+ beta → 1.0.0-rc.0 (Vitest 5, Node 20 dropped); pnpm latest 12.3.4 →
   12.6.0; version receipts re-checked vs npm.
   2026-09-21 REOPENED: Vite CVE-2026-39364 floor 8.0.5 / 7.3.2; Noxcturnal with its activation
@@ -176,7 +181,7 @@ note: >
   Rolldown-as-bundler; Metro stays the RN default.
 defer_to_skill: null
 doc: "RB-E-BUILD.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-24   # Vite+ 1.0.0-rc.0 (Vitest 5, Node 20 dropped); pnpm 12.6.0; receipts re-checked vs npm; prior 2026-09-21: react-native-boost 2.0 added on the ADVOCATE PASS (build-time JSX rewriting — a mechanism no other row here covers) · VITE DEV-SERVER CVE-2026-39364 security floor 8.0.5 / 7.3.2, actively mass-scanned when exposed · Noxcturnal — Expo's first-party Rust/oxc Metro transformer (SDK 58 beta) with its activation limits · fingerprint `balanced` default · webpack 5.111 stable ESM output
+updated: 2026-10-01   # Vite+ reached stable 1.0 (~2M downloads/week); prior 2026-09-24: Vite+ 1.0.0-rc.0 (Vitest 5, Node 20 dropped); pnpm 12.6.0; receipts re-checked vs npm; prior 2026-09-21: react-native-boost 2.0 added on the ADVOCATE PASS (build-time JSX rewriting — a mechanism no other row here covers) · VITE DEV-SERVER CVE-2026-39364 security floor 8.0.5 / 7.3.2, actively mass-scanned when exposed · Noxcturnal — Expo's first-party Rust/oxc Metro transformer (SDK 58 beta) with its activation limits · fingerprint `balanced` default · webpack 5.111 stable ESM output
 watching:
   - title: "How React Native Builds Actually Work (APK, AAB, IPA, APP)"
     url: "https://www.youtube.com/watch?v=1o0pEjYGUWM"
@@ -243,6 +248,7 @@ sources:
   - "https://www.callstack.com/blog/mobile-module-federation-with-re-pack-when-runtime-delivery-is-worth-the-complexity"
   - "https://webpack.js.org/blog/2026-07-24-webpack-5-109/"
   - "https://github.com/voidzero-dev/vite-plus/releases/tag/v1.0.0-rc.0"
+  - "https://voidzero.dev/posts/announcing-vite-plus-1-0"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "vite", label: "Vite", token: "vite" }
   - { pkg: "@rspack/*", label: "Rspack", token: "rspack" }
