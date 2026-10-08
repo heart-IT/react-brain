@@ -9,7 +9,7 @@ options:
   - { name: "Reanimated 4", tradeoff: "UI-thread worklet + CSS-style animations/transitions; New Architecture only. 4.7.0 (2026-09-18, verified vs npm 2026-09-24) peers react-native 0.86 - 0.88 + react-native-worklets 0.13.x and makes the new layout-animations engine the default; 4.6.0 (2026-08-21) peers RN 0.83 - 0.87 + Worklets 0.12.x. See note: REANIMATED 4.7" }
   - { name: "Gesture Handler 3.0", tradeoff: "native gestures; v3 adds a hook-based API built for the React Compiler + Reanimated 4, and a single unified Touchable button component that replaces (and deprecates) the library's 9 legacy button/touchable exports" }
   - { name: "react-native-worklets (0.13.x)", tradeoff: "the worklets runtime under Reanimated 4, its own package. 0.13.0 (2026-09-18, verified vs npm 2026-09-24; peer react-native 0.86 - 0.88) pairs with Reanimated 4.7, 0.12.x with 4.6. Turn Bundle Mode on (stable since 0.10) and measure cold start. See note: WORKLETS BUNDLE MODE, WORKLETS 0.13" }
-  - { name: "react-native-skia (2.x)", tradeoff: "GPU 2D drawing; v2.1 plays Lottie via Skottie; pairs with Reanimated. 2.13.0 (2026-09-24, verified vs npm + GitHub) REMOVES legacy-architecture support — apps still on the old architecture are capped at 2.12.x. Stewardship is moving to its author under a NEW PACKAGE NAME and the Shopify repo will be archived; pin across the window. See note: SKIA STEWARDSHIP" }
+  - { name: "react-native-skia (3.x; 2.x line)", tradeoff: "GPU 2D drawing; plays Lottie via Skottie; pairs with Reanimated. NOW PUBLISHED AS `react-native-skia` by its author: 3.0.0 (2026-10-02) renders with Graphite (Vulkan on Android, minSdk 26; iOS 15.1+; no Expo Go, no tvOS/Android TV/Mac Catalyst), 3.1.0 latest (2026-10-07); the v2 line continues as react-native-skia@2 (2.15.0). @shopify/react-native-skia STOPS at 2.14.0 (2026-10-01) and is not npm-deprecated; 2.13.0 removed legacy-architecture support. Verified vs npm + the fork's README + migration guide. See note: SKIA STEWARDSHIP" }
   - { name: "lottie-react-native", tradeoff: "designer Lottie/JSON animations; v7 adds visionOS" }
   - { name: "Rive — @rive-app/react-native (Nitro) / rive-react-native (legacy)", tradeoff: "designer-driven INTERACTIVE vector animation (state machines), the Lottie alternative. The Nitro rewrite @rive-app/react-native (0.4.20, 2026-08-19, early line — pin) shares files/view-models as typed HybridObjects: up to 94× multi-view loads + ~4.7× lower memory vs legacy (rewrite authors' own benchmark). Legacy rive-react-native 9.8.5 (2026-07-17). See note: RIVE" }
   - { name: "react-native-morph-view (Software Mansion)", tradeoff: "GPU image-morph transitions (Metal/AGSL shaders, metaball blend); RN 0.76+, iOS 15.1+/Android 13+; niche/new" }
@@ -24,7 +24,7 @@ recommend:
   when:
     - "web animation (React DOM) → Motion / framer-motion — Reanimated and Gesture Handler are React Native only"
     - "React Native app on RN 0.83–0.85 → Reanimated 4.6 (with Worklets 0.12.x; 4.7 peers RN 0.86 - 0.88 and Worklets 0.13.x)"
-    - "custom/GPU drawing or visuals → react-native-skia (pin: the package name changes when its author's fork publishes)"
+    - "custom/GPU drawing or visuals → react-native-skia (new installs: `react-native-skia` 3.x, Graphite, minSdk 26 / iOS 15.1, dev build; existing @shopify apps: `react-native-skia@2` is the same v2 line renamed — hold @shopify ≤2.14 while Victory Native XL or react-native-livechart peer on the old name)"
     - "designer-made animations → lottie-react-native, else Skia's Skottie player"
     - "designer animations that need INTERACTIVITY/state machines, or many Rive views sharing files → Rive (new work on the Nitro line @rive-app/react-native, 0.4.x — pin; not the legacy package)"
     - "image-to-image morph transition → react-native-morph-view (GPU shader; niche)"
@@ -116,6 +116,22 @@ note: >
   on top of the pending rename. This thread is owned here; RB-E-CHARTS, RB-E-GAMES and
   RB-E-SVG carry pointers. The same announcement puts FlashList on critical-fixes-only (RB-E-LISTS
   owns that) and archives Restyle, which this corpus never recommended.
+  THE HANDOVER LANDED (2026-10-08, verified vs npm, the fork's README and migration guide, and the
+  GitHub API, whose Shopify/react-native-skia lookup now answers "Moved Permanently" to
+  wcandillon/react-native-skia): the package is now `react-native-skia` (maintainers wcandillon,
+  kudochien, chrfalch). 3.0.0 (2026-10-02) is "React Native Skia Graphite" — Vulkan instead of
+  OpenGL on Android with minSdk 26, iOS 15.1 minimum, a development build required (no Expo Go),
+  tvOS / Android TV / Mac Catalyst dropped, the Canvas props debug / colorSpace / androidWarmup
+  removed, screenshot tests may differ; the drawing API is unchanged. 3.1.0 (2026-10-07) links Dawn
+  from react-native-webgpu-dawn so Skia and react-native-webgpu share one GPU device. The v2 line
+  stays maintained as `react-native-skia@2` (2.15.0, 2026-10-02). @shopify/react-native-skia stops
+  at 2.14.0 (2026-10-01, which also removed the mutable SkPath API) and carries NO npm deprecation
+  flag, so the tripwire that waited for one would never have fired; its then: was done by hand.
+  Migrating = swap the dependency, rewrite imports (including deep imports and Jest config), never
+  install both names side by side. The catch is downstream: victory-native 42.0.1 peers
+  @shopify/react-native-skia >=2.6.0 <3.0.0 and react-native-livechart 4.26.0 peers
+  @shopify/react-native-skia >=2.6.0, so chart stacks stay on the @shopify name until those
+  libraries repoint (RB-E-CHARTS).
 
   SKIA 2.10 MOVED OFF HostObject (2026-07-23, verified vs the release + the published manifest): the
   release's one feature is "migrate from host objects to native states" (#3964) — Skia's JSI objects
@@ -132,6 +148,7 @@ note: >
   framer-motion (the legacy package name) moved to 13.0.0 in lockstep; neither package is deprecated.
 
   HISTORY:
+  2026-10-08 REOPENED: the Skia handover landed — npm `react-native-skia` 3.x (Graphite) by its author, v2 continues as react-native-skia@2, @shopify/react-native-skia stops at 2.14.0 (not npm-deprecated); option row, when-clause, detect and migrate rows repointed; the deprecation tripwire retired with its then: done by hand.
   2026-10-01 REOPENED: Skia 2.13.0 removes legacy-architecture support entirely — apps on the old
   architecture are capped at 2.12.x, on top of the pending author-fork rename.
   2026-09-24 CORRECTED: legacy rive-react-native is at 9.8.5 (2026-07-17), not 9.8.3 "quiet since
@@ -143,7 +160,7 @@ note: >
   recommended for React Native only.
 defer_to_skill: react-native-best-practices
 doc: "RB-E-ANIMATION.md"   # long-form Explanation entry in content_dir
-updated: 2026-10-01   # Skia 2.13.0 removes legacy-architecture support (New Arch only); prior 2026-09-24: Reanimated 4.7 floor (RN 0.86-0.88, Worklets 0.13.x) + Worklets 0.13 row · legacy rive-react-native 9.8.5 correction; prior 2026-09-21: Skia stewardship moves to its author under a new name (Shopify leaves RN) · Reanimated 4.7 new layout-animations engine is the default · Expo-Router shared-element GAP CLOSED with screen-choreography 0.6
+updated: 2026-10-08   # Skia handover: react-native-skia 3.x (Graphite) / @2, @shopify stops at 2.14.0 — detect + migrate rows added, deprecation tripwire retired; prior 2026-10-01: Skia 2.13.0 removes legacy-architecture support (New Arch only); prior 2026-09-24: Reanimated 4.7 floor (RN 0.86-0.88, Worklets 0.13.x) + Worklets 0.13 row · legacy rive-react-native 9.8.5 correction; prior 2026-09-21: Skia stewardship moves to its author under a new name (Shopify leaves RN) · Reanimated 4.7 new layout-animations engine is the default · Expo-Router shared-element GAP CLOSED with screen-choreography 0.6
 reading:
   - title: "React Native Gesture Handler's Touchable: The Button We Wish We Had Sooner"
     url: "https://swmansion.com/blog/react-native-gesture-handler-s-touchable-the-button-we-wish-we-had-sooner/"
@@ -166,7 +183,7 @@ reading:
     by: "Vishesh Raheja (Margelo)"
     what: "A low-end-Android profiling deep-dive: smoothness is frame-cadence timing, not curve math; the dominant fix is SurfaceView over TextureView (no per-frame texture upload, ~50-65% less RenderThread CPU), plus stable-reference buffer mutation and quantizing per-frame values. With profiler-triangulation methodology (gfxinfo/Perfetto/Hermes)."
     claim: "You ship Skia — on low-end Android the dominant smoothness fix is SurfaceView over TextureView (no per-frame texture upload, ~50-65% less RenderThread CPU); smoothness is frame-cadence timing, not curve math."
-    applies_when: { deps: ["@shopify/react-native-skia"], platforms: [react-native] }
+    applies_when: { deps: ["@shopify/react-native-skia", "react-native-skia"], platforms: [react-native] }
   - title: "The real cost of React Native animations: benchmarking every approach"
     url: "https://expo.dev/blog/the-real-cost-of-react-native-animations-benchmarking-every-approach"
     by: "Janic Duplessis (Expo; react-native-ease author)"
@@ -203,6 +220,9 @@ sources:
   - "https://registry.npmjs.org/react-native-screen-transitions/latest"
   - "https://github.com/Shopify/react-native-skia/releases/tag/v2.10.0"
   - "https://github.com/Shopify/react-native-skia/releases/tag/v2.13.0"
+  - "https://registry.npmjs.org/react-native-skia"
+  - "https://raw.githubusercontent.com/wcandillon/react-native-skia/main/README.md"
+  - "https://wcandillon.github.io/react-native-skia/docs/getting-started/migration"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "react-native-reanimated", label: "Reanimated", token: "reanimated" }
   - { pkg: "react-native-gesture-handler", label: "Gesture Handler", token: "gesture handler" }
@@ -211,6 +231,7 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "motion", label: "Motion", token: "motion" }
   - { pkg: "lottie-react-native", label: "Lottie", token: "lottie" }
   - { pkg: "@shopify/react-native-skia", label: "Skia", token: "skia" }
+  - { pkg: "react-native-skia", label: "Skia", token: "skia" }
   - { pkg: "moti", label: "Moti (dormant)", token: "moti" }
   - { pkg: "react-native-screen-transitions", label: "screen-transitions", token: "screen-transitions" }
   - { pkg: "react-native-screen-choreography", label: "screen-choreography", token: "screen-choreography" }
@@ -221,10 +242,14 @@ detect_source:   # source-level signals owned by this entry (regex over repo sou
   - pattern: "useNativeDriver:\\s*false"
     signal: "JS-driven Animated animations (useNativeDriver: false)"
     hint: "drive animations off the JS thread — native driver where supported, else Reanimated (perf depth → react-native-best-practices)"
+migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-brain migrate`)
+  - from: { pkg: "@shopify/react-native-skia" }
+    to: "react-native-skia (3.x Graphite; or react-native-skia@2 for the same v2 line under the new name)"
+    urgency: superseded
+    effort: M
+    why: "The author's fork publishes as `react-native-skia`; @shopify/react-native-skia stops at 2.14.0 (not npm-deprecated). Swap the dependency and rewrite every import (deep imports and Jest config too); never install both. Taking 3.x also means Android minSdk 26 (Vulkan), iOS 15.1, a dev build instead of Expo Go, no tvOS/Android TV/Mac Catalyst, and removed Canvas props debug/colorSpace/androidWarmup. HOLD if you use victory-native or react-native-livechart: both still peer on @shopify/react-native-skia."
+    receipts: ["https://registry.npmjs.org/react-native-skia", "https://wcandillon.github.io/react-native-skia/docs/getting-started/migration", "https://registry.npmjs.org/victory-native/latest"]
 tripwires:   # standing caveats as executable conditions — evaluated by `harvest firsthand`; fired ⇒ do the then:, update prose, remove the row
-  - when: { pkg: "@shopify/react-native-skia", deprecated: true }
-    then: "the Skia handover landed — @shopify/react-native-skia is flagged on npm, so Candillon's fork has published under its new name: find it, repoint the option rows + detect rows + reading claims in this entry and in RB-E-CHARTS / RB-E-GAMES / RB-E-SVG, and add a migrate rule off the @shopify name"
-    added: 2026-09-21
   - when: { pkg: "react-native-screen-choreography", atleast: "1.0.0" }
     then: "screen-choreography hit 1.0 — the API churn caveat expires: drop the 'pin it, 0.x' hedging from the option row and the note, and consider promoting it from a when-clause to the shared-element default for Expo Router"
     added: 2026-09-21

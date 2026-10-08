@@ -11,7 +11,7 @@ options:
   - { name: "agent-device (Callstack)", tradeoff: "agent-native CLI: AI agents drive real iOS/Android/tvOS/macOS/web devices & simulators — a11y snapshots, actions, and REPLAY of a saved flow with zero model calls. 0.21 cut iOS-Simulator cold opens 27–40% and broke some commands, so pin it; npm 0.21.13 (2026-09-24, verified vs npm). See note: AGENT-DEVICE." }
   - { name: "Argent (Software Mansion)", tradeoff: "MCP server + skills: simulator and PHYSICAL iOS device control, debugger attach (React tree + JS), console/HTTP monitoring, correlated React+iOS profiling; also tvOS/Android TV/Vega OS. npm 0.25.2 (2026-09-18, verified vs npm 2026-09-24); see note: ARGENT. Also listed in RB-E-TESTING." }
   - { name: "Maestro MCP / Maestro Viewer", tradeoff: "agents drive devices and GENERATE E2E flows on the tool the ecosystem already tests with — see RB-E-TESTING (which owns the testing depth)" }
-  - { name: "TesterArmy (Agentic CI for Expo) — NEW/vendor", tradeoff: "a hosted agent that reads a PR's description + diff, builds via EAS Workflows (iOS Simulator + Android emulator profiles, fingerprint-gated rebuilds), then clicks through the app like a user and posts results/recordings as PR checks. Commercial/closed-source — verified only via Expo's guest-post announcement (2026-09-30) and one customer case study (Juno); no independent adoption signal, physical-device support still 'working on'. Not open source, so no star-count sanity check like the other rows here." }
+  - { name: "TesterArmy (Agentic CI for Expo) — NEW/vendor", tradeoff: "a hosted agent that reads a PR's description + diff, builds via EAS Workflows (iOS Simulator + Android emulator profiles, fingerprint-gated rebuilds), then clicks through the app like a user and posts results/recordings as PR checks. The hosted PR agent is commercial — verified only via Expo's guest-post announcement (2026-09-30) and one customer case study (Juno); physical-device support still 'working on'. CORRECTED 2026-10-08: TesterArmy also publishes the Apache-2.0 `e2e` framework (github.com/tester-army/e2e, ~7.9k★; npm e2e 0.18.0, 2026-10-06, ~61k downloads/week): natural-language agent steps that replay with no model calls once a later assertion verifies them, web engine on Playwright, mobile engine @e2e-dev/mobile on agent-device, bring-your-own model." }
   - { name: "Reactotron MCP", tradeoff: "the classic RN debugger exposes runtime state/network to coding agents via MCP (reactotron-core-server 3.3.0, 2026-05)" }
   - { name: "Expo AI tooling", tradeoff: "SDK 55+ ships agent tooling as part of the framework (Expo skills, the Expo MCP server, the `expo` agent plugin, @expo/agent-cli in the SDK 58 beta) — the durable, first-party layer; see note: EXPO FIRST-PARTY LAYER. Expo Agent, the hosted app-building agent, is DEAD (wound down 2026-07-20)." }
   - { name: "TanStack Intent (ALPHA)", tradeoff: "a DISTRIBUTION mechanism, not a pack: agent skills ship INSIDE npm packages and are discovered via the node_modules dependency graph, version-pinned with staleness detection; rolling out in TanStack DB first. @tanstack/intent 0.5.0 (2026-09-30, verified vs npm + the release post) adds the MAINTENANCE side — TypeScript-validated code examples inside skills, staleness tracking tied to source changes, and CI workflow integration with automated repair suggestions, aimed at the failure mode where a rename/API change ships but the bundled skill still tells an agent the old name." }
@@ -20,6 +20,7 @@ options:
   - { name: "Simlock (Callstack incubator) — EARLY", tradeoff: "a device-LEASE daemon for parallel agents: provisions a matching simulator/emulator when none is free, queues fairly, reclaims idle devices, and fronts remote workers over one outbound WebSocket. VERY EARLY: npm 0.2.0 (2026-08-21), ~14★ (verified 2026-09-24); the lease primitive is the durable idea. See note: SIMLOCK." }
   - { name: "Metrognome (Uphold)", tradeoff: "an AUTONOMOUS performance loop: hypothesis → drive the app (via agent-device + Callstack's profiling tooling) → measure N times → keep a change only if it beats the noise, else revert; every experiment lands in a committed performance-memory file. npm 0.2.6 (2026-08-08, verified vs npm 2026-09-24), early; the gate is the durable idea." }
   - { name: "React Native Evals (Callstack)", tradeoff: "open-source benchmark suite for WHICH MODEL writes good RN code — task dataset by category/library, TS+Bun runner, judge + methodology whitepaper; the model-selection layer under all the tools above" }
+  - { name: "Apex (Callstack) — NEW/vendor model", tradeoff: "a CODING MODEL specialized for React Native and Next.js (Callstack's domain data and training on an open-weight Qwen base; first of a planned family, iOS/Android models next). Generally available via apex.callstack.com (`npx @callstack/apex init`), self-hosting under a commercial agreement; $0.50 in / $3.00 out per M tokens. Every figure is vendor-reported: 'frontier-level' on React Native Evals with no score published, 28/31 on Vercel's Next.js eval under its stealth name Pixel Canary. Weights not stated as open." }
   - { name: "ReactBench (Million)", tradeoff: "WHICH MODEL writes good REACT-WEB code — Write/Fix React tasks from real merged PRs, graded by behavioral tests + react-doctor's 400+ rules (RB-E-DX) in clean-room containers; public leaderboard (2026-07: GPT 5.6 Terramax/Solmax 53%, Fable 5xhigh 46% Pass@1)." }
 recommend:
   default: "First-party first: on Expo start from Expo's own agent layer; on React web, the React team's react-devtools-cdt-mcp. Then give the agent RN KNOWLEDGE (Callstack agent-skills; add Margelo react-native-skills for camera/native depth) and EYES+HANDS on the running app: Maestro MCP if you already test with Maestro, else agent-device (cross-platform) or Argent (iOS debug/profile depth). Fast-moving (confidence: low): trial one workflow before standardizing."
@@ -38,6 +39,7 @@ recommend:
     - "agent does performance work → Metrognome (or its gate: measure N times, keep only what beats the noise floor)"
     - "consuming a library that ships skills inside its npm package (TanStack DB first) → TanStack Intent (alpha)"
     - "choosing the model for RN code → React Native Evals"
+    - "want a cheaper RN/Next.js-specialized coding model → Apex (vendor, new; vendor numbers only — run it against React Native Evals on your own tasks first)"
     - "choosing the model for React-web code → ReactBench"
     - "choosing a device tool + model pair → AppControlBench (leaderboard over Argent and agent-device × Claude/GPT lines)"
     - "how to WORK with agents (TDD, review discipline, cognitive debt) → agentic-engineering-patterns"
@@ -116,6 +118,8 @@ note: >
   the skills/MCP layer over hosted products.
 
   HISTORY:
+  2026-10-08 CORRECTED: TesterArmy is not closed-source end to end — its Apache-2.0 `e2e` framework (npm e2e, agent-device mobile engine) is public; the hosted PR agent stays commercial.
+  2026-10-08 GAP CLOSED: Apex, Callstack's RN/Next.js-specialized coding model, GA — vendor-caveated row.
   2026-10-01 GAP CLOSED: TesterArmy (vendor Agentic CI for Expo/EAS) added, NEW/vendor-caveated; TanStack Intent 0.5 maintenance tooling (staleness tracking, TS-validated examples, CI repair suggestions).
   2026-09-24 GAP CLOSED: Shopify Helix primary-source reading (VLM UI-review gate); star counts and npm pins refreshed (agent-skills ~1.7k★ reconciles the row's ~1.5k and the default's ~1.6k).
   2026-09-21 GAP CLOSED: @expo/agent-cli (SDK 58 beta), the first-party agent layer the 2026-09-10 challenge predicted; Shopify agent-addressable-architecture reading.
@@ -130,7 +134,7 @@ note: >
   2026-07-09 GAP CLOSED: entry created — agent tooling ran through every Native Weekly issue 11–16 (Jan–Jun 2026); all options fetch-verified.
 defer_to_skill: agentic-engineering-patterns
 doc: null
-updated: 2026-10-01   # TesterArmy (Agentic CI for Expo/EAS, vendor) added · TanStack Intent 0.5.0 maintenance tooling; prior 2026-09-24: Shopify Helix primary-source reading (VLM UI-review gate) · star counts and npm pins refreshed (agent-skills ~1.7k★, agent-device 0.21.13, Argent 0.25.2, Simlock ~14★); prior 2026-09-21: @expo/agent-cli (SDK 58 beta) — the first-party agent layer the 2026-09-10 challenge predicted · Shopify's agent-addressable-architecture reading
+updated: 2026-10-08   # Apex (Callstack RN/Next.js coding model, GA, vendor) added · TesterArmy CORRECTED: open-source `e2e` framework (npm 0.18.0); prior 2026-10-01: TesterArmy (Agentic CI for Expo/EAS, vendor) added · TanStack Intent 0.5.0 maintenance tooling; prior 2026-09-24: Shopify Helix primary-source reading (VLM UI-review gate) · star counts and npm pins refreshed (agent-skills ~1.7k★, agent-device 0.21.13, Argent 0.25.2, Simlock ~14★); prior 2026-09-21: @expo/agent-cli (SDK 58 beta) — the first-party agent layer the 2026-09-10 challenge predicted · Shopify's agent-addressable-architecture reading
 reading:
   - title: "Native is now the future of mobile at Shopify"
     url: "https://shopify.engineering/back-to-native"
@@ -185,6 +189,9 @@ reading:
     claim: "You write agent context for React tooling — check what the tool already ships first: Next.js, MUI, Storybook and Playwright bundle their own MCP servers/docs/agents, which version with the package where hand-written summaries go stale."
     applies_when: { deps: ["next", "@mui/*", "storybook", "@playwright/*"], platforms: [react] }
 sources:
+  - "https://www.callstack.com/blog/apex-agetic-coding-for-mobile-and-web-spcialied-in-react"
+  - "https://github.com/tester-army/e2e"
+  - "https://registry.npmjs.org/e2e/latest"
   - "https://expo.dev/changelog/sdk-58-beta"
   - "https://shopify.engineering/back-to-native"
   - "https://shopify.engineering/helix"

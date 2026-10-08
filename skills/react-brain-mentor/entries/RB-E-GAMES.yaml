@@ -6,7 +6,7 @@ status: reviewed   # long-form entry written + source-checked
 confidence: low
 platforms: [react-native]
 options:
-  - { name: "react-native-skia", tradeoff: "GPU 2D drawing loop; the common base for RN games and interactive visuals. @shopify/react-native-skia 2.12.0 (2026-09-16, verified vs npm); changing owner and package name, see note: SKIA." }
+  - { name: "react-native-skia", tradeoff: "GPU 2D drawing loop; the common base for RN games and interactive visuals. Now published by its author as `react-native-skia` (3.x on Graphite, minSdk 26 / iOS 15.1; v2 line as react-native-skia@2); @shopify/react-native-skia stops at 2.14.0 (verified vs npm 2026-10-08), see note: SKIA." }
   - { name: "react-native-godot (@borndotcom)", tradeoff: "Embeds the Godot engine (RTNGodotView; by Born & Migeran), running off RN's JS thread — the only real-game-engine route in RN. WEAKENED (2026-09-10 challenge): 1.0.1 (2025-11-04) is still the last npm publish (2026-09-24, verified vs npm), so adopt it as a dormant dependency and pin it. See note: GODOT." }
   - { name: "WebGPU (react-native-webgpu, formerly react-native-wgpu)", tradeoff: "3D render and compute pipelines on Google's Dawn (by William Candillon, not Software Mansion); UI-thread via Reanimated/worklets; advanced. react-native-webgpu 0.10.2 (2026-09-16, verified vs npm); react-native-wgpu is deprecated, see note: WEBGPU RENAME." }
   - { name: "react-native-game-engine", tradeoff: "Entity-component loop for simple 2D games; effectively unmaintained: 1.2.0 (2020-06-09) is the last release (2026-09-24, verified vs npm)." }
@@ -65,13 +65,16 @@ note: >
   receipts and its tripwire. Shopify sponsors Skia through the end of 2026; the author will fork
   and republish under a new name and the Shopify repo is then archived. Nothing is deprecated
   today (2.12.0 shipped 2026-09-16) → no reason to leave Skia, but this entry's 2D default is
-  what changes name.
+  what changes name. 2026-10-08: it changed — `react-native-skia` 3.x (Graphite) by its author,
+  v2 continuing as react-native-skia@2, @shopify stops at 2.14.0; 3.1.0 shares one Dawn device
+  with react-native-webgpu (RB-E-ANIMATION owns the receipts and the migrate rule).
 
   QUEST (2026-07-10, verified vs the official RN blog): React Native supports Meta Quest / Horizon
   OS directly via the expo-horizon-core config plugin, with Expo Go on the Horizon Store → a
   first-party 2D-panel path beside ReactVision's immersive AR/VR.
 
   HISTORY:
+  2026-10-08 REOPENED: Skia pointer — the rename landed (react-native-skia 3.x / @2; @shopify stops at 2.14.0).
   2026-09-24 CORRECTED: ReactVision 3.0 raises the peer floor to RN 0.86 / Expo SDK 57 (it was
   recorded as a version-line move with no new floor); Callstack visionOS latest is 0.79.6
   (2025-08-23), not 0.78 (2025-03); react-native-wgpu now carries an npm deprecation.
@@ -85,7 +88,7 @@ note: >
   react-three-fiber), from Native Weekly #15.
 defer_to_skill: react-native-best-practices
 doc: "RB-E-GAMES.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-24   # ReactVision 3 peer floor RN 0.86/SDK 57, ReactVision visionOS fork 0.86.4, Callstack visionOS 0.79.6, react-native-wgpu deprecated; earlier today: R3F 9.8 React 19.3 compatibility; prior 2026-09-21: Skia stewardship pointer (the 2D default changes owner + package name) · prior challenge verdict on the Godot leg still stands
+updated: 2026-10-08   # Skia rename landed (react-native-skia 3.x Graphite / @2); prior 2026-09-24: ReactVision 3 peer floor RN 0.86/SDK 57, ReactVision visionOS fork 0.86.4, Callstack visionOS 0.79.6, react-native-wgpu deprecated; earlier today: R3F 9.8 React 19.3 compatibility; prior 2026-09-21: Skia stewardship pointer (the 2D default changes owner + package name) · prior challenge verdict on the Godot leg still stands
 sources:
   - "https://shopify.engineering/back-to-native"
   - "https://github.com/wcandillon/react-native-webgpu"

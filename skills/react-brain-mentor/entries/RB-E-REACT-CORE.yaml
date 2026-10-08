@@ -12,7 +12,7 @@ options:
   - { name: "<Activity>", tradeoff: "hide a subtree while preserving its state (defer/restore); 100% satisfaction in State-of-React 2025; effects are destroyed and re-created on every toggle, so pair it with effect cleanup (see reading: The hidden cost of React.Activity)." }
   - { name: "<ViewTransition> / use()", tradeoff: "<ViewTransition> is STABLE in 19.3: animates enter/exit/update/share on Transition-marked updates via the browser View Transition API; DOM-ONLY, RN support in progress. use() reads promises/context under Suspense." }
   - { name: "Fragment Refs", tradeoff: "STABLE in 19.3: a ref on a <Fragment> yields a FragmentInstance over its children as a group (events, focus, observers, scrollIntoView), so you can attach behavior to components that expose no ref without a layout-distorting wrapper <div>." }
-  - { name: "alternative React runtimes", tradeoff: "Preact (small, drop-in-ish) is the production option. @tanstack/redact (0.1.0, 23.3KB vs React's 69.2KB gzipped — 66% smaller; synchronous, not concurrent), Million, TSRX (a JSX successor) and Vidact (a Rust React-subset compiler, 0.2.0-beta) are mostly experimental; see note: ALTERNATIVE RUNTIMES." }
+  - { name: "alternative React runtimes", tradeoff: "Preact (small, drop-in-ish) is the production option — 11.0.0 (2026-09-30, verified vs npm + the upgrade guide) is ESM-only and moves defaultProps + px auto-suffixing into preact/compat. @tanstack/redact (0.1.0, 23.3KB vs React's 69.2KB gzipped — 66% smaller; synchronous, not concurrent), Million, TSRX (a JSX successor) and Vidact (a Rust React-subset compiler, 0.2.0-beta) are mostly experimental; see note: ALTERNATIVE RUNTIMES." }
 recommend:
   default: "Move to React 19.3 (stable 2026-09-09, additive over 19.2) and turn on React Compiler 1.0 for new code; keep existing useMemo/useCallback as escape hatches (removing them can change the compiler's output). On React Native, React follows the RN line: 19.2 on RN 0.83–0.87, 19.3 only from RN 0.88, still a release candidate."
   when:
@@ -76,12 +76,21 @@ note: >
   69.2KB gzipped (66% smaller), microbenchmarks favor it on most scenarios especially state updates;
   deployed in production on tanstack.com and tannerlinsley.com, which is more real-world mileage than
   the other experimental runtimes here have. TSRX compiles to React/Preact/Solid.
+  PREACT 11 (2026-09-30 per npm; verified vs the release post and the v11 upgrade guide): the
+  production small runtime took a major. Breaking: ESM-only (.mjs; the CommonJS/UMD bundles are gone,
+  `require('preact')` works only where the runtime supports require(esm)); TypeScript 5.1 minimum;
+  defaultProps and automatic `px` suffixing moved out of core into preact/compat; render()'s third
+  argument and Component.base removed; SuspenseList removed from compat; useRef needs an initial
+  value; useEffect cleanup on unmount runs after paint. New: Hydration 2.0, refs forwarded as plain
+  props, Object.is for hook arguments. → A React app swapped onto Preact through preact/compat keeps
+  most of its behaviour; code written against Preact core directly is what migrates.
 
   RB-E-SECURITY owns the RSC/Server-Function CVEs and Trusted Types; RB-E-META-FRAMEWORKS owns how
   RSC is productised; RB-E-STATE owns how the Compiler changes store choice; RB-E-RN-VERSIONS owns the
   RN release line.
 
   HISTORY:
+  2026-10-08 REOPENED: Preact 11.0.0 stable — ESM-only, TS 5.1+, defaultProps/px suffixing moved to preact/compat.
   2026-10-08 CORRECTED: the Aurora Scharff "global hooks" reading (added 2026-10-01) was dropped — the post was unpublished (404, absent from the author's RSS, no Wayback snapshot).
   2026-10-01 CORRECTED: @tanstack/redact's figures replaced with verified ones (0.1.0, 23.3KB vs
   React's 69.2KB gzipped, synchronous not concurrent, useOptimistic/useFormStatus no-ops, production
@@ -94,7 +103,7 @@ note: >
   2026-06-25 CHALLENGED → SURVIVES: adversarial stress test; caveat applied — don't strip existing memoization when enabling the Compiler.
 defer_to_skill: engineering-principles
 doc: "RB-E-REACT-CORE.md"   # long-form Explanation entry in content_dir
-updated: 2026-10-08   # dropped the Aurora Scharff "global hooks" reading (post unpublished: 404, no Wayback snapshot); prior 2026-10-01: @tanstack/redact figures corrected + verified (0.1.0); prior 2026-09-24: RN 0.88 status moved to rc.2 (2026-09-22) and React-on-native ranges verified vs npm peer deps (0.83–0.87 → ^19.2, 0.88 RC → ^19.3) · Vidact added to the experimental-runtimes lead list (2nd sighting: TWiR #296 + React Digest #2370); prior 2026-09-21: dated the 19.3-on-native answer: RN 0.88 (RC 2026-09-16) is the line that syncs React 19.3.0
+updated: 2026-10-08   # Preact 11.0.0 (ESM-only, TS 5.1+, compat moves); earlier today: dropped the Aurora Scharff "global hooks" reading (post unpublished: 404, no Wayback snapshot); prior 2026-10-01: @tanstack/redact figures corrected + verified (0.1.0); prior 2026-09-24: RN 0.88 status moved to rc.2 (2026-09-22) and React-on-native ranges verified vs npm peer deps (0.83–0.87 → ^19.2, 0.88 RC → ^19.3) · Vidact added to the experimental-runtimes lead list (2nd sighting: TWiR #296 + React Digest #2370); prior 2026-09-21: dated the 19.3-on-native answer: RN 0.88 (RC 2026-09-16) is the line that syncs React 19.3.0
 reading:
   - title: "Avoiding Server Component Waterfall Fetching with React 19 cache()"
     url: "https://aurorascharff.no/posts/avoiding-server-component-waterfall-fetching-with-react-19-cache/"
@@ -163,6 +172,8 @@ detect_source:   # source-level signals owned by this entry (regex over repo sou
     hint: "React Compiler 1.0 (stable) memoizes automatically — adopt it for new code instead of growing the hand-memoization surface; KEEP existing useMemo/useCallback when enabling (removal can change output — see reading: 'React Compiler at Eighteen Months')"
     unless_dep: ["babel-plugin-react-compiler", "react-compiler-runtime"]
 sources:
+  - "https://preactjs.com/blog/preact-11/"
+  - "https://preactjs.com/guide/v11/upgrade-guide"
   - "https://github.com/react/react-native/releases/tag/v0.88.0-rc.1"
   - "https://github.com/react/react-native/releases/tag/v0.88.0-rc.2"
   - "https://registry.npmjs.org/react-native"

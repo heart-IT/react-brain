@@ -8,18 +8,20 @@ platforms: [react, react-native]
 options:
   - { name: "Victory Native (XL)", tradeoff: "RN; Skia-backed (peers @shopify/react-native-skia + Reanimated + Gesture Handler); mature, broad chart types. 42.0.1 (2026-08-31, verified vs npm 2026-09-24) is a floor-raise major: Skia >=2.6.0 <3.0.0 and Reanimated >=3.19.1; on older Skia/Reanimated stay on 41.x. See note: VICTORY NATIVE 42" }
   - { name: "react-native-gifted-charts", tradeoff: "RN; declarative, quick to adopt; renders through react-native-svg, not Skia (peer verified vs npm 2026-09-24; latest 1.4.78, 2026-08-10)" }
-  - { name: "react-native-skia (build-your-own)", tradeoff: "RN; max control + perf, more code. Its package name will change when its author's fork publishes — see note: SKIA STEWARDSHIP" }
+  - { name: "react-native-skia (build-your-own)", tradeoff: "RN; max control + perf, more code. Now published as `react-native-skia` (3.x Graphite; v2 line as react-native-skia@2) — but Victory Native XL and react-native-livechart still peer on @shopify/react-native-skia, so a chart stack stays on the old name for now. See note: SKIA STEWARDSHIP" }
   - { name: "react-native-livechart", tradeoff: "RN; Skia + Reanimated + Gesture Handler; realtime/finance focus, crosshair scrubbing — newer/niche; 4.23.0 (2026-09-22, verified vs npm 2026-09-24) peers Reanimated >=4 and Skia >=2.6.0" }
   - { name: "react-native-graph (Margelo)", tradeoff: "RN; Skia-based LINE graphs with gesture scrubbing; rebooted at v1.2 (2026-04-15) onto current Skia APIs after ~2y dormancy and has shipped since (1.4.0, 2026-08-24, verified vs npm + releases 2026-09-24) — line-focused, check it covers your chart types" }
   - { name: "Recharts / visx / Chart.js", tradeoff: "web; visx = low-level D3 primitives (4.0.0), Recharts = batteries-included (3.10.1), both current (verified vs npm 2026-09-24). Chart.js is carried for detection and not graded against them. The legacy web `victory` package is not one of these — it is dormant, see note: VICTORY (WEB)" }
+  - { name: "TanStack Charts (NEW, 1.0)", tradeoff: "web (and experimental RN): marks + scales + axes (grammar-of-graphics, Observable Plot lineage) from the org behind Query/Table/Router; 1.0.0 (2026-10-03, verified vs npm + the v1.0.0 release) is a compatibility contract for the documented public API; SVG by default, Canvas as a separate renderer; React via @tanstack/react-charts 1.0.0. React Native 'remains experimental' (optional peers react-native ^0.86 + react-native-svg 15.15.4+). No adoption signal yet. See note: TANSTACK CHARTS" }
 recommend:
-  default: "RN: Victory Native (XL) for standard charts; react-native-skia when you need custom/realtime rendering. Web: Recharts (batteries-included) or visx (low-level D3). Pin Skia-backed chart stacks while Skia changes package name (RB-E-ANIMATION)."
+  default: "RN: Victory Native (XL) for standard charts; react-native-skia when you need custom/realtime rendering. Web: Recharts (batteries-included) or visx (low-level D3). Skia-backed chart stacks stay on @shopify/react-native-skia (≤2.14) until Victory Native XL / livechart repoint to the renamed react-native-skia (RB-E-ANIMATION)."
   when:
     - "realtime/finance RN charts → Victory Native XL, else react-native-graph for scrubbing line charts, else react-native-livechart (all Skia-based; the latter two newer/niche)"
     - "RN app on Skia below 2.6.0 or Reanimated below 3.19.1 → Victory Native 41.x (pinned; 42 raises both floors)"
     - "RN team wanting the quickest declarative adoption without a Skia dependency → react-native-gifted-charts (SVG-rendered)"
     - "fully custom web viz → visx"
     - "quick standard web charts → Recharts"
+    - "web charts from the TanStack stack with a 1.0 API contract → TanStack Charts (new; no adoption signal yet; RN support experimental)"
     - "existing Chart.js web code → Chart.js (keep it; this entry does not grade it against Recharts/visx)"
     - "heavy Skia/Reanimated perf → react-native-best-practices (owns render-perf depth)"
 note: >
@@ -42,7 +44,11 @@ note: >
   archived. Nothing is deprecated today (2.12.0 shipped 2026-09-16, after the announcement). The
   exposure here is broad rather than deep: Victory Native XL, react-native-graph and
   react-native-livechart all render THROUGH Skia, so a rename propagates to their peer ranges, not
-  just to your own dependency list → pin across the transition window.
+  just to your own dependency list → pin across the transition window. 2026-10-08: the rename
+  LANDED — `react-native-skia` 3.x (and @2 for the v2 line) — while victory-native 42.0.1 still
+  peers @shopify/react-native-skia >=2.6.0 <3.0.0 and react-native-livechart 4.26.0 peers
+  @shopify/react-native-skia >=2.6.0 (both verified vs npm), so those stacks hold the old name;
+  react-native-graph 1.4.0 declares no Skia peer at all.
 
   DEFAULT CHALLENGED (2026-08-18, verified vs the npm API and GitHub): react-native-gifted-charts
   ships weekly (1.4.78, 2026-08-10) and had more stars (1,362 vs 1,210), so should it take the RN
@@ -64,16 +70,22 @@ note: >
   called "ready to be field-tested" at 0.16 — a charting entrant from the org behind Query, Router,
   Table, Form and AI in this corpus; 0.18.0 adds renderer-neutral radial gradients with SVG and React
   Native fill support. NOT an option yet: alpha, no adoption signal; weigh it against the rows above
-  at 1.0.
+  at 1.0. 2026-10-08: 1.0.0 SHIPPED (2026-10-03, verified vs npm, the v1.0.0 release and Tanner
+  Linsley's announcement): the release "establish[es] the TanStack Charts 1.0 compatibility contract
+  for documented public APIs, extension protocols, framework support, and renderer behavior" and
+  says "React Native remains experimental"; SVG is the default renderer with Canvas imported
+  separately; no bundle figures were published. So it enters as a web option row, not the default:
+  the stability contract is new, the adoption signal is still zero.
 
   HISTORY:
+  2026-10-08 REOPENED: TanStack Charts 1.0 (web option row; RN experimental); the Skia rename landed and Victory Native XL / livechart still peer on the @shopify name.
   2026-09-01 CORRECTED: the "Victory Native XL is slower-moving — watch it" caveat from the
   2026-08-18 challenge retired; v42 shipped two months after it.
   2026-08-18 CHALLENGED → WEAKENED: the RN default (Victory Native XL over gifted-charts) survived on
   downloads and substrate; the web `victory` package was reclassified from slow to dormant.
 defer_to_skill: react-native-best-practices  # Skia/Reanimated render-perf depth
 doc: "RB-E-CHARTS.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-24   # react-native-graph 1.4.0 + @tanstack/charts 0.18.0 refreshed, gifted-charts SVG substrate + livechart peers (npm); prior 2026-09-21: Skia stewardship pointer — Shopify leaves RN, library moves to its author under a new name (every Skia-backed chart option inherits it)
+updated: 2026-10-08   # TanStack Charts 1.0 option row; Skia rename landed (chart stacks hold @shopify ≤2.14 on their peers); prior 2026-09-24: react-native-graph 1.4.0 + @tanstack/charts 0.18.0 refreshed, gifted-charts SVG substrate + livechart peers (npm); prior 2026-09-21: Skia stewardship pointer — Shopify leaves RN, library moves to its author under a new name (every Skia-backed chart option inherits it)
 reading:
   - title: "Agentic Coding: Bet on the Primitives"
     url: "https://www.robinwieruch.de/agentic-coding-bet-on-primitives/"
@@ -92,10 +104,13 @@ reading:
     by: "William Candillon (Shopify)"
     what: "How RN Skia renders graphics — incl. the canonical high-density line-chart-as-GPU-texture example, JSI, immutable display lists, a unified WebGPU backend. The rendering model under Victory Native XL and build-your-own Skia charts."
     claim: "You ship Skia-backed RN charts (Victory Native XL or raw react-native-skia) — the rendering model underneath: JSI, immutable display lists, a unified WebGPU backend, and the canonical high-density line-chart-as-GPU-texture pattern."
-    applies_when: { deps: ["victory-native", "@shopify/react-native-skia"], platforms: [react-native] }
+    applies_when: { deps: ["victory-native", "@shopify/react-native-skia", "react-native-skia"], platforms: [react-native] }
 sources:
   - "https://shopify.engineering/back-to-native"
   - "https://github.com/TanStack/charts/releases/tag/v0.16.0"
+  - "https://github.com/TanStack/charts/releases/tag/v1.0.0"
+  - "https://tanstack.com/blog/tanstack-charts-1-0"
+  - "https://registry.npmjs.org/react-native-livechart/latest"
   - "https://www.robinwieruch.de/agentic-coding-bet-on-primitives/"
   - "https://registry.npmjs.org/victory-native/latest"
   - "https://registry.npmjs.org/react-native-gifted-charts/latest"

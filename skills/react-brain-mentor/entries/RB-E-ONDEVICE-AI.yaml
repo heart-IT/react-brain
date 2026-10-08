@@ -6,19 +6,19 @@ status: reviewed   # long-form entry written + source-checked → encyclopedia/R
 confidence: low
 platforms: [react-native]
 options:
-  - { name: "react-native-executorch", tradeoff: "cross-platform on-device models (Meta ExecuTorch) with per-silicon delegates and worklet-callable JSI; tool-calling/embeddings since 0.4, OCR since 0.3. 0.10.2 (2026-09-11, verified vs npm 2026-09-24); 0.10 was a GROUND-UP REWRITE, see note: EXECUTORCH 0.10." }
+  - { name: "react-native-executorch", tradeoff: "cross-platform on-device models (Meta ExecuTorch) with per-silicon delegates and worklet-callable JSI; tool-calling/embeddings since 0.4, OCR since 0.3. 0.10.5 (2026-10-06, verified vs npm 2026-10-08); 0.10 was a GROUND-UP REWRITE, and it still pins react-native-worklets <0.13, which rules out Reanimated 4.7 — see note: EXECUTORCH 0.10." }
   - { name: "@react-native-ai/apple", tradeoff: "Apple on-device LLM + SpeechAnalyzer (iOS 26); zero cloud, no model to ship; RN 0.80+ (preview). 0.12.0 (2026-01-28, verified vs npm 2026-09-24): eight months without a release, so the preview label is doing real work." }
   - { name: "@react-native-ai/adk", tradeoff: "Google Gemini on ANDROID via the Agent Development Kit: on-device Gemini Nano + cloud models behind one Vercel-AI-SDK provider; tool calling + streaming; same react-native-ai family as the Apple provider. 0.12.1 (2026-07-07, verified vs npm 2026-09-24)." }
   - { name: "react-native-nitro-mlx", tradeoff: "Apple MLX on-device LLM + TTS/STT via Nitro Modules, with tool calling (ChatSession API); iOS 26+ ONLY; v0.7 (2026-08-22, verified vs npm 2026-09-24), ~100★ — niche/early." }
-  - { name: "react-native-rag", tradeoff: "on-device RAG over ExecuTorchLLM with a local vector store. 0.9.0 (2026-05-26, verified vs npm 2026-09-24) is built against executorch's PRE-0.10 API; the 0.10 migration is an open, breaking PR (#23), not a release. See note: RAG VERSION PINCER." }
+  - { name: "react-native-rag", tradeoff: "on-device RAG over ExecuTorchLLM with a local vector store. 0.10.0 (2026-10-05, verified vs npm 2026-10-08) SHIPPED the executorch 0.10 migration: @react-native-rag/executorch 0.10.0 peers react-native-executorch ^0.10.4, @react-native-rag/op-sqlite 0.10.0 alongside; 0.9.0 remains the line for executorch 0.9. See note: RAG VERSION PINCER." }
   - { name: "@react-native-ai/llama", tradeoff: "llama.cpp behind the Vercel AI SDK provider interface: runs GGUF chat AND embedding models on one engine, which makes a hand-rolled local RAG pipeline practical; pair with react-native-nitro-sqlite + sqlite-vec (see reading: Fitting RAG in Your Pocket). 0.12.0 (2026-01-28, verified vs npm 2026-09-24)." }
   - { name: "offline speech (expo-speech-recognition / whisper.rn)", tradeoff: "speech-to-text without network; whisper.rn (0.7.2, ~800★, verified vs npm + repo 2026-07-28) is the concrete binding — whisper.cpp under the hood, and it also carries NVIDIA Parakeet ASR alongside Whisper." }
 recommend:
-  default: "Cross-platform on-device models → react-native-executorch (0.10+); Apple-only → @react-native-ai/apple (Apple's own models, nothing to ship); local RAG → @react-native-ai/llama + nitro-sqlite/sqlite-vec until react-native-rag releases executorch 0.10 support. Fast-moving (confidence: low): validate on-device perf before committing."
+  default: "Cross-platform on-device models → react-native-executorch (0.10+); Apple-only → @react-native-ai/apple (Apple's own models, nothing to ship); local RAG → react-native-rag 0.10 on executorch 0.10.4+ (packaged), or hand-roll it with @react-native-ai/llama + nitro-sqlite/sqlite-vec. Fast-moving (confidence: low): validate on-device perf before committing."
   when:
     - "offline speech-to-text → expo-speech-recognition (managed path), else whisper.rn for whisper.cpp/Parakeet models"
     - "private/offline LLM over local docs → @react-native-ai/llama + nitro-sqlite/sqlite-vec (budget RAM for generator + embedder TOGETHER; see reading)"
-    - "already on react-native-executorch 0.9 and want packaged RAG → react-native-rag 0.9.0 (built for that API; keep executorch on 0.9 under it until PR #23 ships in a release)"
+    - "packaged RAG on react-native-executorch 0.10 → react-native-rag 0.10 (@react-native-rag/executorch peers executorch ^0.10.4; still on executorch 0.9 → react-native-rag 0.9.0)"
     - "Android with Gemini (on-device Nano or cloud) via ADK → @react-native-ai/adk"
     - "iOS 26+ only and want MLX with TTS/STT in one Nitro module → react-native-nitro-mlx (early; pin)"
 note: >
@@ -27,9 +27,9 @@ note: >
   leaves model choice to your own on-device benchmarks. react-native-executorch holds the
   cross-platform lane because it is the only option that treats both platforms and multiple
   accelerators as first-class, and since 0.10 its orchestration is TypeScript you can edit.
-  Apple's own stack wins the Apple-only lane by shipping no model at all. Local RAG is assembled from
-  one engine plus a vector store, because the packaged library has not yet followed the executorch
-  rewrite. The area outpaces any settled recommendation (confidence: low) → validate on real devices.
+  Apple's own stack wins the Apple-only lane by shipping no model at all. Local RAG has a packaged
+  path again since react-native-rag 0.10 followed the executorch rewrite (2026-10-05), with one
+  engine plus a vector store as the hand-rolled alternative. The area outpaces any settled recommendation (confidence: low) → validate on real devices.
 
   EXECUTORCH 0.10 REWRITE (2026-09-08, verified vs the GitHub release + the 0.10.1 patch; npm latest
   0.10.2, 2026-09-11): the library was rebuilt on a TWO-LAYER architecture — native now exposes only
@@ -48,7 +48,9 @@ note: >
   pre-0.10 API for screen-by-screen migration, but it is marked DEPRECATED and slated for removal →
   a stepping stone, not a resting place. Take 0.10.1 (2026-09-09) or later, not 0.10.0: 0.10.1 fixes
   iOS `use_frameworks!` duplicate-header build failures and silent setup failures, and pins
-  react-native-worklets >=0.10.0 <0.13.0 (unchanged in 0.10.2). The repo also publishes
+  react-native-worklets >=0.10.0 <0.13.0 (unchanged in 0.10.2 and in 0.10.5, 2026-10-06, verified vs
+  npm 2026-10-08). Reanimated 4.7 requires Worklets 0.13.x (RB-E-ANIMATION), so an app on executorch
+  0.10.x stays on Reanimated 4.6 (Worklets 0.12.x, RN 0.83–0.87) until executorch widens that range. The repo also publishes
   vX.Y.Z-libs GitHub tags (native library builds, v0.10.5-libs on 2026-09-22); those are not npm
   versions of the package.
 
@@ -58,12 +60,18 @@ note: >
   migrate to react-native-executorch 0.10" has been open since 2026-09-17 with commits through
   2026-09-22 — breaking, unmerged and unreleased. So the risk moved from "may not follow" to "is
   following, not shipped" → roll the pipeline yourself on executorch 0.10 today, and re-check the
-  package when a release carrying PR #23 appears.
+  package when a release carrying PR #23 appears. RESOLVED 2026-10-08 (verified vs npm):
+  react-native-rag 0.10.0 published 2026-10-05 with @react-native-rag/executorch 0.10.0 (peers
+  react-native-executorch ^0.10.4, react-native-worklets >=0.10.0 <0.13.0) and
+  @react-native-rag/op-sqlite 0.10.0 → the packaged path is back on the current executorch; the
+  hand-rolled llama path stays the option when you want one engine for embedder and generator.
 
   RB-E-AI-UI owns cloud-LLM app UI; RB-E-MEDIA owns camera pipelines; RB-E-ANIMATION owns the
   worklets runtime; RB-E-NATIVE owns JSI memory and threading; RB-E-STORAGE owns the vector store.
 
   HISTORY:
+  2026-10-08 REOPENED: react-native-rag 0.10.0 shipped the executorch 0.10 migration — packaged RAG is back on the current executorch; default lists both paths.
+  2026-10-08 CORRECTED: executorch npm latest is 0.10.5 (2026-10-06); 0.10.4 (2026-09-28) became a real npm release after the 09-24 correction. Its Worklets <0.13 pin keeps executorch apps on Reanimated 4.6.
   2026-09-24 CORRECTED: executorch npm latest is 0.10.2 — the "0.10.4" cited 2026-09-21 is a v0.10.4-libs GitHub tag; @react-native-ai/apple 0.12.0 was published 2026-01-28 (2026-02-11 is the registry's metadata-modified date).
   2026-09-24 REOPENED: react-native-rag PR #23 migrates to executorch 0.10 (open, breaking, unreleased); the default local-RAG pick moved to the @react-native-ai/llama path, matching the existing when-clause.
   2026-09-21 CHALLENGED → WEAKENED: re-check — rag still 0.9.0 against executorch 0.10.x.
@@ -75,7 +83,7 @@ note: >
   2026-07-28 GAP CLOSED: whisper.rn named as the offline-ASR binding (+ Parakeet).
 defer_to_skill: null
 doc: "RB-E-ONDEVICE-AI.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-24   # corrected executorch latest (npm 0.10.2; 0.10.4 was a -libs tag) and the apple provider date (0.12.0 = 2026-01-28) · react-native-rag PR #23 migrates to executorch 0.10 (open) → default local-RAG pick is the llama path; prior 2026-09-21: RAG version pincer RE-CHECKED and unchanged: rag still 0.9.0 (2026-05-26) against executorch 0.10.4 — four months of divergence
+updated: 2026-10-08   # react-native-rag 0.10.0 ships the executorch 0.10 migration (pincer resolved); executorch 0.10.5, Worklets <0.13 pin vs Reanimated 4.7; prior 2026-09-24: corrected executorch latest (npm 0.10.2; 0.10.4 was a -libs tag) and the apple provider date (0.12.0 = 2026-01-28) · react-native-rag PR #23 migrates to executorch 0.10 (open) → default local-RAG pick is the llama path; prior 2026-09-21: RAG version pincer RE-CHECKED and unchanged: rag still 0.9.0 (2026-05-26) against executorch 0.10.4 — four months of divergence
 sources:
   - "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.10.0"
   - "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.10.1"
@@ -88,6 +96,9 @@ sources:
   - "https://registry.npmjs.org/react-native-executorch"
   - "https://registry.npmjs.org/@react-native-ai/apple"
   - "https://github.com/software-mansion-labs/react-native-rag/pull/23"
+  - "https://registry.npmjs.org/react-native-rag/latest"
+  - "https://registry.npmjs.org/@react-native-rag/executorch/latest"
+  - "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.10.5"
 reading:
   - title: "Fitting RAG in Your Pocket: Local Retrieval in React Native"
     url: "https://margelo.com/blog/fitting-RAG-in-your-pocket"

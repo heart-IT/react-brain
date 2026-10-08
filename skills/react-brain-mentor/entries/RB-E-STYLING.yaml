@@ -8,7 +8,7 @@ platforms: [react, react-native]
 options:
   - { name: "StyleSheet (RN)", tradeoff: "built-in; manual theming" }
   - { name: "NativeWind (v4 stable; v5/TW4 RC)", tradeoff: "Tailwind for RN; most-adopted (~1.3M dl/wk, npm API 2026-09-24). Stable 4.2.7 (2026-09-14) is the Tailwind v3-era line; the Tailwind-v4 line is 5.0.0-rc.0 (2026-09-13) on the preview/rc tags, not yet latest (verified vs npm 2026-09-24). See note: TAILWIND V4 ON RN" }
-  - { name: "Unistyles", tradeoff: "C++/Nitro styling engine; fast theming + variants" }
+  - { name: "Unistyles", tradeoff: "C++/Nitro styling engine; fast theming + variants. 3.4.0 (2026-10-01) raised the floor to React Native 0.81 (it now relies on ShadowNode::getFamilyShared()) — RN 0.76–0.80 stay on 3.3.x; 3.5.1 latest (verified vs the v3.4.0 release + npm peers react-native >=0.81.0)" }
   - { name: "Uniwind", tradeoff: "Tailwind w/ C++ styling engine + animated themes, from the Unistyles authors; the stable Tailwind-v4 option for RN — 1.12.0 (2026-09-04, verified vs npm 2026-09-24) peers tailwindcss >=4 and react-native >=0.81. Pro is paid (~$99/seat/yr)" }
   - { name: "@mgcrea/react-native-tailwind", tradeoff: "Babel-plugin / zero-runtime Tailwind — no JS-side styling overhead; micro-adoption (~1.1k dl/wk, npm API 2026-09-24). (The unscoped npm name react-native-tailwind is a dead 2020 package — don't cite it)" }
   - { name: "Tamagui", tradeoff: "cross-platform design-system + optimizing compiler" }
@@ -21,7 +21,7 @@ recommend:
   when:
     - "RN needing TW4 parity with web today → Uniwind (stable, requires Tailwind >=4; NativeWind's v5/TW4 line is still RC)"
     - "design-system with variants/theming shared across web + native → Tamagui"
-    - "RN-only design-system with variants/theming → Unistyles"
+    - "RN-only design-system with variants/theming → Unistyles (3.4+ needs RN 0.81+; hold 3.3.x on RN 0.76–0.80)"
     - "Meta-style atomic CSS for a large web codebase → StyleX"
     - "web+native shared styling → React Strict DOM (RB-E-CROSSPLATFORM)"
     - "new web CSS-in-JS → StyleX, else another zero-runtime library (runtime libs pay per render; styled-components v7 is actively developed but still runtime)"
@@ -53,11 +53,12 @@ note: >
   successor — RB-E-CROSSPLATFORM owns that thread.
 
   HISTORY:
+  2026-10-08 REOPENED: Unistyles 3.4 raised its floor to RN 0.81 (3.3.x for RN 0.76–0.80).
   2026-09-24 CORRECTED: NativeWind's v5/TW4 line is at RC (5.0.0-rc.0), not preview-only; StyleX is
   on 0.19, not 0.18; @mgcrea/react-native-tailwind is ~1.1k dl/wk, not <1k.
 defer_to_skill: design-system  # tokens, theme parity, a11y intrinsics
 doc: "RB-E-STYLING.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-24   # NativeWind v5 at RC, Uniwind TW4 peer floor, StyleX 0.19, styled-components v7 prerelease date (npm); prior 2026-09-21: Tailwind Labs joined Shopify — OSS stays MIT under the same team, Tailwind Plus/ui.sh closed to new sign-ups (React Status #490)
+updated: 2026-10-08   # Unistyles 3.4 RN 0.81 floor (3.3.x for RN 0.76–0.80); prior 2026-09-24: NativeWind v5 at RC, Uniwind TW4 peer floor, StyleX 0.19, styled-components v7 prerelease date (npm); prior 2026-09-21: Tailwind Labs joined Shopify — OSS stays MIT under the same team, Tailwind Plus/ui.sh closed to new sign-ups (React Status #490)
 reading:
   - title: "Styling Linear for the future with StyleX"
     url: "https://linear.app/now/styling-linear-for-the-future-stylex"
@@ -96,6 +97,7 @@ reading:
     claim: "You ship zero-runtime CSS-in-JS — the field converged on plain class-name output, so pick on atomicity and design-system features: next-yak/Linaria for a styled-components codebase, vanilla-extract or Panda for typed styles, StyleX at hundreds-of-teams scale."
     applies_when: { deps: ["linaria", "@linaria/*", "@vanilla-extract/*", "@pandacss/*", "next-yak", "@griffel/*", "@stylexjs/stylex"], platforms: [react] }
 sources:
+  - "https://github.com/jpudysz/react-native-unistyles/releases/tag/v3.4.0"
   - "https://tailwindcss.com/blog/tailwind-is-joining-shopify"
   - "https://linear.app/now/styling-linear-for-the-future-stylex"
   - "https://dx-styles.dev/blog/why-dx-styles/"

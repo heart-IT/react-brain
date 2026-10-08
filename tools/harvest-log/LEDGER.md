@@ -3049,3 +3049,164 @@ after the drop), 1 tripwire fired (Next.js 16.3.7), 2 manifests (firsthand 101 r
 Gates (re-run 2026-10-08): lint clean (2 warnings: shared YouTube URL; 14 long-form docs trail their
 entry) · rules ✓ 7 rules, 2,763 gold rows · engine 24 ✓ · eval 139/139 · verify-diff vs 54f60ec 27/27
 ok, 0 failures (5 deprecation-matcher false-positive warnings) · React Status #492 coverage ✓ 39/39.
+
+## 2026-10-08 — the Skia handover lands · Next.js 16.4 makes Cache Components the default path · react-native-rag catches executorch 0.10 · Preact 11 · TanStack Charts 1.0
+
+One week after the 10-01 pass: one firsthand manifest (120 events: 24 rule-dispositioned, 96 judged),
+seven newsletter issues (TWiR #299 and #300, RN Rewind #59 and #60, React Digest #2375 and #2380,
+Native Weekly #22), 12 entries touched, 0 new entries. React Status was re-probed at the end of the
+pass (a Thursday): `no new issue after #492 (probed 493, 494)`.
+
+PREFLIGHT: `git branch --list 'harvest/*'` showed `harvest/2026-10-01`, EMPTY (it pointed at 54f60ec)
+because that scheduled run died at max turns (250). Deleted with `git branch -d`. `tail
+tools/harvest.log` showed today's 09:00 run aborting (`HARVEST-ABORT: tracked changes in the working
+tree`, the uncommitted 10-01 work), so Tier 1 and the poll ran by hand. No firsthand manifest had TODO
+rows. The 10-01 pass was gated, corrected and given its LEDGER entry first (commit #1 of this
+session, entry above). Its stale `harvest-state.json` (React Status still at #491) was fixed before
+any prep, since `harvest prep react-status` would otherwise have re-probed #492 and refused to
+overwrite its manifest.
+
+KEEPS, each with the receipt it was verified against today:
+- THE SKIA HANDOVER LANDED (RB-E-ANIMATION owns it, with pointers in RB-E-CHARTS, RB-E-GAMES and
+  RB-E-SVG). The firsthand watch reported a `v3.1.0` release under `shopify/react-native-skia`; the
+  GitHub API now answers "Moved Permanently" for that repo (to wcandillon/react-native-skia). npm:
+  `react-native-skia` 3.0.0 (2026-10-02) through 3.1.0 (2026-10-07), with the v2 line continuing as
+  react-native-skia@2 (2.15.0). `@shopify/react-native-skia` stops at 2.14.0 (2026-10-01, which also
+  removed the mutable SkPath API) and has NO npm deprecation flag. The fork's README and migration
+  guide: v3 renders with Graphite (Vulkan on Android, minSdk 26; iOS 15.1), needs a dev build (no Expo
+  Go), drops tvOS / Android TV / Mac Catalyst, removes three Canvas props; imports change and the two
+  names must never be installed side by side. DOWNSTREAM CATCH: victory-native 42.0.1 peers
+  `@shopify/react-native-skia >=2.6.0 <3.0.0` and react-native-livechart 4.26.0 peers the @shopify
+  name, so chart stacks hold the old name. ANIMATION's tripwire waited for an npm deprecation flag
+  that has not been set, so it would never have fired. Its `then:` was done by hand: option rows,
+  when-clause, a `react-native-skia` detect row, a `@shopify/react-native-skia → react-native-skia`
+  migrate rule (urgency superseded, with the Victory/livechart hold), reading `applies_when`
+  repointed, and the tripwire row removed.
+- NEXT.JS 16.4 (RB-E-META-FRAMEWORKS; npm `latest` 16.4.0 2026-10-06 + nextjs.org/blog/next-16-4).
+  Cache Components is now recommended "for every Next.js app", create-next-app enables it, and it
+  "will become the default in Next.js 17". New: `ensureStatic` ('navigation' | 'prefetch' | 'shell'),
+  `await navigation()` / `await prefetch()` from next/cache, `next upgrade --agent`, and
+  experimental.agentUpgrade with 'security' as the default policy. Ships React 19.3. The post names no
+  security fixes. The two vulnerabilities postponed from September are recorded as still open,
+  because nothing shows they shipped (the GitHub advisories published 2026-10-07 all list 16.3.8 as
+  the patch).
+- REACT-NATIVE-RAG 0.10.0 (RB-E-ONDEVICE-AI, status flip). npm 2026-10-05:
+  @react-native-rag/executorch 0.10.0 peers react-native-executorch ^0.10.4, so the RAG VERSION
+  PINCER resolves and the default lists the packaged path again next to the hand-rolled llama one.
+  Same entry: executorch latest is 0.10.5 (2026-10-06); 0.10.4 became a real npm release on 09-28,
+  after the 09-24 "0.10.4 is only a -libs tag" correction. NEW CONSTRAINT: executorch still peers
+  react-native-worklets >=0.10.0 <0.13.0 while Reanimated 4.7 needs Worklets 0.13.x, so an executorch
+  app stays on Reanimated 4.6 (Worklets 0.12.x, RN 0.83–0.87). Read from npm peers of executorch
+  0.10.5, Reanimated 4.6.0 and 4.7.1.
+- PREACT 11 (RB-E-REACT-CORE; npm 11.0.0 2026-09-30 + the release post + the v11 upgrade guide;
+  TWiR #299). ESM-only (CJS/UMD gone), TS 5.1 minimum, defaultProps and px auto-suffixing moved to
+  preact/compat, render()'s replaceNode and Component.base removed, refs forwarded as props.
+- TANSTACK CHARTS 1.0 (RB-E-CHARTS; npm @tanstack/charts and @tanstack/react-charts 1.0.0
+  2026-10-03 + the v1.0.0 release + the announcement). The entry's own note said to weigh it "at
+  1.0". It enters as a web option row with a when-clause, not the default: the release says "React
+  Native remains experimental" and there is still no adoption signal.
+- UNISTYLES 3.4 RN FLOOR (RB-E-STYLING; the v3.4.0 release + npm peers): minimum React Native 0.81,
+  with RN 0.76–0.80 staying on 3.3.x.
+- PAKE 3.17.3 (RB-E-DESKTOP; the V3.17.3 release + npm): native capabilities are now granted only to
+  the exact packaged origin, so package the final landing URL.
+- APEX (RB-E-AI-DEVTOOLS, NEW/vendor row + when-clause; Callstack's GA post). An RN/Next.js-
+  specialized coding model on an open-weight Qwen base at $0.50 in / $3.00 out per M tokens. Every
+  number is vendor-reported (no React Native Evals score published), and the row says so. It was a
+  beta-gated too-early skip in twir-298.
+- TESTERARMY CORRECTED (RB-E-AI-DEVTOOLS; TWiR #300 → github.com/tester-army/e2e + npm). The row said
+  "Not open source". TesterArmy publishes the Apache-2.0 `e2e` framework (~7.9k★; npm e2e 0.18.0,
+  2026-10-06, ~61k downloads/week): agent steps replay without model calls, and its mobile engine
+  runs on agent-device. The hosted PR agent stays commercial.
+- READINGS (3): kettanaito "Electron to PWA: There and Back Again" (RB-E-DESKTOP; the first source
+  for the PWA-vs-Electron rows, which the 09-24c audit listed as unsourced); jjenzz "Making React
+  Context Cheap with React Compiler" (RB-E-STATE; STATE had no Compiler coverage although REACT-CORE
+  delegates that thread to it; narrow, author-flagged benchmark); Marmelab "Real-time and offline are
+  the same problem" (RB-E-DATA; reopened from react-status-491's too-early skip on its stated signal,
+  a second independent sighting in Digest #2380; prototype-based and vendor-adjacent, both stated in
+  the entry).
+
+NOTABLE SKIPS (reopen signals in the manifests):
+- VITE 8.3.3 + same-day backports 8.2.4 / 8.1.6 / 7.3.7 / 6.4.4 (2026-10-06), including "server: check
+  `fs.serve` for `?vite-wasm-instance`". This looks like a security release, but no GHSA was published
+  as of today (advisories API checked). too-early; reopen: a vite GHSA naming these versions.
+- "Coinbase is going native too" (TWiR #300, an x.com post): unverifiable. A web search found only
+  undated Coinbase job postings about a native rewrite. If confirmed, it is a CROSSPLATFORM datapoint
+  next to Shopify.
+- Mobile Dev for Codex (Callstack/Margelo, preview, built on agent-device) is pre-ship. Motion 14 is a
+  major that only removes internal APIs. Waku rc.3 (breaking defineRouter redesign inside the RC)
+  stays a prerelease skip, because META only claims "1.0-rc". Panda CSS v2, Lynx 4.0, Playwright 1.64
+  WebMCP, RN 0.88 rc.4, whisper.rn 0.8 rc and EAS Simulator (fourth+ sighting, still "early access.
+  Join the waitlist") were also skipped. @tanstack/markdown 1.0.0 was verified on npm (recurring 6×
+  on the watchlist) and still has no entry that owns general markdown rendering.
+
+ADVOCATE PASS over my own skips: Vite backports, Coinbase, Mobile Dev, Motion 14, Panda v2, Live
+Activities push-to-start (NATIVE-UI already holds an end-to-end Live Activities reading with the
+APNs-push tradeoff), Playwright WebMCP, ReviewBench, Effect 4. 0 flips. The one reopen (Marmelab)
+fired on its own recorded signal, not on advocacy.
+
+SPOT-CHECK of the previous pass (react-status-492.md, firsthand-2026-10-01.md): both `cap` skips
+re-adjudicated. react-live v5 is UPHELD (still no docs/playground entry). github.blog "+N more" is
+flagged for the THIRD time today. DECISION: keep the host, because it originated the 10-01 GitHub
+Security Lab keep; the new reopen is a fourth consecutive pass with zero keeps from it. 2 random
+skips UPHELD: @tanstack/react-query 5.104 (CHANGELOG: build with Vite 8 only) and lexical 0.52
+(0.x minor with routine breaking items). 2 random rule rows correct: mobx 7.0.5 npm-patch and Next
+16.4.0-canary.54 gh-nightly. 0 corrections, 0 rule changes. aurorascharff.no reported "+17 more
+new posts": the feed's lastId pointed at the unpublished 10-01 post, so the whole RSS window
+re-reported. These are re-sightings, not volume, and the host stays.
+
+WATCHLIST reviewed: registry.npmjs.org rows are noise as expected. @tanstack/markdown was handled
+above. The Apex intro post (skipped 08-18) is now superseded by the GA keep. Nothing else re-triaged.
+
+TIER 1 (2026-10-08): pulse 502 URLs, 500 ok, 0 DEAD, 2 blocked (HTTP 429 on github.com auth0
+CHANGELOG and react-devtools CHANGELOG), 0 unreachable, 0 aging. Stack drift: ourpot's P2P set no
+longer includes Autobase (multiwriter), and it now shows DESKTOP: Pear (mobile). Signals: the same 5
+flags as 10-01 (react-router out-downloads TanStack Router 2.7×; axios vs nitro-fetch; expo-image-
+picker out-downloads expo-camera 2.0×; d3 and react-native-keychain STALE). Census: ledger adopted
+XState. No entry cites ledger's state stack, so nothing to correct.
+
+PROCESS LEARNINGS:
+- The gold parser reads a row as kept only when it says `**kept**` (bold). Since about 2026-08-24
+  the firsthand and newsletter manifests write plain `kept`, so their keeps count as skips in bench
+  gold and in `rules --check`. It also made `harvest prep` carry three of today's own firsthand keeps
+  into twir-300 as "previously skipped (other)". This pass's manifests use `**kept**`. With the bold
+  form, a pin-guarded patch or rc keep on an npm row would collide with npm-patch/npm-prerelease in
+  the replay, which runs without the pin-guard. So the executorch keep is anchored on its GitHub
+  release row, and the npm row is the duplicate-anchor `already-held`.
+- A tripwire on `deprecated: true` can wait forever. Shopify handed Skia over without flagging the old
+  package. Watch the new name (or the repo redirect), not only the old name's flag.
+- A firsthand RSS cursor that points at an unpublished post resets the feed: everything in the window
+  re-reports as new.
+- My own dedupe helper stripped query strings, so every YouTube link looked held. One row
+  (rn-rewind-60 "Long live React Native!") was caught and corrected before the gates.
+
+FOLLOW-UPS (not done here):
+1. Tooling: the `**kept**` convention split (parser vs. the last ~20 manifests). Either teach
+   `parseGoldManifest`/`replayGold`/verify-diff to read plain `kept →`, or normalize the old
+   manifests. Today's bench gold and rule admission undercount keeps.
+2. Tooling: verify-diff's deprecation matcher still substring-matches (`react-native`, `expo`, `ai`);
+   7 false-positive warnings this pass, 5 on the 10-01 diff.
+3. Tooling: the scheduled runner's max-turns death left no gate record and a stale state file;
+   consider a post-run `npm test` + state check in `tools/local-harvest.sh`.
+4. Tooling: `harvest watchlist` lists registry.npmjs.org version-event URLs as recurring skips.
+5. Docs: 20 long-form `encyclopedia/*.md` docs now trail their entries (lint warning; ANIMATION,
+   CHARTS, DATA, DESKTOP, META-FRAMEWORKS, ONDEVICE-AI and others changed today).
+6. Watch: Vite 8.3.3 backports (GHSA pending); Coinbase native rewrite (unconfirmed); victory-native /
+   livechart repointing to `react-native-skia` (then CHARTS' hold lifts); executorch widening its
+   Worklets range (then the Reanimated 4.6 hold lifts); the two postponed September Next.js
+   vulnerabilities.
+7. React Digest measurement: #2375 and #2380 originated 0 of 26 links between them. #2380 produced one
+   corroborating keep (Marmelab, second sighting), so the pre-committed rule ("both yield zero") is
+   not triggered by keeps but would be by originations. That is a maintainer call.
+8. The 2026-09-24c follow-up list (detect rows for @base-ui/react, react-native-webgpu,
+   enriched-html/platejs; migrate rows; resolver label bugs) still stands.
+
+Delta: 12 entries touched (ANIMATION · CHARTS · GAMES · SVG · META-FRAMEWORKS · STYLING · ONDEVICE-AI ·
+DESKTOP · AI-DEVTOOLS · REACT-CORE · STATE · DATA), 0 new entries, 3 new readings (189 → 192 reading
+URLs), +1 detect row (238 → 239), +1 migrate rule, 0 tripwires fired / 1 retired with its then: done
+by hand (Skia) / 0 added, 8 manifests (firsthand 120 events: 24 rule + 96 judged; TWiR #299 62 links;
+TWiR #300 57; RN Rewind #59 22; #60 21; React Digest #2375 13; #2380 13; Native Weekly #22 52).
+Sources digested: TWiR 32 → 34, RN Rewind 58 → 60, React Digest 27 → 29, Native Weekly 11 → 12,
+React Status 33 (no new issue). Gold rows 2,763 → 3,123.
+Gates: lint clean (2 warnings: shared YouTube URL; 20 long-form docs trail their entry) · rules ✓ 7
+rules, 3,123 gold rows · engine 24 ✓ · eval 139/139 · coverage 0 unaccounted ×7 · verify-diff 27/27
+added receipts ok, 0 failures (7 deprecation-matcher false positives) · watchlist reviewed.

@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-01",
+  "date": "2026-10-08",
   "fingerprints": {
     "ledger-hr": {
       "RB-E-COMPONENT-LIBS": "Radix UI",
@@ -18,10 +18,11 @@
     "ourpot": {
       "RB-E-STORAGE": "AsyncStorage, expo-secure-store (secrets)",
       "RB-E-NAV": "React Navigation",
-      "RB-E-P2P": "Autobase (multiwriter), Corestore, Holepunch (Hypercore stack), blind-pairing, hrpc",
+      "RB-E-P2P": "Corestore, Holepunch (Hypercore stack), blind-pairing, hrpc",
       "RB-E-NATIVE": "Expo (managed native)",
       "RB-E-MEDIA": "QR generation (qrcode-svg), expo-camera, expo-image-picker",
       "RB-E-POLISH": "expo-haptics, expo-splash-screen",
+      "RB-E-DESKTOP": "Pear (mobile, Holepunch)",
       "RB-E-ANIMATION": "Gesture Handler",
       "RB-E-SVG": "react-native-svg",
       "RB-E-TESTING": "brittle (Holepunch TAP)",

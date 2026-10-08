@@ -8,13 +8,13 @@ platforms: [react, react-native]
 options:
   - { name: "react-native-svg (Software Mansion)", tradeoff: "The de-facto RN SVG primitive: declarative <Svg>/<Path>, underpins most RN charts + icon libs; iOS/Android/macOS/Windows + RN-Web. 15.15.5 (2026-05-11, verified vs npm); 15.13+ needs RN >=0.78 — see note: SVG RN FLOOR." }
   - { name: "react-native-svg-transformer (kristerkari)", tradeoff: "Metro transformer to import designer .svg files directly as React components; pairs with react-native-svg (peer >=12). 1.5.3 (2026-01-25, verified vs npm)." }
-  - { name: "@shopify/react-native-skia", tradeoff: "GPU canvas: renders SVG (ImageSVG / Skia.SVG.MakeFromString, with limits: no CSS / <text> / <animate>) and does animated/custom vector drawing beyond declarative SVG. 2.12.0 (2026-09-16, verified vs npm); stewardship change — see note: SKIA STEWARDSHIP; RB-E-ANIMATION owns it." }
+  - { name: "react-native-skia (formerly @shopify/react-native-skia)", tradeoff: "GPU canvas: renders SVG (ImageSVG / Skia.SVG.MakeFromString, with limits: no CSS / <text> / <animate>) and does animated/custom vector drawing beyond declarative SVG. Renamed 2026-10: `react-native-skia` 3.x (Graphite) or @2 for the v2 line; @shopify stops at 2.14.0 (verified vs npm 2026-10-08) — see note: SKIA STEWARDSHIP; RB-E-ANIMATION owns it." }
   - { name: "Redraw (William Candillon) — EXPERIMENTAL", tradeoff: "Next-gen 2D graphics on WebGPU/TypeGPU: variable-stroke Bézier paths, vector feathering, physically-based 2D; shaders authored as typed TS functions. Technical preview — not on npm (subscriber early access), unstable API. Watch, not a production bet." }
   - { name: "icon sets — lucide-react-native / @react-native-vector-icons/*", tradeoff: "lucide-react-native = Lucide (1.48.0, 2026-09-24; peer react-native-svg 12–15); @react-native-vector-icons/* = per-family scoped sets (13.x, 2026-09-07; both verified vs npm). @expo/vector-icons is DEPRECATED in Expo SDK 56 — use the scoped packages directly." }
   - { name: "react-native-vector-icons (legacy)", tradeoff: "The monolith is SUPERSEDED by per-family @react-native-vector-icons/* (v11+) and flagged deprecated on npm at 10.3.0 (2025-07-23, verified vs npm); a codemod migrates from it and from @expo/vector-icons." }
   - { name: "web: native <svg>", tradeoff: "No library needed on React DOM; icon sets (Lucide etc.) ship as plain React components." }
 recommend:
-  default: "React Native → react-native-svg for declarative vector graphics; import static .svg assets via react-native-svg-transformer; icons from lucide-react-native or per-family @react-native-vector-icons/* (on Expo too — @expo/vector-icons is deprecated in SDK 56). Drop to @shopify/react-native-skia only for GPU-accelerated / animated / custom canvas drawing. Web → native <svg>, no library."
+  default: "React Native → react-native-svg for declarative vector graphics; import static .svg assets via react-native-svg-transformer; icons from lucide-react-native or per-family @react-native-vector-icons/* (on Expo too — @expo/vector-icons is deprecated in SDK 56). Drop to react-native-skia (formerly @shopify/react-native-skia) only for GPU-accelerated / animated / custom canvas drawing. Web → native <svg>, no library."
   when:
     - "declarative vector shapes → react-native-svg (15.13+ on RN 0.78+; older RN pins an older 15.x)"
     - "import designer .svg files as components → react-native-svg-transformer"
@@ -42,16 +42,19 @@ note: >
   tripwire): Shopify is leaving React Native and sponsors react-native-skia through the end of 2026;
   the author keeps developing it, forks it and republishes under a new name, then the Shopify repo
   is archived. Nothing is deprecated today (2.12.0 shipped 2026-09-16). Here Skia is only the escape
-  hatch, so the blast radius is small — react-native-svg, the default, is unaffected.
+  hatch, so the blast radius is small — react-native-svg, the default, is unaffected. 2026-10-08:
+  the rename landed — install `react-native-skia` (3.x Graphite, or @2 for the v2 line); the
+  @shopify name stops at 2.14.0.
 
   HISTORY:
+    2026-10-08 REOPENED: Skia escape hatch renamed — react-native-skia 3.x / @2; @shopify stops at 2.14.0.
     2026-09-24 CORRECTED: "RN 0.78+" read as a floor for all of react-native-svg 15.x — it applies to 15.13+; react-native-vector-icons npm deprecation flag recorded.
     2026-09-21 REOPENED: Skia stewardship pointer added (affects only the GPU escape-hatch clause).
     2026-07-09 GAP CLOSED: Expo SDK 56 deprecates @expo/vector-icons (verified vs the SDK 56 changelog).
     2026-06-25 GAP CLOSED: entry created after the evidence-loop self-audit flagged react-native-svg (ourpot, bitbarter) with no entry.
 defer_to_skill: react-native-best-practices
 doc: "RB-E-SVG.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-24   # react-native-svg RN floor made per-version (15.13+ → RN 0.78); vector-icons npm deprecation; version pins; prior 2026-09-21: Skia stewardship pointer — affects only the GPU escape-hatch clause, not the react-native-svg default
+updated: 2026-10-08   # Skia escape hatch renamed to react-native-skia (3.x / @2); prior 2026-09-24: react-native-svg RN floor made per-version (15.13+ → RN 0.78); vector-icons npm deprecation; version pins; prior 2026-09-21: Skia stewardship pointer — affects only the GPU escape-hatch clause, not the react-native-svg default
 reading:
   - title: "Hello, Project Redraw"
     url: "https://wcandillon.dev/article/hello-project-redraw"

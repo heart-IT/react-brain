@@ -1,5 +1,5 @@
 {
- "date": "2026-10-01",
+ "date": "2026-10-08",
  "cohort": {
   "fetched": 34,
   "total": 34,
@@ -256,6 +256,7 @@
     "TanStack Query",
     "VisionCamera",
     "Worklets",
+    "XState",
     "axios",
     "expo-haptics",
     "gorhom bottom-sheet",
@@ -1186,6 +1187,7 @@
     "Zustand": 4,
     "Redux Toolkit": 8,
     "Jotai": 5,
+    "XState": 1,
     "MobX (7.x line)": 4,
     "nuqs": 4,
     "Valtio": 1

@@ -50,7 +50,10 @@ note: >
   offline possible. Zero 1.9.0 (2026-08-14), with React Native support; npm dates 1.0.0 to
   2026-03-24. TinyBase 10.0.1 (2026-09-24, a major; 9.0.0 was 2026-07-03). All three are an
   architecture commitment for products where offline or realtime is core, not a way to avoid a
-  loading spinner.
+  loading spinner. What none of them hands you (the Marmelab reading, 2026-10-08): offline and
+  realtime are one reconciliation problem, records need client-generated IDs (UUIDv7) from day one,
+  Zero and Verdant resolve conflicts as last-write-wins, and no library ships rollback, retry or a
+  conflict UI — budget that work.
 
   RSC TEST (verified vs the Aurora Scharff reading, which owns the mechanism): in a server-rendered
   web app a client cache earns its place only when data changes on its own; otherwise it means
@@ -60,12 +63,19 @@ note: >
   RB-E-STATE owns client state.
 
   HISTORY:
+  2026-10-08 GAP CLOSED: conflict resolution / client IDs / mutation recovery facet of LOCAL-FIRST — Marmelab reading (reopened on its second independent sighting).
     2026-09-24 CORRECTED: PR #10658 deprecates fetchQuery as well as prefetchQuery/ensureQueryData, via @deprecated tags; npm dates Zero 1.0.0 to 2026-03-24, not 2026-06.
     2026-06-25 CHALLENGED → SURVIVES (high): RSC complements the client cache; TanStack DB builds on TanStack Query; Zero 1.0 ships React Native support.
 defer_to_skill: null
 doc: "RB-E-DATA.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-24   # Apollo 4.3 (TS 5.9 floor), Zero 1.9, TinyBase 10, TanStack DB 0.9; fetchQuery also deprecated; prior 2026-09-01: TanStack Query 5.102: query()/infiniteQuery() supersede fetchQuery/prefetchQuery/ensureQueryData (additive) — React Status #488
+updated: 2026-10-08   # LOCAL-FIRST: Marmelab offline=realtime reading (client IDs, LWW conflicts, no built-in rollback); prior 2026-09-24: Apollo 4.3 (TS 5.9 floor), Zero 1.9, TinyBase 10, TanStack DB 0.9; fetchQuery also deprecated; prior 2026-09-01: TanStack Query 5.102: query()/infiniteQuery() supersede fetchQuery/prefetchQuery/ensureQueryData (additive) — React Status #488
 reading:
+  - title: "Real-time and offline are the same problem"
+    url: "https://marmelab.com/blog/2026/09/09/real-time-and-offline-are-the-same-problem.html"
+    by: "Matthieu Hochlander (Marmelab)"
+    what: "Treats offline support and real-time sync as one problem, divergent-state reconciliation, and walks it through Verdant, TanStack DB and Zero on two prototypes. Concrete consequences: local mutations need client-generated IDs (UUIDv7 suggested), so allowing them later is a breaking migration; Verdant and Zero effectively resolve conflicts as last-write-wins and none of the three offers built-in rollback, retry or user-facing conflict choices; TanStack DB leaves the sync layer to you. Prototype-based (no production data) and written by the React Admin maintainers, which the article does not hide."
+    claim: "You're adding offline or realtime sync: plan both as one reconciliation layer — client-generated IDs from day one, and your own conflict UI and mutation rollback, since Zero/Verdant are last-write-wins and none ship recovery."
+    applies_when: { deps: ["@tanstack/db", "@tanstack/react-db", "@rocicorp/zero", "tinybase"], platforms: [react, react-native] }
   - title: "Reliable Query Prefetching with TanStack Router"
     url: "https://tkdodo.eu/blog/reliable-query-prefetching-with-tanstack-router"
     by: "Dominik Dorfmeister (TkDodo)"
@@ -125,6 +135,7 @@ reading:
     claim: "You ship Relay — scope it to cross-referenced entity data: config, experiments, volatile time-series, server-driven UI trees and inlined assets don't benefit from normalization, and a plain store beside Relay is strictly cheaper for them."
     applies_when: { deps: ["react-relay"] }
 sources:
+  - "https://marmelab.com/blog/2026/09/09/real-time-and-offline-are-the-same-problem.html"
   - "https://aurorascharff.no/posts/coordinating-optimistic-updates-in-nextjs/"
   - "https://github.com/TanStack/query/pull/10658"
   - "https://github.com/apollographql/apollo-client/releases/tag/%40apollo%2Fclient%404.3.0"

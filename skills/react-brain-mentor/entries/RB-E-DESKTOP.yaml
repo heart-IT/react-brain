@@ -8,7 +8,7 @@ platforms: [react]
 options:
   - { name: "Electron", tradeoff: "bundles its own Chromium + Node; largest ecosystem & most mature; deep Node/native access; heaviest install (~100–200MB)" }
   - { name: "Tauri (2.x)", tradeoff: "Rust shell using the OS native webview (no bundled Chromium) → tiny builds (from ~600KB); desktop + mobile (iOS/Android); native logic in Rust. @tauri-apps/cli 2.11.5 (2026-09-20, verified vs npm)" }
-  - { name: "Pake", tradeoff: "one-command wrapper that turns a web URL into a desktop app on Tauri; <10MB (~20x smaller than Electron); fast path to ship an existing site, not a full app framework. pake-cli 3.17.1 (2026-09-20, verified vs npm)" }
+  - { name: "Pake", tradeoff: "one-command wrapper that turns a web URL into a desktop app on Tauri; <10MB (~20x smaller than Electron); fast path to ship an existing site, not a full app framework. pake-cli 3.17.3 (2026-10-05, verified vs npm + the V3.17.3 release): native capabilities are now scoped to the exact packaged origin — package the URL a site finally lands on" }
   - { name: "Pear (Holepunch)", tradeoff: "P2P/serverless desktop+mobile runtime (Bare); no central server, content-addressed distribution; depth → holepunch-p2p-systems" }
   - { name: "Capacitor (Ionic)", tradeoff: "wraps a web app into iOS/Android (and desktop via Electron) native shells; web-first teams shipping to mobile" }
   - { name: "PWA (no shell)", tradeoff: "installable from the browser; least native integration but zero packaging — try this before reaching for a shell" }
@@ -33,12 +33,17 @@ note: >
   the webview: react-native-windows/-macos render RN code natively, GTKX renders React to GTK4 on
   Linux, and Native SDK owns its renderer. The default is the lightest shell that grants the OS
   access you need. Tauri/Pake facts are verified vs tauri.app and the Pake repo;
-  Electron/Capacitor/PWA rows are settled industry knowledge.
+  Electron/Capacitor/PWA rows are settled industry knowledge; the PWA-vs-Electron limits are sourced
+  in the Zakharchenko reading (2026-10-08).
 
 
   PAKE (2026-09-24, verified vs npm and the Pake README): a one-command web-URL→desktop wrapper
   built ON Tauri, under 10MB and ~20x smaller than an Electron equivalent; pake-cli 3.17.1
-  (2026-09-20). → Good for shipping an existing site, not for a from-scratch app.
+  (2026-09-20). → Good for shipping an existing site, not for a from-scratch app. 3.17.3 (2026-10-05,
+  verified vs the V3.17.3 release + npm) grants notifications, downloads, zoom, window controls and
+  open-in-browser only to local pages and the exact origin of the packaged URL, so a page that
+  navigates to another site loses them — package the final landing URL (the release's example:
+  https://mail.google.com, not https://gmail.com).
 
 
   RN DESKTOP (2026-07-10, verified vs npm + microsoft/react-native-windows releases; pins
@@ -85,6 +90,9 @@ note: >
 
   HISTORY:
 
+  2026-10-08 REOPENED: Pake 3.17.3 scopes native capabilities to the packaged origin; PWA-vs-Electron
+  reading added (first source for the PWA row's limits).
+
   2026-10-01 REOPENED: react-native-macos jumped 0.81.9 → 0.83.0 (first 0.83 release, syncs core RN
   0.83.10), narrowing its lag behind react-native-windows (0.84.0) from three minors to one.
 
@@ -99,8 +107,14 @@ note: >
   2026-07-10 GAP CLOSED: RN-desktop rows added (React Weekly); the entry had been web-shell-only.
 defer_to_skill: engineering-principles   # shell↔web boundary; Pear depth → holepunch-p2p-systems; shell security → RB-E-SECURITY
 doc: "RB-E-DESKTOP.md"   # long-form Explanation entry in content_dir
-updated: 2026-10-01   # react-native-macos 0.81.9 → 0.83.0 (first 0.83 release, narrows the rn-windows lag to one minor); prior 2026-09-24: Pake pin V3.12.0 → 3.17.1; Tauri/rn-windows/rn-macos pins; prior 2026-09-01: GTKX 1.5: @gtkx/forms (RHF/Adwaita) + @gtkx/i18n (gettext via react-i18next API); pin 1.2.2 → 1.6.0 — React Status #488
+updated: 2026-10-08   # Pake 3.17.3 origin-scoped capabilities; Electron↔PWA reading; prior 2026-10-01: react-native-macos 0.81.9 → 0.83.0 (first 0.83 release, narrows the rn-windows lag to one minor); prior 2026-09-24: Pake pin V3.12.0 → 3.17.1; Tauri/rn-windows/rn-macos pins; prior 2026-09-01: GTKX 1.5: @gtkx/forms (RHF/Adwaita) + @gtkx/i18n (gettext via react-i18next API); pin 1.2.2 → 1.6.0 — React Status #488
 reading:
+  - title: "Electron to PWA: There and Back Again"
+    url: "https://kettanaito.com/blog/electron-to-pwa-and-back-again"
+    by: "Artem Zakharchenko (kettanaito)"
+    what: "Six months moving an EPUB editor (Byte Binding) from Electron to a PWA and back. The PWA won on size, startup and updates, but lost on desktop basics: file associations and launch parameters blocked by open WICG bugs, APIs that differ or are missing in Safari, an installed PWA always opening in the browser it came from, no custom tray/dock menus or global hotkeys, Cmd+S/Cmd+Q reserved by the browser, no 'Open with' entry, and a hard-to-find install icon. His verdict: a PWA is a good addition to a website, not a desktop-app platform."
+    claim: "You're choosing a PWA over a desktop shell: file associations are blocked by open WICG bugs, tray/dock menus and global hotkeys are missing, Cmd+S/Cmd+Q belong to the browser, and Safari differs — fine for a website, not for a real desktop app."
+    applies_when: { platforms: [react] }
   - title: "The Conductor Rewrite: what they changed to make it fast"
     url: "https://performance.dev/the-conductor-rewrite"
     by: "Dennis Brotzky (performance.dev)"
@@ -120,6 +134,7 @@ sources:
   - "https://github.com/shirakaba/expo-desktop"
   - "https://tauri.app/"
   - "https://github.com/tw93/Pake"
+  - "https://github.com/tw93/Pake/releases/tag/V3.17.3"
   - "https://github.com/microsoft/react-native-windows/releases"
   - "https://registry.npmjs.org/pake-cli/latest"
   - "https://github.com/microsoft/react-native-macos/releases/tag/react-native-macos%400.83.0"
