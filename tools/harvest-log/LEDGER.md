@@ -2955,3 +2955,97 @@ FOLLOW-UPS (frozen fields and tooling, not changed in this pass):
 
 Gates: lint clean (1 pre-existing shared-URL warning; doc-drift warning GONE) · rules ✓ 2,623 gold
 rows · engine 24 ✓ · eval 139/139 · verify-diff 50/50 added receipts ok · frozen-field diff 0.
+
+## 2026-10-01 — Better Auth critical Magic Link CVE · TanStack Start CVE-2026-102989 · Next.js September release resolved · MSW 3.0 · jotai 3.0.1 floor (backfilled 2026-10-08)
+
+Written on 2026-10-08, after the fact. The scheduled 2026-10-01 run polled firsthand with `--manifest`,
+prepped React Status #492, edited 16 entries and then died with `Error: Reached max turns (250)`
+(`tools/harvest.log`). Its `harvest/2026-10-01` branch was EMPTY (it pointed at 54f60ec): the work sat
+in the working tree, which made the 2026-10-08 09:00 run abort (`HARVEST-ABORT: tracked changes in the
+working tree`). That work was committed as aa5dc2d (16 entries: AI-DEVTOOLS, AI-UI, ANIMATION, AUTH,
+BUILD, COMPONENT-LIBS, DESKTOP, LISTS, META-FRAMEWORKS, NETWORKING, PAYMENTS, REACT-CORE, RN-VERSIONS,
+SECURITY, STATE, TESTING; 4 Tier 1 baselines; 2 manifests) WITHOUT its gates being run, a LEDGER entry,
+or a `harvest-state.json` update. THE PASS SHIPPED WITH A RED GATE. This entry records it and the
+corrections made when the gates were finally run.
+
+PREFLIGHT (2026-10-08): the empty branch was deleted (`git branch -d`, an ancestor of main); no
+firsthand manifest had TODO rows; `firsthand-2026-10-01.md` (101 rows: 17 rule-dispositioned, 25 kept
+or duplicate-anchor kept, 1 tripwire fired) and `react-status-492.md` (39 links, 12 pre-dispositioned,
+3 keeps) were fully triaged.
+
+KEEPS, from the two manifests (receipts are in the entries; verify-diff re-checked all 27 added URLs):
+- BETTER AUTH CRITICAL (RB-E-AUTH): 1.7.7 fixes GHSA-965c-763c-88jm, CVSS 9.1, a Magic Link account
+  takeover — new note, top when-clause and a mandatory-upgrade option row.
+- TANSTACK START CVE-2026-102989 (RB-E-SECURITY note + RB-E-META-FRAMEWORKS pointer): critical
+  reflected XSS in server-function response handling; floors react-start 1.168.60 / solid-start
+  1.168.57 / vue-start 1.168.56 / start-server-core 1.169.39.
+- NEXT.JS SEPTEMBER RELEASE, ⚡ TRIPWIRE FIRED AND RESOLVED (RB-E-META-FRAMEWORKS): 16.3.8 / 15.5.27
+  shipped 7 of the 9 announced CVEs (1 critical + 1 high postponed); 16.3.7 was a non-security build.
+  The announced figures in the SEPTEMBER note were replaced and the tripwire row removed.
+- MSW 3.0 BREAKING MAJOR (RB-E-TESTING): ESM-only, Node 22 floor, `msw/native` removed with no published
+  RN replacement.
+- JOTAI 3.0.1 REGRESSION FLOOR (RB-E-STATE): 3.0.0 shipped a useAtomValue regression; the migrate
+  rule's floor moved 3.0.0 → 3.0.1.
+- PINS AND SMALL STATUS MOVES: RN 0.88.0-rc.3 (Hermes quadratic-reserve fix, Metro package-exports
+  warning fix, SwiftPM autolinking fix; RB-E-RN-VERSIONS); react-native-macos 0.83.0, the first 0.83
+  line, narrowing the rn-windows lag to one minor (RB-E-DESKTOP); nitro-fetch 1.8.0 (`formData()` for
+  urlencoded bodies; RB-E-NETWORKING); @tanstack/ai 0.63 (0.61 ai-worldlabs, 0.63 typed subagent
+  inputSchema; RB-E-AI-UI); react-native-iap 16.7.2 / expo-iap 5.8.2 lockstep (RB-E-PAYMENTS); waku
+  rc.2 (RB-E-META-FRAMEWORKS); react-native-plain-text 0.9 unified Text (RB-E-LISTS).
+- NEW OPTION ROWS (RB-E-AI-DEVTOOLS): TesterArmy (PR-scoped agentic E2E on EAS Workflows, vendor) and
+  TanStack Intent 0.5 (TS-validated skill examples, staleness tracking).
+- REDACT CORRECTED (RB-E-REACT-CORE, React Status #492): @tanstack/redact 0.1.0, 23.3KB vs React's
+  69.2KB gzipped, synchronous, useOptimistic/useFormStatus no-ops — the prior "~9KB, 2-3x" was unsourced.
+  Receipts: the repo and Tanner Linsley's "projecting-react" post.
+- READINGS: GitHub Security Lab's 24 Android vulnerabilities (RB-E-SECURITY), thoughtbot's AI-feature
+  consent (RB-E-AI-UI), Kent C. Dodds "You Own the Outcome" (RB-E-TESTING), vitonsky "Props Are Not a
+  Design System" (RB-E-COMPONENT-LIBS, React Status #492).
+- KEPT WITHOUT A MANIFEST ROW (found reading the aa5dc2d diff): Vite+ STABLE 1.0 (RB-E-BUILD), Vinext
+  STABLE 1.0 (RB-E-META-FRAMEWORKS, 2026-09-28 per npm), and Skia 2.13.0 dropping legacy-architecture
+  support (RB-E-ANIMATION). The Skia keep contradicted its own manifest row ("bug fixes only"); the row
+  was amended in place 2026-10-08 after re-reading the v2.13.0 release notes. The Vite+ and Vinext
+  sources are not in either manifest.
+
+CORRECTIONS MADE AT GATE TIME (2026-10-08):
+1. Lint, 2 errors: two new reading claims over the 260-char cap. The SECURITY claim was distilled to
+   260 chars with no new assertion; the REACT-CORE one was dropped (item 3).
+2. Eval, 1 failure ("production-gated SECURITY claim must NOT fire at prototype stage"): the GitHub
+   Security Lab reading had `applies_when: { platforms: [react-native] }` with no stage gate. It now
+   carries `stages: [production, scale]`, like the entry's other stage-gated readings.
+3. verify-diff, 1 failure: the Aurora Scharff post "Rebuilding React Router's Global Hooks in Next.js"
+   returns 404 to WebFetch and browser-UA curl, is gone from the author's RSS, and has no Wayback
+   capture (CDX query empty). It was unpublished after the 10-01 poll saw it. The reading and its
+   `sources:` URL were removed and the manifest row was amended, not deleted.
+4. RB-E-BUILD dated Vite+ 1.0 to 2026-09-30 with "~2M downloads/week"; the VoidZero post is dated
+   Sep 28, 2026, npm 1.0.0 was published 2026-09-28, and the post says "about to reach two million
+   weekly downloads". Date and figure corrected.
+5. `harvest-state.json` still said React Status `#491` ×32 and `encyclopedia.yaml` ×32, though #492
+   was processed. Both moved to #492 ×33. Left as it was, `harvest prep react-status` would have
+   probed #492 and refused to overwrite its manifest.
+
+NOTABLE SKIPS (reopen signals in the manifests): RTK 2.13 (build-tooling modernization, no API change);
+react-redux 9.4 alpha.1 (pre-ship); TanStack Charts (no package); react-live v5 (too-early/cap, no
+entry); pdfcn/Takumi/Forme (too-early; PDF generation is an uncovered GAP); github.blog "+4 more" (cap,
+second sighting of the host-volume flag).
+
+TIER 1 (10-01 logs): pulse 479 URLs, 476 ok, 0 DEAD, 2 blocked (429 on github.com auth0 CHANGELOG and
+vector-icons MIGRATION), 1 unreachable (code.visualstudio.com TS 7 blog, timeout), 0 aging, no stack
+drift. Signals: 5 flags — react-router out-downloads TanStack Router 2.4×; axios vs nitro-fetch; d3 and
+react-native-keychain STALE; and expo-image-picker out-downloads expo-camera 2.0× (MEDIA), in place of
+the 09-24 corestore-vs-autobase flag. Census deltas: rocketchat adopted Keychain and expo-video and
+dropped expo-av; uniswap dropped Apollo Client; twenty dropped Playwright.
+
+PROCESS LEARNINGS:
+- A max-turns death leaves no gate record and a stale state file while the edits survive in the working
+  tree. Committing that tree is not the end of the pass: run the gates and the Record step first.
+- A post seen by the firsthand poll can be unpublished days later. verify-diff is what catches it.
+- Every keep needs its manifest row. Three aa5dc2d keeps had none, so only the diff showed them.
+
+FOLLOW-UPS: see the 2026-10-08 entry.
+
+Delta (aa5dc2d + 2026-10-08 corrections): 16 entries touched, 0 new entries, readings 189 (lint header
+after the drop), 1 tripwire fired (Next.js 16.3.7), 2 manifests (firsthand 101 rows; React Status #492
+39). Sources digested: React Status 32 → 33.
+Gates (re-run 2026-10-08): lint clean (2 warnings: shared YouTube URL; 14 long-form docs trail their
+entry) · rules ✓ 7 rules, 2,763 gold rows · engine 24 ✓ · eval 139/139 · verify-diff vs 54f60ec 27/27
+ok, 0 failures (5 deprecation-matcher false-positive warnings) · React Status #492 coverage ✓ 39/39.

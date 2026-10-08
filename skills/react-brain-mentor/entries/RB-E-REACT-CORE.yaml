@@ -82,11 +82,10 @@ note: >
   RN release line.
 
   HISTORY:
+  2026-10-08 CORRECTED: the Aurora Scharff "global hooks" reading (added 2026-10-01) was dropped — the post was unpublished (404, absent from the author's RSS, no Wayback snapshot).
   2026-10-01 CORRECTED: @tanstack/redact's figures replaced with verified ones (0.1.0, 23.3KB vs
   React's 69.2KB gzipped, synchronous not concurrent, useOptimistic/useFormStatus no-ops, production
-  on tanstack.com/tannerlinsley.com) — the prior "~9KB, claims 2-3x" was unverified; added the Aurora
-  Scharff reading (state-proximity over global state, shown via rebuilding React Router's global
-  hooks in Next.js).
+  on tanstack.com/tannerlinsley.com) — the prior "~9KB, claims 2-3x" was unverified.
   2026-09-24 GAP CLOSED: Vidact added to the experimental runtimes (2nd sighting: TWiR #296 + React Digest #2370); React-on-native ranges verified vs npm peer deps; RN 0.88 status moved to rc.2.
   2026-09-21 GAP CLOSED: dated the 19.3-on-native answer — RN 0.88 (RC) is the line that syncs React 19.3.0.
   2026-09-10 GAP CLOSED: React 19.3 stable (tripwire fired) — <ViewTransition> + Fragment Refs graduate, browser(), Trusted Types, Context in RSC.
@@ -95,7 +94,7 @@ note: >
   2026-06-25 CHALLENGED → SURVIVES: adversarial stress test; caveat applied — don't strip existing memoization when enabling the Compiler.
 defer_to_skill: engineering-principles
 doc: "RB-E-REACT-CORE.md"   # long-form Explanation entry in content_dir
-updated: 2026-10-01   # @tanstack/redact figures corrected + verified (0.1.0); added the Aurora Scharff state-proximity reading; prior 2026-09-24: RN 0.88 status moved to rc.2 (2026-09-22) and React-on-native ranges verified vs npm peer deps (0.83–0.87 → ^19.2, 0.88 RC → ^19.3) · Vidact added to the experimental-runtimes lead list (2nd sighting: TWiR #296 + React Digest #2370); prior 2026-09-21: dated the 19.3-on-native answer: RN 0.88 (RC 2026-09-16) is the line that syncs React 19.3.0
+updated: 2026-10-08   # dropped the Aurora Scharff "global hooks" reading (post unpublished: 404, no Wayback snapshot); prior 2026-10-01: @tanstack/redact figures corrected + verified (0.1.0); prior 2026-09-24: RN 0.88 status moved to rc.2 (2026-09-22) and React-on-native ranges verified vs npm peer deps (0.83–0.87 → ^19.2, 0.88 RC → ^19.3) · Vidact added to the experimental-runtimes lead list (2nd sighting: TWiR #296 + React Digest #2370); prior 2026-09-21: dated the 19.3-on-native answer: RN 0.88 (RC 2026-09-16) is the line that syncs React 19.3.0
 reading:
   - title: "Avoiding Server Component Waterfall Fetching with React 19 cache()"
     url: "https://aurorascharff.no/posts/avoiding-server-component-waterfall-fetching-with-react-19-cache/"
@@ -151,12 +150,6 @@ reading:
     what: "The composition facet these readings otherwise skip — they explain how React RENDERS, this explains how to SHAPE a component API as an app grows. A production team's four-rung ladder with the named pain that justifies each climb: plain props (where most components should stay) → compound components with slots (when a row sprouts a prop for every shape) → a Composer plus Providers (when the same UI must render data from swappable or deferred sources) → lifted state behind a contract (when state must cross a boundary and the layout should stay pure). The first two rungs use no context at all. Its governing rule is the useful one: an abstraction earns its place by making a CURRENT requirement simpler, never by betting on a future you can't see."
     claim: "You create Context in many files — climb the composition ladder instead of reaching for providers by default: plain props, then compound components with slots, and only then a Composer + Providers, each rung justified by a named pain."
     applies_when: { platforms: [react, react-native] }
-  - title: "Rebuilding React Router's Global Hooks in Next.js"
-    url: "https://aurorascharff.no/posts/rebuilding-react-routers-global-hooks-in-nextjs/"
-    by: "Aurora Scharff"
-    what: "A durable restatement of React's own architecture rule, reached by trying to port React Router's global useNavigation()/useFetchers() to Next.js: keep state close to the interaction it describes, then lift it only when more of the tree needs it. Framework-level global hooks capture EVERY navigation automatically; the Next.js replacement (a Context provider that pending/optimistic actions explicitly report into) only sees what is routed through it — explicit participation instead of implicit coverage. Shown working for filter updates across components and coordinated optimistic updates between calendar elements, not just navigation."
-    claim: "You're tempted to add a global pending/navigation Context because React Router has one — in Next.js (or anywhere without framework-level interception) you re-derive the same value by having each interaction explicitly report into a shared provider; components that never opt in never see it, which is the tradeoff, not a bug."
-    applies_when: { deps: ["next"], platforms: [react] }
   - title: "React Compiler at Eighteen Months"
     url: "https://saschb2b.com/blog/react-compiler-year-in-review"
     by: "Sascha Becker"
@@ -174,7 +167,6 @@ sources:
   - "https://github.com/react/react-native/releases/tag/v0.88.0-rc.2"
   - "https://registry.npmjs.org/react-native"
   - "https://react.dev/blog/2026/09/09/react-19-3"
-  - "https://aurorascharff.no/posts/rebuilding-react-routers-global-hooks-in-nextjs/"
   - "https://github.com/TanStack/redact"
   - "https://react.dev/community/team"
   - "https://react.dev/reference/react-dom/browser"

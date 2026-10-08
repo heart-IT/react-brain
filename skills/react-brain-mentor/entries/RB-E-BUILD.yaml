@@ -18,7 +18,7 @@ options:
   - { name: "Re.Pack 5 (Rspack)", tradeoff: "Metro alternative on Rust-based Rspack for module federation / super-apps. @callstack/repack 5.3.0 (2026-08-05, verified vs npm)." }
   - { name: "Rock (Callstack)", tradeoff: "Native build-artifact caching (reported 35min → <4min); works with Metro or Re.Pack. rock 0.15.2 (2026-09-16, verified vs npm)." }
   - { name: "Rollipop (early alpha)", tradeoff: "Metro replacement powered by Rolldown (the Rust bundler behind Vite 8): Rollup/Rolldown plugin ecosystem, Yarn PnP by default, dev dashboard; bare RN CLI only (no Expo). 1.0.0-alpha.29 (2026-07-25, verified vs npm): early-alpha, not production." }
-  - { name: "Vite+", tradeoff: "VoidZero's unified toolchain — one CLI over Vite, Vitest, Rolldown, tsdown, Oxlint, Oxfmt; MIT; framework-agnostic. STABLE 1.0 (2026-09-30, verified vs the release post + npm), ~2M downloads/week. It orchestrates existing tools (not a framework, package manager, or Vite replacement) — your Vite plugins and package manager keep working. See note: VITE+." }
+  - { name: "Vite+", tradeoff: "VoidZero's unified toolchain — one CLI over Vite, Vitest, Rolldown, tsdown, Oxlint, Oxfmt; MIT; framework-agnostic. STABLE 1.0 (2026-09-28, verified vs the release post + npm), nearly 2M downloads/week. It orchestrates existing tools (not a framework, package manager, or Vite replacement) — your Vite plugins and package manager keep working. See note: VITE+." }
 recommend:
   default: "Web: Vite 8 (Rolldown). React Native: Metro (+ Hermes V1, precompiled iOS binaries). Monorepo: pnpm workspaces + Turborepo. Expo for managed velocity."
   when:
@@ -96,7 +96,7 @@ note: >
   registry revisions. RB-E-DX owns pnpm's workspace versioning (`pnpm change` / `pnpm version -r`).
 
   VITE+ (2026-07-02 beta, verified vs the VoidZero announcement; 2026-09-22 RC; STABLE 1.0 shipped
-  2026-09-30, verified vs the announcement post): one CLI over the VoidZero stack, MIT,
+  2026-09-28, verified vs the announcement post): one CLI over the VoidZero stack, MIT,
   framework-agnostic — `vp env` manages the Node runtime, `vp install` wraps your chosen package
   manager, and nine core commands cover scaffold-to-build. The beta was "stable, but not yet
   complete" with a migration command that may need manual follow-up; 1.0.0-rc.0 (2026-09-22) moved
@@ -167,6 +167,7 @@ note: >
   RB-E-REACT-CORE owns the React Compiler default; RB-E-META-FRAMEWORKS owns Next.js/Turbopack.
 
   HISTORY:
+  2026-10-08 CORRECTED: Vite+ 1.0 shipped 2026-09-28, not 2026-09-30 (the VoidZero post is dated Sep 28, npm 1.0.0 published 2026-09-28), and the post says "about to reach two million weekly downloads", not ~2M.
   2026-10-01 GAP CLOSED: Vite+ reached STABLE 1.0 (~2M downloads/week) — the RC tracking note graduates to an adoption target, not just new-project-only.
   2026-09-24 REOPENED: Vite+ beta → 1.0.0-rc.0 (Vitest 5, Node 20 dropped); pnpm latest 12.3.4 →
   12.6.0; version receipts re-checked vs npm.
@@ -181,7 +182,7 @@ note: >
   Rolldown-as-bundler; Metro stays the RN default.
 defer_to_skill: null
 doc: "RB-E-BUILD.md"   # long-form Explanation entry in content_dir
-updated: 2026-10-01   # Vite+ reached stable 1.0 (~2M downloads/week); prior 2026-09-24: Vite+ 1.0.0-rc.0 (Vitest 5, Node 20 dropped); pnpm 12.6.0; receipts re-checked vs npm; prior 2026-09-21: react-native-boost 2.0 added on the ADVOCATE PASS (build-time JSX rewriting — a mechanism no other row here covers) · VITE DEV-SERVER CVE-2026-39364 security floor 8.0.5 / 7.3.2, actively mass-scanned when exposed · Noxcturnal — Expo's first-party Rust/oxc Metro transformer (SDK 58 beta) with its activation limits · fingerprint `balanced` default · webpack 5.111 stable ESM output
+updated: 2026-10-08   # corrected the Vite+ 1.0 date (2026-09-28, not 09-30) and download figure (nearly 2M/week); prior 2026-10-01: Vite+ reached stable 1.0; prior 2026-09-24: Vite+ 1.0.0-rc.0 (Vitest 5, Node 20 dropped); pnpm 12.6.0; receipts re-checked vs npm; prior 2026-09-21: react-native-boost 2.0 added on the ADVOCATE PASS (build-time JSX rewriting — a mechanism no other row here covers) · VITE DEV-SERVER CVE-2026-39364 security floor 8.0.5 / 7.3.2, actively mass-scanned when exposed · Noxcturnal — Expo's first-party Rust/oxc Metro transformer (SDK 58 beta) with its activation limits · fingerprint `balanced` default · webpack 5.111 stable ESM output
 watching:
   - title: "How React Native Builds Actually Work (APK, AAB, IPA, APP)"
     url: "https://www.youtube.com/watch?v=1o0pEjYGUWM"

@@ -6,7 +6,7 @@
     "`react-brain lint` cross-checks each `count` against encyclopedia.yaml sources_digested — they must match.",
     "Narrative harvest history (what each pass changed, process learnings) lives in tools/harvest-log/LEDGER.md — in-repo since 2026-08-07."
   ],
-  "updated": "2026-09-24",
+  "updated": "2026-10-08",
   "sources": {
     "this-week-in-react": {
       "name": "This Week in React",
@@ -20,10 +20,10 @@
     "react-status": {
       "name": "React Status",
       "archive": "https://react.statuscode.com/issues",
-      "last_processed": "#491",
-      "count": 32,
+      "last_processed": "#492",
+      "count": 33,
       "cadence": "weekly",
-      "notes": "corroboration-heavy; headliners usually already held. Probed FIRST per the standing note: #490 AND #491 were both live on 2026-09-21 and both processed. #490 originated the Tailwind-Labs-joins-Shopify keep; #491 originated the VITE DEV-SERVER CVE keep (CVE-2026-39364) — which sat FAR DOWN its link list and was only caught because the coverage gate demands a row per link. Lesson recorded: this source buries real finds below the headline items, so never triage it from the headlines alone. Next: probe #492 (publishes Thursdays). 2026-09-24 (Thursday): re-probed #492 and #493 — both 404 and the archive listing ends at #491, so nothing new yet; probe again next pass (publishes Thursdays, sometimes late in the day)",
+      "notes": "corroboration-heavy; headliners usually already held. Probed FIRST per the standing note: #490 AND #491 were both live on 2026-09-21 and both processed. #490 originated the Tailwind-Labs-joins-Shopify keep; #491 originated the VITE DEV-SERVER CVE keep (CVE-2026-39364) — which sat FAR DOWN its link list and was only caught because the coverage gate demands a row per link. Lesson recorded: this source buries real finds below the headline items, so never triage it from the headlines alone. Next: probe #492 (publishes Thursdays). 2026-09-24 (Thursday): re-probed #492 and #493 — both 404 and the archive listing ends at #491, so nothing new yet; probe again next pass (publishes Thursdays, sometimes late in the day). 2026-10-01: #492 ('Signals come to React-Redux') went live and was processed by the 10-01 pass (39 links, 12 pre-dispositioned, 3 keeps: @tanstack/redact figures corrected, the projecting-react primary source, the vitonsky design-system reading); the state file was not advanced at the time and was corrected 2026-10-08. 2026-10-08: #493 404. Next: probe #493",
       "url_pattern": "https://react.statuscode.com/issues/{n}"
     },
     "react-digest": {

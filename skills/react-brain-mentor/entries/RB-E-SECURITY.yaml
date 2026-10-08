@@ -125,8 +125,8 @@ reading:
     url: "https://github.blog/security/how-we-found-24-android-vulnerabilities-using-our-open-source-ai-security-agent/"
     by: "GitHub Security Lab"
     what: "Real-world evidence for the DeepSec-style pattern of this entry: GitHub's open-source Taskflow Agent combines AI prompts with structured, PLATFORM-SPECIFIC workflows (not generic prompting) to find real bugs — 24 Android vulnerabilities across shipped apps, including a location-tracking injection in OsmAnd and a deeplink-based account takeover in Wikipedia's Android app. The caveat that matters: the authors state LLMs struggle to estimate severity and produce false positives, so every finding still needs review by a researcher who knows the mobile platform — automation finds candidates, it doesn't replace the review."
-    claim: "You're evaluating an AI security scanner (DeepSec or similar) — platform-specific taskflows beat generic prompting at finding real bugs, but treat every finding as a candidate: LLMs misjudge severity and produce false positives, so a human who knows the platform still reviews each one."
-    applies_when: { platforms: [react-native] }
+    claim: "You're evaluating an AI security scanner (DeepSec or similar): platform-specific taskflows beat generic prompting at finding real bugs, but every finding is a candidate — LLMs misjudge severity and false-positive, so a platform-literate human reviews each one."
+    applies_when: { platforms: [react-native], stages: [production, scale] }
   - title: "The React2Shell Story"
     url: "https://lachlan.nz/blog/the-react2shell-story"
     by: "Lachlan Davidson"
