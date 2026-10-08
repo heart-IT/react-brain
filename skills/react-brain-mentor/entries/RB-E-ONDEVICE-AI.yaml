@@ -130,3 +130,8 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "@react-native-ai/adk", label: "Gemini ADK (Android)", token: "adk" }
   - { pkg: "react-native-rag", label: "react-native-rag", token: "rag" }
   - { pkg: "react-native-nitro-mlx", label: "MLX (Apple, Nitro)", token: "mlx" }
+
+tripwires:   # standing caveats as executable conditions — evaluated by `harvest firsthand`; fired ⇒ do the then:, update prose, remove the row
+  - when: { pkg: "react-native-executorch", atleast: "0.11.0" }
+    then: "executorch cut a new minor — re-read its react-native-worklets peer (>=0.10.0 <0.13.0 at 0.10.5); if it admits 0.13.x, drop the 'stays on Reanimated 4.6' caveat from the note"
+    added: 2026-10-08

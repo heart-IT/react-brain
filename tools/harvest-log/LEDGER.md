@@ -3203,7 +3203,7 @@ FOLLOW-UPS (not done here):
 Delta: 12 entries touched (ANIMATION · CHARTS · GAMES · SVG · META-FRAMEWORKS · STYLING · ONDEVICE-AI ·
 DESKTOP · AI-DEVTOOLS · REACT-CORE · STATE · DATA), 0 new entries, 3 new readings (189 → 192 reading
 URLs), +1 detect row (238 → 239), +1 migrate rule, 0 tripwires fired / 1 retired with its then: done
-by hand (Skia) / 0 added, 8 manifests (firsthand 120 events: 24 rule + 96 judged; TWiR #299 62 links;
+by hand (Skia) / 2 added post-verify (victory-native ≥43 in CHARTS, react-native-executorch ≥0.11 in ONDEVICE-AI — the two prose watch caveats this pass wrote), 8 manifests (firsthand 120 events: 24 rule + 96 judged; TWiR #299 62 links;
 TWiR #300 57; RN Rewind #59 22; #60 21; React Digest #2375 13; #2380 13; Native Weekly #22 52).
 Sources digested: TWiR 32 → 34, RN Rewind 58 → 60, React Digest 27 → 29, Native Weekly 11 → 12,
 React Status 33 (no new issue). Gold rows 2,763 → 3,123.

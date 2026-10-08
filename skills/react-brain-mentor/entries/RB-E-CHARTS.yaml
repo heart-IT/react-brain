@@ -127,3 +127,8 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "react-native-graph", label: "react-native-graph", token: "react-native-graph" }
   - { pkg: "d3-force", label: "d3-force", token: "visx" }
   - { pkg: "d3", label: "D3", token: "visx" }
+
+tripwires:   # standing caveats as executable conditions — evaluated by `harvest firsthand`; fired ⇒ do the then:, update prose, remove the row
+  - when: { pkg: "victory-native", atleast: "43.0.0" }
+    then: "Victory Native XL cut a major after the Skia handover — check whether its peer moved from @shopify/react-native-skia (<3.0.0 at 42.0.1) to react-native-skia; if so, drop the '≤2.14 until repoint' caveat from the default and from RB-E-ANIMATION's note"
+    added: 2026-10-08
