@@ -3210,3 +3210,17 @@ React Status 33 (no new issue). Gold rows 2,763 → 3,123.
 Gates: lint clean (2 warnings: shared YouTube URL; 20 long-form docs trail their entry) · rules ✓ 7
 rules, 3,123 gold rows · engine 24 ✓ · eval 139/139 · coverage 0 unaccounted ×7 · verify-diff 27/27
 added receipts ok, 0 failures (7 deprecation-matcher false positives) · watchlist reviewed.
+
+## 2026-10-08b — React Digest retired
+
+REACT DIGEST RETIRED, by the maintainer's call on the measurement the 2026-10-08 pass recorded
+rather than by the pre-committed keeps rule (which counted #2380's Marmelab reading as a keep and so
+did not trigger). Measured: #2375 originated ZERO of 13 links; #2380 originated ZERO of 13 — its one
+keep was a second sighting of a React Status #491 lead. Over the last five issues (#2360–#2380) the
+source originated one keep (the translate-shield DOM article in #2370), and 8 of the 26 rows this
+pass were the publisher's own sibling-newsletter/media-kit chrome. Left listed in harvest-state with
+active:false so the ×29 count keeps matching sources_digested and the decision stays visible. Unlike
+React Weekly, the archive (/newsletters.rss) resolves old slugs, so this is reversible.
+
+Delta: 0 entries touched · harvest-state react-digest active:false · encyclopedia.yaml source
+comments. Sources still running: TWiR, RN Rewind, React Status, Native Weekly.
