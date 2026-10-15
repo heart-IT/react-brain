@@ -11,6 +11,7 @@ options:
   - { name: "react-native-skia (formerly @shopify/react-native-skia)", tradeoff: "GPU canvas: renders SVG (ImageSVG / Skia.SVG.MakeFromString, with limits: no CSS / <text> / <animate>) and does animated/custom vector drawing beyond declarative SVG. Renamed 2026-10: `react-native-skia` 3.x (Graphite) or @2 for the v2 line; @shopify stops at 2.14.0 (verified vs npm 2026-10-08) — see note: SKIA STEWARDSHIP; RB-E-ANIMATION owns it." }
   - { name: "Redraw (William Candillon) — EXPERIMENTAL", tradeoff: "Next-gen 2D graphics on WebGPU/TypeGPU: variable-stroke Bézier paths, vector feathering, physically-based 2D; shaders authored as typed TS functions. Technical preview — not on npm (subscriber early access), unstable API. Watch, not a production bet." }
   - { name: "icon sets — lucide-react-native / @react-native-vector-icons/*", tradeoff: "lucide-react-native = Lucide (1.48.0, 2026-09-24; peer react-native-svg 12–15); @react-native-vector-icons/* = per-family scoped sets (13.x, 2026-09-07; both verified vs npm). @expo/vector-icons is DEPRECATED in Expo SDK 56 — use the scoped packages directly." }
+  - { name: "react-native-nano-icons (Software Mansion Labs)", tradeoff: "Your OWN SVGs compiled at build time into an icon font (plus .woff2 on web), rendered as text — no react-native-svg at runtime. 1.0 (2026-10-12): Metro hot reload of edited SVGs, SVGs emitted as SF Symbols / VectorDrawables for React Navigation 8 native tabs (needs react-native-screens 4.29+), size/color as native props animatable with Reanimated. Floor RN 0.81+; regenerate fonts and rebuild after upgrading. 1.0.1 (2026-10-14, verified vs npm), ~59K weekly downloads, ~620★. See note: NANO ICONS." }
   - { name: "react-native-vector-icons (legacy)", tradeoff: "The monolith is SUPERSEDED by per-family @react-native-vector-icons/* (v11+) and flagged deprecated on npm at 10.3.0 (2025-07-23, verified vs npm); a codemod migrates from it and from @expo/vector-icons." }
   - { name: "web: native <svg>", tradeoff: "No library needed on React DOM; icon sets (Lucide etc.) ship as plain React components." }
 recommend:
@@ -20,6 +21,7 @@ recommend:
     - "import designer .svg files as components → react-native-svg-transformer"
     - "GPU / animated / custom drawing (charts, generative visuals) → react-native-skia (see RB-E-ANIMATION / RB-E-CHARTS)"
     - "icons → lucide-react-native or per-family @react-native-vector-icons/* (avoid the legacy monolithic react-native-vector-icons for new work; a codemod exists — and @expo/vector-icons is deprecated in SDK 56, same migration)"
+    - "a custom/brand SVG icon set, or icons for native bottom tabs → react-native-nano-icons (build-time icon font + native symbols; RN 0.81+, 1.0 is days old — pin)"
     - "web → native <svg>; reuse the same icon set as React components"
 note: >
   react-native-svg is the one primitive: it underpins most RN charts (Victory Native) and icon
@@ -38,6 +40,17 @@ note: >
   deprecates @expo/vector-icons — "it will be replaced by @react-native-vector-icons/*" because
   "recent upstream work has made that wrapper unnecessary" — so one codemod covers both.
 
+  NANO ICONS (2026-10-15, verified vs Software Mansion's 1.0.0 changelog and npm): the third icon
+  route besides a stock set and SVG components — your designers' SVGs become a generated icon font
+  at prebuild (`npx react-native-nano-icons` or `npx expo prebuild`), rendered as glyphs, so a large
+  icon set costs no react-native-svg trees at runtime. 1.0.0 (2026-10-12) adds `withNanoIcons` Metro
+  hot reload, SF Symbols / VectorDrawable output usable as React Navigation 8 native-tab icons
+  (`nativeNanoSymbol`, react-native-screens 4.29+; RB-E-NAV owns native tabs), PlatformColor /
+  DynamicColorIOS colors, per-build font fingerprints verified at runtime, and size/color as native
+  props (animatable via Reanimated, settable via Unistyles). Breaking for 0.x users: RN 0.81+ (was
+  0.74+), regenerate fonts and rebuild native, and CLI flag/path changes. A Software Mansion Labs
+  repo created 2026-02 — popular already, but young; pin it.
+
   SKIA STEWARDSHIP (2026-09-21, pointer — RB-E-ANIMATION owns this thread, its receipts and the
   tripwire): Shopify is leaving React Native and sponsors react-native-skia through the end of 2026;
   the author keeps developing it, forks it and republishes under a new name, then the Shopify repo
@@ -47,6 +60,7 @@ note: >
   @shopify name stops at 2.14.0.
 
   HISTORY:
+    2026-10-15 GAP CLOSED: react-native-nano-icons 1.0 (SWM Labs) added — custom SVG sets as a build-time icon font, native tab-bar symbols.
     2026-10-08 REOPENED: Skia escape hatch renamed — react-native-skia 3.x / @2; @shopify stops at 2.14.0.
     2026-09-24 CORRECTED: "RN 0.78+" read as a floor for all of react-native-svg 15.x — it applies to 15.13+; react-native-vector-icons npm deprecation flag recorded.
     2026-09-21 REOPENED: Skia stewardship pointer added (affects only the GPU escape-hatch clause).
@@ -54,7 +68,7 @@ note: >
     2026-06-25 GAP CLOSED: entry created after the evidence-loop self-audit flagged react-native-svg (ourpot, bitbarter) with no entry.
 defer_to_skill: react-native-best-practices
 doc: "RB-E-SVG.md"   # long-form Explanation entry in content_dir
-updated: 2026-10-08   # Skia escape hatch renamed to react-native-skia (3.x / @2); prior 2026-09-24: react-native-svg RN floor made per-version (15.13+ → RN 0.78); vector-icons npm deprecation; version pins; prior 2026-09-21: Skia stewardship pointer — affects only the GPU escape-hatch clause, not the react-native-svg default
+updated: 2026-10-15   # react-native-nano-icons 1.0 option (custom SVG icon font, native tab symbols, RN 0.81+); prior 2026-10-08: Skia escape hatch renamed to react-native-skia (3.x / @2); prior 2026-09-24: react-native-svg RN floor made per-version (15.13+ → RN 0.78); vector-icons npm deprecation; version pins; prior 2026-09-21: Skia stewardship pointer — affects only the GPU escape-hatch clause, not the react-native-svg default
 reading:
   - title: "Hello, Project Redraw"
     url: "https://wcandillon.dev/article/hello-project-redraw"
@@ -67,6 +81,8 @@ reading:
     claim: "You ship react-native-svg — the canonical workflow how-to: inline SVG, importing designer .svg files as components via react-native-svg-transformer, SvgUri/SvgXml, and animating SVGs."
     applies_when: { deps: ["react-native-svg"], platforms: [react-native] }
 sources:
+  - "https://swmansion.com/changelog/react-native-nano-icons-1-0-0/"
+  - "https://registry.npmjs.org/react-native-nano-icons"
   - "https://shopify.engineering/back-to-native"
   - "https://registry.npmjs.org/react-native-svg/latest"
   - "https://github.com/software-mansion/react-native-svg"
@@ -78,6 +94,7 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "@react-native-vector-icons/*", label: "vector-icons (scoped)", token: "vector-icons" }
   - { pkg: "react-native-vector-icons", label: "react-native-vector-icons (legacy)", token: "legacy" }
   - { pkg: "lucide-react-native", label: "Lucide icons", token: "lucide" }
+  - { pkg: "react-native-nano-icons", label: "Nano Icons (SWM)", token: "nano-icons" }
   - { pkg: "@expo/vector-icons", label: "@expo/vector-icons (deprecated SDK 56)", token: "deprecated" }
 migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-brain migrate`)
   - from: { pkg: "react-native-vector-icons" }

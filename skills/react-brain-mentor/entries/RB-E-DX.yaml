@@ -61,6 +61,19 @@ note: >
   strongest datapoint that the type-aware + compiler-rule surface suffices for a large TypeScript
   codebase.
 
+  ESLINT 10 vs THE REACT PLUGINS (2026-10-15, verified vs npm metadata, the eslint-config-next
+  16.4.0 package contents and vercel/next.js PR #99628): ESLint 10 (10.12.0 current) removed the
+  rule-context members getCwd(), getFilename(), getPhysicalFilename(), getSourceCode(), parserOptions
+  and parserPath. eslint-plugin-react 7.37.5 — its latest release, 2025-04-03 — still calls them
+  (e.g. for settings.react.version: 'detect') and declares eslint up to ^9.7 only;
+  eslint-plugin-import 2.32.0 stops at ^9 too. eslint-plugin-react-hooks 7.1+ does declare ^10. So
+  a flat config that loads eslint-plugin-react directly breaks on ESLint 10. eslint-config-next
+  crashed under ESLint 10 until 16.4.0 (2026-10-06), which ships a rule-context shim
+  (fixupPluginRules) around both plugins plus a parser patch; ESLint 10 itself needs Node
+  ^20.19 || ^22.13 || >=24. → On Next.js, ESLint 10 needs eslint-config-next 16.4+; elsewhere, stay
+  on ESLint 9 while you load eslint-plugin-react directly — react-hooks is not the blocker, the
+  older plugins are.
+
   PNPM RELEASE MANAGEMENT (2026-07-28, verified vs the pnpm 11.11-11.14 post; pnpm 12 keeps pnpm 11's
   commands and settings per the 12.0 post, RB-E-BUILD owns pnpm 12): `pnpm change` records
   changesets-compatible `.changeset/*.md` intents; a bare `pnpm version -r` consumes them across the
@@ -77,6 +90,7 @@ note: >
   review layer.
 
   HISTORY:
+  2026-10-15 REOPENED: ESLint 10 breaks eslint-plugin-react 7.37.5 / eslint-plugin-import 2.32.0 (removed rule-context APIs); eslint-config-next shims them from 16.4.0.
   2026-09-24 CORRECTED: "Sentry has NO eslint" read as "no ESLint run" — eslint is back as a
   devDependency to host plugins under Oxlint's jsPlugins; Oxlint pin moved 1.83 → 1.85.0.
   2026-09-21 REOPENED: Oxlint 1.83 updates its rules for React 19.3.
@@ -87,7 +101,7 @@ note: >
   2026-07-28 GAP CLOSED: pnpm 11.11+ workspace versioning fires the twir-290 reopen signal.
 defer_to_skill: engineering-principles
 doc: "RB-E-DX.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-24   # version receipts re-checked vs npm (Oxlint 1.85.0, pnpm 12.6.0); Sentry's Oxlint lane runs ESLint plugins via jsPlugins (census follow-up); prior 2026-09-21: Oxlint 1.83 updates its rules for React 19.3 — the third lint lane keeps pace with the recommended React line
+updated: 2026-10-15   # ESLint 10 vs eslint-plugin-react/import (removed rule-context APIs; eslint-config-next 16.4.0+ shims them); prior 2026-09-24: version receipts re-checked vs npm (Oxlint 1.85.0, pnpm 12.6.0); Sentry's Oxlint lane runs ESLint plugins via jsPlugins (census follow-up); prior 2026-09-21: Oxlint 1.83 updates its rules for React 19.3 — the third lint lane keeps pace with the recommended React line
 reading:
   - title: "Best CI/CD for mobile apps in 2026: a practical comparison"
     url: "https://expo.dev/blog/best-ci-cd-for-mobile-apps"
@@ -100,6 +114,9 @@ reading:
     claim: "You ship Expo at scale — Doctolib's blueprint runs the bare workflow without EAS: fingerprint caching + JS patching halved CI builds while contributors grew 9→105."
     applies_when: { deps: ["expo"], stages: [scale] }
 sources:
+  - "https://github.com/vercel/next.js/pull/99628"
+  - "https://registry.npmjs.org/eslint-plugin-react"
+  - "https://registry.npmjs.org/eslint-config-next"
   - "https://biomejs.dev/linter/rules/use-react-compiler/"
   - "https://raw.githubusercontent.com/getsentry/sentry/master/oxlint.config.ts"
   - "https://medium.com/doctolib/expo-without-eas-scaling-the-react-native-developer-experience-of-an-app-with-90m-users-2694ea841805"
@@ -120,3 +137,7 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "react-doctor", label: "react-doctor", token: "react-doctor" }
   - { pkg: "oxlint", label: "Oxlint", token: "oxlint" }
   - { pkg: "typescript-eslint", label: "typescript-eslint", token: "type-aware" }
+tripwires:   # standing caveats as executable conditions — evaluated by `harvest firsthand`; fired ⇒ do the then:, update prose, remove the row
+  - when: { pkg: "eslint-plugin-react", atleast: "7.38.0" }
+    then: "eslint-plugin-react cut its first release since 7.37.5 (2025-04-03) — check whether its eslint peer now admits ^10 and the removed rule-context calls are gone; if so, retire the 'stay on ESLint 9 while you load eslint-plugin-react' advice in the ESLINT 10 note"
+    added: 2026-10-15

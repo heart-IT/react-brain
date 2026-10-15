@@ -3224,3 +3224,213 @@ React Weekly, the archive (/newsletters.rss) resolves old slugs, so this is reve
 
 Delta: 0 entries touched · harvest-state react-digest active:false · encyclopedia.yaml source
 comments. Sources still running: TWiR, RN Rewind, React Status, Native Weekly.
+
+## 2026-10-15 — React 19.3.1 and Next.js 16.4.1 close critical RSC holes · TanStack Start 1.0 · react-native-code-push deprecated on npm · react-native-web maintained again · RN 0.88.0 tagged, not yet on npm
+
+One week after the 10-08 pass: one firsthand manifest (139 events: 35 rule-dispositioned, 104 judged),
+three newsletter issues (TWiR #301, React Status #493, RN Rewind #61), 18 entries touched, 0 new entries.
+Native Weekly: the beehiiv /p/ list still ends at #22, so no manifest. React Status was re-probed at
+the end of the pass (a Thursday): `no new issue after #493 (probed 494, 495)`.
+
+PREFLIGHT (planner, 2026-10-15): no `harvest/*` branch, no `tools/harvest.log` on this machine (no
+scheduled runner), no manifest with stranded TODO rows. Dry poll: 139 pending events, 0 tripwires
+fired (14 armed).
+
+KEEPS, each with the receipt it was verified against today:
+- REACT 19.3.1 SECURITY PATCH (RB-E-SECURITY + RB-E-REACT-CORE; the "19.3.1 (October 14th, 2026)"
+  release + GHSA). GHSA-xqc2-xf4c-x3h3 (CRITICAL, RSC remote code execution) and GHSA-h3gv-c5rc-p453
+  (HIGH, server-function DoS). Affected react-server-dom-* 19.0.0–19.0.8, 19.1.0–19.1.9, 19.2.0–19.2.8
+  and 19.3.0; patched 19.0.9 / 19.1.10 / 19.2.9 / 19.3.1 (2026-10-14).
+- NEXT.JS 16.4.1 / 15.5.28 (RB-E-META-FRAMEWORKS + RB-E-SECURITY; nextjs.org "Security Update for
+  Upstream Vulnerabilities" 2026-10-14 + GHSA). CRITICAL GHSA-673q-mjm6-r5xr (`use cache` typed-array
+  RCE, >=16.0.0 <=16.4.0, no workaround); CRITICAL CVE-2026-96889 / GHSA-2464-fhr4-w9xw (SVG Image
+  Optimization RCE on glibc, >=10.0.0 <=15.5.27 and >16.0.0 <=16.4.0; workaround sharp >=0.35.5); HIGH
+  GHSA-p3m5-59mp-jv5r (Server Actions CPU DoS). Two of the three are the vulnerabilities postponed from
+  September, so 10-08 follow-up #6's Next.js item is RESOLVED. Anchored on the nextjs.org post row; the
+  npm row is the duplicate anchor.
+- TANSTACK START 1.0 STABLE (RB-E-META-FRAMEWORKS; tanstack.com/blog post 2026-10-13, npm
+  @tanstack/react-start already 1.169.x). Status flip; RSC support stays experimental.
+- VITE SECURITY FLOOR (RB-E-BUILD + RB-E-SECURITY; api.github.com/repos/vitejs/vite/security-advisories).
+  GHSA-rq7h-c2jc-7f22 (medium, files outside server.fs.allow on non-Windows), GHSA-vfpm-58rq-9qcg
+  (medium, ?vite-wasm-instance 4-byte read) and GHSA-9jrq-w75r-8gcw (low, cross-origin script execution
+  in middleware mode), all published 2026-10-06. Floor: 8.3.3 / 8.2.4 / 8.1.6 / 7.3.7 / 6.4.4 (Vite+
+  1.1.0). REOPENED from firsthand-2026-10-08's too-early skip, whose "no GHSA" call was wrong (see
+  SPOT-CHECK). Anchored on the vite-plus v1.2.0 GitHub row, because the vite 8.3.4 npm row is a correct
+  [rule:npm-patch].
+- REACT-NATIVE-CODE-PUSH DEPRECATED ON NPM (RB-E-OTA; registry.npmjs.org). All 117 versions carry
+  "Package no longer supported. Contact Support at npmjs.com/support for more info.", registry
+  `modified` 2026-10-12, still 9.0.1. A hard-guard event; every install now warns.
+- HOT-UPDATER 1.0.0 STABLE (RB-E-OTA; release + npm, 2026-10-11, latest 1.0.7). Separate v1
+  infrastructure and a new native build; v0 continues as 0.36.19; median update check 301 → 50 ms.
+  The "stay on 0.36.x" caveat is retired.
+- READING: Expo's TeamReach guest post (RB-E-OTA; expo.dev/blog/teamreach-ota-updates-relaunch, curl-UA).
+  Fix-forward lesson from a 5M-user cutover; tagged claim + applies_when.
+- TAMAGUI 3.0.0 (RB-E-STYLING + RB-E-CROSSPLATFORM; release 2026-10-10). Breaking major; the C++ native
+  runtime is an opt-in beta needing RN 0.82+ New Architecture; `npx @tamagui/cli migrate --from v2`.
+- REACT-NATIVE-WEBRTC 155.0.0 (RB-E-MEDIA; release 2026-10-14). Chromium M124 → M155, now newer than
+  LiveKit's M144 fork.
+- REACT-NATIVE-IAP 17.0.0 + EXPO-IAP 6.0.0 (RB-E-PAYMENTS; npm 2026-10-09). One lockstep keep on two rows;
+  OpenIAP Client Protocol 1.0.0; the dist-tag trap wording corrected.
+- NITRO-FETCH 1.9.0 (RB-E-NETWORKING; release 2026-10-15). iOS WebSockets now default to
+  Network.framework, which BYPASSES ATS / NSPinnedDomains pinning; opt out with
+  NitroWebSocketsUseNetworkFramework=false; nitro-modules peer >=0.37.1.
+- TAMBO CLOUD SHUTS DOWN (RB-E-AI-UI; tambo.co/blog/posts/tambo-is-shutting-down). Hosted API stops
+  2026-10-31, data deleted 2026-11-30; the OSS self-host remains. Row + when-clause updated.
+- SHADCN/UI AI ELEMENTS (RB-E-AI-UI, new option row; ui.shadcn.com/docs/changelog/2026-10-ai-elements).
+  21 copy-in agentic-UI patterns; replaces AI SDK Elements.
+- READING: Software Mansion "A Website Can Read Your Local MCP Server" (RB-E-AI-DEVTOOLS). DNS
+  rebinding against local MCP servers; FastMCP's Host/Origin guard is off by default. Tagged claim.
+- REACT-NATIVE-SKIA 3.5.0 (RB-E-ANIMATION; release + npm 2026-10-15). Pin 3.1.0 → 3.5.0, onSize
+  deprecated; the @2 line is at 2.15.1. victory-native is still 42.0.1, so the CHARTS tripwire did not
+  fire.
+- RNTL 14.1.0 (RB-E-TESTING; release). RN 0.88 / React 19.3 support, fireEvent.layout / pullToRefresh.
+- REACT-NATIVE-WEB MAINTAINED AGAIN (RB-E-CROSSPLATFORM status flip, STYLING pointer; TWiR #301 →
+  github.com/necolas/react-native-web/discussions/2872 + npm). Since 2026-10-07 @zoontek maintains it with
+  Gallagher, Expo and the community; it moves to the React Foundation org; 0.21.3 / 0.21.4 shipped
+  2026-10-08. A breaking 0.22 is planned (React 19-only, ESM-only, browser floors Chrome/Edge 95+,
+  Firefox 93+, Safari 15.1+, removals of CheckBox/Picker/ProgressBar/YellowBox/InteractionManager/the
+  Touchable mixin, babel-plugin-react-native-web deprecated). React Strict DOM is flagged quiet (npm
+  0.0.55 since 2026-01-09, last commit 2026-08-31). Rows, default, when-clauses and note rewritten; the
+  "use dom" reading claim corrected; HISTORY line added.
+- COINBASE LEAVING REACT NATIVE (RB-E-CROSSPLATFORM; React Status #493 → a LinkedIn post by a Coinbase
+  engineer, datePublished 2026-09-30, curl-UA). The consumer app goes fully native (Swift/Kotlin); "AI
+  coding agents have collapsed the cost of building a feature twice". COINBASE note under the Shopify
+  thread; default holds. A hiring post is not an engineering write-up, so the new trigger is a published
+  technical account. Reopens twir-300's unverifiable row.
+- EAS OBSERVE RECORDS NATIVE CRASHES (RB-E-OBSERVABILITY correction;
+  expo.dev/changelog/native-crash-reporting-in-eas-observe). Since 2026-10-07, expo-observe 57.0.21+ on
+  SDK 57; error reporting is still preview. "Not a crash reporter" retired; pin 57.0.24 → 57.0.25;
+  Sentry default unchanged.
+- REMIX 3.0.0 STABLE (RB-E-META-FRAMEWORKS status flip; npm latest, 2026-10-01). Own remix/component
+  JSX runtime; @remix-run/ui still 0.x; still not an option row.
+- ESLINT 10 PLUGIN BREAKAGE (RB-E-DX; npm peers + the eslint-config-next 16.4.0 tarball). eslint-plugin-
+  react 7.37.5 (eslint peer ^9.7) and eslint-plugin-import 2.32.0 break on ESLint 10; eslint-config-next
+  ships a fixupPluginRules shim from 16.4.0 (2026-10-06, confirmed in dist/rule-context.js — TWiR's
+  "16.5 canary" framing was stale); eslint-plugin-react-hooks 7.1+ supports ESLint 10. ESLINT 10 note,
+  3 sources, tripwire.
+- REACT-NATIVE-NANO-ICONS 1.0 (RB-E-SVG gap filled; swmansion.com/changelog/react-native-nano-icons-1-0-0
+  + npm 1.0.1). Build-time icon font from your own SVGs, SF Symbols / VectorDrawables for React
+  Navigation 8 native tabs (screens 4.29+), RN 0.81+ floor, ~59K weekly. Option row, when-clause, note,
+  HISTORY "GAP CLOSED", detect row.
+
+NOT A KEEP — RN 0.88.0: the firsthand watch reported a `v0.88.0` GitHub release, but it is a bare git tag
+(no release object; the API 404s) and react-native@0.88.0 is not on npm (latest 0.87.1, next 0.88.0-rc.6
+2026-10-14) even though the @react-native/* 0.88.0 siblings are. RN-VERSIONS moved its row/note rc.3 →
+rc.6 and armed a tripwire (react-native ≥0.88.0) whose then: does the whole stable flip, including the
+REACT-CORE and Expo SDK 58 wording. RN Rewind #61's "stable 0.88 scheduled for October 12" did not happen.
+
+NOTABLE SKIPS (reopen signals in the manifests):
+- vite 8.3.4: plain bug fix, [rule:npm-patch] correct. @react-native/metro-config 0.88.0 pre-ship (see
+  above). Meta VR Layout SDK (Callstack, RN 0.85+) too-early. react-native-screens 5.0.0-alpha.4 pre-ship;
+  carry its "transparent headers on iOS 26+" caveat into NAV at 5.0 stable.
+- vitest-plugin-rsc 0.3 too-early. It is a REAL TESTING gap for RSC; reopen at 1.0 or a Next.js docs
+  recommendation. react-native-better-pdf 1.0 too-early (~270/wk; PDF has no corpus home).
+- Deno joining Cloudflare: off-scope (Deno Deploy shuts down in 6 months). Expo "Your skills need an
+  evaluation mechanism": how-to. MobX Compiler plugin PR, the React work-counters RFC, AsyncContext and
+  bun lint/fmt: pre-ship. One 2.0, expo-native-variants, wifi-aware, munim-maps, inkpad, skia-diagrams,
+  ts-rust: too-early. Lingui's Vite native compile: sponsor placement.
+- Zero 1.10, ky 2.2, styled-components 6.6, Motion 14.1–14.3, Rozenite 2.5, Astryx 0.7.0, XPREM 3.2.6,
+  executorch v0.10.6-libs: corroboration. Pake "v3" is a moving tag (pake-cli 3.17.5); react-doctor
+  v2.4.0 is tag-only.
+- An Infinite Red Medium post was 403 to curl-UA and dispositioned as corroboration from the blurb (Expo
+  brownfield already held); Wayback was not tried.
+- Feeds: github.blog "+3 more" is the FOURTH volume flag, but the 10-01 keep breaks the zero run.
+  blog.logrocket.com's "+9 more" are all July re-reports — the feed itself is STALE (lastBuildDate
+  2026-07-28, re-checked at close-out). callstack +3, engineering.fb +1, pnpm +3: off-scope / cap.
+
+ADVOCATE PASS over my own skips: firsthand — Meta VR, Expo skills-eval, screens 5 alpha, pnpm 12.11
+approve, ky 2.2, Zero 1.10, Rozenite 2.5, Astryx 0.7. TWiR #301 — vitest-plugin-rsc, Deno, Partytown 1.0,
+React Aria's CSS sheet, direct-imports, the jimmyhmiller / julesblom two-sighting posts. React Status
+#493 — Lexical ESM-only, Mantine / MUI, the redux.js.org docs move. RN Rewind #61 — direct-imports, the
+new RN libs. 0 flips. The two reopens (Vite, Coinbase) fired on their own recorded signals, not on
+advocacy.
+
+SPOT-CHECK of the previous pass (twir-300.md, firsthand-2026-10-08.md). twir-300 has no `cap` rows;
+firsthand-2026-10-08 has two, both re-adjudicated:
+- github.blog "+2 more" (cap): UPHELD. Its reopen ("a 4th consecutive pass with zero keeps") has not
+  fired: the zero run is 2 passes (10-08, 10-15) since the 10-01 Security Lab keep. Host stays.
+- pnpm.io "+4 more" (cap): UPHELD. The registry shows only 12.8.2–12.10.1 / 11.28.x minors and patches
+  between 2026-09-30 and 10-06; no major, no breaking default change.
+2 random skips: SWM "Select Partner in the Claude Partner Network" (off-scope) UPHELD; Callstack "Mobile
+Dev for Codex" (pre-ship, twir-300 carry-over) UPHELD — the post still calls it "an initial preview".
+2 random rule rows: @lodev09/react-native-true-sheet 3.11.17 → 3.11.18 [rule:npm-patch] UPHELD (two
+Android bug fixes, peers unchanged); agent-device 0.21.18 → 0.21.23 [rule:npm-patch] UPHELD (the 0.x
+patch line carries small features such as managed-provider plugins and archive URLs from any host, but no
+AI-DEVTOOLS claim moves; peer `ai ^6 || ^7` unchanged).
+Plus the two rows this pass reopened:
+- vite 8.3.3 too-early (firsthand-2026-10-08): CORRECTED. "No GHSA was published" was wrong. The three
+  GHSAs were published 2026-10-06T14:15Z, two days before that row was written. They are visible on the
+  repo-scoped endpoint (api.github.com/repos/vitejs/vite/security-advisories, re-confirmed today), while
+  the global /advisories/<id> endpoint answered Not Found. Row amended with a dated note → the 10-15 keep.
+  A judged row, not a rule row, so no rule change.
+- Coinbase "unverifiable" (twir-300): UPHELD on the evidence of 10-08, then REOPENED by React Status
+  #493's LinkedIn link. Row amended with a dated note → the CROSSPLATFORM keep.
+Tally: 1 correction, 0 rule changes.
+
+WATCHLIST reviewed (85 manifests; 509 recurring URLs, 386 of them not registry.npmjs.org; 430 standing
+reopen signals). The new pairs this pass created (base-ui v1.9.0, galeria 3.1, Rozenite 2.5, Expo
+skills-eval, Astryx 0.7, julesblom visual notation ×3, jimmyhmiller, React Aria sheet, Mantine 9.7,
+ts-rust) were all judged twice this week on the same facts, so nothing to re-triage.
+nextjs.org's "Upcoming … security update" pre-announcement is superseded by the 16.4.1 keep.
+@tanstack/markdown did not recur and no 10-15 fact touches it. github.blog/feed (8 manifests): host
+stays as above. blog.logrocket.com/feed and three of its July posts now recur ×3 (07-28, 09-21, 10-15):
+the upstream feed is frozen at 2026-07-28 and the cursor re-reports its window, so drop the host or fix
+the cursor (follow-up). The registry rows are noise, as before.
+
+PROCESS LEARNINGS:
+- GHSA lookups must use the REPO-scoped endpoint (api.github.com/repos/<owner>/<repo>/security-advisories).
+  The global /advisories/<id> returned Not Found for just-published advisories, which is the likely
+  cause of the wrong 10-08 "no GHSA" call. Rule-skipped patch rows can become security-relevant after
+  the fact. Here the keep was anchored on a GitHub row so the npm-patch rule stays honest.
+- A GitHub "release" row can be a bare tag (RN v0.88.0, Pake v3, RNW 0.84.1, react-doctor v2.4.0).
+  @react-native/* siblings publish before react-native itself, so verify the CORE package on npm before
+  any status flip.
+- Newsletter blurbs lag the registry (TWiR: "16.5 canary" vs 16.4.0, "RC5" vs rc.6; RN Rewind: "stable
+  on October 12"). Version facts come from npm only.
+- React Status buried both keeps (IN BRIEF, Elsewhere) again; the headline was off-scope.
+- verify-diff picks up any scheme-qualified URL inside a quoted message (npm's deprecation text carries
+  npmjs.com/support with a scheme, which answers 403 with no Wayback). Quote such messages without the scheme.
+- Unauthenticated GitHub API is 60/h; scraping release pages with the browser UA (markdown-body div)
+  worked as the fallback.
+
+FOLLOW-UPS (not done here):
+1. Tooling: the `**kept**` convention split (parser vs. the ~20 older manifests that write plain
+   `kept →`) is still open; bench gold and rule admission still undercount older keeps.
+2. Tooling: verify-diff's deprecation matcher still substring-matches (`react-native`, `react`, `expo`,
+   `react-native-skia`, `react-native-iap`); 11 false-positive warnings this pass (7 on 10-08).
+3. Tooling: the scheduled runner's max-turns death (10-08 #3) still stands; no runner on this machine.
+4. Tooling: `harvest watchlist` still lists registry.npmjs.org version-event URLs as recurring skips.
+5. Docs: 25 long-form `encyclopedia/*.md` docs now trail their entries (was 20; worst SECURITY 24d).
+6. Watch: RN 0.88.0 stable is pending on npm — the RN-VERSIONS tripwire (react-native ≥0.88.0) is armed
+   and does the full flip; victory-native / livechart repointing to `react-native-skia` (CHARTS tripwire
+   ≥43, still 42.0.1); executorch widening its Worklets range (ONDEVICE-AI ≥0.11); react-native-web 0.22
+   and react-strict-dom ≥0.0.56 (CROSSPLATFORM tripwires); eslint-plugin-react ≥7.38 (DX tripwire);
+   Tambo Cloud shutdown 2026-10-31 / data deletion 2026-11-30 (AI-UI rows to retire after); screens 5.0
+   stable (carry the iOS 26 transparent-header caveat into NAV). RESOLVED: Vite 8.3.3 GHSA (kept); the
+   two postponed September Next.js vulnerabilities (kept, 16.4.1); Coinbase (confirmed, kept).
+7. Feeds: blog.logrocket.com is stale upstream (lastBuildDate 2026-07-28) and re-reports July posts
+   after cursor resets (07-28, 09-21, 10-15) — drop the host or fix the cursor. github.blog: 2 zero-keep
+   passes since 10-01; reopen at 4.
+8. Tooling: `harvest prep react-native-rewind` has no url_pattern (inventory + hand-built manifest each
+   pass) and `prep native-weekly` only prints "check manually".
+9. Tooling: firsthand/advisory checks should query the repo-scoped GHSA endpoint (see learnings).
+10. Gap: TESTING has nothing for RSC component tests (vitest-plugin-rsc 0.3; reopen at 1.0).
+11. The 2026-09-24c follow-up list (detect rows for @base-ui/react, react-native-webgpu,
+   enriched-html/platejs; migrate rows; resolver label bugs) still stands.
+(10-08 #7, React Digest measurement, was closed by the 10-08b retirement.)
+
+Delta: 18 entries touched (AI-DEVTOOLS · AI-UI · ANIMATION · BUILD · CROSSPLATFORM · DX · MEDIA ·
+META-FRAMEWORKS · NETWORKING · OBSERVABILITY · OTA · PAYMENTS · REACT-CORE · RN-VERSIONS · SECURITY ·
+STYLING · SVG · TESTING), 0 new entries, 2 new readings (192 → 194 reading URLs), 2 new option rows (shadcn/ui
+AI Elements, react-native-nano-icons), +1 detect row (239 → 240), 0 migrate rules, 0 tripwires fired /
+4 added (react-native ≥0.88.0 in RN-VERSIONS; react-native-web ≥0.22.0 and react-strict-dom ≥0.0.56 in
+CROSSPLATFORM; eslint-plugin-react ≥7.38.0 in DX; 14 → 18 armed), 4 manifests (firsthand 139 events: 35
+rule + 104 judged, 17 bold kept rows = 16 keeps; TWiR #301 71 links, 3 keeps; React Status #493 44, 2 keeps;
+RN Rewind #61 21, 0 keeps), 2 manifests amended (firsthand-2026-10-08 vite row, twir-300 Coinbase row),
+2 bench fixtures (twir-301, react-status-493 inventories).
+Sources digested: TWiR 34 → 35, React Status 33 → 34, RN Rewind 60 → 61, Native Weekly 12 (no new
+issue; archive ends at #22), React Digest 29 and React Weekly 30 (retired). Gold rows 3,123 → 3,398.
+Gates: lint clean (2 warnings: shared YouTube URL; 25 long-form docs trail their entry) · rules ✓ 7
+rules, 3,398 gold rows · engine 24 ✓ · eval 139/139 · coverage 0 unaccounted ×3 (firsthand has no issue
+URL) · verify-diff 50/50 added receipts ok, 0 failures (11 deprecation-matcher false positives) ·
+watchlist reviewed · React Status re-probe: no #494 (404; editor back 2026-10-23).

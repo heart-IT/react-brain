@@ -45,7 +45,7 @@
    "deprecated": false
   },
   "@tanstack/react-query": {
-   "latest": "5.104.1",
+   "latest": "5.104.3",
    "deprecated": false
   },
   "swr": {
@@ -53,7 +53,7 @@
    "deprecated": false
   },
   "@apollo/client": {
-   "latest": "4.3.2",
+   "latest": "4.3.3",
    "deprecated": false
   },
   "urql": {
@@ -61,11 +61,11 @@
    "deprecated": false
   },
   "@rocicorp/zero": {
-   "latest": "1.9.0",
+   "latest": "1.10.0",
    "deprecated": false
   },
   "@tanstack/react-db": {
-   "latest": "0.5.7",
+   "latest": "0.5.10",
    "deprecated": false
   },
   "autobase": {
@@ -73,7 +73,7 @@
    "deprecated": false
   },
   "corestore": {
-   "latest": "7.13.0",
+   "latest": "7.15.0",
    "deprecated": false
   },
   "hrpc": {
@@ -81,7 +81,7 @@
    "deprecated": false
   },
   "expo-router": {
-   "latest": "57.0.25",
+   "latest": "57.0.27",
    "deprecated": false
   },
   "react-router-dom": {
@@ -93,19 +93,19 @@
    "deprecated": false
   },
   "@tanstack/react-router": {
-   "latest": "1.170.41",
+   "latest": "1.170.44",
    "deprecated": false
   },
   "next": {
-   "latest": "16.4.0",
+   "latest": "16.4.1",
    "deprecated": false
   },
   "@tanstack/react-start": {
-   "latest": "1.168.60",
+   "latest": "1.169.2",
    "deprecated": false
   },
   "astro": {
-   "latest": "7.3.7",
+   "latest": "7.3.8",
    "deprecated": false
   },
   "waku": {
@@ -113,7 +113,7 @@
    "deprecated": false
   },
   "react-hook-form": {
-   "latest": "7.89.0",
+   "latest": "7.90.0",
    "deprecated": false
   },
   "formik": {
@@ -125,7 +125,7 @@
    "deprecated": false
   },
   "zod": {
-   "latest": "4.6.5",
+   "latest": "4.6.7",
    "deprecated": false
   },
   "valibot": {
@@ -133,7 +133,7 @@
    "deprecated": false
   },
   "better-auth": {
-   "latest": "1.7.7",
+   "latest": "1.7.9",
    "deprecated": false
   },
   "next-auth": {
@@ -141,11 +141,11 @@
    "deprecated": false
   },
   "react-native-auth0": {
-   "latest": "5.11.1",
+   "latest": "5.11.2",
    "deprecated": false
   },
   "expo-auth-session": {
-   "latest": "57.0.14",
+   "latest": "57.0.16",
    "deprecated": false
   },
   "@react-native-firebase/auth": {
@@ -157,11 +157,11 @@
    "deprecated": false
   },
   "react-native-nitro-fetch": {
-   "latest": "1.8.0",
+   "latest": "1.9.0",
    "deprecated": false
   },
   "ky": {
-   "latest": "2.1.0",
+   "latest": "2.2.0",
    "deprecated": false
   },
   "ofetch": {
@@ -169,7 +169,7 @@
    "deprecated": false
   },
   "electron": {
-   "latest": "44.7.0",
+   "latest": "44.7.2",
    "deprecated": false
   },
   "pear-runtime-react-native": {
@@ -205,11 +205,11 @@
    "deprecated": false
   },
   "react-native-unistyles": {
-   "latest": "3.5.1",
+   "latest": "3.5.3",
    "deprecated": false
   },
   "tamagui": {
-   "latest": "2.7.7",
+   "latest": "3.0.14",
    "deprecated": false
   },
   "@stylexjs/stylex": {
@@ -217,7 +217,7 @@
    "deprecated": false
   },
   "styled-components": {
-   "latest": "6.5.3",
+   "latest": "6.6.0",
    "deprecated": false
   },
   "react-native-tailwind": {
@@ -225,11 +225,11 @@
    "deprecated": false
   },
   "react-aria-components": {
-   "latest": "1.22.0",
+   "latest": "1.22.1",
    "deprecated": false
   },
   "antd": {
-   "latest": "6.6.5",
+   "latest": "6.6.6",
    "deprecated": false
   },
   "react-native-reanimated": {
@@ -245,11 +245,11 @@
    "deprecated": false
   },
   "framer-motion": {
-   "latest": "14.0.0",
+   "latest": "14.2.0",
    "deprecated": false
   },
   "motion": {
-   "latest": "14.0.0",
+   "latest": "14.2.0",
    "deprecated": false
   },
   "lottie-react-native": {
@@ -273,7 +273,7 @@
    "deprecated": false
   },
   "@rive-app/react-native": {
-   "latest": "0.5.4",
+   "latest": "0.5.5",
    "deprecated": false
   },
   "rive-react-native": {
@@ -289,15 +289,15 @@
    "deprecated": false
   },
   "react-window": {
-   "latest": "2.3.3",
+   "latest": "2.3.4",
    "deprecated": false
   },
   "@tanstack/react-virtual": {
-   "latest": "3.14.13",
+   "latest": "3.14.19",
    "deprecated": false
   },
   "@tanstack/react-table": {
-   "latest": "9.2.6",
+   "latest": "9.3.1",
    "deprecated": false
   },
   "next-intl": {
@@ -309,7 +309,7 @@
    "deprecated": false
   },
   "i18next": {
-   "latest": "26.4.2",
+   "latest": "26.4.5",
    "deprecated": false
   },
   "react-intl": {
@@ -353,7 +353,7 @@
    "deprecated": false
   },
   "slate": {
-   "latest": "0.130.1",
+   "latest": "0.139.0",
    "deprecated": false
   },
   "react-native-enriched": {
@@ -377,7 +377,7 @@
    "deprecated": true
   },
   "lucide-react-native": {
-   "latest": "1.53.0",
+   "latest": "1.57.0",
    "deprecated": false
   },
   "@expo/vector-icons": {
@@ -393,7 +393,7 @@
    "deprecated": false
   },
   "@rnmapbox/maps": {
-   "latest": "10.3.7",
+   "latest": "10.3.8",
    "deprecated": false
   },
   "@maplibre/maplibre-react-native": {
@@ -457,11 +457,11 @@
    "deprecated": false
   },
   "expo-splash-screen": {
-   "latest": "57.0.9",
+   "latest": "57.0.10",
    "deprecated": false
   },
   "@nandorojo/galeria": {
-   "latest": "3.0.3",
+   "latest": "3.1.0",
    "deprecated": false
   },
   "react-native-image-viewing": {
@@ -473,11 +473,11 @@
    "deprecated": false
   },
   "expo-modules-core": {
-   "latest": "57.0.21",
+   "latest": "57.0.23",
    "deprecated": false
   },
   "expo": {
-   "latest": "57.0.27",
+   "latest": "57.0.29",
    "deprecated": false
   },
   "react-native-vision-camera": {
@@ -489,7 +489,7 @@
    "deprecated": false
   },
   "react-native-webrtc": {
-   "latest": "124.0.8",
+   "latest": "155.0.0",
    "deprecated": false
   },
   "expo-av": {
@@ -545,7 +545,7 @@
    "deprecated": false
   },
   "react-native-keyboard-controller": {
-   "latest": "1.22.6",
+   "latest": "1.22.7",
    "deprecated": false
   },
   "react-native-avoid-softinput": {
@@ -553,15 +553,15 @@
    "deprecated": false
   },
   "react-native-purchases": {
-   "latest": "10.12.0",
+   "latest": "10.14.0",
    "deprecated": false
   },
   "react-native-iap": {
-   "latest": "16.7.3",
+   "latest": "17.0.2",
    "deprecated": false
   },
   "expo-iap": {
-   "latest": "5.8.3",
+   "latest": "6.0.2",
    "deprecated": false
   },
   "@reactvision/react-viro": {
@@ -569,7 +569,7 @@
    "deprecated": false
   },
   "@react-three/fiber": {
-   "latest": "9.8.1",
+   "latest": "9.8.2",
    "deprecated": false
   },
   "@borndotcom/react-native-godot": {
@@ -585,7 +585,7 @@
    "deprecated": false
   },
   "vite": {
-   "latest": "8.3.3",
+   "latest": "8.3.4",
    "deprecated": false
   },
   "esbuild": {
@@ -593,7 +593,7 @@
    "deprecated": false
   },
   "@react-native/metro-config": {
-   "latest": "0.87.1",
+   "latest": "0.88.0",
    "deprecated": false
   },
   "metro": {
@@ -613,11 +613,11 @@
    "deprecated": false
   },
   "vitest": {
-   "latest": "5.0.3",
+   "latest": "5.0.4",
    "deprecated": false
   },
   "@testing-library/react-native": {
-   "latest": "14.0.1",
+   "latest": "14.1.0",
    "deprecated": false
   },
   "@testing-library/react": {
@@ -625,7 +625,7 @@
    "deprecated": false
   },
   "@playwright/test": {
-   "latest": "1.64.0",
+   "latest": "1.64.1",
    "deprecated": false
   },
   "detox": {
@@ -633,11 +633,11 @@
    "deprecated": false
   },
   "msw": {
-   "latest": "3.0.2",
+   "latest": "3.0.3",
    "deprecated": false
   },
   "brittle": {
-   "latest": "4.4.0",
+   "latest": "4.5.0",
    "deprecated": false
   },
   "react-native-harness": {
@@ -645,7 +645,7 @@
    "deprecated": false
   },
   "react-test-renderer": {
-   "latest": "19.3.0",
+   "latest": "19.3.1",
    "deprecated": false
   },
   "husky": {
@@ -653,7 +653,7 @@
    "deprecated": false
   },
   "lefthook": {
-   "latest": "2.2.0",
+   "latest": "2.2.2",
    "deprecated": false
   },
   "@biomejs/biome": {
@@ -665,7 +665,7 @@
    "deprecated": false
   },
   "prettier": {
-   "latest": "3.9.9",
+   "latest": "3.9.10",
    "deprecated": false
   },
   "lint-staged": {
@@ -673,7 +673,7 @@
    "deprecated": false
   },
   "turbo": {
-   "latest": "2.11.7",
+   "latest": "2.11.8",
    "deprecated": false
   },
   "nx": {
@@ -681,11 +681,11 @@
    "deprecated": false
   },
   "lunte": {
-   "latest": "1.8.4",
+   "latest": "1.8.6",
    "deprecated": false
   },
   "react-doctor": {
-   "latest": "0.9.17",
+   "latest": "0.9.18",
    "deprecated": false
   },
   "@callstack/inspector": {
@@ -701,15 +701,15 @@
    "deprecated": false
   },
   "expo-updates": {
-   "latest": "57.0.25",
+   "latest": "57.0.26",
    "deprecated": false
   },
   "react-native-code-push": {
    "latest": "9.0.1",
-   "deprecated": false
+   "deprecated": true
   },
   "hot-updater": {
-   "latest": "0.36.18",
+   "latest": "1.0.7",
    "deprecated": false
   },
   "react-native-executorch": {
@@ -733,19 +733,19 @@
    "deprecated": false
   },
   "ai": {
-   "latest": "7.0.133",
+   "latest": "7.0.141",
    "deprecated": false
   },
   "@tanstack/ai": {
-   "latest": "0.65.1",
+   "latest": "0.69.0",
    "deprecated": false
   },
   "@tanstack/ai-react": {
-   "latest": "0.30.0",
+   "latest": "0.30.4",
    "deprecated": false
   },
   "agent-device": {
-   "latest": "0.21.23",
+   "latest": "0.21.28",
    "deprecated": false
   },
   "reactotron-react-native": {
@@ -753,7 +753,7 @@
    "deprecated": false
   },
   "@swmansion/argent": {
-   "latest": "0.27.0",
+   "latest": "0.29.0",
    "deprecated": false
   },
   "react": {
@@ -781,11 +781,11 @@
    "deprecated": false
   },
   "oxlint": {
-   "latest": "1.87.0",
+   "latest": "1.88.0",
    "deprecated": false
   },
   "typescript-eslint": {
-   "latest": "8.71.1",
+   "latest": "8.71.2",
    "deprecated": false
   },
   "next-yak": {
@@ -801,11 +801,11 @@
    "deprecated": false
   },
   "nuqs": {
-   "latest": "2.10.1",
+   "latest": "2.10.2",
    "deprecated": false
   },
   "react-dropzone": {
-   "latest": "20.1.2",
+   "latest": "20.1.3",
    "deprecated": false
   },
   "@uppy/core": {
@@ -825,30 +825,34 @@
    "deprecated": false
   },
   "react-native-screen-choreography": {
-   "latest": "0.7.1",
+   "latest": "0.7.2",
+   "deprecated": false
+  },
+  "react-native-skia": {
+   "latest": "3.5.0",
    "deprecated": false
   }
  },
  "github": {
   "software-mansion/react-native-screens": {
-   "id": "tag:github.com,2008:Repository/143419925/v4.29.0-nightly-20261007-43f3784d5",
-   "title": "v4.29.0-nightly-20261007-43f3784d5"
+   "id": "tag:github.com,2008:Repository/143419925/5.0.0-alpha.4",
+   "title": "5.0.0-alpha.4"
   },
   "margelo/react-native-nitro-fetch": {
-   "id": "tag:github.com,2008:Repository/1049779544/v1.8.0",
-   "title": "Release 1.8.0"
+   "id": "tag:github.com,2008:Repository/1049779544/v1.9.0",
+   "title": "Release 1.9.0"
   },
   "tw93/pake": {
-   "id": "tag:github.com,2008:Repository/551376520/V3.17.3",
-   "title": "V3.17.3 Tide"
+   "id": "tag:github.com,2008:Repository/551376520/v3",
+   "title": "v3"
   },
   "microsoft/react-native-windows": {
-   "id": "tag:github.com,2008:Repository/48009214/react-native-windows_v0.85.0-preview.2",
-   "title": "react-native-windows_v0.85.0-preview.2: RELEASE: Releasing 12 package(s) (0.85-stable) (#16454)"
+   "id": "tag:github.com,2008:Repository/48009214/react-native-windows_v0.84.1",
+   "title": "react-native-windows_v0.84.1: RELEASE: Releasing 31 package(s) (0.84-stable) (#16299)"
   },
   "mui/base-ui": {
-   "id": "tag:github.com,2008:Repository/762289766/v1.8.0",
-   "title": "v1.8.0"
+   "id": "tag:github.com,2008:Repository/762289766/v1.9.0",
+   "title": "v1.9.0"
   },
   "amannn/next-intl": {
    "id": "tag:github.com,2008:Repository/314533356/v4.14.9",
@@ -875,8 +879,8 @@
    "title": "v1.1.1"
   },
   "oblador/react-native-vector-icons": {
-   "id": "tag:github.com,2008:Repository/35685034/@react-native-vector-icons/zocial@13.1.4",
-   "title": "@react-native-vector-icons/zocial@13.1.4"
+   "id": "tag:github.com,2008:Repository/35685034/@react-native-vector-icons/zocial@13.1.5",
+   "title": "@react-native-vector-icons/zocial@13.1.5"
   },
   "gmi-software/react-native-better-maps": {
    "id": "tag:github.com,2008:Repository/1280405740/v1.2.1",
@@ -911,8 +915,8 @@
    "title": "@callstack/react-native-brownfield@5.3.0"
   },
   "wcandillon/react-native-webgpu": {
-   "id": "tag:github.com,2008:Repository/816390466/v0.13.0",
-   "title": "v0.13.0"
+   "id": "tag:github.com,2008:Repository/816390466/v0.15.0",
+   "title": "v0.15.0"
   },
   "callstack/react-native-visionos": {
    "id": "tag:github.com,2008:Repository/690161615/v0.79.0-visionos",
@@ -935,12 +939,12 @@
    "title": "v1.5.0"
   },
   "mdjastrzebski/test-renderer": {
-   "id": "tag:github.com,2008:Repository/882070678/v1.3.0",
-   "title": "v1.3.0"
+   "id": "tag:github.com,2008:Repository/882070678/v1.3.1",
+   "title": "v1.3.1"
   },
   "millionco/react-doctor": {
-   "id": "tag:github.com,2008:Repository/1156960719/v2.3.1",
-   "title": "v2.3.1"
+   "id": "tag:github.com,2008:Repository/1156960719/v2.4.0",
+   "title": "v2.4.0"
   },
   "adnxy/rnsec": {
    "id": "tag:github.com,2008:Repository/1122506875/v1.3.0",
@@ -951,16 +955,16 @@
    "title": "Version 9.0.1"
   },
   "software-mansion/react-native-executorch": {
-   "id": "tag:github.com,2008:Repository/873548300/v0.10.5",
-   "title": "v0.10.5"
+   "id": "tag:github.com,2008:Repository/873548300/v0.10.6-libs",
+   "title": "v0.10.6-libs"
   },
   "corasan/react-native-nitro-mlx": {
    "id": "tag:github.com,2008:Repository/930311095/v0.7.0",
    "title": "v0.7.0"
   },
   "tambo-ai/tambo": {
-   "id": "tag:github.com,2008:Repository/815634288/web-v0.135.1",
-   "title": "web: v0.135.1"
+   "id": "tag:github.com,2008:Repository/815634288/web-v0.136.0",
+   "title": "web: v0.136.0"
   },
   "callstackincubator/agent-skills": {
    "id": null,
@@ -975,16 +979,16 @@
    "title": "reactotron-react-native@5.3.1"
   },
   "callstack/agent-device": {
-   "id": "tag:github.com,2008:Repository/1146193768/v0.21.23",
-   "title": "v0.21.23"
+   "id": "tag:github.com,2008:Repository/1146193768/v0.21.28",
+   "title": "v0.21.28"
   },
   "react/react-native": {
-   "id": "tag:github.com,2008:Repository/29028775/v0.88.0-rc.4",
-   "title": "0.88.0-rc.4"
+   "id": "tag:github.com,2008:Repository/29028775/v0.88.0",
+   "title": "v0.88.0"
   },
   "shirakaba/expo-desktop": {
-   "id": "tag:github.com,2008:Repository/949207990/expo-desktop-template-blank-typescript@54.81.1",
-   "title": "expo-desktop-template-blank-typescript@54.81.1"
+   "id": "tag:github.com,2008:Repository/949207990/expo-desktop-template-blank-typescript@55.83.9",
+   "title": "expo-desktop-template-blank-typescript@55.83.9"
   },
   "margelo/react-native-runtimes": {
    "id": "tag:github.com,2008:Repository/1243782787/@react-native-runtimes/state@0.1.0-alpha.2",
@@ -999,16 +1003,16 @@
    "title": "react-native-delta - 1.0.0"
   },
   "auth0/react-native-auth0": {
-   "id": "tag:github.com,2008:Repository/61161994/v6.0.0-beta.0",
-   "title": "v6.0.0-beta.0"
+   "id": "tag:github.com,2008:Repository/61161994/v5.11.2",
+   "title": "v5.11.2"
   },
   "remix-run/react-router": {
-   "id": "tag:github.com,2008:Repository/19872456/v0.0.0-experimental-f20bcf6de",
-   "title": "v0.0.0-experimental-f20bcf6de"
+   "id": "tag:github.com,2008:Repository/19872456/v0.0.0-experimental-f1bb8ea3f",
+   "title": "v0.0.0-experimental-f1bb8ea3f"
   },
   "react/react": {
-   "id": "tag:github.com,2008:Repository/10270250/v19.3.0",
-   "title": "19.3.0 (September 9, 2026)"
+   "id": "tag:github.com,2008:Repository/10270250/v19.3.1",
+   "title": "19.3.1 (October 14th, 2026)"
   },
   "mybigday/whisper.rn": {
    "id": "tag:github.com,2008:Repository/614676995/v0.8.0-rc.2",
@@ -1019,28 +1023,28 @@
    "title": "mobx@7.0.6"
   },
   "shopify/react-native-skia": {
-   "id": "tag:github.com,2008:Repository/425845325/v3.1.0",
-   "title": "v3.1.0"
+   "id": "tag:github.com,2008:Repository/425845325/v3.5.0",
+   "title": "v3.5.0"
   },
   "hyodotdev/openiap": {
-   "id": "tag:github.com,2008:Repository/1036625243/react-native-iap-16.7.3",
-   "title": "react-native-iap 16.7.3"
+   "id": "tag:github.com,2008:Repository/1036625243/archive/next-2026-10-15",
+   "title": "archive/next-2026-10-15"
   },
   "microsoft/playwright": {
-   "id": "tag:github.com,2008:Repository/221981891/v1.64.0",
-   "title": "v1.64.0"
+   "id": "tag:github.com,2008:Repository/221981891/v1.64.1",
+   "title": "v1.64.1"
   },
   "mercuretechnologies/xprem": {
-   "id": "tag:github.com,2008:Repository/920701667/v3.2.5",
-   "title": "v3.2.5"
+   "id": "tag:github.com,2008:Repository/920701667/v3.2.6",
+   "title": "v3.2.6"
   },
   "software-mansion/react-native-enriched-html": {
    "id": "tag:github.com,2008:Repository/967922414/v1.1.1",
    "title": "Release 1.1.1"
   },
   "better-auth/better-auth": {
-   "id": "tag:github.com,2008:Repository/803014189/v1.7.7",
-   "title": "v1.7.7"
+   "id": "tag:github.com,2008:Repository/803014189/v1.7.9",
+   "title": "v1.7.9"
   },
   "software-mansion/react-native-reanimated": {
    "id": "tag:github.com,2008:Repository/130961487/4.7.1",
@@ -1063,12 +1067,12 @@
    "title": "codemagic-patch-server-v0.6.0"
   },
   "tanstack/query": {
-   "id": "tag:github.com,2008:Repository/207645083/@tanstack/angular-query-persist-client@5.0.0-rc.1",
-   "title": "@tanstack/angular-query-persist-client@5.0.0-rc.1"
+   "id": "tag:github.com,2008:Repository/207645083/@tanstack/vue-query-devtools@6.3.3",
+   "title": "@tanstack/vue-query-devtools@6.3.3"
   },
   "47ng/nuqs": {
-   "id": "tag:github.com,2008:Repository/262932920/v2.10.2-beta.1",
-   "title": "v2.10.2-beta.1"
+   "id": "tag:github.com,2008:Repository/262932920/v2.10.2",
+   "title": "v2.10.2"
   },
   "pmndrs/jotai": {
    "id": "tag:github.com,2008:Repository/286867459/v3.0.1",
@@ -1079,8 +1083,8 @@
    "title": "v1.1.0"
   },
   "tanstack/charts": {
-   "id": "tag:github.com,2008:Repository/1314386748/v1.0.0",
-   "title": "TanStack Charts v1.0.0"
+   "id": "tag:github.com,2008:Repository/1314386748/v1.1.0",
+   "title": "TanStack Charts v1.1.0"
   },
   "margelo/nitro": {
    "id": "tag:github.com,2008:Repository/814092544/v0.37.1",
@@ -1091,12 +1095,12 @@
    "title": "v30.5.2"
   },
   "vitest-dev/vitest": {
-   "id": "tag:github.com,2008:Repository/434708679/v5.0.3",
-   "title": "v5.0.3"
+   "id": "tag:github.com,2008:Repository/434708679/v5.0.4",
+   "title": "v5.0.4"
   },
   "callstackincubator/rozenite": {
-   "id": "tag:github.com,2008:Repository/1017830023/v2.4.0",
-   "title": "v2.4.0"
+   "id": "tag:github.com,2008:Repository/1017830023/v2.5.0",
+   "title": "v2.5.0"
   },
   "software-mansion-labs/react-native-streamdown": {
    "id": "tag:github.com,2008:Repository/1167685989/0.3.0",
@@ -1107,32 +1111,32 @@
    "title": "v0.2.0"
   },
   "software-mansion/argent": {
-   "id": "tag:github.com,2008:Repository/1164885639/v0.27.0",
-   "title": "v0.27.0"
+   "id": "tag:github.com,2008:Repository/1164885639/v0.29.0",
+   "title": "v0.29.0"
   },
   "shadcn-ui/lint": {
-   "id": "tag:github.com,2008:Repository/1354701193/@shadcn/lint@0.2.0",
-   "title": "@shadcn/lint@0.2.0"
+   "id": "tag:github.com,2008:Repository/1354701193/@shadcn/lint@0.2.1",
+   "title": "@shadcn/lint@0.2.1"
   },
   "dorianmazur/react-native-screen-choreography": {
-   "id": "tag:github.com,2008:Repository/1223516865/v0.7.1",
-   "title": "0.7.1"
+   "id": "tag:github.com,2008:Repository/1223516865/v0.8.0-alpha.0",
+   "title": "0.8.0-alpha.0"
   },
   "kuatsu/react-native-boost": {
    "id": "tag:github.com,2008:Repository/937406465/v2.0.3",
    "title": "Release 2.0.3"
   },
   "vercel/next.js": {
-   "id": "tag:github.com,2008:Repository/70107786/v16.5.0-canary.3",
-   "title": "v16.5.0-canary.3"
+   "id": "tag:github.com,2008:Repository/70107786/v16.5.0-canary.13",
+   "title": "v16.5.0-canary.13"
   },
   "pmndrs/react-three-fiber": {
    "id": "tag:github.com,2008:Repository/172521926/v9.8.1",
    "title": "v9.8.1"
   },
   "apollographql/apollo-client": {
-   "id": "tag:github.com,2008:Repository/52630616/@apollo/client@4.3.2",
-   "title": "@apollo/client@4.3.2"
+   "id": "tag:github.com,2008:Repository/52630616/@apollo/client@4.3.3",
+   "title": "@apollo/client@4.3.3"
   },
   "rpldy/react-uploady": {
    "id": "tag:github.com,2008:Repository/221179329/v1.13.0",
@@ -1147,28 +1151,28 @@
    "title": "7.3.4"
   },
   "nandorojo/galeria": {
-   "id": "tag:github.com,2008:Repository/683837119/v3.0.3",
-   "title": "v3.0.3"
+   "id": "tag:github.com,2008:Repository/683837119/v3.1.0",
+   "title": "v3.1.0"
   },
   "livekit/client-sdk-react-native": {
    "id": "tag:github.com,2008:Repository/466724366/@livekit/react-native@3.0.0",
    "title": "@livekit/react-native@3.0.0"
   },
   "voidzero-dev/vite-plus": {
-   "id": "tag:github.com,2008:Repository/943901988/v1.1.0",
-   "title": "vite-plus v1.1.0: faster `vp dev` startup and clearer interactive prompts"
+   "id": "tag:github.com,2008:Repository/943901988/v1.2.0",
+   "title": "vite-plus v1.2.0"
   },
   "gronxb/hot-updater": {
-   "id": "tag:github.com,2008:Repository/708452754/v0.36.18",
-   "title": "v0.36.18"
+   "id": "tag:github.com,2008:Repository/708452754/v1.0.6",
+   "title": "v1.0.6"
   },
   "software-mansion-labs/react-native-rag": {
    "id": "tag:github.com,2008:Repository/1007061173/v0.10.0",
    "title": "v0.10.0"
   },
   "tanstack/ai": {
-   "id": "tag:github.com,2008:Repository/1072429861/@tanstack/ai-vue-ui@0.3.6",
-   "title": "@tanstack/ai-vue-ui@0.3.6"
+   "id": "tag:github.com,2008:Repository/1072429861/@tanstack/openai-base@0.14.0",
+   "title": "@tanstack/openai-base@0.14.0"
   },
   "tanstack/redact": {
    "id": "tag:github.com,2008:Repository/1215537628/@tanstack/redact@0.1.4",
@@ -1179,12 +1183,20 @@
    "title": "react-native-macos@0.83.0"
   },
   "mswjs/msw": {
-   "id": "tag:github.com,2008:Repository/157397583/v3.0.2",
-   "title": "v3.0.2"
+   "id": "tag:github.com,2008:Repository/157397583/v3.0.3",
+   "title": "v3.0.3"
   },
   "mswjs/react-native": {
    "id": null,
    "title": null
+  },
+  "jpudysz/react-native-unistyles": {
+   "id": "tag:github.com,2008:Repository/699781382/v3.5.3",
+   "title": "Release v3.5.3"
+  },
+  "tester-army/e2e": {
+   "id": "tag:github.com,2008:Repository/1308631234/@e2e-dev/web@0.15.0",
+   "title": "@e2e-dev/web@0.15.0"
   }
  },
  "blogs": {
@@ -1194,7 +1206,7 @@
   },
   "peterp.me": {
    "feed": "https://peterp.me/rss.xml",
-   "lastId": "https://peterp.me/articles/agent-harnesses-and-workflows/"
+   "lastId": "https://peterp.me/articles/what-actually-happens-when-you-message-grok-bot/"
   },
   "blog.isquaredsoftware.com": {
    "feed": "https://blog.isquaredsoftware.com/index.xml",
@@ -1202,7 +1214,7 @@
   },
   "callstack.com": {
    "feed": "https://callstack.com/blog/rss.xml",
-   "lastId": "https://www.callstack.com/blog/introducing-mobile-dev-full-mobile-dev-tooling-right-in-your-codex-app"
+   "lastId": "https://www.callstack.com/blog/multi-window-react-native-apps-with-the-meta-vr-layout-sdk"
   },
   "aurorascharff.no": {
    "feed": "https://aurorascharff.no/rss.xml",
@@ -1226,15 +1238,15 @@
   },
   "expo.dev": {
    "feed": "https://expo.dev/blog/rss.xml",
-   "lastId": "54882b75-033f-4bb5-b15a-e812dcd11a08"
+   "lastId": "91459b0e-ec09-4f96-beaf-79eb95e79460"
   },
   "tanstack.com": {
    "feed": "https://tanstack.com/rss.xml",
-   "lastId": "https://tanstack.com/blog/tanstack-charts-1-0"
+   "lastId": "https://tanstack.com/blog/tanstack-start-1-0"
   },
   "code.visualstudio.com": {
    "feed": "https://code.visualstudio.com/feed.xml",
-   "lastId": "https://code.visualstudio.com/updates/v1_142"
+   "lastId": "https://code.visualstudio.com/updates/v1_143"
   },
   "2025.stateofreact.com": {
    "feed": null,
@@ -1266,7 +1278,7 @@
   },
   "nextjs.org": {
    "feed": "https://nextjs.org/feed.xml",
-   "lastId": "/blog/next-16-4"
+   "lastId": "/blog/nextjs-security-update-october-14-2026"
   },
   "evanbacon.dev": {
    "feed": null,
@@ -1278,11 +1290,11 @@
   },
   "engineering.fb.com": {
    "feed": "https://engineering.fb.com/feed/",
-   "lastId": "https://engineering.fb.com/?p=24581"
+   "lastId": "https://engineering.fb.com/?p=24641"
   },
   "ui.shadcn.com": {
    "feed": "https://ui.shadcn.com/rss.xml",
-   "lastId": "https://ui.shadcn.com/docs/changelog/2026-09-cn"
+   "lastId": "https://ui.shadcn.com/docs/changelog/2026-10-ai-elements"
   },
   "blog.margelo.com": {
    "feed": "https://blog.margelo.com/feed.xml",
@@ -1298,7 +1310,7 @@
   },
   "blog.logrocket.com": {
    "feed": "https://blog.logrocket.com/feed",
-   "lastId": "https://blog.logrocket.com/?p=158980"
+   "lastId": "https://blog.logrocket.com/?p=214587"
   },
   "docs.expo.dev": {
    "feed": null,
@@ -1306,7 +1318,7 @@
   },
   "swmansion.com": {
    "feed": "https://swmansion.com/rss.xml",
-   "lastId": "https://swmansion.com/blog/software-mansion-claude-select-partner/"
+   "lastId": "https://swmansion.com/blog/internships-in-a-nutshell-all-you-need-to-know-about-summer-and-winter-programs-at-software-mansion-and-how-to-get-on-board-1/"
   },
   "vercel.com": {
    "feed": "https://vercel.com/blog/rss.xml",
@@ -1322,7 +1334,7 @@
   },
   "github.blog": {
    "feed": "https://github.blog/feed/",
-   "lastId": "https://github.blog/?p=99310"
+   "lastId": "https://github.blog/?p=99506"
   },
   "docs.pears.com": {
    "feed": null,
@@ -1402,7 +1414,7 @@
   },
   "pnpm.io": {
    "feed": "https://pnpm.io/blog/rss.xml",
-   "lastId": "https://pnpm.io/blog/releases/12.10.1"
+   "lastId": "https://pnpm.io/blog/releases/12.13.0"
   },
   "uppy.io": {
    "feed": "https://uppy.io/blog/rss.xml",
@@ -1410,7 +1422,7 @@
   },
   "astryx.atmeta.com": {
    "feed": "https://astryx.atmeta.com/rss.xml",
-   "lastId": "https://astryx.atmeta.com/blog/astryx-v0-6-0"
+   "lastId": "https://astryx.atmeta.com/blog/astryx-v0-7-0"
   },
   "raw.githubusercontent.com": {
    "feed": null,
@@ -1418,7 +1430,7 @@
   },
   "devblogs.microsoft.com": {
    "feed": "https://devblogs.microsoft.com/feed",
-   "lastId": "https://devblogs.microsoft.com/?p=22461"
+   "lastId": "https://devblogs.microsoft.com/?p=22513"
   },
   "zod.dev": {
    "feed": "https://zod.dev/blog/rss.xml",
@@ -1431,8 +1443,24 @@
   "voidzero.dev": {
    "feed": "https://voidzero.dev/feed.xml",
    "lastId": "https://voidzero.dev/posts/whats-new-sep-2026"
+  },
+  "preactjs.com": {
+   "feed": "https://preactjs.com/feed.xml",
+   "lastId": "https://preactjs.com/blog/website-redesign-competition"
+  },
+  "jjenzz.com": {
+   "feed": "https://jjenzz.com/rss.xml",
+   "lastId": "https://jjenzz.com/making-react-context-cheap"
+  },
+  "marmelab.com": {
+   "feed": "https://marmelab.com/atom.xml",
+   "lastId": "https://marmelab.com/blog/2013/02/11/pour-la-fin-des-contrats-au-forfait.html"
+  },
+  "wcandillon.github.io": {
+   "feed": null,
+   "lastId": null
   }
  },
- "updated": "2026-10-08",
+ "updated": "2026-10-15",
  "tripwires": {}
 }

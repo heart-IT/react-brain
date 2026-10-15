@@ -7,7 +7,7 @@ confidence: medium
 platforms: [react, react-native]
 options:
   - { name: "Sentry (v8)", tradeoff: "Crash + performance monitoring on both platforms; v8 of @sentry/react-native captures crashes before RN bootstraps via sentry.options.json (the 'instant death on TestFlight' class). @sentry/react-native 8.28.0 (2026-09-24, verified vs npm); web uses @sentry/react 11.0.0 (2026-09-23, verified vs npm)." }
-  - { name: "EAS Observe (Expo)", tradeoff: "Production performance monitoring for Expo apps: real-session startup/TTI/bundle-load/update-apply metrics with every build and OTA update as a marker, plus per-route TTI. Not a crash reporter — no native crashes, keep Sentry alongside. GA 2026-08-25 (verified vs the GA post); expo-observe 57.0.24 (2026-09-24, verified vs npm). See note: EAS OBSERVE." }
+  - { name: "EAS Observe (Expo)", tradeoff: "Production performance monitoring for Expo apps: real-session startup/TTI/bundle-load/update-apply metrics with every build and OTA update as a marker, plus per-route TTI. Error reporting (JS errors AND, since 2026-10-07, native crashes on Android + iOS) is still in PREVIEW — keep Sentry alongside for production crash reporting. GA 2026-08-25 (verified vs the GA post); expo-observe 57.0.25 (2026-10-06, verified vs npm). See note: EAS OBSERVE." }
   - { name: "Firebase Crashlytics / Bugsnag", tradeoff: "Established crash reporting; neither gives Observe-style build/update attribution. @react-native-firebase/crashlytics 26.4.0 (2026-09-05), @bugsnag/react-native 9.0.0 (2026-09-22, new major; both verified vs npm)." }
   - { name: "Rozenite (Callstack incubator)", tradeoff: "Plug-and-play panels inside React Native DevTools (network/storage/performance, custom type-safe panels), no extra window or server; plugins are auto-disabled in production builds. rozenite 2.4.0 (2026-09-03, verified vs npm). See note: ROZENITE." }
   - { name: "React DevTools 8.0", tradeoff: "8.0.0 (2026-09-08, verified vs CHANGELOG) removes the Timeline profiler tab — React profiling moves to the browser Performance panel's React tracks — and turns the Suspense tab on by default. A runbook that says 'open the Timeline tab' is out of date. See note: REACT DEVTOOLS 8.0." }
@@ -15,7 +15,7 @@ options:
 recommend:
   default: "Sentry for crash + performance monitoring on React and React Native (v8 of the RN SDK catches pre-bootstrap crashes); add app/route-level error boundaries and wire them to it at the production stage."
   when:
-    - "on Expo (SDK 55+) and want build/OTA regression tracing or per-route time-to-interactive → EAS Observe (add alongside Sentry; expo-observe + markInteractive(); needs a new binary; does not capture native crashes)"
+    - "on Expo (SDK 55+) and want build/OTA regression tracing or per-route time-to-interactive → EAS Observe (add alongside Sentry; expo-observe + markInteractive(); needs a new binary; its JS-error and native-crash reporting is still preview)"
     - "already on Firebase → Firebase Crashlytics (for crashes; add Sentry or EAS Observe for performance)"
     - "already on Bugsnag → Bugsnag (keep it for crashes; 9.0.0 is a new major, read its changelog before upgrading)"
     - "need component-level profiling of a RELEASE build → @callstack/inspector (0.1.x; dev-mode profiles misrepresent production)"
@@ -39,8 +39,19 @@ note: >
   for agent handoff). Pricing is per event, not per MAU: 100K events/mo free; Starter $19/mo and
   Production $199/mo each include 500K; $5 per million beyond; 90-day minimum retention. Floors: SDK
   55+ for startup metrics, 56+ for per-route metrics, 57+ for JS error reporting (in preview); enabling
-  it needs a new binary, not just config. It does not capture native crashes, and Expo's own guidance
-  is to keep Sentry alongside.
+  it needs a new binary, not just config. At GA it did not capture native crashes and Expo's
+  guidance was to keep Sentry alongside — see NATIVE CRASHES below for what changed.
+
+  NATIVE CRASHES (2026-10-07, verified vs the Expo changelog "Native crash reporting in Expo's
+  Observability service"): expo-observe 57.0.21+ on SDK 57 records native crashes with no setup —
+  Android uncaught Java/Kotlin exceptions plus the OS crash records kept on Android 11+, iOS Mach
+  exceptions (EXC_BAD_ACCESS), Unix signals (SIGSEGV) and uncaught Objective-C/Swift exceptions.
+  They land in the same Errors list as JS errors (filter by source), with crash-free sessions, the
+  stack trace, the session records leading up to it, a version/OS/device/country breakdown and a
+  "Hand off to AI" button (Claude Code or Codex). Error reporting as a whole is still IN PREVIEW. →
+  The "not a crash reporter" line is retired, but the default does not move: Sentry stays the
+  production crash reporter until Observe's error reporting leaves preview; an Expo app already on
+  Observe gets native-crash visibility by bumping expo-observe, not by adding an SDK.
 
   EXPO-OBSERVE SDK 58 SURFACE (2026-09-21, verified vs the Expo SDK 58 beta changelog): the error side
   grows — ObserveErrorBoundary and reportError, an errorHandlingEnabled option,
@@ -71,14 +82,18 @@ note: >
   RB-E-META-FRAMEWORKS owns rendering strategy behind the web metrics.
 
   HISTORY:
+  2026-10-15 CORRECTED: EAS Observe records native crashes since 2026-10-07 (expo-observe 57.0.21+,
+  error reporting still preview) — the "no native crashes" lines in the option row, when-clause and
+  note were stale; default unchanged.
   2026-09-24 REOPENED: version receipts re-checked vs npm; Bugsnag 9.0.0 (2026-09-22) and the web
   Sentry SDK major (@sentry/react 11) recorded.
   2026-09-21 REOPENED: expo-observe AppMetrics deprecated → Observe; SDK 58 error-reporting surface.
   2026-07-10 GAP CLOSED: @callstack/inspector added (release-build profiling, verified vs npm).
 defer_to_skill: null
 doc: "RB-E-OBSERVABILITY.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-24   # version receipts re-checked vs npm: Bugsnag 9.0.0 major, @sentry/react 11; prior 2026-09-21: expo-observe AppMetrics DEPRECATED → Observe, plus the SDK 58 error-reporting surface (ObserveErrorBoundary/reportError/clientId)
+updated: 2026-10-15   # EAS Observe native crash reporting (2026-10-07, expo-observe 57.0.21+, preview) — 'not a crash reporter' retired, Sentry default holds; prior 2026-09-24: version receipts re-checked vs npm: Bugsnag 9.0.0 major, @sentry/react 11; prior 2026-09-21: expo-observe AppMetrics DEPRECATED → Observe, plus the SDK 58 error-reporting surface (ObserveErrorBoundary/reportError/clientId)
 sources:
+  - "https://expo.dev/changelog/native-crash-reporting-in-eas-observe"
   - "https://expo.dev/changelog/sdk-58-beta"
   - "https://github.com/callstackincubator/rozenite/releases/tag/v2.3.0"
   - "https://github.com/callstackincubator/rozenite"

@@ -6,8 +6,8 @@ status: reviewed   # long-form entry written + source-checked → encyclopedia/R
 confidence: medium
 platforms: [react-native]
 options:
-  - { name: "expo-iap", tradeoff: "OpenIAP-compliant IAP as an Expo module (Google Play Billing v8 / Apple StoreKit) without ejecting; you own receipt validation. 5.8.2 (2026-09-30, verified vs npm), released in lockstep with react-native-iap. See note: OPENIAP PACKAGES." }
-  - { name: "react-native-iap", tradeoff: "The long-standing community IAP wrapper for bare RN, same OpenIAP code as expo-iap; its standalone repo is archived but the package is NOT deprecated. 16.7.2 (2026-09-30, verified vs npm). Never install @next: see note: DIST-TAG TRAP." }
+  - { name: "expo-iap", tradeoff: "OpenIAP-compliant IAP as an Expo module (Google Play Billing v8 / Apple StoreKit) without ejecting; you own receipt validation. 6.0.2 (2026-10-14; 6.0.0 major 2026-10-09, verified vs npm + the expo-iap-6.0.0 release), released in lockstep with react-native-iap. See note: OPENIAP PACKAGES." }
+  - { name: "react-native-iap", tradeoff: "The long-standing community IAP wrapper for bare RN, same OpenIAP code as expo-iap; its standalone repo is archived but the package is NOT deprecated. 17.0.2 (2026-10-14; 17.0.0 major 2026-10-09, verified vs npm + the react-native-iap-17.0.0 release). Never install @next: see note: DIST-TAG TRAP." }
   - { name: "RevenueCat (react-native-purchases)", tradeoff: "Hosted subscription infra + entitlements across stores; fees vs less server work. Remote-configurable paywalls and pricing experiments come with the hosting decision, not as separate choices. 10.10.2 (2026-09-24, verified vs npm)." }
   - { name: "@premieroctet/react-native-wallet", tradeoff: "Apple PassKit / Google Wallet passes (tickets, loyalty, coupons), NOT tap-to-pay; iOS needs a Pass Type ID + entitlements. 1.0.2 (2025-06-26) is still the latest release (2026-09-24, verified vs npm): stable-but-quiet, pin it. Not bare react-native-wallet, see note: WALLET NAME." }
 recommend:
@@ -28,14 +28,22 @@ note: >
   OPENIAP PACKAGES (2026-10-01, verified vs npm): both libraries are released from the
   hyodotdev/openiap monorepo (the npm repository field of both points there) and still ship in
   lockstep: react-native-iap 16.7.2 and expo-iap 5.8.2 both on 2026-09-30 (and both on 2026-09-26
-  before that). The old
+  before that). BOTH TOOK A MAJOR TOGETHER (2026-10-15, verified vs the react-native-iap-17.0.0 and
+  expo-iap-6.0.0 releases and npm): react-native-iap 17.0.0 and expo-iap 6.0.0 on 2026-10-09 (latest
+  17.0.2 / 6.0.2, 2026-10-14) implement OpenIAP Client Protocol 1.0.0, add support for community
+  store providers, and sit on the native openiap-apple 4.0.0 / openiap-google 4.0.0; peers are
+  unchanged (react-native-iap still needs react-native-nitro-modules >=0.36.5). The release notes
+  list no migration steps → treat it as a major anyway: read the API reference and re-test purchase
+  and restore flows before moving off 16.x / 5.x. The old
   hyochan/react-native-iap and hyochan/expo-iap repos were archived 2026-04-26 on the way into the
   monorepo; neither package carries an npm deprecation flag → pick on runtime (Expo module vs bare
   RN wrapper), not on liveness. expo-iap does not supersede react-native-iap.
 
-  DIST-TAG TRAP (2026-09-24, verified vs npm): the `next` tag is BEHIND `latest` on
-  react-native-iap (next 15.4.0-rc.3), expo-iap (next 4.4.0-rc.7) and react-native-purchases (next
-  8.9.1-vc-beta.1) → installing @next silently downgrades you a major.
+  DIST-TAG TRAP (2026-09-24, verified vs npm; re-checked 2026-10-15): the `next` tag is BEHIND
+  `latest`. react-native-purchases (next 8.9.1-vc-beta.1 vs latest 10.x) still downgrades you two
+  majors. On react-native-iap (next 17.0.0-rc.0) and expo-iap (next 6.0.0-rc.0) the 17/6 release
+  cycle refreshed `next`, so @next now gives the RC of the current major rather than an old major —
+  still older than `latest` → install @latest.
 
   SERVER-SIDE LAYER (2026-09-24, verified vs npm; first recorded 2026-09-02 vs the GitHub
   release): the OpenIAP Commerce Protocol extends OpenIAP past the client SDKs into a
@@ -54,6 +62,7 @@ note: >
   @premieroctet/react-native-wallet → verify identity (repository field), not existence.
 
   HISTORY:
+  2026-10-15 REOPENED: react-native-iap 17.0 / expo-iap 6.0 lockstep majors (2026-10-09; OpenIAP Client Protocol 1.0.0, community providers, openiap-apple/google 4.0.0); DIST-TAG TRAP re-checked (iap `next` now the current-major RC; purchases still two majors behind).
   2026-10-01 REOPENED: pins react-native-iap 16.6.2 → 16.7.2, expo-iap 5.6.3 → 5.8.2 — still lockstep
   (both 2026-09-26 and again 2026-09-30).
   2026-09-24 REOPENED: pins react-native-iap 16.5.1 → 16.6.2, expo-iap 5.5.1 → 5.6.3,
@@ -67,8 +76,10 @@ note: >
   archived thing was the standalone repo, not the package.
 defer_to_skill: null
 doc: "RB-E-PAYMENTS.md"   # long-form Explanation entry in content_dir
-updated: 2026-10-01   # pins iap 16.6.2 → 16.7.2 / expo-iap 5.6.3 → 5.8.2, still lockstep; prior 2026-09-24: purchases 10.10.2, commerce protocol → @hyodotdev scope 0.3.0 (unscoped deprecated); prior 2026-09-10: OpenIAP backed by Amazon (TWiR #295) + iap lockstep pins (firsthand) · openiap-commerce-protocol 0.1.0 server contract — reconciled from harvest/2026-09-03
+updated: 2026-10-15   # react-native-iap 17.0 / expo-iap 6.0 lockstep majors (Client Protocol 1.0.0); DIST-TAG TRAP re-checked; prior 2026-10-01: pins iap 16.6.2 → 16.7.2 / expo-iap 5.6.3 → 5.8.2, still lockstep; prior 2026-09-24: purchases 10.10.2, commerce protocol → @hyodotdev scope 0.3.0 (unscoped deprecated); prior 2026-09-10: OpenIAP backed by Amazon (TWiR #295) + iap lockstep pins (firsthand) · openiap-commerce-protocol 0.1.0 server contract — reconciled from harvest/2026-09-03
 sources:
+  - "https://github.com/hyodotdev/openiap/releases/tag/react-native-iap-17.0.0"
+  - "https://github.com/hyodotdev/openiap/releases/tag/expo-iap-6.0.0"
   - "https://github.com/hyodotdev/openiap/releases/tag/openiap-commerce-protocol-0.1.0"
   - "https://www.openiap.dev/docs/updates/announcements"
   - "https://github.com/hyodotdev/openiap/releases/tag/react-native-iap-16.5.1"

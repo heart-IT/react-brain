@@ -8,7 +8,7 @@ platforms: [react, react-native]
 options:
   - { name: "VisionCamera (v5, Nitro)", tradeoff: "RN camera with JSI frame processors, rebuilt on Nitro in v5; the base for custom real-time frame pipelines (RB-E-NATIVE owns Nitro). 5.2.3 (2026-08-20, verified vs npm); v4 frozen at 4.7.3 (2025-11-12). See note: VISIONCAMERA V5." }
   - { name: "expo-camera", tradeoff: "Managed camera for Expo apps; simpler, fewer real-time hooks than VisionCamera; the scanner that works in Expo Go." }
-  - { name: "react-native-webrtc", tradeoff: "Low-level WebRTC bindings; you wire signaling/SFU yourself. Patch-only on Chromium M124: 124.0.8 (2026-07-21, verified vs npm) is the fifth 124.0.x patch since 2024-08, while LiveKit's fork is on M144 — prefer a calling SDK. See note: WEBRTC LINES." }
+  - { name: "react-native-webrtc", tradeoff: "Low-level WebRTC bindings; you wire signaling/SFU yourself. Jumped from the M124 patch line to Chromium M155: 155.0.0 (2026-10-14, verified vs the 155.0.0 release + npm; major, peer react-native >=0.60.0 unchanged), now ahead of LiveKit's M144 fork — still prefer a calling SDK unless you own signaling. See note: WEBRTC LINES." }
   - { name: "LiveKit / Daily / Agora / Stream Video", tradeoff: "WebRTC conferencing SDKs (RN + web); LiveKit is open-source + self-hostable, the others are hosted infra. @livekit/react-native 3.0.0 (2026-09-11, verified vs npm) moved to LiveKit-prefixed WebRTC builds; see note: WEBRTC LINES." }
   - { name: "Skia / Metal + MediaPipe / Vision / ML Kit", tradeoff: "GPU compositing (Skia/Metal) + on-device segmentation/detection (MediaPipe on Android, Vision on iOS) for filters/effects. See note: FILTER PIPELINE." }
   - { name: "expo-video / expo-audio", tradeoff: "Media PLAYBACK (not capture or calling), the replacements for expo-av, which is DEPRECATED (removed from Expo Go in SDK 55, no longer patched); expo-video splits player logic (VideoPlayer) from view (VideoView)." }
@@ -20,7 +20,7 @@ recommend:
     - "custom real-time effects (blur / segmentation / virtual bg) → VisionCamera frame processors (+ Skia/Metal + MediaPipe/Vision, injected into the WebRTC VideoSource)"
     - "self-hosted / open-source calling → LiveKit (@livekit/react-native 3.x)"
     - "fastest managed calling setup → Daily / Agora / Stream (hosted SDK; pick on pricing and features, not yet verified here)"
-    - "raw WebRTC with your own signaling/SFU → react-native-webrtc (M124 line, patch-only; only when no calling SDK fits)"
+    - "raw WebRTC with your own signaling/SFU → react-native-webrtc (155.x on Chromium M155 since 2026-10-14; only when no calling SDK fits)"
     - "just capture photos → expo-camera (or VisionCamera for advanced)"
     - "code scanning, no custom camera UI → platform scanner (one call; choose by the native engine, not the wrapper — see the barcode reading's engine map)"
     - "code scanning with overlays / validation → VisionCamera + barcode plugin"
@@ -46,13 +46,20 @@ note: >
   Vision on iOS, composited with Metal/Skia; the gotchas are YUV↔I420/NV12 conversion, monotonic
   timestamps and buffer pooling. Encoder, transport and signaling stay untouched.
 
-  WEBRTC LINES (2026-09-24, verified vs npm and the LiveKit 3.0.0 release): react-native-webrtc
-  is patch-only on Chromium M124 (124.0.4 2024-08-14 through 124.0.8 2026-07-21).
+  WEBRTC LINES (2026-09-24, verified vs npm and the LiveKit 3.0.0 release; re-checked 2026-10-15 vs
+  the 155.0.0 release): react-native-webrtc sat patch-only on Chromium M124 (124.0.4 2024-08-14
+  through 124.0.8 2026-07-21), then 155.0.0 (2026-10-14) updated WebRTC to M155 in one jump — its
+  first libwebrtc move in over two years. The release also fixes an Android frame leak with multiple
+  video processors and a duplicate onActivityResult crash in screen capture, and ships the vendored
+  TypeScript declarations; it states no API migration, but an eleven-milestone native jump is a
+  device-test release, not a drop-in bump.
   @livekit/react-native 3.0.0 (2026-09-11) peers LiveKit's own fork @livekit/react-native-webrtc
   ^144.2.0 and moves to LiveKit-prefixed WebRTC builds (io.github.webrtc-sdk:android-prefixed on
   Android, the LiveKitWebRTC pod on iOS) to prevent collisions with any other WebRTC
   implementation → an app mixing LiveKit with another WebRTC library should take 3.x; the
-  maintained WebRTC line in RN today is LiveKit's.
+  maintained WebRTC line in RN was LiveKit's until 155.0.0; now the upstream package is the newer
+  libwebrtc (M155 vs LiveKit's M144), while LiveKit's fork keeps the prefixed builds that avoid
+  collisions.
 
   CALL UI (verified vs the Software Mansion callkeep-alternatives post, 2026-08-26, and npm):
   react-native-callkeep is dormant (4.3.16, 2024-11-18, still its latest) and built on the
@@ -73,6 +80,7 @@ note: >
   and no longer patched → the migrate row sequences expo-video + expo-audio.
 
   HISTORY:
+  2026-10-15 REOPENED: react-native-webrtc 155.0.0 (2026-10-14) leaves the M124 patch line for Chromium M155; option row + when-clause + WEBRTC LINES updated.
   2026-09-24 REOPENED: react-native-webrtc now five M124 patches (was "2 releases since mid-2024");
   LiveKit RN 3.0.0 prefixed WebRTC builds; expo-callkit-telecom 0.4.x → 0.5.0 (LiveKit WebRTC
   peer).
@@ -81,7 +89,7 @@ note: >
   2026-06-25 GAP CLOSED: entry created from the Margelo video-call filters deep-dive.
 defer_to_skill: react-native-jsi   # frame processors / native modules; real-time perf → rt-audio-pipeline-audit
 doc: "RB-E-MEDIA.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-24   # react-native-webrtc release count corrected (5 M124 patches), LiveKit RN 3.0.0 prefixed WebRTC, expo-callkit-telecom 0.5.0; prior 2026-09-10: native-call-UI clause gains the Android FCM one-service-slot collision — reconciled from harvest/2026-08-27
+updated: 2026-10-15   # react-native-webrtc 155.0.0 → Chromium M155 (off the M124 patch line; ahead of LiveKit's M144 fork); prior 2026-09-24: react-native-webrtc release count corrected (5 M124 patches), LiveKit RN 3.0.0 prefixed WebRTC, expo-callkit-telecom 0.5.0; prior 2026-09-10: native-call-UI clause gains the Android FCM one-service-slot collision — reconciled from harvest/2026-08-27
 reading:
   - title: "Building a video call app with filters"
     url: "https://blog.margelo.com/building-videocall-app-with-filters"
@@ -117,6 +125,7 @@ reading:
     claim: "You ship VisionCamera and scan codes — three APIs (CodeScanner / useBarcodeScannerOutput / frame processors); narrow barcodeFormats and outputResolution for latency, and mind the frame-vs-preview coordinate gotcha."
     applies_when: { deps: ["react-native-vision-camera"], platforms: [react-native] }
 sources:
+  - "https://github.com/react-native-webrtc/react-native-webrtc/releases/tag/155.0.0"
   - "https://swmansion.com/blog/react-native-callkeep-alternative-2026/"
   - "https://margelo.com/blog/react-native-barcode-scanner"
   - "https://blog.margelo.com/building-videocall-app-with-filters"

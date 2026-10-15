@@ -9,11 +9,11 @@ options:
   - { name: "EAS Update (expo-updates client)", tradeoff: "The hosted default: channels, phased rollouts, republish-to-rollback. SDK 55 added bsdiff bytecode/bundle diffing (est. ~75% smaller update downloads; default in SDK 56). expo-updates 57.0.23 (2026-09-18; 58.0.8 on next for SDK 58 beta; verified vs npm)." }
   - { name: "expo-updates + custom server", tradeoff: "The Expo Updates protocol is open: self-host the server and keep the battle-tested client; more ops work than EAS. XPREM (next row) is the ready-made server." }
   - { name: "XPREM (ex expo-open-ota)", tradeoff: "Go implementation of the Expo Updates protocol: multi-app, progressive rollouts + instant rollback, A/B branch splitting, S3/GCS/Azure/R2 backends, no Expo account or token; open core, RBAC/SSO commercial. Renamed from expo-open-ota at v3. v3.2.4 (2026-09-23, verified vs GitHub releases). See note: XPREM." }
-  - { name: "hot-updater", tradeoff: "Self-hosted open-source OTA (gronxb) positioned as the CodePush successor; younger than expo-updates. 0.36.15 (2026-09-22, verified vs npm); v1 in release candidates on GitHub since 2026-09-08. See note: HOT-UPDATER V1." }
+  - { name: "hot-updater", tradeoff: "Self-hosted open-source OTA (gronxb) positioned as the CodePush successor; younger than expo-updates. v1 STABLE: 1.0.0 (2026-10-11, verified vs the v1.0.0 release + npm; latest 1.0.7) — needs separate v1 infrastructure and a new native build; v0 continues as 0.36.x on the `v0` tag. See note: HOT-UPDATER V1." }
   - { name: "Codemagic Patch (@codemagic/react-native-patch)", tradeoff: "Self-hosted OTA from the CodePush lineage with a dashboard, CLI, Expo config plugin and a CI vendor behind it — its edge is operability, not protocol. Still early: SDK 0.5.0 and server v0.5.0 (2026-09-23, verified vs npm + GitHub releases); evaluate, do not standardize. See note: CODEMAGIC PATCH." }
   - { name: "code-push-server (standalone)", tradeoff: "Microsoft's open-sourced server, compatible with the legacy react-native-code-push client — a self-host stopgap for existing CodePush apps, not a bet for new ones." }
   - { name: "Delta (Zepto, OSS)", tradeoff: "Self-hosted BINARY DELTA patching at quick-commerce scale (bsdiff patches to your S3, Lambda + CloudFront picks the patch per device). Zepto's own receipts: 80% adoption in 24h, 15M update requests/day, P90 patch download 305ms. @zepto-labs/react-native-delta 1.0.0 (2026-07-01, verified vs npm). See note: DELTA." }
-  - { name: "react-native-code-push (RETIRED service)", tradeoff: "App Center and the hosted CodePush service shut down 2025-03-31; the client npm is dormant at 9.0.1 (2024-12-19, verified vs npm). Not recommended: migrate." }
+  - { name: "react-native-code-push (RETIRED service)", tradeoff: "App Center and the hosted CodePush service shut down 2025-03-31; the client npm is dormant at 9.0.1 (2024-12-19) and now DEPRECATED on npm — every version (117 of 117) carries 'Package no longer supported', first seen by the 2026-10-15 poll (registry modified 2026-10-12; verified vs npm). Not recommended: migrate." }
 recommend:
   default: "On Expo/EAS → EAS Update via the expo-updates client (channels + phased rollouts + rollback; diffing makes updates dramatically smaller since SDK 55/56). Hard self-host requirement → hot-updater, or the open expo-updates protocol with your own server. Anything still pointed at the retired CodePush service is silently broken — migrate."
   when:
@@ -35,7 +35,11 @@ note: >
   CODEPUSH IS GONE (verified vs the microsoft/react-native-code-push repo): Microsoft retired App
   Center AND the hosted CodePush service on 2025-03-31, archived the repo and open-sourced the
   standalone code-push-server as the escape hatch → anything still pointed at the service stops
-  updating without crashing, i.e. it is silently broken.
+  updating without crashing, i.e. it is silently broken. The npm package is now deprecated too
+  (2026-10-15 poll, verified vs the registry): all 117 versions carry npm's "Package no longer
+  supported. Contact Support at npmjs.com/support for more info." (the registry's
+  `modified` stamp is 2026-10-12), so every install prints a deprecation warning and dependency
+  scanners will flag it — the client is no longer merely dormant.
 
   EAS UPDATE DIFFING (verified vs the SDK 55 changelog): binary bsdiff patches for Hermes bytecode —
   the client applies diffs against previously installed bytecode instead of re-downloading whole
@@ -44,8 +48,16 @@ note: >
   HOT-UPDATER V1 (2026-09-24, verified vs the gronxb/hot-updater v1.0.0-rc.0 release): v1 moves to
   hybrid delivery — the server serves shared, cacheable Release Catalogs and the client decides which
   update to apply; in the project's own Cloudflare test, p95 update-check latency fell from 283.2 ms
-  (v0) to 70.0 ms and cache hit rate rose from 0% to 96.9%. It is an RC and the release warns of
-  breaking changes → stay on 0.36.x for production until 1.0.0 ships.
+  (v0) to 70.0 ms and cache hit rate rose from 0% to 96.9%. 1.0.0 SHIPPED 2026-10-11 (verified vs
+  the v1.0.0 release and npm; 1.0.7 on 2026-10-15): the release reports a median check time of 301 ms
+  (v0) → 50 ms on Cloudflare, and adds Insights (downloads, launches, crash recoveries, failed
+  updates, release health with rollback suggestions), Remote Config, a plugin system (Insights,
+  Remote Config and client API keys are plugins), a self-hostable Console, and agent-driven setup
+  (`hot-updater doctor --fix`). 1.0.6 adds RN's Swift Package Manager mode and an artifact protocol
+  v2 that signs only the files a device downloads. MIGRATION IS NOT A BUMP: v1 needs separate v1
+  infrastructure and a new native build; keep the v0 endpoint running for binaries already in the
+  field (v0 continues on the `v0` branch / npm tag, 0.36.19) and follow BREAKING_CHANGES.md → new
+  self-hosted projects start on v1; existing v0 apps migrate on their next store release.
 
   XPREM (verified vs the mercuretechnologies/xprem repo and the expo-open-ota v3 post): the concrete
   server for the expo-updates + custom server row. Stateless (bucket-only) or PostgreSQL
@@ -83,6 +95,7 @@ note: >
   depends on (EAS Observe marks every OTA update).
 
   HISTORY:
+  2026-10-15 REOPENED: hot-updater 1.0 stable (2026-10-11; separate v1 infra + new native build, v0 stays on 0.36.x); react-native-code-push now npm-DEPRECATED (all versions); TeamReach reading (rollback vs persistent state, delivery vs publish, launch-crash recovery window).
   2026-09-24 CORRECTED: Delta was described as "GitHub-install, not yet on npm" — it has been on npm
   as @zepto-labs/react-native-delta since 2026-07-01; hot-updater 0.35 → 0.36 and v1 RC recorded;
   Codemagic Patch 0.1.6 → 0.5.0.
@@ -92,7 +105,7 @@ note: >
   2026 run (bundle diffing, runtime channel switching, iteration speed, issues 12–14).
 defer_to_skill: null
 doc: "RB-E-OTA.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-24   # Delta is on npm (@zepto-labs/react-native-delta, corrected); hot-updater 0.36 + v1 RC; Codemagic Patch 0.5.0; prior 2026-09-10: Codemagic Patch server 0.3.0 (firsthand) · SWSH E2E-gate-every-OTA-push reading — reconciled from harvest/2026-08-27
+updated: 2026-10-15   # hot-updater 1.0 stable (v1 infra + new native build; v0 continues); react-native-code-push npm-deprecated; TeamReach OTA cutover reading; prior 2026-09-24: Delta is on npm (@zepto-labs/react-native-delta, corrected); hot-updater 0.36 + v1 RC; Codemagic Patch 0.5.0; prior 2026-09-10: Codemagic Patch server 0.3.0 (firsthand) · SWSH E2E-gate-every-OTA-push reading — reconciled from harvest/2026-08-27
 watching:
   - title: "The OTA Illusion: What No One Tells You About Instant Updates At Scale (RUC 2025)"
     url: "https://www.youtube.com/watch?v=hBoAD6sYDYo"
@@ -111,6 +124,12 @@ reading:
     what: "The operational canon for this entry: staged percentage rollouts as exposure control, what to monitor while an update bakes, and aborts vs republish-rollbacks as distinct mitigations — 'sometimes it helps to go a little slower.' Vendor-authored but the staged-rollout discipline is platform-agnostic. (Body verified via the page's embedded content JSON — the blog is a JS shell.)"
     claim: "You ship OTA updates — run them like releases: staged percentage rollouts, a monitored bake period, and know abort vs republish-rollback as distinct mitigations before you need one."
     applies_when: { deps: ["expo-updates", "hot-updater", "@hot-updater/*"], platforms: [react-native] }
+  - title: "Relaunching TeamReach: how OTA updates saved a 5,000,000-user cutover"
+    url: "https://expo.dev/blog/teamreach-ota-updates-relaunch"
+    by: "Gene Cornfield (TeamReach), guest post on the Expo blog"
+    what: "A production cutover where OTA was the plan, not the safety net: a 3-month Expo rewrite of two native apps cut over every user overnight, then shipped twelve OTA updates in three days (about $4,000 on MAU billing, where repeated updates to the same audience cost little more than one). Most breakage came from a decade of untyped legacy data (fields that were tinyint, then JSON, then HTML), fixed in the client. Three caveats this entry's rollback framing lacked: they FIXED FORWARD because rolling back is not safe once a bad update has written persistent state the older code cannot read; publishing is not delivering (expo-updates applies a fix on the launch that downloads it in time, otherwise on the next one, so a fix took ~24h to reach the fleet); and expo-updates' automatic recovery only catches a fatal JS error early in launch, before first render, falling back to the last working update. Vendor-hosted and business-authored, with the technical detail relayed from the lead developer."
+    claim: "You rely on OTA rollback — it is unsafe once a bad update wrote persistent state older code cannot read, a fix reaches users only as they relaunch (~24h here), and expo-updates recovers only pre-first-render crashes; plan to fix forward."
+    applies_when: { deps: ["expo-updates", "hot-updater", "@hot-updater/*"], platforms: [react-native], stages: [production, scale] }
   - title: "EAS Update introduction (docs)"
     url: "https://docs.expo.dev/eas-update/introduction/"
     by: "Expo"
@@ -127,6 +146,10 @@ sources:
   - "https://github.com/mercuretechnologies/xprem"
   - "https://www.mercuretechnologies.com/blog/expo-open-ota-v3"
   - "https://github.com/gronxb/hot-updater/releases/tag/v1.0.0-rc.0"
+  - "https://github.com/gronxb/hot-updater/releases/tag/v1.0.0"
+  - "https://github.com/gronxb/hot-updater/releases/tag/v1.0.6"
+  - "https://registry.npmjs.org/react-native-code-push"
+  - "https://expo.dev/blog/teamreach-ota-updates-relaunch"
   - "https://github.com/codemagic-ci-cd/codemagic-patch/releases/tag/codemagic-patch-server-v0.5.0"
   - "https://registry.npmjs.org/@zepto-labs/react-native-delta"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
@@ -139,5 +162,5 @@ migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-
     to: "hot-updater (self-hosted successor) or expo-updates + EAS Update"
     urgency: dead
     effort: M
-    why: "the hosted CodePush service shut down 2025-03-31 and the client npm has been dormant since 2024-12 — anything still pointed at the service is silently broken; standalone code-push-server is a stopgap, not a destination"
-    receipts: ["https://github.com/microsoft/react-native-code-push"]
+    why: "the hosted CodePush service shut down 2025-03-31, the client npm has been dormant since 2024-12 and is now DEPRECATED on npm (all versions, seen 2026-10-15) — anything still pointed at the service is silently broken; standalone code-push-server is a stopgap, not a destination"
+    receipts: ["https://github.com/microsoft/react-native-code-push", "https://registry.npmjs.org/react-native-code-push"]

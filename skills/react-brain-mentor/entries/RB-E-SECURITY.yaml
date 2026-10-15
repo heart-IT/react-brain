@@ -18,9 +18,9 @@ recommend:
   when:
     - "device-trust requirement, or jail-monkey installed → server-side Play Integrity / DeviceCheck (jail-monkey is client-side only and defeatable; keep it as a signal, not the gate)"
     - "web XSS surface → Trusted Types (needs React ≥19.3 under an enforcing CSP; plus sanitized dangerouslySetInnerHTML)"
-    - "RSC/Server Functions on web → patched React (19.2.8 / 19.1.9 / 19.0.8 floors for the recurring server-function DoS; does not affect React Native)"
+    - "RSC/Server Functions on web → patched React (19.3.1 / 19.2.9 / 19.1.10 / 19.0.9 floors since 2026-10-14: a CRITICAL RSC RCE + a HIGH server-function DoS; does not affect React Native) and patched Next.js (16.4.1 / 15.5.28, RB-E-META-FRAMEWORKS)"
     - "TanStack Start app → @tanstack/react-start ≥1.168.60 (CVE-2026-102989, critical reflected XSS in server-function response handling; solid-start ≥1.168.57, vue-start ≥1.168.56, start-server-core ≥1.169.39)"
-    - "dev server reachable beyond localhost (--host, server.host, a Docker port mapping) → patched Vite (≥8.0.5 / ≥7.3.2 for CVE-2026-39364; RB-E-BUILD owns the floor) and no secrets beside the dev server"
+    - "dev server reachable beyond localhost (--host, server.host, a Docker port mapping) → patched Vite (≥8.3.3, or 8.2.4 / 8.1.6 / 7.3.7 / 6.4.4 since the 2026-10-06 advisories; RB-E-BUILD owns the floor) and no secrets beside the dev server"
     - "want a cheap CI gate for RN-specific security footguns → rnsec (young — treat findings as leads, route confirmations to the review skill)"
     - "want an AI-driven data-flow scan of your own codebase → DeepSec (severity-rated findings, ~10–20% false positives; not auto-fix)"
     - "known-CVE check on dependencies → dependency CVE scanning (npm/pnpm audit in CI; depth via the review skill)"
@@ -83,6 +83,17 @@ note: >
   (crafted HTTP requests → OOM / excessive CPU) affecting react-server-dom-webpack/parcel/turbopack
   19.0.0–19.0.7, 19.1.0–19.1.8 and 19.2.0–19.2.7, patched in 19.0.8 / 19.1.9 / 19.2.8 — the current
   floors. No server and no RSC-capable bundler means no exposure.
+  OCTOBER 2026 RAISES THE FLOOR (2026-10-14, verified vs GHSA-xqc2-xf4c-x3h3 and GHSA-h3gv-c5rc-p453
+  on react/react, the v19.3.1 release and npm): GHSA-xqc2-xf4c-x3h3 is CRITICAL unauthenticated RCE in
+  React Server Components — crafted payloads, but only in "extremely rare cases where responses
+  transport multiple typed arrays and an attacker-controlled value"; GHSA-h3gv-c5rc-p453 is a HIGH
+  server-function DoS. Both affect react-server-dom-webpack/parcel/turbopack 19.0.0–19.0.8,
+  19.1.0–19.1.9, 19.2.0–19.2.8 and 19.3.0; patched in 19.0.9 / 19.1.10 / 19.2.9 / 19.3.1, all published
+  to npm 2026-10-14 (the 19.3.1 release note reads only "Improve transport protocol"). These are the
+  two fixes Next.js postponed from its September release; Next.js's own advisories
+  (GHSA-673q-mjm6-r5xr for `use cache` returning typed arrays, GHSA-p3m5-59mp-jv5r) and the patched
+  16.4.1 / 15.5.28 are owned by RB-E-META-FRAMEWORKS → current floors: React 19.3.1 / 19.2.9 / 19.1.10
+  / 19.0.9 wherever react-server-dom-* ships, same no-server/no-RSC exemption.
 
   TANSTACK START XSS (2026-09-30, verified vs tanstack.com/blog and npm): CVE-2026-102989, a CRITICAL
   reflected XSS in TanStack Start's server-function response handling — a crafted server-function URL
@@ -107,6 +118,7 @@ note: >
   storage; the review skill owns per-diff secret/injection/dependency checks.
 
   HISTORY:
+  2026-10-15 REOPENED: RSC floors → 19.3.1 / 19.2.9 / 19.1.10 / 19.0.9 (GHSA-xqc2-xf4c-x3h3 critical RCE, GHSA-h3gv-c5rc-p453 high DoS, 2026-10-14); Vite floor pointer → 8.3.3 (2026-10-06 GHSAs, RB-E-BUILD).
   2026-10-01 REOPENED: TanStack Start critical reflected XSS, CVE-2026-102989 (server-function response
   handling; floors react-start ≥1.168.60 / solid-start ≥1.168.57 / vue-start ≥1.168.56 /
   start-server-core ≥1.169.39); added the GitHub Security Lab AI-agent reading (24 Android CVEs,
@@ -119,7 +131,7 @@ note: >
   2026-07-09 GAP CLOSED: rnsec added.
 defer_to_skill: review
 doc: "RB-E-SECURITY.md"   # long-form Explanation entry in content_dir
-updated: 2026-10-01   # TanStack Start CVE-2026-102989 (critical reflected XSS in server-function response handling, floors react-start 1.168.60 / solid-start 1.168.57 / vue-start 1.168.56 / start-server-core 1.169.39); added GitHub Security Lab AI-agent reading; prior 2026-09-21: dev-server attack surface: Vite CVE-2026-39364 (server.fs.deny bypass, fixed 8.0.5/7.3.2) with measured mass-scanning of exposed dev servers — React Status #491
+updated: 2026-10-15   # RSC floors raised to 19.3.1 / 19.2.9 / 19.1.10 / 19.0.9 (critical RCE GHSA-xqc2-xf4c-x3h3 + high DoS GHSA-h3gv-c5rc-p453, 2026-10-14; Next.js 16.4.1 / 15.5.28 pointer); Vite floor pointer → 8.3.3; prior 2026-10-01: TanStack Start CVE-2026-102989 (critical reflected XSS in server-function response handling, floors react-start 1.168.60 / solid-start 1.168.57 / vue-start 1.168.56 / start-server-core 1.169.39); added GitHub Security Lab AI-agent reading; prior 2026-09-21: dev-server attack surface: Vite CVE-2026-39364 (server.fs.deny bypass, fixed 8.0.5/7.3.2) with measured mass-scanning of exposed dev servers — React Status #491
 reading:
   - title: "How we found 24 Android vulnerabilities using our open source AI security agent"
     url: "https://github.blog/security/how-we-found-24-android-vulnerabilities-using-our-open-source-ai-security-agent/"
@@ -169,6 +181,9 @@ reading:
     what: "The nuance behind this entry's supply-chain note: npm v12's default block on preinstall/install/postinstall closes the INSTALL-TIME door but leaves the EXECUTION-TIME door open. Attackers already moved the payload into the module body as a top-level side effect (runs on first require), or ship a binding.gyp so npm's implicit node-gyp rebuild fires anyway (the June-2026 Miasma campaign). Removing a trigger isn't removing the capability — so layer defenses: Node's --permission model (--allow-net / --allow-child-process / --allow-fs-write to cap what running code may DO), CI egress allow-listing (Harden-Runner), and container/seccomp isolation. Install-script blocking raises the floor; it is not the ceiling."
 sources:
   - "https://github.com/advisories/GHSA-v2wj-q39q-566r"
+  - "https://github.com/react/react/security/advisories/GHSA-xqc2-xf4c-x3h3"
+  - "https://github.com/react/react/security/advisories/GHSA-h3gv-c5rc-p453"
+  - "https://github.com/react/react/releases/tag/v19.3.1"
   - "https://react.dev/blog/2026/09/09/react-19-3"
   - "https://www.aikido.dev/blog/keyv-and-friends-compromised-in-npm-supply-chain-attack"
   - "https://react.dev/blog/2025/12/11/denial-of-service-and-source-code-exposure-in-react-server-components"

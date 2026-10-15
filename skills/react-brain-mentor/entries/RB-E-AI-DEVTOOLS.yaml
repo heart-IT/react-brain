@@ -118,6 +118,7 @@ note: >
   the skills/MCP layer over hosted products.
 
   HISTORY:
+  2026-10-15 GAP CLOSED: local MCP servers over HTTP are reachable from web pages via DNS rebinding — Software Mansion reading (Host/Origin allowlist + local token; stdio avoids it).
   2026-10-08 CORRECTED: TesterArmy is not closed-source end to end — its Apache-2.0 `e2e` framework (npm e2e, agent-device mobile engine) is public; the hosted PR agent stays commercial.
   2026-10-08 GAP CLOSED: Apex, Callstack's RN/Next.js-specialized coding model, GA — vendor-caveated row.
   2026-10-01 GAP CLOSED: TesterArmy (vendor Agentic CI for Expo/EAS) added, NEW/vendor-caveated; TanStack Intent 0.5 maintenance tooling (staleness tracking, TS-validated examples, CI repair suggestions).
@@ -134,8 +135,14 @@ note: >
   2026-07-09 GAP CLOSED: entry created — agent tooling ran through every Native Weekly issue 11–16 (Jan–Jun 2026); all options fetch-verified.
 defer_to_skill: agentic-engineering-patterns
 doc: null
-updated: 2026-10-08   # Apex (Callstack RN/Next.js coding model, GA, vendor) added · TesterArmy CORRECTED: open-source `e2e` framework (npm 0.18.0); prior 2026-10-01: TesterArmy (Agentic CI for Expo/EAS, vendor) added · TanStack Intent 0.5.0 maintenance tooling; prior 2026-09-24: Shopify Helix primary-source reading (VLM UI-review gate) · star counts and npm pins refreshed (agent-skills ~1.7k★, agent-device 0.21.13, Argent 0.25.2, Simlock ~14★); prior 2026-09-21: @expo/agent-cli (SDK 58 beta) — the first-party agent layer the 2026-09-10 challenge predicted · Shopify's agent-addressable-architecture reading
+updated: 2026-10-15   # local-MCP DNS-rebinding reading (Software Mansion; Host allowlist + token, stdio transport); prior 2026-10-08: Apex (Callstack RN/Next.js coding model, GA, vendor) added · TesterArmy CORRECTED: open-source `e2e` framework (npm 0.18.0); prior 2026-10-01: TesterArmy (Agentic CI for Expo/EAS, vendor) added · TanStack Intent 0.5.0 maintenance tooling; prior 2026-09-24: Shopify Helix primary-source reading (VLM UI-review gate) · star counts and npm pins refreshed (agent-skills ~1.7k★, agent-device 0.21.13, Argent 0.25.2, Simlock ~14★); prior 2026-09-21: @expo/agent-cli (SDK 58 beta) — the first-party agent layer the 2026-09-10 challenge predicted · Shopify's agent-addressable-architecture reading
 reading:
+  - title: "A Website Can Read Your Local MCP Server, and Here's How to Stop It"
+    url: "https://swmansion.com/blog/a-website-can-read-your-local-mcp-server-and-here-s-how-to-stop-it/"
+    by: "Software Mansion"
+    what: "The security caveat this entry's MCP-heavy picks never stated: binding an MCP server to 127.0.0.1 keeps other machines out but not web pages. DNS rebinding lets a page you merely visit re-resolve its own hostname to loopback after the DNS cache expires, so the browser treats requests to your local server as same-origin; the author ran the MCP handshake against an unauthenticated FastMCP server and read its config (a fake Stripe key and database URL included). Chrome and Firefox now gate public-to-loopback requests (Private/Local Network Access), but Safari 27 still let it through when re-tested in September 2026, and non-browser clients (an agent's fetch tool that only checks the URL) have no such check at all. FastMCP 4.0.10 ships a Host/Origin guard that is OFF by default. Fix on any stack: reject requests whose Host header is not a loopback name (stops every rebinding), validate Origin as the MCP Streamable HTTP spec already requires, and require a local token against a malicious local process; stdio transport avoids the network entirely (Argent uses stdio and puts a Host allowlist on its local Express tool-server). Vendor-authored, but the demo is reproducible."
+    claim: "You run or build a local MCP server over HTTP — loopback binding is not a security boundary: DNS rebinding lets a visited web page (or an agent's fetch tool) call it, so validate Host/Origin, require a local token, or use stdio transport."
+    applies_when: { platforms: [react, react-native] }
   - title: "Native is now the future of mobile at Shopify"
     url: "https://shopify.engineering/back-to-native"
     by: "Mustafa Ali (Shopify Engineering)"
@@ -189,6 +196,7 @@ reading:
     claim: "You write agent context for React tooling — check what the tool already ships first: Next.js, MUI, Storybook and Playwright bundle their own MCP servers/docs/agents, which version with the package where hand-written summaries go stale."
     applies_when: { deps: ["next", "@mui/*", "storybook", "@playwright/*"], platforms: [react] }
 sources:
+  - "https://swmansion.com/blog/a-website-can-read-your-local-mcp-server-and-here-s-how-to-stop-it/"
   - "https://www.callstack.com/blog/apex-agetic-coding-for-mobile-and-web-spcialied-in-react"
   - "https://github.com/tester-army/e2e"
   - "https://registry.npmjs.org/e2e/latest"

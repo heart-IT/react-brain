@@ -8,20 +8,21 @@ platforms: [react, react-native]
 options:
   - { name: "shared logic/hooks package", tradeoff: "platform-agnostic core (business logic, state, data) in a workspace package; serves the web app and the native app alike — the highest-leverage, lowest-risk share" }
   - { name: "platform-extension files (.web.tsx/.native.tsx)", tradeoff: "one API, per-platform implementation; keeps each file single-platform instead of Platform.OS branching" }
-  - { name: "React Strict DOM (Meta)", tradeoff: "write strict HTML/CSS rendering web + native; Babel flattens to real DOM + static CSS on web; emerging RN-Web successor; involved setup. 0.0.55 (2026-01-09, verified vs npm), pre-1.0" }
-  - { name: "react-native-web", tradeoff: "MAINTENANCE MODE (2026) — maps RN primitives to HTML; still works, no major features coming. 0.21.2 (2025-10-16, verified vs npm); see note: REACT-NATIVE-WEB" }
-  - { name: "Tamagui", tradeoff: "cross-platform UI + optimizing compiler" }
+  - { name: "React Strict DOM (Meta)", tradeoff: "write strict HTML/CSS rendering web + native; Babel flattens to real DOM + static CSS on web; involved setup. Pre-1.0 and QUIET: 0.0.55 (2026-01-09) is still the latest npm release and the repo's last commit is 2026-08-31 (both verified 2026-10-15); see note: REACT-NATIVE-WEB" }
+  - { name: "react-native-web", tradeoff: "MAINTAINED AGAIN since 2026-10-07 — maps RN primitives to HTML; Expo-backed maintainers took it over with its creator and it is moving to the React Foundation org. A breaking 0.22 modernization is planned (React 19-only, ESM, newer browser floor). 0.21.4 (2026-10-08, verified vs npm); see note: REACT-NATIVE-WEB" }
+  - { name: "Tamagui", tradeoff: "cross-platform UI + optimizing compiler; 3.0 (2026-10-10, verified vs the v3.0.0 release) adds React Strict DOM elements and a Tailwind authoring mode on the same compiler and is a breaking major for v2 apps — RB-E-STYLING owns the detail (see note: TAMAGUI 3 there)" }
   - { name: "Expo Universal Components / @expo/ui", tradeoff: "single API → SwiftUI (iOS) / Jetpack Compose (Android) / react-dom or react-native-web (web); native APIs stable since SDK 56, web APIs still experimental (verified vs the SDK 56 changelog); see note: EXPO UI" }
   - { name: "Solito", tradeoff: "shared routing across Expo + Next.js; v5 dropped the RN-Web core dep" }
   - { name: "Expo DOM Components (`use dom`)", tradeoff: "render real web components inside RN via a webview wrapper (since Expo SDK 52); good for incremental web reuse" }
 recommend:
-  default: "Shared logic/hooks package (a platform-agnostic workspace package used by both the React web app and the React Native app) first — the highest-leverage, lowest-risk win. For shared UI on NEW projects the pick is Expo Universal Components or React Strict DOM, not a fresh react-native-web bet. The pick changes only for an organisation that can staff and gate agent-maintained duplicate native implementations (see when)."
+  default: "Shared logic/hooks package (a platform-agnostic workspace package used by both the React web app and the React Native app) first — the highest-leverage, lowest-risk win. For shared UI on NEW projects the pick is Expo Universal Components in an Expo app, otherwise react-native-web (maintained again since 2026-10 under Expo + the React Foundation) for RN-primitive authoring; React Strict DOM stays an option for strict HTML/CSS authoring but has shipped nothing to npm since 2026-01. The pick changes only for an organisation that can staff and gate agent-maintained duplicate native implementations (see when)."
   when:
     - "duplicated business logic across web + native → shared logic/hooks package (extract a workspace package now)"
     - "UI that must differ per platform behind one API → platform-extension files (.web.tsx/.native.tsx)"
     - "new universal UI in an Expo app → Expo Universal Components (@expo/ui; native lanes stable, web lane experimental)"
-    - "new universal UI authored as strict HTML/CSS, web-first → React Strict DOM (pre-1.0, involved setup)"
-    - "existing react-native-web app → react-native-web (keep it; still works, just don't expand the bet)"
+    - "new universal UI authored with RN primitives, web as a real target → react-native-web (maintained again since 2026-10; expect the breaking 0.22: React 19-only, ESM, newer browsers)"
+    - "new universal UI authored as strict HTML/CSS, web-first → React Strict DOM (pre-1.0, involved setup, no npm release since 2026-01-09 — pin and watch)"
+    - "existing react-native-web app → react-native-web (keep it; maintained again — move to React 19 before the 0.22 line)"
     - "existing Tamagui design system → Tamagui (keep it; cross-platform UI with an optimizing compiler)"
     - "Expo + Next.js shared routing → Solito"
     - "incremental web reuse inside an RN app → Expo DOM Components (`use dom`)"
@@ -36,11 +37,25 @@ note: >
   lane.
 
 
-  REACT-NATIVE-WEB (2026, verified vs official RN sources, Callstack and Gallagher's notes):
-  react-native-web has entered MAINTENANCE-ONLY mode — creator Nicolas Gallagher and Zalando
-  pivoted to React Strict DOM, and Software Mansion sees "no major features on the horizon". →
-  NEW universal web+native work goes to React Strict DOM or Expo Universal Components; existing
-  RN-Web apps keep working.
+  REACT-NATIVE-WEB (2026-10-15, verified vs necolas/react-native-web discussion #2872 and npm):
+  earlier in 2026 react-native-web sat in MAINTENANCE-ONLY mode — creator Nicolas Gallagher and
+  Zalando had pivoted to React Strict DOM. That reversed on 2026-10-07: Mathieu (@zoontek), with
+  Gallagher, Expo and the community, picked up active maintenance and development, and the repo is
+  moving to the React Foundation GitHub org next to React and React Native. Gallagher called it "the
+  ideal outcome for RNW". The direction is conservative — track React Native as closely as
+  practical; native/web convergence questions belong to React Native and React Strict DOM. Releases
+  resumed (0.21.3 2026-09-25, 0.21.4 2026-10-08). The modernization lands on a 0.22-dev branch and
+  is BREAKING: react/react-dom peers ^19.0.0 (React 18 dropped), browser floor Chrome/Edge 95+,
+  Firefox 93+, Safari/iOS Safari 15.1+, an ESM ("type": "module") package, Flow → TypeScript,
+  removal of modules React Native core no longer has (CheckBox, Picker, ProgressBar, YellowBox,
+  InteractionManager, the old Touchable mixin), missing RN APIs added (PlatformColor,
+  useAnimatedValue, usePressability and more), and babel-plugin-react-native-web deprecated in
+  favour of a bundler alias plus tree shaking. Meanwhile React Strict DOM has gone quiet: 0.0.55
+  (2026-01-09) is still its latest npm release and the repo's last commit is 2026-08-31; in the
+  same thread contributors described its activity as "mostly stalled since spring", and Gallagher
+  suggested Expo might help there "at some point". → react-native-web is a maintained lane again
+  and no longer a bet to avoid; React Strict DOM is still an option but pin it and watch for a
+  release. Existing RN-Web apps should get onto React 19 before 0.22.
 
 
   EXPO UI (2026-09-24, verified vs the SDK 56 changelog): SDK 56 made the Expo UI native APIs
@@ -71,12 +86,31 @@ note: >
   same conclusion.
 
 
+  COINBASE (2026-10-15, verified vs a 2026-09-30 LinkedIn post by the Coinbase engineer whose team
+  runs the migration — a hiring post, not an engineering write-up): Coinbase is taking its consumer
+  trading app fully native, off React Native to Swift and Kotlin, with the same core reason as
+  Shopify — "AI coding agents have collapsed the cost of building a feature twice" — plus claimed
+  faster startup, fewer crashes and day-one access to new platform capabilities. That meets the
+  revisit trigger above in weak form. Re-checked, the default holds on the same three terms: the
+  default is about LOGIC; this is a staffed native rewrite (the post is hiring native-mobile and
+  mobile-QA engineers, Senior to Senior Staff), not a swap a normal team copies; and no web app is
+  weighed. → Two consumer-scale apps now make agent-maintained duplication a trend rather than one
+  outlier; the next revisit trigger is a published technical account (costs, parity machinery) from
+  Coinbase or a third organisation.
+
+
   CROSS-REFERENCES: RB-E-AI-DEVTOOLS owns the agent-workflow half of the Shopify thread (Helix,
   headless agent-drivable business logic). The engineering-principles skill owns boundaries and
   dependency direction for the shared package.
 
 
   HISTORY:
+
+  2026-10-15 REOPENED: react-native-web is maintained again (Expo-backed maintainers + React
+  Foundation org, 2026-10-07) — option row, default, when-clauses and note rewritten; React Strict
+  DOM flagged quiet (no npm release since 2026-01-09). Coinbase datapoint added to the Shopify thread.
+
+  2026-10-15 REOPENED: Tamagui row notes 3.0 (React Strict DOM + Tailwind mode; breaking for v2), pointer to RB-E-STYLING.
 
   2026-09-24 CORRECTED: the Expo UI row said "SDK 56 beta"; SDK 56 made the native APIs stable
   and left only the web APIs experimental.
@@ -86,7 +120,7 @@ note: >
   competitor named as a when-clause.
 defer_to_skill: engineering-principles  # boundaries/dependency direction
 doc: "RB-E-CROSSPLATFORM.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-24   # Expo UI row corrected (SDK 56: native APIs stable, web experimental); RSD/RN-Web pins; prior 2026-09-21: CHALLENGED — SURVIVES: Shopify's move off RN attacks the share-an-implementation premise and answers it with "share the spec, not the code" (agent-maintained duplicates); default holds, competitor named · KMP+SwiftUI scaling reading
+updated: 2026-10-15   # react-native-web maintained again (Expo + React Foundation, breaking 0.22 planned), RSD flagged quiet; Coinbase leaves RN (second Shopify-style datapoint, default holds); Tamagui 3.0 pointer (RSD + Tailwind mode, breaking major; RB-E-STYLING owns); prior 2026-09-24: Expo UI row corrected (SDK 56: native APIs stable, web experimental); RSD/RN-Web pins; prior 2026-09-21: CHALLENGED — SURVIVES: Shopify's move off RN attacks the share-an-implementation premise and answers it with "share the spec, not the code" (agent-maintained duplicates); default holds, competitor named · KMP+SwiftUI scaling reading
 reading:
   - title: "How Does KMP with SwiftUI Scale on iOS?"
     url: "https://andrei-calazans.com/posts/2026-09-14-how-kmp-with-swiftui-scales-on-ios/"
@@ -96,13 +130,18 @@ reading:
     url: "https://evanbacon.dev/blog/use-dom"
     by: "Evan Bacon (Expo)"
     what: "Deep-dive on Expo DOM Components and the `use dom` directive — run real web UI inside a native app and migrate to native views component-by-component; covers the Metro bundling, offline support, and honest WebView trade-offs. The primary source for the incremental-reuse path."
-    claim: "You ship react-native-web — it's in maintenance mode (2026); don't expand the bet. For incremental web-UI reuse inside native, Expo DOM Components (`use dom`) are the maintained migration path."
+    claim: "You ship react-native-web — for the opposite direction, reusing web UI inside a native app, Expo DOM Components (`use dom`) are the incremental migration path, component by component."
     applies_when: { deps: ["react-native-web"] }
   - title: "AI-Assisted React Native Migration for TV: Lessons From Zattoo"
     url: "https://www.callstack.com/blog/ai-assisted-react-native-migration-for-tv-lessons-from-zattoo"
     by: "Callstack (Zattoo case study)"
     what: "TV/cross-platform RN case study: share until a platform gives a reason to split, telemetry-driven perf, team reorg, and a deflated, realistic account of AI's role. A concrete companion to this entry's share-by-layer thesis."
 sources:
+  - "https://github.com/necolas/react-native-web/discussions/2872"
+  - "https://registry.npmjs.org/react-native-web"
+  - "https://registry.npmjs.org/react-strict-dom"
+  - "https://www.linkedin.com/posts/adamawolf_senior-software-engineer-native-mobile-activity-7511201803389186048-JV6b"
+  - "https://github.com/tamagui/tamagui/releases/tag/v3.0.0"
   - "https://shopify.engineering/back-to-native"
   - "https://expo.dev/changelog/sdk-56"
   - "https://andrei-calazans.com/posts/2026-09-14-how-kmp-with-swiftui-scales-on-ios/"
@@ -113,3 +152,10 @@ detect_source:   # source-level signals owned by this entry (regex over repo sou
     min_files: 10
     signal: "Platform.OS branching in 10+ files"
     hint: "widespread inline platform forking suggests sharing at the wrong layer — share logic/state/data, split divergent UI by platform-extension files (.ios/.android/.web) so each file stays single-platform (see RB-E-CROSSPLATFORM doc)"
+tripwires:   # standing caveats as executable conditions — evaluated by `harvest firsthand`; fired ⇒ do the then:, update prose, remove the row
+  - when: { pkg: "react-native-web", atleast: "0.22.0" }
+    then: "react-native-web 0.22 shipped — the breaking modernization line: read its release notes and add a migrate note (React 19-only peers, ESM package, browser floor Chrome/Edge 95+ / Firefox 93+ / Safari 15.1+, removed CheckBox/Picker/ProgressBar/YellowBox/InteractionManager/Touchable mixin, babel-plugin-react-native-web deprecated); refresh the option row pin and the 'expect the breaking 0.22' when-clauses"
+    added: 2026-10-15
+  - when: { pkg: "react-strict-dom", atleast: "0.0.56" }
+    then: "React Strict DOM published again after the 2026-01-09 → 2026-10 gap — read the release, note who is shipping it (Meta or Expo), and drop or soften the 'quiet / no npm release since 2026-01' caveat in the option row, default, when-clause and REACT-NATIVE-WEB note"
+    added: 2026-10-15
