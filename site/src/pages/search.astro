@@ -16,12 +16,12 @@ const EXAMPLES = ['zustand or jotai', 'expo router', 'react compiler'];
 ---
 <Base title="Search">
   <h1>Search</h1>
-  <form id="sform" class="sform" role="search" action={href('search/')} method="get">
+  <form id="sform" class="sform" role="search" aria-label="Search the corpus" action={href('search/')} method="get">
     <label for="q" class="sr-only">Search decisions, readings and tools</label>
     <span class="prompt" aria-hidden="true">❯</span>
-    <input id="q" name="q" type="search" autocomplete="off" spellcheck="false" placeholder="ask — “should I use zustand?”" aria-describedby="s-keys" aria-controls="results" />
+    <input id="q" name="q" type="search" autocomplete="off" spellcheck="false" placeholder="search or ask — “should I use zustand?”" aria-describedby="s-keys" aria-controls="results" />
   </form>
-  <p id="s-keys" class="meta keys"><kbd>enter</kbd> open first result · <kbd>↓</kbd> move into results · <kbd>esc</kbd> clear</p>
+  <p id="s-keys" class="meta keys"><kbd>enter</kbd> open first result · <kbd>↓</kbd> move into results · <kbd>esc</kbd> clear · <kbd class="plat-key">⌘J</kbd> console</p>
 
   <div id="ask-out" hidden>
     <p class="label-caps ask-label">readings that answer this</p>
@@ -41,10 +41,13 @@ const EXAMPLES = ['zustand or jotai', 'expo router', 'react compiler'];
   </div>
   <p id="search-hint" class="muted" hidden>Search is generated at build time — run <code>npm run build &amp;&amp; npm run preview</code> to use it locally (in <code>astro dev</code> the index doesn't exist yet).</p>
 
-  <div id="results" aria-label="Search results"></div>
+  <section id="results" aria-label="Search results"></section>
 
   <script is:inline define:vars={{ BASE }}>
     const $ = (id) => document.getElementById(id);
+    // the ⌘ glyph is Mac-only (Base.astro does the same for the header's kbds)
+    if (!/Mac|iPhone|iPad/.test(navigator.platform))
+      for (const k of document.querySelectorAll('kbd.plat-key')) k.textContent = k.textContent.replace('⌘', 'Ctrl ');
     const input = $('q'), status = $('s-status'), results = $('results');
     const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     const TYPES = [
@@ -186,23 +189,23 @@ const EXAMPLES = ['zustand or jotai', 'expo router', 'react compiler'];
 </Base>
 
 <style>
-  .sform { display: flex; align-items: center; gap: .55rem; max-width: 40rem; margin: 1rem 0 0; background: var(--code-bg); border: 1px solid var(--border-control); border-radius: 6px; padding: .55rem .8rem; }
-  .sform:focus-within { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent); }
+  .sform { display: flex; align-items: center; gap: .55rem; max-width: 40rem; margin: 1rem 0 0; background: var(--code-bg); border: 1px solid var(--border-control); border-radius: var(--radius-md); padding: .55rem .8rem; }
+  .sform:focus-within { border-color: var(--accent); box-shadow: 0 0 0 2px var(--glow); }
   .sform input { flex: 1; min-width: 0; background: none; border: 0; color: var(--fg); font: 400 var(--fs-md) var(--font-mono); }
   .sform input:focus { outline: none; box-shadow: none; }
   .sform input::placeholder { color: var(--muted); }
   .keys { margin: .45rem 0 1.2rem; }
-  .keys kbd { font: 500 var(--fs-xs) var(--font-mono); border: 1px solid var(--line-strong); border-radius: 4px; padding: 0 .3em; color: var(--fg); }
+  .keys kbd { padding: 0 .3em; color: var(--fg); }   /* size, border and radius come from the global kbd rule */
   @media (hover: none) { .keys { display: none; } }
   #ask-out { margin: 0 0 1.4rem; }
   .ask-label { margin: 0 0 .3rem; color: var(--muted); }
   /* #ask-rows children are built in JS — :global so the scoped styles reach them */
-  :global(.ask-title) { font: 600 var(--fs-md)/1.4 var(--font-head); color: var(--bright); text-decoration: none; }
-  :global(.ask-title:hover) { color: var(--accent); }
-  :global(.ask-slug) { margin-inline-start: var(--sp-2); }
+  #ask-out :global(.ask-title) { font: 600 var(--fs-md)/1.4 var(--font-head); color: var(--bright); text-decoration: none; }
+  #ask-out :global(.ask-title:hover) { color: var(--accent); }
+  #ask-out :global(.ask-slug) { margin-inline-start: var(--sp-2); }
   /* both are the row's targets: ≥ 24px tall without moving the baseline */
-  :global(.ask-title), :global(.ask-slug) { display: inline-block; padding-block: var(--sp-1); margin-block: calc(-1 * var(--sp-1)); }
-  :global(.ask-gist) { margin: var(--sp-1) 0 0; font-size: var(--fs-sm); max-width: var(--measure); }
+  #ask-out :global(.ask-title), #ask-out :global(.ask-slug) { display: inline-block; padding-block: var(--sp-1); margin-block: calc(-1 * var(--sp-1)); }
+  #ask-out :global(.ask-gist) { margin: var(--sp-1) 0 0; font-size: var(--fs-sm); max-width: var(--measure); }
   .flush { margin: 0; }
   .s-try { margin: var(--sp-2) 0 0; }
   .s-browse { margin: .3rem 0 0; }
@@ -213,7 +216,7 @@ const EXAMPLES = ['zustand or jotai', 'expo router', 'react compiler'];
   :global(.s-n) { color: var(--line-strong); margin-left: .3rem; }
   :global(.s-list) { list-style: none; padding: 0; margin: 0; }
   :global(.s-list > li) { margin: 0; padding: .75rem 0; border-top: 1px solid var(--line); min-width: 0; }
-  :global(.s-link) { display: flex; flex-wrap: wrap; align-items: baseline; gap: .1rem .6rem; text-decoration: none; }
+  :global(.s-link) { display: flex; flex-wrap: wrap; align-items: baseline; gap: .1rem .6rem; text-decoration: none; padding-block: 2px; }
   :global(.s-title) { color: var(--bright); font: 600 var(--fs-md)/1.4 var(--font-head); }
   :global(.s-link:hover .s-title), :global(.s-link:focus-visible .s-title) { color: var(--accent); }
   :global(.s-ex) { margin: .25rem 0 0; color: var(--muted); font-size: var(--fs-sm); max-width: var(--measure); overflow-wrap: anywhere; }

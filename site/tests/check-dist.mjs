@@ -70,6 +70,20 @@ function target(fromPage, path) {
   return { file: existsSync(fsPath) ? fsPath : null };
 }
 
+// Every font-size / font shorthand in a block of CSS must come from the type scale.
+// Allowed besides var(--fs-…): inherit, the .9em code idiom, a shorthand with no
+// number (font: var(--font-mono)), and the h1's fluid clamp() — the one size outside
+// the steps, by design.
+function checkFontSizes(css, where) {
+  for (const m of css.matchAll(/(?:^|[;{\s])(font(?:-size)?)\s*:\s*([^;}]*)/g)) {
+    const v = m[2].trim();
+    if (v.includes('var(--fs-') || /^inherit\b/.test(v) || /^\.9em\b/.test(v) || /clamp\(/.test(v)) continue;
+    if (m[1] === 'font' && !/\d/.test(v.replace(/var\([^)]*\)/g, ''))) continue;
+    fail('font-size token', where, `${m[1]}: ${v.slice(0, 60)}`);
+  }
+}
+for (const f of files.filter((x) => x.endsWith('.css') && !rel(x).startsWith('pagefind/'))) checkFontSizes(readFileSync(f, 'utf8'), rel(f));   // pagefind's own UI css is not ours (and not loaded)
+
 const today = new Date().toISOString().slice(0, 10);
 
 for (const [p, raw] of html) {
@@ -144,15 +158,9 @@ for (const [p, raw] of html) {
   }
 
   // 14. font sizes come from the type scale: inside <style>, every font-size / font
-  //     shorthand uses var(--fs-…) (inherit and the .9em code/sup idiom excepted)
-  for (const block of raw.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)) {
-    for (const m of block[1].matchAll(/(?:^|[;{\s])(font(?:-size)?)\s*:\s*([^;}]*)/g)) {
-      const v = m[2].trim();
-      if (v.includes('var(--fs-') || /^inherit\b/.test(v) || /^\.9em\b/.test(v)) continue;
-      if (m[1] === 'font' && !/\d/.test(v.replace(/var\([^)]*\)/g, ''))) continue;   // e.g. font: var(--font-mono)
-      fail('font-size token', where, `${m[1]}: ${v.slice(0, 60)}`);
-    }
-  }
+  //     shorthand uses var(--fs-…) (inherit and the .9em code/sup idiom excepted).
+  //     The emitted stylesheets (dist/_astro/*.css) get the same check below the loop.
+  for (const block of raw.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)) checkFontSizes(block[1], where);
 
   // 10. the top bar is rendered exactly once
   const bars = (markup.match(/<[a-z]+\s[^>]*class="(?:[^"]*\s)?bar(?:\s[^"]*)?"/gi) || []).length;
@@ -160,7 +168,10 @@ for (const [p, raw] of html) {
 }
 
 // 7. homepage date labels: "built", "corpus changed", "last verified", each with a
-//    <time datetime> that is a real date and not in the future
+//    <time datetime> that is a real date. "built" must be today or yesterday (UTC — a
+//    build and this test may straddle midnight); the other two must not be after it.
+const yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+const dates = {};
 for (const label of ['built', 'corpus changed', 'last verified']) {
   const re = new RegExp(`${label}\\s*<time\\b[^>]*datetime="([^"]*)"`, 'i');
   const m = home.match(re);
@@ -168,7 +179,18 @@ for (const label of ['built', 'corpus changed', 'last verified']) {
   const d = m[1];
   if (!/^\d{4}-\d{2}-\d{2}/.test(d) || Number.isNaN(Date.parse(d))) fail('date labels', 'index.html', `${label}: "${d}" is not an ISO date`);
   else if (d.slice(0, 10) > today) fail('date labels', 'index.html', `${label}: ${d} is after today (${today})`);
+  else dates[label] = d.slice(0, 10);
 }
+if (dates.built && dates.built !== today && dates.built !== yesterday)
+  fail('date labels', 'index.html', `built: ${dates.built} is neither today (${today}) nor yesterday — stale dist/ or a typed date`);
+for (const label of ['corpus changed', 'last verified'])
+  if (dates.built && dates[label] && dates[label] > dates.built)
+    fail('date labels', 'index.html', `${label}: ${dates[label]} is after built (${dates.built})`);
+
+// 15. the homepage demo is generated at build from the corpus — never a typed fixture
+const demoFig = home.match(/<figure\b[^>]*class="[^"]*\bdemo\b[^"]*"[^>]*>([\s\S]*?)<\/figure>/i);
+if (!demoFig) fail('demo', 'index.html', 'no <figure class="demo">');
+else if (!/generated at build/i.test(demoFig[1])) fail('demo', 'index.html', 'demo figure does not say "generated at build"');
 
 // 9. sitemap + robots
 const sitemapPath = join(DIST, 'sitemap.xml');
@@ -187,11 +209,16 @@ const robotsPath = join(DIST, 'robots.txt');
 if (!existsSync(robotsPath)) fail('robots', 'robots.txt', 'missing');
 else if (!/^Sitemap:\s*https?:\/\/\S+sitemap\.xml\s*$/im.test(readFileSync(robotsPath, 'utf8'))) fail('robots', 'robots.txt', 'no Sitemap: line pointing at sitemap.xml');
 
-// lazily-fetched data islands must exist and parse (the doctor and console fetch them)
-for (const f of ['doctor-data.json', 'console-data.json']) {
+// lazily-fetched data islands must exist and parse (the doctor, console and decide fetch them)
+// Each has a byte budget (KB) so a growing corpus slice can't silently become a
+// multi-megabyte download — ratchet down, never up.
+const DATA_BUDGET_KB = { 'doctor-data.json': 128, 'console-data.json': 512, 'decide-data.json': 256 };
+for (const [f, kb] of Object.entries(DATA_BUDGET_KB)) {
   const p = join(DIST, f);
   if (!existsSync(p)) { fail('data', f, 'missing'); continue; }
   try { JSON.parse(readFileSync(p, 'utf8')); } catch (e) { fail('data', f, `invalid JSON: ${e.message}`); }
+  const size = statSync(p).size;
+  if (size > kb * 1024) fail('data', f, `${(size / 1024).toFixed(0)} KB > ${kb} KB budget`);
 }
 
 // ── report ──
@@ -205,4 +232,4 @@ if (failures.length) {
   }
   process.exit(1);
 }
-console.log(`check-dist: ✓ ${pages.length} pages passed (base ${BASE}) — h1, canonical, title, base path, links + anchors, leaked values, date labels, page size ≤ ${MAX_PAGE_BYTES / 1024} KB, sitemap/robots, nav bar, th scope, pagefind body, no inline styles, font-size tokens, data islands`);
+console.log(`check-dist: ✓ ${pages.length} pages passed (base ${BASE}) — h1, canonical, title, base path, links + anchors, leaked values, date labels, demo provenance, page size ≤ ${MAX_PAGE_BYTES / 1024} KB, sitemap/robots, nav bar, th scope, pagefind body, no inline styles, font-size tokens (incl. emitted CSS), data islands + budgets`);

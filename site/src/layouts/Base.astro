@@ -87,9 +87,9 @@ const aboutLinks = [
   <header>
     <div class="bar">
       <a class="brand" href={href('')}><img class="brand-mark" src={href('brand-64.png')} alt="" width="22" height="22" /> react-brain</a>
-      <form class="search" action={href('search/')} method="get" role="search">
+      <form class="search" action={href('search/')} method="get" role="search" aria-label="Site search">
         <span aria-hidden="true" class="prompt">❯</span>
-        <input id="nav-q" name="q" type="search" placeholder="ask — “should I use zustand?”" autocomplete="off" aria-label="Search the corpus" aria-keyshortcuts="Meta+K Control+K" />
+        <input id="nav-q" name="q" type="search" placeholder="search or ask — “should I use zustand?”" autocomplete="off" aria-label="Search the corpus" aria-keyshortcuts="Meta+K Control+K" />
         <kbd>⌘K</kbd>
       </form>
       <nav aria-label="Primary">
@@ -201,6 +201,21 @@ const aboutLinks = [
       });
       pre.appendChild(b);
     }
+    // Overflowing tables and code blocks are scroll regions: give them a tab stop and a
+    // name (WCAG 2.1.1 / axe scrollable-region-focusable). Re-run for nodes rendered
+    // later (doctor / decide / stack / console output).
+    const markScrollable = (root) => {
+      for (const el of root.querySelectorAll?.('.tbl, pre') || []) {
+        if (el.scrollWidth <= el.clientWidth + 1) continue;
+        if (el.hasAttribute('tabindex')) continue;
+        el.tabIndex = 0;
+        if (el.classList.contains('tbl')) { el.setAttribute('role', 'region'); el.setAttribute('aria-label', 'Scrollable table'); }
+      }
+    };
+    markScrollable(document);
+    new MutationObserver((muts) => { for (const m of muts) for (const n of m.addedNodes) if (n.nodeType === 1) markScrollable(n.parentElement || n); })
+      .observe(document.body, { childList: true, subtree: true });
+    addEventListener('resize', () => markScrollable(document), { passive: true });
     // honest shortcut hints per platform (the ⌘ glyph is Mac-only)
     if (!/Mac|iPhone|iPad/.test(navigator.platform))
       for (const k of document.querySelectorAll('.search kbd, .console-link kbd')) k.textContent = k.textContent.replace('⌘', 'Ctrl ');
@@ -214,6 +229,8 @@ const aboutLinks = [
       document.addEventListener('keydown', (e) => {
         if ((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'k') {
           e.preventDefault();
+          const con = document.getElementById('console');
+          if (con && !con.hidden) con.hidden = true;   // search wins over an open console; never focus behind a modal
           if (q && q.offsetParent !== null) { if (document.activeElement !== q) back = document.activeElement; q.focus(); q.select(); }
           else location.href = document.body.dataset.base + 'search/';
         }
@@ -266,7 +283,7 @@ const aboutLinks = [
     --fs-code: 13px;          /* pre / terminal blocks */
     /* spacing */
     --sp-1: .25rem; --sp-2: .5rem; --sp-3: .75rem; --sp-4: 1rem; --sp-6: 1.5rem; --sp-8: 2rem; --sp-12: 3rem;
-    --measure: 60ch;          /* max line length for running text (≈ 72–76 chars in Inter) */
+    --measure: 56ch;          /* max line length for running text: ≤ 80 characters measured at 14px Inter, ~70 at 16px */
     --radius-sm: 4px; --radius-md: 8px; --radius-lg: 10px;
     /* the only two elevation levels */
     --shadow-raised: inset 0 1px 0 color-mix(in srgb, var(--bright) 6%, transparent), 0 16px 40px -20px color-mix(in srgb, var(--bg) 95%, transparent);
@@ -375,7 +392,8 @@ const aboutLinks = [
   .err { color: var(--bad); }
   .err::before { content: "✗ "; }
   .rows a, .meta a, .sources a { overflow-wrap: anywhere; }
-  p.meta { max-width: var(--measure); }   /* long meta sentences wrap at the same measure as prose */
+  /* long meta sentences: 80 mono characters (a ch IS a character in mono — 60ch at 12px is only 420px) */
+  p.meta { max-width: 78ch; }
 
   /* code — literal values are mono; blocks sit on the deepest layer */
   code { background: var(--card); border: 1px solid var(--line); padding: .08em .35em; border-radius: var(--radius-sm); font: 400 max(.9em, var(--fs-xs)) var(--font-mono); }
@@ -434,6 +452,7 @@ const aboutLinks = [
   /* buttons — primary solid, secondary ghost; rectangular soft corners, never pills.
      No resting glow: elevation is reserved for cards/overlays; hover may light up. */
   input, textarea, button, select { font: inherit; color: inherit; }
+  ::placeholder { color: var(--muted); opacity: 1; }   /* the UA default #757575 is 4.1:1 on our fields */
   button, .btn { display: inline-block; background: var(--primary); color: var(--on-primary); border: 1px solid transparent; border-radius: var(--radius-sm); padding: var(--sp-2) var(--sp-4); cursor: pointer; font: 600 var(--fs-sm) var(--font-mono); text-decoration: none;
     transition: box-shadow .16s ease-out, background .16s, transform .12s; box-shadow: none; }
   button:hover, .btn:hover { background: color-mix(in srgb, var(--primary) 88%, var(--bright)); box-shadow: 0 8px 28px -10px var(--glow); transform: translateY(-1px); }
@@ -508,6 +527,12 @@ const aboutLinks = [
   .statusline .dates { display: inline-flex; flex-wrap: wrap; gap: .2rem .45rem; }
   .statusline .end { margin-left: auto; display: inline-flex; gap: .45rem; align-items: center; }
   .console-link kbd { padding: 0 .3em; }
+  /* buttons the console renders into its output (decide → copy / download) */
+  .c-btn, .c-btn:is(:hover, :active) { padding: var(--sp-1) var(--sp-3); font-size: var(--fs-xs); min-height: 24px; }
+  .c-btn + .c-btn { margin-inline-start: var(--sp-2); }
+  .c-pre.wrap { white-space: pre-wrap; }
+  /* a scroll region the keyboard can reach: focus ring on the wrapper, not the table */
+  .tbl:focus-visible, pre:focus-visible { outline-offset: 0; }
 
   ::selection { background: var(--accent); color: var(--on-primary); }
   * { scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }

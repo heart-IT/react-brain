@@ -8,7 +8,7 @@ import { BASE, href } from '../lib/corpus.js';
 ---
 <Base title="Doctor" description="Paste a package.json and get an ecosystem-fit report and migration findings against the verified corpus — runs entirely in your browser.">
   <h1>Doctor</h1>
-  <p class="kicker"><span class="badge beta">beta</span> · runs in your browser — nothing is uploaded</p>
+  <p class="kicker"><span class="badge beta">beta</span> · runs in your browser</p>
   <p class="muted prose">Paste a <code>package.json</code>. Each dependency is matched against the corpus's
   detection table, every detected choice is compared to the context-keyed recommendation, installed
   versions are crossed with the verified migration rules, and expected-but-missing domains are flagged.
@@ -51,7 +51,7 @@ import { BASE, href } from '../lib/corpus.js';
   </div>
 
   <script>
-    import { analyze, stageOf, depsOf, hostOf, SAMPLE } from '../lib/doctor-core.js';
+    import { analyze, stageOf, depsOf, hostOf, matchDetector, SAMPLE } from '../lib/doctor-core.js';
 
     const root = document.getElementById('doctor');
     const BASE = root.dataset.base || '/';
@@ -62,6 +62,9 @@ import { BASE, href } from '../lib/corpus.js';
     const entryUrl = (slug) => `${BASE}entries/${slug}/`;
     const safeUrl = (u) => (/^https?:\/\//i.test(u) ? u : null);
     const SEVERE = new Set(['dead', 'deprecated']);
+    const migrateUrl = (slug) => `${entryUrl(slug)}#migrate`;
+    const actNow = (s) => !s.blocked && SEVERE.has(s.urgency);
+    const CLI = ['npx -y @heart-it/react-brain doctor .', 'npx -y @heart-it/react-brain migrate .', 'npx -y @heart-it/react-brain review . --ci'];
 
     // corpus tables: fetched once, on demand
     let dataPromise = null;
@@ -84,7 +87,48 @@ import { BASE, href } from '../lib/corpus.js';
       const tally = { '✓': 0, '~': 0, '↗': 0 };
       for (const f of a.fits) tally[f.fit[0]]++;
 
+      // ── summary: fit (review) and urgency (act now / plan) are independent axes ──
+      const nAct = a.steps.filter(actNow).length;
+      const nPlan = a.steps.length - nAct;
+      const nReview = tally['↗'];
+      const deps = Object.keys(depsOf(pkg));
+      const nMatched = deps.filter((n) => { const d = matchDetector(n, data.detectors); return d && caps[d[1]]; }).length;
+      // already ordered unblocked-first then by urgency; stable re-sort makes the act-now steps lead
+      const next = [...a.steps].sort((x, y) => (actNow(x) ? 0 : 1) - (actNow(y) ? 0 : 1)).slice(0, 3);
+      const stepLine = (s) => `${s.name}@${s.installed} → ${s.to}`;
+
       let html = `<p class="dr-context"><strong>${esc(a.name)}</strong> · platform: ${esc(a.platform)} · stage (guess, manifest only): ${esc(stage)} · ${a.depCount} deps · ${a.fits.length} decisions detected</p>`;
+
+      html += '<section class="dr-summary" aria-labelledby="summary-h"><h2 id="summary-h">Summary</h2><dl class="dr-counts">' +
+        `<div><dt>Act now</dt><dd class="dr-n">${nAct}</dd><dd class="meta">unblocked steps that are dead or deprecated</dd></div>` +
+        `<div><dt>Plan</dt><dd class="dr-n">${nPlan}</dd><dd class="meta">superseded, upgrade, conditional or blocked steps</dd></div>` +
+        `<div><dt>Review</dt><dd class="dr-n">${nReview}</dd><dd class="meta">choices that differ from the default — contextual, not necessarily wrong</dd></div>` +
+        '</dl>' +
+        `<p class="meta dr-note">${a.gaps.length} gap${a.gaps.length === 1 ? '' : 's'} (expected domains with nothing detected) · ` +
+        `${nMatched} of ${deps.length} dependencies matched a decision — the rest are not judged.</p>`;
+      md.push('## Summary', '',
+        `- act now: ${nAct} (unblocked dead/deprecated steps)`,
+        `- plan: ${nPlan} (superseded/upgrade/conditional/blocked steps)`,
+        `- review: ${nReview} (choices that differ from the default — not necessarily wrong)`,
+        `- gaps: ${a.gaps.length}`,
+        `- ${nMatched} of ${deps.length} dependencies matched a decision — the rest are not judged`, '');
+
+      html += '<h3 id="next-h">Recommended next actions</h3>';
+      md.push('### Recommended next actions', '');
+      if (next.length) {
+        html += '<ol class="rows dr-next">' + next.map((s) =>
+          `<li><p class="f-what"><strong>${esc(stepLine(s))}</strong> <span class="meta">${actNow(s) ? 'act now' : s.blocked ? 'plan · blocked' : 'plan'} · ${esc(s.urgency)}</span></p>` +
+          `<p class="f-why">${esc(clip(s.why, 200))}</p>` +
+          `<p class="meta f-facts"><a href="${entryUrl(s.slug)}">open decision</a> · <a href="${migrateUrl(s.slug)}">migration rule</a></p></li>`).join('') +
+          '</ol>';
+        next.forEach((s, i) => md.push(`${i + 1}. **${stepLine(s)}** (${actNow(s) ? 'act now' : 'plan'}, ${s.urgency}) — ${s.why}`,
+          `   - decision: ${location.origin}${entryUrl(s.slug)} · migration rule: ${location.origin}${migrateUrl(s.slug)}`));
+      } else {
+        html += '<p class="muted">No migration steps — nothing to act on from installed versions.</p>';
+        md.push('No migration steps — nothing to act on from installed versions.');
+      }
+      html += '</section>';
+      md.push('');
 
       // ── fit ──
       html += '<h2 id="fit">Fit</h2>';
@@ -123,13 +167,13 @@ import { BASE, href } from '../lib/corpus.js';
             (s.blocked ? `<p class="f-why"><strong>⛔ blocked by</strong> ${esc(s.blocked)} — do that step first</p>` : '') +
             `<p class="meta f-facts">receipts: ${receipts.length
               ? receipts.map((u) => `<a href="${esc(u)}" rel="noopener">${esc(hostOf(u))}</a>`).join(' · ')
-              : 'none recorded'} · next: <a href="${entryUrl(s.slug)}">entries/${esc(s.slug)}</a></p>` +
+              : 'none recorded'} · next: <a href="${entryUrl(s.slug)}">entries/${esc(s.slug)}</a> · <a href="${migrateUrl(s.slug)}">migration rule</a></p>` +
             '</div>';
           md.push(`- ${glyph} **${s.name}@${s.installed} → ${s.to}** — urgency ${s.urgency}, effort ${s.effort}, applies to: ${applies}`,
             `  - why: ${s.why}`,
             ...(s.blocked ? [`  - blocked by: ${s.blocked}`] : []),
             ...(receipts.length ? [`  - receipts: ${receipts.join(' · ')}`] : []),
-            `  - next: ${location.origin}${entryUrl(s.slug)}`);
+            `  - next: ${location.origin}${entryUrl(s.slug)} · migration rule: ${location.origin}${migrateUrl(s.slug)}`);
         }
         html += '</div>';
       } else {
@@ -154,14 +198,34 @@ import { BASE, href } from '../lib/corpus.js';
         html += '<p class="muted">Every expected domain has something detected.</p>';
         md.push('Every expected domain has something detected.');
       }
-      md.push('', `Generated in the browser by ${location.origin}${BASE}doctor/ — full scan: \`npx -y @heart-it/react-brain doctor .\``);
+      // ── continue locally ──
+      const cliWhy = 'The CLI reads your source too: it adds the legacy-API scan, source-level signals and a sequenced migration plan. ' +
+        'Run migrate when you are ready to do the work; run review --ci in CI to fail a build on new drift.';
+      html += '<section class="dr-local" aria-labelledby="local-h"><h2 id="local-h">Continue locally</h2>' +
+        `<pre class="no-copy"><code>${CLI.map(esc).join('\n')}</code></pre><p class="muted dr-note">${esc(cliWhy)}</p></section>`;
+      md.push('## Continue locally', '', '```sh', ...CLI, '```', '', cliWhy, '',
+        `Generated in the browser by ${location.origin}${BASE}doctor/`);
 
-      html += '<p class="muted dr-note">For the legacy-API modernization scan and source signals run <code>npx -y @heart-it/react-brain doctor .</code></p>';
       out.innerHTML = html;
+      addCopy(out.querySelector('.dr-local pre'));
       report = { md: md.join('\n'), name: a.name };
       $('exports').hidden = false;
       $('export-status').textContent = '';
       out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Base.astro adds copy buttons only to <pre> present at load; this one is rendered later
+    function addCopy(pre) {
+      const text = CLI.join('\n');
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'copy-btn'; b.textContent = 'copy';
+      b.setAttribute('aria-label', 'Copy commands to clipboard');
+      b.addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(text); b.textContent = '✓'; }
+        catch { b.textContent = '✗'; }
+        setTimeout(() => (b.textContent = 'copy'), 1400);
+      });
+      pre.appendChild(b);
     }
 
     async function run() {
@@ -225,20 +289,17 @@ import { BASE, href } from '../lib/corpus.js';
   .dr-legend { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: .6rem 0; margin: 1rem 0 1.4rem; }
   .dr-legend h2 { margin: 0 0 .4rem; font-size: var(--fs-xs); }
   .dr-legend dl { display: grid; grid-template-columns: max-content 1fr; gap: .3rem 1rem; margin: 0; font-size: var(--fs-sm); }
-  .dr-legend dd { max-width: var(--measure); }
-  .prose { max-width: var(--measure); }
   .pkg-label { display: block; margin-block-end: var(--sp-2); }
   #privacy { margin: 0 0 var(--sp-2); }
   .file-btn { position: relative; cursor: pointer; margin: 0; }
   .file-btn:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
   .dr-legend dt { font-family: var(--font-mono); color: var(--muted); }
-  .dr-legend dd { margin: 0; }
+  .dr-legend dd { margin: 0; max-width: var(--measure); }
   @media (max-width: 600px) {
     .dr-legend dl { grid-template-columns: 1fr; }
     .dr-legend dd { margin-bottom: .4rem; }
   }
   .dr-actions { display: flex; gap: .7rem; align-items: center; flex-wrap: wrap; }
-  .dr-actions[hidden] { display: none; }
   #out :global(.dr-context) { font-family: var(--font-mono); font-size: var(--fs-sm); overflow-wrap: anywhere; }
   #out :global(.dr-note) { font-size: var(--fs-sm); max-width: var(--measure); }
   #out :global(.gap-what) { margin: 0; }
@@ -248,4 +309,19 @@ import { BASE, href } from '../lib/corpus.js';
   #out :global(.f-what) { overflow-wrap: anywhere; }
   #out :global(.f-why) { font-size: var(--fs-sm); max-width: var(--measure); }
   #out :global(.f-facts) { overflow-wrap: anywhere; }
+  #out :global(.dr-counts) { display: grid; grid-template-columns: repeat(3, 1fr); margin: 0; border-block: 1px solid var(--line); }
+  #out :global(.dr-counts > div) { padding: var(--sp-3) var(--sp-4); border-inline-start: 1px solid var(--line); }
+  #out :global(.dr-counts > div:first-child) { border-inline-start: 0; padding-inline-start: 0; }
+  #out :global(.dr-counts dt) { font: 600 var(--fs-xs) var(--font-mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  #out :global(.dr-counts dd) { margin: 0; }
+  #out :global(.dr-n) { font: 600 var(--fs-2xl)/1.2 var(--font-mono); color: var(--bright); font-variant-numeric: tabular-nums; }
+  #out :global(.dr-next) { padding: 0; list-style: none; }
+  #out :global(.dr-next p) { margin: 0; }
+  #out :global(.dr-next p + p) { margin-top: var(--sp-1); }
+  #out :global(.dr-summary h3) { font-size: var(--fs-md); margin-block: var(--sp-6) var(--sp-2); }
+  @media (max-width: 600px) {
+    #out :global(.dr-counts) { grid-template-columns: 1fr; }
+    #out :global(.dr-counts > div) { border-inline-start: 0; padding-inline: 0; display: grid; grid-template-columns: 6rem auto 1fr; gap: var(--sp-3); align-items: baseline; }
+    #out :global(.dr-counts > div + div) { border-block-start: 1px solid var(--line); }
+  }
 </style>

@@ -5,17 +5,16 @@ import { decideData, corpusInfo, href, BASE } from '../lib/corpus.js';
 // served as decide-data.json and fetched on the first "Generate record".
 const { groups, data } = decideData();
 const info = corpusInfo();
-const clip = (s, n) => (s.length > n ? s.slice(0, n - 1).trimEnd() + '…' : s);
 const options = groups.map((g) => ({ label: g.label,
-  entries: g.entries.filter((id) => data[id]).map((id) => ({ id, label: clip(`${data[id].slug} — ${data[id].topic}`, 40) })) }));
+  entries: g.entries.filter((id) => data[id]).map((id) => ({ id, slug: data[id].slug, label: `${data[id].slug} — ${data[id].topic}` })) }));
 ---
 <Base title="react-brain — decision records" description="Generate an Architecture Decision Record with receipts: context-resolved pick, candidate table, evidence chain, and premises that react-brain doctor re-checks over time.">
   <h1>Decision records</h1>
-  <p class="kicker">runs in your browser — nothing is uploaded</p>
+  <p class="kicker">runs in your browser</p>
   <p class="muted prose">Turn a recommendation into the artifact your team reviews: an ADR with <strong class="fg">receipts</strong> — the resolved context, the candidate table, sources with
   verified-on dates, the pick's calibration track record — plus a machine-readable premise block.
   Commit it to <code>docs/adr/</code> and <code>npx -y @heart-it/react-brain doctor . --ci</code> will tell you when the
-  premises move. <span class="muted">Nothing leaves your browser.</span></p>
+  premises move.</p>
 
   <fieldset class="intent">
     <legend>decision</legend>
@@ -23,7 +22,7 @@ const options = groups.map((g) => ({ label: g.label,
       <select id="entry">
         {options.map((g) => (
           <optgroup label={g.label}>
-            {g.entries.map((o) => <option value={o.id}>{o.label}</option>)}
+            {g.entries.map((o) => <option value={o.id} data-slug={o.slug}>{o.label}</option>)}
           </optgroup>
         ))}
       </select>
@@ -54,7 +53,14 @@ const options = groups.map((g) => ({ label: g.label,
 
   <script is:inline define:vars={{ version: info.version, BASE }}>
     const $ = (id) => document.getElementById(id);
-    // honor the console's session context (⌘K → load)
+    // deep link from a decision page: ?entry=<RB-E-ID or slug> preselects the topic
+    // (an unknown value leaves the default selection)
+    const want = (new URLSearchParams(location.search).get('entry') || '').trim();
+    if (want) {
+      const o = [...$('entry').options].find((x) => x.value === want || x.dataset.slug === want.toLowerCase());
+      if (o) $('entry').value = o.value;
+    }
+    // honor the console's session context (⌘J → load)
     try {
       const ctx = JSON.parse(localStorage.getItem('rb-console-ctx'));
       if (ctx) {
@@ -197,18 +203,15 @@ ${e.reading.length ? '- **Canonical reading:**\n' + e.reading.map((x) => '  - ['
 
 <style>
   .fg { color: var(--fg); }
-  .prose { max-width: var(--measure); }
   .intent { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-4); }
   .intent label { display: block; margin: 0; }
   .intent select { max-width: 100%; margin-inline-start: var(--sp-2); }
-  @media (max-width: 600px) {
-    .intent .topic { flex: 1 1 100%; }
-    .intent .topic select { display: block; width: 100%; margin: var(--sp-1) 0 0; }
-  }
+  /* the topic select carries full "slug — topic" labels: it owns a row at every width
+     (an intrinsic-width select overflowed tablets once the labels stopped being clipped) */
+  .intent .topic { flex: 1 1 100%; min-width: 0; }
+  .intent .topic select { display: block; width: 100%; max-width: 44rem; margin: var(--sp-1) 0 0; }
   .pkg { margin-block: var(--sp-3); }
   .pkg summary { cursor: pointer; padding-block: var(--sp-1); }   /* ≥ 24px tall target */
   .pkg .meta { margin-block: var(--sp-2) var(--sp-1); }
   .actions { display: flex; gap: var(--sp-3); flex-wrap: wrap; }
-  /* the global button/.btn display beats the UA [hidden] rule */
-  .actions [hidden] { display: none; }
 </style>

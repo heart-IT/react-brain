@@ -13,31 +13,51 @@ const { recipe, stageRank, caps } = await stackData();
   context-keyed picks — the same recipe and resolver as <code>npx -y @heart-it/react-brain stack</code>. Domains enter
   the stack by maturity stage (a prototype isn't told to set up observability); feature domains
   (media, maps, payments…) are demand-driven — look them up per need.</p>
+  <p class="muted prose">Existing project? The <a href={`${BASE}doctor/`}>doctor</a> reviews what is installed; this page composes a stack for a new one.</p>
 
-  <fieldset class="intent">
-    <legend>Intent</legend>
-    <label>platform
-      <select id="platform">
-        <option value="react-native">React Native</option>
-        <option value="react">Web</option>
-        <option value="both">Both (universal)</option>
-      </select>
-    </label>
-    <label>stage
-      <select id="stage">
-        <option value="prototype">prototype</option>
-        <option value="mvp" selected>mvp</option>
-        <option value="production">production</option>
-        <option value="scale">scale</option>
-      </select>
-    </label>
-    <label><input type="checkbox" id="expo" checked /> Expo</label>
-    <label><input type="checkbox" id="p2p" /> P2P / Holepunch</label>
-    <label><input type="checkbox" id="graphql" /> GraphQL</label>
-    <label><input type="checkbox" id="ssr" /> SSR / server-rendered</label>
-  </fieldset>
+  <div class="intent">
+    <fieldset class="basics">
+      <legend>Platform &amp; stage</legend>
+      <label>platform
+        <select id="platform">
+          <option value="react-native">React Native</option>
+          <option value="react">Web</option>
+          <option value="both">Both (universal)</option>
+        </select>
+      </label>
+      <label>stage
+        <select id="stage">
+          <option value="prototype">prototype</option>
+          <option value="mvp" selected>mvp</option>
+          <option value="production">production</option>
+          <option value="scale">scale</option>
+        </select>
+      </label>
+    </fieldset>
+    <fieldset class="constraints">
+      <legend>Constraints</legend>
+      <div class="opt" id="opt-expo">
+        <label><input type="checkbox" id="expo" aria-describedby="hint-expo" checked /> Expo</label>
+        <span class="hint" id="hint-expo">preference: use the managed Expo toolchain (dev builds, EAS)</span>
+      </div>
+      <div class="opt">
+        <label><input type="checkbox" id="p2p" aria-describedby="hint-p2p" /> P2P / Holepunch</label>
+        <span class="hint" id="hint-p2p">requirement: peers sync directly — no backend server</span>
+      </div>
+      <div class="opt">
+        <label><input type="checkbox" id="graphql" aria-describedby="hint-graphql" /> GraphQL</label>
+        <span class="hint" id="hint-graphql">preference: the backend already speaks it</span>
+      </div>
+      <div class="opt" id="opt-ssr">
+        <label><input type="checkbox" id="ssr" aria-describedby="hint-ssr" /> SSR</label>
+        <span class="hint" id="hint-ssr">requirement: pages must render on the server</span>
+      </div>
+    </fieldset>
+  </div>
   <p><button id="compose" type="button">Compose stack</button></p>
   <div id="out" aria-live="polite"></div>
+  <p class="copyrow"><button id="copy" type="button" class="ghost">Copy stack summary</button>
+    <span class="meta" id="copy-status" role="status"></span></p>
 
   <script is:inline define:vars={{ recipe, stageRank, caps, BASE }}>
     // port of detect.mjs resolveRecommendation (when-clause context matching)
@@ -58,10 +78,16 @@ const { recipe, stageRank, caps } = await stackData();
       rowPlat === 'any' ? true : rowPlat === 'both' ? p === 'both'
       : rowPlat === 'rn' ? (p === 'react-native' || p === 'both') : (p === 'react' || p === 'both');
     const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const clip = (s, n) => { const t = String(s || '').trim(); return t.length > n ? t.slice(0, n - 1).trimEnd() + '…' : t; };
+    const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
 
     const $ = (id) => document.getElementById(id);
     const CHECKS = ['expo', 'p2p', 'ssr', 'graphql'];
     const OPTS = { platform: ['react', 'react-native', 'both'], stage: ['prototype', 'mvp', 'production', 'scale'] };
+    const PLATFORM_LABEL = { 'react-native': 'React Native', react: 'Web', both: 'universal (Web + React Native)' };
+    // groups in maturity order: `core` rows enter before any stage, then STAGE_RANK order
+    const GROUPS = ['core', ...Object.keys(stageRank).sort((a, b) => stageRank[a] - stageRank[b])];
+    const GROUP_LABEL = { core: 'Core — every app', mvp: 'MVP', production: 'Production', scale: 'Scale' };
 
     // deep links: ?platform=react|react-native|both&stage=…&expo=0|1&p2p=1&ssr=1&graphql=1
     const q = new URLSearchParams(location.search);
@@ -74,11 +100,19 @@ const { recipe, stageRank, caps } = await stackData();
       for (const id of CHECKS) u.searchParams.set(id, $(id).checked ? '1' : '0');
       history.replaceState(history.state, '', u);
     };
+    // Expo is RN-only, SSR is web-only: hide the control that cannot apply. Its checked
+    // value is kept (and stays in the URL), but a hidden control contributes no token.
+    const syncControls = () => {
+      const p = $('platform').value;
+      $('opt-expo').hidden = p === 'react';
+      $('opt-ssr').hidden = p === 'react-native';
+    };
+    const on = (id) => $(id).checked && !$(id).closest('.opt').hidden;
 
+    let summary = '';
     const compose = () => {
-      const platform = document.getElementById('platform').value;
-      const stage = document.getElementById('stage').value;
-      const on = (id) => document.getElementById(id).checked;
+      const platform = $('platform').value;
+      const stage = $('stage').value;
       const tokens = ['new project'];
       if (platform === 'react-native') tokens.push('bare rn');
       if (platform === 'both') tokens.push('new universal');
@@ -87,42 +121,81 @@ const { recipe, stageRank, caps } = await stackData();
       if (on('graphql')) tokens.push('graphql');
       if (on('ssr')) tokens.push('server-rendered', 'data-fetching/ssr', 'next.js');
 
-      let html = '';
+      const groups = Object.fromEntries(GROUPS.map((g) => [g, []]));
       for (const row of recipe) {
         if (!platMatch(row.plat, platform)) continue;
         if (stageRank[row.tier] > stageRank[stage]) continue;
         if (row.onlyIf === 'p2p' && !on('p2p')) continue;
         const cap = caps[row.id]; if (!cap) continue;
-        const r = resolve(cap, tokens);
-        const via = r.via === 'when' ? `matched “${esc(r.ctx)}”` : r.via === 'na' ? 'not applicable for this intent' : 'default';
-        html += `<li><p class="pick"><a href="${BASE}entries/${cap.slug}/"><strong>${cap.slug}</strong></a>
-          <span class="badge ${cap.confidence}">${cap.confidence}</span>
-          <span class="meta">${via} · enters at ${row.tier}</span></p>
-          <p class="why">${esc(r.why)}</p></li>`;
+        (groups[row.tier] ||= []).push({ cap, r: resolve(cap, tokens) });
       }
-      html = `<ul class="rows picks">${html}</ul>`;
+
+      const cli = `npx -y @heart-it/react-brain stack --${platform === 'react-native' ? 'rn' : platform === 'react' ? 'web' : 'both'}`
+        + `${on('expo') ? ' --expo' : ''}${on('p2p') ? ' --p2p' : ''}${on('graphql') ? ' --graphql' : ''}${on('ssr') ? ' --ssr' : ''} --stage=${stage}`;
+      const flags = CHECKS.filter(on).map((id) => ({ expo: 'Expo', p2p: 'P2P', graphql: 'GraphQL', ssr: 'SSR' }[id]));
+      const intent = `${PLATFORM_LABEL[platform]}, ${stage}${flags.length ? ` + ${flags.join(', ')}` : ''}`;
+
+      let html = '';
+      const md = [`# React stack — ${intent}`, ''];
+      for (const g of Object.keys(groups)) {
+        const rows = groups[g]; if (!rows.length) continue;
+        html += `<section class="group"><h2>${esc(GROUP_LABEL[g] || g)}</h2><ul class="rows picks">`;
+        md.push(`## ${GROUP_LABEL[g] || g}`);
+        for (const { cap, r } of rows) {
+          const via = r.via === 'when' ? `matched “${esc(r.ctx)}”` : r.via === 'na' ? 'not applicable for this intent' : 'default';
+          const href = `${BASE}entries/${cap.slug}/`;
+          const lead = cap.lead ? `<span>lead: ${esc(cap.lead)}${cap.tradeoff ? ` — ${esc(clip(cap.tradeoff, 140))}` : ''}</span>` : '';
+          html += `<li><p class="pick"><a href="${href}"><strong>${cap.slug}</strong></a>
+            <span class="badge ${cap.confidence}">${cap.confidence}</span>
+            <span class="meta">${via}</span></p>
+            <p class="why">${esc(r.why)}</p>
+            <p class="meta facts">${lead}<a href="${href}#options">${plural(cap.nOptions, 'option')} considered →</a><span>${plural(cap.nSources, 'source')}</span></p></li>`;
+          md.push(`- ${cap.slug} — ${r.why}`);
+        }
+        html += `</ul></section>`;
+        md.push('');
+      }
       html += `<p class="muted note">Feature domains (media, maps, payments, charts, editors, i18n…)
         aren't in a default stack — look them up per need. For the install-ready version with coherence
-        checks: <code>npx -y @heart-it/react-brain stack --${platform === 'react-native' ? 'rn' : platform === 'react' ? 'web' : 'both'}${on('expo') ? ' --expo' : ''}${on('p2p') ? ' --p2p' : ''} --stage=${stage}</code></p>`;
-      document.getElementById('out').innerHTML = html;
+        checks: <code>${esc(cli)}</code></p>`;
+      md.push('CLI:', '', '```sh', cli, '```', '', `Share: ${location.href}`);
+      summary = md.join('\n');
+      $('out').innerHTML = html;
     };
+
     $('compose').addEventListener('click', () => {
       compose();
       $('out').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
-    for (const id of [...Object.keys(OPTS), ...CHECKS]) $(id).addEventListener('change', () => { syncUrl(); compose(); });
+    for (const id of [...Object.keys(OPTS), ...CHECKS]) $(id).addEventListener('change', () => { syncControls(); syncUrl(); compose(); });
+    $('copy').addEventListener('click', async () => {
+      syncUrl(); compose();   // the share URL in the summary must carry the current intent
+      try { await navigator.clipboard.writeText(summary); $('copy-status').textContent = 'copied ✓'; }
+      catch { $('copy-status').textContent = 'copy failed'; }
+    });
+    syncControls();
     compose();   // show the (deep-linked or default) intent immediately — no blank region
   </script>
 </Base>
 
 <style>
-  .prose { max-width: var(--measure); }
-  .intent { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-4); }
+  .intent { display: flex; flex-wrap: wrap; align-items: start; gap: 0 var(--sp-4); }   /* fieldsets keep their own height */
+  .intent fieldset { flex: 1 1 18rem; min-width: 0; }
+  .basics { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-4); }
   .intent label { display: block; margin: 0; }
   .intent select { max-width: 100%; margin-inline-start: var(--sp-2); }
-  #out :global(.picks) { list-style: none; padding: 0; margin: var(--sp-4) 0; }
+  .opt { margin-block: var(--sp-1); }
+  .opt[hidden] { display: none; }
+  .opt label { display: inline-flex; align-items: center; gap: var(--sp-2); min-height: 24px; }
+  .hint { display: block; padding-inline-start: var(--sp-6); font-size: var(--fs-xs); color: var(--muted); max-width: var(--measure); }
+  .copyrow { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3); }
+  #out :global(.group h2) { font-size: var(--fs-xl); margin-block: var(--sp-6) 0; }
+  #out :global(.picks) { list-style: none; padding: 0; margin: var(--sp-2) 0 var(--sp-4); }
   #out :global(.picks li) { margin: 0; }
   #out :global(.pick) { margin: 0; }
   #out :global(.why) { margin: var(--sp-2) 0 0; font-size: var(--fs-md); max-width: var(--measure); }
+  #out :global(.facts) { margin: var(--sp-1) 0 0; max-width: var(--measure); display: flex; flex-wrap: wrap; gap: 0 var(--sp-3); }
+  #out :global(.facts span:first-child) { flex-basis: 100%; }
+  #out :global(.facts a) { padding-block: 3px; }   /* a flex item is its own target: 18px line → 24px */
   #out :global(.note) { font-size: var(--fs-sm); max-width: var(--measure); }
 </style>

@@ -14,8 +14,23 @@
 import { createRequire } from 'node:module';
 
 const BASE_URL = (process.argv.slice(2).find((a) => !a.startsWith('--')) || process.env.SITE_URL || 'http://127.0.0.1:4321/').replace(/\/?$/, '/');
-const PAGES = ['', 'entries/', 'entries/state/', 'entries/nav/', 'doctor/', 'search/?q=zustand', 'decide/', 'stack/',
-  'libraries/', 'reading/', 'scorecard/', 'methodology/', 'census/', 'benchmark/', 'newsletter/', '404.html'];
+// Every page in the sitemap (plus the two routes it cannot list), each in its loaded
+// state — and the pages that render on interaction get a second pass in that state.
+const FALLBACK_PAGES = ['', 'entries/', 'entries/state/', 'doctor/', 'decide/', 'stack/', 'libraries/', 'reading/', 'scorecard/', 'methodology/', 'census/', 'benchmark/', 'newsletter/'];
+async function listPages() {
+  try {
+    const xml = await (await fetch(BASE_URL + 'sitemap.xml')).text();
+    const base = new URL(BASE_URL).pathname;
+    const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname).filter((p) => p.startsWith(base)).map((p) => p.slice(base.length));
+    if (locs.length) return [...new Set([...locs, 'search/?q=zustand', '404.html'])];
+  } catch {}
+  return [...FALLBACK_PAGES, 'search/?q=zustand', '404.html'];
+}
+const STATES = {
+  'doctor/': { label: 'after sample run', run: async (page) => { await page.click('#sample'); await page.waitForSelector('#out table', { timeout: 10_000 }); } },
+  'decide/': { label: 'after generate', run: async (page) => { await page.click('#gen'); await page.waitForSelector('#out pre', { timeout: 10_000 }); } },
+  '': { label: 'console open', run: async (page) => { await page.keyboard.press('Control+J'); await page.waitForSelector('#console:not([hidden])', { timeout: 5_000 }); await page.keyboard.type('help'); await page.keyboard.press('Enter'); await page.waitForTimeout(300); } },
+};
 const WIDTHS = [320, 360, 820, 1440];
 const MIN_TEXT_PX = 12;      // nothing legible below this on a dark screen
 const MIN_TARGET_PX = 24;    // WCAG 2.2 AA 2.5.8 (inline links inside a sentence are exempt)
@@ -49,8 +64,9 @@ function audit({ MIN_TEXT_PX, MIN_TARGET_PX, MAX_CHARS_PER_LINE }) {
 
   for (const el of document.querySelectorAll('a[href], button, input, select, textarea, summary')) {
     if (!visible(el)) continue;
-    // an <a> that sits inside running text is exempt (WCAG 2.5.8 "inline" exception)
-    if (el.tagName === 'A' && el.closest('p, li, td, dd, h1, h2, h3, figcaption, pre, nav[aria-label="Breadcrumb"]')) continue;
+    // an <a> that flows inline inside running text is exempt (WCAG 2.5.8 "inline"
+    // exception); a block/inline-block link inside a list item is a target of its own
+    if (el.tagName === 'A' && getComputedStyle(el).display === 'inline' && el.closest('p, li, td, dd, h1, h2, h3, figcaption, pre, nav[aria-label="Breadcrumb"]')) continue;
     if (el.type === 'checkbox' || el.type === 'radio') continue;   // the <label> is the target
     // a text field inside a padded <label>/<form> wrapper: the wrapper is what you tap
     const box = /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName) ? (el.closest('label, form') || el) : el;
@@ -58,25 +74,48 @@ function audit({ MIN_TEXT_PX, MIN_TARGET_PX, MAX_CHARS_PER_LINE }) {
     if (r.width < MIN_TARGET_PX - 0.5 || r.height < MIN_TARGET_PX - 0.5) out.targets.push(`${label(el)} ${Math.round(r.width)}×${Math.round(r.height)} "${(el.textContent || el.getAttribute('aria-label') || '').trim().slice(0, 24)}"`);
   }
 
-  // chars per line ≈ width / average glyph width of the element's own font
-  const probe = document.createElement('span');
-  probe.textContent = 'abcdefghijklmnopqrstuvwxyz the quick brown fox ';
-  probe.style.cssText = 'position:absolute;visibility:hidden;white-space:pre';
-  document.body.appendChild(probe);
+  // lines as actually laid out: every word's first client rect is grouped by its top
+  // edge, characters (plus a space) summed per line
+  const longestLine = (el) => {
+    const lines = new Map();
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node = walker.nextNode())) {
+      const text = node.textContent;
+      for (const m of text.matchAll(/\S+/g)) {
+        const r = document.createRange();
+        r.setStart(node, m.index); r.setEnd(node, m.index + m[0].length);
+        const rect = r.getClientRects()[0];
+        if (!rect) continue;
+        const top = Math.round(rect.top);
+        lines.set(top, (lines.get(top) || 0) + m[0].length + 1);
+      }
+    }
+    // the measure is a typographic average: a single line of narrow glyphs (i, l, spaces)
+    // can hold 90+ characters inside a correct 56ch column, so judge the mean of the
+    // full lines (the last, ragged line is excluded)
+    const full = [...lines.values()].slice(0, -1);
+    return full.length ? Math.round(full.reduce((a, b) => a + b, 0) / full.length) - 1 : 0;
+  };
   for (const el of document.querySelectorAll('main p, main li, main dd')) {
     if (!visible(el) || el.textContent.trim().length < 160) continue;
     if (el.closest('pre, table, nav')) continue;
     if (el.querySelector('p, div, ul, ol, table, pre')) continue;   // a wrapper: its children are measured instead
-    probe.style.font = getComputedStyle(el).font;
-    const cw = probe.getBoundingClientRect().width / probe.textContent.length;
-    const cpl = Math.round(el.getBoundingClientRect().width / cw);
-    if (cpl > MAX_CHARS_PER_LINE) out.measure.push(`${label(el)} ≈${cpl} chars/line`);
+    const cpl = longestLine(el);
+    if (cpl > MAX_CHARS_PER_LINE) out.measure.push(`${label(el)} averages ${cpl} chars/line`);
   }
-  probe.remove();
   return out;
 }
 
+const PAGES = await listPages();
 const browser = await chromium.launch();
+const runAudit = async (page, where, width) => {
+  const r = await page.evaluate(audit, { MIN_TEXT_PX, MIN_TARGET_PX, MAX_CHARS_PER_LINE });
+  if (r.hscroll) fail('horizontal scroll', where, r.hscroll);
+  for (const t of r.tiny) fail(`text < ${MIN_TEXT_PX}px`, where, t);
+  for (const t of r.targets) fail(`target < ${MIN_TARGET_PX}px`, where, t);
+  if (width >= 820) for (const t of r.measure) fail(`measure > ${MAX_CHARS_PER_LINE}`, where, t);
+};
 for (const width of WIDTHS) {
   const ctx = await browser.newContext({ viewport: { width, height: 900 } });
   const page = await ctx.newPage();
@@ -84,11 +123,12 @@ for (const width of WIDTHS) {
     const where = `${width}px ${p || '/'}`;
     try { await page.goto(BASE_URL + p, { waitUntil: 'networkidle', timeout: 20_000 }); }
     catch (e) { fail('load', where, e.message.split('\n')[0]); continue; }
-    const r = await page.evaluate(audit, { MIN_TEXT_PX, MIN_TARGET_PX, MAX_CHARS_PER_LINE });
-    if (r.hscroll) fail('horizontal scroll', where, r.hscroll);
-    for (const t of r.tiny.slice(0, 8)) fail(`text < ${MIN_TEXT_PX}px`, where, t);
-    for (const t of r.targets.slice(0, 8)) fail(`target < ${MIN_TARGET_PX}px`, where, t);
-    if (width >= 820) for (const t of r.measure.slice(0, 5)) fail(`measure > ${MAX_CHARS_PER_LINE}`, where, t);
+    await runAudit(page, where, width);
+    const state = STATES[p];
+    if (state) {
+      try { await state.run(page); await runAudit(page, `${where} (${state.label})`, width); }
+      catch (e) { fail('state', `${where} (${state.label})`, e.message.split('\n')[0]); }
+    }
   }
   await ctx.close();
 }
@@ -100,8 +140,8 @@ if (failures.length) {
   for (const [check, list] of Object.entries(byCheck)) {
     console.error(`✗ ${check} (${list.length})`);
     for (const f of list.slice(0, SHOW)) console.error(`    ${f.where}: ${f.detail}`);
-    if (list.length > SHOW) console.error(`    … and ${list.length - 30} more`);
+    if (list.length > SHOW) console.error(`    … and ${list.length - SHOW} more`);
   }
   process.exit(1);
 }
-console.log(`ui-check: ✓ ${PAGES.length} pages × ${WIDTHS.length} widths — no horizontal scroll, no text < ${MIN_TEXT_PX}px, targets ≥ ${MIN_TARGET_PX}px, running text ≤ ${MAX_CHARS_PER_LINE} chars/line`);
+console.log(`ui-check: ✓ ${PAGES.length} pages (+${Object.keys(STATES).length} interaction states) × ${WIDTHS.length} widths — no horizontal scroll, no text < ${MIN_TEXT_PX}px, targets ≥ ${MIN_TARGET_PX}px, running text ≤ ${MAX_CHARS_PER_LINE} chars/line`);

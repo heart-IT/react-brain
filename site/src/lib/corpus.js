@@ -333,9 +333,30 @@ import { pathToFileURL } from 'node:url';
 export async function stackData() {
   const stack = await import(pathToFileURL(join(ROOT, 'tools/react-brain-stack.mjs')).href);
   const { entries } = corpus();
-  const caps = Object.fromEntries(entries.map((e) => [e.id, {
-    slug: e.slug, topic: e.topic, status: e.status, confidence: e.confidence, group: e.group,
-    def: e.recommend?.default || '', when: e.recommend?.when || [],
-  }]));
+  // Lead option — mirrors entry.js leadOption (not imported: entry.js imports this
+  // module): the option whose name appears earliest in recommend.default, else the first.
+  const leadOf = (e) => {
+    const opts = e.options || [];
+    const def = String(e.recommend?.default || '').toLowerCase();
+    let best = null, bestAt = Infinity;
+    for (const o of opts) {
+      const names = String(o.name).toLowerCase().replace(/\s*\(.*?\)/g, '').split(/\s*[/+]\s*/).map((s) => s.trim()).filter((s) => s.length > 2);
+      for (const n of names) {
+        const at = def.indexOf(n);
+        if (at >= 0 && at < bestAt) { best = o; bestAt = at; }
+      }
+    }
+    return best || opts[0] || null;
+  };
+  const inRecipe = new Set(stack.RECIPE.map((r) => r.id));   // ship only what the page renders
+  const caps = Object.fromEntries(entries.filter((e) => inRecipe.has(e.id)).map((e) => {
+    const lead = leadOf(e);
+    return [e.id, {
+      slug: e.slug, topic: e.topic, status: e.status, confidence: e.confidence, group: e.group,
+      def: e.recommend?.default || '', when: e.recommend?.when || [],
+      lead: lead?.name || '', tradeoff: lead?.tradeoff || '',
+      nOptions: e.options?.length || 0, nSources: e.sources?.length || 0,
+    }];
+  }));
   return { recipe: stack.RECIPE, stageRank: stack.STAGE_RANK, caps };
 }

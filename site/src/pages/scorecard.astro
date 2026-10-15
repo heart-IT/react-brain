@@ -12,6 +12,14 @@ const evalWindow = sc && sc.resolved.length ? {
 } : null;
 // ledger claims were stored truncated at 200 chars — show the cut honestly
 const claimText = (c) => /[.!?)\u2026\u201d"']$/.test(c.trim()) ? c : c + '\u2026';
+// outcome bars: segment widths are flex-grow = count, emitted as per-tier classes (no inline style)
+const VERDICTS = ['held', 'weakened', 'overturned'];
+const barCss = tierRows.flatMap((r) => [
+  ...VERDICTS.filter((k) => r[k] > 0).map((k) => `.ob-${r.t} .s-${k}{flex-grow:${r[k]}}`),
+  r.total - r.resolved > 0 ? `.ob-${r.t} .s-ungraded{flex-grow:${r.total - r.resolved}}` : '',
+]).join('');
+const TIER_CHIPS = ['all', 'high', 'medium', 'low'];
+const VERDICT_CHIPS = ['all', ...VERDICTS];
 ---
 <Base title="Calibration scorecard" description="Every recommendation is a dated, falsifiable prediction — scored per confidence tier from an append-only ledger.">
   <h1>Calibration scorecard</h1>
@@ -28,19 +36,37 @@ const claimText = (c) => /[.!?)\u2026\u201d"']$/.test(c.trim()) ? c : c + '\u202
 
   <h2>Score by confidence tier</h2>
   <div class="tbl wide"><table>
-    <thead><tr><th scope="col">tier</th><th scope="col" class="num">predictions</th><th scope="col" class="num">resolved</th><th scope="col" class="num">held</th><th scope="col" class="num">weakened</th><th scope="col" class="num">overturned</th><th scope="col" class="num">score</th></tr></thead>
+    <thead><tr><th scope="col">tier</th><th scope="col" class="num">score</th><th scope="col" class="num">predictions</th><th scope="col" class="num">resolved</th><th scope="col" class="num">held</th><th scope="col" class="num">weakened</th><th scope="col" class="num">overturned</th></tr></thead>
     <tbody>
       {tierRows.map((r) => (
         <tr>
           <td><span class={`badge ${r.t}`}>{r.t}</span></td>
-          <td class="num">{r.total}</td><td class="num">{r.resolved}</td><td class="num">{r.held}</td><td class="num">{r.weakened}</td><td class="num">{r.overturned}</td>
+          {/* the score is the key number: second column so it stays on screen when the table scrolls on phones */}
           <td class="num">{r.score != null
             ? <><strong>{r.score}%</strong>{r.resolved < 3 && <span class="meta"> (early — n={r.resolved})</span>}</>
             : <span class="muted">unproven — no resolutions yet</span>}</td>
+          <td class="num">{r.total}</td><td class="num">{r.resolved}</td><td class="num">{r.held}</td><td class="num">{r.weakened}</td><td class="num">{r.overturned}</td>
         </tr>
       ))}
     </tbody>
   </table></div>
+  <style is:inline set:html={barCss}></style>
+  <ul class="obars" aria-label="Outcomes per tier">
+    {tierRows.map((r) => (
+      <li class={`ob ob-${r.t}`}>
+        <span class={`badge ${r.t} ob-tier`}>{r.t}</span>
+        <span class="ob-bar" aria-hidden="true">
+          {VERDICTS.filter((k) => r[k] > 0).map((k) => <span class={`seg s-${k}`}></span>)}
+          {r.total - r.resolved > 0 && <span class="seg s-ungraded"></span>}
+        </span>
+        <span class="ob-legend">
+          {VERDICTS.filter((k) => r[k] > 0).map((k) => <span class={`badge ${k}`}>{k} {r[k]}</span>)}
+          {r.total - r.resolved > 0 && <span class="badge">ungraded {r.total - r.resolved}</span>}
+        </span>
+      </li>
+    ))}
+  </ul>
+  <p class="meta">score = (held + 0.5 × weakened) ÷ resolved · ungraded predictions are excluded · tiers with &lt; 3 grades are marked early · <a href={href('methodology/#m-calibration')}>methodology</a></p>
   <p class="muted small prose">Reading the numbers: <strong class="hi">{tierRows.reduce((n, r) => n + r.overturned, 0)} of {tierRows.reduce((n, r) => n + r.resolved, 0)} graded predictions have been overturned</strong> —
   every “weakened” verdict means the default <em>survived</em> an adversarial challenge but gained a
   real caveat, and it's deliberately scored harshly at 0.5. A modest score in the <span class="badge low">low</span> tier
@@ -48,23 +74,59 @@ const claimText = (c) => /[.!?)\u2026\u201d"']$/.test(c.trim()) ? c : c + '\u202
   (high above low) is the claim this page tests. Tiers marked <em>early</em> have too few grades to read as a trend.</p>
 
   <h2>Resolved predictions</h2>
-  <div class="rows">
+  <div class="filters">
+    <div class="chips" role="group" aria-label="Confidence tier">
+      <span class="meta f-label" aria-hidden="true">tier</span>
+      {TIER_CHIPS.map((v) => <button type="button" class="chip" data-f="tier" data-v={v} aria-pressed={v === 'all' ? 'true' : 'false'}>{v}</button>)}
+    </div>
+    <div class="chips" role="group" aria-label="Verdict">
+      <span class="meta f-label" aria-hidden="true">verdict</span>
+      {VERDICT_CHIPS.map((v) => <button type="button" class="chip" data-f="verdict" data-v={v} aria-pressed={v === 'all' ? 'true' : 'false'}>{v}</button>)}
+    </div>
+    <p id="f-count" class="meta" aria-live="polite">{sc.resolved.length} of {sc.resolved.length} shown</p>
+  </div>
+  <div class="rows" id="ledger">
   {sc.resolved.map((r) => {
     const e = byId[r.id];
     return (
-      <div>
+      <div data-tier={r.confidence} data-verdict={r.outcome.outcome}>
         <p class="res-head">
           {e ? <a href={href(`entries/${e.slug}/`)}><strong>{e.slug}</strong></a> : <strong>{r.id}</strong>}
           {' '}<span class={`badge ${r.outcome.outcome}`}>{r.outcome.outcome}</span>
           <span class="badge">{r.confidence}</span>
           <span class="muted small"> asserted {r.asserted} · resolved {r.outcome.on}</span>
         </p>
-        <p class="muted res-body">“{claimText(r.claim)}”</p>
-        {r.outcome.note && <p class="res-body">↳ {r.outcome.note}</p>}
+        <p class="res-body claim">“{claimText(r.claim)}”</p>
+        {r.outcome.note && <p class="res-body note"><span class="note-mark" aria-hidden="true">↳ </span>{r.outcome.note}</p>}
       </div>
     );
   })}
   </div>
+  <p id="f-none" class="muted" hidden>No resolved predictions match — <button type="button" class="linkish" id="f-reset">clear filters</button></p>
+  <script is:inline>
+    (() => {
+      const chips = [...document.querySelectorAll('.filters .chip')];
+      const rows = [...document.querySelectorAll('#ledger > [data-tier]')];
+      const count = document.getElementById('f-count');
+      const none = document.getElementById('f-none');
+      const sel = { tier: 'all', verdict: 'all' };
+      function apply() {
+        let shown = 0;
+        for (const r of rows) {
+          const ok = (sel.tier === 'all' || r.dataset.tier === sel.tier) && (sel.verdict === 'all' || r.dataset.verdict === sel.verdict);
+          r.hidden = !ok; if (ok) shown++;
+        }
+        for (const c of chips) c.setAttribute('aria-pressed', String(sel[c.dataset.f] === c.dataset.v));
+        count.textContent = `${shown} of ${rows.length} shown`;
+        none.hidden = shown > 0;
+      }
+      for (const c of chips) c.addEventListener('click', () => { sel[c.dataset.f] = c.dataset.v; apply(); });
+      document.getElementById('f-reset').addEventListener('click', () => {
+        sel.tier = 'all'; sel.verdict = 'all'; apply();
+        chips[0].focus();
+      });
+    })();
+  </script>
 
   <p class="muted prose">Ledger: append-only <a href={`${GITHUB}/blob/main/tools/predictions.jsonl`}><code>tools/predictions.jsonl</code></a> — {sc.totalPredictions} predictions to date. Unresolved ones aren't shown as wins; the score only counts
   what has actually been re-examined.</p>
@@ -80,4 +142,28 @@ const claimText = (c) => /[.!?)\u2026\u201d"']$/.test(c.trim()) ? c : c + '\u202
   .small { font-size: var(--fs-sm); }
   .res-head { margin: 0; }
   .res-body { margin: var(--sp-2) 0 0; font-size: var(--fs-sm); max-width: var(--measure); }
+  .claim { color: var(--muted); font-style: italic; }
+  .note { color: var(--fg); }
+  .note-mark { color: var(--accent); }
+
+  /* outcome bars: one row per tier — badge | stacked bar | text counts */
+  .obars { list-style: none; padding: 0; margin: var(--sp-4) 0 var(--sp-2); display: grid; gap: var(--sp-2); }
+  .ob { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr); grid-template-areas: "tier bar" ". legend"; align-items: center; column-gap: var(--sp-3); row-gap: var(--sp-1); }
+  .ob-tier { grid-area: tier; }
+  .ob-bar { grid-area: bar; display: flex; gap: 2px; height: 14px; }
+  .ob-legend { grid-area: legend; display: flex; flex-wrap: wrap; gap: 0 var(--sp-3); }
+  .ob-legend .badge + .badge { margin-left: 0; }
+  @media (min-width: 720px) {
+    .ob { grid-template-columns: 4.5rem minmax(0, 1fr) 18rem; grid-template-areas: "tier bar legend"; }
+  }
+  .seg { flex: 0 1 0; min-width: 2px; border-radius: 2px; }
+  .s-held { background: var(--ok); }
+  .s-weakened { background: var(--warn); }
+  .s-overturned { background: var(--bad); }
+  .s-ungraded { background: transparent; border: 1px solid var(--border-control); }
+
+  .filters { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-4); margin: 0 0 var(--sp-3); }
+  .chips { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); }
+  .f-label { margin: 0; }
+  #f-count { margin: 0; }
 </style>

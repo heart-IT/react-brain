@@ -85,7 +85,7 @@ const { bare, withCorpus } = m.bench;
         <div class="term-bar" aria-hidden="true"><i></i><i></i><i></i><span>react-brain doctor</span></div>
         <pre class="no-copy" set:html={demoHtml}></pre>
       </div>
-      <figcaption class="meta">sample repo · generated at build from the corpus · <a href={href('doctor/')}>run it on yours →</a></figcaption>
+      <figcaption class="meta">fictional sample repo ({demo.name}) · generated at build from the corpus · <a href={href('doctor/')}>run it on yours →</a></figcaption>
     </figure>
   </section>
 
@@ -94,6 +94,7 @@ const { bare, withCorpus } = m.bench;
       <li><a href={href(s.to)} title={s.title}><strong>{s.value}</strong> {s.label}<span class="sub">{s.sub}</span></a></li>
     ))}
   </ul>
+  <p class="meta stat-def"><a href={href('methodology/#metrics')}>what these numbers mean →</a></p>
 
   <h2>Start with your task</h2>
   <p class="muted lede">Greenfield and existing apps get different answers: a new app gets a stack composed from intent;
@@ -172,6 +173,7 @@ const { bare, withCorpus } = m.bench;
 
   .statline { list-style: none; margin: 2.2rem 0 0; padding: 1.1rem 0 0; border-top: 1px solid var(--line); }
   .statline li { margin: 0; }
+  .stat-def { margin: var(--sp-2) 0 0; }
   .statline .sub { display: block; font-size: var(--fs-xs); }
   @media (max-width: 640px) { .statline { display: grid; grid-template-columns: 1fr 1fr; } }
 

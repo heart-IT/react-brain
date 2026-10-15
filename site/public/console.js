@@ -12,6 +12,10 @@
   const esc = (x) => String(x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const CTX_KEY = 'rb-console-ctx';
   const ctx = () => { try { return JSON.parse(localStorage.getItem(CTX_KEY)); } catch { return null; } };
+  // the ⌘ glyph is Mac-only; elsewhere the same shortcuts are Ctrl-based
+  const MAC = /Mac|iPhone|iPad/.test(navigator.platform);
+  const KEY_J = MAC ? '⌘J' : 'Ctrl J', KEY_K = MAC ? '⌘K' : 'Ctrl K';
+  const SEARCH_LINE = `${KEY_K} focuses site search (full text + question routing); this console is for commands`;
   const setPrompt = () => { const c = ctx(); promptEl.textContent = c ? `~/${c.name} ❯` : '❯'; };
 
   async function ensureData() {
@@ -35,7 +39,7 @@
   function open() {
     lastFocus = document.activeElement;
     box.hidden = false; setPrompt(); input.focus();
-    if (!out.childElementCount) print('<span class="t-dim">react-brain console — try <b>ask should I use zustand</b> · <b>doctor</b> (after <b>load</b>) · <b>query maps</b> · <b>help</b> for everything. ' + (/Mac|iPhone|iPad/.test(navigator.platform) ? '⌘J' : 'Ctrl J') + ' toggles, esc closes.</span>');
+    if (!out.childElementCount) print('<span class="t-dim">react-brain console — try <b>ask should I use zustand</b> · <b>doctor</b> (after <b>load</b>) · <b>query maps</b> · <b>help</b> for everything. ' + KEY_J + ' toggles, esc closes.<br>' + SEARCH_LINE + '.</span>');
   }
   function close() { box.hidden = true; lastFocus?.focus?.(); }
 
@@ -46,6 +50,15 @@
   for (const a of document.querySelectorAll('[data-open-console]'))
     a.addEventListener('click', (e) => { e.preventDefault(); open(); });
   box.addEventListener('click', (e) => { if (e.target === box || e.target.classList.contains('console-scrim')) close(); });
+  // aria-modal promises focus stays inside: wrap Tab / Shift-Tab around the dialog's focusables
+  box.addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab') return;
+    const f = [...box.querySelectorAll('a[href], button, input, textarea, [tabindex="0"]')].filter((x) => x.offsetParent !== null);
+    if (!f.length) return;
+    const i = f.indexOf(document.activeElement);
+    if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
+    else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); }
+  });
   input.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowUp') { if (history.length) { histIdx = Math.max(0, (histIdx < 0 ? history.length : histIdx) - 1); input.value = history[histIdx]; e.preventDefault(); } }
     if (e.key === 'ArrowDown') { if (histIdx >= 0) { histIdx = Math.min(history.length, histIdx + 1); input.value = history[histIdx] || ''; e.preventDefault(); } }
@@ -120,7 +133,9 @@ stack [--rn|--web] [--expo] [--p2p] [--stage=x]
 doctor          fit report for the loaded repo
 decide &lt;topic&gt;  decision record for the loaded repo
 load / unload   set the session repo (paste package.json) / clear
-context · clear · help</span>`); break;
+context · clear · help
+
+${SEARCH_LINE}</span>`); break;
       case 'clear': out.replaceChildren(); break;
       case 'go': {
         const t = (args[0] || '').toLowerCase().replace(/\/$/, '');
@@ -276,15 +291,13 @@ context · clear · help</span>`); break;
         const md = L.join('\n');
         const wrap = document.createElement('div'); wrap.className = 'c-res';
         const bar = document.createElement('div');
-        const cp = document.createElement('button'); cp.type = 'button'; cp.className = 'ghost'; cp.textContent = 'copy';
-        cp.style.cssText = 'padding:.15rem .6rem;font-size:.72rem';
+        const cp = document.createElement('button'); cp.type = 'button'; cp.className = 'ghost c-btn'; cp.textContent = 'copy';
         cp.addEventListener('click', async () => { await navigator.clipboard.writeText(md); cp.textContent = '✓'; setTimeout(() => (cp.textContent = 'copy'), 1200); });
-        const dl = document.createElement('a'); dl.className = 'btn ghost'; dl.textContent = 'download .md';
-        dl.style.cssText = 'padding:.15rem .6rem;font-size:.72rem;margin-left:.5rem';
+        const dl = document.createElement('a'); dl.className = 'btn ghost c-btn'; dl.textContent = 'download .md';
         dl.href = URL.createObjectURL(new Blob([md], { type: 'text/markdown' }));
         dl.download = 'NNN-' + e.slug + '.md';
         bar.append(cp, dl);
-        const pre = document.createElement('pre'); pre.className = 'c-pre'; pre.style.whiteSpace = 'pre-wrap'; pre.textContent = md;
+        const pre = document.createElement('pre'); pre.className = 'c-pre wrap'; pre.textContent = md;
         wrap.append(bar, pre);
         out.appendChild(wrap); out.scrollTop = out.scrollHeight;
         break;

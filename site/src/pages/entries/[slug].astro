@@ -18,6 +18,9 @@ const dl = downloads();
 const tr = track()[id];
 const pkgs = (e.detect || []).filter((d) => !d.pkg.includes('*') && dl[d.pkg] != null);
 const doc = docHtml(e);
+// reading time for the collapsed essay: words of the rendered text at ~220 wpm
+const docWords = doc ? doc.replace(/<[^>]*>/g, ' ').replace(/&[#a-z0-9]+;/gi, ' ').split(/\s+/).filter(Boolean).length : 0;
+const docMinutes = Math.max(1, Math.round(docWords / 220));
 const group = groupOf(e);
 const rels = relations(e);
 const { prev, next } = prevNext(e);
@@ -66,7 +69,7 @@ const toc = [
   </nav>
   <h1>{e.topic}</h1>
   <p class="meta entry-meta" data-pagefind-ignore>
-    <span><span class={`badge ${e.status}`}>{e.status}</span></span>
+    <span>status <span class={`badge ${e.status}`}>{e.status}</span></span>
     <span>confidence <span class={`badge ${e.confidence}`}>{e.confidence}</span>{tier?.total > 0 && (
       <a href={href('scorecard/')} title={`${e.confidence}-confidence forecasts on the public scorecard: ${tier.held} held · ${tier.weakened} weakened · ${tier.overturned} overturned`}> ({tier.score != null && tier.resolved >= 3 ? `tier ${tier.score}%, ` : tier.resolved ? 'early: ' : ''}{tier.resolved}/{tier.total} graded)</a>
     )}</span>
@@ -92,6 +95,7 @@ const toc = [
     {e.confidence === 'low' && (
       <p class="rec-caveat"><strong>Low confidence</strong> — fast-moving or lightly-vetted domain: treat the pick as a vetted lead and prototype before committing.</p>
     )}
+    <p class="meta rec-next" data-pagefind-ignore>Commit this: <a href={href(`decide/?entry=${e.id}`)}>generate a decision record →</a> · <a href={href('doctor/')}>check your repo against it</a></p>
   </section>
 
   <div id="session-banner" class="session" data-pagefind-ignore hidden></div>
@@ -195,8 +199,11 @@ const toc = [
   {doc && (
     <>
       <h2 id="explanation" class="anc"><a class="h-anchor" data-pagefind-ignore href="#explanation" aria-label="Copy link to The full explanation">#</a>The full explanation</h2>
-      <p class="meta lede">the reviewed long-form essay behind this entry — the <em>why</em>, not a how-to · also on <a href={`${GITHUB}/blob/main/encyclopedia/${e.doc}`} rel="noopener">GitHub</a></p>
-      <article class="prose essay" set:html={doc} />
+      <details class="essay-wrap" id="essay-wrap">
+        <summary data-pagefind-ignore>Read the full explanation · ≈{docMinutes} min read</summary>
+        <p class="meta lede">the reviewed long-form essay behind this entry — the <em>why</em>, not a how-to · also on <a href={`${GITHUB}/blob/main/encyclopedia/${e.doc}`} rel="noopener">GitHub</a></p>
+        <article class="prose essay" set:html={doc} />
+      </details>
     </>
   )}
 
@@ -256,6 +263,28 @@ const toc = [
       });
     }
 
+    // The essay is collapsed by default (progressive disclosure). Anchors that point
+    // at it or into it would land on nothing inside a closed <details>, so open it for
+    // #explanation, any id inside it, links to #explanation (TOC, copy-link), and print.
+    const wrap = document.getElementById('essay-wrap');
+    if (wrap) {
+      const reveal = (id, scroll) => {
+        if (!id) return;
+        const el = document.getElementById(id);
+        if (!el || !(id === 'explanation' || wrap.contains(el))) return;
+        wrap.open = true;
+        if (scroll) el.scrollIntoView({ block: 'start' });
+      };
+      const fromHash = () => { try { return decodeURIComponent(location.hash.slice(1)); } catch { return location.hash.slice(1); } };
+      reveal(fromHash(), true);
+      addEventListener('hashchange', () => reveal(fromHash(), true));
+      document.addEventListener('click', (ev) => {
+        const a = ev.target.closest?.('a[href="#explanation"]');
+        if (a) wrap.open = true;
+      });
+      addEventListener('beforeprint', () => { wrap.open = true; });
+    }
+
     // Sticky mini-TOC (long pages only, ≥1024px via CSS): mark the section in view.
     const toc = document.querySelector('.toc-sticky');
     if (toc && 'IntersectionObserver' in window) {
@@ -267,6 +296,13 @@ const toc = [
         }
       }, { rootMargin: '-20% 0px -70% 0px' });
       for (const id of links.keys()) { const h = document.getElementById(id); if (h) io.observe(h); }
+      // a TOC jump can land a heading past the observed band without it ever
+      // intersecting — mark the clicked section directly
+      toc.addEventListener('click', (ev) => {
+        const a = ev.target.closest('a'); if (!a) return;
+        for (const l of links.values()) l.removeAttribute('aria-current');
+        a.setAttribute('aria-current', 'location');
+      });
     }
   </script>
 </Base>
@@ -278,14 +314,14 @@ const toc = [
   .crumbs a { color: var(--muted); }
   .crumbs a:hover { color: var(--accent); }
   .crumbs [aria-current] { color: var(--fg); }
-  .entry-meta { display: flex; flex-wrap: wrap; gap: .15rem 0; margin: .2rem 0 0; }
+  .entry-meta { max-width: none; display: flex; flex-wrap: wrap; gap: .15rem 0; margin: .2rem 0 0; }
   .entry-meta > span:not(:last-child)::after { content: "·"; margin: 0 .55rem; color: var(--line-strong); }
   .entry-meta a { color: var(--muted); }
   .entry-meta a:hover { color: var(--accent); }
 
   /* the page's one visual anchor: the answer */
-  .rec-panel { margin: 1.4rem 0 0; padding: 1.15rem 1.3rem 1.2rem; background: var(--card); border: 1px solid var(--line-strong); border-left: 3px solid var(--ok); border-radius: 8px;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 0 60px -30px rgba(80,250,123,.45); }
+  .rec-panel { margin: 1.4rem 0 0; padding: 1.15rem 1.3rem 1.2rem; background: var(--card); border: 1px solid var(--line-strong); border-left: 3px solid var(--ok); border-radius: var(--radius-md);
+    box-shadow: var(--shadow-raised); }   /* the green rule is the anchor; glow is reserved for the hero terminal */
   .rec-label, .rec-sub { font: 500 var(--fs-xs)/1.5 var(--font-mono); margin: 0; }
   .rec-label { color: var(--ok); }
   .rec-label::before { content: "❯ "; }
@@ -362,18 +398,32 @@ const toc = [
   .sources { margin: 1.2rem 0 0; padding-top: .2rem; }
   .sources ul { list-style: none; padding: 0; margin: 0; }
   .sources li { display: flex; gap: .7rem; align-items: baseline; margin: 0; padding: .3rem 0; border-top: 1px solid var(--line); font-size: var(--fs-sm); min-width: 0; }
-  .sources li a { overflow-wrap: anywhere; min-width: 0; }
+  .sources li a { overflow-wrap: anywhere; min-width: 0; padding-block: 2px; }
   .src-type { flex: 0 0 6.6rem; font: 400 var(--fs-xs) var(--font-mono); color: var(--muted); }
 
   .related { list-style: none; padding: 0; margin: 0; }
   .related li { display: grid; grid-template-columns: minmax(8rem, 12rem) minmax(0, 1fr) auto; gap: .2rem 1rem; align-items: baseline; margin: 0; padding: .5rem 0; border-top: 1px solid var(--line); }
-  .related li a { font: 600 var(--fs-md) var(--font-head); text-decoration: none; }
+  .related li a { font: 600 var(--fs-md) var(--font-head); text-decoration: none; padding-block: 2px; }
   .rel-topic { color: var(--muted); font-size: var(--fs-sm); }
   .rel-label { text-align: end; white-space: nowrap; }
   @media (max-width: 600px) {
     .related li { grid-template-columns: minmax(0, 1fr); gap: .1rem; }
     .rel-label { text-align: start; white-space: normal; }
   }
+
+  /* the collapsed essay: a ghost-button row that reveals the long form */
+  .essay-wrap > summary { display: flex; align-items: center; gap: var(--sp-2); min-height: 24px; width: fit-content; max-width: 100%; margin: 0 0 var(--sp-3); padding: var(--sp-2) var(--sp-4); border: 1px solid var(--border-control); border-radius: var(--radius-sm); font: 500 var(--fs-sm) var(--font-mono); color: var(--fg); cursor: pointer; list-style: none; }
+  .essay-wrap > summary::-webkit-details-marker { display: none; }
+  .essay-wrap > summary::before { content: "▸"; color: var(--accent); }
+  .essay-wrap[open] > summary::before { content: "▾"; }
+  .essay-wrap > summary:hover { border-color: var(--muted); background: var(--card); }
+  @media print {
+    .essay-wrap > summary { display: none; }
+    .essay-wrap::details-content { content-visibility: visible; display: block; }
+    .essay-wrap > :not(summary) { display: block; }
+  }
+
+  .rec-next { margin: var(--sp-4) 0 0; }
 
   .pager { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 3rem 0 0; padding-top: 1rem; border-top: 1px solid var(--line); }
   .pager a { display: flex; flex-direction: column; gap: .15rem; text-decoration: none; min-width: 0; }
