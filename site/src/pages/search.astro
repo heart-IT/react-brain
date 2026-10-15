@@ -1,39 +1,121 @@
 ---
 import Base from '../layouts/Base.astro';
-import { BASE } from '../lib/corpus.js';
-// Pagefind indexes the BUILT site (npm run build → pagefind --site dist), so its
-// assets exist only after a build. In `astro dev` the widget shows a hint instead.
+import { BASE, corpus, siteMeta, href } from '../lib/corpus.js';
+// Full-text search over the BUILT site via Pagefind's JS API (pagefind.js — the
+// index Pagefind writes into dist/pagefind/ after `astro build`). Results are
+// rendered here rather than by Pagefind's prebuilt UI so they can be grouped by
+// content type and carry honest loading / empty / no-results states. In
+// `astro dev` the index doesn't exist yet; the page says so.
+const m = siteMeta();
+const { groups } = corpus();
+const gl = (g) => g.label.split(' — ')[0].split(' (')[0].toLowerCase();
+// "try:" suggestions on a miss — the three largest decision groups
+const suggest = [...groups].sort((a, b) => b.entries.length - a.entries.length).slice(0, 3)
+  .map((g) => ({ label: gl(g), url: href(`entries/#${g.id}`) }));
+const EXAMPLES = ['zustand or jotai', 'expo router', 'react compiler'];
 ---
-<Base title="react-brain — search">
+<Base title="Search">
   <h1>Search</h1>
-  <link rel="stylesheet" href={`${BASE}pagefind/pagefind-ui.css`} />
+  <form id="sform" class="sform" role="search" action={href('search/')} method="get">
+    <label for="q" class="sr-only">Search decisions, readings and tools</label>
+    <span class="prompt" aria-hidden="true">❯</span>
+    <input id="q" name="q" type="search" autocomplete="off" spellcheck="false" placeholder="ask — “should I use zustand?”" aria-describedby="s-keys" aria-controls="results" />
+  </form>
+  <p id="s-keys" class="meta keys"><kbd>enter</kbd> open first result · <kbd>↓</kbd> move into results · <kbd>esc</kbd> clear</p>
+
   <div id="ask-out" hidden>
     <p class="label-caps" style="margin:0 0 .3rem; color:var(--muted)">readings that answer this</p>
     <div class="rows" id="ask-rows"></div>
   </div>
-  <div id="search"></div>
-  <p id="search-hint" class="muted" hidden>Search is generated at build time — run <code>npm run build &amp;&amp; npm run preview</code> to use it locally (in <code>astro dev</code> the
-  index doesn't exist yet).</p>
+
+  <p id="s-status" class="meta status" role="status" aria-live="polite"></p>
+
+  <div id="s-empty" class="s-state">
+    <p class="muted" style="margin:0">Search {m.decisions} decisions, {m.readings} annotated readings, the tools and the methodology.</p>
+    <p class="meta" style="margin:.5rem 0 0">try: {EXAMPLES.map((x, i) => <>{i > 0 && ' · '}<a href={`?q=${encodeURIComponent(x)}`} data-example={x}>{x}</a></>)}</p>
+    <p class="meta" style="margin:.3rem 0 0">or browse: {groups.map((g, i) => <>{i > 0 && ' · '}<a href={href(`entries/#${g.id}`)}>{gl(g)}</a></>)}</p>
+  </div>
+  <div id="s-none" class="s-state" hidden>
+    <p style="margin:0">No results for <b id="s-none-q"></b>.</p>
+    <p class="meta" style="margin:.4rem 0 0">try: {suggest.map((s, i) => <>{i > 0 && ' · '}<a href={s.url}>{s.label}</a></>)} · or <a href={href('entries/')}>all decisions</a></p>
+  </div>
+  <p id="search-hint" class="muted" hidden>Search is generated at build time — run <code>npm run build &amp;&amp; npm run preview</code> to use it locally (in <code>astro dev</code> the index doesn't exist yet).</p>
+
+  <div id="results" aria-label="Search results"></div>
+
   <script is:inline define:vars={{ BASE }}>
-    const s = document.createElement('script');
-    s.src = `${BASE}pagefind/pagefind-ui.js`;
-    s.onload = () => {
-      new PagefindUI({ element: '#search', showSubResults: true, pageSize: 8 });
-      // the top-bar search form lands here with ?q= — run it immediately
-      const q = new URLSearchParams(location.search).get('q');
-      if (q) setTimeout(() => {
-        const input = document.querySelector('#search input');
-        if (input) { input.value = q; input.dispatchEvent(new Event('input', { bubbles: true })); input.focus(); }
-      }, 60);
+    const $ = (id) => document.getElementById(id);
+    const input = $('q'), status = $('s-status'), results = $('results');
+    const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const TYPES = [
+      ['decision', 'decisions', (p) => p.startsWith('entries/') && p !== 'entries/'],
+      ['reading', 'readings & newsletter', (p) => /^(reading|newsletter)\//.test(p)],
+      ['tool', 'tools', (p) => /^(doctor|stack|decide|libraries|entries)\/$/.test(p) || p === 'entries/'],
+      ['about', 'about & evidence', () => true],
+    ];
+    const typeOf = (url) => {
+      const p = url.startsWith(BASE) ? url.slice(BASE.length) : url.replace(/^\//, '');
+      return TYPES.find(([, , t]) => t(p.split('#')[0]))[0];
     };
-    s.onerror = () => { document.getElementById('search-hint').hidden = false; };
-    document.head.appendChild(s);
+
+    let pf = null, pfLoading = null;
+    function loadPagefind() {
+      pfLoading ||= import(`${BASE}pagefind/pagefind.js`).then(async (mod) => {
+        await mod.options({ baseUrl: BASE, excerptLength: 26 });
+        mod.init();
+        pf = mod;
+        return mod;
+      });
+      return pfLoading;
+    }
+
+    function show(state, q) {
+      if (state !== 'results') shownQ = null;
+      $('s-empty').hidden = state !== 'empty';
+      $('s-none').hidden = state !== 'none';
+      if (state === 'none') $('s-none-q').textContent = `“${q}”`;
+      if (state !== 'results') results.innerHTML = '';
+    }
+
+    let seq = 0, shownQ = null;
+    async function run(q) {
+      const my = ++seq;
+      q = q.trim();
+      if (!q) { status.textContent = ''; show('empty'); return; }
+      status.textContent = pf ? 'searching…' : 'loading the search index…';
+      let mod;
+      try { mod = await loadPagefind(); }
+      catch { status.textContent = ''; show('hidden'); $('search-hint').hidden = false; return; }
+      const res = await mod.search(q);
+      if (my !== seq) return;                       // a newer query superseded this one
+      if (!res || !res.results.length) { status.textContent = ''; show('none', q); return; }
+      const data = await Promise.all(res.results.slice(0, 24).map((r) => r.data()));
+      if (my !== seq) return;
+      const byType = new Map(TYPES.map(([k, label]) => [k, { label, items: [] }]));
+      for (const d of data) byType.get(typeOf(d.url)).items.push(d);
+      results.innerHTML = [...byType.entries()].filter(([, g]) => g.items.length).map(([k, g]) => `
+        <section class="s-group" aria-label="${esc(g.label)}">
+          <p class="label-caps s-glabel">${esc(g.label)} <span class="s-n">${g.items.length}</span></p>
+          <ol class="s-list">${g.items.map((d) => {
+            const subs = (d.sub_results || []).filter((s) => s.url !== d.url && s.title !== d.meta?.title).slice(0, 2);
+            const path = d.url.startsWith(BASE) ? d.url.slice(BASE.length) : d.url;
+            return `<li><a class="s-link" href="${esc(d.url)}"><span class="s-title">${esc(d.meta?.title || path)}</span>${k === 'decision' ? `<span class="s-path meta">${esc(path.replace(/^entries\//, '').replace(/\/.*$/, ''))}</span>` : ''}</a>
+              <p class="s-ex">${d.excerpt || ''}</p>
+              ${subs.length ? `<p class="meta s-subs">${subs.map((s) => `<a href="${esc(s.url)}">§ ${esc(s.title)}</a>`).join(' · ')}</p>` : ''}</li>`;
+          }).join('')}</ol>
+        </section>`).join('');
+      const total = res.results.length;
+      status.textContent = `${total} result${total === 1 ? '' : 's'} for “${q}”${total > data.length ? ` · showing the top ${data.length}` : ''}`;
+      show('results');
+      shownQ = q;
+    }
 
     // question routing above full-text: the console's `ask` scorer over the corpus's
     // reading annotations + claims (deterministic, same data island as the console)
     let RB = null;
-    const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     async function ask(qs) {
+      const out = $('ask-out');
+      if (!qs.trim()) { out.hidden = true; return; }
       if (!RB) { try { RB = await (await fetch(`${BASE}console-data.json`)).json(); } catch { return; } }
       const STOP = new Set('the a an is are was be my our your this that these of in on at to for and or but with without after before does do did how why what when where which it its as from by not no so if then than can could should would use using i we you'.split(' '));
       const toks = [...new Set(qs.toLowerCase().split(/\s+/).map((t) => t.replace(/[^\w-]/g, '')).filter((t) => t.length > 2 && !STOP.has(t)))];
@@ -43,51 +125,90 @@ import { BASE } from '../lib/corpus.js';
         let sc = 0, h = 0;
         for (const t of toks) { const tf = text.split(stem(t)).length - 1; if (tf) { h++; sc += Math.min(tf, 3); } }
         return { r, sc, h };
-      }).filter((x) => x.h >= Math.min(2, toks.length)).sort((a, b) => b.sc - a.sc).slice(0, 3);
-      const out = document.getElementById('ask-out');
+      }).filter((x) => toks.length && x.h >= Math.min(2, toks.length)).sort((a, b) => b.sc - a.sc).slice(0, 3);
       out.hidden = !hits.length;
-      document.getElementById('ask-rows').innerHTML = hits.map(({ r }) => {
+      $('ask-rows').innerHTML = hits.map(({ r }) => {
         const gist = r.claim || r.what || '';
         return `<div><a href="${esc(r.url)}" rel="noopener" style="font:600 .95rem/1.4 var(--font-head); color:var(--bright); text-decoration:none">${esc(r.title)}</a>
           <a class="meta" style="margin-left:.5rem" href="${BASE}entries/${esc(r.slug)}/">${esc(r.slug)}</a>
           <p class="muted" style="margin:.25rem 0 0; font-size:.88rem; max-width:78ch">${esc(gist.length > 260 ? gist.slice(0, 259) + '…' : gist)}</p></div>`;
       }).join('');
     }
-    const q0 = new URLSearchParams(location.search).get('q');
-    if (q0) ask(q0);
+
+    // keep ?q= in the address bar so a search is shareable and survives reload
+    const syncUrl = (q) => {
+      const u = new URL(location.href);
+      if (q) u.searchParams.set('q', q); else u.searchParams.delete('q');
+      history.replaceState(null, '', u);
+    };
     let deb;
-    document.addEventListener('input', (ev) => {
-      if (!ev.target.matches('#search input')) return;
+    input.addEventListener('input', () => {
       clearTimeout(deb);
-      const v = ev.target.value;
-      deb = setTimeout(() => ask(v), 350);
+      const v = input.value;
+      if (!v.trim()) { run(''); ask(''); syncUrl(''); return; }
+      deb = setTimeout(() => { run(v); ask(v); syncUrl(v.trim()); }, 220);
     });
+    const links = () => [...results.querySelectorAll('a.s-link')];
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        if (input.value) { input.value = ''; input.dispatchEvent(new Event('input')); }
+        input.blur();
+      } else if (e.key === 'ArrowDown' && links().length) {
+        e.preventDefault(); links()[0].focus();
+      }
+    });
+    // Enter opens the first result (in displayed order); with none yet, run now
+    $('sform').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearTimeout(deb);
+      const v = input.value.trim();
+      if (v && shownQ !== v) { syncUrl(v); await Promise.all([run(v), ask(v)]); }
+      const first = links()[0];
+      if (first && input.value.trim() === v) location.href = first.href;
+    });
+    results.addEventListener('keydown', (e) => {
+      const ls = links(), i = ls.indexOf(document.activeElement);
+      if (i < 0) return;
+      if (e.key === 'ArrowDown' && i < ls.length - 1) { e.preventDefault(); ls[i + 1].focus(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); (i > 0 ? ls[i - 1] : input).focus(); }
+      else if (e.key === 'Escape') { e.preventDefault(); input.focus(); }
+    });
+    for (const a of document.querySelectorAll('[data-example]')) a.addEventListener('click', (e) => {
+      e.preventDefault(); input.value = a.dataset.example; input.dispatchEvent(new Event('input')); input.focus();
+    });
+
+    // deep link: the header search form (and shared links) land here with ?q=
+    const q0 = (new URLSearchParams(location.search).get('q') || '').trim();
+    if (q0) { input.value = q0; run(q0); ask(q0); input.focus(); }
+    else { show('empty'); loadPagefind().catch(() => { $('search-hint').hidden = false; $('s-empty').hidden = true; }); }
   </script>
 </Base>
 
-<style is:global>
-  /* Map Pagefind UI onto the site palette. Scoped to #search, NOT :root —
-     pagefind-ui.css loads after this style and re-declares its light-theme
-     defaults on :root, so a :root mapping loses the cascade (the broken white
-     input / dim text / yellow marks). Container-scoped vars always win. */
-  #search {
-    --pagefind-ui-primary: var(--accent);
-    --pagefind-ui-text: var(--fg);
-    --pagefind-ui-background: var(--card);
-    --pagefind-ui-border: var(--line);
-    --pagefind-ui-tag: var(--card);
-    --pagefind-ui-border-width: 1px;
-    --pagefind-ui-border-radius: 6px;
-    --pagefind-ui-font: inherit;
-  }
-  #search .pagefind-ui__search-input { color: var(--fg); font-weight: 400; }
-  #search .pagefind-ui__search-input::placeholder { color: var(--muted); opacity: 1; }
-  #search .pagefind-ui__search-clear { color: var(--muted); background: transparent; }
-  #search .pagefind-ui__message { color: var(--muted); font-weight: 400; }
-  #search .pagefind-ui__result { border-top: 1px solid var(--line); }
-  #search .pagefind-ui__result-link { color: var(--bright); font-family: var(--font-head); }
-  #search .pagefind-ui__result-link:hover { color: var(--accent); }
-  #search .pagefind-ui__result-excerpt, #search .pagefind-ui__result-nested { color: var(--muted); }
-  #search mark { background: rgba(80, 250, 123, .16); color: var(--accent); border-radius: 2px; padding: 0 .12em; }
-  #search .pagefind-ui__button { background: var(--card); color: var(--fg); border: 1px solid var(--line); }
+<style>
+  .sform { display: flex; align-items: center; gap: .55rem; max-width: 40rem; margin: 1rem 0 0; background: var(--code-bg); border: 1px solid var(--line-strong); border-radius: 6px; padding: .55rem .8rem; }
+  .sform:focus-within { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent); }
+  .sform input { flex: 1; min-width: 0; background: none; border: 0; color: var(--fg); font: 400 1rem var(--font-mono); }
+  .sform input:focus { outline: none; box-shadow: none; }
+  .sform input::placeholder { color: var(--muted); }
+  .keys { margin: .45rem 0 1.2rem; }
+  .keys kbd { font: 500 .7rem var(--font-mono); border: 1px solid var(--line-strong); border-radius: 4px; padding: 0 .3em; color: var(--fg); }
+  @media (hover: none) { .keys { display: none; } }
+  #ask-out { margin: 0 0 1.4rem; }
+  .status { min-height: 1.2em; margin: 0 0 .4rem; }
+  .s-state { margin: .2rem 0 0; }
+  :global(.s-group) { margin: 1.2rem 0 0; }
+  :global(.s-glabel) { margin: 0 0 .2rem; }
+  :global(.s-n) { color: var(--line-strong); margin-left: .3rem; }
+  :global(.s-list) { list-style: none; padding: 0; margin: 0; }
+  :global(.s-list > li) { margin: 0; padding: .75rem 0; border-top: 1px solid var(--line); min-width: 0; }
+  :global(.s-link) { display: flex; flex-wrap: wrap; align-items: baseline; gap: .1rem .6rem; text-decoration: none; }
+  :global(.s-title) { color: var(--bright); font: 600 .95rem/1.4 var(--font-head); }
+  :global(.s-link:hover .s-title), :global(.s-link:focus-visible .s-title) { color: var(--accent); }
+  :global(.s-ex) { margin: .25rem 0 0; color: var(--muted); font-size: .88rem; max-width: 78ch; overflow-wrap: anywhere; }
+  :global(.s-ex mark) { background: rgba(80, 250, 123, .16); color: var(--accent); border-radius: 2px; padding: 0 .12em; }
+  :global(.s-subs) { margin: .25rem 0 0; }
+  :global(.s-subs a) { color: var(--muted); }
+  :global(.s-subs a:hover) { color: var(--accent); }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 </style>

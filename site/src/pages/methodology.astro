@@ -1,21 +1,31 @@
 ---
 import Base from '../layouts/Base.astro';
-import { href, GITHUB, corpus } from '../lib/corpus.js';
-// digest counts pulled live from the corpus meta so this section never drifts
-const digested = new Map((corpus().meta.sources_digested || []).map((s) => {
-  const m = String(s).match(/^(.*)\s+×(\d+)$/);
-  return m ? [m[1].trim(), m[2]] : [String(s), null];
-}));
-const NEWSLETTERS = [
-  ['React Native Rewind', 'https://reactnativerewind.com/'],
-  ['This Week in React', 'https://thisweekinreact.com/'],
-  ['React Status', 'https://react.statuscode.com/'],
-  ['React Digest', 'https://reactdigest.net/'],
-  ['React Weekly', 'https://react-weekly.dev/'],
-  ['Native Weekly', 'https://nativeweekly.com/'],
-].map(([name, url]) => ({ name, url, n: digested.get(name) }));
+import { href, GITHUB, siteMeta, scorecard, census } from '../lib/corpus.js';
+// Every number on this page is read from siteMeta()/scorecard()/census() — the
+// same loaders the homepage tiles and footer use — so the definitions can't drift.
+const m = siteMeta();
+const sc = scorecard();
+const cen = census();
+const URLS = {
+  'React Native Rewind': 'https://reactnativerewind.com/',
+  'This Week in React': 'https://thisweekinreact.com/',
+  'React Status': 'https://react.statuscode.com/',
+  'React Digest': 'https://reactdigest.net/',
+  'React Weekly': 'https://react-weekly.dev/',
+  'Native Weekly': 'https://nativeweekly.com/',
+};
+const NEWSLETTERS = m.sources.map((s) => ({ ...s, url: URLS[s.name] || null }));
+// calibration evaluation window: earliest assertion → latest resolution among GRADED predictions
+const evalWindow = sc && sc.resolved.length ? {
+  from: sc.resolved.map((r) => r.asserted).sort()[0],
+  to: sc.resolved.map((r) => r.outcome.on).sort().at(-1),
+} : null;
+const tiers = sc ? ['high', 'medium', 'low'].map((t) => ({ t, ...sc.tiers[t] })) : [];
+const graded = tiers.reduce((n, r) => n + r.resolved, 0);
+const { bare, withCorpus, bankSize } = m.bench;
+const runLine = (r) => `${r.freshPct}% fresh · ${r.confidentlyStalePct}% confidently stale · ${r.hedged}/${r.n} hedged (${r.model}, ${r.date}, n=${r.n})`;
 ---
-<Base title="react-brain — methodology" description="How the corpus stays true: verification, adversarial challenge, calibration, live-npm signals, mechanized invariants.">
+<Base title="Methodology" description="How the corpus stays true: verification, adversarial challenge, calibration, live-npm signals, mechanized invariants.">
   <h1>Methodology — how this stays true</h1>
   <p class="prose">Most React resources rot silently: a listicle is true the day it's published and
   unaccountable after. react-brain is built around the opposite bet — <strong>every claim should be
@@ -50,20 +60,92 @@ const NEWSLETTERS = [
   vetted reading, every category is reachable, no duplicate sources, schemas hold — run as an offline lint
   plus a golden-fixture eval in <a href={`${GITHUB}/actions`}>CI on every change</a>.</p>
 
+  <h2 id="metrics">Metrics, defined</h2>
+  <p class="prose">Every figure this site prints is computed at build time from the corpus files —
+  none is typed into copy. Here is what each one counts, with its current value.</p>
+  <dl class="metrics">
+    <dt id="m-decisions">decisions <span class="meta">{m.decisions}</span></dt>
+    <dd>Entries in the encyclopedia — one per engineering decision (state, navigation, lists…).
+      {m.reviewed} of {m.decisions} have status <em>reviewed</em>; the rest are drafted or stubs and say so on the page.</dd>
+
+    <dt id="m-readings">readings <span class="meta">{m.readings}</span></dt>
+    <dd>Reading annotations across all entries: an article, talk or doc that was fetch-verified
+      (opened, read, still live) and given a one-line editorial note on why it matters. "Watching"
+      items are not counted. See <a href={href('reading/')}>the reading index</a>.</dd>
+
+    <dt id="m-libraries">libraries tracked <span class="meta">{m.libraries}</span></dt>
+    <dd>Distinct npm package names in the entries' detection tables — the packages the doctor
+      recognizes in a <code>package.json</code>. Wildcard patterns (e.g. a scope) are excluded, so
+      this undercounts rather than inflates.</dd>
+
+    <dt id="m-verified">last verified <span class="meta">{m.verifiedLatest}</span></dt>
+    <dd>The most recent <code>updated:</code> date on any entry — the last time an entry's facts were
+      checked against primary sources. {m.verifiedThisWeek} entries were re-verified in the 7 days
+      before this build ({m.built}). <em>corpus changed</em> ({m.contentLatest}) is the last git
+      commit touching entries or explanations.</dd>
+
+    <dt id="m-calibration">calibration{m.calibration && <span class="meta"> {m.calibration.score}% {m.calibration.tier} tier ({m.calibration.graded}/{m.calibration.total} graded)</span>}</dt>
+    <dd>
+      Each <code>recommend.default</code> is logged as a dated prediction. When a challenge or signal
+      resolves it, the outcome scores <strong>held = 1</strong>, <strong>weakened = 0.5</strong>,{' '}<strong>overturned = 0</strong>. A tier's score = (held + 0.5 × weakened) ÷ resolved predictions
+      in that tier. Ungraded (unresolved) predictions are excluded from the denominator — never
+      counted as wins — so always read a score with its n.
+      {sc ? <>
+        {' '}Evaluation window: {evalWindow ? <>assertions from {evalWindow.from}, resolutions through {evalWindow.to}</> : 'no resolutions yet'};
+        {' '}{graded} of {sc.totalPredictions} predictions graded.
+        <div class="tbl"><table>
+          <thead><tr><th>tier</th><th>score</th><th>graded / predictions</th><th>held · weakened · overturned</th></tr></thead>
+          <tbody>
+            {tiers.map((r) => (
+              <tr><td>{r.t}</td><td>{r.score != null ? `${r.score}%` : 'unproven'}</td><td>{r.resolved} / {r.total}</td><td>{r.held} · {r.weakened} · {r.overturned}</td></tr>
+            ))}
+          </tbody>
+        </table></div>
+        Full ledger on the <a href={href('scorecard/')}>scorecard</a>.
+      </> : <> No predictions ledger is present in this build.</>}
+    </dd>
+
+    <dt id="m-sources">sources <span class="meta">{m.sourcesRunning} running · {m.sourcesRetired} retired</span></dt>
+    <dd>Newsletters digested for leads (never facts — every fact is re-verified at its primary source).
+      A source is retired when it stops originating leads the others don't already cover; its past
+      digests stay counted. Current list under <a href="#sources">Sources &amp; thanks</a>.</dd>
+
+    <dt id="m-census">census cohort <span class="meta">{m.censusApps != null ? `${m.censusApps} apps` : 'no snapshot'}</span></dt>
+    <dd>{cen ? <>Shipped, production open-source apps whose manifests were read to observe actual
+      adoption — {cen.cohort.rn} React Native, {cen.cohort.web} web, snapshot {m.censusDate}. It measures what
+      shipped apps use, not what is best. See <a href={href('census/')}>census</a>.</> : <>No census snapshot is present in this build.</>}</dd>
+
+    <dt id="m-bench">benchmark fresh% / confidently-stale%</dt>
+    <dd>A bank of {bankSize} questions, each derived from a verified corpus fact, asked to a model
+      with and without the relevant entry as context; graded by a deterministic regex rubric (no judge
+      model). <strong>fresh%</strong> = answers that state the current truth ÷ n.{' '}<strong>confidently-stale%</strong> = answers asserting the outdated fact without any hedge ÷ n.
+      n excludes API errors. Latest runs:
+      <div class="bench-runs">
+        bare: {bare ? runLine(bare) : 'no run'}<br />
+        with corpus: {withCorpus ? runLine(withCorpus) : 'no run'}
+      </div>
+      See <a href={href('benchmark/')}>benchmark</a>.</dd>
+  </dl>
+
   <h2>Editorial line on articles</h2>
   <p class="prose">Great articles are cited with a short editorial annotation on <em>why they matter</em> and linked prominently to the original. Nothing is republished or paraphrased at length — <a href={href('reading/')}>the reading index</a> exists to send you to the canonical source with
   context, not to replace it.</p>
 
   <h2 id="sources">Sources &amp; thanks</h2>
-  <p class="prose">The corpus's discovery layer is six excellent newsletters, digested issue by issue —
-  our genuine thanks to the people who curate them week after week:</p>
+  <p class="prose">The corpus's discovery layer is newsletters, digested issue by issue —
+  {m.sourcesRunning} running{m.sourcesRetired > 0 && <>, {m.sourcesRetired} retired after they stopped originating leads</>}.
+  Our genuine thanks to the people who curate them week after week:</p>
   <div class="rows">
-    {NEWSLETTERS.map((s) => (
-      <a class="row" href={s.url} rel="noopener" style="display:flex; justify-content:space-between; gap:1rem; align-items:baseline">
+    {NEWSLETTERS.map((s) => {
+      const label = [s.issues != null && `${s.issues} issues digested`, s.retired && `retired${s.retiredOn ? ` ${s.retiredOn}` : ''}`].filter(Boolean).join(' · ');
+      const inner = <>
         <span class="row-title" style="font-family:var(--font-head); font-weight:600; color:var(--bright)">{s.name}</span>
-        {s.n && <span class="meta">{s.n} issues digested</span>}
-      </a>
-    ))}
+        {label && <span class="meta">{label}</span>}
+      </>;
+      return s.url
+        ? <a class="row" href={s.url} rel="noopener" style="display:flex; justify-content:space-between; gap:1rem; align-items:baseline">{inner}</a>
+        : <div style="display:flex; justify-content:space-between; gap:1rem; align-items:baseline">{inner}</div>;
+    })}
   </div>
   <p class="muted" style="font-size:.9rem; margin-top:.6rem">To be precise about the division of labor:
   newsletters surface the <em>leads</em> — every load-bearing fact is then independently
@@ -75,3 +157,12 @@ const NEWSLETTERS = [
   <p class="muted">Everything above is inspectable: the corpus, the tools, the ledger, and the tests are
   all in <a href={GITHUB}>the repo</a>.</p>
 </Base>
+
+<style>
+  .metrics { margin: 1rem 0 2rem; border-top: 1px solid var(--line); }
+  .metrics dt { font: 600 .92rem/1.4 var(--font-mono); color: var(--bright); padding-top: .9rem; }
+  .metrics dt .meta { font-weight: 400; margin-left: .4rem; }
+  .metrics dd { margin: .3rem 0 0; padding-bottom: .9rem; border-bottom: 1px solid var(--line); max-width: 78ch; font-size: .94rem; }
+  .metrics .tbl { display: block; margin: .6rem 0; }
+  .metrics .bench-runs { font: 400 .82rem/1.6 var(--font-mono); color: var(--muted); margin: .4rem 0; overflow-wrap: anywhere; }
+</style>

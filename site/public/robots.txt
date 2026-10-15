@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://heart-it.github.io/react-brain/sitemap.xml

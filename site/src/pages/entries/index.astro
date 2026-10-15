@@ -1,17 +1,30 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { corpus, track, href } from '../../lib/corpus.js';
+import { corpus, href } from '../../lib/corpus.js';
 const { groups, entries } = corpus();
-const tr = track();
 const fresh = (e) => e.updated && Date.now() - new Date(String(e.updated)).getTime() < 7 * 864e5;
+const PLATFORMS = [['', 'all'], ['react', 'react'], ['react-native', 'react native']];
 ---
-<Base title="react-brain — decisions">
-  <h1>Decisions</h1>
-  <p class="muted prose">One page per decision. <span class="badge reviewed">reviewed</span> = checked against
+<Base title="Explore decisions">
+  <h1>Explore decisions</h1>
+  <p class="muted prose">One page per decision, {entries.length} in all. <span class="badge reviewed">reviewed</span> = checked against
   primary sources with a long-form explanation; <span class="badge drafted">drafted</span> = internally
   consistent, citable.</p>
+
+  <div class="filters" role="search" aria-label="Filter decisions">
+    <label class="f-input">
+      <span class="prompt" aria-hidden="true">❯</span>
+      <span class="sr-only">Filter by name or topic</span>
+      <input id="f-q" type="search" placeholder="filter — e.g. state, forms, lists" autocomplete="off" spellcheck="false" />
+    </label>
+    <div class="chips" role="group" aria-label="Platform">
+      {PLATFORMS.map(([v, label]) => <button type="button" class="chip" data-platform={v} aria-pressed={v === '' ? 'true' : 'false'}>{label}</button>)}
+    </div>
+    <p id="f-count" class="meta" aria-live="polite"></p>
+  </div>
+
   {groups.map((g) => (
-    <section id={g.id}>
+    <section id={g.id} class="grp">
       <h2>{g.label}</h2>
       <div class="tbl"><table>
         <thead><tr><th>entry</th><th>topic</th><th>status</th><th>updated</th></tr></thead>
@@ -19,7 +32,7 @@ const fresh = (e) => e.updated && Date.now() - new Date(String(e.updated)).getTi
           {g.entries.map((id) => {
             const e = entries.find((x) => x.id === id);
             return e && (
-              <tr>
+              <tr data-q={`${e.slug} ${e.topic}`.toLowerCase()} data-platforms={(e.platforms || []).join(' ')}>
                 <td><a href={href(`entries/${e.slug}/`)}>{e.slug}</a></td>
                 <td>{e.topic}</td>
                 <td><span class={`badge ${e.status}`}>{e.status}</span></td>
@@ -31,9 +44,61 @@ const fresh = (e) => e.updated && Date.now() - new Date(String(e.updated)).getTi
       </table></div>
     </section>
   ))}
+  <p id="f-none" class="muted" hidden>No decision matches — <button type="button" class="linkish" id="f-reset">clear the filter</button> or <a href={href('search/')}>search everything</a>.</p>
+
+  <script is:inline>
+    (() => {
+      const q = document.getElementById('f-q');
+      const chips = [...document.querySelectorAll('.chip')];
+      const rows = [...document.querySelectorAll('tr[data-q]')];
+      const count = document.getElementById('f-count');
+      const none = document.getElementById('f-none');
+      let platform = '';
+      function apply() {
+        const terms = q.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+        let shown = 0;
+        for (const r of rows) {
+          const ok = terms.every((t) => r.dataset.q.includes(t)) && (!platform || r.dataset.platforms.split(' ').includes(platform));
+          r.hidden = !ok; if (ok) shown++;
+        }
+        for (const s of document.querySelectorAll('section.grp')) s.hidden = !s.querySelector('tr[data-q]:not([hidden])');
+        const filtering = terms.length || platform;
+        count.textContent = filtering ? `${shown} of ${rows.length} decisions` : '';
+        none.hidden = shown > 0;
+      }
+      q.addEventListener('input', apply);
+      q.addEventListener('keydown', (e) => { if (e.key === 'Escape' && q.value) { q.value = ''; apply(); } });
+      for (const c of chips) c.addEventListener('click', () => {
+        platform = c.dataset.platform;
+        for (const x of chips) x.setAttribute('aria-pressed', String(x === c));
+        apply();
+      });
+      document.getElementById('f-reset').addEventListener('click', () => {
+        q.value = ''; platform = '';
+        for (const x of chips) x.setAttribute('aria-pressed', String(x.dataset.platform === ''));
+        apply(); q.focus();
+      });
+      // a filter typed before the script ran (or restored by bfcache) still applies
+      if (q.value) apply();
+    })();
+  </script>
 </Base>
 
 <style>
+  .filters { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1rem; margin: 1.4rem 0 0; }
+  .f-input { flex: 1 1 16rem; max-width: 26rem; display: flex; align-items: center; gap: .5rem; margin: 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: 4px; padding: .35rem .65rem; }
+  .f-input:focus-within { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent); }
+  .f-input input { flex: 1; min-width: 0; background: none; border: 0; color: var(--fg); font: 400 .85rem var(--font-mono); }
+  .f-input input:focus { outline: none; box-shadow: none; }
+  .chips { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .chip, .chip:hover { background: transparent; color: var(--muted); border: 1px solid var(--line); box-shadow: none; transform: none; font: 400 .8rem var(--font-mono); padding: .3rem .65rem; }
+  .chip:hover { color: var(--fg); border-color: var(--line-strong); }
+  .chip[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); }
+  #f-count { margin: 0; }
+  .linkish, .linkish:hover { background: none; border: 0; box-shadow: none; transform: none; padding: 0; color: var(--accent); font: inherit; text-decoration: underline; cursor: pointer; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+  section[id] { scroll-margin-top: calc(var(--header-h) + 1rem); }
+
   /* scanning hierarchy: the entry name leads, topic supports, status/updated recede */
   td:first-child a { font: 600 .92rem/1.5 var(--font-head); color: var(--bright); text-decoration: none; }
   td:first-child a:hover { color: var(--accent); }

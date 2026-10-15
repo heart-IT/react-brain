@@ -1,111 +1,143 @@
 ---
-// "Technical Precision" theme — navigation shell synced to the v4 mock:
-// top bar = brand · search field (⌘K) · doctor/libraries/reading/scorecard/github;
-// left sidebar = the encyclopedia groups with entry counts (+ tools & meta pages at
-// the bottom), active-group highlighted on entry pages. Dark-first tonal layers,
-// Hanken Grotesk / Inter / JetBrains Mono, semantic color = categorization only.
-const { title = 'react-brain', description = 'Engineering decisions for React & React Native, with receipts — context-keyed recommendations, every fact dated and source-verified, every default a graded forecast. Analyze any repo with one command.', activeGroup = null } = Astro.props;
-import { GITHUB, href, corpusInfo, corpus, BASE } from '../lib/corpus.js';
+// "Technical Precision" theme — the navigation shell.
+// Top bar = brand · search field (⌘K / Ctrl-K focuses it) · four task sections
+// (Explore · Doctor · Learn · Evidence) · GitHub. Left sidebar = the encyclopedia
+// groups (Explore), with Tools + About as quieter secondary lists. Below 1024px the
+// sidebar becomes one compact <details> menu; below 640px the top-bar section links
+// fold into that menu too, so nothing can overflow a 320px viewport.
+// Every number/date printed here comes from siteMeta() — never typed into copy.
+const HOME_TITLE = 'react-brain — React & React Native engineering decisions, with receipts';
+const { title = null, description = 'Engineering decisions for React & React Native, with receipts — context-keyed recommendations with dated primary sources and graded forecasts.', activeGroup = null } = Astro.props;
+import { GITHUB, href, siteMeta, corpus, BASE } from '../lib/corpus.js';
 import interUrl from '../assets/fonts/Inter.woff2?url';
 import monoUrl from '../assets/fonts/JetBrainsMono.woff2?url';
 const fontFaces = [
   ['Inter', interUrl, '100 900'],
   ['JetBrains Mono', monoUrl, '100 800'],
 ].map(([fam, url, w]) => `@font-face{font-family:"${fam}";src:url(${url}) format("woff2");font-weight:${w};font-display:swap;}`).join('');
-const info = corpusInfo();
+const meta = siteMeta();
 const { groups } = corpus();
 const path = Astro.url.pathname;
-// brand mark (circuit-brain + React atom) extracted from the heartit brand sheet 2026-07-13
+
+// "<Page> · react-brain" everywhere; legacy "react-brain — page" props are normalized
+// so every page gets the same pattern without each page restating the brand.
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+const pageTitle = title == null ? HOME_TITLE
+  : title.startsWith('react-brain — ') ? `${cap(title.slice('react-brain — '.length))} · react-brain`
+  : title.includes('react-brain') ? title : `${title} · react-brain`;
+const canonical = new URL(path, Astro.site).href;
+const ogImage = new URL(href('og.png'), Astro.site).href;
+
+// ── the four task sections; a section is active for every route it owns ──
+const under = (p) => path.startsWith(href(p));
+const SECTIONS = [
+  { to: 'entries/', label: 'Explore', owns: ['entries/', 'libraries/', 'stack/', 'decide/'] },
+  { to: 'doctor/', label: 'Doctor', owns: ['doctor/'] },
+  { to: 'reading/', label: 'Learn', owns: ['reading/', 'newsletter/'] },
+  { to: 'scorecard/', label: 'Evidence', owns: ['scorecard/', 'census/', 'benchmark/', 'methodology/', 'changelog/', 'architecture/', 'roadmap/'] },
+];
+const activeSection = SECTIONS.find((s) => s.owns.some(under))?.label ?? null;
+
+const groupLabel = (g) => g.label.split(' — ')[0].split(' (')[0];
 const toolLinks = [
+  { to: 'libraries/', label: 'libraries' },
   { to: 'stack/', label: 'stack composer' },
   { to: 'decide/', label: 'decision records' },
   { to: 'census/', label: 'census' },
   { to: 'benchmark/', label: 'staleness bench' },
 ];
 const aboutLinks = [
-  { to: 'newsletter/', label: 'newsletter' },
+  { to: 'methodology/', label: 'methodology' },
   { to: 'architecture/', label: 'architecture' },
   { to: 'changelog/', label: 'changelog' },
-  { to: 'methodology/', label: 'methodology' },
   { to: 'roadmap/', label: 'roadmap' },
+  { to: 'newsletter/', label: 'newsletter' },
 ];
-const bottomLinks = [...toolLinks, ...aboutLinks];   // mobile nav keeps the flat list
 ---
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{title}</title>
+  <title>{pageTitle}</title>
   <meta name="description" content={description} />
-  <meta property="og:title" content={title} />
+  <link rel="canonical" href={canonical} />
+  <meta property="og:title" content={pageTitle} />
   <meta property="og:description" content={description} />
   <meta property="og:type" content="website" />
-  {/* absolute URL required by scrapers — update alongside a future custom domain */}
-  <meta property="og:image" content={`https://heart-it.github.io${href('og.png')}`} />
+  <meta property="og:url" content={canonical} />
+  <meta property="og:site_name" content="react-brain" />
+  <meta property="og:image" content={ogImage} />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
+  <link rel="sitemap" type="application/xml" href={href('sitemap.xml')} />
   <link rel="icon" type="image/png" sizes="32x32" href={href('favicon-32.png')} />
   <link rel="apple-touch-icon" href={href('apple-touch-icon.png')} />
   <link rel="preload" href={interUrl} as="font" type="font/woff2" crossorigin />
   <link rel="preload" href={monoUrl} as="font" type="font/woff2" crossorigin />
   <style set:html={fontFaces}></style>
+  <script defer src={href('console.js')}></script>
 </head>
-<body>
+<body data-base={BASE}>
   <a class="skip" href="#main">Skip to content</a>
   <header>
     <div class="bar">
       <a class="brand" href={href('')}><img class="brand-mark" src={href('brand-64.png')} alt="" width="22" height="22" /> react-brain</a>
       <form class="search" action={href('search/')} method="get" role="search">
         <span aria-hidden="true" class="prompt">❯</span>
-        <input id="nav-q" name="q" type="search" placeholder="ask — “should I use zustand?”" autocomplete="off" aria-label="Search the corpus" />
+        <input id="nav-q" name="q" type="search" placeholder="ask — “should I use zustand?”" autocomplete="off" aria-label="Search the corpus" aria-keyshortcuts="Meta+K Control+K" />
         <kbd>⌘K</kbd>
       </form>
       <nav aria-label="Primary">
-        <a class="search-link" href={href('search/')}>search</a>
-        {[['doctor/', 'Doctor'], ['libraries/', 'Libraries'], ['reading/', 'Reading'], ['scorecard/', 'Scorecard']].map(([to, label]) => (
-          <a href={href(to)} class={path.startsWith(href(to)) ? 'active' : ''} aria-current={path.startsWith(href(to)) ? 'page' : undefined}>{label}</a>
+        {SECTIONS.map((s) => (
+          <a class={`sec${activeSection === s.label ? ' active' : ''}`} href={href(s.to)} aria-current={activeSection === s.label ? (path === href(s.to) ? 'page' : 'true') : undefined}>{s.label}</a>
         ))}
-        <a href={GITHUB} rel="noopener">GitHub</a>
+        <a class="search-link" href={href('search/')}>search</a>
+        <a class="gh" href={GITHUB} rel="noopener" aria-label="GitHub repository" title="GitHub">
+          <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        </a>
       </nav>
     </div>
   </header>
 
   <details class="mobile-nav">
-    <summary>Browse decisions</summary>
-    <div class="mobile-nav-items">
-      {groups.map((g) => (
-        <a href={href(`entries/#${g.id}`)}>{g.label.split(' — ')[0].split(' (')[0]} <span class="count">{g.entries.length}</span></a>
-      ))}
-      {bottomLinks.map((l) => <a href={href(l.to)}>{l.label}</a>)}
-      <a href={href('stack/')} hidden></a>
-    </div>
+    <summary>Menu{activeSection && <span class="here"> · {activeSection}</span>}</summary>
+    <nav class="mobile-nav-items" aria-label="Site menu">
+      <div class="m-row m-primary">
+        {SECTIONS.map((s) => <a class={activeSection === s.label ? 'active' : ''} href={href(s.to)}>{s.label}</a>)}
+      </div>
+      <p class="m-head">Decisions</p>
+      <div class="m-row">
+        {groups.map((g) => (
+          <a class={activeGroup === g.id ? 'active' : ''} href={href(`entries/#${g.id}`)}>{groupLabel(g).toLowerCase()} <span class="count">{g.entries.length}</span></a>
+        ))}
+      </div>
+      <p class="m-head">Tools · About</p>
+      <div class="m-row m-quiet">
+        {[...toolLinks, ...aboutLinks].map((l) => <a href={href(l.to)}>{l.label}</a>)}
+      </div>
+    </nav>
   </details>
 
   <div class="shell">
-    <aside aria-label="Decisions">
-      <p class="label-caps side-head">Decisions</p>
-      <p class="meta" style="margin:.1rem 0 .9rem">React ecosystem · corpus v{info.version}</p>
+    <aside aria-label="Explore">
+      <p class="label-caps side-head">Explore decisions</p>
       {groups.map((g) => (
         <a class={`side-item${activeGroup === g.id ? ' active' : ''}`} aria-current={activeGroup === g.id ? 'location' : undefined} href={href(`entries/#${g.id}`)}>
           <span aria-hidden="true" class="tree">▸</span>
-          <span>{g.label.split(' — ')[0].split(' (')[0].toLowerCase()}/</span>
+          <span>{groupLabel(g).toLowerCase()}/</span>
           <span class="count">{g.entries.length}</span>
         </a>
       ))}
       <div class="side-bottom">
         <p class="label-caps side-sub">Tools</p>
         {toolLinks.map((l) => (
-          <a class={`side-item${path.startsWith(href(l.to)) ? ' active' : ''}`} aria-current={path.startsWith(href(l.to)) ? 'page' : undefined} href={href(l.to)}>
-            <span>{l.label}</span>
-          </a>
+          <a class={`side-item quiet${under(l.to) ? ' active' : ''}`} aria-current={under(l.to) ? 'page' : undefined} href={href(l.to)}>{l.label}</a>
         ))}
         <p class="label-caps side-sub">About</p>
         {aboutLinks.map((l) => (
-          <a class={`side-item${path.startsWith(href(l.to)) ? ' active' : ''}`} aria-current={path.startsWith(href(l.to)) ? 'page' : undefined} href={href(l.to)}>
-            <span>{l.label}</span>
-          </a>
+          <a class={`side-item quiet${under(l.to) ? ' active' : ''}`} aria-current={under(l.to) ? 'page' : undefined} href={href(l.to)}>{l.label}</a>
         ))}
       </div>
     </aside>
@@ -114,9 +146,20 @@ const bottomLinks = [...toolLinks, ...aboutLinks];   // mobile nav keeps the fla
       <main id="main"><slot /></main>
       <footer>
         <p class="statusline" aria-label="Corpus status">
-          <span class="mode">corpus v{info.version}</span>
-          <span>{info.count} decisions</span><span>·</span><span>updated {info.updated}</span>
-          <span style="margin-left:auto"><a href={href('methodology/#sources')} style="color:var(--muted)">sources</a> · <a href={href('changelog/')} style="color:var(--muted)">changelog →</a></span>
+          <span class="mode">v{meta.version}</span>
+          <a href={href('entries/')}>{meta.decisions} decisions</a>
+          <span class="dates">
+            <a href={href('changelog/')} title="date this site was generated">built <time datetime={meta.built}>{meta.built}</time></a>
+            <span aria-hidden="true">·</span>
+            <a href={href('changelog/')} title="last commit that changed the corpus (entries or explanations)">corpus changed <time datetime={meta.contentLatest}>{meta.contentLatest}</time></a>
+            <span aria-hidden="true">·</span>
+            <a href={href('methodology/#metrics')} title="most recent date an entry was fetch-verified against primary sources">last verified <time datetime={meta.verifiedLatest}>{meta.verifiedLatest}</time></a>
+          </span>
+          <span class="end">
+            <button type="button" class="console-link" data-open-console aria-keyshortcuts="Meta+J Control+J">console <kbd>⌘J</kbd></button>
+            <span aria-hidden="true">·</span>
+            <a href={href('methodology/#sources')}>sources</a>
+          </span>
         </p>
         <p>Generated from the <a href={GITHUB}>react-brain corpus</a> — every fact carries a
         verified-on date; every recommendation is context-keyed and adversarially challenged
@@ -141,7 +184,7 @@ const bottomLinks = [...toolLinks, ...aboutLinks];   // mobile nav keeps the fla
 
   <script is:inline>
     // DESIGN.md: "Code Blocks: … with a Copy action in the top right"
-    for (const pre of document.querySelectorAll('pre')) {
+    for (const pre of document.querySelectorAll('pre:not(.no-copy)')) {
       const text = pre.innerText;
       const b = document.createElement('button');
       b.type = 'button'; b.className = 'copy-btn'; b.textContent = 'copy';
@@ -153,312 +196,30 @@ const bottomLinks = [...toolLinks, ...aboutLinks];   // mobile nav keeps the fla
       });
       pre.appendChild(b);
     }
-    // honest shortcut hint per platform (Ctrl+K works everywhere; the glyph is Mac-only)
-    if (!/Mac|iPhone|iPad/.test(navigator.platform)) {
-      const k = document.querySelector('.search kbd');
-      if (k) k.textContent = 'Ctrl K';
-    }
-  </script>
-  <script is:inline define:vars={{ BASE }}>
-  // ═══ THE CONSOLE — the terminal identity, made functional ══════════════════
-  (() => {
-    const $ = (id) => document.getElementById(id);
-    const box = $('console'), out = $('c-out'), input = $('c-in'), promptEl = $('c-prompt');
-    let DATA = null, lastFocus = null, histIdx = -1;
-    const history = [];
-    const esc = (x) => String(x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-    const CTX_KEY = 'rb-console-ctx';
-    const ctx = () => { try { return JSON.parse(localStorage.getItem(CTX_KEY)); } catch { return null; } };
-    const setPrompt = () => { const c = ctx(); promptEl.textContent = c ? `~/${c.name} ❯` : '❯'; };
-
-    async function ensureData() {
-      if (DATA) return DATA;
-      print('<span class="t-dim">loading corpus…</span>');
-      DATA = await (await fetch(`${BASE}console-data.json`)).json();
-      out.lastChild?.remove();
-      return DATA;
-    }
-
-    function print(html, cmd) {
-      if (cmd != null) {
-        const c = document.createElement('div');
-        c.className = 'c-cmd'; c.textContent = `${promptEl.textContent} ${cmd}`;
-        out.appendChild(c);
-      }
-      if (html) { const d = document.createElement('div'); d.className = 'c-res'; d.innerHTML = html; out.appendChild(d); }
-      out.scrollTop = out.scrollHeight;
-    }
-
-    function open() {
-      lastFocus = document.activeElement;
-      box.hidden = false; setPrompt(); input.focus();
-      if (!out.childElementCount) print('<span class="t-dim">react-brain console — try <b>ask should I use zustand</b> · <b>doctor</b> (after <b>load</b>) · <b>query maps</b> · <b>help</b> for everything. ⌘K toggles, esc closes.</span>');
-    }
-    function close() { box.hidden = true; lastFocus?.focus?.(); }
-
-    document.addEventListener('keydown', (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); box.hidden ? open() : close(); }
-      else if (e.key === '/' && box.hidden && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName)) { e.preventDefault(); open(); }
-      else if (e.key === 'Escape' && !box.hidden) close();
-    });
-    box.addEventListener('click', (e) => { if (e.target === box || e.target.classList.contains('console-scrim')) close(); });
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowUp') { if (history.length) { histIdx = Math.max(0, (histIdx < 0 ? history.length : histIdx) - 1); input.value = history[histIdx]; e.preventDefault(); } }
-      if (e.key === 'ArrowDown') { if (histIdx >= 0) { histIdx = Math.min(history.length, histIdx + 1); input.value = history[histIdx] || ''; e.preventDefault(); } }
-    });
-
-    // ── ports of the corpus primitives (same semantics as tools/detect.mjs) ──
-    const matchDetector = (name, dets) => {
-      for (const d of dets) {
-        const p = d[0];
-        if (p.endsWith('*')) { if (name.startsWith(p.replace(/\*$/, ''))) return d; }
-        else if (name === p) return d;
-      }
-      return null;
-    };
-    const resolve = (e, tokens) => {
-      const t = tokens.map((x) => x.toLowerCase());
-      for (const clause of e.when || []) {
-        const i = clause.indexOf('→'); if (i < 0) continue;
-        if (t.some((tok) => clause.slice(0, i).toLowerCase().includes(tok)))
-          return { why: clause.slice(i + 1).trim(), ctx: clause.slice(0, i).trim(), via: 'when' };
-      }
-      return { why: e.def, ctx: 'default', via: 'default' };
-    };
-    const fit = (e, tokens) => {
-      const def = (e.def || '').toLowerCase(), when = (e.when || []).join('||').toLowerCase();
-      if (tokens.some((x) => def.includes(x))) return '✓ aligned';
-      if (tokens.some((x) => when.includes(x))) return '~ contextual';
-      return '↗ review';
-    };
-    const searchTop = (terms, entries, max = 3) => {
-      const q = terms.join(' ').toLowerCase().replace(/^rb-e-/, '');
-      return Object.values(entries).map((e) => {
-        const id = e.id.replace('RB-E-', '').toLowerCase();
-        const hay = [e.id, e.slug, e.topic, JSON.stringify(e.options), e.def].join(' ').toLowerCase();
-        let s = 0;
-        if (id === q || e.slug === q) s += 100;
-        if (id.includes(q) || e.topic.toLowerCase().includes(q)) s += 20;
-        for (const t of terms) if (hay.includes(t.toLowerCase())) s += 3;
-        return [s, e];
-      }).filter((x) => x[0] > 0).sort((a, b) => b[0] - a[0]).slice(0, max).map((x) => x[1]);
-    };
-    const ctxTokens = (c) => {
-      const t = [];
-      if (!c) return ['new project'];
-      if (c.platform === 'react-native') t.push(c.expo ? 'expo app' : 'bare rn');
-      if (c.expo) t.push('expo');
-      if (c.p2p) t.push('p2p', 'holepunch', 'serverless');
-      t.push(c.stage);
-      return t;
-    };
-    const entryHtml = (e, c) => {
-      const mine = c?.byEntry?.[e.id];
-      return `<div class="c-entry"><b><a href="${BASE}entries/${e.slug}/">${e.slug}</a></b> <span class="badge ${e.status}">${e.status}</span> <span class="badge ${e.confidence}">${e.confidence}</span> <span class="t-dim">verified ${e.updated}</span>` +
-        (mine ? `<br><span class="t-dim">in ~/${esc(c.name)}: ${esc(mine.labels.join(', '))} — ${fit(e, mine.tokens)}</span>` : '') +
-        `<br>${esc(e.def)}` +
-        (e.when?.length ? '<br>' + e.when.map((w) => `<span class="t-dim">· ${esc(w)}</span>`).join('<br>') : '') + '</div>';
-    };
-
-    const PAGES = ['entries', 'libraries', 'reading', 'stack', 'doctor', 'decide', 'scorecard', 'benchmark', 'census', 'architecture', 'changelog', 'methodology', 'roadmap', 'search'];
-
-    async function exec(line) {
-      const [cmd, ...args] = line.trim().split(/\s+/);
-      const arg = args.join(' ');
-      const c = ctx();
-      switch ((cmd || '').toLowerCase()) {
-        case 'help':
-          print(`<span class="t-dim">ask &lt;question&gt; route a question to the entry + readings that answer it
-query &lt;topic&gt;   the verified entry, inline
-go &lt;page|entry&gt; navigate (${PAGES.slice(0, 5).join(' · ')} …)
-search &lt;q&gt;      full-text search
-stack [--rn|--web] [--expo] [--p2p] [--stage=x]
-doctor          fit report for the loaded repo
-decide &lt;topic&gt;  decision record for the loaded repo
-load / unload   set the session repo (paste package.json) / clear
-context · clear · help</span>`); break;
-        case 'clear': out.replaceChildren(); break;
-        case 'go': {
-          const t = (args[0] || '').toLowerCase().replace(/\/$/, '');
-          if (!t) { print('<span class="t-warn">go where? try: go scorecard</span>'); break; }
-          if (t === 'home') { location.href = BASE; break; }
-          if (PAGES.includes(t)) { location.href = `${BASE}${t}/`; break; }
-          const D = await ensureData();
-          const hit = D.entries[`RB-E-${t.toUpperCase()}`] || Object.values(D.entries).find((e) => e.slug === t);
-          if (hit) location.href = `${BASE}entries/${hit.slug}/`;
-          else print(`<span class="t-warn">unknown page: ${esc(t)}</span>`);
-          break;
+    // honest shortcut hints per platform (the ⌘ glyph is Mac-only)
+    if (!/Mac|iPhone|iPad/.test(navigator.platform))
+      for (const k of document.querySelectorAll('.search kbd, .console-link kbd')) k.textContent = k.textContent.replace('⌘', 'Ctrl ');
+    // ⌘K / Ctrl-K focuses the header search (Enter submits to search/); where the
+    // field is hidden (narrow screens) it opens the search page instead. Escape in
+    // the field blurs it and returns focus where it was. ⌘J (console) is console.js.
+    (() => {
+      // on the search page the page's own field (#q) is the better target
+      const q = document.getElementById('q') || document.getElementById('nav-q');
+      let back = null;
+      document.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'k') {
+          e.preventDefault();
+          if (q && q.offsetParent !== null) { if (document.activeElement !== q) back = document.activeElement; q.focus(); q.select(); }
+          else location.href = document.body.dataset.base + 'search/';
         }
-        case 'search': location.href = `${BASE}search/?q=${encodeURIComponent(arg)}`; break;
-        case 'query': case 'q': {
-          if (!arg) { print('<span class="t-warn">query what? try: query maps</span>'); break; }
-          const D = await ensureData();
-          const hits = searchTop(args, D.entries);
-          print(hits.length ? hits.map((e) => entryHtml(e, c)).join('') : `<span class="t-warn">no entry matches — try</span> <a href="${BASE}search/?q=${encodeURIComponent(arg)}">search ${esc(arg)}</a>`);
-          break;
-        }
-        case 'ask': {
-          // deterministic question routing (the site-side of the CLI's searchReadings):
-          // lexical scoring over every reading's title + annotation + tagged claim —
-          // grounded and zero-cost, not a chat model.
-          if (!arg) { print('<span class="t-warn">ask what? try: ask should I use zustand</span>'); break; }
-          const D = await ensureData();
-          const STOP = new Set('the a an is are was be my our your this that these of in on at to for and or but with without after before does do did how why what when where which it its as from by not no so if then than can could should would use using i we you'.split(' '));
-          const toks = [...new Set(arg.toLowerCase().split(/\s+/).map((t) => t.replace(/[^\w-]/g, '')).filter((t) => t.length > 2 && !STOP.has(t)))];
-          const stem = (t) => (t.length > 3 && t.endsWith('s') ? t.slice(0, -1) : t);
-          const reads = (D.readings || []).map((r) => {
-            const text = `${r.title} ${r.what} ${r.claim || ''}`.toLowerCase();
-            let s = 0, h = 0;
-            for (const t of toks) { const tf = text.split(stem(t)).length - 1; if (tf) { h++; s += Math.min(tf, 3); } }
-            return { r, s, h };
-          }).filter((x) => x.h >= Math.min(2, toks.length)).sort((a, b) => b.s - a.s).slice(0, 3);
-          const ents = searchTop(args, D.entries).slice(0, 1);
-          if (!ents.length && !reads.length) { print(`<span class="t-warn">nothing matched — try</span> <a href="${BASE}search/?q=${encodeURIComponent(arg)}">search ${esc(arg)}</a>`); break; }
-          let html = ents.map((e) => entryHtml(e, c)).join('');
-          if (reads.length) html += '<div class="c-entry"><span class="t-dim">readings that answer this:</span><br>' +
-            reads.map(({ r }) => `· <a href="${r.url}" rel="noopener">${esc(r.title)}</a> <span class="t-dim">[<a href="${BASE}entries/${r.slug}/">${r.slug}</a>]</span><br><span class="t-dim">&nbsp;&nbsp;${esc((r.claim || r.what).slice(0, 220))}${(r.claim || r.what).length > 220 ? '…' : ''}</span>`).join('<br>') + '</div>';
-          print(html);
-          break;
-        }
-        case 'stack': {
-          const D = await ensureData();
-          const has = (f) => args.includes(f);
-          const platform = has('--rn') ? 'react-native' : has('--web') ? 'react' : 'both';
-          const stage = (args.find((a) => a.startsWith('--stage=')) || '--stage=mvp').split('=')[1];
-          const tokens = ['new project'];
-          if (platform === 'react-native') tokens.push(has('--expo') ? 'expo app' : 'bare rn');
-          if (has('--expo')) tokens.push('expo');
-          if (has('--p2p')) tokens.push('p2p', 'holepunch', 'serverless');
-          const rank = D.stageRank;
-          const rows = D.recipe.filter((row) =>
-            (row.plat === 'any' || (row.plat === 'both' ? platform === 'both' : row.plat === 'rn' ? platform !== 'react' : platform !== 'react-native')) &&
-            rank[row.tier] <= rank[stage] && (row.onlyIf !== 'p2p' || has('--p2p')));
-          print(rows.map((row) => {
-            const e = D.entries[row.id]; if (!e) return '';
-            const r = resolve(e, tokens);
-            return `<div class="c-entry"><b><a href="${BASE}entries/${e.slug}/">${e.slug}</a></b> <span class="t-dim">${r.via === 'when' ? 'matched: ' + esc(r.ctx) : 'default'}</span><br>${esc(r.why)}</div>`;
-          }).join(''));
-          break;
-        }
-        case 'load': {
-          print('<span class="t-dim">paste a package.json below and press ⌘/ctrl+enter (or esc to cancel):</span>');
-          const ta = document.createElement('textarea');
-          ta.rows = 6; ta.className = 'c-paste'; ta.setAttribute('aria-label', 'package.json');
-          out.appendChild(ta); ta.focus(); out.scrollTop = out.scrollHeight;
-          ta.addEventListener('keydown', async (e) => {
-            if (e.key === 'Escape') { e.stopPropagation(); ta.remove(); input.focus(); }
-            if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-              try {
-                const pkg = JSON.parse(ta.value);
-                const D = await ensureData();
-                const deps = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) };
-                const byEntry = {};
-                for (const n of Object.keys(deps)) {
-                  const d = matchDetector(n, D.detectors);
-                  if (d) { (byEntry[d[1]] ||= { labels: [], tokens: [] }); if (!byEntry[d[1]].labels.includes(d[2])) byEntry[d[1]].labels.push(d[2]); if (d[3]) byEntry[d[1]].tokens.push(d[3]); }
-                }
-                const rn = 'react-native' in deps || 'expo' in deps;
-                const score = [!!pkg.scripts?.test, 'typescript' in deps, ['eslint', '@biomejs/biome', 'prettier'].some((x) => x in deps), ['husky', 'lefthook'].some((x) => x in deps), pkg.private === true, (parseInt(pkg.version, 10) || 0) >= 1].filter(Boolean).length;
-                const c2 = { name: pkg.name || 'app', deps: Object.keys(deps).length,
-                  platform: rn && 'react-dom' in deps ? 'both' : rn ? 'react-native' : 'react',
-                  expo: 'expo' in deps, p2p: Object.keys(deps).some((d) => /^hyper|^autobase$|^corestore$|^hrpc$/.test(d)),
-                  stage: score <= 1 ? 'prototype' : score <= 3 ? 'mvp' : 'production', byEntry };
-                localStorage.setItem(CTX_KEY, JSON.stringify(c2));
-                ta.remove(); setPrompt();
-                print(`<span class="t-ok">loaded ~/${esc(c2.name)}</span> <span class="t-dim">${c2.platform} · ${c2.stage} · ${c2.deps} deps · ${Object.keys(byEntry).length} decisions detected — try <b>doctor</b></span>`);
-                input.focus();
-              } catch { print('<span class="t-warn">not valid JSON</span>'); }
-            }
-          });
-          break;
-        }
-        case 'unload': localStorage.removeItem(CTX_KEY); setPrompt(); print('<span class="t-dim">session cleared</span>'); break;
-        case 'context':
-          print(c ? `<span class="t-dim">~/${esc(c.name)} — ${c.platform} · ${c.stage} · ${c.deps} deps · ${Object.keys(c.byEntry).length} decisions</span>` : '<span class="t-dim">no repo loaded — try <b>load</b></span>');
-          break;
-        case 'doctor': {
-          if (!c) { print('<span class="t-warn">no repo loaded — run <b>load</b> first (or use</span> <a href="' + BASE + 'doctor/">the doctor page</a><span class="t-warn">)</span>'); break; }
-          const D = await ensureData();
-          const rows = Object.keys(c.byEntry).map((id) => {
-            const e = D.entries[id]; if (!e) return '';
-            const f = fit(e, c.byEntry[id].tokens);
-            const cls = f.startsWith('✓') ? 't-ok' : f.startsWith('~') ? 't-warn' : 't-dim';
-            return `  <a href="${BASE}entries/${e.slug}/">${e.slug.padEnd(14)}</a> ${esc(c.byEntry[id].labels.join(', ')).padEnd(28)} <span class="${cls}">${f}</span>`;
-          }).filter(Boolean);
-          print(`<pre class="c-pre">~/${esc(c.name)} · ${c.platform} · ${c.stage}\n\n${rows.join('\n')}\n\n<span class="t-dim">full report incl. gaps + source signals: npx -y @heart-it/react-brain doctor .</span></pre>`);
-          break;
-        }
-        case 'decide': {
-          if (!arg) { print('<span class="t-warn">decide what? try: decide state</span>'); break; }
-          const D = await ensureData();
-          const hits = searchTop(args, D.entries, 1);
-          if (!hits.length) { print(`<span class="t-warn">no entry matches ${esc(arg)}</span>`); break; }
-          const e = hits[0];
-          const tokens = ctxTokens(c);
-          const r = resolve(e, tokens);
-          const mine = c?.byEntry?.[e.id];
-          const today = new Date().toISOString().slice(0, 10);
-          const L = ['---',
-            'adr: 0                      # renumber to the next NNN in your docs/adr/',
-            'title: ' + JSON.stringify(e.topic),
-            'status: proposed            # -> accepted | superseded (edit after team review)',
-            'date: ' + today,
-            'react_brain:                # machine-readable premises - react-brain doctor re-checks these',
-            '  entry: ' + e.id,
-            '  entry_status: ' + e.status,
-            '  confidence: ' + e.confidence,
-            '  entry_updated: ' + e.updated,
-            '  resolved_via: ' + r.via];
-          if (r.via === 'when') L.push('  matched_context: ' + JSON.stringify(r.ctx));
-          L.push('  prediction_check_by: ' + (e.check_by || 'null'),
-            '  corpus_version: ' + D.v,
-            '---', '', '# ' + e.topic, '', '## Context', '',
-            c ? 'Decided for **' + c.name + '** (' + c.platform + ' · ' + c.stage + ' stage).' + (mine ? ' Current choice detected: **' + mine.labels.join(', ') + '**.' : ' Nothing detected for this domain yet.') : 'Decided without a repo context (run load in the console to add one).',
-            'Context tokens resolved against the corpus: ' + tokens.join(', ') + '.',
-            '', '## Decision', '', r.why, '',
-            r.via === 'when' ? '*(Resolved via the context clause: "' + r.ctx + ' -> ...")*' : "*(Resolved via the entry's default - no context clause overrode it.)*",
-            '', '## Options considered', '', '| option | tradeoff |', '|---|---|');
-          for (const o of e.options) L.push('| **' + o.name + '** | ' + String(o.tradeoff).split('|').join('\\|') + ' |');
-          L.push('', '## Evidence', '',
-            '- **Corpus entry:** ' + e.id + ' (' + e.status + ' · ' + e.confidence + ', verified ' + e.updated + ')');
-          if (e.verdict) L.push('- **Track record:** prediction resolved **' + e.verdict + '**.');
-          if (e.note) L.push('- **Verified notes:** ' + e.note);
-          if (e.sources.length) { L.push('- **Primary sources:**'); for (const u of e.sources) L.push('  - ' + u); }
-          if (e.reading.length) { L.push('- **Canonical reading:**'); for (const x of e.reading) L.push('  - [' + x.title + '](' + x.url + ')' + (x.by ? ' - ' + x.by : '')); }
-          L.push('', '## Review by', '',
-            '**' + (e.check_by || "the entry's next corpus verification") + '** - or earlier if react-brain doctor flags moved premises.',
-            '', '---',
-            '*Generated by react-brain v' + D.v + ' on ' + today + '. Re-check premises: npx -y @heart-it/react-brain doctor . --ci*');
-          const md = L.join('\n');
-          const wrap = document.createElement('div'); wrap.className = 'c-res';
-          const bar = document.createElement('div');
-          const cp = document.createElement('button'); cp.type = 'button'; cp.className = 'ghost'; cp.textContent = 'copy';
-          cp.style.cssText = 'padding:.15rem .6rem;font-size:.72rem';
-          cp.addEventListener('click', async () => { await navigator.clipboard.writeText(md); cp.textContent = '✓'; setTimeout(() => (cp.textContent = 'copy'), 1200); });
-          const dl = document.createElement('a'); dl.className = 'btn ghost'; dl.textContent = 'download .md';
-          dl.style.cssText = 'padding:.15rem .6rem;font-size:.72rem;margin-left:.5rem';
-          dl.href = URL.createObjectURL(new Blob([md], { type: 'text/markdown' }));
-          dl.download = 'NNN-' + e.slug + '.md';
-          bar.append(cp, dl);
-          const pre = document.createElement('pre'); pre.className = 'c-pre'; pre.style.whiteSpace = 'pre-wrap'; pre.textContent = md;
-          wrap.append(bar, pre);
-          out.appendChild(wrap); out.scrollTop = out.scrollHeight;
-          break;
-        }
-        case 'bench': location.href = `${BASE}benchmark/`; break;
-        case '': break;
-        default:
-          print(`<span class="t-warn">unknown: ${esc(cmd)}</span> <span class="t-dim">— try <b>help</b>, or</span> <a href="${BASE}search/?q=${encodeURIComponent(line)}">search “${esc(line)}”</a>`);
-      }
-    }
-
-    $('c-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const line = input.value; input.value = ''; histIdx = -1;
-      if (line.trim()) { history.push(line); print(null, line); await exec(line); }
-    });
-    setPrompt();
-  })();
+      });
+      q?.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        q.blur();
+        if (back && back !== document.body && document.contains(back)) back.focus?.();
+        back = null;
+      });
+    })();
   </script>
 
 </body>
@@ -499,21 +260,23 @@ context · clear · help</span>`); break;
 
   /* ── top bar ─────────────────────────────────────────────────────────────── */
   header { border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(8px); position: sticky; top: 0; z-index: 5; }
-  .bar { max-width: 1500px; margin: 0 auto; padding: 0 20px; height: var(--header-h); display: flex; gap: 1.1rem; align-items: center; }
+  .bar { max-width: 1500px; margin: 0 auto; padding: 0 20px; height: var(--header-h); display: flex; gap: 1.1rem; align-items: center; min-width: 0; }
   .brand { color: var(--bright); font: 700 .95rem var(--font-mono); display: inline-flex; align-items: center; gap: .5rem; text-decoration: none; white-space: nowrap; }
   /* the mark ships with its navy background baked in — rendered as a rounded chip
      with a hairline border it reads as an app icon, not a mismatched patch */
   .brand-mark { width: 22px; height: 22px; border-radius: 5px; border: 1px solid var(--line); display: block; }
   .prompt { color: var(--accent); font-family: var(--font-mono); font-weight: 700; }
-  .search { flex: 1 1 200px; max-width: 430px; display: flex; align-items: center; gap: .55rem; background: var(--code-bg); border: 1px solid var(--line); border-radius: 4px; padding: .38rem .7rem; color: var(--muted); }
+  .search { flex: 1 1 160px; min-width: 0; max-width: 430px; display: flex; align-items: center; gap: .55rem; background: var(--code-bg); border: 1px solid var(--line); border-radius: 4px; padding: .38rem .7rem; color: var(--muted); }
   .search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent); }
   .search input { flex: 1; min-width: 0; background: none; border: 0; color: var(--fg); font: 400 .85rem var(--font-mono); }
   .search input:focus { outline: none; box-shadow: none; border: 0; }
   .search kbd { font: 500 .7rem var(--font-mono); color: var(--muted); background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: .1em .4em; }
-  header nav { margin-left: auto; display: flex; gap: 1.05rem; align-items: center; }
+  header nav { margin-left: auto; display: flex; gap: 1.05rem; align-items: center; flex-shrink: 0; }
   header nav a { color: var(--muted); text-decoration: none; font: 500 .85rem var(--font-mono); white-space: nowrap; padding: .95rem .15rem; }
   header nav a:hover { color: var(--fg); }
-  header nav a.active { color: var(--accent); box-shadow: inset 0 -1px 0 var(--accent); }
+  /* active section: green text + a 2px underline — unmistakable without relying on color alone */
+  header nav a.active { color: var(--accent); box-shadow: inset 0 -2px 0 var(--accent); }
+  header nav .gh { display: inline-flex; padding: .95rem .1rem; }
 
   /* ── shell: sidebar + content ────────────────────────────────────────────── */
   .shell { max-width: 1500px; margin: 0 auto; display: grid; grid-template-columns: 250px minmax(0, 1fr); }
@@ -525,6 +288,8 @@ context · clear · help</span>`); break;
   .side-item .tree { color: var(--line-strong); }
   .side-item.active .tree { color: var(--accent); }
   .side-item .count { margin-left: auto; font: 400 .75rem var(--font-mono); color: var(--muted); opacity: .75; }
+  /* tools/about are secondary: smaller and tighter than the decision groups */
+  .side-item.quiet { font-size: .78rem; padding: .32rem .55rem; }
   .side-bottom { margin-top: auto; padding-top: .4rem; border-top: 1px solid var(--line); }
   .side-sub { margin: .85rem 0 .15rem; padding-left: .55rem; font-size: .62rem; opacity: .7; }
   .content main { max-width: 1140px; margin: 0 auto; padding: 2.4rem 28px 5rem; }
@@ -535,9 +300,15 @@ context · clear · help</span>`); break;
   .mobile-nav summary { cursor: pointer; padding: .7rem 20px; font: 600 .78rem/1.4 var(--font-body); text-transform: uppercase; letter-spacing: .05em; color: var(--muted); list-style: none; }
   .mobile-nav summary::before { content: '☰  '; }
   .mobile-nav[open] summary { color: var(--fg); }
-  .mobile-nav-items { display: flex; flex-wrap: wrap; gap: .4rem .8rem; padding: 0 20px .9rem; }
-  .mobile-nav-items a { color: var(--muted); text-decoration: none; font-size: .9rem; padding: .45rem .6rem; background: var(--card); border: 1px solid var(--line); border-radius: 4px; }
-  .mobile-nav-items a .count { color: var(--muted); font: 500 .72rem var(--font-mono); }
+  .mobile-nav summary .here { color: var(--accent); text-transform: none; letter-spacing: 0; font-family: var(--font-mono); }
+  .mobile-nav-items { padding: 0 20px .9rem; }
+  .m-row { display: flex; flex-wrap: wrap; gap: .4rem .5rem; }
+  .m-head { margin: .8rem 0 .35rem; font: 500 .72rem var(--font-mono); color: var(--muted); }
+  .m-row a { color: var(--muted); text-decoration: none; font: 400 .85rem var(--font-mono); padding: .4rem .55rem; border: 1px solid var(--line); border-radius: 4px; }
+  .m-row a.active { color: var(--accent); border-color: var(--accent); }
+  .m-primary a { color: var(--fg); font-weight: 600; padding: .5rem .8rem; }
+  .m-quiet a { border-color: transparent; padding-inline: .3rem; font-size: .8rem; }
+  .m-row a .count { color: var(--muted); font: 500 .72rem var(--font-mono); opacity: .75; }
   @media (max-width: 1023px) {
     aside { display: none; }
     .mobile-nav { display: block; }
@@ -547,8 +318,11 @@ context · clear · help</span>`); break;
   }
   .search-link { display: none !important; }
   @media (max-width: 640px) {
-    .search { display: none; }
+    /* the four sections live in the Menu below the bar; the bar keeps brand · search · GitHub */
+    .search, header nav a.sec { display: none; }
     .search-link { display: inline !important; }
+    .bar { gap: .8rem; padding: 0 16px; }
+    .mobile-nav summary, .mobile-nav-items { padding-inline: 16px; }
   }
 
   a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
@@ -607,9 +381,7 @@ context · clear · help</span>`); break;
      adjacent badges glue into "heldhigh" without this (scorecard, entry heroes, …) */
   .badge + .badge { margin-left: .35rem; }
   a.row { text-decoration: none; color: inherit; padding-inline: .55rem; margin-inline: -.55rem; border-radius: 4px; }
-  a.row:hover { background: var(--card); }
-  a.row:hover .row-title { color: var(--accent); }
-  a.row { transition: background .14s; border-radius: 4px; }
+  a.row { transition: background .14s; }
   a.row:hover { background: color-mix(in srgb, var(--card) 60%, transparent); }
   a.row:hover .row-title { color: var(--accent); }
   .hero { padding: 1.6rem 0 .5rem; }
@@ -622,8 +394,6 @@ context · clear · help</span>`); break;
   .statline a:hover { color: var(--fg); }
   .statline a:hover strong { color: var(--accent); }
 
-  /* the flagship widget — one accent bar, nothing else */
-  .card.pick { border-left: 2px solid var(--accent); box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 16px 40px -20px rgba(0,0,0,.95), 0 0 56px -20px rgba(80,250,123,.35); }
 
   /* buttons — primary solid, secondary ghost; rectangular soft corners, never pills */
   input, textarea, button, select { font: inherit; color: inherit; }
@@ -668,13 +438,21 @@ context · clear · help</span>`); break;
 
   .statusline { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; font: 400 .78rem var(--font-mono); color: var(--muted); background: var(--card); border-radius: 4px; padding: .45rem .7rem !important; margin-top: 1rem; }
   .statusline .mode { background: var(--accent); color: var(--on-primary); font-weight: 700; padding: .05rem .5rem; border-radius: 3px; }
+  .statusline a { color: var(--muted); text-decoration: none; }
+  .statusline a:hover { color: var(--fg); text-decoration: underline; }
+  .statusline time { color: var(--fg); }
+  .statusline .dates { display: inline-flex; flex-wrap: wrap; gap: .2rem .45rem; }
+  .statusline .end { margin-left: auto; display: inline-flex; gap: .45rem; align-items: center; }
+  .console-link { background: none; box-shadow: none; border: 0; padding: 0; color: var(--muted); font: inherit; }
+  .console-link:hover { background: none; box-shadow: none; transform: none; color: var(--fg); }
+  .console-link kbd { font: 500 .68rem var(--font-mono); border: 1px solid var(--line-strong); border-radius: 4px; padding: 0 .3em; }
 
   ::selection { background: var(--accent); color: var(--on-primary); }
   * { scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
   .prose h4 { font-size: .95rem; }
   .card p, .card ul { max-width: 78ch; }
 
-  /* ── the console (⌘K) ─────────────────────────────────────────────────── */
+  /* ── the console (⌘J) ─────────────────────────────────────────────────── */
   #console { position: fixed; inset: 0; z-index: 50; }
   .console-scrim { position: absolute; inset: 0; background: rgba(0,0,0,.55); backdrop-filter: blur(3px); }
   .console-box { position: relative; max-width: 46rem; margin: 9vh auto 0; background: var(--code-bg); border: 1px solid var(--line-strong); border-radius: 10px; overflow: hidden;
@@ -706,5 +484,6 @@ context · clear · help</span>`); break;
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
     html { scroll-behavior: auto !important; }
+    .blink { animation: none; }
   }
 </style>

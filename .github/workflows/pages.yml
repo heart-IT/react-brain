@@ -40,6 +40,8 @@ jobs:
         working-directory: site
         env:
           ASTRO_BASE: /react-brain/   # `npm run build -- --base` would hit pagefind, not astro
+      - run: npm test   # dist/ structural checks — a failing site never deploys
+        working-directory: site
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site/dist

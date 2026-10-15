@@ -33,3 +33,9 @@ jobs:
         working-directory: site
       - run: npm run build
         working-directory: site
+        env:
+          ASTRO_BASE: /react-brain/   # same base as pages.yml, so the link checks reflect production
+      # structural checks over dist/: one h1, canonical, base-path links + anchors,
+      # no leaked undefined/NaN, footer dates, page budgets, sitemap/robots
+      - run: npm test
+        working-directory: site

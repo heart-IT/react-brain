@@ -5,6 +5,9 @@ import { defineConfig } from 'astro/config';
 // Base path comes from the environment (Pages deploys under /react-brain/);
 // `npm run build -- --base …` does NOT work — the extra args land on the
 // pagefind half of the build script, not on astro.
+// `site` makes Astro.site available for canonical/og:url and the sitemap; update it
+// alongside a future custom domain.
 export default defineConfig({
+  site: 'https://heart-it.github.io',
   base: process.env.ASTRO_BASE || '/',
 });

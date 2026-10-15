@@ -1,182 +1,203 @@
 ---
 import Base from '../layouts/Base.astro';
-import { corpus, scorecard, href } from '../lib/corpus.js';
-const { meta, groups, entries } = corpus();
-const reviewed = entries.filter((e) => e.status === 'reviewed').length;
-const readingCount = entries.reduce((n, e) => n + (e.reading?.length || 0), 0);
-const libCount = new Set(entries.flatMap((e) => (e.detect || []).map((d) => d.pkg)).filter((p) => !p.includes('*'))).size;
-const sc = scorecard();
-const high = sc?.tiers?.high;
-const recent = [...entries].sort((a, b) => String(b.updated).localeCompare(String(a.updated))).slice(0, 3);
-// freshness — computed from the corpus itself at build time (the site redeploys on every harvest)
-const lastVerified = recent[0] ? String(recent[0].updated) : '';
-const now = Date.now();
-const updated7 = entries.filter((e) => e.updated && now - new Date(String(e.updated)).getTime() < 7 * 864e5).length;
-// Recommendation of the week: deterministic — the most recently re-verified reviewed entry
-const pick = [...entries].filter((e) => e.status === 'reviewed')
-  .sort((a, b) => String(b.updated).localeCompare(String(a.updated)))[0];
-// first clause only — split at real sentence boundaries (". ", ";", spaced em-dash),
-// never at version dots like "19.2"
-const clause = (pick.recommend?.default || '').split(/\.\s|;|\s—\s/)[0].trim();
-const pickHeadline = clause.length > 110 ? clause.slice(0, 109) + '…' : clause;
+import { corpus, doctorData, siteMeta, href } from '../lib/corpus.js';
+import { analyze, SAMPLE, hostOf } from '../lib/doctor-core.js';
+const { entries } = corpus();
+const m = siteMeta();
+
+// ── the visual anchor: a REAL doctor run on the sample manifest, computed at build
+// time with the same functions the doctor page uses (lib/doctor-core.js) ──
+const demo = analyze(SAMPLE, doctorData());
+const finding = demo.steps.find((s) => !s.blocked);
+// fit rows: skip domains the finding already covers so the demo shows breadth
+const urgentSlugs = new Set(demo.steps.filter((s) => ['dead', 'deprecated', 'superseded'].includes(s.urgency)).map((s) => s.slug));
+const fitRows = demo.fits.filter((f) => !urgentSlugs.has(f.slug)).slice(0, 3);
+const clip = (s, n) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
+const fitCls = (f) => (f.startsWith('✓') ? 't-ok' : f.startsWith('~') ? 't-warn' : 't-dim');
+const moreFindings = demo.steps.length - (finding ? 1 : 0);
+const nextSlug = finding?.slug ?? demo.fits[0]?.slug ?? 'state';
+// Rendered as one HTML string: JSX expressions inside <pre> lose their whitespace.
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const demoHtml = [
+  `<span class="t-p">❯</span> analyze ${esc(demo.name)}/package.json`,
+  '',
+  `<span class="t-dim">${esc(demo.name)} · ${demo.platform} · ${demo.depCount} deps · ${demo.fits.length} decisions detected</span>`,
+  '',
+  ...fitRows.map((f) => `  ${f.slug.padEnd(12)} ${esc(clip(f.choice, 18).padEnd(18))} <span class="${fitCls(f.fit)}">${f.fit}</span>`),
+  ...(finding ? [
+    '',
+    `  <span class="t-warn">✗ ${esc(finding.urgency)}</span>  ${esc(finding.name)} ${esc(finding.installed)}`,
+    `     → ${esc(clip(finding.to, 64))}`,
+    `     <span class="t-dim">effort ${esc(finding.effort)} · receipt:</span> ` +
+      (finding.receipts[0] ? `<a href="${esc(finding.receipts[0])}" rel="noopener">${esc(hostOf(finding.receipts[0]))}</a>` : '<span class="t-dim">none</span>'),
+  ] : []),
+  '',
+  `<span class="t-dim">+ ${moreFindings} more findings · ${demo.gaps.length} gaps</span>`,
+  `<span class="t-p">next:</span> <a href="${href(`entries/${nextSlug}/`)}">entries/${nextSlug}</a>`,
+].join('\n');
+
+// ── stat line: every number from siteMeta(), every tile defines itself ──
+const cal = m.calibration;
 const stats = [
-  { label: 'decisions', value: entries.length, to: 'entries/', go: 'Browse' },
-  { label: 'verified readings', value: readingCount, to: 'reading/', go: 'Read' },
-  { label: 'libraries tracked', value: libCount, to: 'libraries/', go: 'Compare' },
-  ...(high?.score != null ? [{ label: 'calibration · high tier', value: `${high.score}%`, to: 'scorecard/', go: 'Inspect' }] : []),
+  { value: m.decisions, label: 'decisions', sub: `${m.reviewed} reviewed`, to: 'entries/',
+    title: 'Context-keyed decision entries in the corpus' },
+  { value: m.readings, label: 'readings', sub: 'fetch-verified', to: 'reading/',
+    title: 'Articles and talks cited as evidence on entries; each link was fetched and checked' },
+  { value: m.libraries, label: 'libraries tracked', sub: 'by package detector', to: 'libraries/',
+    title: 'Distinct npm packages the doctor recognizes and maps to a decision' },
+  ...(cal ? [{ value: `${cal.score}%`, label: 'calibration', sub: `${cal.graded}/${cal.total} high-tier graded`, to: 'scorecard/',
+    title: `High-confidence forecasts scored held=1, weakened=0.5, overturned=0 over the ${cal.graded} resolved so far (${cal.held} held, ${cal.weakened} weakened, ${cal.overturned} overturned)` }] : []),
 ];
+
+const tasks = [
+  { to: 'stack/', label: 'New React app', why: 'compose a web stack from intent — platform, stage, SSR' },
+  { to: 'stack/', label: 'New React Native app', why: 'Expo or bare, P2P or not — a stack with reasons' },
+  { to: 'doctor/', label: 'Existing app', why: 'paste package.json — fit report against the corpus' },
+  { to: 'doctor/', label: 'Migration', why: 'dead, deprecated and outdated deps, sequenced with receipts' },
+  { to: 'entries/#ui', label: 'Performance', why: 'lists, animation, rendering — the UI decisions' },
+  { to: 'libraries/', label: 'Picking a library', why: `${m.libraries} packages, each mapped to its decision` },
+];
+
+const retired = m.sources.filter((s) => s.retired);
+const recent = [...entries].sort((a, b) => String(b.updated).localeCompare(String(a.updated))).slice(0, 3);
+// pick of the week: deterministic — the most recently re-verified reviewed entry
+const pick = recent.find((e) => e.status === 'reviewed')
+  ?? [...entries].filter((e) => e.status === 'reviewed').sort((a, b) => String(b.updated).localeCompare(String(a.updated)))[0];
+// first clause only — split at real sentence boundaries, never at version dots ("19.2")
+const pickHeadline = pick ? clip((pick.recommend?.default || '').split(/\.\s|;|\s—\s/)[0].trim(), 110) : '';
+const { bare, withCorpus } = m.bench;
 ---
 <Base>
-  <div class="hero hero-home" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr)); gap:2.5rem; align-items:center;">
-    <div style="flex: 1.15">
-      <p class="label-caps" style="margin:0">engineering intelligence · react &amp; react native</p>
-      <h1>React decisions, with receipts.<span class="blink" aria-hidden="true">▊</span></h1>
-      <p class="muted">Hundreds of libraries, conflicting takes, advice that quietly rots.
-      react-brain digests the ecosystem continuously and turns it into <strong style="color:var(--fg)">context-keyed recommendations</strong> — every load-bearing fact
-      carries a <strong style="color:var(--fg)">verified-on date and a primary source</strong>, and every
-      default is a forecast <a href={href('scorecard/')}>graded on the public scorecard</a>.</p>
-
-      <div class="statline">
-        {stats.map((s) => (
-          <a href={href(s.to)}><strong>{s.value}</strong>{s.label}</a>
-        ))}
-      </div>
-
-      <p style="display:flex; gap:.7rem; flex-wrap:wrap">
+  <section class="hero home" aria-labelledby="home-h1">
+    <div>
+      <p class="label-caps eyebrow">engineering intelligence · react &amp; react native</p>
+      <h1 id="home-h1">React decisions, with receipts.<span class="blink" aria-hidden="true">▊</span></h1>
+      <p class="sub">For teams shipping React and React Native: bring your project's context,
+      get a recommendation, and inspect the dated, primary-source evidence behind it.</p>
+      <p class="ctas">
         <a class="btn" href={href('doctor/')}>Analyze your project →</a>
-        <a class="btn ghost" href={href('entries/')}>Browse decisions</a>
-      </p>
-      <p class="meta" style="margin-top:.4rem">ecosystem pulse: last verification {lastVerified} · {updated7} decision{updated7 === 1 ? '' : 's'} re-verified this week · 6 sources digested</p>
-    </div>
-
-    <div style="max-width:34rem; justify-self:center; width:100%">
-      <div class="term" role="img" aria-label="Example react-brain doctor run: detected ecosystem choices compared against the corpus, with fit marks and gaps">
-        <div class="term-bar" aria-hidden="true"><i></i><i></i><i></i><span>react-brain — doctor</span></div>
-        <pre aria-hidden="true"><span class="t-p">$ npx -y @heart-it/react-brain doctor .</span>
-
-<span class="t-dim">ourpot (v1.4) · react-native · production · 41 deps</span>
-
-  state        Zustand              <span class="t-ok">✓ aligned</span>
-  lists        FlashList            <span class="t-ok">✓ aligned</span>
-  nav          Expo Router          <span class="t-ok">✓ aligned</span>
-  data         Hypercore (P2P)      <span class="t-warn">~ contextual</span>
-  animation    Reanimated 4         <span class="t-ok">✓ aligned</span>
-  rn-versions  0.83 → 0.86          <span class="t-warn">↗ review</span>
-
-<span class="t-dim">2 source signals · 1 gap · docs: entries/rn-versions</span></pre>
-      </div>
-      <p class="meta" style="text-align:center; margin-top:.5rem">
-        <a href={href('architecture/')} style="color:var(--muted)">how it works →</a>
+        <a class="btn ghost" href={href('entries/')}>Explore decisions</a>
       </p>
     </div>
-  </div>
 
-  <div class="pipeline" aria-label="How knowledge flows through react-brain">
-    <span class="p-stage">6 newsletters · release notes · npm · 34 shipped apps</span>
-    <span class="p-arrow" aria-hidden="true">→</span>
-    <span class="p-stage">every claim fetch-verified &amp; dated</span>
-    <span class="p-arrow" aria-hidden="true">→</span>
-    <span class="p-stage">{entries.length} context-keyed decisions</span>
-    <span class="p-arrow" aria-hidden="true">→</span>
-    <span class="p-stage">doctor · migrate · review · MCP</span>
-    <a class="p-more" href={href('methodology/')}>methodology →</a>
-  </div>
-
-  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr)); gap:0 4rem; align-items:start">
-    <div>
-      <h2>Browse by decision</h2>
-      <div class="rows">
-        {groups.map((g) => (
-          <a class="row" href={href(`entries/#${g.id}`)} style="display:flex; justify-content:space-between; gap:1rem; align-items:baseline">
-            <span class="row-title" style="font-family:var(--font-head); font-weight:600; color:var(--bright)">{g.label.split(' — ')[0].split(' (')[0]}</span>
-            <span class="meta">{g.entries.length}</span>
-          </a>
-        ))}
+    <figure class="demo">
+      <div class="term">
+        <div class="term-bar" aria-hidden="true"><i></i><i></i><i></i><span>react-brain doctor</span></div>
+        <pre class="no-copy" set:html={demoHtml}></pre>
       </div>
+      <figcaption class="meta">sample repo · generated at build from the corpus · <a href={href('doctor/')}>run it on yours →</a></figcaption>
+    </figure>
+  </section>
 
-      <h2>Recently updated</h2>
-      <div class="rows">
+  <ul class="statline" aria-label="The corpus in numbers">
+    {stats.map((s) => (
+      <li><a href={href(s.to)} title={s.title}><strong>{s.value}</strong> {s.label}<span class="sub">{s.sub}</span></a></li>
+    ))}
+  </ul>
+
+  <h2>Start with your task</h2>
+  <p class="muted lede">Greenfield and existing apps get different answers: a new app gets a stack composed from intent;
+  an existing one gets a fit report and a migration plan against what is actually installed.</p>
+  <ul class="tasks">
+    {tasks.map((t) => (
+      <li><a href={href(t.to)}><span class="t-label">{t.label}</span><span class="t-why">{t.why}</span></a></li>
+    ))}
+  </ul>
+
+  <h2>How it stays true</h2>
+  <p class="flow">
+    <a href={href('methodology/#sources')} title={retired.map((s) => `${s.name} retired ${s.retiredOn ?? ''}`.trim()).join('; ')}>{m.sourcesRunning} newsletters running, {m.sourcesRetired} retired</a>
+    · release notes · npm{m.censusApps != null && <Fragment> · <a href={href('census/')}>census of {m.censusApps} production apps</a></Fragment>}
+    <span class="arrow" aria-hidden="true">→</span> every claim fetch-verified &amp; dated
+    <span class="arrow" aria-hidden="true">→</span> {m.decisions} decisions
+    <span class="arrow" aria-hidden="true">→</span> doctor · migrate · review · MCP
+    <a class="more" href={href('methodology/')}>methodology →</a>
+  </p>
+  <div class="tbl">
+    <table class="compare">
+      <thead><tr><th scope="col">claim</th><th scope="col">how react-brain records it</th></tr></thead>
+      <tbody>
+        <tr><td>a version or security fact</td><td>fetched from the primary source, stamped with a verified-on date</td></tr>
+        <tr><td>a recommendation's confidence</td><td>a dated forecast, graded in public on the <a href={href('scorecard/')}>scorecard</a></td></tr>
+        <tr><td>what changed this week</td><td>re-verified from running sources; every change in the <a href={href('changelog/')}>changelog</a></td></tr>
+      </tbody>
+    </table>
+  </div>
+  {bare && withCorpus && (
+    <p class="muted bench">The <a href={href('benchmark/')}>staleness benchmark</a> measures it — {withCorpus.model}, {bare.date === withCorpus.date ? `latest runs ${bare.date}` : 'latest runs'}:
+    alone it answered <strong>{bare.freshPct}% fresh</strong> (n={bare.n}, {bare.hedged} hedged{bare.date !== withCorpus.date && `, ${bare.date}`}); with the corpus injected,
+    <strong>{withCorpus.freshPct}% fresh</strong> (n={withCorpus.n}, {withCorpus.hedged} hedged{bare.date !== withCorpus.date && `, ${withCorpus.date}`}). Deterministic rubric, conditions labelled, reproducible with your own key.</p>
+  )}
+
+  <div class="below">
+    <section aria-labelledby="h-recent">
+      <h2 id="h-recent">Recently updated</h2>
+      <ul class="rows plain">
         {recent.map((e) => (
-          <a class="row" href={href(`entries/${e.slug}/`)}>
-            <span class="row-title" style="font-family:var(--font-head); font-weight:600; color:var(--bright)">{e.slug}</span>
-            <span class="meta" style="margin-left:.8rem">{String(e.updated)}</span>
-            <span class="muted" style="display:block; font-size:.88rem; margin-top:.15rem">{e.topic}</span>
-          </a>
+          <li><a class="row" href={href(`entries/${e.slug}/`)}>
+            <span class="row-title">{e.slug}</span> <span class="meta">verified {String(e.updated)}</span>
+            <span class="muted row-sub">{e.topic}</span>
+          </a></li>
         ))}
-      </div>
-    </div>
-    <div>
-
-      <h2>This week</h2>
-      <div class="card pick">
-        <p class="label-caps" style="margin:0 0 .55rem">recommendation of the week</p>
-        <h3 style="margin:0; font: 600 1.1rem/1.35 var(--font-head); color:var(--bright)">{pickHeadline}</h3>
-        <p class="meta" style="margin:.45rem 0 .75rem">
-          {pick.slug} · <span class={`badge ${pick.confidence}`}>{pick.confidence}</span> · verified {String(pick.updated)}
-        </p>
-        <a href={href(`entries/${pick.slug}/#explanation`)}>Read the reasoning →</a>
-      </div>
-      <h2>Quick start</h2>
-      <pre><span class="t-p">$</span> npx -y @heart-it/react-brain doctor .      <span class="t-dim"># assess a repo, ranked priorities</span>
+      </ul>
+      {pick && (
+        <p class="pick"><span class="label-caps">pick of the week</span>
+        <a href={href(`entries/${pick.slug}/#explanation`)}>{pickHeadline}</a>
+        <span class="meta">{pick.slug} · <span class={`badge ${pick.confidence}`}>{pick.confidence}</span> · verified {String(pick.updated)}</span></p>
+      )}
+    </section>
+    <section aria-labelledby="h-quick">
+      <h2 id="h-quick">Quick start</h2>
+      <pre><span class="t-p">$</span> npx -y @heart-it/react-brain doctor .      <span class="t-dim"># assess a repo</span>
 <span class="t-p">$</span> npx -y @heart-it/react-brain migrate .     <span class="t-dim"># sequenced upgrade plan</span>
 <span class="t-p">$</span> npx -y @heart-it/react-brain review . --ci <span class="t-dim"># block dead deps in CI</span></pre>
-      <p class="muted" style="font-size:.9rem">Organized by decision, not by article — {readingCount} deep-dives
-      cited as evidence, every default a dated prediction on the <a href={href('scorecard/')}>scorecard</a>, and <a href={href('methodology/')}>nothing asserted casually</a>.</p>
-    </div>
-  </div>
-
-  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr)); gap:0 4rem; align-items:start">
-    <div>
-      <h2>One corpus, every surface</h2>
-      <pre><span class="t-dim"># this website — press ⌘K for the console</span>
-
-<span class="t-dim"># your terminal, zero install</span>
-<span class="t-p">$</span> npx -y @heart-it/react-brain doctor .
-
-<span class="t-dim"># your coding agent — 9 MCP tools</span>
-<span class="t-p">$</span> claude mcp add react-brain -- npx -y @heart-it/react-brain mcp
-
-<span class="t-dim"># your CI — dead/deprecated dep adds fail the build, with receipts</span>
-<span class="t-p">$</span> npx -y @heart-it/react-brain review . --base=origin/main --ci</pre>
+      <p class="muted small">In your coding agent — the MCP server exposes {m.mcpTools} tools:
+      <code>claude mcp add react-brain -- npx -y @heart-it/react-brain mcp</code></p>
       <p class="meta">package: <a href="https://www.npmjs.com/package/@heart-it/react-brain" rel="noopener">npmjs.com/package/@heart-it/react-brain</a></p>
-    </div>
-    <div>
-      <h2>Not another model answer</h2>
-      <div class="rows">
-        <div class="row"><span class="row-title vs-a">a model predicts from training data</span>
-          <span class="muted" style="display:block; font-size:.88rem; margin-top:.15rem">the corpus <strong style="color:var(--fg)">fetch-verifies against primary sources</strong>, and stamps the date</span></div>
-        <div class="row"><span class="row-title vs-a">a model's confidence is tone</span>
-          <span class="muted" style="display:block; font-size:.88rem; margin-top:.15rem">here confidence is a <strong style="color:var(--fg)">forecast graded in public</strong> — <a href={href('scorecard/')}>the scorecard</a></span></div>
-        <div class="row"><span class="row-title vs-a">a model's knowledge freezes at cutoff</span>
-          <span class="muted" style="display:block; font-size:.88rem; margin-top:.15rem">the corpus is <strong style="color:var(--fg)">re-verified weekly</strong> from 6 cross-checked sources — <a href={href('changelog/')}>changelog</a></span></div>
-      </div>
-      <p class="muted" style="font-size:.9rem">Don’t take the framing on faith — <a href={href('benchmark/')}>the staleness benchmark</a> measured it:
-      claude-sonnet-5 alone answers <strong style="color:var(--fg)">70% fresh</strong> and hedges a third of the time;
-      with the corpus injected it hits <strong style="color:var(--fg)">94% fresh</strong> and barely hedges at all.
-      Deterministic rubric, conditions labeled, reproducible with your own key.</p>
-    </div>
+    </section>
   </div>
 </Base>
 
-
 <style>
-  .hero-home { position: relative; }
-  .hero-home::before { content: ""; position: absolute; inset: -2rem -3rem; z-index: -1; pointer-events: none;
-    background-image: linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
-    background-size: 44px 44px;
-    mask-image: radial-gradient(78% 90% at 55% 30%, black, transparent 80%); }
-  .hero-home > * { animation: rise .55s ease-out both; }
-  .hero-home > *:nth-child(2) { animation-delay: .12s; }
-  @keyframes rise { from { opacity: 0; transform: translateY(16px); } }
+  .home { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 2.5rem; align-items: center; }
+  @media (max-width: 1100px) { .home { grid-template-columns: minmax(0, 1fr); gap: 1.8rem; } }
+  .eyebrow { margin: 0; }
+  .sub { color: var(--muted); }
+  .ctas { display: flex; gap: .7rem; flex-wrap: wrap; margin-top: 1.4rem; }
 
-  .pipeline { display: flex; flex-wrap: wrap; align-items: baseline; gap: .35rem .6rem;
-    margin: 2.6rem 0 2.2rem; padding: .85rem 1rem; border-block: 1px solid var(--line);
-    font: 500 .82rem/1.6 var(--font-mono); color: var(--muted); }
-  .pipeline .p-stage { white-space: nowrap; }
-  .pipeline .p-arrow { color: var(--accent); }
-  .pipeline .p-more { margin-left: auto; color: var(--muted); text-decoration: none; }
-  .pipeline .p-more:hover { color: var(--fg); }
-  @media (max-width: 640px) { .pipeline .p-stage { white-space: normal; } .pipeline .p-more { margin-left: 0; } }
+  .demo { margin: 0; min-width: 0; }
+  .demo pre { white-space: pre; }
+  .demo pre a { color: var(--accent); }
+  .demo figcaption { text-align: center; margin-top: .5rem; }
 
-  .vs-a { font-family: var(--font-head); font-weight: 600; color: var(--bright); }
+  .statline { list-style: none; margin: 2.2rem 0 0; padding: 1.1rem 0 0; border-top: 1px solid var(--line); }
+  .statline li { margin: 0; }
+  .statline .sub { display: block; font-size: .72rem; opacity: .8; }
+
+  .lede { max-width: 46rem; font-size: .92rem; margin-top: -.3rem; }
+  .tasks { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr)); gap: 0 2rem; }
+  .tasks li { margin: 0; border-top: 1px solid var(--line); }
+  .tasks a { display: block; padding: .7rem 0; text-decoration: none; }
+  .tasks .t-label { display: block; font: 600 .92rem var(--font-head); color: var(--bright); }
+  .tasks .t-why { display: block; color: var(--muted); font-size: .86rem; }
+  .tasks a:hover .t-label { color: var(--accent); }
+
+  .flow { font: 500 .82rem/1.9 var(--font-mono); color: var(--muted); margin: 0 0 1rem; }
+  .flow .arrow { color: var(--accent); margin: 0 .3rem; }
+  .flow a { color: var(--fg); }
+  .flow .more { color: var(--muted); margin-left: .6rem; }
+  .compare td:first-child { color: var(--bright); white-space: nowrap; }
+  @media (max-width: 640px) { .compare td:first-child { white-space: normal; } }
+  .bench { font-size: .9rem; max-width: 52rem; }
+  .bench strong { color: var(--fg); }
+
+  .below { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 21rem), 1fr)); gap: 0 4rem; align-items: start; }
+  .plain { list-style: none; padding: 0; }
+  .row-title { font-family: var(--font-head); font-weight: 600; color: var(--bright); }
+  .row-sub { display: block; font-size: .88rem; margin-top: .15rem; }
+  .pick { margin: 1.2rem 0 0; display: grid; gap: .2rem; }
+  .pick a { font: 600 .98rem/1.4 var(--font-head); color: var(--bright); text-decoration: none; }
+  .pick a:hover { color: var(--accent); }
+  .small { font-size: .9rem; }
+  .small code { word-break: break-all; }
 </style>

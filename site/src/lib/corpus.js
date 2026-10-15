@@ -116,11 +116,105 @@ export function revisions(id, limit = 10) {
 
 export const GITHUB = 'https://github.com/heart-IT/react-brain';
 
-// version + freshness line for the footer (real numbers, not marketing copy)
+// Footer/console info. `updated` is the latest entry verification — never
+// encyclopedia.yaml's hand-maintained `updated:` (it drifts; see siteMeta()).
 export function corpusInfo() {
+  const m = siteMeta();
+  return { version: m.version, count: m.decisions, updated: m.verifiedLatest };
+}
+
+// ── siteMeta(): THE single source for every number and date the site prints ─────
+// Copy never types a figure; it reads one of these fields. Invariants below throw
+// at build time, so a broken loader fails the deploy instead of shipping "NaN".
+const DAY = 864e5;
+const isoDay = (d) => new Date(d).toISOString().slice(0, 10);
+let _meta;
+export function siteMeta() {
+  if (_meta) return _meta;
   const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
-  const { meta, entries } = corpus();
-  return { version: pkg.version, count: entries.length, updated: String(meta.updated) };
+  const { entries } = corpus();
+  const built = isoDay(Date.now());
+  const dates = entries.map((e) => String(e.updated || '')).filter(Boolean).sort();
+  const verifiedLatest = dates.at(-1) || null;
+  const verifiedThisWeek = entries.filter((e) => e.updated && Date.now() - new Date(String(e.updated)).getTime() < 7 * DAY).length;
+
+  // when the corpus CONTENT last changed = newest commit touching it (needs history;
+  // pages.yml checks out with fetch-depth 0). No git → fall back to verifiedLatest.
+  let contentLatest = null;
+  try {
+    contentLatest = execSync('git log -1 --format=%cs -- skills/react-brain-mentor encyclopedia',
+      { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim() || null;
+  } catch { /* shallow/no git */ }
+  contentLatest ||= verifiedLatest;
+
+  // Sources: names + counts from encyclopedia.yaml sources_digested ("Name ×N");
+  // retired = tools/harvest-state.json sources with active:false; the retirement
+  // DATE lives only in the encyclopedia.yaml comment beside sources_digested
+  // ("<Name> RETIRED YYYY-MM-DD"), so it is read from the raw text.
+  const rawIndex = readFileSync(join(MENTOR, 'encyclopedia.yaml'), 'utf8');
+  const digested = (corpus().meta.sources_digested || []).map((s) => {
+    const m = String(s).match(/^(.*?)\s*×\s*(\d+)$/);
+    return m ? { name: m[1], issues: Number(m[2]) } : { name: String(s), issues: null };
+  });
+  const hsPath = join(ROOT, 'tools/harvest-state.json');
+  const hs = existsSync(hsPath) ? JSON.parse(readFileSync(hsPath, 'utf8')).sources || {} : {};
+  const inactive = new Set(Object.values(hs).filter((s) => s.active === false).map((s) => s.name));
+  const sources = digested.map((s) => {
+    const retired = inactive.has(s.name);
+    const esc = s.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const d = retired ? rawIndex.match(new RegExp(`${esc} RETIRED (\\d{4}-\\d{2}-\\d{2})`)) : null;
+    return { ...s, retired, retiredOn: d ? d[1] : null };
+  });
+
+  const c = census();
+  const mcpSrc = existsSync(join(ROOT, 'tools/mcp-server.mjs')) ? readFileSync(join(ROOT, 'tools/mcp-server.mjs'), 'utf8') : '';
+  // tool registrations in the TOOLS array: `{ name: 'x', fn: x,`
+  const mcpTools = (mcpSrc.match(/\{\s*name:\s*'[\w-]+',\s*fn:/g) || []).length;
+
+  const { runs, bank } = benchData();
+  const pickRun = (withCorpus) => {
+    const r = runs.filter((x) => !!x.with_corpus === withCorpus).sort((a, b) => b.date.localeCompare(a.date))[0];
+    return r ? { date: r.date, model: r.model, n: r.summary.n, freshPct: r.summary.fresh_pct,
+      confidentlyStalePct: r.summary.confidently_stale_pct, hedged: r.summary.hedged } : null;
+  };
+
+  const sc = scorecard();
+  const high = sc?.tiers?.high;
+
+  _meta = {
+    version: pkg.version,
+    built,                                  // ISO date this site was built
+    contentLatest,                          // last git change to corpus content
+    verifiedLatest,                         // max(entry.updated)
+    verifiedThisWeek,                       // entries re-verified in the last 7 days
+    decisions: entries.length,
+    reviewed: entries.filter((e) => e.status === 'reviewed').length,
+    readings: entries.reduce((n, e) => n + (e.reading?.length || 0), 0),
+    libraries: new Set(entries.flatMap((e) => (e.detect || []).map((d) => d.pkg)).filter((p) => !p.includes('*'))).size,
+    sources,                                // [{ name, issues, retired, retiredOn }]
+    sourcesRunning: sources.filter((s) => !s.retired).length,
+    sourcesRetired: sources.filter((s) => s.retired).length,
+    censusApps: c?.cohort?.total ?? null,
+    censusDate: c?.date ?? null,
+    mcpTools,
+    bench: { bankSize: bank.length, bare: pickRun(false), withCorpus: pickRun(true) },
+    calibration: high && high.score != null
+      ? { tier: 'high', score: high.score, graded: high.resolved, total: high.total,
+          held: high.held, weakened: high.weakened, overturned: high.overturned }
+      : null,
+  };
+
+  // ── invariants: fail the build, never ship a wrong number ──
+  const bad = [];
+  if (!verifiedLatest) bad.push('no entry has an `updated` date');
+  if (verifiedLatest > built) bad.push(`verifiedLatest ${verifiedLatest} is after build date ${built}`);
+  if (contentLatest && verifiedLatest && new Date(contentLatest) < new Date(new Date(verifiedLatest).getTime() - 365 * DAY))
+    bad.push(`contentLatest ${contentLatest} is >365d before verifiedLatest ${verifiedLatest}`);
+  for (const k of ['decisions', 'reviewed', 'readings', 'libraries', 'sourcesRunning', 'mcpTools'])
+    if (!Number.isFinite(_meta[k]) || _meta[k] <= 0) bad.push(`siteMeta.${k} = ${_meta[k]}`);
+  if (_meta.censusApps != null && !(_meta.censusApps > 0)) bad.push(`siteMeta.censusApps = ${_meta.censusApps}`);
+  if (bad.length) throw new Error('siteMeta invariant failed:\n  ' + bad.join('\n  '));
+  return _meta;
 }
 
 // Base-path-aware URL builder. The site will be served under a subpath of an

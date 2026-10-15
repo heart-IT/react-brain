@@ -3,16 +3,28 @@ import Base from '../layouts/Base.astro';
 import { corpus, scorecard, GITHUB, href } from '../lib/corpus.js';
 const sc = scorecard();
 const { byId } = corpus();
-const tierRows = ['high', 'medium', 'low'].map((t) => ({ t, ...sc.tiers[t] }));
+const tierRows = sc ? ['high', 'medium', 'low'].map((t) => ({ t, ...sc.tiers[t] })) : [];
+const graded = tierRows.reduce((n, r) => n + r.resolved, 0);
+// evaluation window: earliest assertion → latest resolution among graded predictions
+const evalWindow = sc && sc.resolved.length ? {
+  from: sc.resolved.map((r) => r.asserted).sort()[0],
+  to: sc.resolved.map((r) => r.outcome.on).sort().at(-1),
+} : null;
 // ledger claims were stored truncated at 200 chars — show the cut honestly
 const claimText = (c) => /[.!?)\u2026\u201d"']$/.test(c.trim()) ? c : c + '\u2026';
 ---
-<Base title="react-brain — calibration scorecard">
+<Base title="Calibration scorecard" description="Every recommendation is a dated, falsifiable prediction — scored per confidence tier from an append-only ledger.">
   <h1>Calibration scorecard</h1>
   <p class="muted prose">Every <code>recommend.default</code> in the corpus is a
   dated, falsifiable <strong>prediction</strong> with a check-by horizon (shorter for fast-moving,
   low-confidence domains). Adversarial challenges and live npm signals resolve them: <span class="badge held">held</span> = 1.0 · <span class="badge weakened">weakened</span> = 0.5 · <span class="badge overturned">overturned</span> = 0.0, scored per confidence tier. This is the page
   that keeps the word “confidence” honest — an assertion becomes a measurement.</p>
+  {sc ? (
+  <>
+  <p class="meta">{graded} of {sc.totalPredictions} predictions graded
+    ({tierRows.map((r) => `${r.t} ${r.resolved}/${r.total}`).join(' · ')})
+    {evalWindow && <> · evaluation window: asserted from {evalWindow.from}, resolved through {evalWindow.to}</>}
+    {' '}· ungraded predictions are excluded from every score · <a href={href('methodology/#m-calibration')}>definition</a></p>
 
   <h2>Score by confidence tier</h2>
   <div class="tbl"><table>
@@ -56,4 +68,8 @@ const claimText = (c) => /[.!?)\u2026\u201d"']$/.test(c.trim()) ? c : c + '\u202
 
   <p class="muted">Ledger: append-only <a href={`${GITHUB}/blob/main/tools/predictions.jsonl`}><code>tools/predictions.jsonl</code></a> — {sc.totalPredictions} predictions to date. Unresolved ones aren't shown as wins; the score only counts
   what has actually been re-examined.</p>
+  </>
+  ) : (
+  <p class="muted">No ledger — <code>tools/predictions.jsonl</code> is not present in this build, so there is nothing to score yet.</p>
+  )}
 </Base>
