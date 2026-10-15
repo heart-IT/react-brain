@@ -1,23 +1,29 @@
 ---
 import Base from '../layouts/Base.astro';
 import { decideData, corpusInfo, href, BASE } from '../lib/corpus.js';
+// Only the <select> is built from the corpus here; the full records slice is
+// served as decide-data.json and fetched on the first "Generate record".
 const { groups, data } = decideData();
 const info = corpusInfo();
+const clip = (s, n) => (s.length > n ? s.slice(0, n - 1).trimEnd() + '…' : s);
+const options = groups.map((g) => ({ label: g.label,
+  entries: g.entries.filter((id) => data[id]).map((id) => ({ id, label: clip(`${data[id].slug} — ${data[id].topic}`, 40) })) }));
 ---
 <Base title="react-brain — decision records" description="Generate an Architecture Decision Record with receipts: context-resolved pick, candidate table, evidence chain, and premises that react-brain doctor re-checks over time.">
-  <h1>Decision records <span class="badge">runs in your browser</span></h1>
-  <p class="muted prose">Turn a recommendation into the artifact your team reviews: an ADR with <strong style="color:var(--fg)">receipts</strong> — the resolved context, the candidate table, sources with
+  <h1>Decision records</h1>
+  <p class="kicker">runs in your browser — nothing is uploaded</p>
+  <p class="muted prose">Turn a recommendation into the artifact your team reviews: an ADR with <strong class="fg">receipts</strong> — the resolved context, the candidate table, sources with
   verified-on dates, the pick's calibration track record — plus a machine-readable premise block.
   Commit it to <code>docs/adr/</code> and <code>npx -y @heart-it/react-brain doctor . --ci</code> will tell you when the
   premises move. <span class="muted">Nothing leaves your browser.</span></p>
 
-  <fieldset>
+  <fieldset class="intent">
     <legend>decision</legend>
-    <label for="entry">topic
+    <label for="entry" class="topic">topic
       <select id="entry">
-        {groups.map((g) => (
+        {options.map((g) => (
           <optgroup label={g.label}>
-            {g.entries.map((id) => data[id] && <option value={id}>{data[id].slug} — {data[id].topic.slice(0, 60)}</option>)}
+            {g.entries.map((o) => <option value={o.id}>{o.label}</option>)}
           </optgroup>
         ))}
       </select>
@@ -34,18 +40,19 @@ const info = corpusInfo();
     <label><input type="checkbox" id="expo" checked /> Expo</label>
     <label><input type="checkbox" id="p2p" /> P2P / Holepunch</label>
   </fieldset>
-  <details style="margin:.8rem 0">
-    <summary class="meta" style="cursor:pointer">optional: paste package.json to auto-fill context + detect your current choice</summary>
-    <textarea id="pkg" style="margin-top:.5rem" placeholder='{"dependencies": {...}}'></textarea>
+  <details class="pkg">
+    <summary class="meta">optional: paste package.json to auto-fill context + detect your current choice</summary>
+    <p class="meta" id="privacy">Read in your browser only — nothing is uploaded.</p>
+    <textarea id="pkg" aria-describedby="privacy" placeholder='{"dependencies": {...}}'></textarea>
   </details>
-  <p style="display:flex; gap:.7rem; flex-wrap:wrap">
+  <p class="actions">
     <button id="gen">Generate record</button>
     <button id="copy" class="ghost" hidden>Copy markdown</button>
     <a id="dl" class="btn ghost" hidden download>Download .md</a>
   </p>
   <div id="out" aria-live="polite"></div>
 
-  <script is:inline define:vars={{ data, version: info.version, BASE }}>
+  <script is:inline define:vars={{ version: info.version, BASE }}>
     const $ = (id) => document.getElementById(id);
     // honor the console's session context (⌘K → load)
     try {
@@ -60,6 +67,15 @@ const info = corpusInfo();
     const today = new Date().toISOString().slice(0, 10);
     const fmt = (n) => (n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? Math.round(n / 1e3) + 'k' : String(n));
     let deps = null;
+    let lastMd = '';
+
+    // corpus records: fetched once, on the first Generate
+    let dataPromise = null;
+    const loadData = () => (dataPromise ||= fetch(`${BASE}decide-data.json`).then((r) => {
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json();
+    }).then((d) => d.data).catch((err) => { dataPromise = null; throw err; }));
+    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
     $('pkg').addEventListener('input', () => {
       try {
@@ -83,7 +99,20 @@ const info = corpusInfo();
       return { why: e.def, ctx: 'default', via: 'default' };
     };
 
-    $('gen').addEventListener('click', () => {
+    $('gen').addEventListener('click', async () => {
+      const btn = $('gen');
+      let data;
+      btn.disabled = true;
+      $('out').setAttribute('aria-busy', 'true');
+      if (!dataPromise) $('out').innerHTML = '<p class="meta">loading the corpus…</p>';
+      try { data = await loadData(); }
+      catch (err) {
+        $('out').innerHTML = `<p class="err">Could not load the corpus data (${esc(err.message)}). Check your connection and try again.</p>`;
+        return;
+      } finally {
+        btn.disabled = false;
+        $('out').removeAttribute('aria-busy');
+      }
       const e = data[$('entry').value];
       const tokens = [];
       if ($('rn').checked) tokens.push($('expo').checked ? 'expo app' : 'bare rn');
@@ -155,13 +184,31 @@ ${e.reading.length ? '- **Canonical reading:**\n' + e.reading.map((x) => '  - ['
       a.download = 'NNN-' + e.slug + '.md';
       a.hidden = false;
       $('out').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      window.__lastMd = md;
+      lastMd = md;
     });
 
     $('copy').addEventListener('click', async (ev) => {
-      await navigator.clipboard.writeText(window.__lastMd || '');
+      await navigator.clipboard.writeText(lastMd);
       ev.target.textContent = 'Copied ✓';
       setTimeout(() => (ev.target.textContent = 'Copy markdown'), 1400);
     });
   </script>
 </Base>
+
+<style>
+  .fg { color: var(--fg); }
+  .prose { max-width: var(--measure); }
+  .intent { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-4); }
+  .intent label { display: block; margin: 0; }
+  .intent select { max-width: 100%; margin-inline-start: var(--sp-2); }
+  @media (max-width: 600px) {
+    .intent .topic { flex: 1 1 100%; }
+    .intent .topic select { display: block; width: 100%; margin: var(--sp-1) 0 0; }
+  }
+  .pkg { margin-block: var(--sp-3); }
+  .pkg summary { cursor: pointer; padding-block: var(--sp-1); }   /* ≥ 24px tall target */
+  .pkg .meta { margin-block: var(--sp-2) var(--sp-1); }
+  .actions { display: flex; gap: var(--sp-3); flex-wrap: wrap; }
+  /* the global button/.btn display beats the UA [hidden] rule */
+  .actions [hidden] { display: none; }
+</style>

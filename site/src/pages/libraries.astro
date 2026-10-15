@@ -11,25 +11,24 @@ rows.sort((a, b) => (b.weekly || 0) - (a.weekly || 0));
 ---
 <Base title="react-brain — library browser">
   <h1>Library browser</h1>
-  <p class="muted">Every concrete package the corpus tracks, joined to the decision it belongs to.
+  <p class="muted lede">Every concrete package the corpus tracks, joined to the decision it belongs to.
   Downloads are npm weekly figures from the corpus's last <code>signals</code> run — the same live
   check that keeps recommendations honest. A big number is popularity, <em>not</em> a verdict:
   click through to the entry for the context-keyed recommendation.</p>
   <p>
-    <label for="lib-filter" class="label-caps" style="display:block; color:var(--muted); margin-bottom:.35rem">Filter</label>
-    <input id="lib-filter" type="search" placeholder="package, label, or decision…" autocomplete="off"
-      style="width:100%; max-width:26rem; background:var(--card); border:1px solid var(--line); border-radius:4px; padding:.5rem .7rem" />
-    <span id="lib-count" class="meta" style="margin-left:.7rem" aria-live="polite"></span>
+    <label for="lib-filter" class="label-caps filter-label">Filter</label>
+    <input id="lib-filter" class="filter" type="search" placeholder="package, label, or decision…" autocomplete="off" />
+    <span id="lib-count" class="meta count" aria-live="polite"></span>
   </p>
-  <div class="tbl"><table>
-    <thead><tr><th>package</th><th>what the corpus calls it</th><th>decision</th><th>npm / week</th></tr></thead>
+  <div class="tbl wide"><table>
+    <thead><tr><th scope="col">package</th><th scope="col">what the corpus calls it</th><th scope="col">decision</th><th scope="col" class="num">npm / week</th></tr></thead>
     <tbody>
       {rows.map((r) => (
         <tr>
           <td><code>{r.pkg}</code></td>
           <td>{r.label}</td>
           <td><a href={href(`entries/${r.entry.slug}/`)}>{r.entry.slug}</a> <span class={`badge ${r.entry.confidence}`}>{r.entry.confidence}</span></td>
-          <td>{r.weekly != null ? fmtDownloads(r.weekly) : '—'}</td>
+          <td class="num">{r.weekly != null ? fmtDownloads(r.weekly) : '—'}</td>
         </tr>
       ))}
     </tbody>
@@ -48,3 +47,10 @@ rows.sort((a, b) => (b.weekly || 0) - (a.weekly || 0));
     });
   </script>
 </Base>
+
+<style>
+  .lede { max-width: var(--measure); }
+  .filter-label { display: block; color: var(--muted); margin: 0 0 var(--sp-2); }
+  .filter { width: 100%; max-width: 26rem; background: var(--card); border: 1px solid var(--border-control); border-radius: var(--radius-sm); padding: var(--sp-2) var(--sp-3); font-size: var(--fs-sm); }
+  .count { margin-inline-start: var(--sp-3); }
+</style>

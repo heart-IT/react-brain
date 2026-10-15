@@ -15,11 +15,10 @@ const DIST = process.argv[2] ? resolve(process.argv[2]) : join(SITE, 'dist');
 const MAX_PAGE_BYTES = 200 * 1024;
 // Pages already over budget when this check landed (2026-10-15), each pinned to a
 // ceiling just above its size then so it cannot GROW. Ratchet: lower these as the
-// pages shrink (decide/ inlines its corpus data via define:vars — the same fix the
-// doctor got, a lazily fetched JSON, applies; reading/ is one long index), delete
-// the line once under 200 KB, never raise one.
+// pages shrink, delete the line once under 200 KB, never raise one. (decide/ left
+// the list the same day once its corpus slice moved to a lazily fetched JSON;
+// reading/ is one long index of real content.)
 const PAGE_BUDGET_EXCEPTIONS = {
-  'decide/index.html': 256 * 1024,
   'reading/index.html': 264 * 1024,
 };
 
@@ -130,6 +129,31 @@ for (const [p, raw] of html) {
   const budget = PAGE_BUDGET_EXCEPTIONS[where] ?? MAX_PAGE_BYTES;
   if (bytes > budget) fail('page size', where, `${(bytes / 1024).toFixed(0)} KB > ${budget / 1024} KB budget`);
 
+  // 11. every table header cell declares what it heads (scope="col" | "row")
+  for (const m of markup.matchAll(/<th\b[^>]*>/gi))
+    if (!/\sscope="/i.test(m[0])) fail('th scope', where, `${m[0].slice(0, 80)} has no scope=`);
+
+  // 12. search indexes the page body (Base.astro marks <main data-pagefind-body>)
+  if (where !== '404.html' && !/\sdata-pagefind-body\b/.test(markup)) fail('pagefind body', where, 'no data-pagefind-body element');
+
+  // 13. no inline style="" in page markup — styling lives in <style> blocks. <img> and
+  //     <svg> (and SVG children) may carry presentational inline styles.
+  for (const m of markup.matchAll(/<([a-z][\w-]*)\b[^>]*\sstyle="[^"]*"[^>]*>/gi)) {
+    if (/^(img|svg|path|g|rect|circle|line|polyline|polygon|text|tspan|use)$/i.test(m[1])) continue;
+    fail('inline style', where, m[0].slice(0, 100));
+  }
+
+  // 14. font sizes come from the type scale: inside <style>, every font-size / font
+  //     shorthand uses var(--fs-…) (inherit and the .9em code/sup idiom excepted)
+  for (const block of raw.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)) {
+    for (const m of block[1].matchAll(/(?:^|[;{\s])(font(?:-size)?)\s*:\s*([^;}]*)/g)) {
+      const v = m[2].trim();
+      if (v.includes('var(--fs-') || /^inherit\b/.test(v) || /^\.9em\b/.test(v)) continue;
+      if (m[1] === 'font' && !/\d/.test(v.replace(/var\([^)]*\)/g, ''))) continue;   // e.g. font: var(--font-mono)
+      fail('font-size token', where, `${m[1]}: ${v.slice(0, 60)}`);
+    }
+  }
+
   // 10. the top bar is rendered exactly once
   const bars = (markup.match(/<[a-z]+\s[^>]*class="(?:[^"]*\s)?bar(?:\s[^"]*)?"/gi) || []).length;
   if (bars !== 1) fail('nav bar', where, `${bars} .bar elements (expected 1)`);
@@ -181,4 +205,4 @@ if (failures.length) {
   }
   process.exit(1);
 }
-console.log(`check-dist: ✓ ${pages.length} pages passed (base ${BASE}) — h1, canonical, title, base path, links + anchors, leaked values, date labels, page size ≤ ${MAX_PAGE_BYTES / 1024} KB, sitemap/robots, nav bar, data islands`);
+console.log(`check-dist: ✓ ${pages.length} pages passed (base ${BASE}) — h1, canonical, title, base path, links + anchors, leaked values, date labels, page size ≤ ${MAX_PAGE_BYTES / 1024} KB, sitemap/robots, nav bar, th scope, pagefind body, no inline styles, font-size tokens, data islands`);

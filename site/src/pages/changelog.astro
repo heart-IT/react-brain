@@ -5,7 +5,7 @@ const days = changelog();
 ---
 <Base title="react-brain — changelog" description="What changed in the corpus, week by week — the freshness machinery, visible.">
   <h1>Changelog</h1>
-  <p class="muted" style="max-width:44rem">The corpus is kept alive by a weekly loop: harvest the React
+  <p class="muted intro">The corpus is kept alive by a weekly loop: harvest the React
   newsletters → fetch-verify every claim → apply a reviewable delta → re-run the invariants. This page is
   that loop made visible — generated straight from the repo's git history for the corpus files.</p>
   {days.length === 0 && <p class="muted">No history available in this build (shallow checkout). See the <a href={`${GITHUB}/commits/main`}>commit log on GitHub</a>.</p>}
@@ -13,11 +13,16 @@ const days = changelog();
   {days.map((d) => (
     <div>
       <strong class="meta">{d.date}</strong>
-      <ul style="margin:.35rem 0 0; max-width:78ch">
-        {d.subjects.map((s) => <li class="muted" style="font-size:.92rem">{s}</li>)}
+      <ul class="subjects">
+        {d.subjects.map((s) => <li class="muted">{s}</li>)}
       </ul>
     </div>
   ))}
   </div>
   <p class="muted">Full history: <a href={`${GITHUB}/commits/main`}>github.com/heart-IT/react-brain/commits</a></p>
 </Base>
+
+<style>
+  .intro { max-width: var(--measure); }
+  .subjects { margin: var(--sp-2) 0 0; max-width: var(--measure); font-size: var(--fs-sm); }
+</style>

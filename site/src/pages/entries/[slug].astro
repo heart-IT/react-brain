@@ -61,11 +61,11 @@ const toc = [
 ].filter(Boolean);
 ---
 <Base title={e.topic} description={`${e.topic} — ${clip(e.recommend?.default, 150)}`} activeGroup={e.group}>
-  <nav class="crumbs meta" aria-label="Breadcrumb">
+  <nav class="crumbs meta" aria-label="Breadcrumb" data-pagefind-ignore>
     <a href={href('entries/')}>Explore</a><span aria-hidden="true"> › </span><a href={href(`entries/#${e.group}`)}>{groupLabel(group).toLowerCase() || e.group}</a><span aria-hidden="true"> › </span><span aria-current="page">{e.slug}</span>
   </nav>
   <h1>{e.topic}</h1>
-  <p class="meta entry-meta">
+  <p class="meta entry-meta" data-pagefind-ignore>
     <span><span class={`badge ${e.status}`}>{e.status}</span></span>
     <span>confidence <span class={`badge ${e.confidence}`}>{e.confidence}</span>{tier?.total > 0 && (
       <a href={href('scorecard/')} title={`${e.confidence}-confidence forecasts on the public scorecard: ${tier.held} held · ${tier.weakened} weakened · ${tier.overturned} overturned`}> ({tier.score != null && tier.resolved >= 3 ? `tier ${tier.score}%, ` : tier.resolved ? 'early: ' : ''}{tier.resolved}/{tier.total} graded)</a>
@@ -77,7 +77,7 @@ const toc = [
   </p>
 
   <section class="rec-panel" aria-labelledby="rec-label">
-    <p class="rec-label" id="rec-label">recommendation</p>
+    <p class="rec-label" id="rec-label" data-pagefind-ignore>recommendation</p>
     <p class="rec-default">{e.recommend?.default}</p>
     {when.length > 0 && (
       <>
@@ -94,20 +94,20 @@ const toc = [
     )}
   </section>
 
-  <div id="session-banner" class="session" hidden></div>
+  <div id="session-banner" class="session" data-pagefind-ignore hidden></div>
 
-  <dl class="glance" aria-label="At a glance">
+  <dl class="glance" aria-label="At a glance" data-pagefind-ignore>
     {lead && <div><dt>lead option</dt><dd>{lead.name}</dd></div>}
     {lead?.tradeoff && <div><dt>its tradeoff</dt><dd title={lead.tradeoff}>{clip(lead.tradeoff, 110)}</dd></div>}
     <div><dt>evidence</dt><dd>{nSources} source{nSources === 1 ? '' : 's'} · {nReading} reading{nReading === 1 ? '' : 's'}{nWatching ? ` · ${nWatching} talk${nWatching === 1 ? '' : 's'}` : ''}</dd></div>
     {e.updated && <div><dt>freshness</dt><dd>{age == null ? String(e.updated) : age === 0 ? 'verified on build day' : `verified ${age} day${age === 1 ? '' : 's'} before this build`}</dd></div>}
   </dl>
 
-  <nav class={`toc${doc ? ' toc-sticky' : ''}`} aria-label="On this page">
+  <nav class={`toc${doc ? ' toc-sticky' : ''}`} aria-label="On this page" data-pagefind-ignore>
     {toc.map(([tid, label]) => <a href={`#${tid}`}>{label}</a>)}
   </nav>
 
-  <h2 id="options" class="anc"><a class="h-anchor" href="#options" aria-label="Copy link to Options and tradeoffs">#</a>Options &amp; tradeoffs</h2>
+  <h2 id="options" class="anc"><a class="h-anchor" data-pagefind-ignore href="#options" aria-label="Copy link to Options and tradeoffs">#</a>Options &amp; tradeoffs</h2>
   <p class="meta lede">the field considered — and why each one isn’t the default here</p>
   <div class="tbl"><table class="opts">
     <thead><tr><th scope="col">option</th><th scope="col">tradeoff</th>{hasEvidence && <th scope="col">evidence</th>}</tr></thead>
@@ -126,15 +126,15 @@ const toc = [
 
   {e.migrate?.length > 0 && (
     <>
-      <h2 id="migrate" class="anc"><a class="h-anchor" href="#migrate" aria-label="Copy link to Migration lines">#</a>Migration lines</h2>
+      <h2 id="migrate" class="anc"><a class="h-anchor" data-pagefind-ignore href="#migrate" aria-label="Copy link to Migration lines">#</a>Migration lines</h2>
       <p class="meta lede">version and deprecation lines this decision tracks — for YOUR repo's sequenced plan: <a href={href('doctor/')}>the doctor</a> or <code>npx -y @heart-it/react-brain migrate .</code></p>
       <div class="rows">
         {e.migrate.map((r) => (
           <div>
-            <p style="margin:0"><strong>{r.from.pkg}{r.from.below ? ` < ${r.from.below}` : ''}</strong> → {r.to}
+            <p class="mig-line"><strong>{r.from.pkg}{r.from.below ? ` < ${r.from.below}` : ''}</strong> → {r.to}
               <span class="meta"> [{r.urgency} · effort {r.effort}]</span></p>
             <p class="muted small">{r.why}</p>
-            {r.receipts?.length > 0 && <p class="meta" style="margin:.25rem 0 0">{r.receipts.map((u, i) => (
+            {r.receipts?.length > 0 && <p class="meta receipts">{r.receipts.map((u, i) => (
               <>{i > 0 && ' · '}<a href={u} rel="noopener">{srcLabel(u)}</a></>
             ))}</p>}
           </div>
@@ -145,12 +145,12 @@ const toc = [
 
   {(e.note || nSources > 0) && (
     <>
-      <h2 id="notes" class="anc"><a class="h-anchor" href="#notes" aria-label="Copy link to Verified notes">#</a>Verified notes</h2>
+      <h2 id="notes" class="anc"><a class="h-anchor" data-pagefind-ignore href="#notes" aria-label="Copy link to Verified notes">#</a>Verified notes</h2>
       {e.note && <div class="prose notes">{paragraphs(e.note).map((p) => <p>{p}</p>)}</div>}
       {nSources > 0 && (
         <div class="sources" id="sources">
           <p class="rec-sub">sources for this entry</p>
-          <p class="meta" style="margin:0 0 .4rem">fetch-verified as of {String(e.updated)} · type is inferred from the URL</p>
+          <p class="meta src-note">fetch-verified as of {String(e.updated)} · type is inferred from the URL</p>
           <ul>{e.sources.map((s) => (
             <li><span class="src-type">{sourceType(s)}</span><a href={s} rel="noopener">{srcLabel(s)}</a></li>
           ))}</ul>
@@ -162,13 +162,13 @@ const toc = [
 
   {nReading > 0 && (
     <>
-      <h2 id="reading" class="anc"><a class="h-anchor" href="#reading" aria-label="Copy link to Canonical reading">#</a>Canonical reading</h2>
+      <h2 id="reading" class="anc"><a class="h-anchor" data-pagefind-ignore href="#reading" aria-label="Copy link to Canonical reading">#</a>Canonical reading</h2>
       <p class="meta lede">editorial annotations on why each piece matters — the articles are the originals; read them there</p>
       <div class="rows">
         {e.reading.map((r) => (
           <div>
-            <a href={r.url} rel="noopener"><strong>{r.title}</strong></a>
-            {r.by && <span class="meta" style="margin-left:.5rem">{r.by}</span>}
+            <a class="item-title" href={r.url} rel="noopener"><strong>{r.title}</strong></a>
+            {r.by && <span class="meta by">{r.by}</span>}
             <p class="muted small">{r.what}</p>
           </div>
         ))}
@@ -178,13 +178,13 @@ const toc = [
 
   {nWatching > 0 && (
     <>
-      <h2 id="watching" class="anc"><a class="h-anchor" href="#watching" aria-label="Copy link to Watching">#</a>Watching</h2>
+      <h2 id="watching" class="anc"><a class="h-anchor" data-pagefind-ignore href="#watching" aria-label="Copy link to Watching">#</a>Watching</h2>
       <p class="meta lede">curated talks, podcasts &amp; videos — the A/V companion to the reading list</p>
       <div class="rows">
         {e.watching.map((w) => (
           <div>
-            <a href={w.url} rel="noopener"><strong>{w.title}</strong></a>
-            {w.by && <span class="meta" style="margin-left:.5rem">{w.by}</span>}
+            <a class="item-title" href={w.url} rel="noopener"><strong>{w.title}</strong></a>
+            {w.by && <span class="meta by">{w.by}</span>}
             <p class="muted small">{w.what}</p>
           </div>
         ))}
@@ -194,15 +194,15 @@ const toc = [
 
   {doc && (
     <>
-      <h2 id="explanation" class="anc"><a class="h-anchor" href="#explanation" aria-label="Copy link to The full explanation">#</a>The full explanation</h2>
+      <h2 id="explanation" class="anc"><a class="h-anchor" data-pagefind-ignore href="#explanation" aria-label="Copy link to The full explanation">#</a>The full explanation</h2>
       <p class="meta lede">the reviewed long-form essay behind this entry — the <em>why</em>, not a how-to · also on <a href={`${GITHUB}/blob/main/encyclopedia/${e.doc}`} rel="noopener">GitHub</a></p>
-      <article class="prose" set:html={doc} />
+      <article class="prose essay" set:html={doc} />
     </>
   )}
 
   {rels.length > 0 && (
     <>
-      <h2 id="related" class="anc"><a class="h-anchor" href="#related" aria-label="Copy link to Related decisions">#</a>Related decisions</h2>
+      <h2 id="related" class="anc"><a class="h-anchor" data-pagefind-ignore href="#related" aria-label="Copy link to Related decisions">#</a>Related decisions</h2>
       <p class="meta lede"><b>cited here</b> = this entry's text names it · <b>cites this</b> = its text names this entry · <b>same group</b> = sibling in {groupLabel(group).toLowerCase() || e.group}</p>
       <ul class="related">
         {rels.map(({ entry: x, labels }) => (
@@ -212,11 +212,11 @@ const toc = [
     </>
   )}
 
-  <nav class="pager" aria-label="Previous and next decision">
+  <nav class="pager" aria-label="Previous and next decision" data-pagefind-ignore>
     {prev ? <a class="prev" href={href(`entries/${prev.slug}/`)} rel="prev"><span class="meta">← previous{prev.group !== e.group ? ` · ${groupLabel(groupOf(prev)).toLowerCase()}` : ''}</span><span class="pg-title">{prev.topic}</span></a> : <span />}
     {next ? <a class="next" href={href(`entries/${next.slug}/`)} rel="next"><span class="meta">next{next.group !== e.group ? ` · ${groupLabel(groupOf(next)).toLowerCase()}` : ''} →</span><span class="pg-title">{next.topic}</span></a> : <span />}
   </nav>
-  <p class="sr-only" id="copy-status" aria-live="polite"></p>
+  <p class="sr-only" id="copy-status" aria-live="polite" data-pagefind-ignore></p>
 
   <script is:inline define:vars={{ entryId: e.id, def: e.recommend?.default || '', when }}>
     // Session context: a repo loaded with the console's `load` (⌘J) is kept in
@@ -272,6 +272,8 @@ const toc = [
 </Base>
 
 <style>
+  /* "Internationalization" alone is wider than a 320px column */
+  h1 { overflow-wrap: break-word; hyphens: auto; }
   .crumbs { margin: 0; }
   .crumbs a { color: var(--muted); }
   .crumbs a:hover { color: var(--accent); }
@@ -284,32 +286,32 @@ const toc = [
   /* the page's one visual anchor: the answer */
   .rec-panel { margin: 1.4rem 0 0; padding: 1.15rem 1.3rem 1.2rem; background: var(--card); border: 1px solid var(--line-strong); border-left: 3px solid var(--ok); border-radius: 8px;
     box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 0 60px -30px rgba(80,250,123,.45); }
-  .rec-label, .rec-sub { font: 500 .78rem/1.5 var(--font-mono); margin: 0; }
+  .rec-label, .rec-sub { font: 500 var(--fs-xs)/1.5 var(--font-mono); margin: 0; }
   .rec-label { color: var(--ok); }
   .rec-label::before { content: "❯ "; }
   .rec-sub { color: var(--muted); margin-top: 1rem; }
-  .rec-default { margin: .45rem 0 0; color: var(--bright); font-size: 1.08rem; line-height: 1.6; max-width: 72ch; }
-  .rec-when { list-style: none; padding: 0; margin: .4rem 0 0; max-width: 78ch; }
-  .rec-when li { margin: 0; padding: .45rem 0 .45rem .9rem; border-top: 1px solid var(--line); font-size: .93rem; position: relative; }
+  .rec-default { margin: .45rem 0 0; color: var(--bright); font-size: var(--fs-lg); line-height: 1.6; max-width: var(--measure); }
+  .rec-when { list-style: none; padding: 0; margin: .4rem 0 0; max-width: var(--measure); }
+  .rec-when li { margin: 0; padding: .45rem 0 .45rem .9rem; border-top: 1px solid var(--line); font-size: var(--fs-sm); max-width: var(--measure); position: relative; }
   .rec-when li::before { content: ""; position: absolute; left: 0; top: .95rem; width: .35rem; height: 1px; background: var(--line-strong); }
   .rec-when .ctx { color: var(--muted); }
   .rec-when .arrow { color: var(--accent); font-family: var(--font-mono); }
   .rec-when .pick { color: var(--fg); }
-  .rec-caveat { margin: 1rem 0 0; padding-top: .7rem; border-top: 1px dashed var(--line-strong); color: var(--muted); font-size: .9rem; }
+  .rec-caveat { margin: 1rem 0 0; padding-top: .7rem; border-top: 1px dashed var(--line-strong); color: var(--muted); font-size: var(--fs-sm); max-width: var(--measure); }
   .rec-caveat strong { color: var(--warn); }
 
-  .session { margin: .7rem 0 0; font-size: .9rem; }
-  .session :global(.linkish) { background: none; border: 0; box-shadow: none; padding: 0; color: var(--accent); font: inherit; text-decoration: underline; cursor: pointer; }
-  .session :global(.linkish:hover) { transform: none; background: none; box-shadow: none; }
+  .session { margin: .7rem 0 0; font-size: var(--fs-sm); }
 
   /* at a glance: four facts on hairlines, no boxes */
   .glance { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: .2rem 1.4rem; margin: 1.1rem 0 0; }
   .glance > div { border-top: 1px solid var(--line); padding: .5rem 0 0; min-width: 0; }
-  .glance dt { font: 500 .72rem/1.4 var(--font-mono); color: var(--muted); }
-  .glance dd { margin: .15rem 0 0; font-size: .88rem; color: var(--fg); overflow-wrap: anywhere; }
+  .glance dt { font: 500 var(--fs-xs)/1.4 var(--font-mono); color: var(--muted); }
+  .glance dd { margin: .15rem 0 0; font-size: var(--fs-sm); color: var(--fg); overflow-wrap: anywhere; }
 
-  .toc { display: flex; flex-wrap: wrap; gap: .3rem 1rem; margin: 1.3rem 0 0; font: 400 .8rem/1.5 var(--font-mono); }
-  .toc a { color: var(--muted); text-decoration: none; padding: .15rem 0; }
+  .toc { display: flex; flex-wrap: wrap; gap: .3rem 1rem; margin: 1.3rem 0 0; font: 400 var(--fs-xs)/1.5 var(--font-mono); }
+  .toc a { color: var(--muted); text-decoration: none; padding: var(--sp-1) 0; }   /* ≥ 24px tall */
+  /* reading/watching titles are the row's target: pad them to ≥ 24px without moving the text */
+  .item-title { display: inline-block; padding-block: var(--sp-1); margin-block: calc(-1 * var(--sp-1)); }
   .toc a:hover, .toc a[aria-current] { color: var(--accent); }
   @media (min-width: 1024px) {
     .toc-sticky { position: sticky; top: var(--header-h); z-index: 3; margin-inline: -28px; padding: .45rem 28px; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
@@ -319,21 +321,29 @@ const toc = [
 
   /* heading copy-link: the "#" prefix IS the link */
   :global(main) h2.anc::before { content: none; }
-  .h-anchor { color: var(--accent); font-weight: 400; text-decoration: none; margin-right: .5rem; position: relative; border-radius: 3px; }
+  /* inline-block so the "#" is a ≥24px target without changing the heading's look */
+  .h-anchor { display: inline-block; min-width: 24px; min-height: 24px; text-align: center; color: var(--accent); font-weight: 400; text-decoration: none; margin-inline-end: var(--sp-1); position: relative; border-radius: 3px; }
   .h-anchor:hover, .h-anchor:focus-visible { color: var(--bright); }
-  .h-anchor::after { content: "copy link"; position: absolute; left: 0; bottom: 100%; white-space: nowrap; font: 400 .7rem var(--font-mono); color: var(--muted); background: var(--card); border: 1px solid var(--line); border-radius: 4px; padding: .05rem .4rem; opacity: 0; pointer-events: none; transition: opacity .12s; }
+  /* tooltip sits below the "#" — above it, the sticky header/TOC would cover it */
+  .h-anchor::after { content: "copy link"; position: absolute; inset-inline-start: 0; top: calc(100% + 2px); z-index: 2; white-space: nowrap; font: 400 var(--fs-xs)/1.5 var(--font-mono); color: var(--muted); background: var(--card); border: 1px solid var(--line); border-radius: 4px; padding: .05rem .4rem; opacity: 0; pointer-events: none; transition: opacity .12s; }
   .h-anchor:hover::after, .h-anchor:focus-visible::after { opacity: 1; }
   .h-anchor[data-state]::after { content: attr(data-state); opacity: 1; color: var(--fg); }
   .h-anchor[data-state="copy failed"]::after { color: var(--bad); }
 
   .lede { margin: -.35rem 0 .6rem; }
   .foot { margin: .4rem 0 0; }
-  .small { margin: .3rem 0 0; font-size: .88rem; max-width: 78ch; }
+  .small { margin: .3rem 0 0; font-size: var(--fs-sm); max-width: var(--measure); }
+  .mig-line { margin: 0; }
+  /* receipt labels are long unbroken URLs — let them wrap at phone widths */
+  .receipts { margin: var(--sp-1) 0 0; }
+  .receipts a { overflow-wrap: anywhere; }
+  .src-note { margin: 0 0 .4rem; }
+  .by { margin-inline-start: var(--sp-2); }
 
-  .opts th[scope="row"] { font: 600 .9rem/1.5 var(--font-body); color: var(--bright); padding-right: 1rem; min-width: 9rem; }
+  .opts th[scope="row"] { font: 600 var(--fs-sm)/1.5 var(--font-body); color: var(--bright); padding-right: 1rem; min-width: 9rem; }
   .opts .lead-mark { color: var(--ok); font-weight: 400; }
   .opts tr.is-lead th[scope="row"] { box-shadow: inset 2px 0 0 var(--ok); padding-left: .6rem; }
-  .opts .ev { white-space: nowrap; }
+  .opts .ev { white-space: nowrap; font-variant-numeric: tabular-nums; }
   /* ≤600px: each option becomes a stacked block — name, tradeoff, evidence */
   @media (max-width: 600px) {
     .opts, .opts tbody, .opts tr, .opts th[scope="row"], .opts td { display: block; width: 100%; }
@@ -346,28 +356,29 @@ const toc = [
     .opts .ev:not(:empty)::before { content: attr(data-label) ": "; }
   }
 
-  .notes p { margin: 0 0 .9rem; }
+  .notes p { margin: 0 0 .9rem; max-width: var(--measure); }
+  /* annotations quote API names / bare URLs that cannot break at 320px */
+  .notes p, .small, .rec-when li, .essay :global(:is(p, li)) { overflow-wrap: anywhere; }
   .sources { margin: 1.2rem 0 0; padding-top: .2rem; }
   .sources ul { list-style: none; padding: 0; margin: 0; }
-  .sources li { display: flex; gap: .7rem; align-items: baseline; margin: 0; padding: .3rem 0; border-top: 1px solid var(--line); font-size: .88rem; min-width: 0; }
+  .sources li { display: flex; gap: .7rem; align-items: baseline; margin: 0; padding: .3rem 0; border-top: 1px solid var(--line); font-size: var(--fs-sm); min-width: 0; }
   .sources li a { overflow-wrap: anywhere; min-width: 0; }
-  .src-type { flex: 0 0 6.6rem; font: 400 .74rem var(--font-mono); color: var(--muted); }
+  .src-type { flex: 0 0 6.6rem; font: 400 var(--fs-xs) var(--font-mono); color: var(--muted); }
 
   .related { list-style: none; padding: 0; margin: 0; }
   .related li { display: grid; grid-template-columns: minmax(8rem, 12rem) minmax(0, 1fr) auto; gap: .2rem 1rem; align-items: baseline; margin: 0; padding: .5rem 0; border-top: 1px solid var(--line); }
-  .related li a { font: 600 .9rem var(--font-head); text-decoration: none; }
-  .rel-topic { color: var(--muted); font-size: .88rem; }
-  .rel-label { text-align: right; white-space: nowrap; }
+  .related li a { font: 600 var(--fs-md) var(--font-head); text-decoration: none; }
+  .rel-topic { color: var(--muted); font-size: var(--fs-sm); }
+  .rel-label { text-align: end; white-space: nowrap; }
   @media (max-width: 600px) {
     .related li { grid-template-columns: minmax(0, 1fr); gap: .1rem; }
-    .rel-label { text-align: left; white-space: normal; }
+    .rel-label { text-align: start; white-space: normal; }
   }
 
   .pager { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 3rem 0 0; padding-top: 1rem; border-top: 1px solid var(--line); }
   .pager a { display: flex; flex-direction: column; gap: .15rem; text-decoration: none; min-width: 0; }
-  .pager .next { text-align: right; }
-  .pg-title { color: var(--fg); font-size: .92rem; }
+  .pager .next { text-align: end; }
+  .pg-title { color: var(--fg); font-size: var(--fs-sm); }
   .pager a:hover .pg-title { color: var(--accent); }
 
-  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 </style>

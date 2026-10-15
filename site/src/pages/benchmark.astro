@@ -7,43 +7,43 @@ const { byId } = corpus();
 <Base title="react-brain — LLM staleness benchmark" description="How stale is your AI's React advice? Frontier models scored against the corpus's verified, dated facts — deterministic rubric, published transcripts.">
   <h1>The staleness benchmark</h1>
   <p class="muted prose">LLMs are the world's largest distributor of React advice — and their training
-  cutoffs make much of it <strong style="color:var(--fg)">quietly wrong</strong>. This corpus is a dated,
+  cutoffs make much of it <strong class="hi">quietly wrong</strong>. This corpus is a dated,
   verified answer key, so it can measure the rot: {bank.length} questions, every one derived from a
-  verified corpus fact, graded by a <strong style="color:var(--fg)">deterministic regex rubric</strong> (no judge model, transcripts published). The headline metric is <strong style="color:var(--fg)">confidently-stale%</strong> — asserting an outdated world without
+  verified corpus fact, graded by a <strong class="hi">deterministic regex rubric</strong> (no judge model, transcripts published). The headline metric is <strong class="hi">confidently-stale%</strong> — asserting an outdated world without
   hedging. Being wrong is forgivable; being confidently wrong burns users.</p>
 
   <h2>Leaderboard</h2>
   {runs.length === 0 ? (
     <div class="card">
-      <p style="margin:0" class="muted"><strong style="color:var(--fg)">The leaderboard is waiting for its first run</strong> — the
+      <p class="muted flush"><strong class="hi">The leaderboard is waiting for its first run</strong> — the
       question bank and the deterministic rubric are published; only the API spend hasn't happened yet.
       What it will show: each model's <em>fresh%</em> and <em>confidently-stale%</em>, bare vs with the
       corpus injected as context — that with-corpus delta is the product, quantified.</p>
-      <p class="muted" style="margin:.7rem 0 0; font-size:.9rem"><strong style="color:var(--fg)">One-click:</strong> maintainers run the <code>bench</code> GitHub Action (Actions → bench → Run workflow; needs the <code>ANTHROPIC_API_KEY</code> repo secret) —
-      results commit themselves and this page fills in on the next deploy. <strong style="color:var(--fg)">Any machine:</strong></p>
-      <pre style="margin:.6rem 0 0"><span class="t-p">$</span> npx -y @heart-it/react-brain bench --run --model=claude-sonnet-5
+      <p class="muted small gap-top"><strong class="hi">One-click:</strong> maintainers run the <code>bench</code> GitHub Action (Actions → bench → Run workflow; needs the <code>ANTHROPIC_API_KEY</code> repo secret) —
+      results commit themselves and this page fills in on the next deploy. <strong class="hi">Any machine:</strong></p>
+      <pre class="gap-top"><span class="t-p">$</span> npx -y @heart-it/react-brain bench --run --model=claude-sonnet-5
 <span class="t-p">$</span> npx -y @heart-it/react-brain bench --run --model=claude-sonnet-5 --with-corpus  <span class="t-dim"># the delta IS the product</span></pre>
     </div>
   ) : (
-    <div class="tbl"><table>
-      <thead><tr><th>model</th><th>context</th><th>date</th><th>fresh</th><th>confidently stale</th><th>hedged</th><th>n</th></tr></thead>
+    <div class="tbl wide"><table>
+      <thead><tr><th scope="col">model</th><th scope="col">context</th><th scope="col">date</th><th scope="col" class="num">fresh</th><th scope="col" class="num">confidently stale</th><th scope="col" class="num">hedged</th><th scope="col" class="num">n</th></tr></thead>
       <tbody>
         {runs.map((r) => (
           <tr>
             <td><code>{r.model}</code>{r.conditions && <span class="mark-warn" title={r.conditions}>*</span>}</td>
             <td>{r.with_corpus ? <span class="badge held">+ react-brain</span> : <span class="muted">alone</span>}</td>
             <td class="meta">{r.date}</td>
-            <td><span class={r.summary.fresh_pct >= 80 ? 'mark-ok' : ''}>{r.summary.fresh_pct}%</span></td>
-            <td><span class={r.summary.confidently_stale_pct > 15 ? 'badge overturned' : ''}>{r.summary.confidently_stale_pct}%</span></td>
-            <td class="muted">{r.summary.hedged}/{r.summary.n}</td>
-            <td class="muted">{r.summary.n}</td>
+            <td class="num"><span class={r.summary.fresh_pct >= 80 ? 'mark-ok' : ''}>{r.summary.fresh_pct}%</span></td>
+            <td class="num"><span class={r.summary.confidently_stale_pct > 15 ? 'badge overturned' : ''}>{r.summary.confidently_stale_pct}%</span></td>
+            <td class="muted num">{r.summary.hedged}/{r.summary.n}</td>
+            <td class="muted num">{r.summary.n}</td>
           </tr>
         ))}
       </tbody>
     </table></div>
   )}
   {runs.some((r) => r.conditions) && (
-    <p class="meta" style="margin:.4rem 0 0">* {[...new Set(runs.filter((r) => r.conditions).map((r) => r.conditions))].join(' · ')}</p>
+    <p class="meta footnote">* {[...new Set(runs.filter((r) => r.conditions).map((r) => r.conditions))].join(' · ')}</p>
   )}
 
   <h2>How it's graded</h2>
@@ -61,8 +61,8 @@ const { byId } = corpus();
   answer key, so models drift staler against it over time. Rubric + runner: <a href={`${GITHUB}/blob/main/bench/questions.yaml`}><code>bench/questions.yaml</code></a> · <a href={`${GITHUB}/blob/main/tools/react-brain-bench.mjs`}><code>tools/react-brain-bench.mjs</code></a>.</p>
 
   <h2>The question bank</h2>
-  <div class="tbl"><table>
-    <thead><tr><th>question</th><th>the current truth</th><th>source entry</th><th>verified</th></tr></thead>
+  <div class="tbl wide"><table>
+    <thead><tr><th scope="col">question</th><th scope="col">the current truth</th><th scope="col">source entry</th><th scope="col">verified</th></tr></thead>
     <tbody>
       {bank.map((q) => {
         const e = byId[q.entry];
@@ -78,3 +78,13 @@ const { byId } = corpus();
     </tbody>
   </table></div>
 </Base>
+
+<style>
+  .prose { max-width: var(--measure); }
+  .hi { color: var(--fg); font-weight: 600; }
+  .flush { margin: 0; max-width: var(--measure); }
+  .small { font-size: var(--fs-sm); }
+  .gap-top { margin: var(--sp-3) 0 0; max-width: var(--measure); }
+  pre.gap-top { max-width: none; }
+  .footnote { margin: var(--sp-2) 0 0; }
+</style>

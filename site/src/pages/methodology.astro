@@ -94,10 +94,10 @@ const runLine = (r) => `${r.freshPct}% fresh · ${r.confidentlyStalePct}% confid
         {' '}Evaluation window: {evalWindow ? <>assertions from {evalWindow.from}, resolutions through {evalWindow.to}</> : 'no resolutions yet'};
         {' '}{graded} of {sc.totalPredictions} predictions graded.
         <div class="tbl"><table>
-          <thead><tr><th>tier</th><th>score</th><th>graded / predictions</th><th>held · weakened · overturned</th></tr></thead>
+          <thead><tr><th scope="col">tier</th><th scope="col" class="num">score</th><th scope="col" class="num">graded / predictions</th><th scope="col" class="num">held · weakened · overturned</th></tr></thead>
           <tbody>
             {tiers.map((r) => (
-              <tr><td>{r.t}</td><td>{r.score != null ? `${r.score}%` : 'unproven'}</td><td>{r.resolved} / {r.total}</td><td>{r.held} · {r.weakened} · {r.overturned}</td></tr>
+              <tr><td>{r.t}</td><td class="num">{r.score != null ? `${r.score}%` : 'unproven'}</td><td class="num">{r.resolved} / {r.total}</td><td class="num">{r.held} · {r.weakened} · {r.overturned}</td></tr>
             ))}
           </tbody>
         </table></div>
@@ -139,30 +139,35 @@ const runLine = (r) => `${r.freshPct}% fresh · ${r.confidentlyStalePct}% confid
     {NEWSLETTERS.map((s) => {
       const label = [s.issues != null && `${s.issues} issues digested`, s.retired && `retired${s.retiredOn ? ` ${s.retiredOn}` : ''}`].filter(Boolean).join(' · ');
       const inner = <>
-        <span class="row-title" style="font-family:var(--font-head); font-weight:600; color:var(--bright)">{s.name}</span>
+        <span class="row-title">{s.name}</span>
         {label && <span class="meta">{label}</span>}
       </>;
       return s.url
-        ? <a class="row" href={s.url} rel="noopener" style="display:flex; justify-content:space-between; gap:1rem; align-items:baseline">{inner}</a>
-        : <div style="display:flex; justify-content:space-between; gap:1rem; align-items:baseline">{inner}</div>;
+        ? <a class="row src" href={s.url} rel="noopener">{inner}</a>
+        : <div class="src">{inner}</div>;
     })}
   </div>
-  <p class="muted" style="font-size:.9rem; margin-top:.6rem">To be precise about the division of labor:
+  <p class="muted small prose">To be precise about the division of labor:
   newsletters surface the <em>leads</em> — every load-bearing fact is then independently
   fetch-verified against primary sources (release notes, changelogs, the npm registry) before it
   enters the corpus, and the newsletters have not reviewed or endorsed anything here. The same
   gratitude extends to every author in <a href={href('reading/')}>the reading index</a>, credited
   by name on their entries.</p>
 
-  <p class="muted">Everything above is inspectable: the corpus, the tools, the ledger, and the tests are
+  <p class="muted prose">Everything above is inspectable: the corpus, the tools, the ledger, and the tests are
   all in <a href={GITHUB}>the repo</a>.</p>
 </Base>
 
 <style>
+  .prose { max-width: var(--measure); }
+  .small { font-size: var(--fs-sm); }
+  p.small { margin-top: var(--sp-3); }
+  .src { display: flex; justify-content: space-between; gap: var(--sp-4); align-items: baseline; }
+  .row-title { font-family: var(--font-head); font-weight: 600; color: var(--bright); }
   .metrics { margin: 1rem 0 2rem; border-top: 1px solid var(--line); }
-  .metrics dt { font: 600 .92rem/1.4 var(--font-mono); color: var(--bright); padding-top: .9rem; }
+  .metrics dt { font: 600 var(--fs-sm)/1.4 var(--font-mono); color: var(--bright); padding-top: .9rem; }
   .metrics dt .meta { font-weight: 400; margin-left: .4rem; }
-  .metrics dd { margin: .3rem 0 0; padding-bottom: .9rem; border-bottom: 1px solid var(--line); max-width: 78ch; font-size: .94rem; }
+  .metrics dd { margin: .3rem 0 0; padding-bottom: .9rem; border-bottom: 1px solid var(--line); max-width: var(--measure); font-size: var(--fs-md); }
   .metrics .tbl { display: block; margin: .6rem 0; }
-  .metrics .bench-runs { font: 400 .82rem/1.6 var(--font-mono); color: var(--muted); margin: .4rem 0; overflow-wrap: anywhere; }
+  .metrics .bench-runs { font: 400 var(--fs-sm)/1.6 var(--font-mono); color: var(--muted); margin: .4rem 0; overflow-wrap: anywhere; }
 </style>

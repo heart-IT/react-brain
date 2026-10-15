@@ -8,7 +8,8 @@
     "dev": "astro dev",
     "build": "astro build && pagefind --site dist",
     "preview": "astro preview",
-    "test": "node tests/check-dist.mjs"
+    "test": "node tests/check-dist.mjs",
+    "test:ui": "node tests/ui-check.mjs"
   },
   "dependencies": {
     "astro": "^7.0.0",

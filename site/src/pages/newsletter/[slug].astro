@@ -15,11 +15,22 @@ const html = issueHtml(issue);
 ---
 <Base title={`react-brain weekly #${issue.number} — ${issue.title}`} description={issue.dek}>
   <p class="meta"><a href={href('newsletter/')}>react-brain weekly</a> · #{issue.number} · {issue.slug}</p>
-  <h1 style="max-width:24ch">{issue.title}</h1>
-  <p class="muted" style="max-width:70ch; font-size:1.02rem">{issue.dek}</p>
+  <h1 class="title">{issue.title}</h1>
+  <p class="muted dek">{issue.dek}</p>
   <article class="prose" set:html={html} />
-  <nav class="muted" style="margin-top:2rem; display:flex; gap:1.2rem; flex-wrap:wrap">
-    {older && <a href={href(`newsletter/${older.slug}/`)}>← #{older.number} {older.title}</a>}
-    {newer && <a href={href(`newsletter/${newer.slug}/`)}>#{newer.number} {newer.title} →</a>}
-  </nav>
+  {(older || newer) && <nav class="pager" aria-label="Older and newer issues">
+    {older ? <a class="prev" href={href(`newsletter/${older.slug}/`)} rel="prev"><span class="meta">← older · #{older.number}</span><span class="pg-title">{older.title}</span></a> : <span />}
+    {newer ? <a class="next" href={href(`newsletter/${newer.slug}/`)} rel="next"><span class="meta">newer · #{newer.number} →</span><span class="pg-title">{newer.title}</span></a> : <span />}
+  </nav>}
 </Base>
+
+<style>
+  .title { max-width: 24ch; }
+  .dek { max-width: var(--measure); font-size: var(--fs-lg); }
+  .prose { max-width: var(--measure); }
+  .pager { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); margin: var(--sp-12) 0 0; padding-top: var(--sp-4); border-top: 1px solid var(--line); }
+  .pager a { display: flex; flex-direction: column; gap: .15rem; text-decoration: none; min-width: 0; }
+  .pager .next { text-align: end; }
+  .pg-title { color: var(--fg); font-size: var(--fs-sm); }
+  .pager a:hover .pg-title { color: var(--accent); }
+</style>

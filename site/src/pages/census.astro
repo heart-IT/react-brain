@@ -19,7 +19,7 @@ const appList = snap ? Object.values(snap.apps).sort((a, b) => (a.platform > b.p
 ---
 <Base title="react-brain — census">
   <h1>Census — what shipped apps actually use</h1>
-  <p class="muted" style="max-width:78ch">Download counts can be gamed (a single vendor's CI once
+  <p class="muted prose">Download counts can be gamed (a single vendor's CI once
   produced a 60× "adoption surge"); the dependency choices of real, active, production
   open-source apps can't. The census fetches each cohort app's <code>package.json</code>, runs
   the corpus's own detectors over it, and reports observed adoption per decision — with honest
@@ -27,7 +27,7 @@ const appList = snap ? Object.values(snap.apps).sort((a, b) => (a.platform > b.p
   that the context-keyed recommendations already account for.</p>
 
   {!snap && (
-    <div class="card caution"><p class="muted" style="margin:0">No census snapshot yet — run <code>npx -y @heart-it/react-brain census</code> and rebuild. This page renders from
+    <div class="card caution"><p class="muted flush">No census snapshot yet — run <code>npx -y @heart-it/react-brain census</code> and rebuild. This page renders from
     <code>tools/.census-baseline.json</code>.</p></div>
   )}
 
@@ -36,13 +36,13 @@ const appList = snap ? Object.values(snap.apps).sort((a, b) => (a.platform > b.p
       <p class="meta">snapshot {snap.date} · {snap.cohort.fetched}/{snap.cohort.total} apps fetched
       · {snap.cohort.rn} React Native · {snap.cohort.web} web/desktop</p>
 
-      <div class="tbl"><table>
-        <thead><tr><th>decision</th><th>apps using the domain</th><th>observed adoption (apps shipping each option)</th></tr></thead>
+      <div class="tbl wide"><table>
+        <thead><tr><th scope="col">decision</th><th scope="col" class="num">apps using the domain</th><th scope="col">observed adoption (apps shipping each option)</th></tr></thead>
         <tbody>
           {rows.map((r) => (
             <tr>
               <td><a href={href(`entries/${r.entry.slug}/`)}>{r.entry.slug}</a></td>
-              <td><strong>{r.appCount}/{r.denom}</strong> <span class="muted">({r.pct}%)</span></td>
+              <td class="num"><strong>{r.appCount}/{r.denom}</strong> <span class="muted">({r.pct}%)</span></td>
               <td>{r.labels.map(([l, n], i) => <span>{i > 0 && ' · '}{l} <strong>×{n}</strong></span>)}</td>
             </tr>
           ))}
@@ -50,13 +50,13 @@ const appList = snap ? Object.values(snap.apps).sort((a, b) => (a.platform > b.p
       </table></div>
 
       <h2>The cohort</h2>
-      <p class="muted" style="font-size:.9rem">Curated in <code>tools/census-cohort.json</code>: real
+      <p class="muted small prose">Curated in <code>tools/census-cohort.json</code>: real
       end-user products, actively developed, fetch-verified before inclusion — not frameworks,
       libraries, or demos.</p>
-      <p style="max-width:78ch">{appList.map((a, i) => <span>{i > 0 && ' · '}{a.name}<span class="meta"> ({a.platform === 'react-native' ? 'RN' : 'web'})</span></span>)}</p>
+      <p class="prose">{appList.map((a, i) => <span>{i > 0 && ' · '}{a.name}<span class="meta"> ({a.platform === 'react-native' ? 'RN' : 'web'})</span></span>)}</p>
 
       <h2>Reading the numbers</h2>
-      <ul class="muted">
+      <ul class="muted prose">
         <li>A high count for a non-default option usually means <em>legacy weight</em> in mature codebases — the entry's when-clauses ("already on X → keep it") are where that reconciles.</li>
         <li>Repeated snapshots diff against the previous baseline, so the CLI reports <em>adoption velocity</em>: what the cohort adopted or dropped since last time.</li>
         <li>This is the corpus's second empirical anchor: <code>signals</code> asks npm, the census asks production. The two disagreeing is a flag worth reading.</li>
@@ -64,3 +64,9 @@ const appList = snap ? Object.values(snap.apps).sort((a, b) => (a.platform > b.p
     </>
   )}
 </Base>
+
+<style>
+  .prose { max-width: var(--measure); }
+  .flush { margin: 0; }
+  .small { font-size: var(--fs-sm); }
+</style>

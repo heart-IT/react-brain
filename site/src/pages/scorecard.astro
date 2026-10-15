@@ -27,21 +27,21 @@ const claimText = (c) => /[.!?)\u2026\u201d"']$/.test(c.trim()) ? c : c + '\u202
     {' '}· ungraded predictions are excluded from every score · <a href={href('methodology/#m-calibration')}>definition</a></p>
 
   <h2>Score by confidence tier</h2>
-  <div class="tbl"><table>
-    <thead><tr><th>tier</th><th>predictions</th><th>resolved</th><th>held</th><th>weakened</th><th>overturned</th><th>score</th></tr></thead>
+  <div class="tbl wide"><table>
+    <thead><tr><th scope="col">tier</th><th scope="col" class="num">predictions</th><th scope="col" class="num">resolved</th><th scope="col" class="num">held</th><th scope="col" class="num">weakened</th><th scope="col" class="num">overturned</th><th scope="col" class="num">score</th></tr></thead>
     <tbody>
       {tierRows.map((r) => (
         <tr>
           <td><span class={`badge ${r.t}`}>{r.t}</span></td>
-          <td>{r.total}</td><td>{r.resolved}</td><td>{r.held}</td><td>{r.weakened}</td><td>{r.overturned}</td>
-          <td>{r.score != null
+          <td class="num">{r.total}</td><td class="num">{r.resolved}</td><td class="num">{r.held}</td><td class="num">{r.weakened}</td><td class="num">{r.overturned}</td>
+          <td class="num">{r.score != null
             ? <><strong>{r.score}%</strong>{r.resolved < 3 && <span class="meta"> (early — n={r.resolved})</span>}</>
             : <span class="muted">unproven — no resolutions yet</span>}</td>
         </tr>
       ))}
     </tbody>
   </table></div>
-  <p class="muted" style="font-size:.9rem">Reading the numbers: <strong style="color:var(--fg)">{tierRows.reduce((n, r) => n + r.overturned, 0)} of {tierRows.reduce((n, r) => n + r.resolved, 0)} graded predictions have been overturned</strong> —
+  <p class="muted small prose">Reading the numbers: <strong class="hi">{tierRows.reduce((n, r) => n + r.overturned, 0)} of {tierRows.reduce((n, r) => n + r.resolved, 0)} graded predictions have been overturned</strong> —
   every “weakened” verdict means the default <em>survived</em> an adversarial challenge but gained a
   real caveat, and it's deliberately scored harshly at 0.5. A modest score in the <span class="badge low">low</span> tier
   is calibration working: low confidence <em>predicts</em> churn — the tiers earning their ordering
@@ -53,23 +53,31 @@ const claimText = (c) => /[.!?)\u2026\u201d"']$/.test(c.trim()) ? c : c + '\u202
     const e = byId[r.id];
     return (
       <div>
-        <p style="margin:0">
+        <p class="res-head">
           {e ? <a href={href(`entries/${e.slug}/`)}><strong>{e.slug}</strong></a> : <strong>{r.id}</strong>}
           {' '}<span class={`badge ${r.outcome.outcome}`}>{r.outcome.outcome}</span>
           <span class="badge">{r.confidence}</span>
-          <span class="muted" style="font-size:.85rem"> asserted {r.asserted} · resolved {r.outcome.on}</span>
+          <span class="muted small"> asserted {r.asserted} · resolved {r.outcome.on}</span>
         </p>
-        <p class="muted" style="margin:.4rem 0 0; font-size:.92rem">“{claimText(r.claim)}”</p>
-        {r.outcome.note && <p style="margin:.4rem 0 0; font-size:.92rem">↳ {r.outcome.note}</p>}
+        <p class="muted res-body">“{claimText(r.claim)}”</p>
+        {r.outcome.note && <p class="res-body">↳ {r.outcome.note}</p>}
       </div>
     );
   })}
   </div>
 
-  <p class="muted">Ledger: append-only <a href={`${GITHUB}/blob/main/tools/predictions.jsonl`}><code>tools/predictions.jsonl</code></a> — {sc.totalPredictions} predictions to date. Unresolved ones aren't shown as wins; the score only counts
+  <p class="muted prose">Ledger: append-only <a href={`${GITHUB}/blob/main/tools/predictions.jsonl`}><code>tools/predictions.jsonl</code></a> — {sc.totalPredictions} predictions to date. Unresolved ones aren't shown as wins; the score only counts
   what has actually been re-examined.</p>
   </>
   ) : (
   <p class="muted">No ledger — <code>tools/predictions.jsonl</code> is not present in this build, so there is nothing to score yet.</p>
   )}
 </Base>
+
+<style>
+  .prose { max-width: var(--measure); }
+  .hi { color: var(--fg); font-weight: 600; }
+  .small { font-size: var(--fs-sm); }
+  .res-head { margin: 0; }
+  .res-body { margin: var(--sp-2) 0 0; font-size: var(--fs-sm); max-width: var(--measure); }
+</style>

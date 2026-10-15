@@ -7,7 +7,8 @@ import Base from '../layouts/Base.astro';
 import { BASE, href } from '../lib/corpus.js';
 ---
 <Base title="Doctor" description="Paste a package.json and get an ecosystem-fit report and migration findings against the verified corpus — runs entirely in your browser.">
-  <h1>Doctor <span class="badge beta">beta · runs in your browser</span></h1>
+  <h1>Doctor</h1>
+  <p class="kicker"><span class="badge beta">beta</span> · runs in your browser — nothing is uploaded</p>
   <p class="muted prose">Paste a <code>package.json</code>. Each dependency is matched against the corpus's
   detection table, every detected choice is compared to the context-keyed recommendation, installed
   versions are crossed with the verified migration rules, and expected-but-missing domains are flagged.
@@ -32,12 +33,12 @@ import { BASE, href } from '../lib/corpus.js';
   </section>
 
   <div id="doctor" data-base={BASE}>
-    <label for="pkg" class="label-caps" style="display:block; margin-bottom:.4rem">Your package.json</label>
-    <p class="meta" id="privacy" style="margin:0 0 .5rem">Runs entirely in your browser — nothing is uploaded; only dependency names and versions are read.</p>
+    <label for="pkg" class="label-caps pkg-label">Your package.json</label>
+    <p class="meta" id="privacy">Runs entirely in your browser — nothing is uploaded; only dependency names and versions are read.</p>
     <textarea id="pkg" aria-describedby="privacy" spellcheck="false" placeholder='{"dependencies": {"react": "19.2.0", "zustand": "5.0.0", ...}}'></textarea>
     <p class="dr-actions">
       <button id="run" type="button">Analyze</button>
-      <label class="btn ghost" style="cursor:pointer">Load a file<input id="file" type="file" accept=".json,application/json" style="display:none" /></label>
+      <label class="btn ghost file-btn">Load a file<input id="file" class="sr-only" type="file" accept=".json,application/json" /></label>
       <button id="sample" type="button" class="btn ghost">Try the sample</button>
       <span class="meta">sample: legacy-rn-demo (fictional manifest)</span>
     </p>
@@ -89,7 +90,7 @@ import { BASE, href } from '../lib/corpus.js';
       html += '<h2 id="fit">Fit</h2>';
       if (a.fits.length) {
         html += `<p class="meta">fit: <span class="mark-ok">✓ ${tally['✓']} aligned</span> · <span class="mark-warn">~ ${tally['~']} contextual</span> · <span class="mark-dim">↗ ${tally['↗']} to review</span></p>`;
-        html += '<div class="tbl"><table><thead><tr><th>decision</th><th>your choice</th><th>fit</th><th>the corpus says</th></tr></thead><tbody>';
+        html += '<div class="tbl wide"><table><thead><tr><th scope="col">decision</th><th scope="col">your choice</th><th scope="col">fit</th><th scope="col">the corpus says</th></tr></thead><tbody>';
         md.push('## Fit', '', '| decision | your choice | fit |', '|---|---|---|');
         for (const f of a.fits) {
           const def = caps[f.id]?.def || '';
@@ -108,7 +109,7 @@ import { BASE, href } from '../lib/corpus.js';
       html += '<h2 id="findings">Findings</h2>';
       md.push('## Findings', '');
       if (a.steps.length) {
-        html += '<p class="muted" style="font-size:.88rem">Installed versions crossed with the corpus\'s verified migration rules — unblocked first, then by urgency.</p><div class="rows dr-findings">';
+        html += '<p class="muted dr-note">Installed versions crossed with the corpus\'s verified migration rules — unblocked first, then by urgency.</p><div class="rows dr-findings">';
         for (const s of a.steps) {
           const severe = SEVERE.has(s.urgency);
           const glyph = s.blocked ? '⛔' : severe ? '✗' : '→';
@@ -141,11 +142,11 @@ import { BASE, href } from '../lib/corpus.js';
       html += '<h2 id="gaps">Gaps</h2>';
       md.push('## Gaps', '');
       if (a.gaps.length) {
-        html += '<p class="muted" style="font-size:.88rem">Nothing detected for these expected domains — may be built in, or genuinely N/A for your architecture; verify.</p><div class="rows">';
+        html += '<p class="muted dr-note">Nothing detected for these expected domains — may be built in, or genuinely N/A for your architecture; verify.</p><div class="rows">';
         for (const id of a.gaps) {
           const cap = caps[id];
-          html += `<div><p style="margin:0"><a href="${entryUrl(cap.slug)}"><strong>${esc(cap.slug)}</strong></a> <span class="meta">nothing detected — may be N/A</span></p>` +
-            `<p class="muted" style="margin:.3rem 0 0; font-size:.9rem">${esc(clip(cap.def, 180))}</p></div>`;
+          html += `<div><p class="gap-what"><a href="${entryUrl(cap.slug)}"><strong>${esc(cap.slug)}</strong></a> <span class="meta">nothing detected — may be N/A</span></p>` +
+            `<p class="muted gap-def">${esc(clip(cap.def, 180))}</p></div>`;
           md.push(`- ${cap.slug}: nothing detected — may be N/A`);
         }
         html += '</div>';
@@ -155,7 +156,7 @@ import { BASE, href } from '../lib/corpus.js';
       }
       md.push('', `Generated in the browser by ${location.origin}${BASE}doctor/ — full scan: \`npx -y @heart-it/react-brain doctor .\``);
 
-      html += '<p class="muted" style="font-size:.88rem">For the legacy-API modernization scan and source signals run <code>npx -y @heart-it/react-brain doctor .</code></p>';
+      html += '<p class="muted dr-note">For the legacy-API modernization scan and source signals run <code>npx -y @heart-it/react-brain doctor .</code></p>';
       out.innerHTML = html;
       report = { md: md.join('\n'), name: a.name };
       $('exports').hidden = false;
@@ -166,9 +167,9 @@ import { BASE, href } from '../lib/corpus.js';
     async function run() {
       let pkg;
       try { pkg = JSON.parse($('pkg').value); }
-      catch { out.innerHTML = '<p class="muted">That is not valid JSON.</p>'; return; }
+      catch { out.innerHTML = '<p class="err">That is not valid JSON.</p>'; return; }
       if (!pkg || typeof pkg !== 'object' || !Object.keys(depsOf(pkg)).length) {
-        out.innerHTML = '<p class="muted">No dependencies found — paste a package.json with <code>dependencies</code> or <code>devDependencies</code>.</p>';
+        out.innerHTML = '<p class="err">No dependencies found — paste a package.json with <code>dependencies</code> or <code>devDependencies</code>.</p>';
         return;
       }
       const btn = $('run');
@@ -178,7 +179,7 @@ import { BASE, href } from '../lib/corpus.js';
       try {
         render(pkg, await loadData());
       } catch (err) {
-        out.innerHTML = `<p class="muted">Could not load the corpus data (${esc(err.message)}). Check your connection and try again.</p>`;
+        out.innerHTML = `<p class="err">Could not load the corpus data (${esc(err.message)}). Check your connection and try again.</p>`;
       } finally {
         btn.disabled = false;
         out.removeAttribute('aria-busy');
@@ -222,8 +223,14 @@ import { BASE, href } from '../lib/corpus.js';
 
 <style>
   .dr-legend { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: .6rem 0; margin: 1rem 0 1.4rem; }
-  .dr-legend h2 { margin: 0 0 .4rem; font-size: .78rem; }
-  .dr-legend dl { display: grid; grid-template-columns: max-content 1fr; gap: .3rem 1rem; margin: 0; font-size: .86rem; }
+  .dr-legend h2 { margin: 0 0 .4rem; font-size: var(--fs-xs); }
+  .dr-legend dl { display: grid; grid-template-columns: max-content 1fr; gap: .3rem 1rem; margin: 0; font-size: var(--fs-sm); }
+  .dr-legend dd { max-width: var(--measure); }
+  .prose { max-width: var(--measure); }
+  .pkg-label { display: block; margin-block-end: var(--sp-2); }
+  #privacy { margin: 0 0 var(--sp-2); }
+  .file-btn { position: relative; cursor: pointer; margin: 0; }
+  .file-btn:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
   .dr-legend dt { font-family: var(--font-mono); color: var(--muted); }
   .dr-legend dd { margin: 0; }
   @media (max-width: 600px) {
@@ -231,10 +238,14 @@ import { BASE, href } from '../lib/corpus.js';
     .dr-legend dd { margin-bottom: .4rem; }
   }
   .dr-actions { display: flex; gap: .7rem; align-items: center; flex-wrap: wrap; }
-  #out :global(.dr-context) { font-family: var(--font-mono); font-size: .9rem; overflow-wrap: anywhere; }
+  .dr-actions[hidden] { display: none; }
+  #out :global(.dr-context) { font-family: var(--font-mono); font-size: var(--fs-sm); overflow-wrap: anywhere; }
+  #out :global(.dr-note) { font-size: var(--fs-sm); max-width: var(--measure); }
+  #out :global(.gap-what) { margin: 0; }
+  #out :global(.gap-def) { margin: var(--sp-1) 0 0; font-size: var(--fs-sm); max-width: var(--measure); }
   #out :global(.dr-findings p) { margin: 0; }
   #out :global(.dr-findings p + p) { margin-top: .3rem; }
   #out :global(.f-what) { overflow-wrap: anywhere; }
-  #out :global(.f-why) { font-size: .9rem; max-width: 78ch; }
+  #out :global(.f-why) { font-size: var(--fs-sm); max-width: var(--measure); }
   #out :global(.f-facts) { overflow-wrap: anywhere; }
 </style>

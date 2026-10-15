@@ -50,8 +50,8 @@ const stats = [
 ];
 
 const tasks = [
-  { to: 'stack/', label: 'New React app', why: 'compose a web stack from intent — platform, stage, SSR' },
-  { to: 'stack/', label: 'New React Native app', why: 'Expo or bare, P2P or not — a stack with reasons' },
+  { to: 'stack/?platform=react', label: 'New React app', why: 'compose a web stack from intent — platform, stage, SSR' },
+  { to: 'stack/?platform=react-native', label: 'New React Native app', why: 'Expo or bare, P2P or not — a stack with reasons' },
   { to: 'doctor/', label: 'Existing app', why: 'paste package.json — fit report against the corpus' },
   { to: 'doctor/', label: 'Migration', why: 'dead, deprecated and outdated deps, sequenced with receipts' },
   { to: 'entries/#ui', label: 'Performance', why: 'lists, animation, rendering — the UI decisions' },
@@ -162,7 +162,7 @@ const { bare, withCorpus } = m.bench;
   .home { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 2.5rem; align-items: center; }
   @media (max-width: 1100px) { .home { grid-template-columns: minmax(0, 1fr); gap: 1.8rem; } }
   .eyebrow { margin: 0; }
-  .sub { color: var(--muted); }
+  .sub { color: var(--muted); max-width: var(--measure); }
   .ctas { display: flex; gap: .7rem; flex-wrap: wrap; margin-top: 1.4rem; }
 
   .demo { margin: 0; min-width: 0; }
@@ -172,32 +172,33 @@ const { bare, withCorpus } = m.bench;
 
   .statline { list-style: none; margin: 2.2rem 0 0; padding: 1.1rem 0 0; border-top: 1px solid var(--line); }
   .statline li { margin: 0; }
-  .statline .sub { display: block; font-size: .72rem; opacity: .8; }
+  .statline .sub { display: block; font-size: var(--fs-xs); }
+  @media (max-width: 640px) { .statline { display: grid; grid-template-columns: 1fr 1fr; } }
 
-  .lede { max-width: 46rem; font-size: .92rem; margin-top: -.3rem; }
+  .lede { max-width: var(--measure); font-size: var(--fs-sm); margin-top: -.3rem; }
   .tasks { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr)); gap: 0 2rem; }
   .tasks li { margin: 0; border-top: 1px solid var(--line); }
   .tasks a { display: block; padding: .7rem 0; text-decoration: none; }
-  .tasks .t-label { display: block; font: 600 .92rem var(--font-head); color: var(--bright); }
-  .tasks .t-why { display: block; color: var(--muted); font-size: .86rem; }
+  .tasks .t-label { display: block; font: 600 var(--fs-md) var(--font-head); color: var(--bright); }
+  .tasks .t-why { display: block; color: var(--muted); font-size: var(--fs-sm); max-width: var(--measure); }
   .tasks a:hover .t-label { color: var(--accent); }
 
-  .flow { font: 500 .82rem/1.9 var(--font-mono); color: var(--muted); margin: 0 0 1rem; }
+  .flow { font: 500 var(--fs-sm)/1.9 var(--font-mono); color: var(--muted); margin: 0 0 1rem; max-width: var(--measure); }
   .flow .arrow { color: var(--accent); margin: 0 .3rem; }
   .flow a { color: var(--fg); }
   .flow .more { color: var(--muted); margin-left: .6rem; }
   .compare td:first-child { color: var(--bright); white-space: nowrap; }
   @media (max-width: 640px) { .compare td:first-child { white-space: normal; } }
-  .bench { font-size: .9rem; max-width: 52rem; }
+  .bench { font-size: var(--fs-sm); max-width: var(--measure); }
   .bench strong { color: var(--fg); }
 
   .below { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 21rem), 1fr)); gap: 0 4rem; align-items: start; }
   .plain { list-style: none; padding: 0; }
   .row-title { font-family: var(--font-head); font-weight: 600; color: var(--bright); }
-  .row-sub { display: block; font-size: .88rem; margin-top: .15rem; }
+  .row-sub { display: block; font-size: var(--fs-sm); margin-top: .15rem; }
   .pick { margin: 1.2rem 0 0; display: grid; gap: .2rem; }
-  .pick a { font: 600 .98rem/1.4 var(--font-head); color: var(--bright); text-decoration: none; }
+  .pick a { font: 600 var(--fs-md)/1.4 var(--font-head); color: var(--bright); text-decoration: none; }
   .pick a:hover { color: var(--accent); }
-  .small { font-size: .9rem; }
+  .small { font-size: var(--fs-sm); }
   .small code { word-break: break-all; }
 </style>

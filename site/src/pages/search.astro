@@ -24,20 +24,20 @@ const EXAMPLES = ['zustand or jotai', 'expo router', 'react compiler'];
   <p id="s-keys" class="meta keys"><kbd>enter</kbd> open first result · <kbd>↓</kbd> move into results · <kbd>esc</kbd> clear</p>
 
   <div id="ask-out" hidden>
-    <p class="label-caps" style="margin:0 0 .3rem; color:var(--muted)">readings that answer this</p>
+    <p class="label-caps ask-label">readings that answer this</p>
     <div class="rows" id="ask-rows"></div>
   </div>
 
   <p id="s-status" class="meta status" role="status" aria-live="polite"></p>
 
   <div id="s-empty" class="s-state">
-    <p class="muted" style="margin:0">Search {m.decisions} decisions, {m.readings} annotated readings, the tools and the methodology.</p>
-    <p class="meta" style="margin:.5rem 0 0">try: {EXAMPLES.map((x, i) => <>{i > 0 && ' · '}<a href={`?q=${encodeURIComponent(x)}`} data-example={x}>{x}</a></>)}</p>
-    <p class="meta" style="margin:.3rem 0 0">or browse: {groups.map((g, i) => <>{i > 0 && ' · '}<a href={href(`entries/#${g.id}`)}>{gl(g)}</a></>)}</p>
+    <p class="muted flush">Search {m.decisions} decisions, {m.readings} annotated readings, the tools and the methodology.</p>
+    <p class="meta s-try">try: {EXAMPLES.map((x, i) => <>{i > 0 && ' · '}<a href={`?q=${encodeURIComponent(x)}`} data-example={x}>{x}</a></>)}</p>
+    <p class="meta s-browse">or browse: {groups.map((g, i) => <>{i > 0 && ' · '}<a href={href(`entries/#${g.id}`)}>{gl(g)}</a></>)}</p>
   </div>
   <div id="s-none" class="s-state" hidden>
-    <p style="margin:0">No results for <b id="s-none-q"></b>.</p>
-    <p class="meta" style="margin:.4rem 0 0">try: {suggest.map((s, i) => <>{i > 0 && ' · '}<a href={s.url}>{s.label}</a></>)} · or <a href={href('entries/')}>all decisions</a></p>
+    <p class="flush">No results for <b id="s-none-q"></b>.</p>
+    <p class="meta s-try">try: {suggest.map((s, i) => <>{i > 0 && ' · '}<a href={s.url}>{s.label}</a></>)} · or <a href={href('entries/')}>all decisions</a></p>
   </div>
   <p id="search-hint" class="muted" hidden>Search is generated at build time — run <code>npm run build &amp;&amp; npm run preview</code> to use it locally (in <code>astro dev</code> the index doesn't exist yet).</p>
 
@@ -129,9 +129,9 @@ const EXAMPLES = ['zustand or jotai', 'expo router', 'react compiler'];
       out.hidden = !hits.length;
       $('ask-rows').innerHTML = hits.map(({ r }) => {
         const gist = r.claim || r.what || '';
-        return `<div><a href="${esc(r.url)}" rel="noopener" style="font:600 .95rem/1.4 var(--font-head); color:var(--bright); text-decoration:none">${esc(r.title)}</a>
-          <a class="meta" style="margin-left:.5rem" href="${BASE}entries/${esc(r.slug)}/">${esc(r.slug)}</a>
-          <p class="muted" style="margin:.25rem 0 0; font-size:.88rem; max-width:78ch">${esc(gist.length > 260 ? gist.slice(0, 259) + '…' : gist)}</p></div>`;
+        return `<div><a href="${esc(r.url)}" rel="noopener" class="ask-title">${esc(r.title)}</a>
+          <a class="meta ask-slug" href="${BASE}entries/${esc(r.slug)}/">${esc(r.slug)}</a>
+          <p class="muted ask-gist">${esc(gist.length > 260 ? gist.slice(0, 259) + '…' : gist)}</p></div>`;
       }).join('');
     }
 
@@ -186,15 +186,26 @@ const EXAMPLES = ['zustand or jotai', 'expo router', 'react compiler'];
 </Base>
 
 <style>
-  .sform { display: flex; align-items: center; gap: .55rem; max-width: 40rem; margin: 1rem 0 0; background: var(--code-bg); border: 1px solid var(--line-strong); border-radius: 6px; padding: .55rem .8rem; }
+  .sform { display: flex; align-items: center; gap: .55rem; max-width: 40rem; margin: 1rem 0 0; background: var(--code-bg); border: 1px solid var(--border-control); border-radius: 6px; padding: .55rem .8rem; }
   .sform:focus-within { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent); }
-  .sform input { flex: 1; min-width: 0; background: none; border: 0; color: var(--fg); font: 400 1rem var(--font-mono); }
+  .sform input { flex: 1; min-width: 0; background: none; border: 0; color: var(--fg); font: 400 var(--fs-md) var(--font-mono); }
   .sform input:focus { outline: none; box-shadow: none; }
   .sform input::placeholder { color: var(--muted); }
   .keys { margin: .45rem 0 1.2rem; }
-  .keys kbd { font: 500 .7rem var(--font-mono); border: 1px solid var(--line-strong); border-radius: 4px; padding: 0 .3em; color: var(--fg); }
+  .keys kbd { font: 500 var(--fs-xs) var(--font-mono); border: 1px solid var(--line-strong); border-radius: 4px; padding: 0 .3em; color: var(--fg); }
   @media (hover: none) { .keys { display: none; } }
   #ask-out { margin: 0 0 1.4rem; }
+  .ask-label { margin: 0 0 .3rem; color: var(--muted); }
+  /* #ask-rows children are built in JS — :global so the scoped styles reach them */
+  :global(.ask-title) { font: 600 var(--fs-md)/1.4 var(--font-head); color: var(--bright); text-decoration: none; }
+  :global(.ask-title:hover) { color: var(--accent); }
+  :global(.ask-slug) { margin-inline-start: var(--sp-2); }
+  /* both are the row's targets: ≥ 24px tall without moving the baseline */
+  :global(.ask-title), :global(.ask-slug) { display: inline-block; padding-block: var(--sp-1); margin-block: calc(-1 * var(--sp-1)); }
+  :global(.ask-gist) { margin: var(--sp-1) 0 0; font-size: var(--fs-sm); max-width: var(--measure); }
+  .flush { margin: 0; }
+  .s-try { margin: var(--sp-2) 0 0; }
+  .s-browse { margin: .3rem 0 0; }
   .status { min-height: 1.2em; margin: 0 0 .4rem; }
   .s-state { margin: .2rem 0 0; }
   :global(.s-group) { margin: 1.2rem 0 0; }
@@ -203,12 +214,11 @@ const EXAMPLES = ['zustand or jotai', 'expo router', 'react compiler'];
   :global(.s-list) { list-style: none; padding: 0; margin: 0; }
   :global(.s-list > li) { margin: 0; padding: .75rem 0; border-top: 1px solid var(--line); min-width: 0; }
   :global(.s-link) { display: flex; flex-wrap: wrap; align-items: baseline; gap: .1rem .6rem; text-decoration: none; }
-  :global(.s-title) { color: var(--bright); font: 600 .95rem/1.4 var(--font-head); }
+  :global(.s-title) { color: var(--bright); font: 600 var(--fs-md)/1.4 var(--font-head); }
   :global(.s-link:hover .s-title), :global(.s-link:focus-visible .s-title) { color: var(--accent); }
-  :global(.s-ex) { margin: .25rem 0 0; color: var(--muted); font-size: .88rem; max-width: 78ch; overflow-wrap: anywhere; }
-  :global(.s-ex mark) { background: rgba(80, 250, 123, .16); color: var(--accent); border-radius: 2px; padding: 0 .12em; }
+  :global(.s-ex) { margin: .25rem 0 0; color: var(--muted); font-size: var(--fs-sm); max-width: var(--measure); overflow-wrap: anywhere; }
+  :global(.s-ex mark) { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); border-radius: 2px; padding: 0 .12em; }
   :global(.s-subs) { margin: .25rem 0 0; }
   :global(.s-subs a) { color: var(--muted); }
   :global(.s-subs a:hover) { color: var(--accent); }
-  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 </style>

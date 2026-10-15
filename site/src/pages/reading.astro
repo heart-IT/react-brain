@@ -15,12 +15,12 @@ const split = (r) => {
 ---
 <Base title="react-brain — curated reading">
   <h1>Curated reading</h1>
-  <p class="muted">{count} deep-dives, every one fetch-verified and annotated with <em>why it matters</em> —
+  <p class="muted intro">{count} deep-dives, every one fetch-verified and annotated with <em>why it matters</em> —
   organized by the decision it informs, not by publish date. The annotations are our editorial take; <strong>the articles are the originals — read them there.</strong> A piece lands here only if it's the
   canonical explanation for its topic; how-to content routes to depth skills instead.</p>
-  <nav aria-label="Jump to group" style="display:flex; flex-wrap:wrap; gap:.45rem; margin:1rem 0 0">
+  <nav class="jump" aria-label="Jump to group">
     {groups.map((g) => (
-      <a href={`#${g.id}`} class="meta" style="text-decoration:none">{g.label.split(' — ')[0].split(' (')[0]} <span style="opacity:.65">{g.entries.reduce((n, id) => n + (entries.find((x) => x.id === id)?.reading?.length || 0), 0)}</span></a>
+      <a href={`#${g.id}`}>{g.label.split(' — ')[0].split(' (')[0]} <span class="n">{g.entries.reduce((n, id) => n + (entries.find((x) => x.id === id)?.reading?.length || 0), 0)}</span></a>
     ))}
   </nav>
   {groups.map((g) => (
@@ -30,7 +30,7 @@ const split = (r) => {
         const e = entries.find((x) => x.id === id);
         return e?.reading?.length > 0 && (
           <div>
-            <h3><a href={href(`entries/${e.slug}/`)}>{e.slug}</a> <span class="muted">— {e.topic}</span></h3>
+            <h3><a href={href(`entries/${e.slug}/`)}>{e.slug}</a> <span class="muted topic">— {e.topic}</span></h3>
             <div class="rows">
               {e.reading.map((r) => {
                 const { lead, rest } = split(r);
@@ -54,9 +54,19 @@ const split = (r) => {
 </Base>
 
 <style>
-  .read-head { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: .25rem .6rem; }
-  .read-title { font: 600 .95rem/1.4 var(--font-head); color: var(--bright); text-decoration: none; }
+  h3 .topic { font-size: var(--fs-sm); font-weight: 400; }
+  .intro { max-width: var(--measure); }
+  .jump { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin: var(--sp-4) 0 0; }
+  .jump a { display: inline-flex; align-items: center; gap: var(--sp-1); min-height: 24px; padding: var(--sp-1) var(--sp-2);
+    border: 1px solid var(--border-control); border-radius: var(--radius-sm); text-decoration: none;
+    font: 400 var(--fs-xs)/1.4 var(--font-mono); color: var(--fg); }
+  .jump a:hover { border-color: var(--accent); color: var(--accent); }
+  .jump .n { color: var(--muted); }
+  /* annotations quote long config keys (experimental.turbopackChunking…) — let them break */
+  .read-item, section h3 { overflow-wrap: anywhere; }
+  .read-head { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-1) var(--sp-2); }
+  .read-title { font: 600 var(--fs-md)/1.4 var(--font-head); color: var(--bright); text-decoration: none; }
   .read-title:hover { color: var(--accent); }
-  .read-lead { margin: .3rem 0 0; font-size: .9rem; line-height: 1.55; color: var(--fg); max-width: 78ch; }
-  .read-rest { margin: .25rem 0 0; font-size: .86rem; line-height: 1.55; max-width: 78ch; }
+  .read-lead { margin: .3rem 0 0; font-size: var(--fs-sm); line-height: 1.55; color: var(--fg); max-width: var(--measure); }
+  .read-rest { margin: .25rem 0 0; font-size: var(--fs-sm); line-height: 1.55; max-width: var(--measure); }
 </style>
