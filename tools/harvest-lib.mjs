@@ -364,3 +364,70 @@ export function prepClassify(links, heldByKey, goldRows) {
     return { ...l, pre: 'todo' };
   });
 }
+
+// ── issue discovery for slug-titled sources (`harvest prep`) ────────────────────
+// Numbered sources resolve the next issue through `url_pattern`. Slug-titled sources
+// need a lookup instead, configured per source in harvest-state.json:
+//   feed + issue_label      RSS/Atom feed (newest-first); the issue number is read
+//                           off each item's PAGE with the `issue_label` regex (RN
+//                           Rewind prints an authoritative 'Issue #NN' near the
+//                           title — its slug carries no number). `slug_issue` reads
+//                           it from the item URL instead when a source has one.
+//   archive + archive_slug  no feed; the archive HTML lists slugs that embed the
+//                           number (beehiiv: /p/sep-25-2026-issue-22). Trust the
+//                           number, never the date in the slug (#21's slug says 2025).
+// Both return [{ issue, url, title }] ASCENDING so prep takes the lowest unprocessed
+// issue and can say when more than one is waiting.
+export function parseFeedItems(xml) {
+  const items = [];
+  const unwrap = (s) => String(s || '').replace(/^\s*<!\[CDATA\[([\s\S]*?)\]\]>\s*$/, '$1')
+    .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;|&#39;/g, "'").trim();
+  for (const m of String(xml).matchAll(/<(item|entry)\b[\s\S]*?<\/\1>/g)) {
+    const block = m[0];
+    const title = unwrap((block.match(/<title[^>]*>([\s\S]*?)<\/title>/) || [])[1]);
+    const url = unwrap((block.match(/<link(?:\s[^>]*)?>([\s\S]*?)<\/link>/) || [])[1])
+      || unwrap((block.match(/<link\b[^>]*\bhref=["']([^"']+)["']/) || [])[1]);
+    const date = unwrap((block.match(/<(pubDate|published|updated)>([\s\S]*?)<\/\1>/) || [])[2]);
+    if (url) items.push({ title, url, date });
+  }
+  return items;
+}
+
+export function archiveIssueLinks(html, baseUrl, slugRe) {
+  const re = slugRe instanceof RegExp ? slugRe : new RegExp(slugRe);
+  const seen = new Map();
+  for (const m of String(html).matchAll(/href=["']?([^"'\s>]+)/g)) {
+    const n = re.exec(m[1]);
+    if (!n) continue;
+    const issue = parseInt(n[1], 10);
+    if (!Number.isFinite(issue)) continue;
+    let url; try { url = new URL(m[1], baseUrl).href; } catch { continue; }
+    if (!seen.has(issue)) seen.set(issue, { issue, url, title: '' });
+  }
+  return [...seen.values()].sort((a, b) => a.issue - b.issue);
+}
+
+// `until`: the last processed issue — page fetches stop once the feed reaches it
+// (feeds are newest-first), so a routine probe costs one page, not `lookback`.
+// Returns null when the source has no lookup config at all.
+export async function discoverIssues(src, fetchText, { until = 0, lookback = 6 } = {}) {
+  if (src.feed) {
+    const items = parseFeedItems(await fetchText(src.feed)).slice(0, lookback);
+    const label = new RegExp(src.issue_label || 'Issue #(\\d+)');
+    const found = [];
+    for (const it of items) {
+      const fromSlug = src.slug_issue ? new RegExp(src.slug_issue).exec(it.url) : null;
+      let issue = fromSlug ? parseInt(fromSlug[1], 10) : NaN;
+      if (!Number.isFinite(issue)) {
+        const m = label.exec(await fetchText(it.url).catch(() => ''));
+        issue = m ? parseInt(m[1], 10) : NaN;
+      }
+      if (!Number.isFinite(issue)) continue;
+      found.push({ issue, url: it.url, title: it.title, date: it.date });
+      if (issue <= until) break;
+    }
+    return found.sort((a, b) => a.issue - b.issue);
+  }
+  if (src.archive && src.archive_slug) return archiveIssueLinks(await fetchText(src.archive), src.archive, src.archive_slug);
+  return null;
+}

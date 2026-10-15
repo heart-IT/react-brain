@@ -3434,3 +3434,25 @@ Gates: lint clean (2 warnings: shared YouTube URL; 25 long-form docs trail their
 rules, 3,398 gold rows · engine 24 ✓ · eval 139/139 · coverage 0 unaccounted ×3 (firsthand has no issue
 URL) · verify-diff 50/50 added receipts ok, 0 failures (11 deprecation-matcher false positives) ·
 watchlist reviewed · React Status re-probe: no #494 (404; editor back 2026-10-23).
+
+## 2026-10-15b — prep resolves the slug-titled sources
+
+TOOLING, closing the 2026-10-15 follow-up "RN Rewind and Native Weekly have no working `prep`".
+`harvest prep` used to stop at "slug/RSS source (no url_pattern) — check manually" for both, so
+every one of their links was judged from scratch with no corpus cross-reference, no prior-manifest
+carry-over, no triage rules and no frozen bench fixture. Now `tools/harvest-lib.mjs` has
+`discoverIssues`: a source with `feed` + `issue_label` (RN Rewind: RSS newest-first, the number read
+off each page's 'Issue #NN' label, page fetches stop at the last processed issue) or `archive_slug`
+(Native Weekly: beehiiv has no feed — /feed 404s — so the archive's /p/<date>-issue-NN slugs are
+scanned and the NUMBER is trusted, never the date; #21's slug says 2025) resolves the lowest
+unprocessed issue and falls into the normal prep flow (pre-dispositioned manifest, title in the
+header, bench fixture). A multi-issue backlog is prepped in order across runs and prep says so.
+Verified live: RN Rewind "no new issue after #61 (newest resolved: #61 'The Great Graphite
+Migration…')", Native Weekly "no new issue after #22", `--issue=61 --stdout` regenerates today's
+hand-built manifest with all 21 links pre-dispositioned; TWiR/React Status behaviour unchanged.
+7 unit assertions added to tests/eval.mjs (RSS/Atom parsing, slug extraction incl. the typo trap,
+the `until` short-circuit, the null case). Docs: tools/README.md, SKILL.md, harvest-state `_readme`
+and both sources' notes.
+
+Delta: 0 entries touched · harvest-lib.mjs +discoverIssues/parseFeedItems/archiveIssueLinks ·
+react-brain-harvest.mjs prep · harvest-state.json (feed/issue_label, archive_slug) · eval 139 → 146.

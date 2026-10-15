@@ -29,7 +29,7 @@
 import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { get, UA_BROWSER, extractLinks, normalize, coverageCheck, prepClassify, parseGoldManifest } from './harvest-lib.mjs';
+import { get, UA_BROWSER, extractLinks, normalize, coverageCheck, prepClassify, parseGoldManifest, discoverIssues } from './harvest-lib.mjs';
 import { flag } from './argv.mjs';
 
 const TOOLS = dirname(fileURLToPath(import.meta.url));
@@ -65,15 +65,31 @@ if (mode === 'firsthand') {
   const state = JSON.parse(readFileSync(join(TOOLS, 'harvest-state.json'), 'utf8'));
   const src = state.sources[key];
   if (!src) { console.error(`usage: harvest prep <source> [--issue=N] [--stdout] — sources: ${Object.keys(state.sources).join(', ')}`); process.exit(1); }
-  if (!src.url_pattern) { console.log(`${key}: slug/RSS source (no url_pattern) — check ${src.archive} manually, then use inventory + hand-write the manifest`); process.exit(0); }
   const last = parseInt(String(src.last_processed).replace(/\D/g, ''), 10);
   const forced = parseInt(flag(args, 'issue', ''), 10);
-  let issue = null, url = null;
-  for (const c of forced ? [forced] : [last + 1, last + 2]) {
-    const u = src.url_pattern.replace('{n}', c);
-    try { await get(u, { ua: UA_BROWSER }); issue = c; url = u; break; } catch { /* not published yet */ }
+  let issue = null, url = null, title = '';
+  if (src.url_pattern) {
+    for (const c of forced ? [forced] : [last + 1, last + 2]) {
+      const u = src.url_pattern.replace('{n}', c);
+      try { await get(u, { ua: UA_BROWSER }); issue = c; url = u; break; } catch { /* not published yet */ }
+    }
+    if (!issue) { console.log(`${key}: no new issue after #${last} (probed ${last + 1}, ${last + 2})`); process.exit(0); }
+  } else {
+    // slug-titled source (RN Rewind, Native Weekly): resolve through the feed + page
+    // label or the archive's slugs — harvest-lib discoverIssues. Lowest unprocessed
+    // issue first, so a two-issue backlog is prepped in order across two runs.
+    const found = await discoverIssues(src, (u) => get(u, { ua: UA_BROWSER }), { until: forced ? 0 : last })
+      .catch((err) => { console.error(`${key}: discovery fetch failed: ${err} — fall back to inventory + a hand-written manifest`); process.exit(2); });
+    if (!found) { console.log(`${key}: no url_pattern / feed / archive_slug configured in harvest-state.json — check ${src.archive} manually, then use inventory + hand-write the manifest`); process.exit(0); }
+    const fresh = forced ? found.filter((f) => f.issue === forced) : found.filter((f) => f.issue > last);
+    if (!fresh.length) {
+      const newest = found.at(-1);
+      console.log(`${key}: no new issue after #${last}${newest ? ` (newest resolved: #${newest.issue}${newest.title ? ` '${newest.title}'` : ''})` : ' (nothing resolvable in the feed/archive)'}`);
+      process.exit(0);
+    }
+    if (fresh.length > 1) console.log(`${key}: ${fresh.length} unprocessed issues (${fresh.map((f) => `#${f.issue}`).join(', ')}) — prepping #${fresh[0].issue} first; re-run prep after processing it`);
+    ({ issue, url, title } = fresh[0]);
   }
-  if (!issue) { console.log(`${key}: no new issue after #${last} (probed ${last + 1}, ${last + 2})`); process.exit(0); }
   const links = extractLinks(await fetchPage(url), url).filter((l) => !l.sameSite);
   const { loadEntries } = await import('./detect.mjs');
   const held = new Map();
@@ -99,7 +115,7 @@ if (mode === 'firsthand') {
   const out = join(LOG_DIR, `${PREFIX[key] || key}-${issue}.md`);
   const esc = (s) => String(s || '').replace(/\|/g, '·');
   const line = (r) => `| [${esc(r.text) || r.url}](${r.url}) | ${r.pre === 'todo' ? 'TODO' : r.pre === 'already-held' ? `already-held: ${esc(r.note).replace('in corpus: ', '')}` : esc(r.note)} |`;
-  const md = `# Harvest manifest — ${src.name} #${issue} (prepped ${new Date().toISOString().slice(0, 10)})\nissue: ${url}\n\nPre-triaged by \`harvest prep\`: ${rows.length} external links · ${rows.length - todo.length} pre-dispositioned (corpus + prior-manifest cross-ref${ruled ? ` + ${ruled} by triage rules` : ''}) · **${todo.length} TODO**.\nJudge ONLY the TODO rows; carried rows re-open only on their reopen signals. Advocate pass, verify-diff and coverage gates apply as usual.\n\n| item | disposition |\n|---|---|\n${[...todo, ...rows.filter((r) => r.pre !== 'todo')].map(line).join('\n')}\n`;
+  const md = `# Harvest manifest — ${src.name} #${issue}${title ? ` '${esc(title)}'` : ''} (prepped ${new Date().toISOString().slice(0, 10)})\nissue: ${url}\n\nPre-triaged by \`harvest prep\`: ${rows.length} external links · ${rows.length - todo.length} pre-dispositioned (corpus + prior-manifest cross-ref${ruled ? ` + ${ruled} by triage rules` : ''}) · **${todo.length} TODO**.\nJudge ONLY the TODO rows; carried rows re-open only on their reopen signals. Advocate pass, verify-diff and coverage gates apply as usual.\n\n| item | disposition |\n|---|---|\n${[...todo, ...rows.filter((r) => r.pre !== 'todo')].map(line).join('\n')}\n`;
   if (args.includes('--stdout')) console.log(md);
   else if (existsSync(out)) { console.error(`refusing to overwrite ${out} — use --stdout to preview`); process.exit(1); }
   else {

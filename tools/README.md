@@ -221,8 +221,10 @@ and changed manifests with an `issue:` header get coverage re-run.
 `.github/workflows/harvest-verify.yml` enforces it on every harvest PR — the
 guardrail under the weekly cloud routine. Shared primitives live in
 `harvest-lib.mjs`.
-**prep** rolls inventory + corpus cross-ref into one step for url_pattern sources: it
-detects the next issue from `harvest-state.json`, writes a PRE-TRIAGED manifest
+**prep** rolls inventory + corpus cross-ref into one step for every source: it
+detects the next issue from `harvest-state.json` (numbered sources by probing
+`url_pattern`; slug-titled ones through their RSS feed + the page's 'Issue #NN'
+label — RN Rewind — or the archive's slugs — Native Weekly), writes a PRE-TRIAGED manifest
 (corpus-held and previously-dispositioned links arrive filled in; judge only the TODO
 rows) and freezes the issue's bench fixture at pre-harvest state.
 ```sh

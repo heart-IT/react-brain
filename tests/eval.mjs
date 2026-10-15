@@ -295,6 +295,33 @@ const signals = (d) => (d.sourceSignals?.findings || []).map((f) => f.entry);
   check(satisfiesTripwire({ pkg: 'x', atleast: '1.0.0' }, undefined) === false, 'tripwire: missing registry info never fires');
 }
 
+// ── harvest prep: issue discovery for slug-titled sources (RN Rewind, Native Weekly) ──
+{
+  const { parseFeedItems, archiveIssueLinks, discoverIssues } = await import(join(ROOT, 'tools/harvest-lib.mjs'));
+  const rss = `<?xml version="1.0"?><rss><channel><title>Feed</title><link>https://ex.test</link>
+<item><title>Newest &amp; Best</title><link>https://ex.test/issues/newest</link><pubDate>Mon, 12 Oct 2026 23:54:51 +0000</pubDate></item>
+<item><title><![CDATA[Older one]]></title><link>https://ex.test/issues/older</link></item></channel></rss>`;
+  const items = parseFeedItems(rss);
+  check(items.length === 2 && items[0].url === 'https://ex.test/issues/newest' && items[0].title === 'Newest & Best' && items[1].title === 'Older one',
+    'prep discovery: RSS items parse newest-first; the channel <link> is not an item; entities + CDATA unwrapped');
+  check(parseFeedItems('<feed><entry><title>A</title><link href="https://ex.test/a"/></entry></feed>')[0].url === 'https://ex.test/a', 'prep discovery: Atom <link href> parses');
+  const archive = '<a href="/p/sep-11-2026-issue-20">x</a><a href="/p/sep-18-2025-issue-21">y</a><a href="/p/sep-25-2026-issue-22">z</a><a href="/p/sep-25-2026-issue-22">dup</a><a href="/about">no</a>';
+  const found = archiveIssueLinks(archive, 'https://nw.test/', '/p/[a-z0-9-]*issue-(\\d+)');
+  check(found.map((f) => f.issue).join(',') === '20,21,22' && found[1].url === 'https://nw.test/p/sep-18-2025-issue-21',
+    'prep discovery: archive slugs → ascending, deduped, absolute URLs; the number wins over the mistyped date');
+  const pages = { 'https://ex.test/feed.xml': rss, 'https://ex.test/issues/newest': '<h1>Issue #61</h1>', 'https://ex.test/issues/older': '<h1>Issue #60</h1>' };
+  const fetched = [];
+  const fetchText = async (u) => { fetched.push(u); if (!(u in pages)) throw new Error('404'); return pages[u]; };
+  const disc = await discoverIssues({ feed: 'https://ex.test/feed.xml', issue_label: 'Issue #(\\d+)' }, fetchText);
+  check(disc.map((d) => d.issue).join(',') === '60,61' && disc[1].title === 'Newest & Best', 'prep discovery: feed + page label resolves issue numbers, ascending');
+  fetched.length = 0;
+  const stopped = await discoverIssues({ feed: 'https://ex.test/feed.xml', issue_label: 'Issue #(\\d+)' }, fetchText, { until: 61 });
+  check(stopped.length === 1 && stopped[0].issue === 61 && !fetched.includes('https://ex.test/issues/older'), 'prep discovery: `until` stops page fetches once the last processed issue is reached');
+  const arch = await discoverIssues({ archive: 'https://nw.test/', archive_slug: '/p/[a-z0-9-]*issue-(\\d+)' }, async () => archive);
+  check(arch.length === 3 && arch[2].issue === 22, 'prep discovery: archive_slug source resolves without a feed');
+  check((await discoverIssues({ archive: 'https://x.test/' }, fetchText)) === null, 'prep discovery: a source with no lookup config returns null (prep sends the agent manual)');
+}
+
 // ── harvest bench: gold-manifest parsing + asymmetric judgment scoring ──────────
 {
   const { parseGoldManifest, scoreTriage, normalize } = await import(join(ROOT, 'tools/harvest-lib.mjs'));

@@ -53,8 +53,10 @@ tail -3 tools/harvest.log            # did the last scheduled run abort?
   stranded for a day).
 - **⚡ Fired tripwires are mandatory work items** — do the `then:`, update the prose,
   remove the row; wire new watch/revisit caveats as tripwires at keep-time.
-- **Per newsletter: `harvest prep <source>`**, judge ONLY the TODO rows; no url_pattern →
-  `harvest inventory <issue-url>`, never an LLM summary of the page.
+- **Per newsletter: `harvest prep <source>`**, judge ONLY the TODO rows. Since 2026-10-15 prep
+  resolves the slug-titled sources too (RN Rewind via RSS + the page's 'Issue #NN' label,
+  Native Weekly via beehiiv archive slugs); only if discovery fails →
+  `harvest inventory <issue-url>` + a hand-written manifest, never an LLM summary of the page.
 - **`[rule:*]` rows are auto-dispositioned** (triage-rules.yaml, skip-only, gold-admitted) —
   leave them unless the spot-check indicts a rule; a wrong rule row means fix/deactivate
   the RULE, and `harvest rules --check` (in npm test) re-verifies admission as gold grows.
