@@ -7,27 +7,51 @@ confidence: low
 platforms: [react, react-native]
 options:
   - { name: "Vercel AI SDK / json-render", tradeoff: "streaming chat + tool-calling, the default SDK (ai 7.0.x, verified vs npm 2026-09-24); json-render renders model output as components (now RN too)." }
-  - { name: "assistant-ui / Tambo", tradeoff: "prebuilt chat/generative-UI components; Tambo 1.0 adds state persistence + streaming. TAMBO CLOUD SHUTS DOWN 2026-10-31 (new signups closed, data deleted 2026-11-30; the SDK + backend stay MIT and self-hostable, the team has moved to another product) — see note: TAMBO WIND-DOWN." }
+  - { name: "assistant-ui / Tambo", tradeoff: "prebuilt chat/generative-UI components; Tambo 1.0 adds state persistence + streaming. TAMBO CLOUD SHUT DOWN 2026-10-31 (hosted API stopped; remaining data deleted 2026-11-30); Tambo is now SELF-HOST ONLY — the SDK + backend stay MIT, but the team has moved to another product, so it is not a pick for new work. See note: TAMBO WIND-DOWN." }
   - { name: "shadcn/ui AI Elements (copy-in)", tradeoff: "21 copy-in patterns for agentic UIs (Chat, Prompt Input, Reasoning, Tool, Plan, Subagent …) built from shadcn/ui components and rendered from AI SDK message parts; no package to install, the code is yours. Replaces AI SDK Elements, which will be deprecated (2026-10, verified vs the shadcn/ui changelog). See note: TAMBO WIND-DOWN." }
   - { name: "Cedar / Streamdown", tradeoff: "Cedar = agent-UI toolkit; Streamdown = streaming-markdown renderer for LLM output on the WEB. The React Native sibling is a separate package; see note: RN STREAMING MARKDOWN." }
-  - { name: "TanStack AI (@tanstack/ai + ai-react)", tradeoff: "type-safe TS AI SDK: streaming chat, tool calling, agents, host-side MCP client, generation hooks beyond chat; the first real Vercel-AI-SDK alternative, in RC since 0.48 (2026-08-21). 0.63.0 (2026-09-30, verified vs npm + the GitHub release) adds a World Labs 3D-world-generation adapter and typed subagent inputs, on top of 0.59's first-class subagents; see note: TANSTACK AI." }
+  - { name: "TanStack AI (@tanstack/ai + ai-react)", tradeoff: "type-safe TS AI SDK: streaming chat, tool calling, agents and subagents, host-side MCP client, generation hooks beyond chat (image, speech, video, 3D); the first real Vercel-AI-SDK alternative. STABLE since 1.0.0 (2026-10-22; blog 2026-10-23): core APIs committed, the new agent harness experimental and still 0.x; 23 provider adapters, eight UI frameworks. 1.8.0 (2026-11-20) / ai-react 1.1.1 latest (verified vs npm + the GitHub releases 2026-11-25). See note: TANSTACK AI 1.0." }
 recommend:
-  default: "Vercel AI SDK for streaming chat + tool-calling on React and React Native; assistant-ui for prebuilt chat UI, or shadcn/ui's AI Elements on the web when you want to own the component code (Tambo only self-hosted: its cloud shuts down 2026-10-31); Streamdown to render streaming markdown on the web. TanStack AI is the type-safe alternative, still 0.x in RC, to re-weigh at 1.0. Fast-moving (confidence: low): treat picks as current-best, not settled."
+  default: "Vercel AI SDK for streaming chat + tool-calling on React and React Native; assistant-ui for prebuilt chat UI, or shadcn/ui's AI Elements on the web when you want to own the component code (Tambo is self-host only since its cloud shut down 2026-10-31); Streamdown to render streaming markdown on the web. TanStack AI (stable 1.0 since 2026-10-22) is the type-safe alternative: re-weighed at 1.0 and the default held — the AI SDK still has ~11× the weekly downloads and the surrounding UI layer (AI Elements, assistant-ui, json-render) is built on its message parts. Fast-moving (confidence: low): treat picks as current-best, not settled."
   when:
     - "render model output as live components → json-render"
     - "agent-style UI → Cedar"
     - "web app already on shadcn/ui wanting agentic chat UI (reasoning, tool calls, plans, subagents) → shadcn/ui AI Elements (copy-in; replaces AI SDK Elements)"
-    - "app on Tambo Cloud → self-host the Tambo backend or migrate before 2026-10-31 (hosted API stops; data deleted 2026-11-30)"
-    - "already TanStack-stack (Query/Router/Start), or need image/speech/video generation hooks or subagents → TanStack AI (RC, still 0.x — pin)"
+    - "app still pointed at Tambo Cloud → it stopped 2026-10-31 (data deleted 2026-11-30): self-host the MIT Tambo backend or migrate to assistant-ui / AI Elements"
+    - "already TanStack-stack (Query/Router/Start), or need image/speech/video generation hooks, subagents or a provider-neutral wire protocol → TanStack AI (1.x stable; upgrade every @tanstack/ai* package together — a 1.0 client needs a 1.0 server — and keep the experimental harness packages pinned)"
+    - "on TanStack AI 0.x → read the v1 migration guide first: 1.0 removes every deprecated 0.x API, makes threadId REQUIRED on useChat/ChatClient/chat() (pass a stable id per conversation), drops addToolApprovalResponse (→ resolveInterrupt) and the old SSE wire formats"
     - "streaming LLM markdown in React Native → native markdown parsing off the JS thread (the Margelo reading; react-native-streamdown is the early SWM Labs option, spike before adopting)"
 note: >
   This entry is cloud-LLM app UI; on-device inference belongs to RB-E-ONDEVICE-AI. The category has
   three layers: the SDK that streams tokens and runs tools (Vercel AI SDK, TanStack AI), the chat
   components (assistant-ui, Tambo, Cedar), and the renderers for model output (json-render,
   Streamdown). The default picks one library per layer; the live contest is the SDK layer, where
-  TanStack AI is converging on 1.0 and a tripwire re-opens the default when it gets there. Across
+  TanStack AI reached 1.0 on 2026-10-22; the default was re-weighed then and held (see TANSTACK AI 1.0). Across
   all three, the interoperable spec layer (A2UI/AG-UI/MCP) is where the category is standardizing
-  (see reading: Architectural Patterns for Generative UI in React).
+  (see reading: Architectural Patterns for Generative UI in React) — A2UI reached 1.0, its first
+  stable spec, on 2026-11-11 (Google; renderer SDKs for web, Android and iOS; agent SDKs for
+  Python/TypeScript/Dart; Atlassian, Bloomberg and ByteDance named as building on it), while the React
+  renderer @a2ui/react is still 0.16.x on npm (verified 2026-11-25) → the spec is stable and the React
+  binding is not yet.
+
+  TANSTACK AI 1.0 (2026-10-22 on npm, "TanStack AI 1.0: Still Your AI, Still Your Way" 2026-10-23;
+  verified vs the blog, the @tanstack/ai@1.0.0 GitHub release and npm 2026-11-25): a formal
+  commitment to the CORE APIs; the new agent harness ships alongside as experimental and stays on
+  0.x. "No new concepts": 1.0 removes every API 0.x had deprecated, but that removal is breaking in
+  practice — threadId is now required on every chat hook, ChatClient, chat() and the generation
+  functions (TanStack no longer invents one), addToolApprovalResponse is gone (resolve the
+  tool-approval interrupt with resolveInterrupt), the old wire formats ([DONE] SSE line, CUSTOM
+  approval events) are removed, so a 1.0 client needs a 1.0 server. Scale at 1.0: 23 provider
+  adapters plus openaiCompatible, eight UI frameworks (React, Vue, Solid, Svelte, Preact, Angular,
+  Octane, Remix + vanilla), coding-agent and 11 sandbox integrations; since the RC it added portable
+  SKILL.md agent skills, compaction, computer use, a cross-provider reasoning option and automatic
+  prompt caching; 1.0.1 took video generation out of experimental. RE-WEIGH (the tripwire's job):
+  the default stays on the Vercel AI SDK — ai 48.2M vs @tanstack/ai 4.2M weekly downloads and
+  @ai-sdk/react 14.1M vs @tanstack/ai-react 3.6M (npm, week to 2026-11-23); the AI-SDK-native UI
+  layer (AI Elements, json-render, assistant-ui's adapters) and the documented React Native path
+  are on the AI SDK side, and the 1.0 post never mentions React Native. TanStack AI is now a STABLE
+  choice rather than an RC bet: pick it for TanStack-stack apps, multi-modal generation hooks or
+  when a provider-neutral protocol (AG-UI) matters more than ecosystem breadth.
 
   TANSTACK AI (2026-09-24, verified vs the GitHub release + npm): RC PHASE since 2026-08-21 (0.48),
   with 24 tree-shakable provider adapters and AG-UI (20+ agent frameworks) as its official protocol,
@@ -59,7 +83,7 @@ note: >
   visible) when you re-render JS-side per token, and native parsing avoids that. Do not conflate the
   two packages when reading newsletter rows.
 
-  TAMBO WIND-DOWN (2026-10-15, verified vs Tambo's shutdown post, the tambo-ai/tambo README and the
+  TAMBO WIND-DOWN (2026-10-15; the 2026-10-31 cloud shutdown has now passed — re-stated 2026-11-25, verified vs Tambo's shutdown post, the tambo-ai/tambo README and the
   web-v0.136.0 release): Tambo Cloud closed new signups and keeps running until 2026-10-31, after which
   the hosted API stops; user data is deleted 2026-11-30. Tambo stays open source (MIT SDK + backend)
   and self-hostable, but the founder states the team has pivoted to a different product (Charming)
@@ -77,6 +101,8 @@ note: >
   It is the agent BACKEND you would surface through these UI libs, not a React UI library.
 
   HISTORY:
+  2026-11-25 RETIRED: Tambo Cloud rows moved to past tense (shut down 2026-10-31; self-host only). A2UI 1.0 stable spec (2026-11-11) noted; @a2ui/react still 0.16.x.
+  2026-11-25 CHALLENGED → SURVIVES (tripwire fired): TanStack AI 1.0 stable (2026-10-22) re-weighed against the Vercel AI SDK; default held on adoption (~11× downloads) and the AI-SDK-native UI layer; option row + when-clauses repinned, v1 breaking list recorded; tripwire @tanstack/ai ≥2.0.0 wired.
   2026-10-15 REOPENED: Tambo Cloud shuts down 2026-10-31 (signups closed; self-host only) — default and option row updated; shadcn/ui AI Elements (copy-in agentic UI patterns, replaces AI SDK Elements) added as an option row.
   2026-10-01 REOPENED: TanStack AI 0.63 (ai-worldlabs 3D-world generation, typed subagent inputSchema); added the thoughtbot just-in-time-AI-consent reading.
   2026-09-24 CORRECTED: react-native-streamdown 0.3.0 was published 2026-09-04 (the note gave its 2026-09-10 check date as the version date).
@@ -88,15 +114,17 @@ note: >
   2026-07-10 GAP CLOSED: TanStack AI added (three independent React Weekly signals, verified vs npm).
 defer_to_skill: null
 doc: null
-updated: 2026-10-15   # Tambo Cloud shutdown 2026-10-31 (self-host only; team pivoted); shadcn/ui AI Elements option row (replaces AI SDK Elements); prior 2026-10-01: TanStack AI 0.63: ai-worldlabs 3D-world generation + typed subagent inputSchema (firsthand, verified vs the release); prior 2026-09-24: TanStack AI 0.59 / ai-react 0.28 first-class subagents (firsthand) · corrected react-native-streamdown 0.3.0 publish date (2026-09-04); prior 2026-09-10: TanStack AI 0.54 + Vercel adapters (firsthand) · react-native-streamdown lead, distinct from the web Streamdown row — reconciled from harvest/2026-08-27
+updated: 2026-11-25   # Tambo Cloud shutdown passed (rows retired to self-host only); A2UI 1.0 spec; TanStack AI 1.0 stable (tripwire fired): re-weighed vs Vercel AI SDK, default held; v1 breaking list (threadId required, 1.0 client ↔ 1.0 server); 1.8.0 / ai-react 1.1.1; prior 2026-10-15: Tambo Cloud shutdown 2026-10-31 (self-host only; team pivoted); shadcn/ui AI Elements option row (replaces AI SDK Elements); prior 2026-10-01: TanStack AI 0.63: ai-worldlabs 3D-world generation + typed subagent inputSchema (firsthand, verified vs the release); prior 2026-09-24: TanStack AI 0.59 / ai-react 0.28 first-class subagents (firsthand) · corrected react-native-streamdown 0.3.0 publish date (2026-09-04); prior 2026-09-10: TanStack AI 0.54 + Vercel adapters (firsthand) · react-native-streamdown lead, distinct from the web Streamdown row — reconciled from harvest/2026-08-27
 tripwires:   # standing caveats as executable conditions — evaluated by `harvest firsthand`; fired ⇒ do the then:, update prose, remove the row
-  - when: { pkg: "@tanstack/ai", atleast: "1.0.0" }
-    then: "TanStack AI hit 1.0 stable (default says 'RC as of 2026-08, re-evaluate at 1.0') — re-weigh the default vs Vercel AI SDK and update the option row + when-clause pins"
-    added: 2026-08-24
+  - when: { pkg: "@tanstack/ai", atleast: "2.0.0" }
+    then: "TanStack AI cut a second major — read its migration guide, re-check whether the agent harness left experimental, and re-weigh the default vs the Vercel AI SDK on weekly downloads (2026-11-25: ai 48.2M vs @tanstack/ai 4.2M) and on React Native support"
+    added: 2026-11-25
 sources:
   - "https://github.com/software-mansion-labs/react-native-streamdown"
   - "https://json-render.dev/docs/ai-sdk"
   - "https://github.com/tambo-ai/tambo"
+  - "https://developers.googleblog.com/a2ui-10-build-delightful-fast-reliable-agentic-experiences/"
+  - "https://registry.npmjs.org/@a2ui/react/latest"
   - "https://tambo.co/blog/posts/tambo-is-shutting-down"
   - "https://github.com/tambo-ai/tambo/releases/tag/web-v0.136.0"
   - "https://ui.shadcn.com/docs/changelog/2026-10-ai-elements"
@@ -107,6 +135,8 @@ sources:
   - "https://tanstack.com/blog/vercel-partnership"
   - "https://tanstack.com/blog/generation-hooks"
   - "https://tanstack.com/blog/tanstack-ai-rc"
+  - "https://tanstack.com/blog/tanstack-ai-1-0"
+  - "https://github.com/TanStack/ai/releases/tag/%40tanstack/ai%401.0.0"
   - "https://registry.npmjs.org/ai/latest"
   - "https://registry.npmjs.org/react-native-streamdown"
   - "https://thoughtbot.com/blog/respecting-your-users-dread-of-the-clankers"

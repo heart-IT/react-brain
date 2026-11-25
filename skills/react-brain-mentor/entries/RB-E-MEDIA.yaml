@@ -8,12 +8,14 @@ platforms: [react, react-native]
 options:
   - { name: "VisionCamera (v5, Nitro)", tradeoff: "RN camera with JSI frame processors, rebuilt on Nitro in v5; the base for custom real-time frame pipelines (RB-E-NATIVE owns Nitro). 5.2.3 (2026-08-20, verified vs npm); v4 frozen at 4.7.3 (2025-11-12). See note: VISIONCAMERA V5." }
   - { name: "expo-camera", tradeoff: "Managed camera for Expo apps; simpler, fewer real-time hooks than VisionCamera; the scanner that works in Expo Go." }
-  - { name: "react-native-webrtc", tradeoff: "Low-level WebRTC bindings; you wire signaling/SFU yourself. Jumped from the M124 patch line to Chromium M155: 155.0.0 (2026-10-14, verified vs the 155.0.0 release + npm; major, peer react-native >=0.60.0 unchanged), now ahead of LiveKit's M144 fork — still prefer a calling SDK unless you own signaling. See note: WEBRTC LINES." }
-  - { name: "LiveKit / Daily / Agora / Stream Video", tradeoff: "WebRTC conferencing SDKs (RN + web); LiveKit is open-source + self-hostable, the others are hosted infra. @livekit/react-native 3.0.0 (2026-09-11, verified vs npm) moved to LiveKit-prefixed WebRTC builds; see note: WEBRTC LINES." }
+  - { name: "react-native-webrtc", tradeoff: "Low-level WebRTC bindings; you wire signaling/SFU yourself. Jumped from the M124 patch line to Chromium M155: 155.0.0 (2026-10-14, verified vs the 155.0.0 release + npm; major, peer react-native >=0.60.0 unchanged), still ahead of LiveKit's fork (150.x since 2026-11-17) — still prefer a calling SDK unless you own signaling. See note: WEBRTC LINES." }
+  - { name: "LiveKit / Daily / Agora / Stream Video", tradeoff: "WebRTC conferencing SDKs (RN + web); LiveKit is open-source + self-hostable, the others are hosted infra. @livekit/react-native 3.0.0 (2026-09-11, verified vs npm) moved to LiveKit-prefixed WebRTC builds; 3.2.0 (2026-11-17, verified vs npm + the 3.2.0 release) requires @livekit/react-native-webrtc ^150.2.0 — upgrade both together (and the Expo plugin); see note: WEBRTC LINES." }
   - { name: "Skia / Metal + MediaPipe / Vision / ML Kit", tradeoff: "GPU compositing (Skia/Metal) + on-device segmentation/detection (MediaPipe on Android, Vision on iOS) for filters/effects. See note: FILTER PIPELINE." }
   - { name: "expo-video / expo-audio", tradeoff: "Media PLAYBACK (not capture or calling), the replacements for expo-av, which is DEPRECATED (removed from Expo Go in SDK 55, no longer patched); expo-video splits player logic (VideoPlayer) from view (VideoView)." }
   - { name: "expo-image", tradeoff: "Image DISPLAY, the modern replacement for core <Image>: disk/memory caching, blurhash/thumbhash placeholders, transitions, faster decode; works in bare RN, not just Expo." }
-  - { name: "react-native-audio-api (Software Mansion)", tradeoff: "Web Audio API for RN: audio graphs, effects/filters via MediaElementAudioSourceNode; the 0.13 line (2026-07, verified vs npm) ships a stable <Audio/> component. The AUDIO-processing layer; playback-only needs go to expo-audio." }
+  - { name: "react-native-fast-image (10.x)", tradeoff: "The long-dormant SDWebImage/Glide image component is MAINTAINED AGAIN: no release between 8.6.3 (2022-10-31) and 8.6.4 (2026-09-24), then 9.x and 10.0.0 (2026-10-12) — a New Architecture-only native component and TurboModule (RN 0.83+, Expo SDK 55+; legacy-architecture apps stay on 9.x). 10.0 is BREAKING: resizeMode removed for objectFit (stretch → fill, center → scale-down) plus a new objectPosition, a single view with no children (FastImageBackground for overlays), the fallback prop removed, Android fades in by default, and the Android package renamed com.fastimage (matters only for manual package registration, class imports or custom ProGuard rules). 10.11.0 (2026-11-02, verified vs npm + the v10.0.0 release). Existing users: plan the 10.0 prop migration; new work: expo-image remains the default." }
+  - { name: "react-native-better-pdf / react-native-pdf (PDF viewing)", tradeoff: "PDF DISPLAY. react-native-pdf 7.0.5 (2026-08-13, ~1.08M dl/wk) is the incumbent: it bundles PDFium on Android and needs react-native-blob-util. react-native-better-pdf (GMI Software, MIT; 1.0.0 2026-10-12, 1.3.0 2026-11-23, ~53K dl/wk 2026-11-17..23, up from ~270 at launch; verified vs npm) uses the OS engines (PDFKit on iOS, PdfRenderer on Android) through Nitro Views, with no PDFium, WebView or blob-util. It needs the New Architecture, RN 0.83+, react-native-nitro-modules >=0.37 and an Expo dev build (no Expo Go). Its author's Android-emulator benchmark: a 1,000-page scan opens in 56 ms vs 622 ms and peaks at 142 MB vs 898 MB. On iOS both libraries use PDFKit, so the gap mostly vanishes. Search, text selection, password-protected PDFs and forms need Android 15, or 12–14 with SDK extension 13; on older Android versions they degrade." }
+  - { name: "react-native-audio-api (Software Mansion)", tradeoff: "Web Audio API for RN: audio graphs, effects/filters via MediaElementAudioSourceNode; 1.0.0 stable (2026-11-03; latest 1.0.1, verified vs npm + the 1.0.0 release) — out of 0.x, with breaking renames (event names lowercased, onPositionChangedInterval renamed, AudioBufferQueueSourceNode.start offset default) and audio worklets v2; the 0.13 line shipped the stable <Audio/> component. The AUDIO-processing layer; playback-only needs go to expo-audio." }
 recommend:
   default: "Camera → VisionCamera (frame processors) or expo-camera (managed). Video calling → LiveKit (open-source, self-hostable) or a hosted SDK (Daily/Agora/Stream), not raw react-native-webrtc. Real-time filters → process VisionCamera frames, GPU-composite, inject into the existing WebRTC source. Playback → expo-video/expo-audio; images → expo-image. Calling-SDK specifics are lightly vetted (confidence: low): prototype per-device."
   when:
@@ -27,6 +29,8 @@ recommend:
     - "code scanning inside Expo Go → expo-camera"
     - "shipping camera to prod NOW → VisionCamera v5 (pinned patch + a device-matrix pass; still stabilizing, see note; don't linger on v4, frozen since 2025-11)"
     - "displaying images (caching, blurhash placeholders, transitions) → expo-image, not core <Image>"
+    - "already on react-native-fast-image → it is maintained again; 10.x needs the New Architecture (RN 0.83+) and replaces resizeMode with objectFit — migrate props, or move to expo-image"
+    - "showing PDFs → react-native-better-pdf on the New Architecture (OS engines, bounded memory on long Android documents; new — pin it), else react-native-pdf (legacy arch, or Android <12 needing search/forms)"
     - "video/audio playback → expo-video / expo-audio (migrate off expo-av: deprecated, unpatched, out of Expo Go since SDK 55)"
     - "audio PROCESSING (graphs, effects, filters, real-time) → react-native-audio-api (Web Audio API; real-time discipline: rt-audio-pipeline-audit)"
     - "real-time pipeline correctness & perf → react-native-jsi skill (frame processors), then rt-audio-pipeline-audit (the real-time discipline transfers from audio)"
@@ -59,7 +63,9 @@ note: >
   implementation → an app mixing LiveKit with another WebRTC library should take 3.x; the
   maintained WebRTC line in RN was LiveKit's until 155.0.0; now the upstream package is the newer
   libwebrtc (M155 vs LiveKit's M144), while LiveKit's fork keeps the prefixed builds that avoid
-  collisions.
+  collisions. @livekit/react-native 3.2.0 (2026-11-17, verified vs npm) moves its fork dependency to
+  @livekit/react-native-webrtc ^150.2.0 (150.2.0 renames its native classes so it can sit in one app
+  beside other react-native-webrtc forks) → bump the two packages together.
 
   CALL UI (verified vs the Software Mansion callkeep-alternatives post, 2026-08-26, and npm):
   react-native-callkeep is dormant (4.3.16, 2024-11-18, still its latest) and built on the
@@ -80,6 +86,7 @@ note: >
   and no longer patched → the migrate row sequences expo-video + expo-audio.
 
   HISTORY:
+  2026-11-25 GAP CLOSED: react-native-fast-image revived (10.0 New-Arch-only, objectFit replaces resizeMode) — option + detect row; PDF viewing (react-native-better-pdf vs react-native-pdf) option row; react-native-audio-api 1.0 stable; LiveKit RN 3.2 ↔ webrtc fork 150.x lockstep.
   2026-10-15 REOPENED: react-native-webrtc 155.0.0 (2026-10-14) leaves the M124 patch line for Chromium M155; option row + when-clause + WEBRTC LINES updated.
   2026-09-24 REOPENED: react-native-webrtc now five M124 patches (was "2 releases since mid-2024");
   LiveKit RN 3.0.0 prefixed WebRTC builds; expo-callkit-telecom 0.4.x → 0.5.0 (LiveKit WebRTC
@@ -89,7 +96,7 @@ note: >
   2026-06-25 GAP CLOSED: entry created from the Margelo video-call filters deep-dive.
 defer_to_skill: react-native-jsi   # frame processors / native modules; real-time perf → rt-audio-pipeline-audit
 doc: "RB-E-MEDIA.md"   # long-form Explanation entry in content_dir
-updated: 2026-10-15   # react-native-webrtc 155.0.0 → Chromium M155 (off the M124 patch line; ahead of LiveKit's M144 fork); prior 2026-09-24: react-native-webrtc release count corrected (5 M124 patches), LiveKit RN 3.0.0 prefixed WebRTC, expo-callkit-telecom 0.5.0; prior 2026-09-10: native-call-UI clause gains the Android FCM one-service-slot collision — reconciled from harvest/2026-08-27
+updated: 2026-11-25   # fast-image 10 revived (option+detect); PDF viewing row (better-pdf / react-native-pdf); audio-api 1.0 stable; LiveKit 3.2 ↔ @livekit/react-native-webrtc 150.2 lockstep; prior 2026-10-15: react-native-webrtc 155.0.0 → Chromium M155 (off the M124 patch line; ahead of LiveKit's M144 fork); prior 2026-09-24: react-native-webrtc release count corrected (5 M124 patches), LiveKit RN 3.0.0 prefixed WebRTC, expo-callkit-telecom 0.5.0; prior 2026-09-10: native-call-UI clause gains the Android FCM one-service-slot collision — reconciled from harvest/2026-08-27
 reading:
   - title: "Building a video call app with filters"
     url: "https://blog.margelo.com/building-videocall-app-with-filters"
@@ -131,6 +138,12 @@ sources:
   - "https://blog.margelo.com/building-videocall-app-with-filters"
   - "https://expo.dev/changelog/sdk-55"
   - "https://github.com/livekit/client-sdk-react-native/releases/tag/%40livekit%2Freact-native%403.0.0"
+  - "https://github.com/livekit/client-sdk-react-native/releases/tag/%40livekit%2Freact-native%403.2.0"
+  - "https://github.com/DylanVann/react-native-fast-image/releases/tag/v10.0.0"
+  - "https://registry.npmjs.org/react-native-fast-image"
+  - "https://github.com/gmi-software/react-native-better-pdf"
+  - "https://github.com/wonday/react-native-pdf"
+  - "https://github.com/software-mansion/react-native-audio-api/releases/tag/1.0.0"
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "react-native-vision-camera", label: "VisionCamera", token: "visioncamera" }
   - { pkg: "expo-camera", label: "expo-camera", token: "expo-camera" }
@@ -139,6 +152,9 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "expo-av", label: "expo-av (DEPRECATED → expo-video/expo-audio)", token: "expo-av" }
   - { pkg: "expo-video", label: "expo-video (playback)", token: "expo-video" }
   - { pkg: "react-native-audio-api", label: "audio-api (Web Audio)", token: "audio-api" }
+  - { pkg: "react-native-fast-image", label: "FastImage (maintained again, 10.x New Arch)", token: "fast-image" }
+  - { pkg: "react-native-pdf", label: "react-native-pdf", token: "react-native-pdf" }
+  - { pkg: "react-native-better-pdf", label: "react-native-better-pdf", token: "better-pdf" }
   - { pkg: "react-native-qrcode-svg", label: "QR generation (qrcode-svg)", token: "scanning" }
   - { pkg: "expo-image-picker", label: "expo-image-picker", token: "camera" }
 migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-brain migrate`)
@@ -148,3 +164,9 @@ migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-
     effort: M
     why: "expo-av is DEPRECATED — removed from Expo Go in SDK 55 and no longer patched; expo-video splits player logic (VideoPlayer) from view (VideoView), expo-audio covers audio playback"
     receipts: ["https://expo.dev/changelog/sdk-55"]
+  - from: { pkg: "react-native-fast-image", below: "10.0.0" }
+    to: "react-native-fast-image 10.x (New Architecture) — or expo-image"
+    urgency: upgrade
+    effort: S
+    why: "maintained again after a 2022–2026 gap; 10.0 is New-Architecture-only (RN 0.83+, Expo SDK 55+) and BREAKING: resizeMode → objectFit (stretch → fill, center → scale-down), no children (FastImageBackground), fallback prop removed, Android package renamed com.fastimage; legacy-arch apps stay on 9.x"
+    receipts: ["https://github.com/DylanVann/react-native-fast-image/releases/tag/v10.0.0"]

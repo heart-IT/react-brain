@@ -6,20 +6,21 @@ status: reviewed   # long-form entry written + source-checked → encyclopedia/R
 confidence: low
 platforms: [react-native]
 options:
-  - { name: "react-native-executorch", tradeoff: "cross-platform on-device models (Meta ExecuTorch) with per-silicon delegates and worklet-callable JSI; tool-calling/embeddings since 0.4, OCR since 0.3. 0.10.5 (2026-10-06, verified vs npm 2026-10-08); 0.10 was a GROUND-UP REWRITE, and it still pins react-native-worklets <0.13, which rules out Reanimated 4.7 — see note: EXECUTORCH 0.10." }
+  - { name: "react-native-executorch", tradeoff: "cross-platform on-device models (Meta ExecuTorch) with per-silicon delegates and worklet-callable JSI; tool-calling/embeddings since 0.4, OCR since 0.3. 0.11.1 (2026-11-19, verified vs npm + the GitHub releases 2026-11-25); 0.10 was a GROUND-UP REWRITE, 0.11 (2026-10-27) adds TypeScript LLM runners with a llama.cpp-derived sampler, 16k contexts, an in-memory vector store, depth/inpainting models and (0.11.1) Reverb voice-cloning TTS + opt-in Qualcomm QNN. Worklets peer widened to <0.14 (Reanimated 4.7 OK, 4.8 not yet); RN floor 0.83 — see note: EXECUTORCH 0.11." }
   - { name: "@react-native-ai/apple", tradeoff: "Apple on-device LLM + SpeechAnalyzer (iOS 26); zero cloud, no model to ship; RN 0.80+ (preview). 0.12.0 (2026-01-28, verified vs npm 2026-09-24): eight months without a release, so the preview label is doing real work." }
-  - { name: "@react-native-ai/adk", tradeoff: "Google Gemini on ANDROID via the Agent Development Kit: on-device Gemini Nano + cloud models behind one Vercel-AI-SDK provider; tool calling + streaming; same react-native-ai family as the Apple provider. 0.12.1 (2026-07-07, verified vs npm 2026-09-24)." }
+  - { name: "@react-native-ai/android", tradeoff: "Google Gemini Nano on ANDROID via ML Kit GenAI behind one Vercel-AI-SDK provider; same react-native-ai family as the Apple provider. 0.13.0 (2026-11-11, verified vs npm). Replaces @react-native-ai/adk (deprecated on npm 'Replaced by @react-native-ai/android', last 0.12.1)." }
   - { name: "react-native-nitro-mlx", tradeoff: "Apple MLX on-device LLM + TTS/STT via Nitro Modules, with tool calling (ChatSession API); iOS 26+ ONLY; v0.7 (2026-08-22, verified vs npm 2026-09-24), ~100★ — niche/early." }
-  - { name: "react-native-rag", tradeoff: "on-device RAG over ExecuTorchLLM with a local vector store. 0.10.0 (2026-10-05, verified vs npm 2026-10-08) SHIPPED the executorch 0.10 migration: @react-native-rag/executorch 0.10.0 peers react-native-executorch ^0.10.4, @react-native-rag/op-sqlite 0.10.0 alongside; 0.9.0 remains the line for executorch 0.9. See note: RAG VERSION PINCER." }
+  - { name: "react-native-rag", tradeoff: "on-device RAG over ExecuTorchLLM with a local vector store. Tracks executorch minors in lockstep: 0.10.0 (2026-10-05) for executorch ^0.10.4; @react-native-rag/executorch 0.11.0 (2026-11-02, verified vs npm 2026-11-25) peers react-native-executorch ^0.11.0 and react-native-rag ^0.11.0; 0.9.0 remains the line for executorch 0.9. See note: RAG VERSION PINCER." }
   - { name: "@react-native-ai/llama", tradeoff: "llama.cpp behind the Vercel AI SDK provider interface: runs GGUF chat AND embedding models on one engine, which makes a hand-rolled local RAG pipeline practical; pair with react-native-nitro-sqlite + sqlite-vec (see reading: Fitting RAG in Your Pocket). 0.12.0 (2026-01-28, verified vs npm 2026-09-24)." }
   - { name: "offline speech (expo-speech-recognition / whisper.rn)", tradeoff: "speech-to-text without network; whisper.rn (0.7.2, ~800★, verified vs npm + repo 2026-07-28) is the concrete binding — whisper.cpp under the hood, and it also carries NVIDIA Parakeet ASR alongside Whisper." }
 recommend:
-  default: "Cross-platform on-device models → react-native-executorch (0.10+); Apple-only → @react-native-ai/apple (Apple's own models, nothing to ship); local RAG → react-native-rag 0.10 on executorch 0.10.4+ (packaged), or hand-roll it with @react-native-ai/llama + nitro-sqlite/sqlite-vec. Fast-moving (confidence: low): validate on-device perf before committing."
+  default: "Cross-platform on-device models → react-native-executorch (0.11+); Apple-only → @react-native-ai/apple (Apple's own models, nothing to ship); local RAG → react-native-rag on the matching executorch minor (0.11 ↔ 0.11, packaged), or hand-roll it with @react-native-ai/llama + nitro-sqlite/sqlite-vec. Fast-moving (confidence: low): validate on-device perf before committing."
   when:
     - "offline speech-to-text → expo-speech-recognition (managed path), else whisper.rn for whisper.cpp/Parakeet models"
     - "private/offline LLM over local docs → @react-native-ai/llama + nitro-sqlite/sqlite-vec (budget RAM for generator + embedder TOGETHER; see reading)"
-    - "packaged RAG on react-native-executorch 0.10 → react-native-rag 0.10 (@react-native-rag/executorch peers executorch ^0.10.4; still on executorch 0.9 → react-native-rag 0.9.0)"
-    - "Android with Gemini (on-device Nano or cloud) via ADK → @react-native-ai/adk"
+    - "packaged RAG → the react-native-rag minor matching your executorch minor (executorch 0.11 → @react-native-rag/executorch 0.11, 0.10.4+ → 0.10, 0.9 → 0.9.0); bump them together"
+    - "app on Reanimated 4.8 / Worklets 0.14 → not yet with executorch: 0.11.1 peers react-native-worklets <0.14.0, so hold Reanimated at 4.7 (Worklets 0.13.x)"
+    - "Android with on-device Gemini Nano → @react-native-ai/android (replaces the deprecated @react-native-ai/adk)"
     - "iOS 26+ only and want MLX with TTS/STT in one Nitro module → react-native-nitro-mlx (early; pin)"
 note: >
   Choose a runtime, not a model: the runtime (loading, tensors, hardware backend, JS bindings)
@@ -50,9 +51,23 @@ note: >
   iOS `use_frameworks!` duplicate-header build failures and silent setup failures, and pins
   react-native-worklets >=0.10.0 <0.13.0 (unchanged in 0.10.2 and in 0.10.5, 2026-10-06, verified vs
   npm 2026-10-08). Reanimated 4.7 requires Worklets 0.13.x (RB-E-ANIMATION), so an app on executorch
-  0.10.x stays on Reanimated 4.6 (Worklets 0.12.x, RN 0.83–0.87) until executorch widens that range. The repo also publishes
+  0.10.x stays on Reanimated 4.6 (Worklets 0.12.x, RN 0.83–0.87); 0.11 widens that range (see EXECUTORCH 0.11). The repo also publishes
   vX.Y.Z-libs GitHub tags (native library builds, v0.10.5-libs on 2026-09-22); those are not npm
   versions of the package.
+
+  EXECUTORCH 0.11 (0.11.0 2026-10-27, 0.11.1 2026-11-19; verified vs the GitHub releases + npm
+  2026-11-25): the worklets peer is now >=0.10.0 <0.14.0, so Reanimated 4.7 (Worklets 0.13.x) works
+  with it — the "stays on Reanimated 4.6" caveat is retired — but Reanimated 4.8.0 (2026-11-19) peers
+  Worklets 0.14.x, one past the range, so an executorch app holds Reanimated at 4.7. 0.11.1 also
+  declares the RN 0.83 floor as a peer. What 0.11 adds: LLM generation on modular TypeScript runners
+  (text, multimodal, Gemma) with a llama.cpp-derived sampler and constrained decoding, re-exported LLMs
+  with up to 16k-token contexts, createVectorStore (in-memory top-k with metadata filters) and ColBERT
+  late-interaction embeddings, depth estimation and inpainting models, Vulkan as the Android default
+  for more vision models; 0.11.1 adds Reverb on-device voice-cloning TTS and an opt-in Qualcomm QNN
+  backend on Snapdragon 8 Gen 1+ (apps need useLegacyPackaging = true). BREAKING: the @experimental LLM
+  runner API changed (chat/generation APIs did not), 15 unquantized XNNPACK LLM variants were removed
+  and 66 more are deprecated for removal in v1.0.0. The v0.11.2-libs native build notes that MLX models
+  exported for v0.11.x will need re-exporting — not device-tested yet, so watch the next npm minor.
 
   RAG VERSION PINCER (2026-09-24, verified vs npm + the GitHub repo): react-native-rag is still 0.9.0
   (last publish 2026-05-26) and built against executorch's pre-0.10 API, while executorch's legacy
@@ -70,6 +85,8 @@ note: >
   worklets runtime; RB-E-NATIVE owns JSI memory and threading; RB-E-STORAGE owns the vector store.
 
   HISTORY:
+  2026-11-25 REOPENED: @react-native-ai/adk deprecated on npm → @react-native-ai/android (on-device Gemini Nano via ML Kit GenAI); option row, when-clause, detect row, migrate rule.
+  2026-11-25 REOPENED (tripwire fired): executorch 0.11 widened its Worklets peer to <0.14 (Reanimated 4.7 OK, 4.8 not); 0.11 features + breaking list; react-native-rag 0.11 tracks it; tripwire executorch ≥0.12.0 wired.
   2026-10-08 REOPENED: react-native-rag 0.10.0 shipped the executorch 0.10 migration — packaged RAG is back on the current executorch; default lists both paths.
   2026-10-08 CORRECTED: executorch npm latest is 0.10.5 (2026-10-06); 0.10.4 (2026-09-28) became a real npm release after the 09-24 correction. Its Worklets <0.13 pin keeps executorch apps on Reanimated 4.6.
   2026-09-24 CORRECTED: executorch npm latest is 0.10.2 — the "0.10.4" cited 2026-09-21 is a v0.10.4-libs GitHub tag; @react-native-ai/apple 0.12.0 was published 2026-01-28 (2026-02-11 is the registry's metadata-modified date).
@@ -83,12 +100,13 @@ note: >
   2026-07-28 GAP CLOSED: whisper.rn named as the offline-ASR binding (+ Parakeet).
 defer_to_skill: null
 doc: "RB-E-ONDEVICE-AI.md"   # long-form Explanation entry in content_dir
-updated: 2026-10-08   # react-native-rag 0.10.0 ships the executorch 0.10 migration (pincer resolved); executorch 0.10.5, Worklets <0.13 pin vs Reanimated 4.7; prior 2026-09-24: corrected executorch latest (npm 0.10.2; 0.10.4 was a -libs tag) and the apple provider date (0.12.0 = 2026-01-28) · react-native-rag PR #23 migrates to executorch 0.10 (open) → default local-RAG pick is the llama path; prior 2026-09-21: RAG version pincer RE-CHECKED and unchanged: rag still 0.9.0 (2026-05-26) against executorch 0.10.4 — four months of divergence
+updated: 2026-11-25   # @react-native-ai/adk deprecated → @react-native-ai/android (row, clause, detect, migrate); executorch 0.11/0.11.1 (tripwire fired): Worklets peer <0.14 — Reanimated 4.7 caveat retired, 4.8 not yet; TS LLM runners, vector store, Reverb TTS, QNN; rag 0.11 lockstep; prior 2026-10-08: react-native-rag 0.10.0 ships the executorch 0.10 migration (pincer resolved); executorch 0.10.5, Worklets <0.13 pin vs Reanimated 4.7; prior 2026-09-24: corrected executorch latest (npm 0.10.2; 0.10.4 was a -libs tag) and the apple provider date (0.12.0 = 2026-01-28) · react-native-rag PR #23 migrates to executorch 0.10 (open) → default local-RAG pick is the llama path; prior 2026-09-21: RAG version pincer RE-CHECKED and unchanged: rag still 0.9.0 (2026-05-26) against executorch 0.10.4 — four months of divergence
 sources:
   - "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.10.0"
   - "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.10.1"
   - "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.8.0"
   - "https://registry.npmjs.org/@react-native-ai/adk/latest"
+  - "https://registry.npmjs.org/@react-native-ai/android/latest"
   - "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.3.0"
   - "https://github.com/corasan/react-native-nitro-mlx"
   - "https://github.com/mybigday/whisper.rn"
@@ -99,6 +117,8 @@ sources:
   - "https://registry.npmjs.org/react-native-rag/latest"
   - "https://registry.npmjs.org/@react-native-rag/executorch/latest"
   - "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.10.5"
+  - "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.11.0"
+  - "https://github.com/software-mansion/react-native-executorch/releases/tag/v0.11.1"
 reading:
   - title: "Fitting RAG in Your Pocket: Local Retrieval in React Native"
     url: "https://margelo.com/blog/fitting-RAG-in-your-pocket"
@@ -127,11 +147,19 @@ reading:
 detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; token matched against recommend text)
   - { pkg: "react-native-executorch", label: "ExecuTorch", token: "executorch" }
   - { pkg: "@react-native-ai/apple", label: "Apple on-device LLM", token: "apple" }
-  - { pkg: "@react-native-ai/adk", label: "Gemini ADK (Android)", token: "adk" }
+  - { pkg: "@react-native-ai/android", label: "Gemini Nano (Android, ML Kit GenAI)", token: "gemini nano" }
+  - { pkg: "@react-native-ai/adk", label: "Gemini ADK (Android) — DEPRECATED, replaced by @react-native-ai/android", token: "adk" }
   - { pkg: "react-native-rag", label: "react-native-rag", token: "rag" }
   - { pkg: "react-native-nitro-mlx", label: "MLX (Apple, Nitro)", token: "mlx" }
+migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-brain migrate`)
+  - from: { pkg: "@react-native-ai/adk" }
+    to: "@react-native-ai/android"
+    urgency: deprecated
+    effort: S
+    why: "@react-native-ai/adk is deprecated on npm ('Replaced by @react-native-ai/android'); the replacement is the same callstackincubator/ai provider family on the Vercel AI SDK provider surface, scoped to on-device Gemini Nano via ML Kit GenAI — re-check any cloud-model path you relied on"
+    receipts: ["https://registry.npmjs.org/@react-native-ai/adk/latest", "https://registry.npmjs.org/@react-native-ai/android/latest"]
 
 tripwires:   # standing caveats as executable conditions — evaluated by `harvest firsthand`; fired ⇒ do the then:, update prose, remove the row
-  - when: { pkg: "react-native-executorch", atleast: "0.11.0" }
-    then: "executorch cut a new minor — re-read its react-native-worklets peer (>=0.10.0 <0.13.0 at 0.10.5); if it admits 0.13.x, drop the 'stays on Reanimated 4.6' caveat from the note"
-    added: 2026-10-08
+  - when: { pkg: "react-native-executorch", atleast: "0.12.0" }
+    then: "executorch cut a new minor — re-read its react-native-worklets peer (>=0.10.0 <0.14.0 at 0.11.1); if it admits 0.14.x, drop the 'hold Reanimated at 4.7' when-clause and EXECUTORCH 0.11 caveat; check whether MLX models need re-exporting (v0.11.2-libs note) and bump the react-native-rag lockstep line"
+    added: 2026-11-25

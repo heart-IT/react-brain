@@ -82,6 +82,7 @@ note: >
   RB-E-META-FRAMEWORKS owns rendering strategy behind the web metrics.
 
   HISTORY:
+  2026-11-25 READING: CrUX experimental soft-navigation Core Web Vitals (Chrome 151 Soft Navigations API).
   2026-10-15 CORRECTED: EAS Observe records native crashes since 2026-10-07 (expo-observe 57.0.21+,
   error reporting still preview) — the "no native crashes" lines in the option row, when-clause and
   note were stale; default unchanged.
@@ -91,7 +92,7 @@ note: >
   2026-07-10 GAP CLOSED: @callstack/inspector added (release-build profiling, verified vs npm).
 defer_to_skill: null
 doc: "RB-E-OBSERVABILITY.md"   # long-form Explanation entry in content_dir
-updated: 2026-10-15   # EAS Observe native crash reporting (2026-10-07, expo-observe 57.0.21+, preview) — 'not a crash reporter' retired, Sentry default holds; prior 2026-09-24: version receipts re-checked vs npm: Bugsnag 9.0.0 major, @sentry/react 11; prior 2026-09-21: expo-observe AppMetrics DEPRECATED → Observe, plus the SDK 58 error-reporting surface (ObserveErrorBoundary/reportError/clientId)
+updated: 2026-11-25   # CrUX experimental soft-navigation CWV reading (SPA routes measured per destination URL); prior 2026-10-15: EAS Observe native crash reporting (2026-10-07, expo-observe 57.0.21+, preview) — 'not a crash reporter' retired, Sentry default holds; prior 2026-09-24: version receipts re-checked vs npm: Bugsnag 9.0.0 major, @sentry/react 11; prior 2026-09-21: expo-observe AppMetrics DEPRECATED → Observe, plus the SDK 58 error-reporting surface (ObserveErrorBoundary/reportError/clientId)
 sources:
   - "https://expo.dev/changelog/native-crash-reporting-in-eas-observe"
   - "https://expo.dev/changelog/sdk-58-beta"
@@ -102,6 +103,12 @@ sources:
   - "https://docs.expo.dev/eas/observe/introduction/"
   - "https://expo.dev/blog/introducing-observe"
 reading:
+  - title: "Experimental soft navigation metrics now available in CrUX"
+    url: "https://web.dev/blog/crux-experimental-soft-navs/"
+    by: "Annie Sullivan (Google Chrome)"
+    what: "After the Soft Navigations API shipped in Chrome 151, CrUX publishes EXPERIMENTAL versions of all three Core Web Vitals that blend soft (client-side route) navigations with hard loads — experimental_largest_contentful_paint_with_softnavs, …interaction_to_next_paint…, …cumulative_layout_shift…. Each in-app view change that updates content and URL is measured as its own navigation and reported under the destination URL, instead of every SPA interaction and layout shift being charged to the landing page. Stable CWV scores are unchanged while these are evaluated. Only SPAs with heavy follow-up navigation move (about 70% of origins have under 5% soft navs, but 35–42% of the top 1,000 sites exceed 50%); for them LCP typically improves and INP/CLS become attributable per route. CrUX Vis has an 'Include soft navigations' toggle."
+    claim: "Your web app routes client-side — CrUX now reports experimental soft-navigation LCP/INP/CLS per destination URL; check your routes there before trusting landing-page-only Core Web Vitals."
+    applies_when: { deps: ["react-router", "next", "@tanstack/react-router", "react-router-dom"], platforms: [react], stages: [production, scale] }
   - title: "How to find a Next.js memory leak in production"
     url: "https://xabierlameiro.com/blog/nextjs/nextjs-memory-leak-in-production"
     by: "Xabier Lameiro"

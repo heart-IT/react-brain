@@ -9,7 +9,7 @@ options:
   - { name: "fetch (built-in)", tradeoff: "the default on both platforms — RN's WHATWG polyfill over native networking, the browser's native fetch on web; fine for most apps" }
   - { name: "expo/fetch", tradeoff: "WinterTC-compliant fetch with streaming; installed as the global fetch since Expo SDK 56 (no import needed; opt out with EXPO_PUBLIC_USE_RN_FETCH=1) — the modern managed default (verified vs the SDK 56 changelog)" }
   - { name: "react-native-nitro-fetch (Margelo)", tradeoff: "drop-in native fetch on Cronet (Android) / URLSession (iOS): HTTP/1-2-3+QUIC, Brotli, disk cache, prefetch, worklet parsing off the JS thread. Vendor harness ~1.3x (~23%) vs built-in; Expensify in production: 15-30% faster requests, −267ms iOS / −650ms Android P50 warm start. 1.9.0 (2026-10-15, verified vs npm + the GitHub release; peers nitro-modules >=0.37.1) switches iOS WebSockets to Network.framework BY DEFAULT, which bypasses App Transport Security and NSPinnedDomains pinning — see note: NITRO-FETCH" }
-  - { name: "axios", tradeoff: "the ubiquitous promise client (interceptors, defaults, wide team familiarity); runs over XHR in RN — no reason to churn OFF it, little reason to start ON it for new work. 1.20.0 (2026-08-26, verified vs npm)" }
+  - { name: "axios", tradeoff: "the ubiquitous promise client (interceptors, defaults, wide team familiarity); runs over XHR in RN — no reason to churn OFF it, little reason to start ON it for new work. 1.21.1 (2026-11-09, verified vs npm); SECURITY FLOOR 1.21.0 on Node/SSR — see note: AXIOS PROXY" }
   - { name: "ky / ofetch", tradeoff: "small fetch wrappers (retries, hooks, typed convenience), web-leaning. ky 2.1.0 (2026-08-28), ofetch (unjs) 1.5.1 (2025-11-01), verified vs npm" }
 recommend:
   default: "fetch (built-in) on both platforms: the browser's native fetch on react; on react-native the built-in fetch, which on Expo SDK 56+ is already expo/fetch globally. The bigger win in most apps is the CACHE layer above it (TanStack Query, RB-E-DATA), not the client. The pick changes to react-native-nitro-fetch only when the network layer is a MEASURED hot path (cold-start requests, media, HTTP/3 backends) or you need prefetch/worklet parsing."
@@ -53,11 +53,19 @@ note: >
   web cancellation patterns (per-request deadlines, merged signals) work unmodified.
 
 
+  AXIOS PROXY (2026-11-25, verified vs the axios GHSAs published 2026-11-24 + npm): two HIGH
+  advisories in axios's NODE http adapter, fixed in 1.21.0 / 0.35.0 — GHSA-wwgw-vggh-5g74 (`proxy:
+  false` is not honored when the Node agent has native proxyEnv support, e.g. Node 22.21+/24.5+ with
+  NODE_USE_ENV_PROXY=1 or --use-env-proxy, so a proxy can see URLs, headers, credentials and bodies)
+  and GHSA-g987-ghpm-49w8 (NO_PROXY entries miss equivalent IDN/IPv6 forms). → Servers, SSR and
+  Node scripts on axios take ≥1.21.0; the React Native XHR path is not the affected adapter.
+
   CROSS-REFERENCES: RB-E-DATA owns caching, retries and invalidation; RB-E-AI-UI owns the
   streaming-token UI; RB-E-P2P owns the no-HTTP lane.
 
 
   HISTORY:
+  2026-11-25 REOPENED: axios security floor 1.21.0 for Node/SSR (two high proxy-bypass GHSAs, 2026-11-24); pin 1.20.0 → 1.21.1.
 
   2026-10-15 REOPENED: nitro-fetch 1.9.0 — iOS WebSockets default to Network.framework, bypassing ATS + NSPinnedDomains pinning (opt out via NitroWebSocketsUseNetworkFramework=false); nitro-modules peer ≥0.37.1.
 
@@ -67,7 +75,7 @@ note: >
   Weekly first harvest (nitro-fetch featured twice; SDK 56 made expo/fetch the global default).
 defer_to_skill: null
 doc: "RB-E-NETWORKING.md"   # long-form Explanation entry in content_dir
-updated: 2026-10-15   # nitro-fetch 1.9.0: iOS WebSockets on Network.framework by default bypass ATS + NSPinnedDomains pinning (Info.plist opt-out); nitro-modules ≥0.37.1; prior 2026-10-01: nitro-fetch pin 1.7.0 → 1.8.0 (formData() for urlencoded bodies, timeoutMs/abort-reason fixes); prior 2026-09-24: nitro-fetch pin 1.6.3 → 1.7.0; abort modernization shipped in RN 0.87.0; axios/ky/ofetch pins; prior 2026-09-01: Expensify production receipt for nitro-fetch (15-30% requests, −200ms+ startup; margelo blog) + pin 1.6.1 → 1.6.3
+updated: 2026-11-25   # axios 1.21.0 security floor (Node proxy-bypass GHSAs); prior 2026-10-15: nitro-fetch 1.9.0: iOS WebSockets on Network.framework by default bypass ATS + NSPinnedDomains pinning (Info.plist opt-out); nitro-modules ≥0.37.1; prior 2026-10-01: nitro-fetch pin 1.7.0 → 1.8.0 (formData() for urlencoded bodies, timeoutMs/abort-reason fixes); prior 2026-09-24: nitro-fetch pin 1.6.3 → 1.7.0; abort modernization shipped in RN 0.87.0; axios/ky/ofetch pins; prior 2026-09-01: Expensify production receipt for nitro-fetch (15-30% requests, −200ms+ startup; margelo blog) + pin 1.6.1 → 1.6.3
 reading:
   - title: "react-native-nitro-fetch — architecture & benchmarks"
     url: "https://github.com/margelo/react-native-nitro-fetch"
@@ -82,6 +90,8 @@ reading:
     claim: "You use react-native-nitro-fetch — Expensify's rollout is the calibration point: 15-30% faster requests, with the startup win coming from prefetch-before-JS (account-scoped keys, pre-runtime token refresh); on Android Cronet you own cert pinning."
     applies_when: { deps: ["react-native-nitro-fetch"], platforms: [react-native] }
 sources:
+  - "https://github.com/axios/axios/security/advisories/GHSA-wwgw-vggh-5g74"
+  - "https://github.com/axios/axios/security/advisories/GHSA-g987-ghpm-49w8"
   - "https://github.com/react/react-native/commit/6f3375a140b10cffe9bed3dd72a017ece97bbbba"
   - "https://github.com/margelo/react-native-nitro-fetch"
   - "https://github.com/margelo/react-native-nitro-fetch/releases/tag/v1.8.0"

@@ -85,11 +85,20 @@ note: >
   environment diagnosis with non-zero exit, --json, --offline) and fix a path-traversal vulnerability.
   For a pnpm monorepo this removes a dependency (changesets) rather than adding one.
 
+  XCODE 27 (2026-11-25, pointer): Xcode 27 removed Simulator.app for Device Hub, so scripts that
+  `open -a Simulator` and old Expo CLIs stop finding the simulator — RB-E-RN-VERSIONS owns the fix
+  (Expo CLI for SDK 56–58 is Device Hub aware).
+
+  DEAD CODE (2026-11-25, verified vs the TkDodo talk page): unused files, exports and dependencies
+  are a lint lane the ESLint/Oxlint options here don't cover; Knip (6.48.0, 2026-11-22, verified vs
+  npm) is the tool the reading uses, at ~28k removed lines.
+
   CROSS-REFERENCES: engineering-principles owns architecture/boundaries depth; RB-E-BUILD owns bundler
   choice and pnpm 12; RB-E-SECURITY owns supply chain; RB-E-AI-DEVTOOLS owns the agent-written-code
   review layer.
 
   HISTORY:
+  2026-11-25 GAP CLOSED: dead-code detection (TkDodo's Knip talk reading); Xcode 27 Device Hub pointer to RB-E-RN-VERSIONS.
   2026-10-15 REOPENED: ESLint 10 breaks eslint-plugin-react 7.37.5 / eslint-plugin-import 2.32.0 (removed rule-context APIs); eslint-config-next shims them from 16.4.0.
   2026-09-24 CORRECTED: "Sentry has NO eslint" read as "no ESLint run" — eslint is back as a
   devDependency to host plugins under Oxlint's jsPlugins; Oxlint pin moved 1.83 → 1.85.0.
@@ -101,8 +110,12 @@ note: >
   2026-07-28 GAP CLOSED: pnpm 11.11+ workspace versioning fires the twir-290 reopen signal.
 defer_to_skill: engineering-principles
 doc: "RB-E-DX.md"   # long-form Explanation entry in content_dir
-updated: 2026-10-15   # ESLint 10 vs eslint-plugin-react/import (removed rule-context APIs; eslint-config-next 16.4.0+ shims them); prior 2026-09-24: version receipts re-checked vs npm (Oxlint 1.85.0, pnpm 12.6.0); Sentry's Oxlint lane runs ESLint plugins via jsPlugins (census follow-up); prior 2026-09-21: Oxlint 1.83 updates its rules for React 19.3 — the third lint lane keeps pace with the recommended React line
+updated: 2026-11-25   # Knip dead-code reading; Xcode 27 Device Hub pointer; prior 2026-10-15: ESLint 10 vs eslint-plugin-react/import (removed rule-context APIs; eslint-config-next 16.4.0+ shims them); prior 2026-09-24: version receipts re-checked vs npm (Oxlint 1.85.0, pnpm 12.6.0); Sentry's Oxlint lane runs ESLint plugins via jsPlugins (census follow-up); prior 2026-09-21: Oxlint 1.83 updates its rules for React 19.3 — the third lint lane keeps pace with the recommended React line
 reading:
+  - title: "Dead Code Shouldn't Exist: How We Removed 28k Lines of Code, One Knip at a Time"
+    url: "https://tkdodo.eu/blog/dead-code-shouldnt-exist"
+    by: "Dominik Dorfmeister (TkDodo, TanStack Query maintainer)"
+    what: "Slides and transcript of a conference talk (given at React Paris, JSHeroes, JSNation and others): removing ~28k lines of unused files, exports and dependencies with Knip. The only dead-code-detection reading in DX — unused exports and dependencies are a lint lane the ESLint/Oxlint options don't cover."
   - title: "Best CI/CD for mobile apps in 2026: a practical comparison"
     url: "https://expo.dev/blog/best-ci-cd-for-mobile-apps"
     by: "Expo (VENDOR — comparing its own EAS Workflows)"
@@ -114,6 +127,7 @@ reading:
     claim: "You ship Expo at scale — Doctolib's blueprint runs the bare workflow without EAS: fingerprint caching + JS patching halved CI builds while contributors grew 9→105."
     applies_when: { deps: ["expo"], stages: [scale] }
 sources:
+  - "https://registry.npmjs.org/knip"
   - "https://github.com/vercel/next.js/pull/99628"
   - "https://registry.npmjs.org/eslint-plugin-react"
   - "https://registry.npmjs.org/eslint-config-next"

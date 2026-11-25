@@ -9,7 +9,7 @@ options:
   - { name: "useState/useReducer + Context", tradeoff: "Zero-dep; right for local state and low-frequency globals. Every Context consumer re-renders on any value change, so re-render scope is hard to control at scale." }
   - { name: "Zustand", tradeoff: "Tiny selector-based store with minimal boilerplate; selectors keep re-renders to the slice read. A State-of-React-2025 favorite (see note)." }
   - { name: "Jotai (3.x)", tradeoff: "Atomic, fine-grained subscriptions for naturally derived state. v3 (2026-09-08, verified vs npm) keeps the hooks API but is ESM-only, React 18+, Node ≥22.12, with atomFamily and the babel plugins split out (see migrate)." }
-  - { name: "Redux Toolkit (2.x)", tradeoff: "Structured, devtools, larger surface; earns its weight on large teams with auditable transitions. React-Redux `connect` HOC deprecated → use hooks." }
+  - { name: "Redux Toolkit (2.x)", tradeoff: "Structured, devtools, larger surface; earns its weight on large teams with auditable transitions. React-Redux `connect` HOC deprecated → use hooks. 2.15.0 (2026-11-18, verified vs npm); 3.0 announced — see note: RTK 3.0." }
   - { name: "XState (5.x) / XState Store", tradeoff: "State machines / statecharts for flows where legal transitions are the hard part; Store 4.x is a lighter signal-style store." }
   - { name: "TanStack Store / Signals", tradeoff: "Fine-grained reactive store (alien-signals core) underpinning TanStack Router/Table/Form; usually consumed transitively through those, not picked as the app store." }
   - { name: "Legend State", tradeoff: "Fine-grained observables + built-in sync/persistence; decouples ownership from subscription so re-renders push to leaf nodes; smaller ecosystem than Zustand/Jotai. npm latest 2.1.15 (2024-08-30), v3 on the beta tag (3.0.0-beta.48, 2026-07-12; verified vs npm 2026-09-24)." }
@@ -21,7 +21,7 @@ recommend:
     - "tiny app / a few shared values → useState + Context (no library)"
     - "complex multi-step flows / statecharts → XState"
     - "already on Redux and it's fine → keep RTK (migrate only for a concrete pain)"
-    - "already on MobX or Valtio and it works → keep it (store-to-store migrations rarely repay their cost; MobX 7 needs React 18+, see migrate)"
+    - "already on MobX or Valtio and it works → keep it (store-to-store migrations rarely repay their cost; MobX 7 needs React 18+, see migrate); adopting React Compiler on MobX → mobx-react-plugin (auto observer + 'use no memo', see note: MOBX + REACT COMPILER)"
     - "want fine-grained atoms → Jotai (v3; see migrate for the v2-to-v3 move)"
     - "leaf-level re-render hot paths where ownership must be decoupled from subscription → Legend State (see reading 'How to Build the Fastest Apps: Break the Rules'; the principle also works with Jotai atoms or Zustand selectors)"
     - "state that must survive a refresh or a shared link (filters, tabs, pagination, search) → nuqs (in the URL, web; a third bucket, not a Zustand/Query replacement)"
@@ -44,10 +44,27 @@ note: >
   rewrite; an app on v2 with no deprecation warnings should run on v3 as is. The migrate rule owns
   the checklist.
 
+  RTK 3.0 (2026-11-01, verified vs Mark Erikson's roadmap discussion + npm 2.15.0 2026-11-18):
+  Redux Toolkit 3.0 is planned roughly 6–8 months out — ESM-only, with breaking changes:
+  state.api.queries re-nested by endpoint name (code that walks Object.keys(state.api.queries)
+  breaks), createSlice's extraReducers renamed respondTo (alias in 2.17, removal in 3.0), and
+  redux-thunk folded into the redux core. 2.14–2.17 ship the groundwork and opt-ins first (2.15
+  gives each store its own RTK Query runtime). → Staying on RTK is still fine; stop reading RTK
+  Query's internal state shape and adopt the 2.x opt-ins as they land so 3.0 is a codemod, not a
+  rewrite. A tripwire watches for 3.0.0.
+
+  MOBX + REACT COMPILER (2026-11-25, verified vs npm + the package source): mobx-react-plugin 1.0
+  (2026-11-06; 1.0.3 latest) is a Babel plugin (plus a Vite wrapper) that wraps components in
+  observer(), adds "use no memo" so React Compiler leaves MobX components alone, and turns async
+  store methods into flows. Peers mobx ^7, mobx-react-lite ^5, React 18/19; list it BEFORE the
+  compiler in the Babel plugins. → A MobX app adopting React Compiler no longer hand-annotates
+  opt-outs.
+
   RB-E-DATA owns server state and local-first sync; RB-E-FORMS owns why form fields stay out of the
   global store; react-native-best-practices owns selector and re-render wiring rules.
 
   HISTORY:
+  2026-11-25 REOPENED: RTK 3.0 roadmap (ESM-only, queries re-nested, extraReducers → respondTo) noted + tripwire; mobx-react-plugin 1.0 (MobX × React Compiler, reopens the twir-301 MobX PR skip); xstate ≥6 tripwire.
   2026-10-08 GAP CLOSED: first STATE source on how React Compiler changes store choice — the jjenzz context-vs-store benchmark reading.
     2026-10-01 CORRECTED: Jotai 3.0.0 shipped a useAtomValue regression (missed synchronous onMount
     updates), fixed in 3.0.1 — the migrate rule's floor moved from 3.0.0 to 3.0.1.
@@ -55,7 +72,7 @@ note: >
     2026-06-25 CHALLENGED → SURVIVES (high): nothing has overtaken Zustand; local-first (TanStack DB) builds on TanStack Query rather than replacing it.
 defer_to_skill: react-native-best-practices  # re-render/perf rules (e.g. RN-RULE-ATOMIC-STATE)
 doc: "RB-E-STATE.md"   # long-form Explanation entry in content_dir
-updated: 2026-10-08   # React Compiler + context reading (context consumer vs useSyncExternalStore benchmark); prior 2026-10-01: Jotai 3 migrate rule floor moved 3.0.0 → 3.0.1 (useAtomValue regression fix); prior 2026-09-24: Legend State status (npm latest 2.1.15, v3 beta); nuqs 2.10 adapter scope corrected; prior 2026-09-10: nuqs named for the entry's existing URL-view-state axis — reconciled from harvest/2026-09-03 · Jotai 3 migrate rule (firsthand)
+updated: 2026-11-25   # RTK 3.0 roadmap + tripwire, mobx-react-plugin 1.0, xstate 6 tripwire; prior 2026-10-08: React Compiler + context reading (context consumer vs useSyncExternalStore benchmark); prior 2026-10-01: Jotai 3 migrate rule floor moved 3.0.0 → 3.0.1 (useAtomValue regression fix); prior 2026-09-24: Legend State status (npm latest 2.1.15, v3 beta); nuqs 2.10 adapter scope corrected; prior 2026-09-10: nuqs named for the entry's existing URL-view-state axis — reconciled from harvest/2026-09-03 · Jotai 3 migrate rule (firsthand)
 reading:
   - title: "Making React Context Cheap with React Compiler"
     url: "https://jjenzz.com/making-react-context-cheap/"
@@ -104,6 +121,9 @@ reading:
     by: "Alex Russell"
     what: "The vocabulary attack on this entry's own subject: Russell argues that Redux, MobX, Zustand — and React itself — don't MANAGE state, they PROPAGATE it, and that real state management is about time and conflicts (the problem CRDTs and sync engines actually solve). Deliberately provocative, and Redux maintainer Mark Erikson pushed back publicly, so read it as a framing argument rather than a verdict. Its durable value here is a third axis next to the client-vs-server split: when your problem is concurrent edits and reconciliation, no propagation library is the answer — that's the local-first/sync-engine row (TanStack DB, Zero — see RB-E-DATA)."
 sources:
+  - "https://github.com/reduxjs/redux-toolkit/discussions/5536"
+  - "https://registry.npmjs.org/mobx-react-plugin/latest"
+  - "https://github.com/mobxjs/mobx/tree/main/packages/mobx-react-plugin"
   - "https://jjenzz.com/making-react-context-cheap/"
   - "https://nuqs.dev/docs/changelog"
   - "https://nuqs.dev/docs/adapters"
@@ -133,6 +153,13 @@ migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-
     effort: M
     why: "MobX 7 (2026-07-30) drops the ES5/non-proxy fallback entirely — Proxy-backed observables are now the only mode, so `configure({ useProxies })` and `{ proxy: false }` are gone; legacy decorators are no longer supported (Stage-3 `@observer` stays in mobx-react); namespaced properties became named exports (observable.ref → observableRef, comparer.structural → compareStructural); the public `trace` API and mobx-react's Provider/inject were removed, and the React bindings now require React 18+. Pays for itself in bundle: the ESM production build drops 17.02 → 13.96 KiB gzip"
     receipts: ["https://github.com/mobxjs/mobx/releases/tag/mobx%407.0.0", "https://registry.npmjs.org/mobx/latest"]
+tripwires:   # standing caveats as executable conditions — evaluated by `harvest firsthand`; fired ⇒ do the then:, update prose, remove the row
+  - when: { pkg: "@reduxjs/toolkit", atleast: "3.0.0" }
+    then: "RTK 3.0 shipped — confirm ESM-only + the state.api.queries re-nesting and extraReducers→respondTo breaks against the release notes, update the RTK option row and the RTK 3.0 note, and add a migrate rule (codemods if shipped)"
+    added: 2026-11-25
+  - when: { pkg: "xstate", atleast: "6.0.0" }
+    then: "XState 6 shipped (6.0.0-beta.5 on npm 2026-11; @xstate/react alongside) — update the XState option row and add a migrate rule if v5→v6 has breaks"
+    added: 2026-11-25
 detect_source:   # source-level signals owned by this entry (regex over repo source)
   - pattern: "\\bcreateContext\\s*\\("
     min_files: 5

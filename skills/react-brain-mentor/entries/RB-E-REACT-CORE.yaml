@@ -12,19 +12,19 @@ options:
   - { name: "<Activity>", tradeoff: "hide a subtree while preserving its state (defer/restore); 100% satisfaction in State-of-React 2025; effects are destroyed and re-created on every toggle, so pair it with effect cleanup (see reading: The hidden cost of React.Activity)." }
   - { name: "<ViewTransition> / use()", tradeoff: "<ViewTransition> is STABLE in 19.3: animates enter/exit/update/share on Transition-marked updates via the browser View Transition API; DOM-ONLY, RN support in progress. use() reads promises/context under Suspense." }
   - { name: "Fragment Refs", tradeoff: "STABLE in 19.3: a ref on a <Fragment> yields a FragmentInstance over its children as a group (events, focus, observers, scrollIntoView), so you can attach behavior to components that expose no ref without a layout-distorting wrapper <div>." }
-  - { name: "alternative React runtimes", tradeoff: "Preact (small, drop-in-ish) is the production option — 11.0.0 (2026-09-30, verified vs npm + the upgrade guide) is ESM-only and moves defaultProps + px auto-suffixing into preact/compat. @tanstack/redact (0.1.0, 23.3KB vs React's 69.2KB gzipped — 66% smaller; synchronous, not concurrent), Million, TSRX (a JSX successor) and Vidact (a Rust React-subset compiler, 0.2.0-beta) are mostly experimental; see note: ALTERNATIVE RUNTIMES." }
+  - { name: "alternative React runtimes", tradeoff: "Preact (small, drop-in-ish) is the production option — 11.0.0 (2026-09-30, verified vs npm + the upgrade guide) is ESM-only and moves defaultProps + px auto-suffixing into preact/compat. @tanstack/redact (0.3.1, 2026-11-04; promoted to a supported TanStack library 2026-10-26; 23.3KB vs React's 69.2KB gzipped at 0.1.0; synchronous, not concurrent), Million, TSRX (a JSX successor) and Vidact (a Rust React-subset compiler, 0.2.0-beta) are mostly experimental; see note: ALTERNATIVE RUNTIMES." }
 recommend:
-  default: "Move to React 19.3 (stable 2026-09-09, additive over 19.2; 19.3.1 or a patched 19.x backport is the security floor for any app using RSC/Server Functions) and turn on React Compiler 1.0 for new code; keep existing useMemo/useCallback as escape hatches (removing them can change the compiler's output). On React Native, React follows the RN line: 19.2 on RN 0.83–0.87, 19.3 only from RN 0.88, still a release candidate (v0.88.0 tagged 2026-10-15, not yet on npm)."
+  default: "Move to React 19.3 (stable 2026-09-09, additive over 19.2; 19.3.1 or a patched 19.x backport is the security floor for any app using RSC/Server Functions) and turn on React Compiler 1.0 for new code; keep existing useMemo/useCallback as escape hatches (removing them can change the compiler's output). On React Native, React follows the RN line: 19.2 on RN 0.83–0.87, 19.3 from RN 0.88 (stable since 2026-10-15; Expo SDK 58 ships it)."
   when:
     - "new project → React 19.3 + React Compiler from day one"
     - "enabling the Compiler with thin test coverage → React Compiler pinned to an exact version"
-    - "React Native app → the React version its RN line ships (19.2 on 0.83–0.87; 19.3 with RN 0.88, see RB-E-RN-VERSIONS)"
+    - "React Native app → the React version its RN line ships (19.2 on 0.83–0.87; 19.3 from RN 0.88, stable since 2026-10-15, see RB-E-RN-VERSIONS)"
     - "web data-fetching/SSR → RSC via a meta-framework (RB-E-META-FRAMEWORKS)"
     - "RSC on React Native → does not apply (RSC is web-only)"
     - "hide a subtree but keep its state → <Activity> (with disciplined effect cleanup)"
     - "animated enter/exit/shared-element transitions on the web → <ViewTransition> (DOM-only; not on RN yet)"
     - "attach behavior to children with no ref and no wrapper element → Fragment Refs"
-    - "bundle-size-critical web → Preact (redact, Million, TSRX and Vidact are experimental or beta, not production bets)"
+    - "bundle-size-critical web → Preact (redact is now a supported TanStack library but 0.x and synchronous-only — measure input latency before betting on it; Million, TSRX and Vidact are experimental or beta)"
 note: >
   React is stable, plural, and compiler-optimized. Stable: the 19.x line only adds. Plural: keep
   three things apart — the library (concurrent features, both platforms), the protocol (RSC: web and
@@ -50,12 +50,12 @@ note: >
   getClientRects/scrollIntoView.
 
   REACT ON NATIVE (2026-09-24, verified vs npm peer dependencies + the RN 0.88 RC notes; status
-  re-checked 2026-10-15): react-native 0.83.0 peers react ^19.2.0 and 0.84.0–0.87.1 peer ^19.2.3;
-  0.88.0-rc.1 through rc.6 peer ^19.3.0, and the rc.1 notes say "Sync React 19.3.0 into React Native".
-  0.88 is still a release candidate on npm (rc.6, 2026-10-14; the v0.88.0 tag exists since 2026-10-15
-  but react-native@0.88.0 was not yet published) → 19.3 reaches native on the 0.88 line, not before;
-  RB-E-RN-VERSIONS' tripwire flips this sentence when 0.88.0 reaches npm `latest`, and this entry's
-  own tripwire re-checks the React line at RN 0.89.
+  re-checked 2026-11-25): react-native 0.83.0 peers react ^19.2.0 and 0.84.0–0.87.1 peer ^19.2.3;
+  0.88.x peers ^19.3.0. 0.88 is STABLE (react-native@0.88.0 on npm 2026-10-15, release blog
+  2026-10-19; 0.88.1 is `latest`) → React 19.3 is available on native from RN 0.88, and Expo SDK 58
+  (stable 2026-10-15) ships RN 0.88 + React 19.3. The 0.88 blog notes its web-style EventTarget
+  dispatch was unblocked by the react@19.3.0 bump. This entry's tripwire re-checks the React line at
+  RN 0.89.
 
   COMPILER RUST PORT (2026-07-06, verified vs the Rspack 2.1 blog): merged into SWC and shipping via
   Rspack 2.1's built-in SWC loader, 7–13x faster than the Babel version (13.5x on dev, 7.4x on
@@ -78,6 +78,18 @@ note: >
   69.2KB gzipped (66% smaller), microbenchmarks favor it on most scenarios especially state updates;
   deployed in production on tanstack.com and tannerlinsley.com, which is more real-world mileage than
   the other experimental runtimes here have. TSRX compiles to React/Preact/Solid.
+  REDACT SUPPORTED (2026-11-25, verified vs the TanStack blog of 2026-10-26 + npm 0.3.1): TanStack
+  promoted Redact from a tanstack.com experiment to a supported library — a BROWSER-only replacement
+  for react + react-dom swapped in through build config with no app-code changes, working with
+  TanStack Start, Vite, Vinext and Next.js (there React stays on the server and Redact handles
+  hydration and client rendering); 0.3 added webpack/Rspack plugins. Rendering stays synchronous, so a
+  heavy render can still delay input. Still 0.x → a measured bet, not a default.
+
+  SUSPENSE REVEAL THROTTLE (2026-11-25, verified vs the Tab Widgets reading): a React.lazy component
+  suspends on its first render even when its chunk is already loaded, and React reveals suspended
+  content at most once per ~300ms since the last fallback appeared → code-split UI rendered at
+  startup can appear ~300ms after its code arrives; bundle-size work does not fix it, rendering a
+  placeholder instead of suspending does.
   PREACT 11 (2026-09-30 per npm; verified vs the release post and the v11 upgrade guide): the
   production small runtime took a major. Breaking: ESM-only (.mjs; the CommonJS/UMD bundles are gone,
   `require('preact')` works only where the runtime supports require(esm)); TypeScript 5.1 minimum;
@@ -92,6 +104,7 @@ note: >
   RN release line.
 
   HISTORY:
+  2026-11-25 STATUS FLIP: RN 0.88 stable (RB-E-RN-VERSIONS tripwire) — React 19.3 on native is no longer RC-only. REOPENED: @tanstack/redact promoted to a supported library (0.3.1). GAP CLOSED: React.lazy + the 300ms Suspense reveal throttle (Tab Widgets reading).
   2026-10-15 REOPENED: React 19.3.1 (2026-10-14) is an RSC security patch (with 19.2.9 / 19.1.10 / 19.0.9); RN 0.88 status re-checked — rc.6, v0.88.0 tagged but not on npm, so "still a release candidate" stands.
   2026-10-08 REOPENED: Preact 11.0.0 stable — ESM-only, TS 5.1+, defaultProps/px suffixing moved to preact/compat.
   2026-10-08 CORRECTED: the Aurora Scharff "global hooks" reading (added 2026-10-01) was dropped — the post was unpublished (404, absent from the author's RSS, no Wayback snapshot).
@@ -106,8 +119,14 @@ note: >
   2026-06-25 CHALLENGED → SURVIVES: adversarial stress test; caveat applied — don't strip existing memoization when enabling the Compiler.
 defer_to_skill: engineering-principles
 doc: "RB-E-REACT-CORE.md"   # long-form Explanation entry in content_dir
-updated: 2026-10-15   # React 19.3.1 RSC security patch (critical RCE + high DoS; floors in RB-E-SECURITY); RN 0.88 status re-checked (rc.6; v0.88.0 tagged, not on npm); prior 2026-10-08: Preact 11.0.0 (ESM-only, TS 5.1+, compat moves); earlier today: dropped the Aurora Scharff "global hooks" reading (post unpublished: 404, no Wayback snapshot); prior 2026-10-01: @tanstack/redact figures corrected + verified (0.1.0); prior 2026-09-24: RN 0.88 status moved to rc.2 (2026-09-22) and React-on-native ranges verified vs npm peer deps (0.83–0.87 → ^19.2, 0.88 RC → ^19.3) · Vidact added to the experimental-runtimes lead list (2nd sighting: TWiR #296 + React Digest #2370); prior 2026-09-21: dated the 19.3-on-native answer: RN 0.88 (RC 2026-09-16) is the line that syncs React 19.3.0
+updated: 2026-11-25   # RN 0.88 stable → React 19.3 on native; Redact supported (0.3.1); React.lazy 300ms Suspense throttle reading; prior 2026-10-15: React 19.3.1 RSC security patch (critical RCE + high DoS; floors in RB-E-SECURITY); RN 0.88 status re-checked (rc.6; v0.88.0 tagged, not on npm); prior 2026-10-08: Preact 11.0.0 (ESM-only, TS 5.1+, compat moves); earlier today: dropped the Aurora Scharff "global hooks" reading (post unpublished: 404, no Wayback snapshot); prior 2026-10-01: @tanstack/redact figures corrected + verified (0.1.0); prior 2026-09-24: RN 0.88 status moved to rc.2 (2026-09-22) and React-on-native ranges verified vs npm peer deps (0.83–0.87 → ^19.2, 0.88 RC → ^19.3) · Vidact added to the experimental-runtimes lead list (2nd sighting: TWiR #296 + React Digest #2370); prior 2026-09-21: dated the 19.3-on-native answer: RN 0.88 (RC 2026-09-16) is the line that syncs React 19.3.0
 reading:
+  - title: "React.lazy, Suspense and the Hidden 300ms Startup Delay"
+    url: "https://tabwidgets.com/blog/react-lazy-suspense-delay"
+    by: "Matthew Wong (Tab Widgets)"
+    what: "Two intentional React behaviours that combine badly at startup: a React.lazy component always suspends on its first render even when its chunk is already loaded (preloading the import() does not help), and React reveals suspended content at most once per ~300ms since the last fallback appeared (FALLBACK_THROTTLE_MS). Widgets whose code loaded in ~100ms appeared at ~380ms; rendering their own placeholder instead of suspending brought content ~200–240ms sooner, while shrinking the bundle changed nothing."
+    claim: "Your lazy-loaded UI appears later than its code arrives: React.lazy suspends once by design and Suspense reveals are throttled to ~300ms, so render a placeholder instead of suspending for components that render at startup."
+    applies_when: { platforms: [react] }
   - title: "Avoiding Server Component Waterfall Fetching with React 19 cache()"
     url: "https://aurorascharff.no/posts/avoiding-server-component-waterfall-fetching-with-react-19-cache/"
     by: "Aurora Scharff"
@@ -183,6 +202,8 @@ sources:
   - "https://registry.npmjs.org/react-native"
   - "https://react.dev/blog/2026/09/09/react-19-3"
   - "https://github.com/TanStack/redact"
+  - "https://tanstack.com/blog/introducing-tanstack-redact"
+  - "https://reactnative.dev/blog/2026/10/19/react-native-0.88"
   - "https://react.dev/community/team"
   - "https://react.dev/reference/react-dom/browser"
   - "https://react.dev/blog/2025/10/07/react-compiler-1"
@@ -191,5 +212,5 @@ sources:
   - "https://www.vidact.dev/"
 tripwires:   # standing caveats as executable conditions — evaluated by `harvest firsthand`; fired ⇒ do the then:, update prose, remove the row
   - when: { pkg: "react-native", atleast: "0.89.0" }
-    then: "Check whether the RN release line moved off React 19.2 — this entry's current-line row and RB-E-RN-VERSIONS both assert 'RN 0.83+ runs React 19.2', and <ViewTransition> is DOM-only pending RN support"
+    then: "Check whether RN 0.89 moves the React line past 19.3 (0.83–0.87 run 19.2, 0.88 runs 19.3) — and whether <ViewTransition> is still DOM-only pending RN support"
     added: 2026-09-10

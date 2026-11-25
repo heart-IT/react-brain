@@ -8,7 +8,7 @@ platforms: [react-native]
 options:
   - { name: "expo-iap", tradeoff: "OpenIAP-compliant IAP as an Expo module (Google Play Billing v8 / Apple StoreKit) without ejecting; you own receipt validation. 6.0.2 (2026-10-14; 6.0.0 major 2026-10-09, verified vs npm + the expo-iap-6.0.0 release), released in lockstep with react-native-iap. See note: OPENIAP PACKAGES." }
   - { name: "react-native-iap", tradeoff: "The long-standing community IAP wrapper for bare RN, same OpenIAP code as expo-iap; its standalone repo is archived but the package is NOT deprecated. 17.0.2 (2026-10-14; 17.0.0 major 2026-10-09, verified vs npm + the react-native-iap-17.0.0 release). Never install @next: see note: DIST-TAG TRAP." }
-  - { name: "RevenueCat (react-native-purchases)", tradeoff: "Hosted subscription infra + entitlements across stores; fees vs less server work. Remote-configurable paywalls and pricing experiments come with the hosting decision, not as separate choices. 10.10.2 (2026-09-24, verified vs npm)." }
+  - { name: "RevenueCat (react-native-purchases)", tradeoff: "Hosted subscription infra + entitlements across stores; fees vs less server work. Remote-configurable paywalls and pricing experiments come with the hosting decision, not as separate choices. 11.0.4 (2026-11-18, verified vs npm + the 11.0.0 release): v11 = Play Billing 9.1, min RN 0.80; experimental SPM path on RN 0.88+. See note: REVENUECAT 11." }
   - { name: "@premieroctet/react-native-wallet", tradeoff: "Apple PassKit / Google Wallet passes (tickets, loyalty, coupons), NOT tap-to-pay; iOS needs a Pass Type ID + entitlements. 1.0.2 (2025-06-26) is still the latest release (2026-09-24, verified vs npm): stable-but-quiet, pin it. Not bare react-native-wallet, see note: WALLET NAME." }
 recommend:
   default: "Subscriptions → RevenueCat (it absorbs receipt validation and entitlement infra). Direct store billing without a third party → expo-iap on Expo, react-native-iap on bare RN; both are the same OpenIAP code, so the runtime picks between them, not liveness. What changes the pick is whether you will run a validation/entitlement backend."
@@ -16,6 +16,7 @@ recommend:
     - "small team, subscriptions, no billing backend → RevenueCat (react-native-purchases)"
     - "one-time purchases or avoiding vendor fees, Expo app → expo-iap (you own validation)"
     - "one-time purchases or avoiding vendor fees, bare RN app → react-native-iap (you own validation; install @latest, never @next)"
+    - "shipping IAP to Fire TV / Amazon Appstore → the same react-native-iap / expo-iap, with the amazon flavor (Fire OS) or the Vega OS adapter — no separate Amazon SDK"
     - "owning server-side receipt validation on the OpenIAP libraries → @hyodotdev/openiap-commerce-protocol (0.x, evaluate before adopting; not the deprecated unscoped openiap-commerce-protocol)"
     - "wallet passes (tickets/loyalty/coupons) → @premieroctet/react-native-wallet (set up an Apple Pass Type ID + entitlements; not tap-to-pay)"
     - "remote paywall config / pricing A-B tests → RevenueCat (its tooling layer, not a separate library decision)"
@@ -40,7 +41,7 @@ note: >
   RN wrapper), not on liveness. expo-iap does not supersede react-native-iap.
 
   DIST-TAG TRAP (2026-09-24, verified vs npm; re-checked 2026-10-15): the `next` tag is BEHIND
-  `latest`. react-native-purchases (next 8.9.1-vc-beta.1 vs latest 10.x) still downgrades you two
+  `latest`. react-native-purchases (next 8.9.1-vc-beta.1 vs latest 11.x) now downgrades you three
   majors. On react-native-iap (next 17.0.0-rc.0) and expo-iap (next 6.0.0-rc.0) the 17/6 release
   cycle refreshed `next`, so @next now gives the RC of the current major rather than an old major —
   still older than `latest` → install @latest.
@@ -56,12 +57,29 @@ note: >
   OPENIAP BACKING (2026-08-19, verified vs openiap.dev/docs/updates/announcements): OpenIAP is
   backed by Amazon Developer, and its docs carry store setup for Amazon and Horizon OS alongside
   Apple/Google → the protocol these libraries implement matters if you ship to Fire OS or Vega OS.
+  AMAZON APPSTORE (2026-11-25, verified vs Amazon Developer's "OpenIAP adds support for Amazon"):
+  react-native-iap and expo-iap sell on Fire OS AND Vega OS through the SAME APIs — Fire OS is the
+  Android `amazon` flavor (bare RN: `fireOsEnabled=true` in gradle.properties; Expo: the expo-iap
+  plugin with `modules.amazon.fireOS: true`); Vega OS gets an OpenIAP adapter over the Kepler IAP
+  service (`modules.amazon.vegaOS: true`, or @amazon-devices/keplerscript-appstore-iap-lib beside
+  react-native-iap). Stable since react-native-iap 16.3.1 / expo-iap 5.3.1; receipt verification uses
+  the same IAPKit Amazon payload, so server code does not fork. → For Fire TV / Amazon devices this
+  is a build flag, not a second IAP SDK.
+
+  REVENUECAT 11 (2026-11-25, verified vs the 11.0.0 release + RevenueCat's CocoaPods→SPM migration
+  doc + npm): react-native-purchases 11.0.0 (2026-10-28; latest 11.0.4) moves Android to Play Billing
+  9.1.0 / Kotlin 2.2 and raises the minimum to RN 0.80 (Kotlin 2.1.0, compileSdk 35). At release the
+  iOS pod was held up by the CocoaPods trunk freeze and Expo apps were told to stay on 10.x "for now";
+  an experimental SPM integration exists on RN 0.88+. RevenueCat states CocoaPods trunk becomes
+  read-only on 2026-12-02 and that SDK 12 will require Swift Package Manager → plan the SPM move
+  before 12, and on Expo re-check RevenueCat's Expo guidance before taking 11.
 
   WALLET NAME (2026-08-18, verified vs npm): bare react-native-wallet on npm is an unrelated 2020
   package (1.0.8, erikpoort, Apple-Wallet-only); the PassKit + Google Wallet library is
   @premieroctet/react-native-wallet → verify identity (repository field), not existence.
 
   HISTORY:
+  2026-11-25 REOPENED: RevenueCat react-native-purchases 11 (Play Billing 9.1, RN ≥0.80; SDK 12 SPM-only, CocoaPods trunk read-only 2026-12-02); GAP CLOSED: Amazon Appstore (Fire OS + Vega OS) via OpenIAP's react-native-iap / expo-iap.
   2026-10-15 REOPENED: react-native-iap 17.0 / expo-iap 6.0 lockstep majors (2026-10-09; OpenIAP Client Protocol 1.0.0, community providers, openiap-apple/google 4.0.0); DIST-TAG TRAP re-checked (iap `next` now the current-major RC; purchases still two majors behind).
   2026-10-01 REOPENED: pins react-native-iap 16.6.2 → 16.7.2, expo-iap 5.6.3 → 5.8.2 — still lockstep
   (both 2026-09-26 and again 2026-09-30).
@@ -76,8 +94,11 @@ note: >
   archived thing was the standalone repo, not the package.
 defer_to_skill: null
 doc: "RB-E-PAYMENTS.md"   # long-form Explanation entry in content_dir
-updated: 2026-10-15   # react-native-iap 17.0 / expo-iap 6.0 lockstep majors (Client Protocol 1.0.0); DIST-TAG TRAP re-checked; prior 2026-10-01: pins iap 16.6.2 → 16.7.2 / expo-iap 5.6.3 → 5.8.2, still lockstep; prior 2026-09-24: purchases 10.10.2, commerce protocol → @hyodotdev scope 0.3.0 (unscoped deprecated); prior 2026-09-10: OpenIAP backed by Amazon (TWiR #295) + iap lockstep pins (firsthand) · openiap-commerce-protocol 0.1.0 server contract — reconciled from harvest/2026-09-03
+updated: 2026-11-25   # RevenueCat 11 + SPM/CocoaPods-trunk note; Amazon Appstore via OpenIAP; prior 2026-10-15: react-native-iap 17.0 / expo-iap 6.0 lockstep majors (Client Protocol 1.0.0); DIST-TAG TRAP re-checked; prior 2026-10-01: pins iap 16.6.2 → 16.7.2 / expo-iap 5.6.3 → 5.8.2, still lockstep; prior 2026-09-24: purchases 10.10.2, commerce protocol → @hyodotdev scope 0.3.0 (unscoped deprecated); prior 2026-09-10: OpenIAP backed by Amazon (TWiR #295) + iap lockstep pins (firsthand) · openiap-commerce-protocol 0.1.0 server contract — reconciled from harvest/2026-09-03
 sources:
+  - "https://github.com/RevenueCat/react-native-purchases/releases/tag/11.0.0"
+  - "https://www.revenuecat.com/docs/sdk-guides/react-native-cocoapods-to-spm-migration"
+  - "https://dev.to/amazonappdev/openiap-adds-supports-for-amazon-33b"
   - "https://github.com/hyodotdev/openiap/releases/tag/react-native-iap-17.0.0"
   - "https://github.com/hyodotdev/openiap/releases/tag/expo-iap-6.0.0"
   - "https://github.com/hyodotdev/openiap/releases/tag/openiap-commerce-protocol-0.1.0"

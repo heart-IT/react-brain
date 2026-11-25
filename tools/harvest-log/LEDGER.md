@@ -3456,3 +3456,86 @@ and both sources' notes.
 
 Delta: 0 entries touched · harvest-lib.mjs +discoverIssues/parseFeedItems/archiveIssueLinks ·
 react-brain-harvest.mjs prep · harvest-state.json (feed/issue_label, archive_slug) · eval 139 → 146.
+
+## 2026-11-25 — six-week backlog: firsthand + TWiR #302–#306 + React Status #494–#498 + RN Rewind #62–#64
+
+PREFLIGHT: no `harvest/*` branches, no `tools/harvest.log` on this machine (no scheduled runner —
+the 10-15 follow-up 3 still stands), no untriaged firsthand manifest. The backlog was six weeks deep
+because nothing ran between 2026-10-15 and today: 13 newsletter issues + one firsthand window.
+Native Weekly: `prep` says no issue after #22 (archive two months quiet). TWiR #307 is a '📨 #307: ...'
+stub (200, archive ends at #306); React Status /issues/499 404 on a Wednesday — re-probe Thursday 11-26.
+
+METHOD (parallel, then merge): prep froze 13 manifests + fixtures in one go (`--issue=N`, since a
+backlog preps one issue per run otherwise). Triage ran in seven parallel forks (tripwires · firsthand
+×2 · TWiR 302–303 · TWiR 304–306 · React Status · RN Rewind), each writing ONLY its manifests and a
+proposals file; entry edits were then applied by four forks partitioned by ENTRY FILE, so the
+cross-newsletter duplicates (Next.js November release ×4 sources, Vite RCE ×2, Discord ×2, X ×2,
+Hydrogen ×2, Den Odell ×2, Owner ×2, React.lazy ×2, Reanimated 4.8 ×2, iPhone Duo ×2) merged into one
+edit each. RN Rewind was the first pass on 10-15b's feed+issue_label discovery — no hand-built manifests.
+
+⚡ TRIPWIRES FIRED (7, all actioned, rows removed): react-native ≥0.88.0 (0.88 ✓ stable, default +
+migrate target; Expo SDK 58 also stable since 10-15 — the 10-15 pass missed both by hours) ·
+victory-native ≥43 (moved to `react-native-skia` but only 2.x, ≥2.15.5 — caveat CHANGED, not gone) ·
+SWM bottom-sheet ≥1.0 (0.x churn caveats retired) · true-sheet ≥4.0 (breaking major, default holds) ·
+solid-js ≥2.0 (twir-290 skip reopened as a reading) · executorch ≥0.11 (worklets <0.14 → executorch
+apps hold Reanimated 4.7) · @tanstack/ai ≥1.0 (CHALLENGED → SURVIVES: AI SDK stays default, ~11×
+downloads + the UI libraries build on it).
+
+HEADLINES: security floors — Next.js 16.4.5 / 15.5.29 (1 high + 6 medium, Cache Components),
+Vite critical dev-server RCE GHSA-p4f5-76q4-ffq7 (8.3.7 / 8.2.5 / 8.1.7 / 7.3.8 / 6.4.6), React Router
+8.5.1 / 7.18.6 (seven advisories 11-18), Better Auth 1.7.16 (12 advisories, critical in
+@better-auth/expo), axios 1.21.0, Electron 44.9.1 / 43.8.1, React2STEAL (patched React2Shell exploited
+at scale — rotate secrets), GitHub `pull_request_target` blocked from 2026-12-02, CocoaPods trunk
+read-only 2026-12-02 (first-party blog.cocoapods.org). Ecosystem — Discord leaves Electron AND RN for a
+Rust core, X leaves react-native-web for Vite SSR, Shopify's rebuild account, Gobi RN→native islands,
+Vega OS 2.0, Hydrogen becomes a library, Expo Simulators, Xcode 27 removes Simulator.app (Device Hub;
+Maestro 2.12 is the floor), RTK 3.0 roadmap, mobx-react-plugin 1.0, TanStack Redact supported,
+TanStack DB 1.0 RC, keychain 11 / auth0 v6 / RNFirebase 27 / RevenueCat 11 / i18next 27 majors,
+@react-native-ai/adk deprecated → android, next-yak renamed @yak/react, fast-image maintained again (10),
+react-native-better-pdf, actions-sheet 11, expo-desktop 1.0, Tambo Cloud retired (shut 10-31).
+
+CORRECTIONS MADE AGAINST FIRST-PARTY PAGES (blurbs and proposals disagreed): React Router v7 floor is
+7.18.6 (React Status / one fork said 7.18.5 / 8.5.2); Next.js November is 1 high + 6 medium (the
+firsthand row first said 7 medium — the manifest row text still carries the first reading, entries are
+right); Better Auth 12 advisories, not 10; X's 23.9 s (lab recording) and ">22 s" (intro) are both on the
+page; Zepto post author per JSON-LD. Advisory severities came from advisory HTML pages — the
+unauthenticated GHSA API hit 60/h mid-pass.
+
+GATE FINDINGS:
+- `harvest rules --check` went RED: npm-patch collided with three gold keeps (next 16.4.1→16.4.6,
+  better-auth 1.7.9→1.7.28, vite 8.3.4→8.3.8). Six weeks of backlog let a security patch hide INSIDE a
+  multi-patch version event. Each fact had also landed via its advisory/blog row (nextjs.org post,
+  twir-304 better-auth.com, react-status-497 GHSA), so the npm rows were re-anchored `already-held`
+  (the 10-15 precedent). FLAG FOR THE MAINTAINER: the rule is only honest because other rows carried the
+  advisories; a backlog pass widens the patch window — consider a rule guard (don't auto-skip when the
+  package has a GHSA published inside the event window) rather than relying on re-anchoring.
+- eval caught an over-firing tag: the Zepto react-query SSR-leak reading gated on react-query alone fired
+  on the web-clean SPA fixture. `applies_when.deps` is any-of, with no "react-query AND an SSR framework"
+  conjunction, so the claim/applies_when was dropped (reading kept untagged). Tooling gap noted below.
+
+FOLLOW-UPS (new; the 10-15 list otherwise stands):
+1. Tooling: npm-patch guard for advisories published inside the event window (above).
+2. Tooling: `applies_when` needs an all-of form (`all_deps`) — Zepto SSR claim waits on it.
+3. Tooling: prep a multi-issue backlog in one command (today: `--issue=N` per issue by hand).
+4. Lint: blog.x.com reading shared by CROSSPLATFORM + META-FRAMEWORKS (different claims; kept both).
+5. Unverified: RN Rewind #62's "Skia 3.7 sends no-Vulkan Android back to v2" — not in the 3.7.0 notes.
+6. Feeds: github.blog now 3 zero-keep passes (reopen threshold 4); peterp.me re-reported old posts after a
+   cursor reset; callstack.com blog feed 404 and inside-react.vercel.app 402 (state kept).
+7. Docs: 34 long-form docs trail their entries (was 25).
+8. Watch: TS 7.1 stable, xstate 6, storybook 11, RTK 3, @tanstack/db 1.0, RN 0.89 (SwiftPM default,
+   deep-imports removal), victory-native 44 (Skia 3?), executorch 0.12, html-webpack-plugin deprecation
+   flag, @legendapp/spark, expo-modules-core 59 — all wired as tripwires.
+
+Delta: 33 entries touched (AI-DEVTOOLS · AI-UI · ALT-FRAMEWORKS · ANIMATION · AUTH · BROWNFIELD · BUILD ·
+CHARTS · COMPONENT-LIBS · CROSSPLATFORM · DATA · DESKTOP · DX · I18N · MEDIA · META-FRAMEWORKS · NATIVE ·
+NATIVE-UI · NAV · NETWORKING · OBSERVABILITY · ONDEVICE-AI · OTA · PAYMENTS · REACT-CORE · RN-VERSIONS ·
+SECURITY · SHEETS · STATE · STORAGE · STYLING · TESTING · TYPESCRIPT), 0 new entries, reading URLs
+194 → 213, detect patterns 240 → 247, tripwires 18 → 24 (7 fired/removed, 13 added), 7 new migrate rules
+(adk→android, next-yak→@yak/react, fast-image <10, keychain 11, better-auth <1.7.16, auth0 v6, i18next 27).
+14 manifests (firsthand 273 events / 37 kept rows; TWiR 302–306: 64/66/67/66/65 links, 5/6/3/8/2 kept;
+React Status 494–498: 46/38/43/37/37, 2/2/4/4/5; RN Rewind 62–64: 34/29/22, 3/3/3), 2 amended (twir-301
+MobX row reopened via twir-305; twir-302 Appduct → held via rn-rewind-63), 13 bench fixtures.
+Sources digested: TWiR 35 → 40, React Status 34 → 39, RN Rewind 61 → 64, Native Weekly 12 (no new issue).
+Gates: coverage 0 unaccounted ×13 · verify-diff ✓ every added receipt checks out (Wayback-noted: X blog,
+Hydrogen) · watchlist reviewed (recurring rows are the known npm version-event noise + retired Digest
+chrome) · `harvest rules --check` ✓ after re-anchoring · npm test ✓ (lint clean, 3 warnings; eval 146/146).

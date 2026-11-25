@@ -6,7 +6,7 @@ status: reviewed   # long-form entry written + source-checked → encyclopedia/R
 confidence: medium
 platforms: [react-native]
 options:
-  - { name: "EAS Update (expo-updates client)", tradeoff: "The hosted default: channels, phased rollouts, republish-to-rollback. SDK 55 added bsdiff bytecode/bundle diffing (est. ~75% smaller update downloads; default in SDK 56). expo-updates 57.0.23 (2026-09-18; 58.0.8 on next for SDK 58 beta; verified vs npm)." }
+  - { name: "EAS Update (expo-updates client)", tradeoff: "The hosted default: channels, phased rollouts, republish-to-rollback. SDK 55 added bsdiff bytecode/bundle diffing (est. ~75% smaller update downloads; default in SDK 56). expo-updates 58.0.22 (SDK 58, stable since 2026-10-15; sdk-57 tag 57.0.29; verified vs npm 2026-11-25)." }
   - { name: "expo-updates + custom server", tradeoff: "The Expo Updates protocol is open: self-host the server and keep the battle-tested client; more ops work than EAS. XPREM (next row) is the ready-made server." }
   - { name: "XPREM (ex expo-open-ota)", tradeoff: "Go implementation of the Expo Updates protocol: multi-app, progressive rollouts + instant rollback, A/B branch splitting, S3/GCS/Azure/R2 backends, no Expo account or token; open core, RBAC/SSO commercial. Renamed from expo-open-ota at v3. v3.2.4 (2026-09-23, verified vs GitHub releases). See note: XPREM." }
   - { name: "hot-updater", tradeoff: "Self-hosted open-source OTA (gronxb) positioned as the CodePush successor; younger than expo-updates. v1 STABLE: 1.0.0 (2026-10-11, verified vs the v1.0.0 release + npm; latest 1.0.7) — needs separate v1 infrastructure and a new native build; v0 continues as 0.36.x on the `v0` tag. See note: HOT-UPDATER V1." }
@@ -105,7 +105,7 @@ note: >
   2026 run (bundle diffing, runtime channel switching, iteration speed, issues 12–14).
 defer_to_skill: null
 doc: "RB-E-OTA.md"   # long-form Explanation entry in content_dir
-updated: 2026-10-15   # hot-updater 1.0 stable (v1 infra + new native build; v0 continues); react-native-code-push npm-deprecated; TeamReach OTA cutover reading; prior 2026-09-24: Delta is on npm (@zepto-labs/react-native-delta, corrected); hot-updater 0.36 + v1 RC; Codemagic Patch 0.5.0; prior 2026-09-10: Codemagic Patch server 0.3.0 (firsthand) · SWSH E2E-gate-every-OTA-push reading — reconciled from harvest/2026-08-27
+updated: 2026-11-25   # expo-updates pin → 58.0.22 (SDK 58 stable); prior 2026-10-15: hot-updater 1.0 stable (v1 infra + new native build; v0 continues); react-native-code-push npm-deprecated; TeamReach OTA cutover reading; prior 2026-09-24: Delta is on npm (@zepto-labs/react-native-delta, corrected); hot-updater 0.36 + v1 RC; Codemagic Patch 0.5.0; prior 2026-09-10: Codemagic Patch server 0.3.0 (firsthand) · SWSH E2E-gate-every-OTA-push reading — reconciled from harvest/2026-08-27
 watching:
   - title: "The OTA Illusion: What No One Tells You About Instant Updates At Scale (RUC 2025)"
     url: "https://www.youtube.com/watch?v=hBoAD6sYDYo"

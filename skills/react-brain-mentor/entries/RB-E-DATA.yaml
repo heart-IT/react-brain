@@ -11,7 +11,7 @@ options:
   - { name: "RTK Query", tradeoff: "Server-state cache shipped inside Redux Toolkit: one mental model and devtools if you are already on RTK. Never adopt Redux just to get it." }
   - { name: "Apollo Client (4.x) / urql / Relay (21)", tradeoff: "GraphQL clients; worth it only when the backend is a real graph. Relay v21 adds first-party TS + experimental RSC; Apollo 4.2 type-safe defaults, 4.3 custom scalars and a TypeScript 5.9 floor (4.3.1, 2026-09-18, verified vs npm). See note: APOLLO 4.3" }
   - { name: "tRPC", tradeoff: "End-to-end type-safe RPC (no schema/codegen) when client + server are both TS; not for public/polyglot APIs." }
-  - { name: "TanStack DB / Zero / TinyBase / RSC", tradeoff: "Local-first sync stores and server-fetched RSC (web only). TanStack DB 0.6 (2026-03) added SQLite-backed persistence (browser WASM, RN/Expo, Node, Electron) + offline transactions; still 0.x. TinyBase has no when-clause here. See note: LOCAL-FIRST" }
+  - { name: "TanStack DB / Zero / TinyBase / RSC", tradeoff: "Local-first sync stores and server-fetched RSC (web only). TanStack DB is at 1.0 RC (1.0.0-rc.1 2026-10-29; npm `latest` 1.0.0-rc.1.5 2026-11-11, verified vs npm + the RC1 post) with the API declared stable; its 0.6 (2026-03) added SQLite-backed persistence (browser WASM, RN/Expo, Node, Electron) + offline transactions. TinyBase has no when-clause here. See note: LOCAL-FIRST" }
 recommend:
   default: "TanStack Query (React and React Native). It caches server state for REST or any transport, and the same data-layer code runs on web and native. The pick changes with the backend: a GraphQL graph, a private all-TypeScript API, offline-first sync, server rendering, or a P2P stack (see when)."
   when:
@@ -45,8 +45,10 @@ note: >
   TypeScript is now 5.9.x → check the TS version before upgrading; `skip` in useQuery/useSubscription
   is deprecated in favor of skipToken. Current 4.3.1 (2026-09-18, verified vs npm).
 
-  LOCAL-FIRST (2026-09-24, verified vs npm): @tanstack/db 0.9.2 (2026-09-14; @tanstack/react-db
-  0.4.1), built on TanStack Query and still 0.x; its 0.6 (2026-03-25) SQLite persistence made real
+  LOCAL-FIRST (2026-09-24, verified vs npm; TanStack DB re-checked 2026-11-25): @tanstack/db reached
+  1.0 RC (rc.1 2026-10-29; npm `latest` points at 1.0.0-rc.1.5 since 2026-11-11 — the maintainers call
+  the API stable and ship a 0.x→1.0 migration guide; a tripwire watches for 1.0.0 final), built on
+  TanStack Query; its 0.6 (2026-03-25) SQLite persistence made real
   offline possible. Zero 1.9.0 (2026-08-14), with React Native support; npm dates 1.0.0 to
   2026-03-24. TinyBase 10.0.1 (2026-09-24, a major; 9.0.0 was 2026-07-03). All three are an
   architecture commitment for products where offline or realtime is core, not a way to avoid a
@@ -59,17 +61,28 @@ note: >
   web app a client cache earns its place only when data changes on its own; otherwise it means
   keeping two caches in sync. RSC does not apply to React Native.
 
+  SSR MEMORY (2026-11-25, verified vs the Zepto postmortem reading): on the server a finite query
+  cache time starts a gc setTimeout per query, and Node's AsyncLocalStorage keeps the whole finished
+  request reachable until it fires (Zepto: pods ~4.8 GiB → ~1.2 GiB on react-query v3). v4/v5 default
+  gcTime to Infinity on the server, but an explicit finite gcTime on a server-side query still starts
+  the timer → keep the per-request server QueryClient at Infinity.
+
   RB-E-P2P owns the Holepunch data path; RB-E-META-FRAMEWORKS owns RSC and route loaders;
   RB-E-STATE owns client state.
 
   HISTORY:
+  2026-11-25 REOPENED: TanStack DB 1.0 RC (API declared stable; tripwire for 1.0.0 final); GAP CLOSED: SSR memory leak from server-side query gc timers (Zepto reading).
   2026-10-08 GAP CLOSED: conflict resolution / client IDs / mutation recovery facet of LOCAL-FIRST — Marmelab reading (reopened on its second independent sighting).
     2026-09-24 CORRECTED: PR #10658 deprecates fetchQuery as well as prefetchQuery/ensureQueryData, via @deprecated tags; npm dates Zero 1.0.0 to 2026-03-24, not 2026-06.
     2026-06-25 CHALLENGED → SURVIVES (high): RSC complements the client cache; TanStack DB builds on TanStack Query; Zero 1.0 ships React Native support.
 defer_to_skill: null
 doc: "RB-E-DATA.md"   # long-form Explanation entry in content_dir
-updated: 2026-10-08   # LOCAL-FIRST: Marmelab offline=realtime reading (client IDs, LWW conflicts, no built-in rollback); prior 2026-09-24: Apollo 4.3 (TS 5.9 floor), Zero 1.9, TinyBase 10, TanStack DB 0.9; fetchQuery also deprecated; prior 2026-09-01: TanStack Query 5.102: query()/infiniteQuery() supersede fetchQuery/prefetchQuery/ensureQueryData (additive) — React Status #488
+updated: 2026-11-25   # TanStack DB 1.0 RC + tripwire; react-query SSR gc-timer leak reading; prior 2026-10-08: LOCAL-FIRST: Marmelab offline=realtime reading (client IDs, LWW conflicts, no built-in rollback); prior 2026-09-24: Apollo 4.3 (TS 5.9 floor), Zero 1.9, TinyBase 10, TanStack DB 0.9; fetchQuery also deprecated; prior 2026-09-01: TanStack Query 5.102: query()/infiniteQuery() supersede fetchQuery/prefetchQuery/ensureQueryData (additive) — React Status #488
 reading:
+  - title: "How we cut Next.js memory from ~5GB to ~1GB: the react-query timer holding every SSR request"
+    url: "https://rohitpotato.xyz/thoughts/ssr-requests-still-alive"
+    by: "Rohit Kashyap (Zepto)"
+    what: "Heap-snapshot postmortem: during SSR, react-query v3 starts a cacheTime setTimeout per query to garbage-collect it, and Node attaches the request's AsyncLocalStorage context to that timer, so every finished request stays reachable until the timer fires; building server-side queries with cacheTime: Infinity took pods from ~4.8 GiB to ~1.2 GiB. v4 and v5 default cacheTime/gcTime to Infinity on the server, but a query that passes an explicit finite value still starts the timer, so upgrading alone does not close it."
   - title: "Real-time and offline are the same problem"
     url: "https://marmelab.com/blog/2026/09/09/real-time-and-offline-are-the-same-problem.html"
     by: "Matthieu Hochlander (Marmelab)"
@@ -135,6 +148,8 @@ reading:
     claim: "You ship Relay — scope it to cross-referenced entity data: config, experiments, volatile time-series, server-driven UI trees and inlined assets don't benefit from normalization, and a plain store beside Relay is strictly cheaper for them."
     applies_when: { deps: ["react-relay"] }
 sources:
+  - "https://tanstack.com/blog/tanstack-db-1.0-rc1-going-all-in-on-oracles"
+  - "https://registry.npmjs.org/@tanstack/db"
   - "https://marmelab.com/blog/2026/09/09/real-time-and-offline-are-the-same-problem.html"
   - "https://aurorascharff.no/posts/coordinating-optimistic-updates-in-nextjs/"
   - "https://github.com/TanStack/query/pull/10658"
@@ -148,6 +163,10 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "@trpc/*", label: "tRPC", token: "trpc" }
   - { pkg: "@rocicorp/zero", label: "Zero", token: "zero" }
   - { pkg: "@tanstack/react-db", label: "TanStack DB", token: "tanstack db" }
+tripwires:   # standing caveats as executable conditions — evaluated by `harvest firsthand`; fired ⇒ do the then:, update prose, remove the row
+  - when: { pkg: "@tanstack/db", atleast: "1.0.0" }
+    then: "TanStack DB 1.0 final shipped (npm latest was 1.0.0-rc.1.5 on 2026-11-25) — drop the RC qualifier in the local-first option row and the LOCAL-FIRST note, and re-weigh the offline/local-first when-clause"
+    added: 2026-11-25
 detect_source:   # source-level signals owned by this entry (regex over repo source)
   - pattern: "useEffect\\([\\s\\S]{0,300}?\\bfetch\\("
     signal: "fetch-in-useEffect data loading"

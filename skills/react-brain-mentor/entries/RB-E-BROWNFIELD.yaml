@@ -57,7 +57,12 @@ note: >
   on iOS, AAR on Android) over the same native binding as the Swift/Obj-C and Kotlin/Java paths;
   the cost is mostly NuGet coexisting with npm/CocoaPods/Gradle (see reading).
 
+  REVERSE BROWNFIELD (2026-11-25): the same AppRegistry-root mechanism runs the other way when an
+  app LEAVES React Native — Gobi kept unmigrated features as RN "islands" in one lazily-started
+  runtime under native hosts; RB-E-CROSSPLATFORM owns that exit thread (see its Gobi reading).
+
   HISTORY:
+  2026-11-25 REOPENED: reverse-brownfield pointer (Gobi's RN-islands exit, RB-E-CROSSPLATFORM).
   2026-09-24 CORRECTED: `npx brownfield package:ios` was credited to the Expo path; the
   `brownfield` bin belongs to @callstack/brownfield-cli (Expo's CLI is expo-brownfield).
   2026-09-24 CORRECTED: Brownie was pinned "stable v3.13.x (2026-06)"; it moved to lockstep with
@@ -68,7 +73,7 @@ note: >
   2026-07-10 REOPENED: capability flip, Expo Updates in isolated brownfield on SDK 55.
 defer_to_skill: engineering-principles
 doc: "RB-E-BROWNFIELD.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-24   # Brownie 3.13.x → lockstep 5.1.x, Rock/Granite/expo-brownfield pins; prior 2026-09-10: brownfield 5.1.0 preloadBundle (firsthand) · .NET MAUI host variant + reading — reconciled from harvest/2026-09-03
+updated: 2026-11-25   # reverse-brownfield pointer (Gobi exit, owned by RB-E-CROSSPLATFORM); prior 2026-09-24: Brownie 3.13.x → lockstep 5.1.x, Rock/Granite/expo-brownfield pins; prior 2026-09-10: brownfield 5.1.0 preloadBundle (firsthand) · .NET MAUI host variant + reading — reconciled from harvest/2026-09-03
 sources:
   - "https://www.callstack.com/blog/react-native-in-net-maui-a-practical-brownfield-integration-guide"
   - "https://github.com/callstack/react-native-brownfield"

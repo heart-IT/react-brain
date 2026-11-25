@@ -9,7 +9,7 @@ options:
   - { name: "next-intl (4.x)", tradeoff: "Next.js-first; since v4.8 compiles ICU messages ahead of time into minified ASTs run by a ~650-byte runtime, shrinking bundles. 4.14.7 (2026-09-24, verified vs npm)." }
   - { name: "FormatJS / react-intl", tradeoff: "ICU message format at runtime; mature, framework-agnostic, the canonical ICU reference. react-intl 12.1.2 (2026-09-19, verified vs npm), peer React >=18." }
   - { name: "Lingui (6.x)", tradeoff: "Compile-time message extraction; low-boilerplate; i18n directives. @lingui/core 6.8.0 (2026-09-23, verified vs npm)." }
-  - { name: "i18next / react-i18next", tradeoff: "Very popular, big plugin ecosystem; works web + RN. i18next 26.4.2 / react-i18next 17.0.15 (2026-09, verified vs npm; react-i18next peers i18next >=26.2)." }
+  - { name: "i18next / react-i18next", tradeoff: "Very popular, big plugin ecosystem; works web + RN. i18next 27.2.9 / react-i18next 18.0.3 (2026-11, verified vs npm; react-i18next 18 peers i18next >=27.0.1 and needs Node 22+). i18next 27 is a breaking major with changed defaults — see note: I18NEXT 27 and migrate." }
   - { name: "fbtee", tradeoff: "Modern continuation of Meta's deprecated fbt: inline translations, no keys or t() wrappers, a native Rust/Oxc compiler (no Babel since 4.0). 5.0.0 (2026-09-16, verified vs npm), peer React ^19; see note: FBTEE PIPELINE." }
 recommend:
   default: "Next.js app → next-intl. Outside Next.js (web or React Native) → i18next (web + RN, huge ecosystem); Lingui instead when compile-time extraction and bundle size outweigh plugin reach."
@@ -42,14 +42,25 @@ note: >
   a web production concern no i18n library covers. Edge and Firefox rewrite nodes in place and do
   not break this way; Safari was unmeasured.
 
+  I18NEXT 27 (2026-11-25, verified vs the v27.0.0 release + the official migration guide + npm):
+  i18next 27.0.0 (2026-11-07) changes defaults most setups had to override — fallbackLng no longer
+  defaults to 'dev' (set your source language), an empty string is no longer a translation
+  (returnEmptyString), cleanCode is on — gives every instance its own logger and post-processors, and
+  refuses language codes that look like markup or paths. Running once on 26.7 with debug: true logs
+  most of what will change (not returnEmptyString, addResources(), createInstance(), keySeparator:
+  false or the TypeScript changes). react-i18next 18 requires i18next ≥27.0.1; both need Node 22+.
+
   HISTORY:
+    2026-11-25 REOPENED: i18next 27 / react-i18next 18 breaking majors (changed defaults, Node 22+) — option row repinned, migrate rule added.
     2026-09-24 CORRECTED: fbtee row described 4.0 as current; 5.0.0 (2026-09-16) consolidated the compiler into @nkzw/fbtee-compiler; detect token formatjs given a when-clause.
     2026-09-24 GAP CLOSED: browser-translator DOM-detach crash class (reading, React Digest #2370).
     2026-09-01 GAP CLOSED: fbtee 4.0 removed the Babel pipeline (native Rust/Oxc CLI; v3.3.0 is the Babel terminus) — firsthand.
 defer_to_skill: null
 doc: "RB-E-I18N.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-24   # fbtee 5.0 compiler consolidation; version pins added; prior 2026-09-24: browser-translator DOM-detach crash class reading (React Digest #2370); prior 2026-09-01: fbtee 4.0: Babel pipeline removed, native Rust/Oxc CLI (breaking; v3.3.0 is the Babel terminus) — firsthand
+updated: 2026-11-25   # i18next 27 / react-i18next 18 breaking majors + migrate rule; prior 2026-09-24: fbtee 5.0 compiler consolidation; version pins added; prior 2026-09-24: browser-translator DOM-detach crash class reading (React Digest #2370); prior 2026-09-01: fbtee 4.0: Babel pipeline removed, native Rust/Oxc CLI (breaking; v3.3.0 is the Babel terminus) — firsthand
 sources:
+  - "https://github.com/i18next/i18next/releases/tag/v27.0.0"
+  - "https://www.i18next.com/misc/migration-guide"
   - "https://github.com/amannn/next-intl/releases/tag/v4.8.0"
   - "https://github.com/nkzw-tech/fbtee"
 reading:
@@ -83,3 +94,10 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "i18next", label: "i18next", token: "i18next" }
   - { pkg: "react-intl", label: "react-intl", token: "formatjs" }
   - { pkg: "@lingui/*", label: "Lingui", token: "lingui" }
+migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-brain migrate`)
+  - from: { pkg: "i18next", below: "27.0.0" }
+    to: "i18next 27 + react-i18next 18"
+    urgency: upgrade
+    effort: S
+    why: "i18next 27 (2026-11-07) is a breaking major built around changed defaults: fallbackLng no longer defaults to 'dev' (set your source language explicitly), returnEmptyString is off (an empty string falls back instead of rendering empty), cleanCode is on, every instance gets its own logger and post-processors, and markup- or path-like language codes are refused. Upgrade to 26.7 first and run once with debug: true — it logs most runtime changes (not returnEmptyString, addResources(), createInstance(), keySeparator: false or the TypeScript changes). Each default has a one-line opt-back in the migration guide. react-i18next 18 requires i18next >=27.0.1; both need Node 22+."
+    receipts: ["https://github.com/i18next/i18next/releases/tag/v27.0.0", "https://www.i18next.com/misc/migration-guide", "https://registry.npmjs.org/react-i18next/latest"]

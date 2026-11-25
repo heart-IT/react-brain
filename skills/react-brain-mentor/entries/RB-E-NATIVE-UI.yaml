@@ -6,20 +6,20 @@ status: reviewed   # long-form entry written + source-checked
 confidence: medium
 platforms: [react-native]
 options:
-  - { name: "expo-widgets (Expo)", tradeoff: "Home-screen widgets + Live Activities from Expo UI components, no SwiftUI/native code; full env access, no pre-render. STABLE in Expo SDK 56 (alpha in SDK 55) on iOS; SDK 58 (beta) adds an Android implementation on a dedicated Hermes runtime. See note: ANDROID WIDGETS." }
+  - { name: "expo-widgets (Expo)", tradeoff: "Home-screen widgets + Live Activities from Expo UI components, no SwiftUI/native code; full env access, no pre-render. STABLE in Expo SDK 56 (alpha in SDK 55) on iOS; SDK 58 (stable 2026-10-15) adds an Android implementation on a dedicated Hermes runtime. See note: ANDROID WIDGETS." }
   - { name: "Voltra (Callstack)", tradeoff: "Live Activities + widgets with SwiftUI-style layout (VStack/HStack); since v2.0 (2026-06-18) on Turbo Modules, so it runs in BARE RN (v2 migration required); iOS 16.2+ (interactive 17+), iOS 18+ activity families. 2.3 (2026-09-15) adds server-driven widgets and per-instance Android config. See note: VOLTRA 2.3." }
   - { name: "Expo Targets", tradeoff: "Native targets (widgets, App Clips, share extensions) in Swift/Kotlin or RN; multi-step setup. The pick when the surface needs custom native code the other rows do not expose." }
-  - { name: "expo-app-intents", tradeoff: "ALPHA (Expo SDK 58 beta): exposes Apple App Intents (Siri, Shortcuts, Spotlight, Apple Intelligence) from an Expo app; `npx expo-app-intents init` scaffolds it. Docs and examples still to come, so prototype only. See note: APP INTENTS." }
+  - { name: "expo-app-intents", tradeoff: "ALPHA (ships with Expo SDK 58, stable 2026-10-15; the package itself is still alpha): exposes Apple App Intents (Siri, Shortcuts, Spotlight, Apple Intelligence) from an Expo app; `npx expo-app-intents init` scaffolds it. Docs and examples still to come, so prototype only. See note: APP INTENTS." }
   - { name: "react-native-teleport", tradeoff: "Portals rendering in the native layer (re-parenting); web + native. 1.2.0 removes the Android black/white flash when teleporting video and maps, with no API or config to adopt. See note: TELEPORT 1.2." }
 recommend:
-  default: "iOS widgets / Live Activities: expo-widgets on Expo (stable since SDK 56, no native code), Voltra 2 on bare RN. Android widgets: expo-widgets on Expo SDK 58 (beta), Voltra 2.3 on bare RN. Custom native targets / App Clips / share extensions → Expo Targets. What changes the pick is Expo vs bare RN, then whether the Android side (days old on both) is production-ready for you."
+  default: "iOS widgets / Live Activities: expo-widgets on Expo (stable since SDK 56, no native code), Voltra 2 on bare RN. Android widgets: expo-widgets on Expo SDK 58, Voltra 2.3 on bare RN. Custom native targets / App Clips / share extensions → Expo Targets. What changes the pick is Expo vs bare RN, then whether the Android side (days old on both) is production-ready for you."
   when:
     - "iOS widgets / Live Activities on Expo → expo-widgets (SDK 56+, stable, no SwiftUI)"
     - "Live Activities on bare RN → Voltra 2 (Turbo Modules; no longer Expo-only)"
     - "widgets / App Clips / share extensions needing custom native → Expo Targets"
-    - "ANDROID home-screen widgets on Expo → expo-widgets (SDK 58 beta; own JS bundle on a dedicated Hermes runtime)"
+    - "ANDROID home-screen widgets on Expo → expo-widgets (SDK 58; own JS bundle on a dedicated Hermes runtime)"
     - "ANDROID widgets on bare RN, or a widget needing per-instance settings or server-driven props → Voltra 2.3"
-    - "Siri / Shortcuts / Spotlight / Apple Intelligence entry points → expo-app-intents (alpha; SDK 58 beta), else Expo Targets if you want to own the Swift"
+    - "Siri / Shortcuts / Spotlight / Apple Intelligence entry points → expo-app-intents (alpha; SDK 58), else Expo Targets if you want to own the Swift"
     - "native-layer portals, e.g. moving a playing video or map between parents without a flash → react-native-teleport (1.2+)"
 note: >
   THE PICTURE: native UI extensions (widgets, Live Activities, App Clips, App Intents) live outside
@@ -73,6 +73,7 @@ note: >
   transition; otherwise it falls back to the old behavior.
 
   HISTORY:
+  2026-11-25 STATUS FLIP: Expo SDK 58 went stable 2026-10-15 (verified vs expo.dev/changelog/sdk-58) — expo-widgets Android ships in a stable SDK; expo-app-intents is still labelled alpha.
   2026-09-21 REOPENED: Android widgets land on both options (expo-widgets SDK 58 beta, Voltra 2.3);
   expo-app-intents alpha; @expo/ui navigation primitives + RNHostView measurement fix. The
   "iOS-leaning" verdict is half-retired: iOS settled, Android days old.
@@ -80,7 +81,7 @@ note: >
   2026-06 REOPENED: expo-widgets stable in SDK 56; Voltra 2.0 bare-RN capable.
 defer_to_skill: null
 doc: "RB-E-NATIVE-UI.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-21   # ANDROID WIDGETS LAND on both options (expo-widgets SDK 58 beta — own JS bundle on a dedicated Hermes runtime; Voltra 2.3 per-instance config + server-driven props) · expo-app-intents alpha · @expo/ui navigation primitives + RNHostView measurement fix
+updated: 2026-11-25   # SDK 58 stable sweep (Android expo-widgets in a stable SDK; app-intents still alpha); prior 2026-09-21: ANDROID WIDGETS LAND on both options (expo-widgets SDK 58 beta — own JS bundle on a dedicated Hermes runtime; Voltra 2.3 per-instance config + server-driven props) · expo-app-intents alpha · @expo/ui navigation primitives + RNHostView measurement fix
 reading:
   - title: "Apple Home Screen Widgets with Expo (Continuous Native Generation)"
     url: "https://evanbacon.dev/blog/apple-home-screen-widgets"
@@ -100,6 +101,7 @@ watching:
     by: "Fernando Rojo, Szymon Rybczak & Oskar Kwaśniewski"
     what: "The v0 iOS team on what shipping a native-feel RN app took — including the upstream RN fixes it produced. Video companion to the v0 case study in `reading`."
 sources:
+  - "https://expo.dev/changelog/sdk-58"
   - "https://expo.dev/changelog/sdk-58-beta"
   - "https://github.com/callstackincubator/voltra/releases/tag/v2.3.0"
   - "https://kirillzyusko.github.io/react-native-teleport/blog/1-2-0-android-fast-reparenting"

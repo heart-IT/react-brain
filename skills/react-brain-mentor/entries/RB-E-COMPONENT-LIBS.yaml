@@ -66,7 +66,7 @@ note: >
   minors → treat version churn as the cost of adopting early. StyleX itself: RB-E-STYLING.
 defer_to_skill: design-system
 doc: "RB-E-COMPONENT-LIBS.md"   # long-form Explanation entry in content_dir
-updated: 2026-10-01   # added the "Props Are Not a Design System" reading (variants/modifiers over raw style props); prior 2026-09-24: Base UI ships as @base-ui/react (old scope deprecated on npm) · @shadcn/lint 0.2.0 + React/Svelte/Vue · Astryx npm @astryxdesign/core; prior 2026-09-21: @shadcn/lint — agent-first design-system linting for Tailwind v4 on ESLint or Oxlint (TWiR #297 · React Status #491) · Astryx pinned at 0.6.0 with its stated path to v1
+updated: 2026-11-25   # Den Odell design-system interaction benchmark reading (249-item select / 100 checkboxes across 10 systems; corroborated by TWiR #303 + React Status #495); prior 2026-10-01: added the "Props Are Not a Design System" reading (variants/modifiers over raw style props); prior 2026-09-24: Base UI ships as @base-ui/react (old scope deprecated on npm) · @shadcn/lint 0.2.0 + React/Svelte/Vue · Astryx npm @astryxdesign/core; prior 2026-09-21: @shadcn/lint — agent-first design-system linting for Tailwind v4 on ESLint or Oxlint (TWiR #297 · React Status #491) · Astryx pinned at 0.6.0 with its stated path to v1
 sources:
   - "https://github.com/shadcn-ui/lint"
   - "https://astryx.atmeta.com/blog/astryx-v0-6-0"
@@ -80,6 +80,12 @@ sources:
   - "https://ui.shadcn.com/docs/changelog"
   - "https://vitonsky.net/blog/2026/09/18/design-system/"
 reading:
+  - title: "Design systems should be fast by default"
+    url: "https://denodell.com/blog/design-systems-should-be-fast-by-default"
+    by: "Den Odell (2026-10-27)"
+    what: "The only measured interaction-performance comparison of this entry's batteries-included systems. Ten design systems on October 2026 versions with the CPU slowed 4x: opening a 249-country selector took 84ms in Mantine 9.7.1, 134ms in Ant Design 6.6.5, 208ms in Material UI 9.5.0 and 227ms in React Spectrum 3.47.6 (Ionic 1,266ms), and Ant Design took six times as long as Material UI to check 100 checkboxes, so framework alone did not predict the result. React Spectrum's slowness traced to React Aria measuring options one at a time (fix in review). Only Spectrum Web Components runs per-component performance tests in CI; the others gate on bundle size, which says nothing about interaction time. The Playwright perf-budget harness is published to rerun on your own components."
+    claim: "You're picking or running a batteries-included design system — its long dropdowns and bulk checkbox updates can blow a 100ms budget under CPU throttling (MUI and React Spectrum did, Mantine didn't), so measure your heaviest components with real data volumes."
+    applies_when: { deps: ["@mui/*", "@mantine/*", "antd", "@adobe/react-spectrum", "react-aria-components"], platforms: [react] }
   - title: "Building an LLM-safe design system"
     url: "https://polar.sh/blog/orbit-llm-safe-design-system"
     by: "Polar"

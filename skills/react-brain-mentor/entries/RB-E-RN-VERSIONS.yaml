@@ -17,34 +17,37 @@ options:
   - { name: "RN 0.84 (2026-02-11) ✓", tradeoff: "Hermes V1 DEFAULT; precompiled iOS binaries default; Node 22.11+ min; Legacy-Arch stripped; bi-monthly cadence" }
   - { name: "RN 0.85 (2026-04-07) ✓", tradeoff: "shared C++ animation backend; Jest preset → @react-native/jest-preset; layout-prop native driver (0.85.1)" }
   - { name: "RN 0.86 (2026-06-11) ✓", tradeoff: "Android-15+ edge-to-edge in core (drop react-native-edge-to-edge); DevTools light/dark; 2nd zero-breaking-change release" }
-  - { name: "RN 0.87 (2026-08-11) ✓", tradeoff: "CURRENT STABLE. Strict TypeScript API becomes the default (deep imports into react-native/Libraries/* are type errors); Metro 0.87 (source maps 2x faster); experimental SwiftPM; AGP 9; floor Node ≥22.13 / Kotlin 2.0+ / compileSdk 37; InteractionManager removed. 0.87.1 (2026-08-26, verified vs npm 2026-09-24); see note: 0.87 IS THE STRICT-API LINE." }
-  - { name: "RN 0.88 (RELEASE CANDIDATE; v0.88.0 tagged, not yet on npm)", tradeoff: "0.88.0-rc.6 (2026-10-14, npm tag `next`). The v0.88.0 git tag was cut 2026-10-15 and the @react-native/* 0.88.0 packages are on npm, but react-native@0.88.0 itself was NOT published when checked (registry 404, `latest` still 0.87.1, 2026-10-15 12:45 UTC) and there are no release notes or blog post yet: plan for it, target it once npm `latest` moves (tripwire below). States it is non-breaking, syncs React 19.3.0, and is the LAST line with the react-native-legacy-deep-imports escape hatch; Expo SDK 58 beta ships it. See note: 0.88 RC." }
+  - { name: "RN 0.87 (2026-08-11) ✓", tradeoff: "PREVIOUS STABLE (0.88 is current). Strict TypeScript API becomes the default (deep imports into react-native/Libraries/* are type errors); Metro 0.87 (source maps 2x faster); experimental SwiftPM; AGP 9; floor Node ≥22.13 / Kotlin 2.0+ / compileSdk 37; InteractionManager removed. 0.87.1 (2026-08-26, verified vs npm 2026-09-24); see note: 0.87 IS THE STRICT-API LINE." }
+  - { name: "RN 0.88 (2026-10-19) ✓", tradeoff: "CURRENT STABLE. react-native@0.88.0 on npm 2026-10-15, release blog 2026-10-19, 0.88.1 (2026-10-27) is npm `latest` (verified vs npm 2026-11-25). NO user-facing breaking changes (the third, after 0.83 and 0.86). Syncs React 19.3.0 (peer react ^19.3.0); events now dispatch through the W3C EventTarget path by default (imperative addEventListener on refs is canary-only); fontVariationSettings on Text/TextInput; iOS SceneDelegate support for the iOS 27 UIScene requirement (single scene only); ArrayBuffer for Java TurboModules; Metro 0.87 (floor 0.87.1); Hermes 260318099.0.4. Deprecates InitializeCore (→ react-native/setup-env), InputAccessoryView, the experimental_ background-style prefixes. 0.85.x moves to unsupported. See note: 0.88 STABLE." }
 recommend:
-  default: "Target the latest stable RN (0.87, npm 0.87.1); the New Architecture is non-optional from 0.82, so plan any migration around that line. Budget the 0.87 step as type-codemod work (the Strict TypeScript API default) and finish it during the 0.88 cycle, because the legacy-deep-imports bridge is removed in the release after 0.88."
+  default: "Target the latest stable RN (0.88, npm 0.88.1); the New Architecture is non-optional from 0.82, so plan any migration around that line. 0.87→0.88 is breaking-change-free, so the real cost is the 0.87 rung: budget it as type-codemod work (the Strict TypeScript API default) and finish it now, while the legacy-deep-imports opt-out still exists. Its removal date has moved: the 0.87 blog said through 0.88; Expo's SDK 58 changelog now says it is set to be removed after RN 0.89."
   when:
     - "on RN < 0.82 → New-Arch migration first (Legacy frozen at 0.80 with no fixes, stripped at 0.84)"
     - "on RN ≥ 0.86 → remove react-native-edge-to-edge (edge-to-edge is in core)"
-    - "moving to 0.87 → Strict TypeScript API migration (fix deep imports into react-native/Libraries/* with the /migrate-to-strict-api skill + the ESLint fixers; the react-native-legacy-deep-imports customCondition is a bridge that exists only through 0.88)"
+    - "moving to 0.87 → Strict TypeScript API migration (fix deep imports into react-native/Libraries/* with the /migrate-to-strict-api skill + the ESLint fixers; the react-native-legacy-deep-imports customCondition is a bridge Expo now dates to removal after 0.89; RN's docs only say 'a future release')"
     - "still importing InteractionManager, Modal `animated` or StatusBar backgroundColor/translucent → requestIdleCallback and the current props (0.87 removed them; migrate now)"
     - "still importing core SafeAreaView → react-native-safe-area-context (deprecated since 0.81; not in 0.87's removal list)"
+    - "building with the iOS 27 SDK / Xcode 27 → RN 0.88+ and move the entry point to a SceneDelegate (UIKit apps without the UIScene lifecycle fail to launch); Expo SDK 58 prebuild does it for you"
+    - "upgraded to Xcode 27 and `i` / run:ios stopped finding the simulator → Expo CLI for SDK 56+ (Device Hub aware), or SDK 58 for the devicectl fix; Simulator.app no longer exists"
     - "on iOS and tempted by SwiftPM → CocoaPods (still the default and supported path; SwiftPM is experimental) — and audit which iOS deps publish only through trunk, which goes read-only 2026-12-02"
-    - "on Expo → SDK 57 (RN 0.86) for production; SDK 58 beta (RN 0.88 RC) only if you need iOS 27 support now"
-    - "want React 19.3 on native → RN 0.88 (RC; the first line to sync it — RB-E-REACT-CORE)"
+    - "on Expo → SDK 58 (RN 0.88 + React 19.3, stable 2026-10-15) — built for iOS 27; SDK 57 (RN 0.86) only while a dependency blocks the jump (it carries the 0.87 Strict-API and removal changes too)"
+    - "want React 19.3 on native → RN 0.88 (stable; the first line to sync it — RB-E-REACT-CORE)"
     - "quoting a pre-0.84 row as authoritative → that version's RN blog (verify the row first)"
 note: >
   A React Native version number is an architecture timeline: where you stand decides what code you
   may write. The New Architecture went default (0.76) → Legacy frozen (0.80) → mandatory (0.82) →
   Legacy stripped (0.84), so 0.82 is the line every other New-Arch-gated upgrade waits on. Above it,
   staying current is cheap (bi-monthly cadence, two zero-breaking-change releases) except for one
-  rung: 0.87 turned the Strict TypeScript API on, and 0.88 is the last line that lets you opt out.
-  Rows marked ✓ (0.84–0.87) are verified vs the official RN blogs; 0.76–0.83 come from release
+  rung: 0.87 turned the Strict TypeScript API on, and the opt-out is now dated to go after 0.89.
+  Rows marked ✓ (0.84–0.88) are verified vs the official RN blogs; 0.76–0.83 come from release
   history + RN Rewind, so verify a row against its RN blog before quoting it.
 
   0.87 IS THE STRICT-API LINE (2026-08-11, verified vs the release blog + the v0.87.0 CHANGELOG): the
   0.80 opt-in preview became the default, so a 0.87 bump is a TYPE migration first and a runtime
   migration second → plan it as codemod work (the /migrate-to-strict-api skill and the ESLint fixers)
   and treat the "react-native-legacy-deep-imports" tsconfig customCondition as a bridge: the blog says
-  it remains available through 0.88 and the legacy types go in the following release. Also in 0.87:
+  it remains available through 0.88 and the legacy types go in the following release (that date has
+  since slipped — see 0.88 STABLE). Also in 0.87:
   Metro 0.84→0.87 (source maps 2x faster, half the source-map memory, stable TS/ESM config files, .es6
   + YAML configs dropped); EXPERIMENTAL Swift Package Manager for iOS (`npx react-native spm`;
   CocoaPods stays the default and the supported path); AGP 9 support (opt out of built-in Kotlin and
@@ -58,32 +61,34 @@ note: >
   hermes-compiler 250829098.0.16 (verified vs the tag's package.json), past the .15 backport that
   fixes the worklet debug-metadata memory regression; RB-E-ANIMATION owns that thread.
 
-  0.88 RC (rc.1 2026-09-16, rc.2 2026-09-22, rc.3 2026-09-29, verified vs the GitHub releases): SYNCS REACT 19.3.0
-  (npm peer react ^19.3.0; the first RN line to carry it), bumps Hermes to 260318099.0.3, enables the
-  Web-based event-dispatching refactor and, in canary, the imperative EventTarget API
-  (addEventListener/removeEventListener/dispatchEvent) on native view refs. SwiftPM manifests derive
-  their iOS floor from the app's IPHONEOS_DEPLOYMENT_TARGET instead of hardcoding iOS 15, so
-  higher-minimum deps (Expo at 16.4) autolink. rc.2 is a stabilisation cut: minimum Metro 0.87.1; it
-  reverts two TurboModule ArrayBuffer codegen changes that broke modules adopting ObjC/C++ ArrayBuffer
-  support in 0.87 (the notes state "0.88 is a non-breaking release"); and it restores the .js fallback
-  for legacy deep imports under the react-native-legacy-deep-imports condition → the deadline that
-  matters is still the removal of that condition after 0.88. rc.3 is a further stabilisation cut:
-  Hermes to 260318099.0.4 (fixes a quadratic reserve() during lazy compilation), a Metro
-  package-exports warning fix, and a SwiftPM autolinking fix that stopped recreating library package
-  roots on every sync (was breaking Xcode builds for libraries shipping their own Package.swift).
-  rc.4 (2026-10-07) lets TypeScript module augmentation extend the generated props and style types
-  and fixes an Android view staying partly untappable after accessibilityState.disabled resets; rc.5
-  (2026-10-12) states "no changes over 0.88.0-rc.4"; rc.6 (2026-10-14) is a tag without notes. THE
-  STABLE CUT IS IN FLIGHT (2026-10-15, verified vs the GitHub tag page + npm): v0.88.0 was tagged at
-  11:38 UTC and @react-native/metro-config, codegen, gradle-plugin, babel-preset and
-  virtualized-lists 0.88.0 are published, but react-native@0.88.0 returned 404 and `latest` stayed
-  0.87.1 → this entry keeps 0.87 as the default until npm `latest` moves; the tripwire then flips the
-  row, the default and RB-E-REACT-CORE's "19.3 only from RN 0.88, still a release candidate".
+  0.88 STABLE (react-native@0.88.0 on npm 2026-10-15, 0.88.1 2026-10-27; release blog 2026-10-19;
+  verified vs the blog, the v0.88.0/v0.88.1 GitHub releases and npm 2026-11-25): NON-BREAKING — the
+  blog states a 0.87 app upgrades "without any changes to your app code". What moves: React 19.3.0 is
+  synced in (peer react ^19.3.0); events now travel the W3C EventTarget capture/bubble path by default
+  (props, synthetic events and the responder system are unchanged; code reaching into RN's event
+  internals is what to test, and the legacy path survives behind an internal flag for now; the
+  imperative addEventListener/removeEventListener/dispatchEvent on native refs is CANARY-only);
+  fontVariationSettings on Text and TextInput (CSS string or object form); iOS SceneDelegate entry
+  points on RCTReactNativeFactory — iOS 27 SDK builds require the UIScene lifecycle and UIKit apps
+  without it fail to launch, support is single-scene only (keep UIApplicationSupportsMultipleScenes
+  false), and with it the window becomes resizable so Dimensions/useWindowDimensions update live;
+  ArrayBuffer in Java TurboModules (borrowed bytes valid only during a sync call); Metro 0.87 (floor
+  0.87.1); Hermes 260318099.0.4; Android's default User-Agent now includes the app name and version.
+  Deprecated, not removed: InitializeCore (→ react-native/setup-env), InputAccessoryView (→
+  react-native-keyboard-controller's KeyboardStickyView), the experimental_ background-style prefixes,
+  ReactFragment.fabricEnabled. 0.85.x moves to unsupported. 0.88.1 is a fix release (Yoga flex-shrink,
+  Android text-decoration crash, iOS 27 StatusBar, Release builds at -O2 instead of -Os on iOS).
+  SWIFTPM ROADMAP (stated in the blog): experimental in 0.88, targeted as the DEFAULT in 0.89 with a
+  CocoaPods opt-out, CocoaPods removal "in a later release" → the "CocoaPods for now" advice has a
+  dated end. THE DEEP-IMPORTS DEADLINE SLIPPED: the 0.87 blog said the react-native-legacy-deep-imports
+  opt-out lasts through 0.88; Expo's SDK 58 changelog (2026-10-15) says it "is set to be removed after
+  React Native 0.89", and RN's Strict TypeScript API docs say only "a future release" → migrate now,
+  but the hard stop is the release after 0.89, not 0.89 itself. 0.89 is already at rc.3 (2026-11-23).
 
-  EXPO SDK 58 BETA IS THE 0.88 ON-RAMP (2026-09-15, verified vs the Expo changelog): it upgrades RN
-  from 0.86 straight to the 0.88 RC, so no stable Expo SDK carries 0.87. The beta runs three to four
-  weeks; Expo will move to 0.88 stable when it ships and release SDK 58 shortly after, so the two dates
-  are coupled, and an app that needs iOS 27 support now can ship on the beta. (1) iOS 27's SDK REQUIRES
+  EXPO SDK 58 (STABLE 2026-10-15) SHIPS RN 0.88 (beta 2026-09-15; verified vs the SDK 58
+  changelog): it upgrades RN from 0.86 straight to 0.88, so no Expo SDK carries 0.87 and an Expo app
+  takes the 0.87 Strict-API and removal changes in the same jump. SDK 58 is "built for iOS 27"; the changelog said
+  Expo Go for SDK 58 would reach the stores "within a few weeks", and the new Expo Go supports only SDK 58. (1) iOS 27's SDK REQUIRES
   THE UISCENE LIFE CYCLE: `npx expo prebuild` generates SceneDelegate.swift plus a
   UIApplicationSceneManifest entry, and the UIWindow is created by the scene delegate rather than in
   didFinishLaunchingWithOptions; Expo forwards URL, user-activity, Handoff, life-cycle and quick-action
@@ -100,12 +105,21 @@ note: >
 
   EXPO SDK MAPPING: SDK 55 = RN 0.83 + React 19.2; SDK 56 = RN 0.85 + Expo UI stable; SDK 57 = RN 0.86
   + React 19.2 (2026-06, verified vs the SDK 57 changelog; skipped the beta phase because 0.86 was
-  breaking-change-free); SDK 58 beta = RN 0.88 RC + React 19.3 (verified vs expo@58.0.0-preview.6
-  bundledNativeModules, 2026-09-24).
+  breaking-change-free); SDK 58 = RN 0.88 + React 19.3 (beta verified vs expo@58.0.0-preview.6
+  bundledNativeModules 2026-09-24; stable 2026-10-15 per the SDK 58 changelog).
 
   APPLE PLATFORM FLOOR (2026-07-10, verified vs the Expo post's body): since 2026-04-28, App Store
   Connect uploads MUST be built with Xcode 26 / iOS-26-family SDKs. Expo SDK 54/55 EAS images already
   run Xcode 26; SDK ≤53 needs an explicit image opt-in → stay ≥SDK 54.
+
+  XCODE 27 DEVICE HUB (2026-11-25, verified vs the Expo blog of 2026-10-20 + npm): Xcode 27 REMOVED
+  Simulator.app and replaced it with Device Hub, so any tool that opens Simulator.app by name stops
+  working — on old Expo CLI, pressing `i` in `expo start` did nothing. Expo CLI detects Device Hub
+  and focuses the device via its devices:// deep link (shipped for SDK 56, 57 and 58); SDK 58 also
+  stops `expo run:ios` treating the simulators devicectl now lists as physical devices. Bare-RN
+  scripts and other tooling that shell out to `open -a Simulator` need the same fix. expo-device-hub
+  (dev-tools plugin, SDK 57+, MIT) streams simulators and emulators into a browser tab with tap/type
+  control. RB-E-TESTING owns which e2e runners boot simulators on Xcode 27.
 
   COCOAPODS TRUNK GOES READ-ONLY 2026-12-02 (verified vs the CocoaPods blog; newsletter framing of this
   is overstated): CocoaPods has been in maintenance mode since 2024-08-13; on 2026-12-02 trunk
@@ -120,6 +134,8 @@ note: >
   internals.
 
   HISTORY:
+  2026-11-25 GAP CLOSED: Xcode 27 removed Simulator.app (Device Hub) — Expo CLI SDK 56–58 handle it; expo-device-hub. react-native-edge-to-edge deprecated on npm (migrate rule why).
+  2026-11-25 STATUS FLIP (tripwire fired): RN 0.88 ✓ stable (0.88.0 npm 2026-10-15, blog 2026-10-19, 0.88.1 latest); default + migrate target 0.87 → 0.88; deep-imports opt-out deadline restated (Expo: removed after 0.89); Expo SDK 58 stable; SwiftPM default targeted for 0.89; tripwire react-native ≥0.89.0 wired.
   2026-10-15 REOPENED: 0.88 row moved to rc.6; v0.88.0 tagged with the @react-native/* 0.88.0 packages on npm, but react-native@0.88.0 not yet published → status NOT flipped; tripwire react-native ≥0.88.0 wired.
   2026-10-01 REOPENED: 0.88 row moved to rc.3 (Hermes 260318099.0.4 quadratic-reserve fix, Metro package-exports warning fix, SwiftPM autolinking fix).
   2026-09-24 CORRECTED: core SafeAreaView is deprecated, not removed, in 0.87 (the when-clause said removed); 0.88 row moved to rc.2.
@@ -130,7 +146,7 @@ note: >
   2026-07-10 GAP CLOSED: Apple Xcode 26 upload floor.
 defer_to_skill: react-native-jsi
 doc: "RB-E-RN-VERSIONS.md"   # long-form Explanation entry in content_dir
-updated: 2026-10-15   # RN 0.88 row moved to rc.6 (rc.4 TS module augmentation + Android a11y fix; rc.5 no changes); v0.88.0 tagged 2026-10-15 but react-native@0.88.0 not on npm yet — status not flipped, tripwire wired; prior 2026-10-01: RN 0.88 row moved to rc.3 (Hermes quadratic-reserve fix, Metro warning fix, SwiftPM autolinking fix); prior 2026-09-24: RN 0.88 row moved to rc.2 (Metro floor 0.87.1, deep-import fallback restored, ArrayBuffer reverts) · corrected: core SafeAreaView is deprecated, not removed, in 0.87; prior 2026-09-21: RN 0.88 RC row added (syncs React 19.3, Hermes 260318099.0.3, EventTarget in canary; legacy-deep-imports opt-out dies after 0.88) · Expo SDK 58 beta is the on-ramp + iOS 27 UIScene requirement
+updated: 2026-11-25   # Xcode 27 Device Hub note + when-clause; edge-to-edge npm deprecation in the migrate why; RN 0.88 ✓ stable (tripwire fired; 0.88.1 latest): non-breaking, React 19.3 sync, EventTarget dispatch, iOS SceneDelegate, fontVariationSettings, deprecations; default/migrate → 0.88; deep-imports opt-out now dated to removal after 0.89 (Expo SDK 58); Expo SDK 58 stable; SwiftPM default targeted for 0.89; tripwire ≥0.89.0 wired; prior 2026-10-15: RN 0.88 row moved to rc.6 (rc.4 TS module augmentation + Android a11y fix; rc.5 no changes); v0.88.0 tagged 2026-10-15 but react-native@0.88.0 not on npm yet — status not flipped, tripwire wired; prior 2026-10-01: RN 0.88 row moved to rc.3 (Hermes quadratic-reserve fix, Metro warning fix, SwiftPM autolinking fix); prior 2026-09-24: RN 0.88 row moved to rc.2 (Metro floor 0.87.1, deep-import fallback restored, ArrayBuffer reverts) · corrected: core SafeAreaView is deprecated, not removed, in 0.87; prior 2026-09-21: RN 0.88 RC row added (syncs React 19.3, Hermes 260318099.0.3, EventTarget in canary; legacy-deep-imports opt-out dies after 0.88) · Expo SDK 58 beta is the on-ramp + iOS 27 UIScene requirement
 reading:
   - title: "React Native Architecture: From Bridge to Fabric"
     url: "https://blog.codeminer42.com/react-native-architecture-from-bridge-to-fabric/"
@@ -143,8 +159,13 @@ sources:
   - "https://github.com/react/react-native/releases/tag/v0.88.0-rc.4"
   - "https://github.com/react/react-native/releases/tag/v0.88.0-rc.5"
   - "https://github.com/react/react-native/releases/tag/v0.88.0"
+  - "https://github.com/react/react-native/releases/tag/v0.88.1"
+  - "https://reactnative.dev/blog/2026/10/19/react-native-0.88"
+  - "https://expo.dev/changelog/sdk-58"
   - "https://expo.dev/changelog/sdk-58-beta"
   - "https://expo.dev/changelog/expo-go-57-login"
+  - "https://expo.dev/blog/xcode-27-device-hub-expo-device-hub"
+  - "https://registry.npmjs.org/expo-device-hub"
   - "https://reactnative.dev/blog/2026/02/11/react-native-0.84"
   - "https://reactnative.dev/blog/2026/04/07/react-native-0.85"
   - "https://reactnative.dev/blog/2026/06/11/react-native-0.86"
@@ -158,19 +179,19 @@ sources:
   - "https://unpkg.com/expo@58.0.0-preview.6/bundledNativeModules.json"
 migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-brain migrate`)
   - from: { pkg: "react-native", below: "0.87.0" }
-    to: "React Native 0.87 (current stable)"
+    to: "React Native 0.88 (current stable)"
     urgency: upgrade
     effort: L
-    why: "the ladder crosses hard lines: New Architecture is the ONLY runtime ≥0.82 (Legacy frozen at 0.80, stripped at 0.84), Hermes V1 + precompiled iOS binaries default at 0.84 (Node 22.11+ min), the Jest preset moves to @react-native/jest-preset at 0.85, Android edge-to-edge lands in core at 0.86, and 0.87 makes the Strict TypeScript API the default (deep imports into react-native/Libraries/* become type errors) while raising the floor to Node 22.13 / Kotlin 2.0 / compileSdk 37 and dropping InteractionManager. Every New-Arch-gated upgrade below unblocks at 0.82+; budget the 0.87 step as type-codemod work."
-    receipts: ["https://reactnative.dev/blog/2026/02/11/react-native-0.84", "https://reactnative.dev/blog/2026/06/11/react-native-0.86", "https://reactnative.dev/blog/2026/08/11/react-native-0.87"]
+    why: "the ladder crosses hard lines: New Architecture is the ONLY runtime ≥0.82 (Legacy frozen at 0.80, stripped at 0.84), Hermes V1 + precompiled iOS binaries default at 0.84 (Node 22.11+ min), the Jest preset moves to @react-native/jest-preset at 0.85, Android edge-to-edge lands in core at 0.86, and 0.87 makes the Strict TypeScript API the default (deep imports into react-native/Libraries/* become type errors) while raising the floor to Node 22.13 / Kotlin 2.0 / compileSdk 37 and dropping InteractionManager. Every New-Arch-gated upgrade below unblocks at 0.82+; 0.87→0.88 adds no user-facing breaking changes (React 19.3, EventTarget dispatch, iOS SceneDelegate for the iOS 27 SDK), so budget the 0.87 step as type-codemod work."
+    receipts: ["https://reactnative.dev/blog/2026/02/11/react-native-0.84", "https://reactnative.dev/blog/2026/06/11/react-native-0.86", "https://reactnative.dev/blog/2026/08/11/react-native-0.87", "https://reactnative.dev/blog/2026/10/19/react-native-0.88"]
   - from: { pkg: "react-native-edge-to-edge" }
     to: "remove the package — Android-15+ edge-to-edge is in RN core since 0.86"
     urgency: conditional
     effort: S
     requires: { pkg: "react-native", atleast: "0.86.0" }
-    why: "RN 0.86 handles edge-to-edge in core; once there, the polyfill package is redundant"
-    receipts: ["https://reactnative.dev/blog/2026/06/11/react-native-0.86"]
+    why: "RN 0.86 handles edge-to-edge in core; once there, the polyfill package is redundant — and the package is now deprecated on npm (flag set on 1.8.2), whose message says to set edgeToEdgeEnabled=true in android/gradle.properties instead"
+    receipts: ["https://reactnative.dev/blog/2026/06/11/react-native-0.86", "https://registry.npmjs.org/react-native-edge-to-edge/latest"]
 tripwires:   # standing caveats as executable conditions — evaluated by `harvest firsthand`; fired ⇒ do the then:, update prose, remove the row
-  - when: { pkg: "react-native", atleast: "0.88.0" }
-    then: "RN 0.88.0 reached npm `latest` — flip the 0.88 row from RELEASE CANDIDATE to ✓ stable (read the v0.88.0 release notes + RN blog), move the default and the migrate row's target from 0.87 to 0.88, restate the deep-imports deadline as 'the NEXT release', update the Expo SDK 58 lines once SDK 58 ships, and update RB-E-REACT-CORE's 'React 19.3 only from RN 0.88, still a release candidate' (default, when-clause, REACT ON NATIVE note)"
-    added: 2026-10-15
+  - when: { pkg: "react-native", atleast: "0.89.0" }
+    then: "RN 0.89 reached npm `latest` — add the 0.89 row from its release blog, move the default + migrate target, and re-check two dated claims: (1) the blog said 0.89 targets Swift Package Manager as the DEFAULT with a CocoaPods opt-out — if it shipped, rewrite the 'on iOS and tempted by SwiftPM → CocoaPods' when-clause and the COCOAPODS TRUNK note; (2) Expo dated the react-native-legacy-deep-imports opt-out to removal AFTER 0.89 — restate it as 'gone in the next release' and wire a tripwire at that version"
+    added: 2026-11-25

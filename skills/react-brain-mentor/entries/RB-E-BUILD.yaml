@@ -7,10 +7,10 @@ confidence: high
 platforms: [react, react-native]
 options:
   - { name: "Metro", tradeoff: "The RN bundler and default. 0.87 ships with RN 0.87 (2026-08-11): source-map generation 2x faster at half the memory, TypeScript/ESM config (metro.config.mts) stable, YAML configs and .es6 extensions removed. metro 0.87.1 (2026-09-13, verified vs npm). See note: METRO 0.87." }
-  - { name: "Vite 8 / Rspack 2.2 / webpack 5.111", tradeoff: "Web bundlers. Vite 8 runs on Rolldown (security floor 8.3.3, or 8.2.4 / 8.1.6 / 7.3.7 / 6.4.4 on older lines); Rspack 2.1 runs the Rust React Compiler at 7–13x the Babel plugin, 2.2 adds ~3x faster CSS parsing and ~5% faster production builds; webpack 5.111 makes ESM output stable. vite 8.3.1, @rspack/core 2.2.7, webpack 5.111.1 (all verified vs npm 2026-09-24). See note: VITE DEV-SERVER FLOOR, RSPACK 2, WEBPACK." }
-  - { name: "Turborepo / Nx + pnpm/yarn workspaces", tradeoff: "Monorepo task graph + caching. pnpm 12 (2026-08-26) is the stable Rust rewrite with pnpm 11's commands, settings and lockfile format; pnpm 12.6.0 (2026-09-22, verified vs npm). See note: PNPM 12." }
+  - { name: "Vite 8 / Rspack 2.3 / webpack 5.113", tradeoff: "Web bundlers. Vite 8 runs on Rolldown (security floor 8.3.7, or 8.2.5 / 8.1.7 / 7.3.8 / 6.4.6 on older lines — a CRITICAL dev-server RCE, 2026-11-10); Rspack 2.1 runs the Rust React Compiler at 7–13x the Babel plugin, 2.2 adds ~3x faster CSS parsing, 2.3 parses with SWC Next; webpack 5.111 makes ESM output stable and webpack's own blog now deprecates css-loader / style-loader / mini-css-extract-plugin / html-webpack-plugin for the built-ins. vite 8.3.8, @rspack/core 2.3.4, webpack 5.113.0 (all verified vs npm 2026-11-25). See note: VITE DEV-SERVER FLOOR, RSPACK 2, WEBPACK." }
+  - { name: "Turborepo / Nx + pnpm/yarn workspaces", tradeoff: "Monorepo task graph + caching. pnpm 12 (2026-08-26) is the stable Rust rewrite with pnpm 11's commands, settings and lockfile format; pnpm 12.23.0 (2026-11-22, verified vs npm) — 12.23 removed platform variants in a minor release. See note: PNPM 12." }
   - { name: "Expo vs bare RN", tradeoff: "Managed velocity (Expo) vs native control (bare RN)." }
-  - { name: "Noxcturnal (Expo, experimental)", tradeoff: "First-party Rust (oxc via napi-rs) Metro transform worker in Expo SDK 58 beta behind `experiments.noxcturnalTransformWorker`. Expo's numbers: ~3x faster per-module transforms, ~2x faster cold bundling — but it switches off for any project with Babel plugins and skips Reanimated/Worklets files. See note: NOXCTURNAL." }
+  - { name: "Noxcturnal (Expo, experimental)", tradeoff: "First-party Rust (oxc via napi-rs) Metro transform worker in Expo SDK 58 (stable 2026-10-15; the transformer itself is still EXPERIMENTAL) behind `experiments.noxcturnalTransformWorker`. Expo's numbers: ~3x faster per-module transforms, ~2x faster cold bundling — but it switches off for any project with Babel plugins and skips Reanimated/Worklets files. See note: NOXCTURNAL." }
   - { name: "react-native-swc", tradeoff: "Rust/SWC Metro transform, faster than Babel; custom Babel plugins need SWC equivalents (e.g. the worklets plugin for Reanimated). @react-native-swc/metro-plugin 0.1.5 (2026-05-31, verified vs npm): early." }
   - { name: "react-native-boost 2.0", tradeoff: "Not a faster transform: it REWRITES your JSX at build time to skip RN component layers (Text/View, Animated, ActivityIndicator, StyleSheet, Platform), so the win is render cost, not bundle time. 2.0 (2026-09-13) moves to a Metro config plugin; 2.0.2 (2026-09-18, verified vs npm). Parity with RN is the whole promise — measure. See note: REACT-NATIVE-BOOST." }
   - { name: "facetpack (early)", tradeoff: "@ecrindigital/facetpack — Rust/OXC Metro transformer (claims ~36x Babel transforms), one-line metro.config, Babel fallback for Flow packages, Doctor CLI. 0.2.0 (2026-01-17, verified vs npm), no release since: early-stage." }
@@ -22,7 +22,7 @@ options:
 recommend:
   default: "Web: Vite 8 (Rolldown). React Native: Metro (+ Hermes V1, precompiled iOS binaries). Monorepo: pnpm workspaces + Turborepo. Expo for managed velocity."
   when:
-    - "dev server reachable beyond localhost (--host, server.host, Docker port) → Vite ≥8.3.3 (or 8.2.4 / 8.1.6 / 7.3.7 / 6.4.4; Vite+ ≥1.1.0) — the 2026-10-06 floor above CVE-2026-39364's 8.0.5 / 7.3.2; and never publish a dev server to a network you do not control"
+    - "dev server reachable beyond localhost (--host, server.host, Docker port) → Vite ≥8.3.7 (or 8.2.5 / 8.1.7 / 7.3.8 / 6.4.6; Vite+ ≥1.5.1) — the 2026-11-10 CRITICAL dev-server RCE floor (GHSA-p4f5-76q4-ffq7), above the 2026-10-06 8.3.3 floor; and never publish a dev server to a network you do not control"
     - "RN bundler alternative for module federation / super-apps → Re.Pack 5 (worth the complexity when independent teams need independent JS release cadences within one app — Callstack's own criterion)"
     - "want the Rolldown/Rollup plugin ecosystem on RN (experimental) → Rollipop (early alpha, prototype only, not an Expo path)"
     - "slow RN CI → RNRepo + Rock (prebuilt native binaries plus native build-artifact caching; they stack)"
@@ -30,7 +30,8 @@ recommend:
     - "RN render cost on Text/View-heavy screens → react-native-boost 2.0 (build-time JSX rewriting; measure your own screens and keep the escape hatch)"
     - "Pear app → esbuild-bundle to dist (desktop) or Metro + bare-pack for the Bare worker (mobile), not the web/Metro defaults — see RB-E-P2P"
     - "new web project → Vite 8"
-    - "legacy web app on webpack → webpack 5.111 (zero-loader defaults, stable ESM output), else Rspack 2 for Rust build speed"
+    - "legacy web app on webpack → webpack 5.113 (zero-loader defaults, stable ESM output; on 5.110+ delete css-loader / style-loader / mini-css-extract-plugin / html-webpack-plugin for the built-ins, which webpack now deprecates), else Rspack 2 for Rust build speed"
+    - "iOS build publishes or consumes pods from CocoaPods trunk → plan the Swift Package Manager move: trunk permanently stops accepting new Podspecs on 2026-12-02 (existing pods keep installing; React Native libraries ship podspecs through npm, but SDKs published only to trunk — RevenueCat's hybrid pod, Firebase's matrix — are moving to SPM; see note: COCOAPODS TRUNK READ-ONLY)"
     - "want one CLI over the whole VoidZero stack (bundler, test runner, linter, formatter) → Vite+ (STABLE 1.0; Node 22.18+; its migrate command may still need manual follow-up on existing multi-tool setups)"
     - "need native control Expo does not give → bare RN (Expo vs bare: managed velocity traded for native control)"
 note: >
@@ -65,10 +66,21 @@ note: >
   LOW: cross-origin script execution when a malicious site is visited while the dev server runs —
   only for apps that pass the unchanged browser request URL to server.transformIndexHtml (middleware
   mode / appType 'custom', as Vite's SSR guide shows) and whose HTML carries an inline module script.
-  Patched in 8.3.3 / 8.2.4 / 8.1.6 / 7.3.7 / 6.4.4 and Vite+ 1.1.0 → that is the floor now (8.3.4,
-  2026-10-08, is a plain bug-fix release).
+  Patched in 8.3.3 / 8.2.4 / 8.1.6 / 7.3.7 / 6.4.4 and Vite+ 1.1.0 (8.3.4, 2026-10-08, is a plain
+  bug-fix release).
+  CRITICAL (2026-11-10, verified vs GHSA-p4f5-76q4-ffq7 and npm 2026-11-25): remote code execution
+  on a dev server reachable from the network — the `__vite-browser-external:<suffix>` and
+  `__vite-optional-peer-dep:<suffix>` virtual modules embedded the URL-derived module ID unescaped,
+  so one HTTP request could run arbitrary code. Every line from 4.0 is affected (vite >=8.3.0
+  <=8.3.6, >=8.2.0 <=8.2.4, >=8.0.0 <=8.1.6, >=7.0.0 <=7.3.7, >=4.0.0 <=6.4.5; vite-plus <=1.5.0).
+  Patched in 8.3.7 / 8.2.5 / 8.1.7 / 7.3.8 / 6.4.6 and Vite+ 1.5.1 (npm 2026-11-09; latest 8.3.8)
+  → that is the floor now. A separate medium (GHSA-8g5g-mxqh-grgj, 2026-10-21, a v6-only fs.deny
+  bypass via queries fixed in 6.4.5) is subsumed by 6.4.6. Exposure is still the `--host` /
+  `server.host` / port-mapping condition above — but the severity is no longer file disclosure, it
+  is code execution on the developer's machine.
 
-  NOXCTURNAL (2026-09-21, verified vs the Expo SDK 58 beta changelog of 2026-09-15): a module
+  NOXCTURNAL (2026-09-21, verified vs the Expo SDK 58 beta changelog of 2026-09-15; SDK 58 went
+  stable 2026-10-15 and its changelog still calls the transformer EXPERIMENTAL): a module
   transformer written in Rust on oxc, bound into Node with napi-rs. Expo measured per-module
   transforms ~3x faster and COLD bundling ~2x faster — the largest test app, ~5,500 files, went 5.26s
   → 2.46s, with 443 of those files still falling back to Babel. Activation rules decide whether it
@@ -81,13 +93,13 @@ note: >
   concern. Consequence: the Babel-bottleneck clause routes to Noxcturnal first (one flag, automatic
   fallback), and the third-party OXC/SWC transformers keep their slot for the projects it excludes.
 
-  FINGERPRINT `balanced` DEFAULT (same changelog): SDK 58 defaults `fingerprint` to the `balanced`
+  FINGERPRINT `balanced` DEFAULT (same changelog; shipped in stable SDK 58): SDK 58 defaults `fingerprint` to the `balanced`
   preset — bumping `version` in app.json or touching files inside node_modules no longer changes the
   fingerprint, and native modules are hashed by package NAME AND VERSION rather than file contents.
   This setting decides whether CI rebuilds native or reuses a build, so a stable hash is a direct
   CI-minutes win; presets are configurable for a stricter tradeoff.
 
-  PNPM 12 (2026-08-26, verified vs the release post; latest re-checked 2026-09-24 vs npm: 12.6.0): the
+  PNPM 12 (2026-08-26, verified vs the release post; latest re-checked 2026-11-25 vs npm: 12.23.0): the
   Rust rewrite is stable and deliberately not a migration — commands, flags, settings and the
   LOCKFILE FORMAT carry over from pnpm 11. The post told readers to `pnpm self-update latest-12`
   because npm's `latest` still pointed at pnpm 11; the registry has since moved, so a plain install
@@ -104,6 +116,10 @@ note: >
   `packageImportMethod: auto` tries a hardlink before a reflink on Linux, which the post says roughly
   halves node_modules materialization from a warm store on btrfs; plus project-aware global bins and
   registry revisions. RB-E-DX owns pnpm's workspace versioning (`pnpm change` / `pnpm version -r`).
+  12.23.0 (2026-11-22, verified vs the release post + npm) carries two credential fixes — pnpm no
+  longer reads `otp` from config files, and sends registry credentials only over HTTPS — and REMOVES
+  platform variants (publishConfig.variants, `pack --variant`) in a minor release: a package that
+  published variants must move to per-platform packages in optionalDependencies.
 
   VITE+ (2026-07-02 beta, verified vs the VoidZero announcement; 2026-09-22 RC; STABLE 1.0 shipped
   2026-09-28, verified vs the announcement post): one CLI over the VoidZero stack, MIT,
@@ -130,7 +146,10 @@ note: >
   Compiler (merged into SWC) through its built-in SWC loader at 7–13x the Babel plugin; 2.2
   (2026-08-26) is a performance release — ~3x faster built-in CSS parsing, ~5% off production builds,
   and HMR that no longer refetches CSS on a JS-only change (a 4.1 MB stylesheet went ~385 ms → ~6 ms
-  per hot update) — plus Browserslist Baseline targets.
+  per hot update) — plus Browserslist Baseline targets. 2.3 (2026-10-29, verified vs the 2.3 post;
+  npm 2.3.4, 2026-11-24) parses with SWC Next — the flat-AST successor parser built with the SWC team,
+  native parsing up to 3x SWC's — and adds an experimental per-loader cache and built-in CSS
+  improvements.
 
   WEBPACK CONVERGES ON THE VITE DX (5.109 released 2026-07-24, verified 2026-07-28 vs the webpack
   blog; 5.110 and 5.111 verified vs their posts): 5.109 flips `experiments.css` / `.html` /
@@ -143,6 +162,25 @@ note: >
   minification and performance hints; 5.111 (2026-09-14) makes ESM OUTPUT STABLE, adds output.copy
   for static files and improves the CSS minimizer. This removes most CONFIGURATION reasons to leave
   webpack; the Rust-speed argument is untouched, so Vite stays the default for new web.
+  2026-11-16 (verified vs the webpack blog): webpack DEPRECATES css-loader, style-loader,
+  mini-css-extract-plugin, css-minimizer-webpack-plugin, html-loader and html-webpack-plugin in favour
+  of the built-ins (5.109 parsing/extraction, 5.110 minification + vendor prefixes); sass/less/postcss
+  loaders keep working on top. The npm deprecation flags are NOT set (checked 2026-11-25), so nothing
+  warns on install — this is a docs-level deprecation: new webpack configs should not add them, and
+  existing ones on 5.110+ can delete them. 5.113 (2026-11-19) adds CSS Modules inside native HTML
+  pages (`<style module>`), SVG minification and loader content filters.
+
+  COCOAPODS TRUNK READ-ONLY (verified 2026-11-25 vs the CocoaPods "Trunk Read-only Plan" post, updated
+  May 2025, and RevenueCat's SPM migration guide): CocoaPods trunk switches to NOT ACCEPT NEW PODSPECS
+  PERMANENTLY on 2026-12-02, after a 2026-11-02–06 test run. Existing pods and the CDN keep serving, so
+  existing builds keep working; what stops is publishing new pod versions to trunk. React Native's own
+  libraries mostly ship their podspecs through npm and are unaffected, but native SDKs distributed
+  through trunk are moving to Swift Package Manager: React Native Firebase v27 is already SPM-only on
+  iOS (RB-E-AUTH), RevenueCat's v11 hybrid pod was blocked by the November test run and its docs say a
+  later major drops CocoaPods (RB-E-PAYMENTS), and RN 0.88 ships an `spm` command while 0.89 targets
+  SwiftPM as the default (RB-E-RN-VERSIONS). → An app whose pods come from trunk should expect its
+  next SDK upgrades to arrive as SPM packages; a team PUBLISHING pods needs another channel before
+  2026-12-02.
 
   METRO 0.87 (verified vs the RN 0.87 blog, 2026-08-11): source-map generation is 2x faster and
   source maps take half the memory (both feed React Native DevTools load time); TypeScript/ESM
@@ -177,6 +215,7 @@ note: >
   RB-E-REACT-CORE owns the React Compiler default; RB-E-META-FRAMEWORKS owns Next.js/Turbopack.
 
   HISTORY:
+  2026-11-25 REOPENED: Vite security floor 8.3.3 → 8.3.7 / 8.2.5 / 8.1.7 / 7.3.8 / 6.4.6 (Vite+ 1.5.1): critical dev-server RCE GHSA-p4f5-76q4-ffq7 (2026-11-10); webpack 5.113 + webpack's docs-level deprecation of css/style/html loaders and plugins; Rspack 2.3 (SWC Next parser); pnpm 12.23 (credential fixes, platform variants removed); Expo SDK 58 stable (Noxcturnal still experimental); CocoaPods trunk read-only from 2026-12-02.
   2026-10-15 REOPENED: Vite security floor 8.0.5 / 7.3.2 → 8.3.3 / 8.2.4 / 8.1.6 / 7.3.7 / 6.4.4 (Vite+ 1.1.0): three dev-server GHSAs published 2026-10-06 with those releases (the 10-08 pass skipped 8.3.3 as "no GHSA yet").
   2026-10-08 CORRECTED: Vite+ 1.0 shipped 2026-09-28, not 2026-09-30 (the VoidZero post is dated Sep 28, npm 1.0.0 published 2026-09-28), and the post says "about to reach two million weekly downloads", not ~2M.
   2026-10-01 GAP CLOSED: Vite+ reached STABLE 1.0 (~2M downloads/week) — the RC tracking note graduates to an adoption target, not just new-project-only.
@@ -193,7 +232,7 @@ note: >
   Rolldown-as-bundler; Metro stays the RN default.
 defer_to_skill: null
 doc: "RB-E-BUILD.md"   # long-form Explanation entry in content_dir
-updated: 2026-10-15   # Vite security floor → 8.3.3 / 8.2.4 / 8.1.6 / 7.3.7 / 6.4.4 (Vite+ 1.1.0) for three 2026-10-06 dev-server GHSAs; prior 2026-10-08: corrected the Vite+ 1.0 date (2026-09-28, not 09-30) and download figure (nearly 2M/week); prior 2026-10-01: Vite+ reached stable 1.0; prior 2026-09-24: Vite+ 1.0.0-rc.0 (Vitest 5, Node 20 dropped); pnpm 12.6.0; receipts re-checked vs npm; prior 2026-09-21: react-native-boost 2.0 added on the ADVOCATE PASS (build-time JSX rewriting — a mechanism no other row here covers) · VITE DEV-SERVER CVE-2026-39364 security floor 8.0.5 / 7.3.2, actively mass-scanned when exposed · Noxcturnal — Expo's first-party Rust/oxc Metro transformer (SDK 58 beta) with its activation limits · fingerprint `balanced` default · webpack 5.111 stable ESM output
+updated: 2026-11-25   # Vite floor → 8.3.7 (critical dev-server RCE GHSA-p4f5-76q4-ffq7); webpack 5.113 + loader deprecations; Rspack 2.3; pnpm 12.23; SDK 58 stable; CocoaPods trunk read-only 2026-12-02; prior 2026-10-15: Vite security floor → 8.3.3 / 8.2.4 / 8.1.6 / 7.3.7 / 6.4.4 (Vite+ 1.1.0) for three 2026-10-06 dev-server GHSAs; prior 2026-10-08: corrected the Vite+ 1.0 date (2026-09-28, not 09-30) and download figure (nearly 2M/week); prior 2026-10-01: Vite+ reached stable 1.0; prior 2026-09-24: Vite+ 1.0.0-rc.0 (Vitest 5, Node 20 dropped); pnpm 12.6.0; receipts re-checked vs npm; prior 2026-09-21: react-native-boost 2.0 added on the ADVOCATE PASS (build-time JSX rewriting — a mechanism no other row here covers) · VITE DEV-SERVER CVE-2026-39364 security floor 8.0.5 / 7.3.2, actively mass-scanned when exposed · Noxcturnal — Expo's first-party Rust/oxc Metro transformer (SDK 58 beta) with its activation limits · fingerprint `balanced` default · webpack 5.111 stable ESM output
 watching:
   - title: "How React Native Builds Actually Work (APK, AAB, IPA, APP)"
     url: "https://www.youtube.com/watch?v=1o0pEjYGUWM"
@@ -243,6 +282,14 @@ reading:
     by: "The Mythical Engineer"
     what: "Why RN Android builds are slow (conservative Gradle/Metro/C++ defaults) and how parallel Gradle, dynamic Metro workers, ccache, and single-architecture builds cut times from 20+ min to 2-5 min, with benchmarks. The RN-CI build-perf dimension the other readings here don't cover."
 sources:
+  - "https://github.com/vitejs/vite/security/advisories/GHSA-p4f5-76q4-ffq7"
+  - "https://expo.dev/changelog/sdk-58"
+  - "https://webpack.js.org/blog/2026-11-19-webpack-5-113/"
+  - "https://webpack.js.org/blog/2026-11-16-css-and-html-are-built-in/"
+  - "https://rspack.rs/blog/announcing-2-3"
+  - "https://pnpm.io/blog/releases/12.23.0"
+  - "https://blog.cocoapods.org/CocoaPods-Specs-Repo/"
+  - "https://www.revenuecat.com/docs/sdk-guides/react-native-cocoapods-to-spm-migration"
   - "https://github.com/kuatsu/react-native-boost/releases/tag/v2.0.0"
   - "https://github.com/advisories/GHSA-v2wj-q39q-566r"
   - "https://www.f5.com/labs/articles/cloud-takeover-mass-scanning-for-exposed-vite-endpoints-cve-2026-39364"
@@ -272,3 +319,7 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "metro", label: "Metro", token: "metro" }
   - { pkg: "webpack", label: "webpack", token: "webpack" }
   - { pkg: "@ecrindigital/facetpack", label: "facetpack", token: "facetpack" }
+tripwires:   # standing caveats as executable conditions — evaluated by `harvest firsthand`; fired ⇒ do the then:, update prose, remove the row
+  - when: { pkg: "html-webpack-plugin", deprecated: true }
+    then: "the npm deprecation flag caught up with webpack's 2026-11-16 docs-level deprecation of css-loader / style-loader / mini-css-extract-plugin / html-webpack-plugin — say so in the WEBPACK note and add a migrate rule (webpack ≥5.110 built-ins) with the flag as receipt"
+    added: 2026-11-25

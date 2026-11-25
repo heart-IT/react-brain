@@ -6,7 +6,7 @@ status: reviewed   # long-form entry written + source-checked → encyclopedia/R
 confidence: medium
 platforms: [react]
 options:
-  - { name: "Electron", tradeoff: "bundles its own Chromium + Node; largest ecosystem & most mature; deep Node/native access; heaviest install (~100–200MB)" }
+  - { name: "Electron", tradeoff: "bundles its own Chromium + Node; largest ecosystem & most mature; deep Node/native access; heaviest install (~100–200MB). Electron 45 stable 2026-10-21 (latest 45.5.0); SECURITY FLOOR 44.9.1 / 43.8.1 / 42.11.16 for the eMudhra intermediate-cert block (high, no workaround) — verified vs the electron GHSA + npm. Discord is replacing its Electron desktop app with a Rust client (2026-11-05; RB-E-CROSSPLATFORM owns the thread)" }
   - { name: "Tauri (2.x)", tradeoff: "Rust shell using the OS native webview (no bundled Chromium) → tiny builds (from ~600KB); desktop + mobile (iOS/Android); native logic in Rust. @tauri-apps/cli 2.11.5 (2026-09-20, verified vs npm)" }
   - { name: "Pake", tradeoff: "one-command wrapper that turns a web URL into a desktop app on Tauri; <10MB (~20x smaller than Electron); fast path to ship an existing site, not a full app framework. pake-cli 3.17.3 (2026-10-05, verified vs npm + the V3.17.3 release): native capabilities are now scoped to the exact packaged origin — package the URL a site finally lands on" }
   - { name: "Pear (Holepunch)", tradeoff: "P2P/serverless desktop+mobile runtime (Bare); no central server, content-addressed distribution; depth → holepunch-p2p-systems" }
@@ -79,8 +79,18 @@ note: >
   experimental; watch, don't bet.
 
 
-  EXPO-DESKTOP LEAD (2026-07-16, TWiR #284): shirakaba/expo-desktop targets Expo → macOS/Windows
-  directly — early and unproven, but a third RN-desktop lane (vs Microsoft's forks) to watch.
+  EXPO-DESKTOP (2026-07-16 lead, TWiR #284; 1.0 verified 2026-11-25 vs npm + its docs site):
+  shirakaba/expo-desktop reached 1.0 (1.0.0 2026-09-29; 1.0.7 latest) — "best-effort desktop
+  support for Expo", an INDEPENDENT project by Jamie Birch, not endorsed or maintained by Expo.
+  `npx expo-desktop create-app`, then prebuild generates the Xcode, Gradle and MSBuild projects
+  so one Expo codebase runs on iOS, Android, web, macOS and Windows. A third RN-desktop lane beside
+  Microsoft's forks; 1.0 is a version, not a support promise — prototype before betting a product
+  on it. The first framework on top of it — Legend Spark (Jay Meistrich; @legendapp/spark 0.0.7,
+  2026-11-23) — adds windows, menus, dialogs, files, tray, SQLite and Sparkle updates over Expo
+  Desktop → react-native-macos/-windows (Hermes, RN native renderer, no browser), and a prebuilt
+  Spark Runner gives Fast Refresh with no Xcode compile until you add native deps. Its own status
+  page says "Experimental — not for production": macOS 14+ on Apple Silicon is the primary target;
+  Intel and Windows 11 "still need validation". Spark stays a lead, not an option row.
 
 
   CROSS-REFERENCES: RB-E-P2P owns the Pear backend architecture and the holepunch-p2p-systems
@@ -89,6 +99,9 @@ note: >
 
 
   HISTORY:
+
+  2026-11-25 REOPENED: expo-desktop 1.0 (independent, best-effort Expo → macOS/Windows); Legend Spark
+  noted as experimental; Electron 45 + eMudhra security floor; Discord leaving Electron (pointer).
 
   2026-10-08 REOPENED: Pake 3.17.3 scopes native capabilities to the packaged origin; PWA-vs-Electron
   reading added (first source for the PWA row's limits).
@@ -107,7 +120,7 @@ note: >
   2026-07-10 GAP CLOSED: RN-desktop rows added (React Weekly); the entry had been web-shell-only.
 defer_to_skill: engineering-principles   # shell↔web boundary; Pear depth → holepunch-p2p-systems; shell security → RB-E-SECURITY
 doc: "RB-E-DESKTOP.md"   # long-form Explanation entry in content_dir
-updated: 2026-10-08   # Pake 3.17.3 origin-scoped capabilities; Electron↔PWA reading; prior 2026-10-01: react-native-macos 0.81.9 → 0.83.0 (first 0.83 release, narrows the rn-windows lag to one minor); prior 2026-09-24: Pake pin V3.12.0 → 3.17.1; Tauri/rn-windows/rn-macos pins; prior 2026-09-01: GTKX 1.5: @gtkx/forms (RHF/Adwaita) + @gtkx/i18n (gettext via react-i18next API); pin 1.2.2 → 1.6.0 — React Status #488
+updated: 2026-11-25   # expo-desktop 1.0 + Legend Spark lead; Electron 45 + eMudhra cert-block security floor; Discord → Rust pointer; prior 2026-10-08: Pake 3.17.3 origin-scoped capabilities; Electron↔PWA reading; prior 2026-10-01: react-native-macos 0.81.9 → 0.83.0 (first 0.83 release, narrows the rn-windows lag to one minor); prior 2026-09-24: Pake pin V3.12.0 → 3.17.1; Tauri/rn-windows/rn-macos pins; prior 2026-09-01: GTKX 1.5: @gtkx/forms (RHF/Adwaita) + @gtkx/i18n (gettext via react-i18next API); pin 1.2.2 → 1.6.0 — React Status #488
 reading:
   - title: "Electron to PWA: There and Back Again"
     url: "https://kettanaito.com/blog/electron-to-pwa-and-back-again"
@@ -132,6 +145,12 @@ sources:
   - "https://registry.npmjs.org/@gtkx/react/latest"
   - "https://native-sdk.dev/platform-support"
   - "https://github.com/shirakaba/expo-desktop"
+  - "https://expo-desktop-docs.vercel.app/"
+  - "https://registry.npmjs.org/expo-desktop"
+  - "https://legend.so/spark/overview/"
+  - "https://legend.so/spark/limitations/"
+  - "https://github.com/electron/electron/security/advisories/GHSA-jr5w-w6x2-84p9"
+  - "https://www.electronjs.org/blog/electron-45-0"
   - "https://tauri.app/"
   - "https://github.com/tw93/Pake"
   - "https://github.com/tw93/Pake/releases/tag/V3.17.3"
@@ -147,3 +166,7 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "@gtkx/*", label: "GTKX (React over GTK4)", token: "gtkx" }
   - { pkg: "react-native-windows", label: "RN Windows", token: "react-native-windows" }
   - { pkg: "react-native-macos", label: "RN macOS", token: "react-native-macos" }
+tripwires:   # standing caveats as executable conditions — evaluated by `harvest firsthand`; fired ⇒ do the then:, update prose, remove the row
+  - when: { pkg: "@legendapp/spark", atleast: "0.1.0" }
+    then: "Legend Spark cut 0.1 — re-read its status page; if it drops 'Experimental — not for production' or validates Windows, promote the EXPO-DESKTOP note's Spark lead to an option row"
+    added: 2026-11-25

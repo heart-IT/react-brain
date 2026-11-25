@@ -7,7 +7,7 @@ confidence: medium
 platforms: [react, react-native]
 options:
   - { name: "StyleSheet (RN)", tradeoff: "built-in; manual theming" }
-  - { name: "NativeWind (v4 stable; v5/TW4 RC)", tradeoff: "Tailwind for RN; most-adopted (~1.3M dl/wk, npm API 2026-09-24). Stable 4.2.7 (2026-09-14) is the Tailwind v3-era line; the Tailwind-v4 line is 5.0.0-rc.0 (2026-09-13) on the preview/rc tags, not yet latest (verified vs npm 2026-09-24). See note: TAILWIND V4 ON RN" }
+  - { name: "NativeWind (v4 stable; v5/TW4 RC)", tradeoff: "Tailwind for RN; most-adopted (~2.7M dl/wk, npm API 2026-11-17..23). Stable 4.2.7 (2026-09-14) is the Tailwind v3-era line; the Tailwind-v4 line is 5.0.0-rc.1 (2026-11-02) on the preview/rc tags, not yet latest. rc.1 is code-identical to rc.0 and only moves the exact engine pin to react-native-css 3.1.0-rc.1 (install both with --save-exact). Its stated target is still Expo 57 / RN 0.86, so the v5 RC does not yet target the now-stable Expo SDK 58 / RN 0.88 (verified vs npm + the rc.1 release 2026-11-25). See note: TAILWIND V4 ON RN" }
   - { name: "Unistyles", tradeoff: "C++/Nitro styling engine; fast theming + variants. 3.4.0 (2026-10-01) raised the floor to React Native 0.81 (it now relies on ShadowNode::getFamilyShared()) — RN 0.76–0.80 stay on 3.3.x; 3.5.1 latest (verified vs the v3.4.0 release + npm peers react-native >=0.81.0)" }
   - { name: "Uniwind", tradeoff: "Tailwind w/ C++ styling engine + animated themes, from the Unistyles authors; the stable Tailwind-v4 option for RN — 1.12.0 (2026-09-04, verified vs npm 2026-09-24) peers tailwindcss >=4 and react-native >=0.81. Pro is paid (~$99/seat/yr)" }
   - { name: "@mgcrea/react-native-tailwind", tradeoff: "Babel-plugin / zero-runtime Tailwind — no JS-side styling overhead; micro-adoption (~1.1k dl/wk, npm API 2026-09-24). (The unscoped npm name react-native-tailwind is a dead 2020 package — don't cite it)" }
@@ -35,7 +35,8 @@ note: >
   Tailwind major you need, not on novelty.
 
   TAILWIND V4 ON RN (2026-09-24, verified vs npm): NativeWind's latest is 4.2.7 (2026-09-14), the
-  Tailwind v3-era line; its Tailwind-v4 line is 5.0.0-rc.0 (2026-09-13) on the preview/rc dist-tags.
+  Tailwind v3-era line; its Tailwind-v4 line is 5.0.0-rc.0 (2026-09-13) on the preview/rc dist-tags
+  (rc.1 2026-11-02, re-checked 2026-11-25: still RC, still targets Expo 57 / RN 0.86).
   Uniwind 1.12.0 (2026-09-04) peers tailwindcss >=4 and react-native >=0.81 → an RN app that needs
   Tailwind v4 parity with its web build today goes to Uniwind; NativeWind stays the pick for Tailwind
   v3-era RN work.
@@ -68,13 +69,14 @@ note: >
   has shipped nothing to npm since 2026-01 — RB-E-CROSSPLATFORM owns that thread.
 
   HISTORY:
+  2026-11-25 REOPENED: NativeWind v5 pin rc.0 → rc.1 (still targets Expo 57 / RN 0.86) + downloads refreshed; next-yak renamed to @yak/react (yak 10) — detect row + migrate rule.
   2026-10-15 REOPENED: Tamagui 3.0 (2026-10-10) — breaking major: flat style props, more native compilation, React Strict DOM, Tailwind mode, opt-in beta C++ native runtime (RN 0.82+ New Arch).
   2026-10-08 REOPENED: Unistyles 3.4 raised its floor to RN 0.81 (3.3.x for RN 0.76–0.80).
   2026-09-24 CORRECTED: NativeWind's v5/TW4 line is at RC (5.0.0-rc.0), not preview-only; StyleX is
   on 0.19, not 0.18; @mgcrea/react-native-tailwind is ~1.1k dl/wk, not <1k.
 defer_to_skill: design-system  # tokens, theme parity, a11y intrinsics
 doc: "RB-E-STYLING.md"   # long-form Explanation entry in content_dir
-updated: 2026-10-15   # WEB+NATIVE pointer: react-native-web maintained again (Expo + React Foundation), RSD quiet; Tamagui 3.0 breaking major (flat props, native compilation, RSD, Tailwind mode, opt-in beta C++ runtime on RN 0.82+); prior 2026-10-08: Unistyles 3.4 RN 0.81 floor (3.3.x for RN 0.76–0.80); prior 2026-09-24: NativeWind v5 at RC, Uniwind TW4 peer floor, StyleX 0.19, styled-components v7 prerelease date (npm); prior 2026-09-21: Tailwind Labs joined Shopify — OSS stays MIT under the same team, Tailwind Plus/ui.sh closed to new sign-ups (React Status #490)
+updated: 2026-11-25   # NativeWind 5.0.0-rc.1 (still Expo 57 / RN 0.86 target), ~2.7M dl/wk; next-yak → @yak/react rename (detect + migrate); prior 2026-10-15: WEB+NATIVE pointer: react-native-web maintained again (Expo + React Foundation), RSD quiet; Tamagui 3.0 breaking major (flat props, native compilation, RSD, Tailwind mode, opt-in beta C++ runtime on RN 0.82+); prior 2026-10-08: Unistyles 3.4 RN 0.81 floor (3.3.x for RN 0.76–0.80); prior 2026-09-24: NativeWind v5 at RC, Uniwind TW4 peer floor, StyleX 0.19, styled-components v7 prerelease date (npm); prior 2026-09-21: Tailwind Labs joined Shopify — OSS stays MIT under the same team, Tailwind Plus/ui.sh closed to new sign-ups (React Status #490)
 reading:
   - title: "Styling Linear for the future with StyleX"
     url: "https://linear.app/now/styling-linear-for-the-future-stylex"
@@ -111,8 +113,10 @@ reading:
     by: "Anton Evzhakov (maintains Linaria + wyw-in-js; built dx-styles — conflicts disclosed in the post)"
     what: "The comparative map this entry's options list lacks: where every live zero-runtime option actually sits — Linaria (maintained, frozen), next-yak (Rust compiler over styled-syntax, RSC-compatible), vanilla-extract (the TypeScript answer to CSS Modules, typed themes), Panda CSS (config-first, atomic output), StyleX (Meta's, strict constraints + deterministic merging), Griffel (Microsoft/Fluent UI, limited ecosystem interop), and dx-styles itself. Routes by situation rather than ranking: big styled-components codebase → next-yak or Linaria; typed styles with little setup → vanilla-extract or Panda; design system → dx-styles or vanilla-extract; hundreds of teams → StyleX; pragmatic → Tailwind or CSS Modules. The category has CONVERGED on plain class-name output, so the live differences are atomicity, authoring style and design-system features — not runtime cost, which the readings above already settle. KEPT ON THE 2026-08-04 ADVOCATE PASS after three cap-skips: recurring in three sources at once, and it is the only piece here covering the field rather than one library."
     claim: "You ship zero-runtime CSS-in-JS — the field converged on plain class-name output, so pick on atomicity and design-system features: next-yak/Linaria for a styled-components codebase, vanilla-extract or Panda for typed styles, StyleX at hundreds-of-teams scale."
-    applies_when: { deps: ["linaria", "@linaria/*", "@vanilla-extract/*", "@pandacss/*", "next-yak", "@griffel/*", "@stylexjs/stylex"], platforms: [react] }
+    applies_when: { deps: ["linaria", "@linaria/*", "@vanilla-extract/*", "@pandacss/*", "next-yak", "@yak/react", "@griffel/*", "@stylexjs/stylex"], platforms: [react] }
 sources:
+  - "https://github.com/nativewind/nativewind/releases/tag/5.0.0-rc.1"
+  - "https://yak.style/docs/migration-from-next-yak"
   - "https://github.com/tamagui/tamagui/releases/tag/v3.0.0"
   - "https://github.com/jpudysz/react-native-unistyles/releases/tag/v3.4.0"
   - "https://tailwindcss.com/blog/tailwind-is-joining-shopify"
@@ -136,7 +140,8 @@ detect:   # package.json dep → this entry (pkg: exact | @scope/* | name*; toke
   - { pkg: "@linaria/*", label: "Linaria (frozen by design)", token: "css-in-js" }
   - { pkg: "@vanilla-extract/*", label: "vanilla-extract", token: "zero-runtime" }
   - { pkg: "@pandacss/*", label: "Panda CSS", token: "zero-runtime" }
-  - { pkg: "next-yak", label: "next-yak", token: "zero-runtime" }
+  - { pkg: "next-yak", label: "next-yak (renamed → @yak/react)", token: "zero-runtime" }
+  - { pkg: "@yak/react", label: "yak (formerly next-yak)", token: "zero-runtime" }
   - { pkg: "@griffel/*", label: "Griffel (Fluent UI)", token: "zero-runtime" }
 migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-brain migrate`)
   - from: { pkg: "react-native-tailwind" }
@@ -145,3 +150,9 @@ migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-
     effort: S
     why: "the unscoped react-native-tailwind npm package is a dead 2020 artifact; the maintained zero-runtime Babel-plugin package lives under the @mgcrea scope"
     receipts: ["https://registry.npmjs.org/react-native-tailwind"]
+  - from: { pkg: "next-yak" }
+    to: "@yak/react (yak 10) — run `npx next-yak migrate`"
+    urgency: superseded
+    effort: S
+    why: "next-yak 10 is a rename shim ('next-yak is now @yak/react'): same API (styled, css, keyframes, globalStyle, atoms, css prop) under @yak/react, @yak/swc, @yak/eslint-plugin, @yak/storybook; needs Node 22.18+, Next ≥16.4 / Vite ≥7 / Rsbuild ≥2 and React 19; 9.x gets bug fixes only through the end of 2026"
+    receipts: ["https://yak.style/docs/migration-from-next-yak", "https://registry.npmjs.org/next-yak/latest"]

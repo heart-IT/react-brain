@@ -23,6 +23,7 @@ recommend:
     - "new universal UI authored with RN primitives, web as a real target → react-native-web (maintained again since 2026-10; expect the breaking 0.22: React 19-only, ESM, newer browsers)"
     - "new universal UI authored as strict HTML/CSS, web-first → React Strict DOM (pre-1.0, involved setup, no npm release since 2026-01-09 — pin and watch)"
     - "existing react-native-web app → react-native-web (keep it; maintained again — move to React 19 before the 0.22 line)"
+    - "react-native-web app whose web UI no longer shares code with a native app → a plain web component stack (X's route; see note: X)"
     - "existing Tamagui design system → Tamagui (keep it; cross-platform UI with an optimizing compiler)"
     - "Expo + Next.js shared routing → Solito"
     - "incremental web reuse inside an RN app → Expo DOM Components (`use dom`)"
@@ -99,12 +100,59 @@ note: >
   Coinbase or a third organisation.
 
 
+  SHOPIFY REBUILD (2026-11-25, verified vs shopify.engineering/shopify-app-rebuild, 2026-11-10): the
+  revisit trigger above fired — Shopify published the technical account. ~30 engineers in pods of two
+  rebuilt the 300+-screen app from React Native to Swift and Kotlin in 12 weeks, agents writing most of
+  the code. Spec-driven development failed (specs went stale within a screen's checkpoints); the legacy
+  RN app WAS the spec, checked checkpoint by checkpoint by Helix. Consistency beat platform idiom — the
+  same ViewModel shape on both platforms, one PR per feature for both, CI failing on iOS/Android
+  divergence. That is parity machinery a normal team does not have, so the default's second term holds
+  harder, not softer: the cheap part was the code, the expensive part was the system around it.
+
+
+  DISCORD (2026-11-05, verified vs The Verge, which quotes CTO Stanislav Vishnevskiy's X post):
+  Discord is moving its whole client to Rust — "Electron goes away, and so does React Native,
+  mobile keeps native UI but shares app code with desktop via Rust" — with no ship date ("testing
+  with users soon"). This is the third consumer-scale exit after Shopify and Coinbase, but the
+  reason differs: not agent-maintained duplicate UIs, but a SHARED NATIVE CORE (Rust) under
+  per-platform UI — the KMP/shared-logic shape, in another language. It is evidence FOR this
+  entry's default (share logic, pick the UI per platform) and against only the JS runtime as the
+  logic carrier. → Agent-maintained duplication (Shopify, Coinbase) and native UI over a shared
+  core (Discord) are now the two documented exits; both keep logic single-sourced or pay for
+  elaborate parity gates, and each came from a company with the staff to run native UI teams.
+  Next revisit: a mid-size team (not a 30-engineer pod system) publishing the same migration.
+  GOBI (2026-11-17, Software Mansion) is the incremental version of the exit — see reading.
+
+
+  X (2026-11-04, content verified via Wayback snapshot 2026-11-15 — blog.x.com answers 403 to
+  scripted fetches): x.com — the app React Native for Web was built for — replaced its rweb client
+  (Redux + Relay, styled through React Native for Web, Flow) with Vite + React streaming SSR +
+  Fastify + Relay and a new component library (XDS) on Base UI + Tailwind CSS; slow-connection
+  first post moved from 23.9 s to 2.7 s on a slow-connection lab recording. RNW's flagship user left the "one RN codebase on the web"
+  model once its web UI stopped being shared with mobile → read alongside RNW's new maintainers
+  (above), not as its end: RN-Web stays the choice when UI is actually shared with an RN codebase,
+  not the default for a web-only app. RB-E-META-FRAMEWORKS owns the SSR-without-a-framework half.
+
+
+  TV / VEGA (2026-10, verified vs Amazon's launch post + the Vega 2.0 release notes): Vega OS 2.0 —
+  the React Native-based OS on newer Fire TV and Echo devices — is GA and rolled out to all Vega
+  Fire TV devices. SDK 2.0 moves apps from RN 0.72 to RN 0.83 (React 19, React Compiler, Hermes v1,
+  RN DevTools; already New Architecture), keeps its API stable across minors with breaking changes
+  once a year, and in the 0.83 library set stops resolving deep imports and replaces
+  @amazon-devices/react-linear-gradient with the experimental_backgroundImage style prop. → An RN
+  TV app targeting Fire TV is a supported first-party target, a few releases behind core RN.
+
+
   CROSS-REFERENCES: RB-E-AI-DEVTOOLS owns the agent-workflow half of the Shopify thread (Helix,
   headless agent-drivable business logic). The engineering-principles skill owns boundaries and
   dependency direction for the shared package.
 
 
   HISTORY:
+
+  2026-11-25 REOPENED: Shopify technical account (12-week rebuild) + Discord (Rust core, native UI;
+  drops RN and Electron) + X drops RN-Web on x.com + Gobi incremental exit (reading) + Vega OS 2.0
+  GA (RN 0.83 on Fire TV); default holds — two documented exit shapes, both keep logic single-sourced.
 
   2026-10-15 REOPENED: react-native-web is maintained again (Expo-backed maintainers + React
   Foundation org, 2026-10-07) — option row, default, when-clauses and note rewritten; React Strict
@@ -120,7 +168,7 @@ note: >
   competitor named as a when-clause.
 defer_to_skill: engineering-principles  # boundaries/dependency direction
 doc: "RB-E-CROSSPLATFORM.md"   # long-form Explanation entry in content_dir
-updated: 2026-10-15   # react-native-web maintained again (Expo + React Foundation, breaking 0.22 planned), RSD flagged quiet; Coinbase leaves RN (second Shopify-style datapoint, default holds); Tamagui 3.0 pointer (RSD + Tailwind mode, breaking major; RB-E-STYLING owns); prior 2026-09-24: Expo UI row corrected (SDK 56: native APIs stable, web experimental); RSD/RN-Web pins; prior 2026-09-21: CHALLENGED — SURVIVES: Shopify's move off RN attacks the share-an-implementation premise and answers it with "share the spec, not the code" (agent-maintained duplicates); default holds, competitor named · KMP+SwiftUI scaling reading
+updated: 2026-11-25   # Shopify rebuild account, Discord → Rust (third exit, shared-core shape), X drops RN-Web, Gobi reading, Vega OS 2.0 GA; default holds; prior 2026-10-15: react-native-web maintained again (Expo + React Foundation, breaking 0.22 planned), RSD flagged quiet; Coinbase leaves RN (second Shopify-style datapoint, default holds); Tamagui 3.0 pointer (RSD + Tailwind mode, breaking major; RB-E-STYLING owns); prior 2026-09-24: Expo UI row corrected (SDK 56: native APIs stable, web experimental); RSD/RN-Web pins; prior 2026-09-21: CHALLENGED — SURVIVES: Shopify's move off RN attacks the share-an-implementation premise and answers it with "share the spec, not the code" (agent-maintained duplicates); default holds, competitor named · KMP+SwiftUI scaling reading
 reading:
   - title: "How Does KMP with SwiftUI Scale on iOS?"
     url: "https://andrei-calazans.com/posts/2026-09-14-how-kmp-with-swiftui-scales-on-ios/"
@@ -136,8 +184,30 @@ reading:
     url: "https://www.callstack.com/blog/ai-assisted-react-native-migration-for-tv-lessons-from-zattoo"
     by: "Callstack (Zattoo case study)"
     what: "TV/cross-platform RN case study: share until a platform gives a reason to split, telemetry-driven perf, team reorg, and a deflated, realistic account of AI's role. A concrete companion to this entry's share-by-layer thesis."
+  - title: "How we rebuilt the Shopify app in 12 weeks"
+    url: "https://shopify.engineering/shopify-app-rebuild"
+    by: "Shopify Engineering (Remi Vanhee)"
+    what: "The cost-and-machinery account behind the SHOPIFY REBUILD note: ~30 engineers in pairs, 12 weeks, 300+ screens moved from React Native to Swift/Kotlin with agents writing most of the code. The transferable findings are about the system around the agents: written specs went stale and the live legacy app became the spec; consistency across platforms was enforced by CI rather than idiom; the bottleneck moved from writing code to review, validation and emulator capacity."
+    claim: "You're weighing a rewrite off React Native with agents: budget for the system around the code first. Shopify needed a live reference app, checkpoint gates, cross-platform CI divergence checks and paired review to make 12 weeks work."
+    applies_when: { deps: ["react-native"], platforms: [react-native] }
+  - title: "Migrating from React Native to Swift and Kotlin, One Feature at a Time – the Gobi Story"
+    url: "https://swmansion.com/blog/react-native-to-native-migration-gobi/"
+    by: "Software Mansion (VENDOR — the agency that did the migration)"
+    what: "The incremental-exit playbook the Shopify thread lacks: start by moving the hot paths native (sheets, then map markers — 120 FPS came from moving camera-driven marker generation out of JS), introduce native hosts, keep unmigrated features running as React Native 'islands' (separate AppRegistry roots in one lazily-started JS runtime — reverse brownfield), fix a navigation contract both platforms implement, and drop the OTA path because new client code now needs a build. ~11 weeks for the main transition; agents did small reviewed tasks, checking visual parity with screenshot diffs."
+    claim: "You're planning to leave React Native — migrate feature by feature behind native hosts with RN 'islands' (AppRegistry roots in one lazy runtime) and a fixed navigation contract, and expect to lose JS OTA for migrated features."
+    applies_when: { deps: ["react-native"] }
+  - title: "Rebuilding the global town square from scratch"
+    url: "https://blog.x.com/en/engineering/rebuilding-the-global-town-square-from-scratch"
+    by: "X Engineering (Yagiz Nizipli)"
+    what: "X's web app moved off React Native for Web, Redux, styled components and Flow onto Vite, React, Fastify, Relay and a Base UI + Tailwind component library, with streaming SSR and one server for people, crawlers and link previews; slow-connection first post went from 23.9 s to 2.7 s. A large-scale datapoint that RN-Web stops paying for itself once web UI is no longer shared with mobile. (Live URL 403s to scripted fetches; content verified via Wayback snapshot 2026-11-15.)"
+    claim: "You run react-native-web on a web-only app that no longer shares UI with a native codebase: X's rebuild shows the payoff of moving to a plain web component stack."
+    applies_when: { deps: ["react-native-web"], absent_deps: ["react-native"], platforms: [react] }
 sources:
   - "https://github.com/necolas/react-native-web/discussions/2872"
+  - "https://shopify.engineering/shopify-app-rebuild"
+  - "https://www.theverge.com/news/1027379/discord-ditching-electron-web-app"
+  - "https://developer.amazon.com/apps-and-games/blogs/2026/10/vega-2-0-sdk-launch"
+  - "https://developer.amazon.com/docs/vega/2.0/vega-release-notes"
   - "https://registry.npmjs.org/react-native-web"
   - "https://registry.npmjs.org/react-strict-dom"
   - "https://www.linkedin.com/posts/adamawolf_senior-software-engineer-native-mobile-activity-7511201803389186048-JV6b"

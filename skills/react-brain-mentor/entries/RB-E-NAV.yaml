@@ -7,8 +7,8 @@ confidence: medium
 platforms: [react, react-native]
 options:
   - { name: "React Navigation", tradeoff: "The bare-RN default: mature, imperative + declarative, deeply customizable. 7.4.1 is latest; 8.0 is still alpha (8.0.0-alpha.48 on the next tag, 2026-09-22, verified vs npm). See note: REACT NAVIGATION 8" }
-  - { name: "Expo Router", tradeoff: "File-based, convention over config; the pick on Expo. Since v56 (SDK 56) its own native-first core, decoupled from React Navigation: direct @react-navigation/* imports no longer work alongside it. SDK 58 (beta) graduates data loaders, SSR, middleware and native tabs out of experimental. See note: EXPO ROUTER" }
-  - { name: "React Router (8.x)", tradeoff: "Web routing; absorbed Remix. v8 is ESM-only, drops react-router-dom and turns future flags (incl. middleware) on by default; 8.4.0 (2026-09-15, verified vs npm). SECURITY FLOOR: 8.3.0 on v8, 7.18.2 on v7. See note: REACT ROUTER SECURITY" }
+  - { name: "Expo Router", tradeoff: "File-based, convention over config; the pick on Expo. Since v56 (SDK 56) its own native-first core, decoupled from React Navigation: direct @react-navigation/* imports no longer work alongside it. SDK 58 (stable 2026-10-15) graduates data loaders, SSR, middleware and native tabs out of experimental. See note: EXPO ROUTER" }
+  - { name: "React Router (8.x)", tradeoff: "Web routing; absorbed Remix. v8 is ESM-only, drops react-router-dom and turns future flags (incl. middleware) on by default; 8.5.3 (2026-11-24, verified vs npm). SECURITY FLOOR: 8.5.1 on v8, 7.18.6 on v7 (2026-11-18 advisories, four high; keep @react-router/* on the same version). See note: REACT ROUTER SECURITY" }
   - { name: "TanStack Router / Start", tradeoff: "Type-safe web routing on a signal-based core; Start is its RSC/SSR meta-framework (see RB-E-META-FRAMEWORKS)." }
   - { name: "Next.js App Router", tradeoff: "Web, full-framework routing + RSC (see RB-E-META-FRAMEWORKS)." }
 recommend:
@@ -17,8 +17,10 @@ recommend:
     - "Expo app → Expo Router (file-based)"
     - "bare RN → React Navigation"
     - "type-safe web SPA without a meta-framework → TanStack Router"
-    - "web SPA already on React Router, or ecosystem/familiarity over route type-safety → React Router 8 (at ≥8.3.0; a v7 app needs ≥7.18.2; its typegen is framework-mode-only, which is why TanStack Router keeps the type-safe-SPA slot)"
+    - "web SPA already on React Router, or ecosystem/familiarity over route type-safety → React Router 8 (at ≥8.5.1; a v7 app needs ≥7.18.6 with @react-router/* matching; its typegen is framework-mode-only, which is why TanStack Router keeps the type-safe-SPA slot)"
     - "adopting React Navigation 8 native tabs → pin the exact 8.0 alpha (still alpha as of 8.0.0-alpha.48, 2026-09-22; verify against the RN8 release notes)"
+    - "iOS 26+ with react-native-screens / native-stack → transparent headers (headerTransparent) and inset content yourself; opaque headers are now supported-but-legacy (see note: iOS 26+ HEADERS)"
+    - "app runs on iOS with JS-drawn headers or tab bars → check iPhone Duo: the system moves bars into a side rail with horizontal safe-area insets; native Stack/NativeTabs adapt for free (see reading 'How to ready your app for iPhone Duo')"
     - "links must survive a store install (invites, referrals, shared products) → deferred deep linking (an attribution SDK or Detour; plain Universal/App Links lose the intent at the store boundary, see reading 'Detour: deferred deep linking done right in Expo Router')"
 note: >
   Navigation is two problems. On React Native it is native UI: a navigation state tree, platform
@@ -31,10 +33,11 @@ note: >
   and web support. On the web the meta-framework owns routing; the standalone slot goes to TanStack
   Router because only it gives route type-safety to a plain SPA.
 
-  EXPO ROUTER (2026-09-15, verified vs the Expo SDK 58 beta and SDK 56 changelogs; npm 2026-09-24):
+  EXPO ROUTER (2026-09-15, verified vs the Expo SDK 58 beta and SDK 56 changelogs; npm 2026-09-24;
+  SDK 58 stable 2026-10-15, verified vs the SDK 58 changelog 2026-11-25):
   v56 made expo-router independent of react-navigation (codemod: npx expo-codemod
   sdk-56-expo-router-react-navigation-replace), and expo-router 57.x ships zero @react-navigation/*
-  deps. SDK 58 (beta; expo 58.0.0-preview.6 on npm's next tag) makes data loaders, SSR and
+  deps. SDK 58 (stable since 2026-10-15; expo 58.0.26 latest) makes data loaders, SSR and
   middleware stable with no experimental flags, and native tabs, toolbars and the standard-navigation
   integration stable too; a loader can call setResponseHeaders({'Cache-Control': 'private,
   max-age=60'}) from expo-server to let clients cache its response. The navigation core was reworked
@@ -63,8 +66,19 @@ note: >
   gesture-handler 3.0+, TS 6+. Underneath, react-native-screens 4.26 (2026-07-16, verified vs the
   release) marked its Tabs API stable (RN 0.84+; FormSheet and Stack-v5 toolbar menus are not yet).
 
+  iOS 26+ HEADERS (2026-11-25, verified vs the react-native-screens 4.30.0 release of 2026-10-13;
+  npm latest 4.30.1): Apple now recommends transparent navigation bars, and UIKit's opaque-header
+  support is degrading. edgesForExtendedLayout mispositions screens in landscape and in modals on
+  iOS 26 (and on iPhone Duo in portrait too), and Apple declined the opaque-header top-strip bug as
+  "not a bug". 4.30 lays Stack v4 screens out under an OPAQUE bar via the safe area, stops opaque
+  headers minimizing on scroll, makes useHeaderHeight report the minimized height on iOS 27+, and
+  adds unstable_safeAreaEdges (ScreenStackItem) plus Tabs prominentScreenKey (iOS 27+). Software
+  Mansion's advice, now this entry's: use headerTransparent on iOS 26+ and inset content yourself;
+  treat opaque headers as supported but legacy. The caveat shipped on the 4.x line, so it does not
+  wait for screens 5.0.
+
   REACT ROUTER 8 (verified vs remix.run/blog/react-router-v8 and npm): 8.0.0 shipped 2026-06-17;
-  8.4.0 (2026-09-15) is current. ESM-only with ES2022 targets; minimums Node 22.22.0+, React 19.2.7+,
+  8.5.3 (2026-11-24) is current. ESM-only with ES2022 targets; minimums Node 22.22.0+, React 19.2.7+,
   Vite 7+; react-router-dom removed; the v8_* future flags (including middleware, now first-class via
   RouterContextProvider) are the default. From a flags-current v7 the upgrade is generally
   non-breaking.
@@ -85,18 +99,25 @@ note: >
   to XSS (CVE-2026-53668). The floor is therefore 8.3.0 on v8 and 7.18.2 on v7; v6 has no patched
   release for the injection and redirect-bypass advisories, so v6 apps must move to v7 or v8. Half of
   these live in the RSC/SSR surface, so exposure scales with how much of React Router's server side
-  you use.
+  you use. 2026-11-18 (verified vs the GitHub advisories + npm 2026-11-25): seven more advisories, four
+  HIGH — route-discovery DoS (GHSA-2rq8-3rm6-2w8f) and data-deserialization prototype pollution
+  (GHSA-qhgm-jj2j-75wj), fixed in 8.5.1 / 7.18.5; Node request-handling DoS in
+  @react-router/node|serve|dev (GHSA-mp5r-736v-j8x9), fixed in 8.3.1 / 7.18.6; route-matching DoS
+  (8.3.1 / 7.18.3, also hits v6) — plus RSC-redirect XSS, a server-action CSRF bypass and a
+  loader/action open redirect. The floor is now 8.5.1 on v8 and 7.18.6 on v7 (keep @react-router/* on
+  the same version; npm latest 8.5.3); v6 again has no fix.
 
   RB-E-META-FRAMEWORKS owns framework-level routing (SSR/RSC); RB-E-CROSSPLATFORM owns sharing
   navigation web↔native; RB-E-NATIVE-UI owns @expo/ui.
 
   HISTORY:
+    2026-11-25 REOPENED: React Router security floor 8.3.0 / 7.18.2 → 8.5.1 / 7.18.6 (seven advisories 2026-11-18, four high); Expo Router SDK 58 stable (2026-10-15); iOS 26+ transparent-header caveat from react-native-screens 4.30; iPhone Duo reading.
     2026-09-24 CORRECTED: the React Router v7 security floor is 7.18.2, not 7.18.0 (the RSC-mode CSRF fix landed in 7.18.2).
     2026-08-18 CHALLENGED → SURVIVES: same downloads attack with a 2.2x gap; typegen still framework-mode-only, so the TanStack type-safe-SPA slot held.
     2026-07-10 CHALLENGED → WEAKENED: React Router when-clause added; the TanStack type-safe-SPA slot survived the 2.3x-downloads attack.
 defer_to_skill: null
 doc: "RB-E-NAV.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-24   # RR v7 security floor corrected to 7.18.2; RR 8.4 + v8 minimums; RN8 still alpha.48; prior 2026-09-21: Expo Router SDK 58: data loaders + SSR + middleware + native tabs graduate from experimental, nav core drops most of the forked React Navigation API, web async routes on by default
+updated: 2026-11-25   # RR floor 8.5.1 / 7.18.6 (2026-11-18 advisories); SDK 58 stable; iOS 26+ HEADERS (screens 4.30); iPhone Duo reading; prior 2026-09-24: RR v7 security floor corrected to 7.18.2; RR 8.4 + v8 minimums; RN8 still alpha.48; prior 2026-09-21: Expo Router SDK 58: data loaders + SSR + middleware + native tabs graduate from experimental, nav core drops most of the forked React Navigation API, web async routes on by default
 reading:
   - title: "React Native Navigation Benchmarks (State of RN Navigation)"
     url: "https://andrei-calazans.com/posts/2026-06-05-state-of-rn-navigation/"
@@ -144,6 +165,12 @@ reading:
     what: "The JS-stack-vs-native-stack behavioral difference no other reading here covers, learned in a real 0.77→New-Arch migration: moving to native-stack means the REAL platform components apply — the app suddenly inherited iOS 26 Liquid Glass styling (opt out with UIDesignRequiresCompatibility in Info.plist while unready), and a 55pt header logo got clipped because the native bar is a hard 44pt. The durable frame: JS-stack headers merely TOLERATED overflow the platform never allowed; native-stack enforces what iOS actually permits, so audit header content heights when migrating. (Live URL is bot-walled — content verified via Wayback snapshot 2026-07-15.)"
     claim: "You ship React Navigation — native-stack applies platform constraints JS-stack merely tolerated: iOS 26 Liquid Glass is inherited (UIDesignRequiresCompatibility opts out) and the 44pt native bar clips taller header content."
     applies_when: { deps: ["@react-navigation/*"], platforms: [react-native] }
+  - title: "How to ready your app for iPhone Duo: SDK 58 changes, Expo Router, and new APIs"
+    url: "https://expo.dev/blog/supporting-iphone-duo"
+    by: "Alex Hunt, Christian Falch, Jakub Tkacz (Expo — VENDOR)"
+    what: "iPhone Duo (iOS 27, Apple's first foldable iPhone, shipped 2026-10-23) moves the status bar, tab bar and toolbar into a vertical RAIL on one edge in book poses, which needs an 84pt left OR right inset; the window also resizes live as the phone folds and in Split View. Native Expo Router Stack + NativeTabs get rail placement from the system; JS <Stack> headers and <TabList> get only minimal compatibility (they render classically inside the safe areas, with a large empty top inset when unfolded, and a rail-hosted TabList is intentionally unsupported) — another argument for native tabs. Other rules: wrap scroll-view CONTENT (not the scroll view) in SafeAreaView, read both left and right insets (the rail stays on the camera edge, including in RTL), never add a fixed tab-bar height to insets.bottom, and treat orientation locks as a preference on iOS 27. Requires SDK 58 + Xcode 27.1 (iOS 27.1 runtime and the Duo simulator). New APIs: ArrangementView (Expo UI) for split panes and a hinge-angle API."
+    claim: "Your app runs on iOS — on iPhone Duo the system bars move into a side rail with an 84pt horizontal inset, so JS-drawn headers/tab bars only get minimal compat; prefer native Stack/NativeTabs and audit every screen's left+right safe areas."
+    applies_when: { platforms: [react-native] }
   - title: "Untangling Dialogs in React Router"
     url: "https://programmingarehard.com/2026/05/06/react-router-dialogs.html/"
     by: "Dave Adams"
@@ -151,6 +178,11 @@ reading:
     claim: "You ship React Router — model modal dialogs as nested routes instead of local useState/useEffect; revalidation, view transitions, flash sessions, and exit animations then ride the router."
     applies_when: { deps: ["react-router", "react-router-dom"], platforms: [react] }
 sources:
+  - "https://expo.dev/changelog/sdk-58"
+  - "https://github.com/software-mansion/react-native-screens/releases/tag/4.30.0"
+  - "https://github.com/remix-run/react-router/security/advisories/GHSA-2rq8-3rm6-2w8f"
+  - "https://github.com/remix-run/react-router/security/advisories/GHSA-qhgm-jj2j-75wj"
+  - "https://github.com/remix-run/react-router/security/advisories/GHSA-mp5r-736v-j8x9"
   - "https://expo.dev/changelog/sdk-58-beta"
   - "https://andrei-calazans.com/posts/2026-06-05-state-of-rn-navigation/"
   - "https://reactrouter.com/explanation/type-safety"
@@ -182,9 +214,9 @@ migrate:   # installed dep → sequenced upgrade knowledge (assembled by `react-
     effort: M
     why: "v8 (8.x, released 2026) is ESM-only and drops both CJS and the react-router-dom package; v7→v8 is generally non-breaking if you're caught up on v7 future flags"
     receipts: ["https://reactrouter.com/"]
-  - from: { pkg: "react-router", below: "8.3.0" }
-    to: "react-router 8.3.0 (or 7.18.0 if you must stay on v7)"
+  - from: { pkg: "react-router", below: "8.5.1" }
+    to: "react-router 8.5.1+ (or 7.18.6 if you must stay on v7), with @react-router/* on the same version"
     urgency: upgrade
     effort: S
-    why: "SECURITY: six advisories published 2026-07-22 — unauthenticated __manifest DoS (High, CVSS 7.6), RSC-mode CSRF bypass, RSCErrorHandler XSS, SSR-hydration constructor injection, two open redirects — fixed in 8.3.0 and backported to 7.18.0. Moving all the way to v8 also gets ESM-only + future flags on by default, generally non-breaking from a flags-current v7"
-    receipts: ["https://github.com/remix-run/react-router/security/advisories", "https://github.com/remix-run/react-router/security/advisories/GHSA-chx6-hx7r-mcp5", "https://registry.npmjs.org/react-router/latest"]
+    why: "SECURITY: seven advisories published 2026-11-18 (four high: route-discovery DoS + data-deserialization prototype pollution fixed in 8.5.1 / 7.18.5, @react-router/node|serve|dev request-handling DoS fixed in 8.3.1 / 7.18.6, route-matching DoS) on top of six published 2026-07-22 — unauthenticated __manifest DoS (High, CVSS 7.6), RSC-mode CSRF bypass, RSCErrorHandler XSS, SSR-hydration constructor injection, two open redirects — fixed in 8.3.0 and backported to 7.18.0. Moving all the way to v8 also gets ESM-only + future flags on by default, generally non-breaking from a flags-current v7"
+    receipts: ["https://github.com/remix-run/react-router/security/advisories", "https://github.com/remix-run/react-router/security/advisories/GHSA-2rq8-3rm6-2w8f", "https://github.com/remix-run/react-router/security/advisories/GHSA-chx6-hx7r-mcp5", "https://registry.npmjs.org/react-router/latest"]

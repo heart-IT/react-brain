@@ -50,7 +50,31 @@ note: >
   row; it competes at the "skip React Native entirely" layer. Promote it only if a
   developer-facing SDK appears.
 
+  SOLID 2.0 (stable 2026-11-16, verified vs the Solid blog's "Solid 2.0 - The Long Hold" + npm
+  solid-js 2.0.0 2026-11-17, 2.0.4 latest 2026-11-25; 1.x continues on the `v1-latest` tag, 1.9.20):
+  the web-side alternative a React team most often weighs, and now a stable one. Same JSX, different
+  engine: components run once and signals update the exact DOM nodes that read them, so there is no
+  re-render, no dependency array and nothing for a compiler to memoize. 2.0's headline is async IN
+  the reactive graph (a memo can return a promise or async iterator; <Loading> + isPending replace
+  createResource/<Suspense>), server functions moved into core (including `live` streams over SSE),
+  and dev builds that report reactive mistakes with a stable code, source location and an agent
+  repair guide shipped inside the package. Context, not a pick: it leaves React's library ecosystem
+  and React Native behind entirely, which is the cost this entry's default weighs; read the Morello
+  piece (written against the beta) for the React-to-Solid mental-model map.
+
+  EXACT (2026-11-25, verified vs Charlie Cheever's 2026-11-09 post and an independent hands-on):
+  Expo's co-founder previewed Exact, an "agent native" app framework written in Rust. UI is written in
+  a new indentation-based, strongly typed language, Contract, compiled to a plan; on iOS/macOS a Rust
+  runner and Taffy-fork layout kernel drive a Swift UIKit/AppKit host, and on the web a ~20 KB JS
+  runtime executes the same plan against the DOM. No WebView, and no app JS draws UI. Agent operations
+  (tree, screenshot, tap, state) are built in. It is pre-1.0 and changes almost daily, and Android and
+  Windows are on the README's "Not yet" list → landscape, not an option row. It is not React, and it
+  comes from the team behind the default RN toolchain, so watch it the way this entry watches Lynx and
+  Valdi. Promote only on a versioned release with Android distribution.
+
   HISTORY:
+  2026-11-25 GAP CLOSED: EXACT landscape note (Expo co-founder's Rust "agent native" framework preview; pre-1.0, no Android) — not an option row.
+  2026-11-25 REOPENED (tripwire fired): Solid 2.0 stable — SOLID 2.0 note + the twir-290 Morello reading reopened (beta-era; stable verified vs the Solid blog).
   2026-09-24 REOPENED: Valdi tag refreshed to beta-0.2.0 (notes pending); rspeedy 0.17.2 → 0.18.0.
   2026-09-21 REOPENED: the 2026-09-10 skip of Lynx 4.0.2 (empty GitHub release body) converted by
   the Lynx 4.0 announcement post (AI-first release, foldables; engine 4.x vs ReactLynx 0.126.x
@@ -58,13 +82,17 @@ note: >
   2026-09-10 GAP CLOSED: Dactyl lead adopted from harvest/2026-08-27.
 defer_to_skill: null
 doc: "RB-E-ALT-FRAMEWORKS.md"   # long-form Explanation entry in content_dir
-updated: 2026-09-24   # rspeedy/create-rspeedy 0.18.0; earlier today: Valdi tag refreshed to beta-0.2.0 (notes pending); prior 2026-09-21: Lynx 4.0 announcement post — REOPENED the 2026-09-10 unverifiable skip (empty release body); AI-first release (agent API-docs skill + A2UI generative UI), foldables; engine 4.x vs ReactLynx 0.126.x split recorded
+updated: 2026-11-25   # EXACT landscape note (Rust agent-native framework preview, pre-1.0); Solid 2.0 stable (tripwire fired): SOLID 2.0 note + Morello React-developer reading; prior 2026-09-24: rspeedy/create-rspeedy 0.18.0; earlier today: Valdi tag refreshed to beta-0.2.0 (notes pending); prior 2026-09-21: Lynx 4.0 announcement post — REOPENED the 2026-09-10 unverifiable skip (empty release body); AI-first release (agent API-docs skill + A2UI generative UI), foldables; engine 4.x vs ReactLynx 0.126.x split recorded
 sources:
+  - "https://ccheever.expo.app/"
+  - "https://rnw.kazutoyo.jp/en/posts/expo-exact-first-impression/"
   - "https://lynxjs.org/blog/lynx-4-0"
   - "https://registry.npmjs.org/@lynx-js/react"
   - "https://dactyl.dev/"
   - "https://github.com/lynx-family/lynx"
   - "https://github.com/Snapchat/Valdi"
+  - "https://www.solidjs.com/blog/solid-2-0-the-long-hold"
+  - "https://registry.npmjs.org/solid-js/latest"
 reading:
   - title: "We Built the Same App in KMP and React Native — Here's What We Found"
     url: "https://swmansion.com/blog/we-built-the-same-app-in-kmp-and-react-native-here-s-what-we-found"
@@ -88,7 +116,7 @@ reading:
     url: "https://strawberrybrowser.com/blog/react-to-svelte"
     by: "Strawberry Browser (Dendrite Systems)"
     what: "A migration case study contrasting React's virtual-DOM overhead with Svelte's compiled reactivity for an AI-driven browser UI, including the LLM-migration ruleset that kept the Svelte idiomatic. A concrete framework-tradeoff data point for teams weighing leaving React."
-tripwires:   # standing caveats as executable conditions — evaluated by `harvest firsthand`; fired ⇒ do the then:, update prose, remove the row
-  - when: { pkg: "solid-js", atleast: "2.0.0" }
-    then: "Solid 2.0 went stable — re-triage the skipped 'SolidJS 2.0: A React Developer's First Look' (twir-290 manifest reopen signal) and consider a Solid row in the web-alternatives reading thread"
-    added: 2026-07-16
+  - title: "SolidJS 2.0 for React Developers: A First Look"
+    url: "https://morello.dev/blog/solidjs-2-react-developers-first-look"
+    by: "Dennis Morello"
+    what: "A long-time React developer's map of Solid 2.0 onto React habits: components run once and signals wire straight to DOM nodes (count() is a call, not a value — the call is the subscription), so dependency arrays and memoization disappear; async computations return promises the graph suspends on; deterministic batching and the renames a React developer trips on. Written against the 2.0 BETA (2026-07, updated 07-18) and its verdict is 'don't drop React, but watch closely' — Solid 2.0 has since gone stable (2026-11-16), so re-check API names against the Solid docs."
