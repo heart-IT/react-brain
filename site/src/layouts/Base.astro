@@ -1,8 +1,9 @@
 ---
 // "Technical Precision" theme — the navigation shell.
 // Top bar = brand · search field (⌘K / Ctrl-K focuses it) · four task sections
-// (Explore · Doctor · Learn · Evidence) · GitHub. Left sidebar = the encyclopedia
-// groups (Explore), with Tools + About as quieter secondary lists. Below 1024px the
+// (Check my app · New app · Topics · How we know) · GitHub. Left sidebar = the saved
+// project (when there is one), the topic groups, then More + How we know as quieter
+// secondary lists. Below 1024px the
 // sidebar becomes one compact <details> menu; below 640px the top-bar section links
 // fold into that menu too, so nothing can overflow a 320px viewport.
 // Every number/date printed here comes from siteMeta() — never typed into copy.
@@ -33,28 +34,29 @@ const ogImage = new URL(href('og.png'), Astro.site).href;
 
 // ── the four task sections; a section is active for every route it owns ──
 const under = (p) => path.startsWith(href(p));
+// Named for what the visitor is doing, not for how the corpus is built.
 const SECTIONS = [
-  { to: 'entries/', label: 'Explore', owns: ['entries/', 'libraries/', 'stack/', 'decide/'] },
-  { to: 'doctor/', label: 'Doctor', owns: ['doctor/'] },
-  { to: 'reading/', label: 'Learn', owns: ['reading/', 'newsletter/'] },
-  { to: 'scorecard/', label: 'Evidence', owns: ['scorecard/', 'census/', 'benchmark/', 'methodology/', 'changelog/', 'architecture/', 'roadmap/'] },
+  { to: 'doctor/', label: 'Check my app', owns: ['doctor/', 'decide/'] },
+  { to: 'stack/', label: 'New app', owns: ['stack/'] },
+  { to: 'entries/', label: 'Topics', owns: ['entries/', 'libraries/', 'reading/', 'newsletter/'] },
+  { to: 'methodology/', label: 'How we know', owns: ['scorecard/', 'census/', 'benchmark/', 'methodology/', 'changelog/', 'architecture/', 'roadmap/'] },
 ];
 const activeSection = SECTIONS.find((s) => s.owns.some(under))?.label ?? null;
 
 const groupLabel = (g) => g.label.split(' — ')[0].split(' (')[0];
 const toolLinks = [
-  { to: 'libraries/', label: 'libraries' },
-  { to: 'stack/', label: 'stack composer' },
-  { to: 'decide/', label: 'decision records' },
-  { to: 'census/', label: 'census' },
-  { to: 'benchmark/', label: 'staleness bench' },
+  { to: 'libraries/', label: 'Library browser' },
+  { to: 'decide/', label: 'Write a decision record' },
+  { to: 'reading/', label: 'Reading list' },
+  { to: 'newsletter/', label: 'Newsletter issues' },
 ];
 const aboutLinks = [
-  { to: 'methodology/', label: 'methodology' },
-  { to: 'architecture/', label: 'architecture' },
-  { to: 'changelog/', label: 'changelog' },
-  { to: 'roadmap/', label: 'roadmap' },
-  { to: 'newsletter/', label: 'newsletter' },
+  { to: 'scorecard/', label: 'Track record' },
+  { to: 'census/', label: 'What real apps use' },
+  { to: 'benchmark/', label: 'AI freshness benchmark' },
+  { to: 'changelog/', label: 'What changed' },
+  { to: 'architecture/', label: 'How it’s built' },
+  { to: 'roadmap/', label: 'Roadmap' },
 ];
 ---
 <!doctype html>
@@ -80,6 +82,7 @@ const aboutLinks = [
   <link rel="preload" href={interUrl} as="font" type="font/woff2" crossorigin />
   <link rel="preload" href={monoUrl} as="font" type="font/woff2" crossorigin />
   <style set:html={fontFaces}></style>
+  <script is:inline>try { if (JSON.parse(localStorage.getItem('rb-console-ctx'))?.name) document.documentElement.classList.add('has-project'); } catch {}</script>
   <script defer src={href('console.js')}></script>
 </head>
 <body data-base={BASE}>
@@ -89,7 +92,7 @@ const aboutLinks = [
       <a class="brand" href={href('')}><img class="brand-mark" src={href('brand-64.png')} alt="" width="22" height="22" /> react-brain</a>
       <form class="search" action={href('search/')} method="get" role="search" aria-label="Site search">
         <span aria-hidden="true" class="prompt">❯</span>
-        <input id="nav-q" name="q" type="search" placeholder="search or ask — “should I use zustand?”" autocomplete="off" aria-label="Search the corpus" aria-keyshortcuts="Meta+K Control+K" />
+        <input id="nav-q" name="q" type="search" placeholder="search — e.g. “should I use zustand?”" autocomplete="off" aria-label="Search the corpus" aria-keyshortcuts="Meta+K Control+K" />
         <kbd>⌘K</kbd>
       </form>
       <nav aria-label="Primary">
@@ -110,13 +113,14 @@ const aboutLinks = [
       <div class="m-row m-primary">
         {SECTIONS.map((s) => <a class={activeSection === s.label ? 'active' : ''} href={href(s.to)}>{s.label}</a>)}
       </div>
-      <p class="m-head">Decisions</p>
+      <a class="proj-link m-proj" href={href('')} hidden data-proj-link>Your project</a>
+      <p class="m-head">Topics</p>
       <div class="m-row">
         {groups.map((g) => (
-          <a class={activeGroup === g.id ? 'active' : ''} href={href(`entries/#${g.id}`)}>{groupLabel(g).toLowerCase()} <span class="count">{g.entries.length}</span></a>
+          <a class={activeGroup === g.id ? 'active' : ''} href={href(`entries/#${g.id}`)}>{groupLabel(g)} <span class="count">{g.entries.length}</span></a>
         ))}
       </div>
-      <p class="m-head">Tools · About</p>
+      <p class="m-head">More · How we know</p>
       <div class="m-row m-quiet">
         {[...toolLinks, ...aboutLinks].map((l) => <a href={href(l.to)}>{l.label}</a>)}
       </div>
@@ -124,22 +128,22 @@ const aboutLinks = [
   </details>
 
   <div class="shell">
-    <aside aria-label="Explore">
-      <nav class="side-nav" aria-label="Explore decisions">
-      <p class="label-caps side-head">Explore decisions</p>
+    <aside aria-label="Topics">
+      <nav class="side-nav" aria-label="Topics">
+      <a class="proj-link side-proj" href={href('')} hidden data-proj-link>Your project</a>
+      <p class="label-caps side-head">Topics</p>
       {groups.map((g) => (
         <a class={`side-item${activeGroup === g.id ? ' active' : ''}`} aria-current={activeGroup === g.id ? 'location' : undefined} href={href(`entries/#${g.id}`)}>
-          <span aria-hidden="true" class="tree">▸</span>
-          <span>{groupLabel(g).toLowerCase()}/</span>
+          <span>{groupLabel(g)}</span>
           <span class="count">{g.entries.length}</span>
         </a>
       ))}
       <div class="side-bottom">
-        <p class="label-caps side-sub">Tools</p>
+        <p class="label-caps side-sub">More</p>
         {toolLinks.map((l) => (
           <a class={`side-item quiet${under(l.to) ? ' active' : ''}`} aria-current={under(l.to) ? 'page' : undefined} href={href(l.to)}>{l.label}</a>
         ))}
-        <p class="label-caps side-sub">About</p>
+        <p class="label-caps side-sub">How we know</p>
         {aboutLinks.map((l) => (
           <a class={`side-item quiet${under(l.to) ? ' active' : ''}`} aria-current={under(l.to) ? 'page' : undefined} href={href(l.to)}>{l.label}</a>
         ))}
@@ -216,6 +220,16 @@ const aboutLinks = [
     new MutationObserver((muts) => { for (const m of muts) for (const n of m.addedNodes) if (n.nodeType === 1) markScrollable(n.parentElement || n); })
       .observe(document.body, { childList: true, subtree: true });
     addEventListener('resize', () => markScrollable(document), { passive: true });
+    // the saved project (lib/project.js) — a way back to its dashboard from every page
+    try {
+      const proj = JSON.parse(localStorage.getItem('rb-console-ctx'));
+      if (proj?.name) for (const a of document.querySelectorAll('[data-proj-link]')) {
+        a.textContent = '';
+        const k = document.createElement('span'); k.className = 'proj-k'; k.textContent = 'your project';
+        const n = document.createElement('span'); n.className = 'proj-n'; n.textContent = proj.name;
+        a.append(k, n); a.hidden = false;
+      }
+    } catch {}
     // honest shortcut hints per platform (the ⌘ glyph is Mac-only)
     if (!/Mac|iPhone|iPad/.test(navigator.platform))
       for (const k of document.querySelectorAll('.search kbd, .console-link kbd')) k.textContent = k.textContent.replace('⌘', 'Ctrl ');
@@ -332,8 +346,13 @@ const aboutLinks = [
   .side-item { display: flex; align-items: center; gap: var(--sp-2); color: var(--muted); text-decoration: none; font: 400 var(--fs-sm) var(--font-mono); padding: .6rem .55rem; border-radius: var(--radius-sm); border-left: 2px solid transparent; }
   .side-item:hover { color: var(--fg); background: var(--card); }
   .side-item.active { color: var(--accent); background: var(--card); border-left-color: var(--accent); }
-  .side-item .tree { color: var(--line-strong); }
-  .side-item.active .tree { color: var(--accent); }
+  /* the saved project: a card at the top of the sidebar / mobile menu */
+  .proj-link { display: flex; flex-direction: column; gap: .1rem; text-decoration: none; border: 1px solid var(--line-strong); border-left: 2px solid var(--accent); border-radius: var(--radius-sm); padding: var(--sp-2) var(--sp-3); }
+  .proj-link:hover { background: var(--card); }
+  .proj-k { font: 500 var(--fs-xs)/1.4 var(--font-mono); color: var(--muted); }
+  .proj-n { font: 600 var(--fs-sm)/1.4 var(--font-mono); color: var(--bright); overflow-wrap: anywhere; }
+  .side-proj { margin-bottom: var(--sp-4); }
+  .m-proj { margin-top: var(--sp-3); }
   .side-item .count { margin-left: auto; font: 400 var(--fs-xs) var(--font-mono); color: var(--muted); }
   /* tools/about are secondary: smaller and tighter than the decision groups (still ≥ 24px tall) */
   .side-item.quiet { font-size: var(--fs-xs); padding: .32rem .55rem; min-height: 24px; }
@@ -361,6 +380,11 @@ const aboutLinks = [
     .shell { grid-template-columns: minmax(0, 1fr); }
     .search kbd { display: none; }
     header nav { gap: .8rem; }
+  }
+  @media (min-width: 641px) and (max-width: 900px) {
+    /* four named sections + a usable field don't both fit: the field becomes a link */
+    .search { display: none; }
+    .search-link { display: inline; }
   }
   @media (max-width: 640px) {
     /* the four sections live in the Menu below the bar; the bar keeps brand · search link · GitHub */

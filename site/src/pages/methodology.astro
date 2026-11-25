@@ -25,8 +25,8 @@ const graded = tiers.reduce((n, r) => n + r.resolved, 0);
 const { bare, withCorpus, bankSize } = m.bench;
 const runLine = (r) => `${r.freshPct}% fresh · ${r.confidentlyStalePct}% confidently stale · ${r.hedged}/${r.n} hedged (${r.model}, ${r.date}, n=${r.n})`;
 ---
-<Base title="Methodology" description="How the corpus stays true: verification, adversarial challenge, calibration, live-npm signals, mechanized invariants.">
-  <h1>Methodology — how this stays true</h1>
+<Base title="How we know" description="How the corpus stays true: verification, adversarial challenge, calibration, live-npm signals, mechanized invariants.">
+  <h1>How we know</h1>
   <p class="prose">Most React resources rot silently: a listicle is true the day it's published and
   unaccountable after. react-brain is built around the opposite bet — <strong>every claim should be
   checkable, dated, and eventually scored.</strong> Five mechanisms do the work:</p>

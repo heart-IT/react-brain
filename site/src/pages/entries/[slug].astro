@@ -1,11 +1,13 @@
 ---
 // One decision page. Reading order is the decision itself, answer first:
-// breadcrumb → h1 → one metadata line → THE recommendation panel (the page's single
-// visual anchor) → at-a-glance strip → options → migration lines → verified notes +
-// sources → reading → watching → full explanation → related decisions → prev/next.
+// breadcrumb → h1 → one trust chip + date → your project's fit (when one is saved) →
+// THE pick panel (the page's single visual anchor) → "how sure are we?" (collapsed:
+// status, calibration, forecast, evidence counts) → other options → upgrade path →
+// key facts + sources → reading → watching → full explanation → related → prev/next.
 import Base from '../../layouts/Base.astro';
 import { corpus, downloads, fmtDownloads, track, docHtml, href, GITHUB, census, revisions, scorecard, siteMeta } from '../../lib/corpus.js';
 import { srcLabel, sourceType, relations, prevNext, groupOf, groupLabel, leadOption, clip, splitWhen, paragraphs, ageDays } from '../../lib/entry.js';
+import { urgencyLabel } from '../../lib/project.js';
 
 export function getStaticPaths() {
   return corpus().entries.map((e) => ({ params: { slug: e.slug }, props: { id: e.id } }));
@@ -53,38 +55,46 @@ const evText = (ev) => ev ? [
   ev.ships != null ? `ships in ${ev.ships}/${ev.denom}` : null,
 ].filter(Boolean).join(' · ') : '';
 
+// one plain-language trust signal in place of three badges (status · confidence ·
+// forecast); the detail behind it is one click away in "How sure are we?"
+const TRUST = {
+  high: ['Strong pick', 'high confidence: well-evidenced and stable — safe to default to'],
+  medium: ['Good default', 'medium confidence: sound default, but check the context notes'],
+  low: ['Early call', 'low confidence: fast-moving or lightly vetted — prototype before committing'],
+};
+const [trustLabel, trustWhy] = TRUST[e.confidence] || TRUST.medium;
+const REL_LABEL = { 'cited here': 'mentioned here', 'cites this': 'mentions this', 'same group': 'same area' };
+
 const toc = [
   ['options', 'Options'],
-  e.migrate?.length ? ['migrate', 'Migration'] : null,
-  e.note || nSources ? ['notes', 'Notes & sources'] : null,
-  nReading ? ['reading', 'Reading'] : null,
-  nWatching ? ['watching', 'Watching'] : null,
-  doc ? ['explanation', 'Explanation'] : null,
+  e.migrate?.length ? ['migrate', 'Upgrade path'] : null,
+  e.note || nSources ? ['notes', 'Key facts'] : null,
+  nReading ? ['reading', 'Read'] : null,
+  nWatching ? ['watching', 'Watch'] : null,
+  doc ? ['explanation', 'Full story'] : null,
   rels.length ? ['related', 'Related'] : null,
 ].filter(Boolean);
 ---
 <Base title={e.topic} description={`${e.topic} — ${clip(e.recommend?.default, 150)}`} activeGroup={e.group}>
   <nav class="crumbs meta" aria-label="Breadcrumb" data-pagefind-ignore>
-    <a href={href('entries/')}>Explore</a><span aria-hidden="true"> › </span><a href={href(`entries/#${e.group}`)}>{groupLabel(group).toLowerCase() || e.group}</a><span aria-hidden="true"> › </span><span aria-current="page">{e.slug}</span>
+    <a href={href('entries/')}>Topics</a><span aria-hidden="true"> › </span><a href={href(`entries/#${e.group}`)}>{groupLabel(group) || e.group}</a><span aria-hidden="true"> › </span><span aria-current="page">{e.topic}</span>
   </nav>
   <h1>{e.topic}</h1>
   <p class="meta entry-meta" data-pagefind-ignore>
-    <span>status <span class={`badge ${e.status}`}>{e.status}</span></span>
-    <span>confidence <span class={`badge ${e.confidence}`}>{e.confidence}</span>{tier?.total > 0 && (
-      <a href={href('scorecard/')} title={`${e.confidence}-confidence forecasts on the public scorecard: ${tier.held} held · ${tier.weakened} weakened · ${tier.overturned} overturned`}> ({tier.score != null && tier.resolved >= 3 ? `tier ${tier.score}%, ` : tier.resolved ? 'early: ' : ''}{tier.resolved}/{tier.total} graded)</a>
-    )}</span>
-    {tr && <span>forecast <span class={`badge ${tr}`}>{tr}</span></span>}
+    <span><span class={`badge ${e.confidence}`} title={trustWhy}>{trustLabel}</span></span>
     {e.platforms?.length > 0 && <span>{e.platforms.join(' + ')}</span>}
-    {e.updated && <span>verified <time datetime={String(e.updated)}>{String(e.updated)}</time></span>}
-    {revs.length > 1 && <span><a href={href('changelog/')} title={`entry file changed on: ${revs.join(', ')}`}>re-verified {revs.length}×</a></span>}
+    {e.updated && <span>checked <time datetime={String(e.updated)}>{String(e.updated)}</time></span>}
   </p>
 
+  <p id="session-banner" class="session" data-pagefind-ignore hidden
+    data-entry={e.id} data-def={e.recommend?.default || ''} data-when={JSON.stringify(when)}></p>
+
   <section class="rec-panel" aria-labelledby="rec-label">
-    <p class="rec-label" id="rec-label" data-pagefind-ignore>recommendation</p>
+    <p class="rec-label" id="rec-label" data-pagefind-ignore>our pick</p>
     <p class="rec-default">{e.recommend?.default}</p>
     {when.length > 0 && (
       <>
-        <p class="rec-sub">when your context differs</p>
+        <p class="rec-sub">unless your situation is different</p>
         <ul class="rec-when">
           {when.map((w) => { const { ctx, pick } = splitWhen(w); return (
             <li>{ctx ? <><span class="ctx">{ctx}</span> <span class="arrow" aria-hidden="true">→</span><span class="sr-only">: use</span> <span class="pick">{pick}</span></> : <span class="pick">{pick}</span>}</li>
@@ -95,29 +105,33 @@ const toc = [
     {e.confidence === 'low' && (
       <p class="rec-caveat"><strong>Low confidence</strong> — fast-moving or lightly-vetted domain: treat the pick as a vetted lead and prototype before committing.</p>
     )}
-    <p class="meta rec-next" data-pagefind-ignore>Commit this: <a href={href(`decide/?entry=${e.id}`)}>generate a decision record →</a> · <a href={href('doctor/')}>check your repo against it</a></p>
+    <p class="meta rec-next" data-pagefind-ignore><a href={href(`decide/?entry=${e.id}`)}>Save this choice as a decision record →</a> · <a href={href('doctor/')}>Check my app against it</a></p>
   </section>
 
-  <div id="session-banner" class="session" data-pagefind-ignore hidden></div>
-
-  <dl class="glance" aria-label="At a glance" data-pagefind-ignore>
-    {lead && <div><dt>lead option</dt><dd>{lead.name}</dd></div>}
-    {lead?.tradeoff && <div><dt>its tradeoff</dt><dd title={lead.tradeoff}>{clip(lead.tradeoff, 110)}</dd></div>}
-    <div><dt>evidence</dt><dd>{nSources} source{nSources === 1 ? '' : 's'} · {nReading} reading{nReading === 1 ? '' : 's'}{nWatching ? ` · ${nWatching} talk${nWatching === 1 ? '' : 's'}` : ''}</dd></div>
-    {e.updated && <div><dt>freshness</dt><dd>{age == null ? String(e.updated) : age === 0 ? 'verified on build day' : `verified ${age} day${age === 1 ? '' : 's'} before this build`}</dd></div>}
-  </dl>
+  <details class="sure" data-pagefind-ignore>
+    <summary>How sure are we?</summary>
+    <dl class="glance">
+      <div><dt>confidence</dt><dd><span class={`badge ${e.confidence}`}>{e.confidence}</span> — {trustWhy.split(': ')[1]}</dd></div>
+      {tier?.total > 0 && <div><dt>track record at this confidence</dt><dd><a href={href('scorecard/')} title={`${tier.held} held · ${tier.weakened} weakened · ${tier.overturned} overturned`}>{tier.score != null && tier.resolved >= 3 ? `${tier.score}% held up` : 'too early to score'}, {tier.resolved} of {tier.total} graded</a></dd></div>}
+      {tr && <div><dt>this pick, graded</dt><dd><span class={`badge ${tr}`}>{tr}</span></dd></div>}
+      <div><dt>depth</dt><dd><span class={`badge ${e.status}`}>{e.status}</span> — {e.status === 'reviewed' ? 'checked against primary sources, with a long-form explanation' : 'internally consistent and cited'}</dd></div>
+      <div><dt>evidence</dt><dd>{nSources} source{nSources === 1 ? '' : 's'} · {nReading} reading{nReading === 1 ? '' : 's'}{nWatching ? ` · ${nWatching} talk${nWatching === 1 ? '' : 's'}` : ''}</dd></div>
+      {e.updated && <div><dt>last checked</dt><dd>{age == null ? String(e.updated) : age === 0 ? 'on build day' : `${age} day${age === 1 ? '' : 's'} before this build`}{revs.length > 1 && <Fragment> · <a href={href('changelog/')} title={`entry file changed on: ${revs.join(', ')}`}>re-checked {revs.length}×</a></Fragment>}</dd></div>}
+    </dl>
+    <p class="meta"><a href={href('methodology/')}>how we check →</a></p>
+  </details>
 
   <nav class={`toc${doc ? ' toc-sticky' : ''}`} aria-label="On this page" data-pagefind-ignore>
     {toc.map(([tid, label]) => <a href={`#${tid}`}>{label}</a>)}
   </nav>
 
-  <h2 id="options" class="anc"><a class="h-anchor" data-pagefind-ignore href="#options" aria-label="Copy link to Options and tradeoffs">#</a>Options &amp; tradeoffs</h2>
-  <p class="meta lede">the field considered — and why each one isn’t the default here</p>
+  <h2 id="options" class="anc"><a class="h-anchor" data-pagefind-ignore href="#options" aria-label="Copy link to Options compared">#</a>Options compared</h2>
+  <p class="meta lede">what else we looked at, and the tradeoff of each</p>
   <div class="tbl"><table class="opts">
     <thead><tr><th scope="col">option</th><th scope="col">tradeoff</th>{hasEvidence && <th scope="col">evidence</th>}</tr></thead>
     <tbody>{(e.options || []).map((o, i) => (
       <tr class={o === lead ? 'is-lead' : undefined}>
-        <th scope="row" data-label="option">{o.name}{o === lead && <span class="lead-mark meta"> · lead</span>}</th>
+        <th scope="row" data-label="option">{o.name}{o === lead && <span class="lead-mark meta"> · our pick</span>}</th>
         <td data-label="tradeoff">{o.tradeoff}</td>
         {hasEvidence && <td data-label="evidence" class="meta ev">{evText(optEvidence[i])}</td>}
       </tr>
@@ -130,13 +144,13 @@ const toc = [
 
   {e.migrate?.length > 0 && (
     <>
-      <h2 id="migrate" class="anc"><a class="h-anchor" data-pagefind-ignore href="#migrate" aria-label="Copy link to Migration lines">#</a>Migration lines</h2>
-      <p class="meta lede">version and deprecation lines this decision tracks — for YOUR repo's sequenced plan: <a href={href('doctor/')}>the doctor</a> or <code>npx -y @heart-it/react-brain migrate .</code></p>
+      <h2 id="migrate" class="anc"><a class="h-anchor" data-pagefind-ignore href="#migrate" aria-label="Copy link to Upgrade path">#</a>Upgrade path</h2>
+      <p class="meta lede">versions and packages to move off — for your app's own ordered plan: <a href={href('doctor/')}>check my app</a> or <code>npx -y @heart-it/react-brain migrate .</code></p>
       <div class="rows">
         {e.migrate.map((r) => (
           <div>
             <p class="mig-line"><strong>{r.from.pkg}{r.from.below ? ` < ${r.from.below}` : ''}</strong> → {r.to}
-              <span class="meta"> [{r.urgency} · effort {r.effort}]</span></p>
+              <span class="meta"> [{urgencyLabel(r.urgency)} · effort {r.effort}]</span></p>
             <p class="muted small">{r.why}</p>
             {r.receipts?.length > 0 && <p class="meta receipts">{r.receipts.map((u, i) => (
               <>{i > 0 && ' · '}<a href={u} rel="noopener">{srcLabel(u)}</a></>
@@ -149,25 +163,25 @@ const toc = [
 
   {(e.note || nSources > 0) && (
     <>
-      <h2 id="notes" class="anc"><a class="h-anchor" data-pagefind-ignore href="#notes" aria-label="Copy link to Verified notes">#</a>Verified notes</h2>
+      <h2 id="notes" class="anc"><a class="h-anchor" data-pagefind-ignore href="#notes" aria-label="Copy link to Key facts">#</a>Key facts</h2>
       {e.note && <div class="prose notes">{paragraphs(e.note).map((p) => <p>{p}</p>)}</div>}
       {nSources > 0 && (
         <div class="sources" id="sources">
-          <p class="rec-sub">sources for this entry</p>
-          <p class="meta src-note">fetch-verified as of {String(e.updated)} · type is inferred from the URL</p>
+          <p class="rec-sub">sources</p>
+          <p class="meta src-note">each link fetched and checked on {String(e.updated)}</p>
           <ul>{e.sources.map((s) => (
             <li><span class="src-type">{sourceType(s)}</span><a href={s} rel="noopener">{srcLabel(s)}</a></li>
           ))}</ul>
         </div>
       )}
-      {e.defer_to_skill && <p class="muted small">Depth (in-domain rules) is owned by the <code>{e.defer_to_skill}</code> skill — this entry is selection breadth.</p>}
+      {e.defer_to_skill && <p class="muted small">This page helps you choose; the <code>{e.defer_to_skill}</code> skill covers how to use it well.</p>}
     </>
   )}
 
   {nReading > 0 && (
     <>
-      <h2 id="reading" class="anc"><a class="h-anchor" data-pagefind-ignore href="#reading" aria-label="Copy link to Canonical reading">#</a>Canonical reading</h2>
-      <p class="meta lede">editorial annotations on why each piece matters — the articles are the originals; read them there</p>
+      <h2 id="reading" class="anc"><a class="h-anchor" data-pagefind-ignore href="#reading" aria-label="Copy link to Read more">#</a>Read more</h2>
+      <p class="meta lede">why each piece is worth your time — the links go to the originals</p>
       <div class="rows">
         {e.reading.map((r) => (
           <div>
@@ -182,8 +196,8 @@ const toc = [
 
   {nWatching > 0 && (
     <>
-      <h2 id="watching" class="anc"><a class="h-anchor" data-pagefind-ignore href="#watching" aria-label="Copy link to Watching">#</a>Watching</h2>
-      <p class="meta lede">curated talks, podcasts &amp; videos — the A/V companion to the reading list</p>
+      <h2 id="watching" class="anc"><a class="h-anchor" data-pagefind-ignore href="#watching" aria-label="Copy link to Watch">#</a>Watch</h2>
+      <p class="meta lede">talks, podcasts and videos</p>
       <div class="rows">
         {e.watching.map((w) => (
           <div>
@@ -198,10 +212,10 @@ const toc = [
 
   {doc && (
     <>
-      <h2 id="explanation" class="anc"><a class="h-anchor" data-pagefind-ignore href="#explanation" aria-label="Copy link to The full explanation">#</a>The full explanation</h2>
+      <h2 id="explanation" class="anc"><a class="h-anchor" data-pagefind-ignore href="#explanation" aria-label="Copy link to The full story">#</a>The full story</h2>
       <details class="essay-wrap" id="essay-wrap">
-        <summary data-pagefind-ignore>Read the full explanation · ≈{docMinutes} min read</summary>
-        <p class="meta lede">the reviewed long-form essay behind this entry — the <em>why</em>, not a how-to · also on <a href={`${GITHUB}/blob/main/encyclopedia/${e.doc}`} rel="noopener">GitHub</a></p>
+        <summary data-pagefind-ignore>Read why · ≈{docMinutes} min</summary>
+        <p class="meta lede">the long-form reasoning behind this pick — the <em>why</em>, not a how-to · also on <a href={`${GITHUB}/blob/main/encyclopedia/${e.doc}`} rel="noopener">GitHub</a></p>
         <article class="prose essay" set:html={doc} />
       </details>
     </>
@@ -209,43 +223,40 @@ const toc = [
 
   {rels.length > 0 && (
     <>
-      <h2 id="related" class="anc"><a class="h-anchor" data-pagefind-ignore href="#related" aria-label="Copy link to Related decisions">#</a>Related decisions</h2>
-      <p class="meta lede"><b>cited here</b> = this entry's text names it · <b>cites this</b> = its text names this entry · <b>same group</b> = sibling in {groupLabel(group).toLowerCase() || e.group}</p>
+      <h2 id="related" class="anc"><a class="h-anchor" data-pagefind-ignore href="#related" aria-label="Copy link to Related topics">#</a>Related topics</h2>
       <ul class="related">
         {rels.map(({ entry: x, labels }) => (
-          <li><a href={href(`entries/${x.slug}/`)}>{x.slug}</a><span class="rel-topic">{x.topic}</span><span class="rel-label meta">{labels.join(' · ')}</span></li>
+          <li><a href={href(`entries/${x.slug}/`)}>{x.topic}</a><span class="rel-label meta">{labels.map((l) => REL_LABEL[l] || l).join(' · ')}</span></li>
         ))}
       </ul>
     </>
   )}
 
-  <nav class="pager" aria-label="Previous and next decision" data-pagefind-ignore>
-    {prev ? <a class="prev" href={href(`entries/${prev.slug}/`)} rel="prev"><span class="meta">← previous{prev.group !== e.group ? ` · ${groupLabel(groupOf(prev)).toLowerCase()}` : ''}</span><span class="pg-title">{prev.topic}</span></a> : <span />}
-    {next ? <a class="next" href={href(`entries/${next.slug}/`)} rel="next"><span class="meta">next{next.group !== e.group ? ` · ${groupLabel(groupOf(next)).toLowerCase()}` : ''} →</span><span class="pg-title">{next.topic}</span></a> : <span />}
+  <nav class="pager" aria-label="Previous and next topic" data-pagefind-ignore>
+    {prev ? <a class="prev" href={href(`entries/${prev.slug}/`)} rel="prev"><span class="meta">← previous{prev.group !== e.group ? ` · ${groupLabel(groupOf(prev))}` : ''}</span><span class="pg-title">{prev.topic}</span></a> : <span />}
+    {next ? <a class="next" href={href(`entries/${next.slug}/`)} rel="next"><span class="meta">next{next.group !== e.group ? ` · ${groupLabel(groupOf(next))}` : ''} →</span><span class="pg-title">{next.topic}</span></a> : <span />}
   </nav>
   <p class="sr-only" id="copy-status" aria-live="polite" data-pagefind-ignore></p>
 
-  <script is:inline define:vars={{ entryId: e.id, def: e.recommend?.default || '', when }}>
-    // Session context: a repo loaded with the console's `load` (⌘J) is kept in
-    // localStorage; when it uses a library this decision covers, say how that
-    // choice sits against the recommendation (same fit rule as the console).
-    try {
-      const ctx = JSON.parse(localStorage.getItem('rb-console-ctx'));
-      const mine = ctx?.byEntry?.[entryId];
-      if (mine) {
-        const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-        const tokens = mine.tokens || [];
-        const d = def.toLowerCase(), w = when.join('||').toLowerCase();
-        const [fit, cls, why] = tokens.some((x) => d.includes(x)) ? ['✓ aligned', 't-ok', 'matches the default']
-          : tokens.some((x) => w.includes(x)) ? ['~ contextual', 't-warn', 'matches a when-clause — check the context fits']
-          : ['↗ review', 'muted', 'not named in the recommendation — compare against the options'];
-        const el = document.getElementById('session-banner');
-        el.innerHTML = `<span class="meta">your repo ~/${esc(ctx.name)} uses</span> <b>${esc((mine.labels || []).join(', '))}</b> here — <span class="${cls}">${fit}</span> <span class="meta">(${why}) · loaded via the console · <button type="button" class="linkish" data-clear-ctx>forget</button></span>`;
-        el.hidden = false;
-        el.querySelector('[data-clear-ctx]').addEventListener('click', () => { try { localStorage.removeItem('rb-console-ctx'); } catch {} el.hidden = true; });
-      }
-    } catch {}
+  <script>
+    // The saved project (lib/project.js): when it uses a library this topic covers,
+    // say how that choice sits against our pick — same fit rule as Check my app.
+    import { load, fitOf } from '../../lib/project.js';
+    import { fit } from '../../lib/doctor-core.js';
+    const el = document.getElementById('session-banner');
+    const p = load();
+    const mine = p?.byEntry?.[el.dataset.entry];
+    if (mine) {
+      const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+      const f = fitOf(fit({ def: el.dataset.def, when: JSON.parse(el.dataset.when || '[]') }, mine.tokens || []));
+      const why = { 'mark-ok': '', 'mark-warn': ' — check the situation below is yours', 'mark-dim': ' — compare it with the options below' }[f.cls];
+      el.innerHTML = `<span class="meta">your project <a href="${document.body.dataset.base}">${esc(p.name)}</a> uses</span> <b>${esc((mine.labels || []).join(', '))}</b> — ` +
+        `<span class="${f.cls}">${esc(f.label)}</span><span class="meta">${why}</span>`;
+      el.hidden = false;
+    }
+  </script>
 
+  <script is:inline>
     // Copy-link anchors on section headings: click copies the section URL (the
     // link still navigates without JS). Clipboard can be denied — say so.
     const status = document.getElementById('copy-status');
@@ -336,7 +347,12 @@ const toc = [
   .rec-caveat { margin: 1rem 0 0; padding-top: .7rem; border-top: 1px dashed var(--line-strong); color: var(--muted); font-size: var(--fs-sm); max-width: var(--measure); }
   .rec-caveat strong { color: var(--warn); }
 
-  .session { margin: .7rem 0 0; font-size: var(--fs-sm); }
+  .session { margin: var(--sp-4) 0 0; padding: var(--sp-2) var(--sp-3); font-size: var(--fs-sm); background: var(--card); border-left: 2px solid var(--accent); border-radius: var(--radius-sm); overflow-wrap: anywhere; }
+  .entry-meta .badge { font-weight: 600; }
+  .sure { margin: var(--sp-4) 0 0; }
+  .sure > summary { cursor: pointer; min-height: 24px; padding-block: var(--sp-1); font: 500 var(--fs-xs)/1.5 var(--font-mono); color: var(--muted); width: fit-content; }
+  .sure > summary:hover { color: var(--fg); }
+  .sure .meta { margin: var(--sp-2) 0 0; }
 
   /* at a glance: four facts on hairlines, no boxes */
   .glance { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: .2rem 1.4rem; margin: 1.1rem 0 0; }
@@ -402,9 +418,8 @@ const toc = [
   .src-type { flex: 0 0 6.6rem; font: 400 var(--fs-xs) var(--font-mono); color: var(--muted); }
 
   .related { list-style: none; padding: 0; margin: 0; }
-  .related li { display: grid; grid-template-columns: minmax(8rem, 12rem) minmax(0, 1fr) auto; gap: .2rem 1rem; align-items: baseline; margin: 0; padding: .5rem 0; border-top: 1px solid var(--line); }
+  .related li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .2rem 1rem; align-items: baseline; margin: 0; padding: .5rem 0; border-top: 1px solid var(--line); }
   .related li a { font: 600 var(--fs-md) var(--font-head); text-decoration: none; padding-block: 2px; }
-  .rel-topic { color: var(--muted); font-size: var(--fs-sm); }
   .rel-label { text-align: end; white-space: nowrap; }
   @media (max-width: 600px) {
     .related li { grid-template-columns: minmax(0, 1fr); gap: .1rem; }

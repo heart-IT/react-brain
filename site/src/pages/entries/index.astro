@@ -5,11 +5,10 @@ const { groups, entries } = corpus();
 const fresh = (e) => e.updated && Date.now() - new Date(String(e.updated)).getTime() < 7 * 864e5;
 const PLATFORMS = [['', 'all'], ['react', 'react'], ['react-native', 'react native']];
 ---
-<Base title="Explore decisions">
-  <h1>Explore decisions</h1>
-  <p class="muted prose">One page per decision, {entries.length} in all. <span class="badge reviewed">reviewed</span> = checked against
-  primary sources with a long-form explanation; <span class="badge drafted">drafted</span> = internally
-  consistent, citable.</p>
+<Base title="Topics">
+  <h1>Topics</h1>
+  <p class="muted prose">{entries.length} questions every React and React Native team answers, each with our pick,
+  the alternatives, and the evidence. Looking for a specific package? Try the <a href={href('libraries/')}>library browser</a>.</p>
 
   <div class="filters" role="search" aria-label="Filter decisions">
     <label class="f-input">
@@ -27,16 +26,15 @@ const PLATFORMS = [['', 'all'], ['react', 'react'], ['react-native', 'react nati
     <section id={g.id} class="grp">
       <h2>{g.label}</h2>
       <div class="tbl"><table>
-        <thead><tr><th scope="col">entry</th><th scope="col">topic</th><th scope="col">status</th><th scope="col">updated</th></tr></thead>
+        <thead><tr><th scope="col">topic</th><th scope="col">depth</th><th scope="col">checked</th></tr></thead>
         <tbody>
           {g.entries.map((id) => {
             const e = entries.find((x) => x.id === id);
             return e && (
               <tr data-q={`${e.slug} ${e.topic}`.toLowerCase()} data-platforms={(e.platforms || []).join(' ')}>
-                <td><a href={href(`entries/${e.slug}/`)}>{e.slug}</a></td>
-                <td>{e.topic}</td>
-                <td><span class={`badge ${e.status}`}>{e.status}</span></td>
-                <td class="meta">{String(e.updated)}{fresh(e) && <span class="mark-ok" title="re-verified this week" aria-label="re-verified this week"> ●</span>}</td>
+                <td><a href={href(`entries/${e.slug}/`)}>{e.topic}</a></td>
+                <td><span class={`badge ${e.status}`} title={e.status === 'reviewed' ? 'checked against primary sources, with a long-form explanation' : 'summary: internally consistent and cited'}>{e.status === 'reviewed' ? 'in depth' : 'summary'}</span></td>
+                <td class="meta">{String(e.updated)}{fresh(e) && <span class="mark-ok" title="re-checked this week" aria-label="re-checked this week"> ●</span>}</td>
               </tr>
             );
           })}
@@ -44,7 +42,7 @@ const PLATFORMS = [['', 'all'], ['react', 'react'], ['react-native', 'react nati
       </table></div>
     </section>
   ))}
-  <p id="f-none" class="muted" hidden>No decision matches — <button type="button" class="linkish" id="f-reset">clear the filter</button> or <a href={href('search/')}>search everything</a>.</p>
+  <p id="f-none" class="muted" hidden>No topic matches — <button type="button" class="linkish" id="f-reset">clear the filter</button> or <a href={href('search/')}>search everything</a>.</p>
 
   <script is:inline>
     (() => {
@@ -63,7 +61,7 @@ const PLATFORMS = [['', 'all'], ['react', 'react'], ['react-native', 'react nati
         }
         for (const s of document.querySelectorAll('section.grp')) s.hidden = !s.querySelector('tr[data-q]:not([hidden])');
         const filtering = terms.length || platform;
-        count.textContent = filtering ? `${shown} of ${rows.length} decisions` : '';
+        count.textContent = filtering ? `${shown} of ${rows.length} topics` : '';
         none.hidden = shown > 0;
       }
       q.addEventListener('input', apply);

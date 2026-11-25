@@ -1,7 +1,14 @@
 ---
+// Home. Two states, chosen in the browser before first paint (Base.astro adds
+// html.has-project when a project is saved — see lib/project.js):
+//   guest   → one promise, two actions, a real sample report, four tasks
+//   project → that project's dashboard: what to fix, what it chose, what is undecided
+// Everything a guest sees is static; the dashboard is rendered client-side from
+// the saved manifest × doctor-data.json with the same analyze() as the doctor page.
 import Base from '../layouts/Base.astro';
-import { corpus, doctorData, siteMeta, href } from '../lib/corpus.js';
+import { corpus, doctorData, siteMeta, href, BASE } from '../lib/corpus.js';
 import { analyze, SAMPLE, hostOf } from '../lib/doctor-core.js';
+import { fitOf, urgencyLabel } from '../lib/project.js';
 const { entries } = corpus();
 const m = siteMeta();
 
@@ -14,170 +21,196 @@ const urgentSlugs = new Set(demo.steps.filter((s) => ['dead', 'deprecated', 'sup
 const fitRows = demo.fits.filter((f) => !urgentSlugs.has(f.slug)).slice(0, 3);
 const clip = (s, n) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
 const fitCls = (f) => (f.startsWith('✓') ? 't-ok' : f.startsWith('~') ? 't-warn' : 't-dim');
+const fitGlyph = (f) => `${f[0]} ${fitOf(f).label}`;
 const moreFindings = demo.steps.length - (finding ? 1 : 0);
 const nextSlug = finding?.slug ?? demo.fits[0]?.slug ?? 'state';
 // Rendered as one HTML string: JSX expressions inside <pre> lose their whitespace.
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const demoHtml = [
-  `<span class="t-p">❯</span> analyze ${esc(demo.name)}/package.json`,
+  `<span class="t-p">❯</span> check ${esc(demo.name)}/package.json`,
   '',
-  `<span class="t-dim">${esc(demo.name)} · ${demo.platform} · ${demo.depCount} deps · ${demo.fits.length} decisions detected</span>`,
+  `<span class="t-dim">${esc(demo.name)} · ${demo.platform} · ${demo.depCount} deps · ${demo.fits.length} choices found</span>`,
   '',
-  ...fitRows.map((f) => `  ${f.slug.padEnd(12)} ${esc(clip(f.choice, 18).padEnd(18))} <span class="${fitCls(f.fit)}">${f.fit}</span>`),
+  ...fitRows.map((f) => `  ${f.slug.padEnd(12)} ${esc(clip(f.choice, 18).padEnd(18))} <span class="${fitCls(f.fit)}">${esc(fitGlyph(f.fit))}</span>`),
   ...(finding ? [
     '',
-    `  <span class="t-warn">✗ ${esc(finding.urgency)}</span>  ${esc(finding.name)} ${esc(finding.installed)}`,
+    `  <span class="t-warn">✗ ${esc(urgencyLabel(finding.urgency))}</span>  ${esc(finding.name)} ${esc(finding.installed)}`,
     `     → ${esc(clip(finding.to, 64))}`,
-    `     <span class="t-dim">effort ${esc(finding.effort)} · receipt:</span> ` +
+    `     <span class="t-dim">effort ${esc(finding.effort)} · source:</span> ` +
       (finding.receipts[0] ? `<a href="${esc(finding.receipts[0])}" rel="noopener">${esc(hostOf(finding.receipts[0]))}</a>` : '<span class="t-dim">none</span>'),
   ] : []),
   '',
-  `<span class="t-dim">+ ${moreFindings} more findings · ${demo.gaps.length} gaps</span>`,
+  `<span class="t-dim">+ ${moreFindings} more to fix · ${demo.gaps.length} not decided yet</span>`,
   `<span class="t-p">next:</span> <a href="${href(`entries/${nextSlug}/`)}">entries/${nextSlug}</a>`,
 ].join('\n');
 
-// ── stat line: every number from siteMeta(), every tile defines itself ──
 const cal = m.calibration;
-const stats = [
-  { value: m.decisions, label: 'decisions', sub: `${m.reviewed} reviewed`, to: 'entries/',
-    title: 'Context-keyed decision entries in the corpus' },
-  { value: m.readings, label: 'readings', sub: 'fetch-verified', to: 'reading/',
-    title: 'Articles and talks cited as evidence on entries; each link was fetched and checked' },
-  { value: m.libraries, label: 'libraries tracked', sub: 'by package detector', to: 'libraries/',
-    title: 'Distinct npm packages the doctor recognizes and maps to a decision' },
-  ...(cal ? [{ value: `${cal.score}%`, label: 'calibration', sub: `${cal.graded}/${cal.total} high-tier graded`, to: 'scorecard/',
-    title: `High-confidence forecasts scored held=1, weakened=0.5, overturned=0 over the ${cal.graded} resolved so far (${cal.held} held, ${cal.weakened} weakened, ${cal.overturned} overturned)` }] : []),
-];
-
 const tasks = [
-  { to: 'stack/?platform=react', label: 'New React app', why: 'compose a web stack from intent — platform, stage, SSR' },
-  { to: 'stack/?platform=react-native', label: 'New React Native app', why: 'Expo or bare, P2P or not — a stack with reasons' },
-  { to: 'doctor/', label: 'Existing app', why: 'paste package.json — fit report against the corpus' },
-  { to: 'doctor/', label: 'Migration', why: 'dead, deprecated and outdated deps, sequenced with receipts' },
-  { to: 'entries/#ui', label: 'Performance', why: 'lists, animation, rendering — the UI decisions' },
-  { to: 'libraries/', label: 'Picking a library', why: `${m.libraries} packages, each mapped to its decision` },
+  { to: 'doctor/', label: 'I have an app', why: 'paste package.json — what to fix, what to keep, what to decide' },
+  { to: 'stack/?platform=react', label: 'New React app', why: 'pick a web stack from what you are building' },
+  { to: 'stack/?platform=react-native', label: 'New React Native app', why: 'Expo or bare, with the reason for each pick' },
+  { to: 'libraries/', label: 'Picking a library', why: `${m.libraries} packages, each mapped to the question it answers` },
 ];
-
-const retired = m.sources.filter((s) => s.retired);
-const recent = [...entries].sort((a, b) => String(b.updated).localeCompare(String(a.updated))).slice(0, 3);
-// pick of the week: deterministic — the most recently re-verified reviewed entry
-const pick = recent.find((e) => e.status === 'reviewed')
-  ?? [...entries].filter((e) => e.status === 'reviewed').sort((a, b) => String(b.updated).localeCompare(String(a.updated)))[0];
-// first clause only — split at real sentence boundaries, never at version dots ("19.2")
-const pickHeadline = pick ? clip((pick.recommend?.default || '').split(/\.\s|;|\s—\s/)[0].trim(), 110) : '';
-const { bare, withCorpus } = m.bench;
+const recent = [...entries].sort((a, b) => String(b.updated).localeCompare(String(a.updated))).slice(0, 4);
 ---
 <Base>
-  <section class="hero home" aria-labelledby="home-h1">
+  <div id="dash" class="project-only" data-base={BASE} data-pagefind-ignore aria-live="polite">
+    <p class="meta">loading your project…</p>
+  </div>
+
+  <section class="hero home guest-only" aria-labelledby="home-h1">
     <div>
-      <p class="label-caps eyebrow">engineering intelligence · react &amp; react native</p>
+      <p class="label-caps eyebrow">for teams shipping React &amp; React Native</p>
       <h1 id="home-h1">React decisions, with receipts.<span class="blink" aria-hidden="true">▊</span></h1>
-      <p class="sub">For teams shipping React and React Native: bring your project's context,
-      get a recommendation, and inspect the dated, primary-source evidence behind it.</p>
+      <p class="sub">Paste your <code>package.json</code>: see what to fix, what to keep and what is still
+      undecided. Every answer links to the dated, primary-source evidence behind it.</p>
       <p class="ctas">
-        <a class="btn" href={href('doctor/')}>Analyze your project →</a>
-        <a class="btn ghost" href={href('entries/')}>Explore decisions</a>
+        <a class="btn" href={href('doctor/')}>Check my app →</a>
+        <a class="btn ghost" href={href('stack/')}>Start a new app</a>
       </p>
+      <p class="meta trust">{m.decisions} topics · {m.readings} sources checked{cal && <Fragment> · <a href={href('scorecard/')} title={`${cal.held} held, ${cal.weakened} weakened, ${cal.overturned} overturned of ${cal.graded} graded high-confidence calls`}>{cal.score}% of past calls held up</a></Fragment>} · <a href={href('methodology/')}>how we know →</a></p>
     </div>
 
     <figure class="demo">
       <div class="term">
-        <div class="term-bar" aria-hidden="true"><i></i><i></i><i></i><span>react-brain doctor</span></div>
+        <div class="term-bar" aria-hidden="true"><i></i><i></i><i></i><span>sample report</span></div>
         <pre class="no-copy" set:html={demoHtml}></pre>
       </div>
-      <figcaption class="meta">fictional sample repo ({demo.name}) · generated at build from the corpus · <a href={href('doctor/')}>run it on yours →</a></figcaption>
+      <figcaption class="meta">a fictional app ({demo.name}) · generated at build from the corpus · <a href={href('doctor/')}>check yours →</a></figcaption>
     </figure>
   </section>
 
-  <ul class="statline" aria-label="The corpus in numbers">
-    {stats.map((s) => (
-      <li><a href={href(s.to)} title={s.title}><strong>{s.value}</strong> {s.label}<span class="sub">{s.sub}</span></a></li>
-    ))}
-  </ul>
-  <p class="meta stat-def"><a href={href('methodology/#metrics')}>what these numbers mean →</a></p>
-
-  <h2>Start with your task</h2>
-  <p class="muted lede">Greenfield and existing apps get different answers: a new app gets a stack composed from intent;
-  an existing one gets a fit report and a migration plan against what is actually installed.</p>
-  <ul class="tasks">
-    {tasks.map((t) => (
-      <li><a href={href(t.to)}><span class="t-label">{t.label}</span><span class="t-why">{t.why}</span></a></li>
-    ))}
-  </ul>
-
-  <h2>How it stays true</h2>
-  <p class="flow">
-    <a href={href('methodology/#sources')} title={retired.map((s) => `${s.name} retired ${s.retiredOn ?? ''}`.trim()).join('; ')}>{m.sourcesRunning} newsletters running, {m.sourcesRetired} retired</a>
-    · release notes · npm{m.censusApps != null && <Fragment> · <a href={href('census/')}>census of {m.censusApps} production apps</a></Fragment>}
-    <span class="arrow" aria-hidden="true">→</span> every claim fetch-verified &amp; dated
-    <span class="arrow" aria-hidden="true">→</span> {m.decisions} decisions
-    <span class="arrow" aria-hidden="true">→</span> doctor · migrate · review · MCP
-    <a class="more" href={href('methodology/')}>methodology →</a>
-  </p>
-  <div class="tbl">
-    <table class="compare">
-      <thead><tr><th scope="col">claim</th><th scope="col">how react-brain records it</th></tr></thead>
-      <tbody>
-        <tr><td>a version or security fact</td><td>fetched from the primary source, stamped with a verified-on date</td></tr>
-        <tr><td>a recommendation's confidence</td><td>a dated forecast, graded in public on the <a href={href('scorecard/')}>scorecard</a></td></tr>
-        <tr><td>what changed this week</td><td>re-verified from running sources; every change in the <a href={href('changelog/')}>changelog</a></td></tr>
-      </tbody>
-    </table>
-  </div>
-  {bare && withCorpus && (
-    <p class="muted bench">The <a href={href('benchmark/')}>staleness benchmark</a> measures it — {withCorpus.model}, {bare.date === withCorpus.date ? `latest runs ${bare.date}` : 'latest runs'}:
-    alone it answered <strong>{bare.freshPct}% fresh</strong> (n={bare.n}, {bare.hedged} hedged{bare.date !== withCorpus.date && `, ${bare.date}`}); with the corpus injected,
-    <strong>{withCorpus.freshPct}% fresh</strong> (n={withCorpus.n}, {withCorpus.hedged} hedged{bare.date !== withCorpus.date && `, ${withCorpus.date}`}). Deterministic rubric, conditions labelled, reproducible with your own key.</p>
-  )}
+  <section class="guest-only" aria-labelledby="h-tasks">
+    <h2 id="h-tasks">What are you doing?</h2>
+    <ul class="tasks">
+      {tasks.map((t) => (
+        <li><a href={href(t.to)}><span class="t-label">{t.label}</span><span class="t-why">{t.why}</span></a></li>
+      ))}
+    </ul>
+  </section>
 
   <div class="below">
     <section aria-labelledby="h-recent">
-      <h2 id="h-recent">Recently updated</h2>
+      <h2 id="h-recent">Recently re-checked</h2>
       <ul class="rows plain">
         {recent.map((e) => (
           <li><a class="row" href={href(`entries/${e.slug}/`)}>
-            <span class="row-title">{e.slug}</span> <span class="meta">verified {String(e.updated)}</span>
-            <span class="muted row-sub">{e.topic}</span>
+            <span class="row-title">{e.topic}</span> <span class="meta">checked {String(e.updated)}</span>
           </a></li>
         ))}
       </ul>
-      {pick && (
-        <p class="pick"><span class="label-caps">pick of the week</span>
-        <a href={href(`entries/${pick.slug}/#explanation`)}>{pickHeadline}</a>
-        <span class="meta">{pick.slug} · <span class={`badge ${pick.confidence}`}>{pick.confidence}</span> · verified {String(pick.updated)}</span></p>
-      )}
+      <p class="meta"><a href={href('entries/')}>all {m.decisions} topics →</a></p>
     </section>
     <section aria-labelledby="h-quick">
-      <h2 id="h-quick">Quick start</h2>
-      <pre><span class="t-p">$</span> npx -y @heart-it/react-brain doctor .      <span class="t-dim"># assess a repo</span>
-<span class="t-p">$</span> npx -y @heart-it/react-brain migrate .     <span class="t-dim"># sequenced upgrade plan</span>
-<span class="t-p">$</span> npx -y @heart-it/react-brain review . --ci <span class="t-dim"># block dead deps in CI</span></pre>
-      <p class="muted small">In your coding agent — the MCP server exposes {m.mcpTools} tools:
+      <h2 id="h-quick">In your terminal or agent</h2>
+      <pre><span class="t-p">$</span> npx -y @heart-it/react-brain doctor .</pre>
+      <p class="muted small">Reads your source too, not just the manifest. For coding agents, an MCP server with {m.mcpTools} tools:
       <code>claude mcp add react-brain -- npx -y @heart-it/react-brain mcp</code></p>
-      <p class="meta">package: <a href="https://www.npmjs.com/package/@heart-it/react-brain" rel="noopener">npmjs.com/package/@heart-it/react-brain</a></p>
     </section>
   </div>
+
+  <script>
+    import { analyze } from '../lib/doctor-core.js';
+    import { load, forget, setDone, fitIn, urgencyLabel, actNow, stepKey, summarize } from '../lib/project.js';
+
+    const dash = document.getElementById('dash');
+    const BASE = dash.dataset.base || '/';
+    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const entryUrl = (slug) => `${BASE}entries/${slug}/`;
+    const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+    const p = load();
+
+    const leave = () => { forget(); document.documentElement.classList.remove('has-project'); };
+
+    function render(data) {
+      const a = analyze(p.pkg, data);
+      const n = summarize(a);
+      const done = p.done || {};
+      const steps = [...a.steps].sort((x, y) => (done[stepKey(x)] ? 1 : 0) - (done[stepKey(y)] ? 1 : 0));
+      const nDone = a.steps.filter((s) => done[stepKey(s)]).length;
+      const topic = (id) => data.caps[id]?.topic || data.caps[id]?.slug || id;
+
+      let html = `<p class="label-caps">your project · saved in this browser</p>` +
+        `<h1 class="dash-h">${esc(a.name)}</h1>` +
+        `<p class="meta">${esc(a.platform)} · ${esc(p.stage || '')} · ${a.depCount} deps · checked ${esc(p.savedAt || 'earlier')}</p>` +
+        '<dl class="dash-counts">' +
+        `<div><dt>Fix now</dt><dd class="dash-n">${n.act}</dd></div>` +
+        `<div><dt>Plan to upgrade</dt><dd class="dash-n">${n.plan}</dd></div>` +
+        `<div><dt>Worth a look</dt><dd class="dash-n">${n.review}</dd></div>` +
+        `<div><dt>Not decided yet</dt><dd class="dash-n">${n.gaps}</dd></div>` +
+        '</dl>' +
+        `<p class="ctas"><a class="btn" href="${BASE}doctor/">Re-check my app</a> <a class="btn ghost" href="${BASE}stack/">Start a new app</a> ` +
+        '<button type="button" class="linkish" data-forget>forget this project</button></p>';
+
+      html += `<h2 id="todo-h">To do <span class="meta">${a.steps.length ? `${nDone} of ${a.steps.length} done` : ''}</span></h2>`;
+      if (steps.length) {
+        html += '<ul class="todo" aria-labelledby="todo-h">' + steps.map((s, i) => {
+          const k = stepKey(s), id = `todo-${i}`;
+          const tag = s.blocked ? 'blocked' : urgencyLabel(s.urgency);
+          return `<li class="${done[k] ? 'is-done' : ''}"><input type="checkbox" id="${id}" data-key="${esc(k)}"${done[k] ? ' checked' : ''} />` +
+            `<label for="${id}"><strong>${esc(s.name)}</strong> → ${esc(s.to)}</label>` +
+            `<span class="meta todo-facts"><span class="${actNow(s) ? 'mark-warn' : 'mark-dim'}">${esc(tag)}</span> · effort ${esc(s.effort)} · <a href="${entryUrl(s.slug)}#migrate">how</a></span></li>`;
+        }).join('') + '</ul>';
+      } else {
+        html += '<p class="muted">Nothing to upgrade from your installed versions.</p>';
+      }
+
+      html += '<h2>Your choices</h2>';
+      html += a.fits.length ? '<ul class="rows plain">' + a.fits.map((f) => {
+        const fo = fitIn(f, a.steps);
+        return `<li><a class="row" href="${entryUrl(f.slug)}"><span class="row-title">${esc(topic(f.id))}</span> ` +
+          `<span class="muted">${esc(f.choice)}</span> <span class="meta ${fo.cls}">${esc(fo.label)}</span></a></li>`;
+      }).join('') + '</ul>' : '<p class="muted">No dependency matched a topic we cover.</p>';
+
+      if (a.gaps.length) {
+        html += '<h2>Not decided yet</h2><p class="muted small">Nothing detected for these. It may be built in or not apply to you.</p><ul class="rows plain">' +
+          a.gaps.map((id) => `<li><a class="row" href="${entryUrl(data.caps[id].slug)}"><span class="row-title">${esc(topic(id))}</span> <span class="meta">see our pick →</span></a></li>`).join('') + '</ul>';
+      }
+      dash.innerHTML = html;
+      dash.querySelector('[data-forget]').addEventListener('click', leave);
+      for (const box of dash.querySelectorAll('.todo input')) box.addEventListener('change', () => {
+        setDone(box.dataset.key, box.checked);
+        box.closest('li').classList.toggle('is-done', box.checked);
+        const left = dash.querySelectorAll('.todo input:checked').length;
+        dash.querySelector('#todo-h .meta').textContent = `${left} of ${a.steps.length} done`;
+      });
+    }
+
+    if (p?.name) {
+      if (!p.pkg) {
+        // loaded with the console's `load` before projects kept their manifest
+        dash.innerHTML = `<p class="label-caps">your project · saved in this browser</p><h1 class="dash-h">${esc(p.name)}</h1>` +
+          `<p class="muted">${plural(Object.keys(p.byEntry || {}).length, 'choice')} found. Re-check it once to get your to-do list.</p>` +
+          `<p class="ctas"><a class="btn" href="${BASE}doctor/">Re-check my app</a> <button type="button" class="linkish" data-forget>forget this project</button></p>`;
+        dash.querySelector('[data-forget]').addEventListener('click', leave);
+      } else {
+        fetch(`${BASE}doctor-data.json`).then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+          .then(render)
+          .catch((err) => { dash.innerHTML = `<p class="err">Could not load the corpus data (${esc(err.message)}). Reload to try again.</p>`; });
+      }
+    }
+  </script>
 </Base>
 
 <style>
+  /* state switch: html.has-project is set in <head> before first paint */
+  :global(html.has-project) .guest-only { display: none; }
+  :global(html:not(.has-project)) .project-only { display: none; }
+
   .home { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 2.5rem; align-items: center; }
   @media (max-width: 1100px) { .home { grid-template-columns: minmax(0, 1fr); gap: 1.8rem; } }
   .eyebrow { margin: 0; }
   .sub { color: var(--muted); max-width: var(--measure); }
-  .ctas { display: flex; gap: .7rem; flex-wrap: wrap; margin-top: 1.4rem; }
+  .ctas { display: flex; gap: .7rem; flex-wrap: wrap; align-items: center; margin-top: 1.4rem; }
+  .hero .trust { margin-top: var(--sp-4); font-size: var(--fs-sm); }
+  .trust a { color: var(--muted); }
+  .trust a:hover { color: var(--accent); }
 
   .demo { margin: 0; min-width: 0; }
   .demo pre { white-space: pre; }
   .demo pre a { color: var(--accent); }
   .demo figcaption { text-align: center; margin-top: .5rem; }
 
-  .statline { list-style: none; margin: 2.2rem 0 0; padding: 1.1rem 0 0; border-top: 1px solid var(--line); }
-  .statline li { margin: 0; }
-  .stat-def { margin: var(--sp-2) 0 0; }
-  .statline .sub { display: block; font-size: var(--fs-xs); }
-  @media (max-width: 640px) { .statline { display: grid; grid-template-columns: 1fr 1fr; } }
-
-  .lede { max-width: var(--measure); font-size: var(--fs-sm); margin-top: -.3rem; }
   .tasks { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr)); gap: 0 2rem; }
   .tasks li { margin: 0; border-top: 1px solid var(--line); }
   .tasks a { display: block; padding: .7rem 0; text-decoration: none; }
@@ -185,22 +218,29 @@ const { bare, withCorpus } = m.bench;
   .tasks .t-why { display: block; color: var(--muted); font-size: var(--fs-sm); max-width: var(--measure); }
   .tasks a:hover .t-label { color: var(--accent); }
 
-  .flow { font: 500 var(--fs-sm)/1.9 var(--font-mono); color: var(--muted); margin: 0 0 1rem; max-width: var(--measure); }
-  .flow .arrow { color: var(--accent); margin: 0 .3rem; }
-  .flow a { color: var(--fg); }
-  .flow .more { color: var(--muted); margin-left: .6rem; }
-  .compare td:first-child { color: var(--bright); white-space: nowrap; }
-  @media (max-width: 640px) { .compare td:first-child { white-space: normal; } }
-  .bench { font-size: var(--fs-sm); max-width: var(--measure); }
-  .bench strong { color: var(--fg); }
-
   .below { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 21rem), 1fr)); gap: 0 4rem; align-items: start; }
   .plain { list-style: none; padding: 0; }
   .row-title { font-family: var(--font-head); font-weight: 600; color: var(--bright); }
-  .row-sub { display: block; font-size: var(--fs-sm); margin-top: .15rem; }
-  .pick { margin: 1.2rem 0 0; display: grid; gap: .2rem; }
-  .pick a { font: 600 var(--fs-md)/1.4 var(--font-head); color: var(--bright); text-decoration: none; }
-  .pick a:hover { color: var(--accent); }
-  .small { font-size: var(--fs-sm); }
+  .small { font-size: var(--fs-sm); max-width: var(--measure); }
   .small code { word-break: break-all; }
+
+  /* ── the project dashboard (rendered by the script above) ── */
+  #dash :global(.dash-h) { margin-top: var(--sp-1); overflow-wrap: anywhere; }
+  #dash :global(.dash-counts) { display: grid; grid-template-columns: repeat(4, 1fr); margin: var(--sp-6) 0 0; border-block: 1px solid var(--line); }
+  #dash :global(.dash-counts > div) { padding: var(--sp-3) var(--sp-4); border-inline-start: 1px solid var(--line); }
+  #dash :global(.dash-counts > div:first-child) { border-inline-start: 0; padding-inline-start: 0; }
+  #dash :global(.dash-counts dt) { font: 500 var(--fs-xs) var(--font-mono); color: var(--muted); }
+  #dash :global(.dash-counts dd) { margin: 0; }
+  #dash :global(.dash-n) { font: 600 var(--fs-2xl)/1.2 var(--font-mono); color: var(--bright); font-variant-numeric: tabular-nums; }
+  @media (max-width: 600px) {
+    #dash :global(.dash-counts) { grid-template-columns: 1fr 1fr; }
+    #dash :global(.dash-counts > div) { border-inline-start: 0; padding-inline: 0; }
+  }
+  #dash :global(.todo) { list-style: none; padding: 0; margin: 0; }
+  #dash :global(.todo li) { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .1rem var(--sp-3); align-items: baseline; margin: 0; padding: var(--sp-3) 0; border-top: 1px solid var(--line); }
+  #dash :global(.todo input) { width: 24px; height: 24px; margin: 0; accent-color: var(--accent); align-self: start; }
+  #dash :global(.todo label) { margin: 0; overflow-wrap: anywhere; cursor: pointer; }
+  #dash :global(.todo-facts) { grid-column: 2; }
+  #dash :global(.todo li.is-done label) { color: var(--muted); text-decoration: line-through; }
+  #dash :global(.row .muted) { font-size: var(--fs-sm); }
 </style>

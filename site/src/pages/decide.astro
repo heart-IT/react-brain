@@ -8,8 +8,8 @@ const info = corpusInfo();
 const options = groups.map((g) => ({ label: g.label,
   entries: g.entries.filter((id) => data[id]).map((id) => ({ id, slug: data[id].slug, label: `${data[id].slug} — ${data[id].topic}` })) }));
 ---
-<Base title="react-brain — decision records" description="Generate an Architecture Decision Record with receipts: context-resolved pick, candidate table, evidence chain, and premises that react-brain doctor re-checks over time.">
-  <h1>Decision records</h1>
+<Base title="Write a decision record" description="Generate an Architecture Decision Record with receipts: context-resolved pick, candidate table, evidence chain, and premises that react-brain doctor re-checks over time.">
+  <h1>Write a decision record</h1>
   <p class="kicker">runs in your browser</p>
   <p class="muted prose">Turn a recommendation into the artifact your team reviews: an ADR with <strong class="fg">receipts</strong> — the resolved context, the candidate table, sources with
   verified-on dates, the pick's calibration track record — plus a machine-readable premise block.

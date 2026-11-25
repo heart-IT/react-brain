@@ -2,47 +2,48 @@
 // In-browser doctor. The page ships no corpus data: the analysis logic is
 // lib/doctor-core.js (the same module the homepage demo runs at build time,
 // bundled here by Vite), and the corpus tables come from doctor-data.json,
-// fetched once on the first Analyze.
+// fetched once on the first Analyze. A saved project (lib/project.js) is re-opened
+// and re-checked on load; "Save as my project" makes the report the home dashboard.
 import Base from '../layouts/Base.astro';
 import { BASE, href } from '../lib/corpus.js';
 ---
-<Base title="Doctor" description="Paste a package.json and get an ecosystem-fit report and migration findings against the verified corpus — runs entirely in your browser.">
-  <h1>Doctor</h1>
-  <p class="kicker"><span class="badge beta">beta</span> · runs in your browser</p>
-  <p class="muted prose">Paste a <code>package.json</code>. Each dependency is matched against the corpus's
-  detection table, every detected choice is compared to the context-keyed recommendation, installed
-  versions are crossed with the verified migration rules, and expected-but-missing domains are flagged.
-  The full CLI (<code>npx -y @heart-it/react-brain doctor .</code>) adds what a browser can't see: the
-  legacy-API source scan and source-level signals. Ready to commit a choice?
-  <a href={href('decide/')}>Generate a decision record</a>.</p>
+<Base title="Check my app" description="Paste a package.json: see what to fix, which choices match our pick and what is still undecided — runs entirely in your browser.">
+  <h1>Check my app</h1>
+  <p class="kicker"><span class="badge beta">beta</span> · runs in your browser · nothing is uploaded</p>
+  <p class="muted prose">Paste your <code>package.json</code>. You get three things: what to fix (outdated or
+  dead packages), how each library you chose compares to our pick, and the topics you haven't decided yet.
+  Save it as your project and the home page becomes your dashboard.</p>
 
-  <section class="dr-legend" aria-labelledby="legend-h">
-    <h2 id="legend-h" class="label-caps">How to read the report</h2>
+  <details class="dr-legend">
+    <summary class="label-caps">How to read the report</summary>
     <dl>
-      <dt>fit</dt>
-      <dd><span class="mark-ok">✓ aligned</span> matches the default for some context ·
-        <span class="mark-warn">~ contextual</span> matches a when-clause ·
-        <span class="mark-dim">↗ review</span> differs from the default (not necessarily wrong — check the entry's context keys)</dd>
-      <dt>urgency</dt>
-      <dd><span class="mark-warn">✗ dead</span> / <span class="mark-warn">✗ deprecated</span> act now ·
-        <span class="mark-dim">→ superseded</span> / <span class="mark-dim">→ upgrade</span> / <span class="mark-dim">→ conditional</span> plan it ·
+      <dt>your choices</dt>
+      <dd><span class="mark-ok">✓ matches our pick</span> ·
+        <span class="mark-warn">~ fits some contexts</span> (our pick for a specific situation — check it is yours) ·
+        <span class="mark-dim">↗ differs — worth a look</span> (not necessarily wrong)</dd>
+      <dt>to fix</dt>
+      <dd><span class="mark-warn">✗ replace now</span> / <span class="mark-warn">✗ replace soon</span> dead or deprecated ·
+        <span class="mark-dim">→ better option exists</span> / <span class="mark-dim">→ upgrade available</span> / <span class="mark-dim">→ upgrade if it applies</span> plan it ·
         <span class="mark-dim">⛔ blocked</span> another step must land first</dd>
-      <dt>gap</dt>
-      <dd>an expected domain with nothing detected — may be built in, or genuinely N/A for your architecture</dd>
+      <dt>not decided yet</dt>
+      <dd>a topic most apps need, with nothing detected — may be built in, or not apply to you</dd>
     </dl>
-  </section>
+  </details>
+
+  <p class="dr-saved" id="saved-note" hidden></p>
 
   <div id="doctor" data-base={BASE}>
     <label for="pkg" class="label-caps pkg-label">Your package.json</label>
     <p class="meta" id="privacy">Runs entirely in your browser — nothing is uploaded; only dependency names and versions are read.</p>
     <textarea id="pkg" aria-describedby="privacy" spellcheck="false" placeholder='{"dependencies": {"react": "19.2.0", "zustand": "5.0.0", ...}}'></textarea>
     <p class="dr-actions">
-      <button id="run" type="button">Analyze</button>
+      <button id="run" type="button">Check</button>
       <label class="btn ghost file-btn">Load a file<input id="file" class="sr-only" type="file" accept=".json,application/json" /></label>
       <button id="sample" type="button" class="btn ghost">Try the sample</button>
-      <span class="meta">sample: legacy-rn-demo (fictional manifest)</span>
+      <span class="meta">sample: a fictional, outdated React Native app</span>
     </p>
     <p class="dr-actions" id="exports" hidden>
+      <button id="save" type="button">Save as my project</button>
       <button id="copy" type="button" class="btn ghost">Copy report</button>
       <button id="download" type="button" class="btn ghost">Download .md</button>
       <span id="export-status" class="meta" role="status"></span>
@@ -52,6 +53,7 @@ import { BASE, href } from '../lib/corpus.js';
 
   <script>
     import { analyze, stageOf, depsOf, hostOf, matchDetector, SAMPLE } from '../lib/doctor-core.js';
+    import { load, save, fitOf, fitIn, urgencyLabel, actNow, SEVERE } from '../lib/project.js';
 
     const root = document.getElementById('doctor');
     const BASE = root.dataset.base || '/';
@@ -61,9 +63,7 @@ import { BASE, href } from '../lib/corpus.js';
     const clip = (s, n) => (s.length > n ? s.slice(0, n) + '…' : s);
     const entryUrl = (slug) => `${BASE}entries/${slug}/`;
     const safeUrl = (u) => (/^https?:\/\//i.test(u) ? u : null);
-    const SEVERE = new Set(['dead', 'deprecated']);
     const migrateUrl = (slug) => `${entryUrl(slug)}#migrate`;
-    const actNow = (s) => !s.blocked && SEVERE.has(s.urgency);
     const CLI = ['npx -y @heart-it/react-brain doctor .', 'npx -y @heart-it/react-brain migrate .', 'npx -y @heart-it/react-brain review . --ci'];
 
     // corpus tables: fetched once, on demand
@@ -73,12 +73,12 @@ import { BASE, href } from '../lib/corpus.js';
       return r.json();
     }).catch((err) => { dataPromise = null; throw err; }));
 
-    let report = null;   // { md, name }
-
-    const fitClass = (f) => (f.startsWith('✓') ? 'mark-ok' : f.startsWith('~') ? 'mark-warn' : 'mark-dim');
+    let report = null;   // { md, name, pkg, a, data }
+    const fitText = (f) => `${f[0]} ${fitOf(f).label}`;
 
     function render(pkg, data) {
       const a = analyze(pkg, data);
+      const urg = urgencyLabel;
       const stage = stageOf(pkg);
       const { caps } = data;
       const md = [`# react-brain doctor — ${a.name}`, '',
@@ -97,63 +97,65 @@ import { BASE, href } from '../lib/corpus.js';
       const next = [...a.steps].sort((x, y) => (actNow(x) ? 0 : 1) - (actNow(y) ? 0 : 1)).slice(0, 3);
       const stepLine = (s) => `${s.name}@${s.installed} → ${s.to}`;
 
-      let html = `<p class="dr-context"><strong>${esc(a.name)}</strong> · platform: ${esc(a.platform)} · stage (guess, manifest only): ${esc(stage)} · ${a.depCount} deps · ${a.fits.length} decisions detected</p>`;
+      let html = `<p class="dr-context"><strong>${esc(a.name)}</strong> · ${esc(a.platform)} · stage (a guess from the manifest): ${esc(stage)} · ${a.depCount} deps · ${a.fits.length} choices found</p>`;
 
       html += '<section class="dr-summary" aria-labelledby="summary-h"><h2 id="summary-h">Summary</h2><dl class="dr-counts">' +
-        `<div><dt>Act now</dt><dd class="dr-n">${nAct}</dd><dd class="meta">unblocked steps that are dead or deprecated</dd></div>` +
-        `<div><dt>Plan</dt><dd class="dr-n">${nPlan}</dd><dd class="meta">superseded, upgrade, conditional or blocked steps</dd></div>` +
-        `<div><dt>Review</dt><dd class="dr-n">${nReview}</dd><dd class="meta">choices that differ from the default — contextual, not necessarily wrong</dd></div>` +
+        `<div><dt>Fix now</dt><dd class="dr-n">${nAct}</dd><dd class="meta">dead or deprecated, nothing blocking</dd></div>` +
+        `<div><dt>Plan to upgrade</dt><dd class="dr-n">${nPlan}</dd><dd class="meta">a better option or a newer version exists</dd></div>` +
+        `<div><dt>Worth a look</dt><dd class="dr-n">${nReview}</dd><dd class="meta">differs from our pick — not necessarily wrong</dd></div>` +
         '</dl>' +
-        `<p class="meta dr-note">${a.gaps.length} gap${a.gaps.length === 1 ? '' : 's'} (expected domains with nothing detected) · ` +
-        `${nMatched} of ${deps.length} dependencies matched a decision — the rest are not judged.</p>`;
+        `<p class="meta dr-note">${a.gaps.length} topic${a.gaps.length === 1 ? '' : 's'} not decided yet · ` +
+        `${nMatched} of ${deps.length} dependencies matched a topic we cover — the rest are not judged.</p>`;
       md.push('## Summary', '',
-        `- act now: ${nAct} (unblocked dead/deprecated steps)`,
-        `- plan: ${nPlan} (superseded/upgrade/conditional/blocked steps)`,
-        `- review: ${nReview} (choices that differ from the default — not necessarily wrong)`,
-        `- gaps: ${a.gaps.length}`,
-        `- ${nMatched} of ${deps.length} dependencies matched a decision — the rest are not judged`, '');
+        `- fix now: ${nAct} (dead or deprecated, nothing blocking)`,
+        `- plan to upgrade: ${nPlan} (a better option or a newer version exists)`,
+        `- worth a look: ${nReview} (differs from our pick — not necessarily wrong)`,
+        `- not decided yet: ${a.gaps.length}`,
+        `- ${nMatched} of ${deps.length} dependencies matched a topic we cover — the rest are not judged`, '');
 
-      html += '<h3 id="next-h">Recommended next actions</h3>';
-      md.push('### Recommended next actions', '');
+      html += '<h3 id="next-h">Do these first</h3>';
+      md.push('### Do these first', '');
       if (next.length) {
         html += '<ol class="rows dr-next">' + next.map((s) =>
-          `<li><p class="f-what"><strong>${esc(stepLine(s))}</strong> <span class="meta">${actNow(s) ? 'act now' : s.blocked ? 'plan · blocked' : 'plan'} · ${esc(s.urgency)}</span></p>` +
+          `<li><p class="f-what"><strong>${esc(stepLine(s))}</strong> <span class="meta">${s.blocked ? 'blocked' : esc(urg(s.urgency))}</span></p>` +
           `<p class="f-why">${esc(clip(s.why, 200))}</p>` +
-          `<p class="meta f-facts"><a href="${entryUrl(s.slug)}">open decision</a> · <a href="${migrateUrl(s.slug)}">migration rule</a></p></li>`).join('') +
+          `<p class="meta f-facts"><a href="${entryUrl(s.slug)}">our pick</a> · <a href="${migrateUrl(s.slug)}">upgrade path</a></p></li>`).join('') +
           '</ol>';
-        next.forEach((s, i) => md.push(`${i + 1}. **${stepLine(s)}** (${actNow(s) ? 'act now' : 'plan'}, ${s.urgency}) — ${s.why}`,
-          `   - decision: ${location.origin}${entryUrl(s.slug)} · migration rule: ${location.origin}${migrateUrl(s.slug)}`));
+        next.forEach((s, i) => md.push(`${i + 1}. **${stepLine(s)}** (${s.blocked ? 'blocked' : urg(s.urgency)}) — ${s.why}`,
+          `   - our pick: ${location.origin}${entryUrl(s.slug)} · upgrade path: ${location.origin}${migrateUrl(s.slug)}`));
       } else {
-        html += '<p class="muted">No migration steps — nothing to act on from installed versions.</p>';
-        md.push('No migration steps — nothing to act on from installed versions.');
+        html += '<p class="muted">Nothing to upgrade from your installed versions.</p>';
+        md.push('Nothing to upgrade from the installed versions.');
       }
       html += '</section>';
       md.push('');
 
       // ── fit ──
-      html += '<h2 id="fit">Fit</h2>';
+      html += '<h2 id="fit">Your choices</h2>';
       if (a.fits.length) {
-        html += `<p class="meta">fit: <span class="mark-ok">✓ ${tally['✓']} aligned</span> · <span class="mark-warn">~ ${tally['~']} contextual</span> · <span class="mark-dim">↗ ${tally['↗']} to review</span></p>`;
-        html += '<div class="tbl wide"><table><thead><tr><th scope="col">decision</th><th scope="col">your choice</th><th scope="col">fit</th><th scope="col">the corpus says</th></tr></thead><tbody>';
-        md.push('## Fit', '', '| decision | your choice | fit |', '|---|---|---|');
+        html += `<p class="meta"><span class="mark-ok">✓ ${tally['✓']} match our pick</span> · <span class="mark-warn">~ ${tally['~']} fit some contexts</span> · <span class="mark-dim">↗ ${tally['↗']} worth a look</span></p>`;
+        html += '<div class="tbl wide"><table><thead><tr><th scope="col">topic</th><th scope="col">you use</th><th scope="col">vs our pick</th><th scope="col">our pick</th></tr></thead><tbody>';
+        md.push('## Your choices', '', '| topic | you use | vs our pick |', '|---|---|---|');
         for (const f of a.fits) {
           const def = caps[f.id]?.def || '';
-          html += `<tr><td><a href="${entryUrl(f.slug)}">${esc(f.slug)}</a> <span class="badge ${esc(f.confidence)}">${esc(f.confidence)}</span></td>` +
-            `<td>${esc(f.choice)}</td><td><span class="${fitClass(f.fit)}">${esc(f.fit)}</span></td>` +
+          const t = caps[f.id]?.topic || f.slug;
+          const fo = fitIn(f, a.steps);
+          html += `<tr><td><a href="${entryUrl(f.slug)}">${esc(t)}</a></td>` +
+            `<td>${esc(f.choice)}</td><td><span class="${fo.cls}">${esc(fo === fitOf(f.fit) ? fitText(f.fit) : `✗ ${fo.label}`)}</span></td>` +
             `<td class="muted">${esc(clip(def, 160))}</td></tr>`;
-          md.push(`| ${f.slug} | ${f.choice} | ${f.fit} |`);
+          md.push(`| ${t} | ${f.choice} | ${fo === fitOf(f.fit) ? fitText(f.fit) : `✗ ${fo.label}`} |`);
         }
         html += '</tbody></table></div>';
         md.push('');
       } else {
-        html += '<p class="muted">No dependency matched the detection table.</p>';
+        html += '<p class="muted">No dependency matched a topic we cover.</p>';
       }
 
       // ── findings: migration steps ──
-      html += '<h2 id="findings">Findings</h2>';
-      md.push('## Findings', '');
+      html += '<h2 id="findings">To fix</h2>';
+      md.push('## To fix', '');
       if (a.steps.length) {
-        html += '<p class="muted dr-note">Installed versions crossed with the corpus\'s verified migration rules — unblocked first, then by urgency.</p><div class="rows dr-findings">';
+        html += '<p class="muted dr-note">Your installed versions checked against known upgrade paths — unblocked first, most urgent first.</p><div class="rows dr-findings">';
         for (const s of a.steps) {
           const severe = SEVERE.has(s.urgency);
           const glyph = s.blocked ? '⛔' : severe ? '✗' : '→';
@@ -162,55 +164,57 @@ import { BASE, href } from '../lib/corpus.js';
           html += '<div>' +
             `<p class="f-what"><span class="${severe && !s.blocked ? 'mark-warn' : 'mark-dim'}" aria-hidden="true">${glyph}</span> ` +
               `<strong>${esc(s.name)}</strong><span class="meta">@${esc(s.installed)}</span> → ${esc(s.to)}</p>` +
-            `<p class="meta f-facts">urgency <strong class="${severe ? 'mark-warn' : 'mark-dim'}">${esc(s.urgency)}</strong> · effort ${esc(s.effort)} · applies to: ${esc(applies)}</p>` +
+            `<p class="meta f-facts"><strong class="${severe ? 'mark-warn' : 'mark-dim'}">${esc(urg(s.urgency))}</strong> · effort ${esc(s.effort)} · applies to: ${esc(applies)}</p>` +
             `<p class="f-why">${esc(s.why)}</p>` +
             (s.blocked ? `<p class="f-why"><strong>⛔ blocked by</strong> ${esc(s.blocked)} — do that step first</p>` : '') +
-            `<p class="meta f-facts">receipts: ${receipts.length
+            `<p class="meta f-facts">sources: ${receipts.length
               ? receipts.map((u) => `<a href="${esc(u)}" rel="noopener">${esc(hostOf(u))}</a>`).join(' · ')
-              : 'none recorded'} · next: <a href="${entryUrl(s.slug)}">entries/${esc(s.slug)}</a> · <a href="${migrateUrl(s.slug)}">migration rule</a></p>` +
+              : 'none recorded'} · <a href="${entryUrl(s.slug)}">our pick</a> · <a href="${migrateUrl(s.slug)}">upgrade path</a></p>` +
             '</div>';
-          md.push(`- ${glyph} **${s.name}@${s.installed} → ${s.to}** — urgency ${s.urgency}, effort ${s.effort}, applies to: ${applies}`,
+          md.push(`- ${glyph} **${s.name}@${s.installed} → ${s.to}** — ${urg(s.urgency)}, effort ${s.effort}, applies to: ${applies}`,
             `  - why: ${s.why}`,
             ...(s.blocked ? [`  - blocked by: ${s.blocked}`] : []),
-            ...(receipts.length ? [`  - receipts: ${receipts.join(' · ')}`] : []),
-            `  - next: ${location.origin}${entryUrl(s.slug)} · migration rule: ${location.origin}${migrateUrl(s.slug)}`);
+            ...(receipts.length ? [`  - sources: ${receipts.join(' · ')}`] : []),
+            `  - our pick: ${location.origin}${entryUrl(s.slug)} · upgrade path: ${location.origin}${migrateUrl(s.slug)}`);
         }
         html += '</div>';
       } else {
-        html += '<p class="muted">No migration rule matches your installed versions.</p>';
-        md.push('No migration rule matches the installed versions.');
+        html += '<p class="muted">Nothing to fix from your installed versions.</p>';
+        md.push('Nothing to fix from the installed versions.');
       }
       md.push('');
 
       // ── gaps ──
-      html += '<h2 id="gaps">Gaps</h2>';
-      md.push('## Gaps', '');
+      html += '<h2 id="gaps">Not decided yet</h2>';
+      md.push('## Not decided yet', '');
       if (a.gaps.length) {
-        html += '<p class="muted dr-note">Nothing detected for these expected domains — may be built in, or genuinely N/A for your architecture; verify.</p><div class="rows">';
+        html += '<p class="muted dr-note">Topics most apps need, with nothing detected. It may be built in or not apply to you; here is our pick if you need one.</p><div class="rows">';
         for (const id of a.gaps) {
           const cap = caps[id];
-          html += `<div><p class="gap-what"><a href="${entryUrl(cap.slug)}"><strong>${esc(cap.slug)}</strong></a> <span class="meta">nothing detected — may be N/A</span></p>` +
-            `<p class="muted gap-def">${esc(clip(cap.def, 180))}</p></div>`;
-          md.push(`- ${cap.slug}: nothing detected — may be N/A`);
+          html += `<div><p class="gap-what"><a href="${entryUrl(cap.slug)}"><strong>${esc(cap.topic || cap.slug)}</strong></a> <span class="meta">nothing detected</span></p>` +
+            `<p class="muted gap-def">our pick: ${esc(clip(cap.def, 180))}</p></div>`;
+          md.push(`- ${cap.topic || cap.slug}: nothing detected`);
         }
         html += '</div>';
       } else {
-        html += '<p class="muted">Every expected domain has something detected.</p>';
-        md.push('Every expected domain has something detected.');
+        html += '<p class="muted">Every topic most apps need has something detected.</p>';
+        md.push('Every topic most apps need has something detected.');
       }
       // ── continue locally ──
       const cliWhy = 'The CLI reads your source too: it adds the legacy-API scan, source-level signals and a sequenced migration plan. ' +
         'Run migrate when you are ready to do the work; run review --ci in CI to fail a build on new drift.';
-      html += '<section class="dr-local" aria-labelledby="local-h"><h2 id="local-h">Continue locally</h2>' +
+      html += '<section class="dr-local" aria-labelledby="local-h"><h2 id="local-h">Go deeper in your terminal</h2>' +
         `<pre class="no-copy"><code>${CLI.map(esc).join('\n')}</code></pre><p class="muted dr-note">${esc(cliWhy)}</p></section>`;
-      md.push('## Continue locally', '', '```sh', ...CLI, '```', '', cliWhy, '',
+      md.push('## Go deeper in your terminal', '', '```sh', ...CLI, '```', '', cliWhy, '',
         `Generated in the browser by ${location.origin}${BASE}doctor/`);
 
       out.innerHTML = html;
       addCopy(out.querySelector('.dr-local pre'));
-      report = { md: md.join('\n'), name: a.name };
+      report = { md: md.join('\n'), name: a.name, pkg, a, data };
       $('exports').hidden = false;
       $('export-status').textContent = '';
+      const saved = load();
+      $('save').textContent = saved?.name === a.name ? 'Update my project' : 'Save as my project';
       out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
@@ -251,6 +255,34 @@ import { BASE, href } from '../lib/corpus.js';
     }
 
     $('run').addEventListener('click', run);
+
+    // Save → the home page becomes this project's dashboard. Re-saving the same app
+    // says what changed since the last check.
+    $('save').addEventListener('click', () => {
+      if (!report) return;
+      const r = save(report.pkg, report.a, report.data.detectors);
+      if (!r) { status('could not save — this browser blocks storage'); return; }
+      document.documentElement.classList.add('has-project');
+      const was = r.prev?.last, now = r.project.last;
+      const delta = was ? [['to fix now', now.act - was.act], ['to plan', now.plan - was.plan]]
+        .filter(([, d]) => d).map(([w, d]) => `${Math.abs(d)} ${d < 0 ? 'fewer' : 'more'} ${w}`).join(', ') : '';
+      const note = $('saved-note');
+      note.innerHTML = `Saved <strong>${esc(r.project.name)}</strong> in this browser${was ? ` — since the last check: ${esc(delta || 'no change')}` : ''}. ` +
+        `<a href="${BASE}">Open your dashboard →</a>`;
+      note.hidden = false;
+      $('save').textContent = 'Update my project';
+      note.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+
+    // A saved project re-opens here: prefill its manifest and re-check it.
+    const saved = load();
+    if (saved?.pkg) {
+      $('pkg').value = JSON.stringify(saved.pkg, null, 2);
+      const note = $('saved-note');
+      note.innerHTML = `Showing your saved project <strong>${esc(saved.name)}</strong> (checked ${esc(saved.savedAt || 'earlier')}). Paste a new <code>package.json</code> to check another app.`;
+      note.hidden = false;
+      run();
+    }
     $('sample').addEventListener('click', () => {
       $('pkg').value = JSON.stringify(SAMPLE, null, 2);
       run();
@@ -287,8 +319,9 @@ import { BASE, href } from '../lib/corpus.js';
 
 <style>
   .dr-legend { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: .6rem 0; margin: 1rem 0 1.4rem; }
-  .dr-legend h2 { margin: 0 0 .4rem; font-size: var(--fs-xs); }
-  .dr-legend dl { display: grid; grid-template-columns: max-content 1fr; gap: .3rem 1rem; margin: 0; font-size: var(--fs-sm); }
+  .dr-legend summary { cursor: pointer; min-height: 24px; padding-block: var(--sp-1); }
+  .dr-legend dl { display: grid; grid-template-columns: max-content 1fr; gap: .3rem 1rem; margin: var(--sp-2) 0 0; font-size: var(--fs-sm); }
+  .dr-saved { border-left: 2px solid var(--accent); padding: var(--sp-2) var(--sp-3); background: var(--card); border-radius: var(--radius-sm); font-size: var(--fs-sm); max-width: none; }
   .pkg-label { display: block; margin-block-end: var(--sp-2); }
   #privacy { margin: 0 0 var(--sp-2); }
   .file-btn { position: relative; cursor: pointer; margin: 0; }

@@ -130,6 +130,19 @@ for (const width of WIDTHS) {
       catch (e) { fail('state', `${where} (${state.label})`, e.message.split('\n')[0]); }
     }
   }
+  // the app state: save the sample as the project, then audit the pages it changes
+  // (home becomes the dashboard, entry pages get a fit banner, the doctor re-opens it)
+  try {
+    await page.goto(BASE_URL + 'doctor/', { waitUntil: 'networkidle', timeout: 20_000 });
+    await page.click('#sample'); await page.waitForSelector('#out table', { timeout: 10_000 });
+    await page.click('#save'); await page.waitForSelector('#saved-note:not([hidden])', { timeout: 5_000 });
+    for (const [p, ready] of [['', '#dash h1'], ['entries/state/', '#session-banner:not([hidden])'], ['doctor/', '#out table']]) {
+      const where = `${width}px ${p || '/'} (saved project)`;
+      await page.goto(BASE_URL + p, { waitUntil: 'networkidle', timeout: 20_000 });
+      try { await page.waitForSelector(ready, { timeout: 10_000 }); } catch (e) { fail('state', where, e.message.split('\n')[0]); continue; }
+      await runAudit(page, where, width);
+    }
+  } catch (e) { fail('state', `${width}px saved project`, e.message.split('\n')[0]); }
   await ctx.close();
 }
 await browser.close();

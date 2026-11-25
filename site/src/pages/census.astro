@@ -17,8 +17,8 @@ const rows = snap ? Object.entries(snap.agg)
   })) : [];
 const appList = snap ? Object.values(snap.apps).sort((a, b) => (a.platform > b.platform ? -1 : a.platform < b.platform ? 1 : a.name.localeCompare(b.name))) : [];
 ---
-<Base title="react-brain — census">
-  <h1>Census — what shipped apps actually use</h1>
+<Base title="What real apps use">
+  <h1>What real apps use</h1>
   <p class="muted prose">Download counts can be gamed (a single vendor's CI once
   produced a 60× "adoption surge"); the dependency choices of real, active, production
   open-source apps can't. The census fetches each cohort app's <code>package.json</code>, runs

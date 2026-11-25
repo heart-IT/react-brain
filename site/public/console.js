@@ -221,8 +221,12 @@ ${SEARCH_LINE}</span>`); break;
               const c2 = { name: pkg.name || 'app', deps: Object.keys(deps).length,
                 platform: rn && 'react-dom' in deps ? 'both' : rn ? 'react-native' : 'react',
                 expo: 'expo' in deps, p2p: Object.keys(deps).some((d) => /^hyper|^autobase$|^corestore$|^hrpc$/.test(d)),
-                stage: score <= 1 ? 'prototype' : score <= 3 ? 'mvp' : 'production', byEntry };
-              localStorage.setItem(CTX_KEY, JSON.stringify(c2));
+                stage: score <= 1 ? 'prototype' : score <= 3 ? 'mvp' : 'production', byEntry,
+                // the saved-project fields (src/lib/project.js): the home dashboard re-runs the analysis from pkg
+                pkg: { name: pkg.name, version: pkg.version, private: pkg.private, scripts: pkg.scripts?.test ? { test: pkg.scripts.test } : undefined,
+                  dependencies: pkg.dependencies, devDependencies: pkg.devDependencies },
+                savedAt: new Date().toISOString().slice(0, 10) };
+              localStorage.setItem(CTX_KEY, JSON.stringify(c2)); document.documentElement.classList.add('has-project');
               ta.remove(); setPrompt();
               print(`<span class="t-ok">loaded ~/${esc(c2.name)}</span> <span class="t-dim">${c2.platform} · ${c2.stage} · ${c2.deps} deps · ${Object.keys(byEntry).length} decisions detected — try <b>doctor</b></span>`);
               input.focus();
@@ -231,7 +235,7 @@ ${SEARCH_LINE}</span>`); break;
         });
         break;
       }
-      case 'unload': localStorage.removeItem(CTX_KEY); setPrompt(); print('<span class="t-dim">session cleared</span>'); break;
+      case 'unload': localStorage.removeItem(CTX_KEY); document.documentElement.classList.remove('has-project'); setPrompt(); print('<span class="t-dim">session cleared</span>'); break;
       case 'context':
         print(c ? `<span class="t-dim">~/${esc(c.name)} — ${c.platform} · ${c.stage} · ${c.deps} deps · ${Object.keys(c.byEntry).length} decisions</span>` : '<span class="t-dim">no repo loaded — try <b>load</b></span>');
         break;
