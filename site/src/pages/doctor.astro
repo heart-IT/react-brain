@@ -36,6 +36,13 @@ import { BASE, href } from '../lib/corpus.js';
     <label for="pkg" class="label-caps pkg-label">Your package.json</label>
     <p class="meta" id="privacy">Runs entirely in your browser — nothing is uploaded; only dependency names and versions are read.</p>
     <textarea id="pkg" aria-describedby="privacy" spellcheck="false" placeholder='{"dependencies": {"react": "19.2.0", "zustand": "5.0.0", ...}}'></textarea>
+    <p class="dr-gh">
+      <label for="gh" class="label-caps">or fetch it from a public GitHub repo</label>
+      <span class="dr-gh-row">
+        <input id="gh" type="text" spellcheck="false" autocomplete="off" placeholder="owner/repo — or a github.com link to a folder" />
+        <button id="gh-go" type="button" class="btn ghost">Fetch</button>
+      </span>
+    </p>
     <p class="dr-actions">
       <button id="run" type="button">Check</button>
       <label class="btn ghost file-btn">Load a file<input id="file" class="sr-only" type="file" accept=".json,application/json" /></label>
@@ -44,6 +51,7 @@ import { BASE, href } from '../lib/corpus.js';
     </p>
     <p class="dr-actions" id="exports" hidden>
       <button id="save" type="button">Save as my project</button>
+      <button id="share" type="button" class="btn ghost">Copy share link</button>
       <button id="copy" type="button" class="btn ghost">Copy report</button>
       <button id="download" type="button" class="btn ghost">Download .md</button>
       <span id="export-status" class="meta" role="status"></span>
@@ -53,7 +61,8 @@ import { BASE, href } from '../lib/corpus.js';
 
   <script>
     import { analyze, stageOf, depsOf, hostOf, matchDetector, SAMPLE } from '../lib/doctor-core.js';
-    import { load, save, fitOf, fitIn, urgencyLabel, actNow, SEVERE } from '../lib/project.js';
+    import { load, save, slimPkg, fitOf, fitIn, urgencyLabel, actNow, SEVERE } from '../lib/project.js';
+    import { encodeReport, decodeReport, reportFromHash, parseRepo, repoLabel, fetchManifest } from '../lib/share.js';
 
     const root = document.getElementById('doctor');
     const BASE = root.dataset.base || '/';
@@ -74,6 +83,7 @@ import { BASE, href } from '../lib/corpus.js';
     }).catch((err) => { dataPromise = null; throw err; }));
 
     let report = null;   // { md, name, pkg, a, data }
+    let source = null;   // the GitHub repo the manifest came from, kept with a saved project
     const fitText = (f) => `${f[0]} ${fitOf(f).label}`;
 
     function render(pkg, data) {
@@ -260,7 +270,7 @@ import { BASE, href } from '../lib/corpus.js';
     // says what changed since the last check.
     $('save').addEventListener('click', () => {
       if (!report) return;
-      const r = save(report.pkg, report.a, report.data.detectors);
+      const r = save(report.pkg, report.a, report.data.detectors, source);
       if (!r) { status('could not save — this browser blocks storage'); return; }
       document.documentElement.classList.add('has-project');
       const was = r.prev?.last, now = r.project.last;
@@ -274,23 +284,75 @@ import { BASE, href } from '../lib/corpus.js';
       note.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
 
-    // A saved project re-opens here: prefill its manifest and re-check it.
-    const saved = load();
-    if (saved?.pkg) {
-      $('pkg').value = JSON.stringify(saved.pkg, null, 2);
-      const note = $('saved-note');
-      note.innerHTML = `Showing your saved project <strong>${esc(saved.name)}</strong> (checked ${esc(saved.savedAt || 'earlier')}). Paste a new <code>package.json</code> to check another app.`;
-      note.hidden = false;
-      run();
+    // a hand-edited manifest no longer comes from the repo it was fetched from
+    $('pkg').addEventListener('input', () => { source = null; });
+
+    // GitHub: the public repo's package.json, straight from raw.githubusercontent.com
+    async function fromGitHub() {
+      const r = parseRepo($('gh').value);
+      if (!r) { out.innerHTML = '<p class="err">Use owner/repo, or a github.com link to the repo or a folder in it.</p>'; return; }
+      const btn = $('gh-go');
+      btn.disabled = true;
+      out.innerHTML = `<p class="meta">fetching ${esc(repoLabel(r))}/package.json…</p>`;
+      try {
+        const pkg = await fetchManifest(r);
+        $('pkg').value = JSON.stringify(pkg, null, 2);
+        source = r;
+        await run();
+      } catch (err) {
+        out.innerHTML = `<p class="err">Could not fetch ${esc(repoLabel(r))}: ${esc(err.message)}</p>`;
+      } finally { btn.disabled = false; }
     }
+    $('gh-go').addEventListener('click', fromGitHub);
+    $('gh').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); fromGitHub(); } });
+
+    // Share: the manifest rides in the link's #fragment — no server ever sees it
+    $('share').addEventListener('click', async () => {
+      if (!report) return;
+      try {
+        const url = `${location.origin}${BASE}doctor/#r=${await encodeReport(slimPkg(report.pkg))}`;
+        await navigator.clipboard.writeText(url);
+        status('share link copied ✓');
+      } catch { status('copy failed'); }
+    });
+
+    // Opening: a shared link wins; otherwise a saved project re-opens and is re-checked.
+    (async () => {
+      const note = $('saved-note');
+      const token = reportFromHash();
+      if (token) {
+        try {
+          const pkg = await decodeReport(token);
+          $('pkg').value = JSON.stringify(pkg, null, 2);
+          note.innerHTML = `A shared report for <strong>${esc(pkg.name || 'an app')}</strong> — the app's dependency list is inside the link itself, nothing was uploaded. ` +
+            'Save it as your project to keep it.';
+          note.hidden = false;
+          return run();
+        } catch { note.innerHTML = '<span class="err">This share link is damaged — ask for it again.</span>'; note.hidden = false; return; }
+      }
+      const saved = load();
+      if (saved?.pkg) {
+        $('pkg').value = JSON.stringify(saved.pkg, null, 2);
+        source = saved.source || null;
+        if (source) $('gh').value = repoLabel(source);
+        note.innerHTML = `Showing your saved project <strong>${esc(saved.name)}</strong> (checked ${esc(saved.savedAt || 'earlier')}${source ? ` from ${esc(repoLabel(source))}` : ''}). ` +
+          (source ? '<button type="button" class="linkish" id="gh-refresh">fetch the latest from GitHub</button>, or paste' : 'Paste') +
+          ' a new <code>package.json</code> to check another app.';
+        note.hidden = false;
+        $('gh-refresh')?.addEventListener('click', fromGitHub);
+        run();
+      }
+    })();
     $('sample').addEventListener('click', () => {
       $('pkg').value = JSON.stringify(SAMPLE, null, 2);
+      source = null;
       run();
     });
     $('file').addEventListener('change', async (ev) => {
       const file = ev.target.files[0];
       if (!file) return;
       $('pkg').value = await file.text();
+      source = null;
       run();
     });
 
@@ -322,6 +384,9 @@ import { BASE, href } from '../lib/corpus.js';
   .dr-legend summary { cursor: pointer; min-height: 24px; padding-block: var(--sp-1); }
   .dr-legend dl { display: grid; grid-template-columns: max-content 1fr; gap: .3rem 1rem; margin: var(--sp-2) 0 0; font-size: var(--fs-sm); }
   .dr-saved { border-left: 2px solid var(--accent); padding: var(--sp-2) var(--sp-3); background: var(--card); border-radius: var(--radius-sm); font-size: var(--fs-sm); max-width: none; }
+  .dr-gh { display: flex; flex-direction: column; gap: var(--sp-1); margin: var(--sp-3) 0; }
+  .dr-gh-row { display: flex; gap: var(--sp-2); max-width: 34rem; }
+  #gh { flex: 1; min-width: 0; background: var(--code-bg); border: 1px solid var(--border-control); border-radius: var(--radius-sm); padding: var(--sp-2) var(--sp-3); font: 400 var(--fs-sm) var(--font-mono); }
   .pkg-label { display: block; margin-block-end: var(--sp-2); }
   #privacy { margin: 0 0 var(--sp-2); }
   .file-btn { position: relative; cursor: pointer; margin: 0; }

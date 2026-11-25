@@ -85,6 +85,7 @@ export function doctorData() {
   const caps = Object.fromEntries(entries.map((e) => [e.id, {
     slug: e.slug, topic: e.topic, status: e.status, confidence: e.confidence,
     def: e.recommend?.default || '', when: e.recommend?.when || [],
+    updated: String(e.updated || ''),   // the dashboard's "since your last visit"
   }]));
   const migrations = entries.flatMap((e) => (e.migrate || []).map((r) => ({
     entry: e.id, slug: e.slug, pkg: r.from.pkg, below: r.from.below || null,

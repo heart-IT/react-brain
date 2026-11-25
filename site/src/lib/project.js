@@ -6,7 +6,8 @@
 // (name, deps, platform, expo, p2p, stage, byEntry), so a repo loaded in the console
 // and one saved from Check my app are the same project. Added fields: pkg (the slim
 // manifest, to re-run the analysis), savedAt, last (summary counts at save), done
-// (migration to-dos ticked off, keyed by stepKey).
+// (migration to-dos ticked off, keyed by stepKey), source ({ owner, repo, ref, dir }
+// when imported from GitHub), seenAt + known (the dashboard's "since your last visit").
 import { depsOf, detect, platformOf, stageOf } from './doctor-core.js';
 
 export const KEY = 'rb-console-ctx';
@@ -48,23 +49,38 @@ export function summarize(a) {
   return { act: nAct, plan: a.steps.length - nAct, review: a.fits.filter((f) => f.fit.startsWith('↗')).length, gaps: a.gaps.length };
 }
 
-// pkg + its analysis → the stored project. Re-saving the same app keeps its ticked to-dos.
-export function save(pkg, a, detectors) {
+// only what the analysis reads — what gets stored, and what a share link carries
+export const slimPkg = (pkg) => ({
+  name: pkg.name, version: pkg.version, private: pkg.private,
+  scripts: pkg.scripts?.test ? { test: pkg.scripts.test } : undefined,
+  dependencies: pkg.dependencies, devDependencies: pkg.devDependencies,
+});
+
+// pkg + its analysis → the stored project. Re-saving the same app keeps its ticked
+// to-dos, its "last visit" markers and (unless a new one is given) its GitHub source.
+export function save(pkg, a, detectors, source = null) {
   const prev = load();
+  const same = prev?.name === a.name;
   const deps = depsOf(pkg);
-  const slim = {
-    name: pkg.name, version: pkg.version, private: pkg.private,
-    scripts: pkg.scripts?.test ? { test: pkg.scripts.test } : undefined,
-    dependencies: pkg.dependencies, devDependencies: pkg.devDependencies,
-  };
+  const slim = slimPkg(pkg);
   const p = {
     name: a.name, deps: Object.keys(deps).length, platform: platformOf(deps),
     expo: 'expo' in deps, p2p: Object.keys(deps).some((d) => /^hyper|^autobase$|^corestore$|^hrpc$/.test(d)),
     stage: stageOf(pkg), byEntry: detect(deps, detectors),
     pkg: slim, savedAt: new Date().toISOString().slice(0, 10), last: summarize(a),
-    done: prev?.name === a.name ? prev.done || {} : {},
+    done: same ? prev.done || {} : {},
+    source: source || (same ? prev.source || null : null),
+    seenAt: same ? prev.seenAt : undefined, known: same ? prev.known : undefined,
   };
-  return write(p) ? { project: p, prev: prev?.name === a.name ? prev : null } : null;
+  return write(p) ? { project: p, prev: same ? prev : null } : null;
+}
+
+// the dashboard was looked at: everything on it now counts as seen
+export function markSeen(keys, today) {
+  const p = load();
+  if (!p) return;
+  p.seenAt = today; p.known = keys;
+  write(p);
 }
 
 export function setDone(key, on) {

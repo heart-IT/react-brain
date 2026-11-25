@@ -36,7 +36,7 @@ const ogImage = new URL(href('og.png'), Astro.site).href;
 const under = (p) => path.startsWith(href(p));
 // Named for what the visitor is doing, not for how the corpus is built.
 const SECTIONS = [
-  { to: 'doctor/', label: 'Check my app', owns: ['doctor/', 'decide/'] },
+  { to: 'doctor/', label: 'Check my app', owns: ['doctor/', 'decide/', 'watch/'] },
   { to: 'stack/', label: 'New app', owns: ['stack/'] },
   { to: 'entries/', label: 'Topics', owns: ['entries/', 'libraries/', 'compare/', 'reading/', 'newsletter/'] },
   { to: 'methodology/', label: 'How we know', owns: ['scorecard/', 'census/', 'benchmark/', 'methodology/', 'changelog/', 'architecture/', 'roadmap/'] },
@@ -48,6 +48,7 @@ const toolLinks = [
   { to: 'compare/', label: 'Compare options' },
   { to: 'libraries/', label: 'Library browser' },
   { to: 'decide/', label: 'Write a decision record' },
+  { to: 'watch/', label: 'Get alerts' },
   { to: 'reading/', label: 'Reading list' },
   { to: 'newsletter/', label: 'Newsletter issues' },
 ];
@@ -88,6 +89,7 @@ const aboutLinks = [
   <link rel="icon" type="image/png" sizes="32x32" href={href('favicon-32.png')} />
   <link rel="apple-touch-icon" href={href('apple-touch-icon.png')} />
   <link rel="manifest" href={href('manifest.webmanifest')} />
+  <link rel="alternate" type="application/atom+xml" title="react-brain — what changed" href={href('feed.xml')} />
   <meta name="theme-color" content="#0A0A0A" />
   <link rel="preload" href={interUrl} as="font" type="font/woff2" crossorigin />
   <link rel="preload" href={monoUrl} as="font" type="font/woff2" crossorigin />

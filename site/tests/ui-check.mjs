@@ -138,7 +138,9 @@ for (const width of WIDTHS) {
     await page.goto(BASE_URL + 'doctor/', { waitUntil: 'networkidle', timeout: 20_000 });
     await page.click('#sample'); await page.waitForSelector('#out table', { timeout: 10_000 });
     await page.click('#save'); await page.waitForSelector('#saved-note:not([hidden])', { timeout: 5_000 });
-    for (const [p, ready] of [['', '#dash h1'], ['entries/state/', '#session-banner:not([hidden])'], ['doctor/', '#out table']]) {
+    // pretend the last visit was long ago, so the dashboard renders "since your last visit"
+    await page.evaluate(() => { const k = 'rb-console-ctx'; const p = JSON.parse(localStorage.getItem(k)); p.seenAt = '2000-01-01'; p.known = []; localStorage.setItem(k, JSON.stringify(p)); });
+    for (const [p, ready] of [['', '#dash .since'], ['entries/state/', '#session-banner:not([hidden])'], ['doctor/', '#out table']]) {
       const where = `${width}px ${p || '/'} (saved project)`;
       await page.goto(BASE_URL + p, { waitUntil: 'networkidle', timeout: 20_000 });
       try { await page.waitForSelector(ready, { timeout: 10_000 }); } catch (e) { fail('state', where, e.message.split('\n')[0]); continue; }

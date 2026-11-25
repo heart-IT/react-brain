@@ -1,0 +1,58 @@
+---
+// Get alerts — without a backend. The site is static (GitHub Pages), so alerts come
+// from places that already notify you: your own repo's CI, a feed reader, and the
+// dashboard's "since your last visit".
+import Base from '../layouts/Base.astro';
+import { href } from '../lib/corpus.js';
+const WORKFLOW = `# .github/workflows/react-brain.yml — a weekly react-brain check of this repo.
+# Fails when a dependency is dead or deprecated; GitHub emails you about failed
+# scheduled runs. Monorepo? Set working-directory to the app's folder.
+name: react-brain
+on:
+  schedule:
+    - cron: '0 6 * * 1'   # Mondays 06:00 UTC
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Upgrade plan
+        run: npx -y @heart-it/react-brain migrate .
+      - name: Fail on dead or deprecated dependencies
+        run: |
+          npx -y @heart-it/react-brain migrate . --json > react-brain-plan.json
+          node -e '
+            const plan = require("./react-brain-plan.json");
+            const bad = plan.steps.filter((s) => !s.blocked && ["dead", "deprecated"].includes(s.urgency));
+            for (const s of bad) console.log("::error::" + s.pkg + " " + s.installed + " → " + s.to);
+            process.exit(bad.length ? 1 : 0);'`;
+---
+<Base title="Get alerts" description="Hear when something in your React or React Native stack is deprecated or a better option appears — a weekly check in your own CI, a feed, and your dashboard.">
+  <h1>Get alerts</h1>
+  <p class="muted prose">react-brain has no accounts and no mailing list — it is a static site, and your
+  project stays in your browser. You get alerts from places that already notify you.</p>
+
+  <h2 id="ci">A weekly check in your repo</h2>
+  <p class="prose">Add this file to your repo. Every Monday it checks your dependencies against the
+  corpus and fails if one is dead or deprecated — GitHub then emails you, like any failed workflow.
+  The log lists the full upgrade plan.</p>
+  <pre><code>{WORKFLOW}</code></pre>
+  <p class="meta">Save as <code>.github/workflows/react-brain.yml</code> · runs the same checks as
+  <a href={href('doctor/')}>Check my app</a> via the <code>@heart-it/react-brain</code> CLI · run it now from the Actions tab (“Run workflow”).</p>
+
+  <h2 id="feed">A feed of corpus changes</h2>
+  <p class="prose">Every change to our picks and facts, day by day, in any feed reader:
+  <a href={href('feed.xml')}>feed.xml</a> (Atom). The same history is on <a href={href('changelog/')}>What changed</a>.</p>
+
+  <h2 id="dashboard">Your dashboard</h2>
+  <p class="prose">Save your app in <a href={href('doctor/')}>Check my app</a>. The home page then shows
+  what is new since your last visit: new to-dos, and your topics we have re-checked. Install the site as
+  an app (your browser’s “Install” or “Add to Home Screen”) to keep it one tap away, offline too.</p>
+</Base>

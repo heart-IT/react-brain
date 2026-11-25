@@ -111,14 +111,16 @@ const recent = [...entries].sort((a, b) => String(b.updated).localeCompare(Strin
 
   <script>
     import { analyze } from '../lib/doctor-core.js';
-    import { load, forget, setDone, fitIn, urgencyLabel, actNow, stepKey, summarize } from '../lib/project.js';
+    import { load, forget, save, setDone, markSeen, fitIn, urgencyLabel, actNow, stepKey, summarize } from '../lib/project.js';
+    import { encodeReport, fetchManifest, repoLabel } from '../lib/share.js';
 
     const dash = document.getElementById('dash');
     const BASE = dash.dataset.base || '/';
     const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const entryUrl = (slug) => `${BASE}entries/${slug}/`;
     const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
-    const p = load();
+    let p = load();
+    const today = new Date().toISOString().slice(0, 10);
 
     const leave = () => { forget(); document.documentElement.classList.remove('has-project'); };
 
@@ -130,17 +132,40 @@ const recent = [...entries].sort((a, b) => String(b.updated).localeCompare(Strin
       const nDone = a.steps.filter((s) => done[stepKey(s)]).length;
       const topic = (id) => data.caps[id]?.topic || data.caps[id]?.slug || id;
 
+      // since the last visit: new to-dos, and this project's topics re-checked in the corpus
+      const keys = a.steps.map(stepKey);
+      const fresh = p.seenAt ? {
+        steps: p.known ? a.steps.filter((s) => !p.known.includes(stepKey(s))) : [],
+        topics: [...new Set([...a.fits.map((f) => f.id), ...a.gaps, ...a.steps.map((s) => s.entry)])]
+          .filter((id) => data.caps[id]?.updated > p.seenAt),
+      } : null;
+
       let html = `<p class="label-caps">your project · saved in this browser</p>` +
         `<h1 class="dash-h">${esc(a.name)}</h1>` +
-        `<p class="meta">${esc(a.platform)} · ${esc(p.stage || '')} · ${a.depCount} deps · checked ${esc(p.savedAt || 'earlier')}</p>` +
+        `<p class="meta">${esc(a.platform)} · ${esc(p.stage || '')} · ${a.depCount} deps · checked ${esc(p.savedAt || 'earlier')}` +
+          `${p.source ? ` from <a href="https://github.com/${esc(p.source.owner)}/${esc(p.source.repo)}" rel="noopener">${esc(repoLabel(p.source))}</a>` : ''}</p>` +
         '<dl class="dash-counts">' +
         `<div><dt>Fix now</dt><dd class="dash-n">${n.act}</dd></div>` +
         `<div><dt>Plan to upgrade</dt><dd class="dash-n">${n.plan}</dd></div>` +
         `<div><dt>Worth a look</dt><dd class="dash-n">${n.review}</dd></div>` +
         `<div><dt>Not decided yet</dt><dd class="dash-n">${n.gaps}</dd></div>` +
         '</dl>' +
-        `<p class="ctas"><a class="btn" href="${BASE}doctor/">Re-check my app</a> <a class="btn ghost" href="${BASE}stack/">Start a new app</a> ` +
-        '<button type="button" class="linkish" data-forget>forget this project</button></p>';
+        '<p class="ctas">' + (p.source
+          ? '<button type="button" id="gh-refresh">Re-check from GitHub</button>'
+          : `<a class="btn" href="${BASE}doctor/">Re-check my app</a>`) +
+        ' <button type="button" class="ghost" id="share">Copy share link</button>' +
+        ` <a class="btn ghost" href="${BASE}watch/">Get alerts</a>` +
+        ' <button type="button" class="linkish" data-forget>forget this project</button></p>' +
+        '<p class="meta" id="dash-status" role="status"></p>';
+
+      if (fresh && (fresh.steps.length || fresh.topics.length)) {
+        html += `<section class="since" aria-labelledby="since-h"><h2 id="since-h">Since your last visit <span class="meta">${esc(p.seenAt)}</span></h2><ul class="rows plain">` +
+          fresh.steps.map((s) => `<li><span class="mark-warn">new to do</span> <strong>${esc(s.name)}</strong> → ${esc(s.to)} <span class="meta">${esc(urgencyLabel(s.urgency))}</span></li>`).join('') +
+          // a big harvest re-checks most topics at once: name a few, count the rest
+          fresh.topics.slice(0, 5).map((id) => `<li><span class="mark-ok">re-checked</span> <a href="${entryUrl(data.caps[id].slug)}">${esc(topic(id))}</a> <span class="meta">${esc(data.caps[id].updated)}</span></li>`).join('') +
+          (fresh.topics.length > 5 ? `<li class="meta">and ${fresh.topics.length - 5} more of your topics re-checked — <a href="${BASE}changelog/">what changed</a></li>` : '') +
+          '</ul></section>';
+      }
 
       html += `<h2 id="todo-h">To do <span class="meta">${a.steps.length ? `${nDone} of ${a.steps.length} done` : ''}</span></h2>`;
       if (steps.length) {
@@ -168,6 +193,24 @@ const recent = [...entries].sort((a, b) => String(b.updated).localeCompare(Strin
       }
       dash.innerHTML = html;
       dash.querySelector('[data-forget]').addEventListener('click', leave);
+      markSeen(keys, today);
+      const say = (m) => { const el = dash.querySelector('#dash-status'); el.textContent = m; setTimeout(() => { if (el.textContent === m) el.textContent = ''; }, 2400); };
+      dash.querySelector('#share').addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(`${location.origin}${BASE}doctor/#r=${await encodeReport(p.pkg)}`); say('share link copied ✓ — the dependency list is inside the link, nothing is uploaded'); }
+        catch { say('copy failed'); }
+      });
+      dash.querySelector('#gh-refresh')?.addEventListener('click', async (ev) => {
+        ev.target.disabled = true;
+        say(`fetching ${repoLabel(p.source)}/package.json…`);
+        try {
+          const pkg = await fetchManifest(p.source);
+          const r = save(pkg, analyze(pkg, data), data.detectors, p.source);
+          if (!r) throw new Error('this browser blocks storage');
+          p = r.project;
+          render(data);
+          dash.querySelector('#dash-status').textContent = 'updated from GitHub ✓';
+        } catch (err) { ev.target.disabled = false; say(`could not fetch: ${err.message}`); }
+      });
       for (const box of dash.querySelectorAll('.todo input')) box.addEventListener('change', () => {
         setDone(box.dataset.key, box.checked);
         box.closest('li').classList.toggle('is-done', box.checked);
@@ -243,4 +286,7 @@ const recent = [...entries].sort((a, b) => String(b.updated).localeCompare(Strin
   #dash :global(.todo-facts) { grid-column: 2; }
   #dash :global(.todo li.is-done label) { color: var(--muted); text-decoration: line-through; }
   #dash :global(.row .muted) { font-size: var(--fs-sm); }
+  #dash :global(.since) { margin-top: var(--sp-6); border-left: 2px solid var(--accent); padding-left: var(--sp-4); }
+  #dash :global(.since h2) { margin-top: 0; }
+  #dash :global(.since li) { font-size: var(--fs-sm); overflow-wrap: anywhere; }
 </style>
