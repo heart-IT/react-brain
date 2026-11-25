@@ -139,8 +139,29 @@ export function splitWhen(w) {
   return i < 0 ? { ctx: null, pick: s } : { ctx: s.slice(0, i).trim(), pick: s.slice(i + 1).trim() };
 }
 
-// Verified notes are folded YAML: blank lines separate paragraphs.
-export const paragraphs = (s) => String(s || '').trim().split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+// Verified notes are folded YAML (`note: >`): folding turns a blank line into ONE
+// newline, so every newline is a paragraph break. A paragraph may open with an
+// upper-case topic label ("RTK 3.0 (2026-11-01, verified vs …): …"), split off for a
+// bold run-in head. Everything from "HISTORY:" on is the entry's change log — dated
+// events, some wrapped onto more-indented lines — returned separately as one item each.
+const LABEL = /^([A-Z0-9][A-Z0-9 .+&×/'-]*[A-Z0-9])(\s*\([^)]*\))?:\s+/;
+const EVENT = /(?=\b\d{4}-\d{2}-\d{2} [A-Z][A-Z →-]+(?:\([a-z]+\))?:)/;
+export function noteParts(s) {
+  const text = String(s || '').trim();
+  const h = text.search(/(^|\n)HISTORY:/);
+  const body = h < 0 ? text : text.slice(0, h);
+  // "… sentence. → What to do about it." — the arrow after a full stop opens the takeaway
+  const paras = body.split(/\n+/).map((p) => p.trim()).filter(Boolean).map((p) => {
+    const m = p.match(LABEL);
+    const head = m && /[A-Z]{2}/.test(m[1]) ? { label: m[1], when: m[2]?.trim() || null, rest: p.slice(m[0].length) } : { label: null, when: null, rest: p };
+    const [text, ...take] = head.rest.split(/(?<=[.)]) → (?=[A-Z])/);
+    return { label: head.label, when: head.when, text, takeaway: take.join(' ') || null };
+  });
+  const history = h < 0 ? [] : text.slice(h).replace(/^\s*HISTORY:\s*/, '').replace(/\s+/g, ' ')
+    .split(EVENT).map((x) => x.trim()).filter(Boolean)
+    .map((x) => { const m = x.match(/^(\d{4}-\d{2}-\d{2}) ([^:]+):\s*/); return m ? { date: m[1], kind: m[2].toLowerCase(), text: x.slice(m[0].length) } : { date: null, kind: null, text: x }; });
+  return { paras, history };
+}
 
 // Whole days between an entry's verified date and the build date.
 export function ageDays(updated, built) {

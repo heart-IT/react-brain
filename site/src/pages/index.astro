@@ -35,7 +35,8 @@ const demoHtml = [
   ...(finding ? [
     '',
     `  <span class="t-warn">✗ ${esc(urgencyLabel(finding.urgency))}</span>  ${esc(finding.name)} ${esc(finding.installed)}`,
-    `     → ${esc(clip(finding.to, 64))}`,
+    // ≤ 56 columns so the widest line fits the hero column without a scrollbar
+    `     → ${esc(clip(finding.to, 48))}`,
     `     <span class="t-dim">effort ${esc(finding.effort)} · source:</span> ` +
       (finding.receipts[0] ? `<a href="${esc(finding.receipts[0])}" rel="noopener">${esc(hostOf(finding.receipts[0]))}</a>` : '<span class="t-dim">none</span>'),
   ] : []),
@@ -104,8 +105,8 @@ const recent = [...entries].sort((a, b) => String(b.updated).localeCompare(Strin
     <section aria-labelledby="h-quick">
       <h2 id="h-quick">In your terminal or agent</h2>
       <pre><span class="t-p">$</span> npx -y @heart-it/react-brain doctor .</pre>
-      <p class="muted small">Reads your source too, not just the manifest. For coding agents, an MCP server with {m.mcpTools} tools:
-      <code>claude mcp add react-brain -- npx -y @heart-it/react-brain mcp</code></p>
+      <p class="muted small">Reads your source too, not just the manifest. For coding agents, an MCP server with {m.mcpTools} tools:</p>
+      <pre><span class="t-p">$</span> claude mcp add react-brain -- npx -y @heart-it/react-brain mcp</pre>
     </section>
   </div>
 
@@ -254,7 +255,7 @@ const recent = [...entries].sort((a, b) => String(b.updated).localeCompare(Strin
   .demo pre a { color: var(--accent); }
   .demo figcaption { text-align: center; margin-top: .5rem; }
 
-  .tasks { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr)); gap: 0 2rem; }
+  .tasks { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); gap: 0 2rem; }
   .tasks li { margin: 0; border-top: 1px solid var(--line); }
   .tasks a { display: block; padding: .7rem 0; text-decoration: none; }
   .tasks .t-label { display: block; font: 600 var(--fs-md) var(--font-head); color: var(--bright); }
@@ -263,9 +264,11 @@ const recent = [...entries].sort((a, b) => String(b.updated).localeCompare(Strin
 
   .below { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 21rem), 1fr)); gap: 0 4rem; align-items: start; }
   .plain { list-style: none; padding: 0; }
-  .row-title { font-family: var(--font-head); font-weight: 600; color: var(--bright); }
+  .plain .row { display: block; }
+  .row-title { display: block; font-family: var(--font-head); font-weight: 600; color: var(--bright); }
+  /* commands wrap at spaces instead of scrolling the half-width column */
+  .below pre { white-space: pre-wrap; }
   .small { font-size: var(--fs-sm); max-width: var(--measure); }
-  .small code { word-break: break-all; }
 
   /* ── the project dashboard (rendered by the script above) ── */
   #dash :global(.dash-h) { margin-top: var(--sp-1); overflow-wrap: anywhere; }

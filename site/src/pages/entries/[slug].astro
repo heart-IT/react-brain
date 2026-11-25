@@ -6,7 +6,7 @@
 // key facts + sources → reading → watching → full explanation → related → prev/next.
 import Base from '../../layouts/Base.astro';
 import { corpus, downloads, fmtDownloads, track, docHtml, href, GITHUB, revisions, scorecard, siteMeta } from '../../lib/corpus.js';
-import { srcLabel, sourceType, relations, prevNext, groupOf, groupLabel, leadOption, optionEvidence, clip, splitWhen, paragraphs, ageDays } from '../../lib/entry.js';
+import { srcLabel, sourceType, relations, prevNext, groupOf, groupLabel, leadOption, optionEvidence, clip, splitWhen, noteParts, ageDays } from '../../lib/entry.js';
 import { urgencyLabel } from '../../lib/project.js';
 
 export function getStaticPaths() {
@@ -34,6 +34,7 @@ const when = e.recommend?.when || [];
 const lead = leadOption(e);
 const age = ageDays(e.updated, meta.built);
 const nSources = e.sources?.length || 0, nReading = e.reading?.length || 0, nWatching = e.watching?.length || 0;
+const notes = e.note ? noteParts(e.note) : null;
 
 const optEvidence = optionEvidence(e);
 const hasEvidence = optEvidence.some(Boolean);
@@ -151,7 +152,20 @@ const toc = [
   {(e.note || nSources > 0) && (
     <>
       <h2 id="notes" class="anc"><a class="h-anchor" data-pagefind-ignore href="#notes" aria-label="Copy link to Key facts">#</a>Key facts</h2>
-      {e.note && <div class="prose notes">{paragraphs(e.note).map((p) => <p>{p}</p>)}</div>}
+      {notes && notes.paras.length > 0 && <div class="prose notes">{notes.paras.map((p) => (
+        <div class="fact">
+          <p>{p.label && <><strong class="fact-k">{p.label}</strong>{p.when && <span class="meta"> {p.when}</span>}<br /></>}{p.text}</p>
+          {p.takeaway && <p class="fact-do"><span aria-hidden="true">→ </span>{p.takeaway}</p>}
+        </div>
+      ))}</div>}
+      {notes && notes.history.length > 0 && (
+        <details class="sure history" data-pagefind-ignore>
+          <summary>What changed on this page ({notes.history.length})</summary>
+          <ol>{notes.history.map((x) => (
+            <li>{x.date && <><time datetime={x.date} class="meta">{x.date}</time> <span class="meta hk">{x.kind}</span> </>}{x.text}</li>
+          ))}</ol>
+        </details>
+      )}
       {nSources > 0 && (
         <div class="sources" id="sources">
           <p class="rec-sub">sources</p>
@@ -396,6 +410,14 @@ const toc = [
   }
 
   .notes p { margin: 0 0 .9rem; max-width: var(--measure); }
+  .fact { margin: 0 0 var(--sp-6); max-width: var(--measure); }
+  .fact p { margin: 0; }
+  /* the source writes topic labels in capitals; tracked per caps rule, run-in above the text */
+  .fact-k { font: 600 var(--fs-xs)/1.5 var(--font-mono); letter-spacing: .04em; color: var(--bright); }
+  .fact .fact-do { margin-top: var(--sp-2); padding-left: var(--sp-3); border-left: 2px solid var(--accent); color: var(--bright); }
+  .history ol { list-style: none; padding: 0; margin: var(--sp-2) 0 0; max-width: var(--measure); }
+  .history li { padding: var(--sp-2) 0; border-top: 1px solid var(--line); font-size: var(--fs-sm); overflow-wrap: anywhere; }
+  .history .hk { color: var(--fg); }
   /* annotations quote API names / bare URLs that cannot break at 320px */
   .notes p, .small, .rec-when li, .essay :global(:is(p, li)) { overflow-wrap: anywhere; }
   .sources { margin: 1.2rem 0 0; padding-top: .2rem; }

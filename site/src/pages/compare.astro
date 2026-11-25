@@ -128,7 +128,9 @@ const topics = entries.filter((e) => (e.options || []).length >= 2).sort((a, b) 
   #cmp-out :global(.cols-3) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   @media (max-width: 760px) { #cmp-out :global(.cmp-grid) { grid-template-columns: minmax(0, 1fr); } }
   #cmp-out :global(.cmp-col) { background: var(--card); border: 1px solid var(--line-strong); border-radius: var(--radius-md); padding: var(--sp-4); min-width: 0; }
-  #cmp-out :global(.cmp-col.is-lead) { border-top: 3px solid var(--ok); }
+  /* every column carries the 3px top edge so headings line up; only our pick colors it */
+  #cmp-out :global(.cmp-col) { border-top-width: 3px; }
+  #cmp-out :global(.cmp-col.is-lead) { border-top-color: var(--ok); }
   #cmp-out :global(.cmp-name) { margin: 0; font-size: var(--fs-lg); overflow-wrap: anywhere; }
   #cmp-out :global(.cmp-name::before) { content: none; }
   #cmp-out :global(.cmp-tag) { margin: 0 0 var(--sp-3); }
