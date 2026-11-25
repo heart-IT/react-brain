@@ -5,8 +5,8 @@
 // status, calibration, forecast, evidence counts) → other options → upgrade path →
 // key facts + sources → reading → watching → full explanation → related → prev/next.
 import Base from '../../layouts/Base.astro';
-import { corpus, downloads, fmtDownloads, track, docHtml, href, GITHUB, census, revisions, scorecard, siteMeta } from '../../lib/corpus.js';
-import { srcLabel, sourceType, relations, prevNext, groupOf, groupLabel, leadOption, clip, splitWhen, paragraphs, ageDays } from '../../lib/entry.js';
+import { corpus, downloads, fmtDownloads, track, docHtml, href, GITHUB, revisions, scorecard, siteMeta } from '../../lib/corpus.js';
+import { srcLabel, sourceType, relations, prevNext, groupOf, groupLabel, leadOption, optionEvidence, clip, splitWhen, paragraphs, ageDays } from '../../lib/entry.js';
 import { urgencyLabel } from '../../lib/project.js';
 
 export function getStaticPaths() {
@@ -35,20 +35,7 @@ const lead = leadOption(e);
 const age = ageDays(e.updated, meta.built);
 const nSources = e.sources?.length || 0, nReading = e.reading?.length || 0, nWatching = e.watching?.length || 0;
 
-// per-option evidence: map option → detect label (fuzzy) → census adoption + npm downloads
-const cen = census();
-const agg = cen?.agg?.[id] || null;
-const optEvidence = (e.options || []).map((o) => {
-  const on = o.name.toLowerCase().replace(/\s*\(.*/, '');
-  const d = (e.detect || []).find((x) => {
-    const l = x.label.toLowerCase().replace(/\s*\(.*/, '');
-    return l.length > 2 && (on.includes(l) || l.includes(on));
-  });
-  if (!d) return null;
-  const ships = agg?.labels?.[d.label] ?? null;
-  const wk = !d.pkg.includes('*') ? (dl[d.pkg] ?? null) : null;
-  return ships != null || wk != null ? { ships, denom: agg?.denom ?? null, wk } : null;
-});
+const optEvidence = optionEvidence(e);
 const hasEvidence = optEvidence.some(Boolean);
 const evText = (ev) => ev ? [
   ev.wk != null ? `${fmtDownloads(ev.wk)}/wk` : null,
@@ -126,7 +113,7 @@ const toc = [
   </nav>
 
   <h2 id="options" class="anc"><a class="h-anchor" data-pagefind-ignore href="#options" aria-label="Copy link to Options compared">#</a>Options compared</h2>
-  <p class="meta lede">what else we looked at, and the tradeoff of each</p>
+  <p class="meta lede">what else we looked at, and the tradeoff of each{(e.options || []).length >= 2 && <Fragment> · <a href={href(`compare/?topic=${e.slug}`)}>compare side by side →</a></Fragment>}</p>
   <div class="tbl"><table class="opts">
     <thead><tr><th scope="col">option</th><th scope="col">tradeoff</th>{hasEvidence && <th scope="col">evidence</th>}</tr></thead>
     <tbody>{(e.options || []).map((o, i) => (

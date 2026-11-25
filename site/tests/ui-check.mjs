@@ -29,6 +29,8 @@ async function listPages() {
 const STATES = {
   'doctor/': { label: 'after sample run', run: async (page) => { await page.click('#sample'); await page.waitForSelector('#out table', { timeout: 10_000 }); } },
   'decide/': { label: 'after generate', run: async (page) => { await page.click('#gen'); await page.waitForSelector('#out pre', { timeout: 10_000 }); } },
+  'entries/': { label: 'palette open', run: async (page) => { await page.keyboard.press('Control+K'); await page.waitForSelector('#palette:not([hidden])', { timeout: 5_000 }); await page.keyboard.type('should I use zustand or jotai?'); await page.waitForSelector('#pal-list .pal-item', { timeout: 5_000 }); await page.waitForTimeout(300); } },
+  'compare/': { label: 'three options', run: async (page) => { await page.waitForSelector('.cmp-col', { timeout: 10_000 }); await page.click('#cmp-opts .chip[aria-pressed="false"]'); await page.waitForSelector('.cols-3', { timeout: 5_000 }); } },
   '': { label: 'console open', run: async (page) => { await page.keyboard.press('Control+J'); await page.waitForSelector('#console:not([hidden])', { timeout: 5_000 }); await page.keyboard.type('help'); await page.keyboard.press('Enter'); await page.waitForTimeout(300); } },
 };
 const WIDTHS = [320, 360, 820, 1440];

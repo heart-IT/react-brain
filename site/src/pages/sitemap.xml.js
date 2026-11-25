@@ -10,7 +10,7 @@ const pages = import.meta.glob('./**/*.astro');
 export function GET({ site }) {
   const { entries } = corpus();
   const statics = Object.keys(pages)
-    .filter((f) => !f.includes('[') && !/\/404\.astro$/.test(f))
+    .filter((f) => !f.includes('[') && !/\/(404|offline)\.astro$/.test(f))
     .map((f) => f.replace(/^\.\//, '').replace(/\.astro$/, '').replace(/(^|\/)index$/, '$1'))
     .map((r) => (r && !r.endsWith('/') ? r + '/' : r));
   const routes = [

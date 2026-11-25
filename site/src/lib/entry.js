@@ -1,7 +1,7 @@
 // Decision-page helpers — pure functions over corpus() data, shared by
 // entries/[slug].astro (and anything else that renders one entry). No I/O here:
 // every input comes from the corpus loader, so the page stays a rendering.
-import { corpus } from './corpus.js';
+import { corpus, census, downloads } from './corpus.js';
 
 const DAY = 864e5;
 
@@ -94,6 +94,24 @@ export function leadOption(e) {
     }
   }
   return best || opts[0] || null;
+}
+
+// Per-option evidence: option → its detect row (fuzzy name match) → npm weekly
+// downloads + adoption across the production-app census. null when nothing maps.
+export function optionEvidence(e) {
+  const dl = downloads();
+  const agg = census()?.agg?.[e.id] || null;
+  return (e.options || []).map((o) => {
+    const on = o.name.toLowerCase().replace(/\s*\(.*/, '');
+    const d = (e.detect || []).find((x) => {
+      const l = x.label.toLowerCase().replace(/\s*\(.*/, '');
+      return l.length > 2 && (on.includes(l) || l.includes(on));
+    });
+    if (!d) return null;
+    const ships = agg?.labels?.[d.label] ?? null;
+    const wk = !d.pkg.includes('*') ? (dl[d.pkg] ?? null) : null;
+    return ships != null || wk != null ? { pkg: d.pkg, ships, denom: agg?.denom ?? null, wk } : null;
+  });
 }
 
 export const clip = (s, n) => {

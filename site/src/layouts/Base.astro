@@ -38,17 +38,25 @@ const under = (p) => path.startsWith(href(p));
 const SECTIONS = [
   { to: 'doctor/', label: 'Check my app', owns: ['doctor/', 'decide/'] },
   { to: 'stack/', label: 'New app', owns: ['stack/'] },
-  { to: 'entries/', label: 'Topics', owns: ['entries/', 'libraries/', 'reading/', 'newsletter/'] },
+  { to: 'entries/', label: 'Topics', owns: ['entries/', 'libraries/', 'compare/', 'reading/', 'newsletter/'] },
   { to: 'methodology/', label: 'How we know', owns: ['scorecard/', 'census/', 'benchmark/', 'methodology/', 'changelog/', 'architecture/', 'roadmap/'] },
 ];
 const activeSection = SECTIONS.find((s) => s.owns.some(under))?.label ?? null;
 
 const groupLabel = (g) => g.label.split(' — ')[0].split(' (')[0];
 const toolLinks = [
+  { to: 'compare/', label: 'Compare options' },
   { to: 'libraries/', label: 'Library browser' },
   { to: 'decide/', label: 'Write a decision record' },
   { to: 'reading/', label: 'Reading list' },
   { to: 'newsletter/', label: 'Newsletter issues' },
+];
+// the mobile tab bar (≤640px): the app's four places + the palette
+const TABS = [
+  { to: '', label: 'Home', icon: 'M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z', on: path === href('') },
+  { to: 'doctor/', label: 'Check', icon: 'M3 12h4l3-8 4 16 3-8h4', on: under('doctor/') || under('decide/') },
+  { to: 'entries/', label: 'Topics', icon: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z', on: under('entries/') || under('libraries/') || under('reading/') },
+  { to: 'compare/', label: 'Compare', icon: 'M4 4h6v16H4zM14 4h6v16h-6z', on: under('compare/') },
 ];
 const aboutLinks = [
   { to: 'scorecard/', label: 'Track record' },
@@ -79,6 +87,8 @@ const aboutLinks = [
   <link rel="sitemap" type="application/xml" href={href('sitemap.xml')} />
   <link rel="icon" type="image/png" sizes="32x32" href={href('favicon-32.png')} />
   <link rel="apple-touch-icon" href={href('apple-touch-icon.png')} />
+  <link rel="manifest" href={href('manifest.webmanifest')} />
+  <meta name="theme-color" content="#0A0A0A" />
   <link rel="preload" href={interUrl} as="font" type="font/woff2" crossorigin />
   <link rel="preload" href={monoUrl} as="font" type="font/woff2" crossorigin />
   <style set:html={fontFaces}></style>
@@ -99,7 +109,7 @@ const aboutLinks = [
         {SECTIONS.map((s) => (
           <a class={`sec${activeSection === s.label ? ' active' : ''}`} href={href(s.to)} aria-current={activeSection === s.label ? (path === href(s.to) ? 'page' : 'true') : undefined}>{s.label}</a>
         ))}
-        <a class="search-link" href={href('search/')}>search</a>
+        <a class="search-link" href={href('search/')} data-open-palette>search</a>
         <a class="gh" href={GITHUB} rel="noopener" aria-label="GitHub repository" title="GitHub">
           <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
         </a>
@@ -178,6 +188,33 @@ const aboutLinks = [
     </div>
   </div>
 
+  <nav class="tabbar" aria-label="App" data-pagefind-ignore>
+    {TABS.map((t) => (
+      <a class={t.on ? 'on' : undefined} href={href(t.to)} aria-current={t.on ? 'page' : undefined}>
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d={t.icon} /></svg>
+        <span>{t.label}</span>
+      </a>
+    ))}
+    <a href={href('search/')} data-open-palette>
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5" /><path d="m20 20-4.2-4.2" /></svg>
+      <span>Search</span>
+    </a>
+  </nav>
+
+  <div id="palette" hidden>
+    <div class="pal-scrim"></div>
+    <div class="pal-box" role="dialog" aria-modal="true" aria-label="Search or ask">
+      <div class="pal-field">
+        <span class="prompt" aria-hidden="true">❯</span>
+        <input id="pal-in" type="text" role="combobox" aria-expanded="true" aria-controls="pal-list" aria-autocomplete="list"
+          autocomplete="off" spellcheck="false" placeholder="ask — “should I use zustand?”, “forms”, “compare jotai zustand”" aria-label="Search or ask" />
+        <kbd>esc</kbd>
+      </div>
+      <ul id="pal-list" role="listbox" aria-label="Results"></ul>
+      <p class="pal-foot meta"><kbd>↑</kbd> <kbd>↓</kbd> move · <kbd>enter</kbd> open · <kbd>esc</kbd> close</p>
+    </div>
+  </div>
+
   <div id="console" hidden>
     <div class="console-scrim"></div>
     <div class="console-box" role="dialog" aria-modal="true" aria-label="react-brain console">
@@ -233,30 +270,35 @@ const aboutLinks = [
     // honest shortcut hints per platform (the ⌘ glyph is Mac-only)
     if (!/Mac|iPhone|iPad/.test(navigator.platform))
       for (const k of document.querySelectorAll('.search kbd, .console-link kbd')) k.textContent = k.textContent.replace('⌘', 'Ctrl ');
-    // ⌘K / Ctrl-K focuses the header search (Enter submits to search/); where the
-    // field is hidden (narrow screens) it opens the search page instead. Escape in
-    // the field blurs it and returns focus where it was. ⌘J (console) is console.js.
+    // ⌘K opens the palette (lib/palette.js) — except on the search page, where it
+    // focuses the page's own field (#q). Escape in that field blurs it and returns
+    // focus where it was. ⌘J (console) is console.js.
     (() => {
-      // on the search page the page's own field (#q) is the better target
-      const q = document.getElementById('q') || document.getElementById('nav-q');
+      const q = document.getElementById('q');
+      if (!q) return;
       let back = null;
       document.addEventListener('keydown', (e) => {
         if ((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'k') {
           e.preventDefault();
           const con = document.getElementById('console');
           if (con && !con.hidden) con.hidden = true;   // search wins over an open console; never focus behind a modal
-          if (q && q.offsetParent !== null) { if (document.activeElement !== q) back = document.activeElement; q.focus(); q.select(); }
-          else location.href = document.body.dataset.base + 'search/';
+          if (document.activeElement !== q) back = document.activeElement;
+          q.focus(); q.select();
         }
       });
-      q?.addEventListener('keydown', (e) => {
+      q.addEventListener('keydown', (e) => {
         if (e.key !== 'Escape') return;
         q.blur();
         if (back && back !== document.body && document.contains(back)) back.focus?.();
         back = null;
       });
     })();
+    // installable + offline: the service worker (sw.js) caches the app shell and topics
+    if ('serviceWorker' in navigator) addEventListener('load', () => {
+      navigator.serviceWorker.register(document.body.dataset.base + 'sw.js', { scope: document.body.dataset.base }).catch(() => {});
+    });
   </script>
+  <script>import '../lib/palette.js';</script>
 
 </body>
 </html>
@@ -561,6 +603,40 @@ const aboutLinks = [
   ::selection { background: var(--accent); color: var(--on-primary); }
   * { scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
 
+  /* ── the palette (⌘K) ─────────────────────────────────────────────────── */
+  #palette { position: fixed; inset: 0; z-index: 50; }
+  .pal-scrim { position: absolute; inset: 0; background: color-mix(in srgb, var(--bg) 55%, transparent); backdrop-filter: blur(3px); }
+  .pal-box { position: relative; max-width: 40rem; margin: 9vh auto 0; background: var(--code-bg); border: 1px solid var(--line-strong); border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-overlay); display: flex; flex-direction: column; max-height: 76vh; overflow: hidden; }
+  @media (max-width: 640px) { .pal-box { margin: var(--sp-2); max-height: calc(100vh - 1rem); } }
+  .pal-field { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--line); }
+  #pal-in { flex: 1; min-width: 0; background: none; border: 0; color: var(--fg); font: 400 var(--fs-md) var(--font-mono); padding: var(--sp-1) 0; }
+  #pal-in:focus { outline: none; box-shadow: none; }
+  #pal-list { list-style: none; margin: 0; padding: var(--sp-1); overflow-y: auto; flex: 1; }
+  .pal-item { display: grid; grid-template-columns: 5.5rem minmax(0, 1fr); gap: var(--sp-3); align-items: baseline; margin: 0; padding: var(--sp-2) var(--sp-3); border-radius: var(--radius-sm); cursor: pointer; min-height: 24px; }
+  .pal-item[aria-selected="true"] { background: var(--card); box-shadow: inset 2px 0 0 var(--accent); }
+  .pal-item:hover { background: var(--card); }
+  .pal-kind { font: 500 var(--fs-xs) var(--font-mono); color: var(--muted); }
+  .pal-main { min-width: 0; overflow-wrap: anywhere; }
+  .pal-title { color: var(--bright); font-weight: 600; font-size: var(--fs-sm); }
+  .pal-item[aria-selected="true"] .pal-title { color: var(--accent); }
+  .pal-sub { color: var(--muted); font-size: var(--fs-xs); }
+  .pal-detail { display: block; color: var(--muted); font-size: var(--fs-xs); margin-top: .1rem; }
+  @media (max-width: 480px) { .pal-item { grid-template-columns: minmax(0, 1fr); gap: 0; } }
+  .pal-foot { margin: 0; padding: var(--sp-2) var(--sp-4); border-top: 1px solid var(--line); }
+  @media (hover: none) { .pal-foot { display: none; } }
+
+  /* ── mobile tab bar ──────────────────────────────────────────────────── */
+  .tabbar { display: none; }
+  @media (max-width: 640px) {
+    .tabbar { display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; inset: auto 0 0 0; z-index: 6;
+      background: color-mix(in srgb, var(--bg) 94%, transparent); backdrop-filter: blur(8px); border-top: 1px solid var(--line);
+      padding-bottom: env(safe-area-inset-bottom); }
+    .tabbar a { display: flex; flex-direction: column; align-items: center; gap: .15rem; padding: var(--sp-2) 0; min-height: 52px; color: var(--muted); text-decoration: none; font: 500 var(--fs-xs) var(--font-mono); }
+    .tabbar a.on { color: var(--accent); }
+    .content { padding-bottom: calc(60px + env(safe-area-inset-bottom)); }
+  }
+
   /* ── the console (⌘J) ─────────────────────────────────────────────────── */
   #console { position: fixed; inset: 0; z-index: 50; }
   .console-scrim { position: absolute; inset: 0; background: color-mix(in srgb, var(--bg) 55%, transparent); backdrop-filter: blur(3px); }
@@ -583,7 +659,7 @@ const aboutLinks = [
     :root { --bg: #fff; --card: #f5f7f9; --code-bg: #f5f7f9; --line: #c8ccd2; --line-strong: #9aa1a9;
       --fg: #111; --bright: #000; --muted: #444; --accent: #0645ad; }
     html { color-scheme: light; }
-    header, aside, .mobile-nav, footer, .copy-btn, .skip, .search { display: none !important; }
+    header, aside, .mobile-nav, footer, .copy-btn, .skip, .search, .tabbar { display: none !important; }
     .shell { display: block; }
     a { text-decoration: underline; }
     h1 { background: none; color: var(--bright); -webkit-text-fill-color: initial; }

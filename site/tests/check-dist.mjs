@@ -212,13 +212,25 @@ else if (!/^Sitemap:\s*https?:\/\/\S+sitemap\.xml\s*$/im.test(readFileSync(robot
 // lazily-fetched data islands must exist and parse (the doctor, console and decide fetch them)
 // Each has a byte budget (KB) so a growing corpus slice can't silently become a
 // multi-megabyte download — ratchet down, never up.
-const DATA_BUDGET_KB = { 'doctor-data.json': 128, 'console-data.json': 512, 'decide-data.json': 256 };
+const DATA_BUDGET_KB = { 'doctor-data.json': 128, 'console-data.json': 512, 'decide-data.json': 256, 'palette-data.json': 64, 'compare-data.json': 192, 'manifest.webmanifest': 4 };
 for (const [f, kb] of Object.entries(DATA_BUDGET_KB)) {
   const p = join(DIST, f);
   if (!existsSync(p)) { fail('data', f, 'missing'); continue; }
   try { JSON.parse(readFileSync(p, 'utf8')); } catch (e) { fail('data', f, `invalid JSON: ${e.message}`); }
   const size = statSync(p).size;
   if (size > kb * 1024) fail('data', f, `${(size / 1024).toFixed(0)} KB > ${kb} KB budget`);
+}
+
+// the installable app: the service worker exists and every URL it precaches is in dist/
+const swPath = join(DIST, 'sw.js');
+if (!existsSync(swPath)) fail('pwa', 'sw.js', 'missing');
+else {
+  const sw = readFileSync(swPath, 'utf8');
+  for (const name of ['CORE', 'TOPICS']) {
+    const m = sw.match(new RegExp(`const ${name} = (\\[[^\\n]*\\]);`));
+    if (!m) { fail('pwa', 'sw.js', `no ${name} list`); continue; }
+    for (const u of JSON.parse(m[1])) { const t = target(join(DIST, 'index.html'), u); if (t.outside || !t.file) fail('pwa', 'sw.js', `${name}: ${u} is not in dist/`); }
+  }
 }
 
 // ── report ──

@@ -1,0 +1,140 @@
+---
+// Compare: two or three options of one topic side by side — tradeoff, when we'd
+// pick each, and the evidence (npm downloads, production-app census). Rendered in
+// the browser from compare-data.json; the URL carries the state
+// (?topic=state&o=Zustand,Jotai — option names, matched loosely) so a comparison
+// can be shared. Without JS the topic list still links to each topic's options.
+import Base from '../layouts/Base.astro';
+import { corpus, href, BASE } from '../lib/corpus.js';
+const { entries } = corpus();
+const topics = entries.filter((e) => (e.options || []).length >= 2).sort((a, b) => a.topic.localeCompare(b.topic));
+---
+<Base title="Compare options" description="Two or three options for the same React or React Native decision, side by side: tradeoffs, when each is the right pick, npm downloads and adoption in production apps.">
+  <h1>Compare options</h1>
+  <p class="muted prose">Pick a topic, then up to three options. Each column shows the tradeoff, when we would
+  choose it, and how widely it is used.</p>
+
+  <div id="cmp" data-base={BASE}>
+    <p class="cmp-topic">
+      <label for="cmp-topic" class="label-caps">topic</label>
+      <select id="cmp-topic">
+        {topics.map((e) => <option value={e.slug}>{e.topic}</option>)}
+      </select>
+    </p>
+    <div class="chips" id="cmp-opts" role="group" aria-label="Options to compare"></div>
+    <p id="cmp-status" class="meta" role="status" aria-live="polite"></p>
+    <div id="cmp-out"></div>
+  </div>
+
+  <noscript>
+    <ul class="rows plain">
+      {topics.map((e) => <li><a href={href(`entries/${e.slug}/#options`)}>{e.topic}</a></li>)}
+    </ul>
+  </noscript>
+
+  <script>
+    const root = document.getElementById('cmp');
+    const BASE = root.dataset.base || '/';
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const fmt = (n) => (n >= 1e6 ? `${(n / 1e6).toFixed(1)}M` : n >= 1e3 ? `${Math.round(n / 1e3)}k` : String(n));
+    const MAX = 3;
+    // "Zustand (v5)" → "zustand"; "Redux Toolkit / RTK" → ["redux toolkit", "rtk"]
+    const names = (o) => o.name.toLowerCase().replace(/\s*\(.*?\)/g, '').split(/\s*[/+]\s*/).map((s) => s.trim()).filter((s) => s.length > 1);
+    const matches = (o, q) => { q = q.toLowerCase().trim(); return names(o).some((n) => n === q || n.includes(q) || q.includes(n)); };
+
+    let data = null, topic = null, picked = [];
+
+    function syncUrl() {
+      const u = new URL(location.href);
+      u.searchParams.set('topic', topic.slug);
+      u.searchParams.set('o', picked.map((i) => topic.options[i].name).join(','));
+      history.replaceState(null, '', u);
+    }
+
+    function chooseTopic(slug, wanted = []) {
+      topic = data.topics.find((t) => t.slug === slug) || data.topics[0];
+      $('cmp-topic').value = topic.slug;
+      picked = [];
+      for (const w of wanted) {
+        const i = topic.options.findIndex((o, j) => !picked.includes(j) && matches(o, w));
+        if (i >= 0 && picked.length < MAX) picked.push(i);
+      }
+      if (picked.length < 2) {
+        // default: our pick plus the next option
+        const lead = topic.options.findIndex((o) => o.lead);
+        for (const i of [lead, ...topic.options.keys()]) if (i >= 0 && !picked.includes(i) && picked.length < 2) picked.push(i);
+      }
+      render();
+    }
+
+    function render() {
+      $('cmp-opts').innerHTML = topic.options.map((o, i) =>
+        `<button type="button" class="chip" data-i="${i}" aria-pressed="${picked.includes(i)}">${esc(o.name)}${o.lead ? ' · our pick' : ''}</button>`).join('');
+      for (const b of $('cmp-opts').querySelectorAll('button')) b.addEventListener('click', () => {
+        const i = Number(b.dataset.i);
+        if (picked.includes(i)) { if (picked.length > 1) picked = picked.filter((x) => x !== i); }
+        else if (picked.length < MAX) picked.push(i);
+        else { $('cmp-status').textContent = `up to ${MAX} at a time — deselect one first`; return; }
+        $('cmp-status').textContent = '';
+        render();
+      });
+
+      const cols = picked.map((i) => topic.options[i]);
+      $('cmp-out').innerHTML = `<div class="cmp-grid cols-${cols.length}">` + cols.map((o) => {
+        const when = topic.when.filter((w) => names(o).some((n) => w.pick.toLowerCase().includes(n)));
+        const ev = o.ev;
+        return `<section class="cmp-col${o.lead ? ' is-lead' : ''}" aria-label="${esc(o.name)}">` +
+          `<h2 class="cmp-name">${esc(o.name)}</h2>` +
+          (o.lead ? '<p class="meta mark-ok cmp-tag">our pick</p>'
+            : o.named ? '<p class="meta mark-warn cmp-tag">named in our recommendation — read it below</p>'
+            : '<p class="meta cmp-tag">alternative</p>') +
+          `<h3 class="label-caps">tradeoff</h3><p class="cmp-p">${esc(o.tradeoff || '—')}</p>` +
+          '<h3 class="label-caps">pick it when</h3>' +
+          (o.lead ? `<p class="cmp-p">it is our default for most apps${when.length ? ', and:' : '.'}</p>` : '') +
+          (when.length ? '<ul class="cmp-when">' + when.map((w) => `<li>${esc(w.ctx || w.pick)}</li>`).join('') + '</ul>'
+            : o.lead ? '' : '<p class="cmp-p muted">not named in our recommendation — see the tradeoff.</p>') +
+          '<h3 class="label-caps">usage</h3><p class="cmp-p meta">' +
+          (ev ? [ev.wk != null ? `${fmt(ev.wk)} npm downloads / week` : null,
+                 ev.ships != null ? `in ${ev.ships} of ${ev.denom} production apps we track` : null].filter(Boolean).join('<br>') : 'no usage data') +
+          '</p></section>';
+      }).join('') + '</div>' +
+        `<p class="cmp-pick"><span class="label-caps">our recommendation</span> ${esc(topic.def)}</p>` +
+        `<p class="meta cmp-foot"><a href="${BASE}entries/${topic.slug}/">${esc(topic.topic)}: full page with sources →</a></p>`;
+      syncUrl();
+    }
+
+    $('cmp-topic').addEventListener('change', (e) => chooseTopic(e.target.value));
+
+    $('cmp-status').textContent = 'loading…';
+    fetch(`${BASE}compare-data.json`).then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+      .then((d) => {
+        data = d;
+        $('cmp-status').textContent = '';
+        const q = new URLSearchParams(location.search);
+        chooseTopic(q.get('topic') || 'state', (q.get('o') || '').split(',').filter(Boolean));
+      })
+      .catch((err) => { $('cmp-status').textContent = `Could not load the comparison data (${err.message}).`; });
+  </script>
+</Base>
+
+<style>
+  .cmp-topic { display: flex; flex-direction: column; gap: var(--sp-1); align-items: flex-start; }
+  .cmp-topic select { max-width: 100%; }
+  .chips { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin: var(--sp-3) 0; }
+  .plain { list-style: none; padding: 0; }
+  #cmp-out :global(.cmp-grid) { display: grid; gap: var(--sp-4); margin-top: var(--sp-4); }
+  #cmp-out :global(.cols-2) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #cmp-out :global(.cols-3) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  @media (max-width: 760px) { #cmp-out :global(.cmp-grid) { grid-template-columns: minmax(0, 1fr); } }
+  #cmp-out :global(.cmp-col) { background: var(--card); border: 1px solid var(--line-strong); border-radius: var(--radius-md); padding: var(--sp-4); min-width: 0; }
+  #cmp-out :global(.cmp-col.is-lead) { border-top: 3px solid var(--ok); }
+  #cmp-out :global(.cmp-name) { margin: 0; font-size: var(--fs-lg); overflow-wrap: anywhere; }
+  #cmp-out :global(.cmp-name::before) { content: none; }
+  #cmp-out :global(.cmp-tag) { margin: 0 0 var(--sp-3); }
+  #cmp-out :global(.cmp-col h3) { margin: var(--sp-4) 0 var(--sp-1); }
+  #cmp-out :global(.cmp-p) { margin: 0; font-size: var(--fs-sm); overflow-wrap: anywhere; }
+  #cmp-out :global(.cmp-when) { margin: var(--sp-1) 0 0; padding-left: 1.1rem; font-size: var(--fs-sm); overflow-wrap: anywhere; }
+  #cmp-out :global(.cmp-foot) { margin-top: var(--sp-4); }
+  #cmp-out :global(.cmp-pick) { margin: var(--sp-4) 0 0; max-width: var(--measure); font-size: var(--fs-sm); }
+</style>

@@ -1,0 +1,20 @@
+---
+// Served by the service worker (sw.js) for a page that isn't cached while offline.
+import Base from '../layouts/Base.astro';
+import { href } from '../lib/corpus.js';
+---
+<Base title="Offline" description="You're offline — the topics and tools you've used are still available.">
+  <h1>You’re offline</h1>
+  <p class="muted prose">This page hasn’t been saved on this device yet. Everything below works without a connection:
+  every topic page, your project dashboard, and Check my app.</p>
+  <ul class="rows plain">
+    <li><a href={href('')}>Home · your project</a></li>
+    <li><a href={href('entries/')}>All topics</a></li>
+    <li><a href={href('doctor/')}>Check my app</a></li>
+    <li><a href={href('compare/')}>Compare options</a></li>
+  </ul>
+</Base>
+
+<style>
+  .plain { list-style: none; padding: 0; }
+</style>
