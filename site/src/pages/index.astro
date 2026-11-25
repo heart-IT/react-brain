@@ -26,24 +26,28 @@ const moreFindings = demo.steps.length - (finding ? 1 : 0);
 const nextSlug = finding?.slug ?? demo.fits[0]?.slug ?? 'state';
 // Rendered as one HTML string: JSX expressions inside <pre> lose their whitespace.
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+// One block per report line, indented by class (not leading spaces) so a line that
+// wraps on a phone stays under its indent instead of snapping back to column 0.
+const ln = (html = '', cls = '') => `<span class="ln${cls ? ' ' + cls : ''}">${html || ' '}</span>`;
 const demoHtml = [
-  `<span class="t-p">❯</span> check ${esc(demo.name)}/package.json`,
-  '',
-  `<span class="t-dim">${esc(demo.name)} · ${demo.platform} · ${demo.depCount} deps · ${demo.fits.length} choices found</span>`,
-  '',
-  ...fitRows.map((f) => `  ${f.slug.padEnd(12)} ${esc(clip(f.choice, 18).padEnd(18))} <span class="${fitCls(f.fit)}">${esc(fitGlyph(f.fit))}</span>`),
+  ln(`<span class="t-p">❯</span> check ${esc(demo.name)}/package.json`),
+  ln(),
+  ln(`<span class="t-dim">${esc(demo.name)} · ${demo.platform} · ${demo.depCount} deps · ${demo.fits.length} choices found</span>`),
+  ln(),
+  // the verdict is its own block on narrow screens: it drops under the row, indented
+  ...fitRows.map((f) => ln(`${f.slug.padEnd(12)} ${esc(clip(f.choice, 18).padEnd(18))} <span class="fit-v ${fitCls(f.fit)}">${esc(fitGlyph(f.fit))}</span>`, 'i2')),
   ...(finding ? [
-    '',
-    `  <span class="t-warn">✗ ${esc(urgencyLabel(finding.urgency))}</span>  ${esc(finding.name)} ${esc(finding.installed)}`,
-    // ≤ 56 columns so the widest line fits the hero column without a scrollbar
-    `     → ${esc(clip(finding.to, 48))}`,
-    `     <span class="t-dim">effort ${esc(finding.effort)} · source:</span> ` +
-      (finding.receipts[0] ? `<a href="${esc(finding.receipts[0])}" rel="noopener">${esc(hostOf(finding.receipts[0]))}</a>` : '<span class="t-dim">none</span>'),
+    ln(),
+    ln(`<span class="t-warn">✗ ${esc(urgencyLabel(finding.urgency))}</span>  <span class="nw">${esc(finding.name)}</span> ${esc(finding.installed)}`, 'i2 hang'),
+    // ≤ 56 columns so the widest line fits the desktop hero column unwrapped
+    ln(`→ ${esc(clip(finding.to, 48))}`, 'i5 hang'),
+    ln(`<span class="t-dim">effort ${esc(finding.effort)} · source:</span> ` +
+      (finding.receipts[0] ? `<a href="${esc(finding.receipts[0])}" rel="noopener">${esc(hostOf(finding.receipts[0]))}</a>` : '<span class="t-dim">none</span>'), 'i5'),
   ] : []),
-  '',
-  `<span class="t-dim">+ ${moreFindings} more to fix · ${demo.gaps.length} not decided yet</span>`,
-  `<span class="t-p">next:</span> <a href="${href(`entries/${nextSlug}/`)}">entries/${nextSlug}</a>`,
-].join('\n');
+  ln(),
+  ln(`<span class="t-dim">+ ${moreFindings} more to fix · ${demo.gaps.length} not decided yet</span>`),
+  ln(`<span class="t-p">next:</span> <a href="${href(`entries/${nextSlug}/`)}">entries/${nextSlug}</a>`),
+].join('');
 
 const cal = m.calibration;
 const tasks = [
@@ -251,7 +255,16 @@ const recent = [...entries].sort((a, b) => String(b.updated).localeCompare(Strin
   .trust a:hover { color: var(--accent); }
 
   .demo { margin: 0; min-width: 0; }
-  .demo pre { white-space: pre; }
+  /* wraps instead of scrolling; at desktop widths every line fits, so nothing wraps */
+  .demo pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+  .demo :global(.ln) { display: block; }
+  .demo :global(.i2) { padding-left: 2ch; }
+  .demo :global(.i5) { padding-left: 5ch; }
+  .demo :global(.i2.hang) { padding-left: 4ch; text-indent: -2ch; }
+  .demo :global(.i5.hang) { padding-left: 7ch; text-indent: -2ch; }
+  .demo :global(.nw) { white-space: nowrap; }
+  /* below ~52 columns the fit rows can't hold the verdict: it moves to its own line */
+  @media (max-width: 520px) { .demo :global(.fit-v) { display: block; padding-left: 2ch; } }
   .demo pre a { color: var(--accent); }
   .demo figcaption { text-align: center; margin-top: .5rem; }
 
