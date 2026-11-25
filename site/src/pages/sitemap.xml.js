@@ -4,6 +4,7 @@
 // the page files themselves (so a new page can't be forgotten); dynamic routes
 // from the same loaders their getStaticPaths use.
 import { corpus, newsletterIssues, href } from '../lib/corpus.js';
+import { readingGroups } from '../lib/entry.js';
 
 const pages = import.meta.glob('./**/*.astro');
 
@@ -17,6 +18,7 @@ export function GET({ site }) {
     ...statics.map((r) => ({ path: r })),
     ...entries.map((e) => ({ path: `entries/${e.slug}/`, lastmod: String(e.updated || '') })),
     ...newsletterIssues().map((i) => ({ path: `newsletter/${i.slug}/`, lastmod: String(i.date || '') })),
+    ...readingGroups().map((g) => ({ path: `reading/${g.id}/` })),
   ];
   const urls = routes.sort((a, b) => a.path.localeCompare(b.path)).map(({ path, lastmod }) =>
     `  <url><loc>${new URL(href(path), site).href}</loc>${/^\d{4}-\d{2}-\d{2}$/.test(lastmod || '') ? `<lastmod>${lastmod}</lastmod>` : ''}</url>`);

@@ -114,6 +114,16 @@ export function optionEvidence(e) {
   });
 }
 
+// The reading list, grouped: groups that have readings, each with its topics and counts.
+export function readingGroups() {
+  const { groups, byId } = corpus();
+  return groups.map((g) => {
+    const topics = g.entries.map((id) => byId[id]).filter((e) => e?.reading?.length)
+      .map((e) => ({ slug: e.slug, topic: e.topic, count: e.reading.length }));
+    return { id: g.id, label: g.label, short: groupLabel(g), entries: g.entries, topics, count: topics.reduce((n, t) => n + t.count, 0) };
+  }).filter((g) => g.count);
+}
+
 export const clip = (s, n) => {
   const t = String(s || '').trim();
   if (t.length <= n) return t;

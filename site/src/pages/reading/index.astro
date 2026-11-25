@@ -1,0 +1,33 @@
+---
+// The reading list's overview: every group and topic with its count. The readings
+// themselves, annotations in full, live one page per group (reading/<group>/).
+import Base from '../../layouts/Base.astro';
+import { href } from '../../lib/corpus.js';
+import { readingGroups } from '../../lib/entry.js';
+const groups = readingGroups();
+const count = groups.reduce((n, g) => n + g.count, 0);
+---
+<Base title="Reading list" description={`${count} fetch-verified deep-dives on React and React Native, each annotated with why it matters — organized by the decision it informs.`}>
+  <h1>Reading list</h1>
+  <p class="muted intro">{count} deep-dives, every one fetch-verified and annotated with <em>why it matters</em> —
+  organized by the decision it informs, not by publish date. The annotations are our editorial take; <strong>the articles are the originals — read them there.</strong> A piece lands here only if it's the
+  canonical explanation for its topic; how-to content routes to depth skills instead.</p>
+  {groups.map((g) => (
+    <section aria-labelledby={`h-${g.id}`}>
+      <h2 id={`h-${g.id}`}><a href={href(`reading/${g.id}/`)}>{g.short}</a> <span class="meta">{g.count} readings</span></h2>
+      <ul class="topics">
+        {g.topics.map((t) => (
+          <li><a href={href(`reading/${g.id}/#${t.slug}`)}>{t.topic}</a> <span class="meta">{t.count}</span></li>
+        ))}
+      </ul>
+    </section>
+  ))}
+</Base>
+
+<style>
+  .intro { max-width: var(--measure); }
+  h2 a { color: var(--bright); text-decoration: none; }
+  h2 a:hover { color: var(--accent); }
+  .topics { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr)); gap: 0 2rem; }
+  .topics li { margin: 0; padding: var(--sp-2) 0; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
+</style>

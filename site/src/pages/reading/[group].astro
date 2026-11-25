@@ -1,0 +1,91 @@
+---
+// One topic group's readings, in full. The list was a single page until its size
+// outgrew the page budget (every harvest adds readings): split by group, nothing
+// is trimmed — reading/ is the overview.
+import Base from '../../layouts/Base.astro';
+import { corpus, href } from '../../lib/corpus.js';
+import { readingGroups } from '../../lib/entry.js';
+
+export function getStaticPaths() {
+  return readingGroups().map((g) => ({ params: { group: g.id }, props: { id: g.id } }));
+}
+const { id } = Astro.props;
+const { entries } = corpus();
+const all = readingGroups();
+const at = all.findIndex((g) => g.id === id);
+const g = all[at];
+const prev = all[at - 1], next = all[at + 1];
+const host = (u) => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return ''; } };
+// Skim structure without hiding evidence: the LEAD line is the tagged claim when the
+// corpus has distilled one, else the annotation's first sentence; the rest stays
+// visible below it in muted text. Nothing is clamped away.
+const split = (r) => {
+  if (r.claim) return { lead: r.claim, rest: r.what };
+  const first = String(r.what || '').split(/(?<=\.)\s+/)[0] || '';
+  return { lead: first, rest: String(r.what || '').slice(first.length).trim() };
+};
+---
+<Base title={`Reading: ${g.short}`} description={`${g.count} fetch-verified, annotated deep-dives on ${g.label}.`}>
+  <nav class="crumbs meta" aria-label="Breadcrumb"><a href={href('reading/')}>Reading list</a><span aria-hidden="true"> › </span><span aria-current="page">{g.short}</span></nav>
+  <h1>{g.short}</h1>
+  <p class="muted intro">{g.count} readings on {g.label.split(' — ')[1] || g.short.toLowerCase()}, each with our note on why it matters.
+  <strong>The articles are the originals — read them there.</strong></p>
+  <nav class="jump" aria-label="Jump to topic">
+    {g.topics.map((t) => <a href={`#${t.slug}`}>{t.topic} <span class="n">{t.count}</span></a>)}
+  </nav>
+  <section>
+      {g.entries.map((id) => {
+        const e = entries.find((x) => x.id === id);
+        return e?.reading?.length > 0 && (
+          <div>
+            <h2 id={e.slug} class="topic-h"><a href={href(`entries/${e.slug}/`)}>{e.topic}</a></h2>
+            <div class="rows">
+              {e.reading.map((r) => {
+                const { lead, rest } = split(r);
+                return (
+                  <div class="read-item">
+                    <p class="read-head">
+                      <a href={r.url} rel="noopener" class="read-title">{r.title}</a>
+                      <span class="meta">{[r.by, host(r.url)].filter(Boolean).join(' · ')}</span>
+                    </p>
+                    <p class="read-lead">{lead}</p>
+                    {rest && <p class="read-rest muted">{rest}</p>}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+  </section>
+  <nav class="pager" aria-label="Other groups">
+    {prev ? <a href={href(`reading/${prev.id}/`)} rel="prev"><span class="meta">← previous</span><span class="pg-title">{prev.short}</span></a> : <span />}
+    {next ? <a class="next" href={href(`reading/${next.id}/`)} rel="next"><span class="meta">next →</span><span class="pg-title">{next.short}</span></a> : <span />}
+  </nav>
+</Base>
+
+<style>
+  .crumbs { margin: 0; }
+  .crumbs a { color: var(--muted); }
+  .topic-h { scroll-margin-top: calc(var(--header-h) + 1rem); }
+  .topic-h a { color: var(--bright); text-decoration: none; }
+  .topic-h a:hover { color: var(--accent); }
+  .intro { max-width: var(--measure); }
+  .jump { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin: var(--sp-4) 0 0; }
+  .jump a { display: inline-flex; align-items: center; gap: var(--sp-1); min-height: 24px; padding: var(--sp-1) var(--sp-2);
+    border: 1px solid var(--border-control); border-radius: var(--radius-sm); text-decoration: none;
+    font: 400 var(--fs-xs)/1.4 var(--font-mono); color: var(--fg); }
+  .jump a:hover { border-color: var(--accent); color: var(--accent); }
+  .jump .n { color: var(--muted); }
+  /* annotations quote long config keys (experimental.turbopackChunking…) — let them break */
+  .read-item, .topic-h { overflow-wrap: anywhere; }
+  .read-head { max-width: var(--measure); margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-1) var(--sp-2); }
+  .read-title { font: 600 var(--fs-md)/1.4 var(--font-head); color: var(--bright); text-decoration: none; padding-block: 2px; }
+  .read-title:hover { color: var(--accent); }
+  .read-lead { margin: .3rem 0 0; font-size: var(--fs-sm); line-height: 1.55; color: var(--fg); max-width: var(--measure); }
+  .read-rest { margin: .25rem 0 0; font-size: var(--fs-sm); line-height: 1.55; max-width: var(--measure); }
+  .pager { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 3rem 0 0; padding-top: 1rem; border-top: 1px solid var(--line); }
+  .pager a { display: flex; flex-direction: column; gap: .15rem; text-decoration: none; }
+  .pager .next { text-align: end; }
+  .pg-title { color: var(--fg); font-size: var(--fs-sm); }
+</style>

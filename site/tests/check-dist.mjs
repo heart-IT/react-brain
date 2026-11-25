@@ -16,11 +16,8 @@ const MAX_PAGE_BYTES = 200 * 1024;
 // Pages already over budget when this check landed (2026-10-15), each pinned to a
 // ceiling just above its size then so it cannot GROW. Ratchet: lower these as the
 // pages shrink, delete the line once under 200 KB, never raise one. (decide/ left
-// the list the same day once its corpus slice moved to a lazily fetched JSON;
-// reading/ is one long index of real content.)
-const PAGE_BUDGET_EXCEPTIONS = {
-  'reading/index.html': 264 * 1024,
-};
+// the list the same day once its corpus slice moved to a lazily fetched JSON.)
+const PAGE_BUDGET_EXCEPTIONS = {};   // reading/ left 2026-11-25 when it split into one page per group
 
 if (!existsSync(join(DIST, 'index.html'))) {
   console.error('check-dist: dist/index.html not found — run `npm run build` first.');
